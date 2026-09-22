@@ -14,12 +14,13 @@ Outlands 클라이언트에 딸려오는 Razor 빌드와 그 확장 문법(`find
 
 ```
 script/            모두가 공유
-  combat/          사냥 중 계속 돌리는 메인 루프, 템플릿당 하나
-  hotkey/          키에 물리는 한 방 매크로: 무기 스왑, 드레스, 타겟 취소, 바드 버프
-  home/            집·은행 작업: 로드아웃, 케그·룬북 리필, 루팅 정리, 셸프 로드아웃
-  field/           사냥터에서 전투 외 작업: recycle, moongate
-  skill/           스킬 트레이닝
+  combat/          사냥 루프, 템플릿당 하나
+  hotkey/          키에 물리는 한 방 매크로: 무기 스왑, 드레스, 타겟 취소, 바드 버프, 문게이트
+  train/           스킬 트레이닝
   gather/          채광, 벌목
+  loot/            주워온 것 정리·분해: recycle, pull-loot, bank-pouch
+  restock/         나가기 전 준비: loadout, refill-keg, refill-runebook, store-keg
+  shelf/           outlandsbutler.com 이 생성한 Storage Shelf 로드아웃, 템플릿당 하나
 config/<이름>/     사람마다 폴더 하나
   razor/           Razor 프로필: 핫키, 에이전트, 쿨다운 바, script variable
   classicuo/       캐릭터마다 폴더 하나: 매크로, 스킬 그룹, 옵션
@@ -135,7 +136,7 @@ endif
 ```
 
 `setvar` 는 타겟을 한 번 요구하고 그 serial 을 내 프로필에 저장합니다. 스크립트에는 이름만 남습니다.
-`home/`, `gather/` 의 오래된 스크립트 몇 개에 아직 serial 이 박혀 있고, 바꿔가는 중입니다.
+`restock/`, `loot/`, `gather/` 의 오래된 스크립트 몇 개에 아직 serial 이 박혀 있고, 바꿔가는 중입니다.
 
 `config/<이름>/` 에 들어가는 것:
 
@@ -171,6 +172,6 @@ Razor 에는 린터가 없고, 빠진 `endif` 가 스크립트가 조용히 이�
 - [Jaseowns](https://outlands.uorazorscripts.com/) — 채광, 벌목, recycle, 스킬 트레이너는 그의 스크립트이거나 그것을 바탕으로 함
 - Demlar — 드레스 스크립트 아이디어
 - raveX — 스틸 트레이너
-- [outlandsbutler.com](https://www.outlandsbutler.com/) — `shelf-*` 로드아웃 스크립트 생성
+- [outlandsbutler.com](https://www.outlandsbutler.com/) — `shelf/` 로드아웃 스크립트 생성
 
 나머지는 [MIT](../LICENSE). 제3자 스크립트는 원저자의 조건을 따릅니다. UO Outlands 와 무관합니다.

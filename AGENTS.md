@@ -27,16 +27,17 @@
 | 폴더 | 언제 | 파일명 규칙 | 예 |
 |---|---|---|---|
 | `script/combat/` | 사냥 중 계속 돌리는 메인 루프 | `<템플릿>[-<변형>]` | `bard-necro`, `bard-necro-eval`, `hally-mage` |
-| `script/hotkey/` | 키에 물려 한 번 실행하는 매크로 | `<동작>[-<대상>]`, 무기 스왑은 `weapon-<무기>` | `weapon-katana`, `cancel-target`, `dress`, `bard-buff` |
-| `script/home/` | 집·은행에서 정리·리필 | `<동사>-<대상>`, Shelf 로드아웃은 `shelf-<템플릿>` | `refill-keg`, `pull-loot`, `loadout`, `shelf-hally-mage` |
-| `script/field/` | 사냥터에서 전투 외 작업 | `<동사>[-<대상>]` | `recycle`, `moongate` |
-| `script/skill/` | 스킬 트레이닝 | `<스킬>` | `magery`, `carto` |
+| `script/hotkey/` | 키에 물려 한 번 실행하는 매크로 | `<동작>[-<대상>]`, 무기 스왑은 `weapon-<무기>` | `weapon-katana`, `cancel-target`, `dress`, `moongate` |
+| `script/train/` | 스킬 트레이닝 | `<스킬>` | `magery`, `carto` |
 | `script/gather/` | 채집 루프 | `<채집>` | `mining`, `lumberjack` |
+| `script/loot/` | 주워온 것 정리·분해 | `<동사>-<대상>` | `recycle`, `pull-loot`, `bank-pouch` |
+| `script/restock/` | 나가기 전 준비: 로드아웃, 리필 | `<동사>-<대상>` | `loadout`, `refill-keg`, `refill-runebook` |
+| `script/shelf/` | outlandsbutler.com 생성 Storage Shelf 로드아웃 | `<템플릿>` | `bard-dexxer`, `sailing` |
 
 - kebab-case, 소문자, 공백 없음. 폴더가 분류를 말하므로 파일명에 `combat-` 같은 접두는 붙이지 않는다.
 - 같은 성격이 3개 이상 모이면 폴더를 나누고, 2개 이하면 기존 폴더에 둔다.
 - `-temp`, `-old`, `-new`, `-backup` 파일을 만들지 않는다. 이력은 git이 가진다.
-- `shelf-*` 는 outlandsbutler.com 생성물. 손으로 고치지 않고 사이트에서 다시 만든다.
+- `shelf/` 는 outlandsbutler.com 생성물. 손으로 고치지 않고 사이트에서 다시 만든다. 내 셸프 serial 이 들어 있어 사실상 개인 파일이다.
 - 외부 출처 스크립트(Jaseowns, Demlar 등)는 헤더 크레딧을 유지하고, 상단 설정 변수 위주로만 고친다.
 
 `config/<이름>/` 는 그 사람의 클라이언트 설정 원본이다 (`util/setup.sh` 가 게임 폴더를 여기로 링크). 스크립트는 모두가 공유하고 설정은 사람마다 분리된다. 다른 사람의 `config/` 는 건드리지 않는다.
@@ -86,7 +87,7 @@
     	setvar var_my_loot_chest
     endif
     ```
-    `setvar 이름` 은 타겟을 요구하고 그 serial 을 프로필 script variable 로 저장한다 (`setvar!` 는 실행 중에만 유지). `home/`, `gather/` 일부에 아직 리터럴이 남아 있으니 그 파일을 손볼 때 이 패턴으로 바꾼다.
+    `setvar 이름` 은 타겟을 요구하고 그 serial 을 프로필 script variable 로 저장한다 (`setvar!` 는 실행 중에만 유지). `restock/`, `loot/`, `gather/` 일부에 아직 리터럴이 남아 있으니 그 파일을 손볼 때 이 패턴으로 바꾼다.
 
 **타이머**
 - `if not timerexists "x_timer"` → `createtimer` → `settimer`. 이름은 `_timer` 접미.
