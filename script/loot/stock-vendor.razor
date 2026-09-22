@@ -41,7 +41,7 @@
 #   radii 148 and 168, 15 pixels apart. Each section starts on a fresh row, so a section
 #   reads as one contiguous band. An item type always lands in the same cell, so the
 #   arrangement is identical every run.
-#   Rows used 20 of 22. If items land outside the barrel, shrink the radii here.
+#   Rows used 21 of 22. If items land outside the barrel, shrink the radii here.
 #
 # NOT INCLUDED
 #   Currency graphics 2539 3821 3891 5360 16898 from script/loot/distribution.razor
@@ -98,12 +98,14 @@ endif
 #   var__price_treasure_lv3  "adeptly drawn treasure map"    5356
 #   var__price_treasure_lv4  "cleverly drawn treasure map"   5356
 #   var__price_treasure_lv5  "deviously drawn treasure map"  5356
+#   var__price_treasure_lv6  "ingeniously drawn treasure map"  5356
 # ####################################################################################
 @setvar! var__price_treasure_lv1 '5000'
 @setvar! var__price_treasure_lv2 '10000'
 @setvar! var__price_treasure_lv3 '20000'
 @setvar! var__price_treasure_lv4 '30000'
 @setvar! var__price_treasure_lv5 '50000'
+@setvar! var__price_treasure_lv6 '75000'
 
 # ####################################################################################
 # PRICE - ORE MAP
@@ -434,7 +436,7 @@ endif
 #   var__price_pristine_lumber         "pristine lumber"                  23996
 #   var__price_redlightning_bottle     "redlightning bottle"              25359
 #   var__price_research_materials      "research materials"               24434
-#   var__price_skill_ball              "skill ball"                       22336
+#   var__price_skill_mastery_orb       "a skill mastery orb"              22336
 #   var__price_arcane_essence          "arcane essence"                   3901
 #   var__price_arcane_scroll           "arcane scroll"                    3827
 #   var__price_black_market_goods      "black market goods"               24343
@@ -449,7 +451,7 @@ endif
 @setvar! var__price_pristine_lumber        '0'
 @setvar! var__price_redlightning_bottle    '0'
 @setvar! var__price_research_materials     '30000'
-@setvar! var__price_skill_ball             '0'
+@setvar! var__price_skill_mastery_orb      '8000'
 @setvar! var__price_arcane_essence         '20'
 @setvar! var__price_arcane_scroll          '1100'
 @setvar! var__price_black_market_goods     '0'
@@ -549,6 +551,13 @@ endif
 @setvar! var__price_mastery_tinkering     '5000'
 @setvar! var__price_mastery_tracking      '5000'
 @setvar! var__price_mastery_veterinary    '5000'
+
+# ####################################################################################
+# PRICE - SKILL MASTERY ORB
+#
+#   var__price_skill_mastery_orb  "a skill mastery orb"  22336
+# ####################################################################################
+@setvar! var__price_skill_mastery_orb '8000'
 
 # ####################################################################################
 # TIMER
@@ -707,6 +716,10 @@ foreach alias__place_item in list__vendor_items
     elseif "deviously drawn" in label__item
         @setvar! var__price_hint var__price_treasure_lv5
         @setvar! var__drop_x 220
+        @setvar! var__drop_y 44
+    elseif "ingeniously drawn" in label__item
+        @setvar! var__price_hint var__price_treasure_lv6
+        @setvar! var__drop_x 235
         @setvar! var__drop_y 44
 
     # ORE MAP
@@ -1700,8 +1713,8 @@ foreach alias__place_item in list__vendor_items
         @setvar! var__price_hint var__price_research_materials
         @setvar! var__drop_x 152
         @setvar! var__drop_y 269
-    elseif "skill ball" in label__item
-        @setvar! var__price_hint var__price_skill_ball
+    elseif "skill mastery orb" in label__item
+        @setvar! var__price_hint var__price_skill_mastery_orb
         @setvar! var__drop_x 167
         @setvar! var__drop_y 269
     elseif "arcane essence" in label__item
@@ -1880,7 +1893,6 @@ foreach alias__place_item in list__vendor_items
         @setvar! var__price_hint var__price_mastery_veterinary
         @setvar! var__drop_x 145
         @setvar! var__drop_y 329
-
     endif
 
     # ### PLACE ON VENDOR
