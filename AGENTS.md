@@ -40,7 +40,7 @@
 - `shelf/` 는 outlandsbutler.com 생성물. 손으로 고치지 않고 사이트에서 다시 만든다. 내 셸프 serial 이 들어 있어 사실상 개인 파일이다.
 - 외부 출처 스크립트(Jaseowns, Demlar 등)는 헤더 크레딧을 유지하고, 상단 설정 변수 위주로만 고친다.
 
-`config/<이름>/` 는 그 사람의 클라이언트 설정 원본이다 (`util/setup.sh` 가 게임 폴더를 여기로 링크). 스크립트는 모두가 공유하고 설정은 사람마다 분리된다. 다른 사람의 `config/` 는 건드리지 않는다.
+`config/<이름>/` 는 그 사람의 클라이언트 설정 원본이다 (`util/setup.sh` 가 게임 폴더를 여기로 링크). 링크 방식과 파일별 설명은 `config/README.md`. 스크립트는 모두가 공유하고 설정은 사람마다 분리된다. 다른 사람의 `config/` 는 건드리지 않는다.
 `settings.json` 은 계정 비밀번호가 들어 있으므로 절대 커밋하지 않는다.
 
 `library/`:
@@ -139,3 +139,12 @@ Razor CE에 없거나 확장된 것. 존재 여부만 적어두니 인자 형식
   - 인게임 확인 절차: 어떤 상황에서 어떤 `overhead` 가 떠야 하고, 어떤 상황이면 실패인지
 - Razor는 스크립트 본문을 메모리에 캐시한다. 파일을 고친 뒤에는 Razor의 Scripts 탭을 다시 열거나 우클릭 → Reload all scripts 를 해야 반영된다. 프로필 xml 은 종료 시 덮어쓰므로 게임을 끈 상태에서만 수정한다. 검증 절차에 이 두 가지를 명시한다.
 - 새 템플릿 스크립트를 만들면 `library/templates.md` 에 한 줄 추가한다.
+
+## 커밋
+
+- 제목 한 줄, 영어, 마침표 없음. 본문·트레일러·`Co-Authored-By` 는 넣지 않는다.
+- Conventional Commits 접두(`feat:`, `fix:`)를 쓰지 않는다. 동사로 시작하는 평서문.
+  - 좋음: `Regroup scripts by activity`, `Add eval rotation to bard-necro`, `Fix stuck target loop in bard-mace`
+  - 나쁨: `feat: regroup`, `update`, `스크립트 수정`
+- 한 커밋에 한 가지 변경. 스크립트 수정과 문서 수정이 독립적이면 나눈다.
+- 사용자가 커밋하라고 할 때만 커밋한다. push 는 별도 요청이 있을 때만.
