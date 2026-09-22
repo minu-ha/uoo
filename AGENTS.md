@@ -57,11 +57,14 @@
 
 기준 파일은 `script/combat/bard-necro-eval.razor`. 새 코드는 이 규칙을 따르고, 기존 파일을 고칠 때는 그 파일 스타일을 유지한다.
 
+**주석** — `//`. Razor는 `#` 도 받지만 에디터가 `.razor` 를 Razor/C# 으로 보기 때문에 `#` 은 주석으로
+하이라이팅되지 않는다. 외부 출처 스크립트와 `shelf/` 생성물은 원본 스타일을 그대로 둔다.
+
 **헤더** — 직접 만든 스크립트는 첫 줄에 한 줄 설명, 둘째 줄에 전제조건.
 
 ```
-# Bard Necro main loop: sustain, bard control, necro rotation.
-# Needs: organizer 1 (loot bag), cooldown "Skill", hotkey "Clear Scavenger Cache", var_my_loot_chest set
+// Bard Necro main loop: sustain, bard control, necro rotation.
+// Needs: organizer 1 (loot bag), cooldown "Skill", hotkey "Clear Scavenger Cache", var_my_loot_chest set
 ```
 
 **시작 4줄** — `clearall` / `clearsysmsg` / `cleardragdrop` / `clearignore`
@@ -71,9 +74,9 @@
 **구조** — `SETUP`(변수, 타이머) → 준비(악기 선택, 핫바 확인) → `while not dead` 메인 루프 하나 → `endwhile`. 섹션 배너:
 
 ```
-# ####################################################################################
-# # SECTION NAME
-# ####################################################################################
+// ####################################################################################
+// # SECTION NAME
+// ####################################################################################
 ```
 
 **변수**

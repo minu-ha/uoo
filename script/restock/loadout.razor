@@ -133,18 +133,18 @@ endif
 // ####################################################################################
 // # INSTRUMENT
 // ####################################################################################
-#Instruments - all serials: 3740|3742|3762|3763|10245|20006|20008|20010|20012|20014|20016
-    #bamboo flute "bamboo flute" 10245
-    #drums "drum" 3740
-    #gemshorn "gemshorn" 20006
-    #harp "lap harp" 3762
-    #hurdy-gurdy "hurdy gurdy" 20008
-    #lute "lute" 3763
-    #psaltery "psaltery" 20010
-    #sackbut "sackbut" 20012
-    #shawm "shawm" 20014
-    #tambourine "tambourine" 3742
-    #Vielle "vielle" 20016
+//Instruments - all serials: 3740|3742|3762|3763|10245|20006|20008|20010|20012|20014|20016
+    //bamboo flute "bamboo flute" 10245
+    //drums "drum" 3740
+    //gemshorn "gemshorn" 20006
+    //harp "lap harp" 3762
+    //hurdy-gurdy "hurdy gurdy" 20008
+    //lute "lute" 3763
+    //psaltery "psaltery" 20010
+    //sackbut "sackbut" 20012
+    //shawm "shawm" 20014
+    //tambourine "tambourine" 3742
+    //Vielle "vielle" 20016
 if var_use_magic_instrument_item = 1
     while findtype 3740|3742|3762|3763|10245|20006|20008|20010|20012|20014|20016 var_my_magic_item_recycler as found_instrument
         getlabel found_instrument found_instrument_description
@@ -174,19 +174,19 @@ clearall
 clearsysmsg
 cleardragdrop
 clearignore
-#bandage "clean bandage%s%" 3617
-#adventure pack "adventure pack" 2726
-#dagger "dagger" 3922
-#pouch "pouch" 3705
-#scissors "scissors" 3998|3999
-#kindling "kindling" 3553
-#skinning knife "Elven Spellblade" 11552|11564
-#smoke bomb "bombs" 52149
-#adventurers rope "rope" 5370 (Hue 2799)
-#Delectable food 28879|28880|28881|28883|28885|28886|28888|29773|29774
-#potion satchel "alchemists satchel" 31262
-#item identification wand "wand" 20496
-#magic mushroom "mushroom" 29012
+//bandage "clean bandage%s%" 3617
+//adventure pack "adventure pack" 2726
+//dagger "dagger" 3922
+//pouch "pouch" 3705
+//scissors "scissors" 3998|3999
+//kindling "kindling" 3553
+//skinning knife "Elven Spellblade" 11552|11564
+//smoke bomb "bombs" 52149
+//adventurers rope "rope" 5370 (Hue 2799)
+//Delectable food 28879|28880|28881|28883|28885|28886|28888|29773|29774
+//potion satchel "alchemists satchel" 31262
+//item identification wand "wand" 20496
+//magic mushroom "mushroom" 29012
 
 removelist sorting_item_list
 createlist sorting_item_list
@@ -676,7 +676,7 @@ while findtype "runetome|runebook" ground -1 -1 2 as found_runetome
     @ignore found_runetome
 endwhile
 
-# Nearby chests
+// Nearby chests
 while findtype 47202|62764|2473|3710|41451|41452|3646|3647|3644|3645|41449|41450|29832|29833|2472|29077|29078|2475|3648|3649|3708|3650|3651|41453|41454|2474|3709|3650|3651|41455|41456|29086|29087 true as found_container
     while findtype "runetome|runebook" found_container as found_runetome
         getlabel var_my_recall_scroll found_runetome_description
