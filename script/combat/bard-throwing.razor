@@ -38,11 +38,19 @@
 # Throw status readout
 #   The moving throw count, the planted reload and the wing proc are printed by Razor's
 #   Overhead Messages agent in the profile, not by this script. They are pure display with
-#   no logic attached, and reading them here meant competing for the system message buffer:
-#   insysmsg consumes what it matches, and every clearsysmsg in the bard blocks wiped any
-#   count that had arrived since the last pass. The agent watches the journal instead, so
-#   the readout no longer depends on what this script does with the buffer.
+#   no logic attached, and reading them here meant competing for the system message buffer.
+#   The agent watches the journal instead, so the readout does not depend on what this
+#   script does with the buffer at all.
 #   Entries live under <overheadmessages> in the Razor profile, hues as listed above.
+#
+# System message buffer
+#   Nothing clears the buffer once the loop is running. The two clearsysmsg left are both in
+#   the setup above the loop, and replay reruns them. The bard blocks used to clear it
+#   before each useskill to keep a stale instrument prompt out of their own check, but that
+#   prompt only appears when the instrument is invalid, and then the useskill fails the same
+#   way and leaves no target cursor for a stale line to hijack. Clearing cost more than it
+#   saved: it wiped the planted line mid fight. The check at the top of the loop drains the
+#   prompt every pass, which is the real guard.
 
 clearsysmsg
 clearall
@@ -725,13 +733,7 @@ while not dead
     # # BARD SONG BUFF
     # ################################################################################
     # The aspect resets the Music cooldown right after a song, so all three are tried in one pass.
-    #
-    # No clearsysmsg in front of the blocks. It was there to stop a leftover instrument prompt
-    # from being read as this song's own, but that case cannot really arise: the prompt only
-    # appears when the instrument is invalid, and then this useskill fails the same way, so
-    # there is no good target cursor for a stale line to hijack. Meanwhile the clear wiped the
-    # whole buffer every time a 15 minute song lapsed, which is how the planted line went
-    # missing mid fight. The check at the top of the loop already drains the prompt each pass.
+    # No clearsysmsg in front of the blocks; see the buffer note in the file header.
     if config__use_bard_song = 1 and not targetexists and cooldown "Discord" = 0 and cooldown "Music" = 0 and not findbuff "song of discordance"
         useskill 'Discordance'
         waitfortarget wait__target
@@ -787,7 +789,6 @@ while not dead
             if "pacified" in label__peace_target or "barding break" in label__peace_target
                 settimer "timer__combat_target_grace" 0
             else
-                clearsysmsg
                 useskill 'Peacemaking'
                 waitfortarget wait__target
 
@@ -821,7 +822,6 @@ while not dead
             if "discord" in label__disco_target
                 settimer "timer__combat_target_grace" 0
             else
-                clearsysmsg
                 useskill 'Discordance'
                 waitfortarget wait__target
 
@@ -850,7 +850,6 @@ while not dead
     # ################################################################################
     if not warmode and not targetexists and find var__combat_target ground -1 -1 10 as alias__virtuoso_target
         if skill "Discordance" > 0 and cooldown "Discord" = 0 and cooldown "Music" = 0 and not findbuff "Virtuoso"
-            clearsysmsg
             useskill 'Discordance'
             waitfortarget wait__target
 
