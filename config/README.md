@@ -76,7 +76,8 @@ owner's account.
 |---|---|---|
 | `razor/profiles/<profile>.xml` | hotkeys, agents (organizer / restock / dress lists, container serials), filters, cooldown bars, script variables, window layout | yes |
 | `razor/profiles/chars.lst` | which profile each character used last | yes |
-| `classicuo/<Char>/macros.xml`, `skillsgroups.xml`, `infobar.xml` | client macros, skill groups, info bar | yes |
-| `classicuo/<Char>/profile.json` | client options and window positions, changes every session | yes, noisy |
-| `classicuo/<Char>/gumps.xml`, `*.bak1..3`, `*.backup1..3` | open-window state, rolling backups | ignored |
+| `classicuo/<Char>/macros.xml`, `skillsgroups.xml`, `infobar.xml`, `journal.xml`, `nameoverhead.xml`, `cooldowns.xml` | client macros, skill groups, info bar, journal tabs, name plates, cooldown bars | yes |
+| `classicuo/<Char>/profile.json` | client options, changes every session | yes, noisy |
+| `classicuo/<Char>/*.gumps.xml`, `gumpmanager.xml` | window positions, one file per monitor layout | yes, noisy |
+| `classicuo/<Char>/backup_*/`, `staggered_*/` | ClassicUO's own profile snapshots; git already keeps history | ignored |
 | `ClassicUO/settings.json` | resolution, fps, **username / password** | ignored, never linked |

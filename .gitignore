@@ -19,7 +19,6 @@ tmp/
 settings.json
 *-bak/
 
-# ClassicUO per-session state and its rolling backups (window positions, not settings)
-gumps.xml
-*.bak[0-9]
-*.backup[0-9]
+# ClassicUO backs its own profiles up next to them. git already does that job.
+backup_*/
+staggered_*/
