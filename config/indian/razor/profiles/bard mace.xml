@@ -13,8 +13,8 @@
 	<property name="SortCounters" type="System.Boolean">True</property>
 	<property name="QueueActions" type="System.Boolean">False</property>
 	<property name="QueueTargets" type="System.Boolean">False</property>
-	<property name="WindowX" type="System.Int32">2591</property>
-	<property name="WindowY" type="System.Int32">110</property>
+	<property name="WindowX" type="System.Int32">2630</property>
+	<property name="WindowY" type="System.Int32">255</property>
 	<property name="CountStealthSteps" type="System.Boolean">True</property>
 	<property name="SysColor" type="System.Int32">68</property>
 	<property name="WarningColor" type="System.Int32">37</property>
@@ -27,8 +27,8 @@
 	<property name="ImageFormat" type="System.String">jpg</property>
 	<property name="UndressConflicts" type="System.Boolean">True</property>
 	<property name="Systray" type="System.Boolean">True</property>
-	<property name="RazorWidth" type="System.Int32">850</property>
-	<property name="RazorHeight" type="System.Int32">918</property>
+	<property name="RazorWidth" type="System.Int32">968</property>
+	<property name="RazorHeight" type="System.Int32">813</property>
 	<property name="SellAgentMax" type="System.Int32">99</property>
 	<property name="SkillListCol" type="System.Int32">1</property>
 	<property name="SkillListAsc" type="System.Boolean">True</property>
@@ -203,18 +203,17 @@
 		<key mod="0" key="88" send="False">L:2057</key>
 		<key mod="0" key="90" send="False">L:2013</key>
 		<key mod="0" key="27" send="False">L:2101</key>
-		<key mod="3" key="48" send="False">Play Script: auto equip</key>
-		<key mod="0" key="115" send="False">Play Script: bard buff</key>
-		<key mod="0" key="112" send="False">Play Script: bard mace</key>
-		<key mod="0" key="113" send="False">Play Script: cancel target</key>
-		<key mod="1" key="50" send="False">Play Script: distribution chest</key>
-		<key mod="0" key="66" send="False">Play Script: esacpe moongate</key>
-		<key mod="1" key="49" send="False">Play Script: loadout</key>
-		<key mod="1" key="51" send="False">Play Script: loot to me</key>
-		<key mod="0" key="114" send="False">Play Script: recycle with farm</key>
 		<key mod="0" key="50" send="False">L:1044069</key>
 		<key mod="0" key="49" send="False">L:1044075</key>
 		<key mod="0" key="51" send="False">L:1044082</key>
+		<key mod="0" key="112" send="False">Play Script: combat\bard-throwing</key>
+		<key mod="0" key="115" send="False">Play Script: hotkey\bard-buff</key>
+		<key mod="0" key="113" send="False">Play Script: hotkey\cancel-target</key>
+		<key mod="3" key="48" send="False">Play Script: hotkey\dress</key>
+		<key mod="0" key="66" send="False">Play Script: hotkey\moongate</key>
+		<key mod="1" key="50" send="False">Play Script: loot\distribution</key>
+		<key mod="1" key="51" send="False">Play Script: loot\pull-loot</key>
+		<key mod="1" key="49" send="False">Play Script: restock\loadout</key>
 	</hotkeys>
 	<overheadmessages>
 		<overheadmessage searchtext=" : Attempting to heal you." message="[ - HEAL COMING - ]" hue="93" />
@@ -384,12 +383,20 @@
 		<overheadmessage searchtext="You detonate a ground trap" message="[ - BOOOM - ]" hue="148" />
 		<overheadmessage searchtext="You may now detonate another trap" message="[ - DETONATE NOW - ]" hue="68" />
 		<overheadmessage searchtext="You increase your [EventScore" message="+ {6}" hue="68" />
-		<overheadmessage searchtext="You are now under the effect of a Song" message="■" hue="68" />
-		<overheadmessage searchtext="You fail to discord" message="▼" hue="133" />
-		<overheadmessage searchtext="You fail to pacify" message="▼" hue="133" />
-		<overheadmessage searchtext="You play successfully" message="▲" hue="68" />
-		<overheadmessage searchtext="additional energy" message="▲" hue="68" />
+		<overheadmessage searchtext="You are now under the effect of a Song" message="++" hue="68" />
+		<overheadmessage searchtext="You fail to discord" message="--" hue="133" />
+		<overheadmessage searchtext="You fail to pacify" message="--" hue="133" />
+		<overheadmessage searchtext="You play successfully" message="++" hue="68" />
+		<overheadmessage searchtext="additional energy" message="+++" hue="68" />
 		<overheadmessage searchtext="What instrument shall you play" message="[ - INSTRUMENT BROKE - ]" hue="133" />
+		<overheadmessage searchtext="now planted" message="You are now planted." hue="73" />
+		<overheadmessage searchtext="5 moving throws" message="5 moving throws left." hue="53" />
+		<overheadmessage searchtext="4 moving throws" message="4 moving throws left." hue="53" />
+		<overheadmessage searchtext="3 moving throws" message="3 moving throws left." hue="53" />
+		<overheadmessage searchtext="2 moving throws" message="2 moving throws left." hue="53" />
+		<overheadmessage searchtext="1 moving throws" message="1 moving throw left." hue="33" />
+		<overheadmessage searchtext="0 moving throws" message="No throws, plant now." hue="33" />
+		<overheadmessage searchtext="wing your target" message="You wing your target." hue="88" />
 	</overheadmessages>
 	<containerlabels />
 	<macrovariables />
@@ -409,7 +416,7 @@
 		<scriptvariable serial="0x45CB99EB" name="var_my_looting_pouch" />
 		<scriptvariable serial="0x45147618" name="var_my_recall_scroll_container" />
 		<scriptvariable serial="0x49F2F20C" name="var_my_wizard_satchel" />
-		<scriptvariable serial="0x46017A85" name="var_my_instrument" />
+		<scriptvariable serial="0x4F96A03A" name="var_my_instrument" />
 		<scriptvariable serial="0x1" name="var_use_discord" />
 		<scriptvariable serial="0x0" name="var_use_peace" />
 		<scriptvariable serial="0x0" name="var_use_provo" />
