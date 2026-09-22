@@ -1,0 +1,29 @@
+# Author: raveX
+# Script: Will steal bottles from a pack animal
+# Notes: You MUST set up an organizer for the stack of bottles
+# and placing in the pack animal and set your organizer
+# number below in the script
+
+if not varexist 'packanimal'
+    overhead 'Select the pack animal to steal from'
+    setvar 'packanimal'
+endif
+
+
+while skill 'stealing' < 120
+
+    while findtype 3854 'packanimal'
+        overhead 'Stealing'
+        skill 'stealing'
+        wft 5000
+        targettype 3854 'packanimal'
+        wait 11000
+    endwhile
+
+    # SET AN ORGANIZER, AND SET NUMBER HERE
+    organizer 2
+    wait 500
+
+ endwhile
+
+overhead 'stopped'

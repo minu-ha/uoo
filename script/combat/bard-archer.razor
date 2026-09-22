@@ -1,0 +1,353 @@
+clearsysmsg
+clearall
+
+
+if not timerexists "overhead_message_timer"
+	setvar! overhead_message_timer_frequency 2700
+	createtimer "overhead_message_timer"
+	settimer "overhead_message_timer" overhead_message_timer_frequency
+endif
+
+if not timerexists "clear_scavenger_timer"
+	setvar! clear_scavenger_timer_frequency 30000
+	createtimer "clear_scavenger_timer"
+	settimer "clear_scavenger_timer" overhead_message_timer_frequency
+endif
+
+if not varexist var_my_instrument
+    @setvar! var_my_instrument 0
+endif
+
+while findtype 3740|3742|3762|3763|10245|20006|20008|20010|20012|20014|20016 backpack as found_instrument
+    getlabel found_instrument found_instrument_description
+
+    if "supremely" in found_instrument_description or "exceedingly" in found_instrument_description
+        @setvar! var_my_instrument found_instrument
+        break
+    endif
+
+    @ignore found_instrument
+endwhile
+
+@clearignore
+
+if not find var_my_instrument backpack
+    clearsysmsg
+    overhead "Select instrument:" 55
+    @setvar! var_my_instrument
+    wait 200
+    
+    while not targetexists and not insysmsg "Select"
+        @setvar! var_my_instrument
+    endwhile
+    
+    wait 200
+    getlabel backpack backpack_description
+    
+    if find var_my_instrument backpack as found_instrument
+        getlabel found_instrument found_instrument_description
+
+        if "flute" in found_instrument_description or "drums" in found_instrument_description or "harp" in found_instrument_description or "lute" in found_instrument_description or "tambourine" in found_instrument_description or "gemshorn" in found_instrument_description or "hurdy" in found_instrument_description or "psaltery" in found_instrument_description or "sackbut" in found_instrument_description or "shawm" in found_instrument_description or "Vielle" in found_instrument_description
+            overhead "{{found_instrument_description}}"
+            dclick var_my_instrument
+            wait 1000
+        else
+            @setvar! var_my_instrument 0
+            overhead "Not an instrument!" 33
+            stop
+        endif
+    else
+        @setvar! var_my_instrument 0
+        overhead "Not in backpack" 33
+        stop
+    endif
+endif
+
+if not gumpexists 2016719803
+	say "[codexhotbar"
+endif
+
+while not dead
+	while queued
+	    wait 100
+	endwhile
+
+	while casting
+		wait 100
+	endwhile
+
+	if rhandempty
+		if findtype 'stubnose crossbow' backpack 2241 as found_crossbow
+			dclick found_crossbow
+		endif
+	endif
+
+	if lhandempty
+		if findtype 'chaos shield' backpack as found_shield
+			dclick found_shield
+		endif
+	endif
+
+	while weight > maxweight
+		if findtype "gold coin" backpack as found_gold
+			lift found_gold 500
+			droprelloc 0 0
+			getlabel backpack backpack_description
+
+			if insysmsg "cannot drop anything"
+				drop backpack -1 -1 -1
+			endif
+
+			wait 1000
+			overhead 'You drop some gold on the ground.' 55
+		endif
+	endwhile
+
+	if not findbuff 'Food Satisfaction'
+        if findtype tray backpack as food
+            dclick food
+            wait 350
+        endif
+    endif
+
+	if diffhits > 0 or poisoned
+		if not bandaging and skill "Healing" > 10
+			if findtype "clean bandage%s%" self
+				hotkey "Bandage Self"
+				wait 200
+			else
+				if timer "overhead_message_timer" > overhead_message_timer_frequency
+					overhead "You are out of bandage." 32
+					settimer "overhead_message_timer" 0
+				endif
+			endif
+		endif
+	endif
+
+	if paralyzed
+		if findtype 3705 backpack 38
+			yell "[Pouch"
+			getlabel backpack ping
+		else
+			overhead "You are out of pouche." 32
+		endif
+	endif
+
+	if hp <= 65
+		if findtype "Yellow Potion" self as found_potion
+				getlabel found_potion found_potion_description
+
+			if "next usable" in found_potion_description
+				if timer "overhead_message_timer" > overhead_message_timer_frequency
+					overhead found_potion_description 83
+					settimer "overhead_message_timer" 0
+				endif
+			else
+				if hidden
+					break
+				endif
+
+				overhead "You drink a healing potion." 53
+				dclick found_potion
+				getlabel backpack ping
+				cooldown "Heal Potion" 10000
+			endif
+		else
+			if timer "overhead_message_timer" > overhead_message_timer_frequency
+				overhead "You are out of healing potion." 32
+				settimer "overhead_message_timer" 0
+			endif
+		endif
+	endif
+
+	if poisoned
+		if findtype "Orange Potion" self as found_potion
+			if hidden
+				break
+			endif
+
+			overhead "You drink a cure potion." 44
+			dclick found_potion
+			getlabel backpack ping
+		else
+			if timer "overhead_message_timer" > overhead_message_timer_frequency
+				overhead "You are out of cure potion." 32
+				settimer "overhead_message_timer" 0
+			endif
+		endif
+	endif
+
+	if stam < 80
+		if findtype "Red Potion" backpack as found_potion
+			dclick found_potion
+			wait 200
+		else
+			if timer "overhead_message_timer" > overhead_message_timer_frequency
+				overhead "You are out of refresh potions." 32
+				settimer "overhead_message_timer" 0
+			endif
+		endif
+	endif
+
+	if str <= 100 and find lasttarget ground -1 -1 12
+		if findtype "White Potion" backpack as found_potion
+			dclick found_potion
+			wait 200
+		else
+			if timer "overhead_message_timer" > overhead_message_timer_frequency
+				overhead "You are out of strength potions." 32
+				settimer "overhead_message_timer" 0
+			endif
+		endif
+	endif
+
+	if dex <= 100 and find lasttarget ground -1 -1 12
+		if findtype "Blue Potion" backpack as found_potion
+			dclick found_potion
+			wait 200
+		else
+			if timer "overhead_message_timer" > overhead_message_timer_frequency
+				overhead "You are out of agility potions." 32
+				settimer "overhead_message_timer" 0
+			endif
+		endif
+	endif
+
+	if not findbuff 'Magic Resist Potion' and find lasttarget ground -1 -1 12
+		if findtype "Black Potion" backpack as found_potion
+			dclick found_potion
+			wait 200
+		else
+			if timer "overhead_message_timer" > overhead_message_timer_frequency
+				overhead "You are out of magic resist potions." 32
+				settimer "overhead_message_timer" 0
+			endif
+		endif
+	endif
+
+	if cooldown "Discord" = 0 and cooldown "Music" = 0 and not findbuff "song of discordance"
+		useskill 'Discordance'
+		waitfortarget 1000
+
+		if insysmsg "What instrument"
+			target var_my_instrument
+			replay
+		elseif targetexists
+			target backpack
+		endif
+	endif
+
+	if cooldown "Provo" = 0 and cooldown "Music" = 0 and not findbuff "song of provocation"
+		useskill 'Provocation'
+		waitfortarget 1000
+
+		if insysmsg "What instrument"
+			target var_my_instrument
+			replay
+		elseif targetexists
+			target backpack
+		endif
+	endif
+
+	if cooldown "Peace" = 0 and cooldown "Music" = 0 and not findbuff "song of peacemaking"
+		useskill 'Peacemaking'
+		waitfortarget 1000
+
+		if insysmsg "What instrument"
+			target var_my_instrument
+			replay
+		elseif targetexists
+			target backpack
+		endif
+	endif
+
+
+
+	if not warmode and find lasttarget ground -1 -1 10 as fount_target
+		if skill "Discordance" > 0 and cooldown "Discord" = 0 and cooldown "Music" = 0
+			getlabel fount_target target_label
+            wait 200
+
+			if "discord" in target_label
+				//
+			else
+				clearsysmsg
+				useskill 'Discordance'
+				waitfortarget 500
+
+				while targetexists
+					if dead fount_target
+						hotkey "Cancel Current Target"
+						wait 200
+					else
+						target fount_target
+						wait 200
+					endif
+				endwhile
+
+				wait 200
+			endif
+		endif
+	endif
+
+	if not warmode and find lasttarget ground -1 -1 10 as fount_target
+		if skill "Peacemaking" > 0 and cooldown "Peace" = 0 and cooldown "Music" = 0
+			getlabel fount_target target_label
+            wait 200
+
+			if "pacified" in target_label or "barding break" in target_label
+				//
+			elseif "discord" in target_label
+				clearsysmsg
+				useskill 'Peacemaking'
+				waitfortarget 500
+
+				while targetexists
+					if dead fount_target
+						hotkey "Cancel Current Target"
+						wait 200
+					else
+						target fount_target
+						wait 200
+					endif
+				endwhile
+
+				wait 200
+			endif
+		endif
+	endif
+
+	if not warmode and find lasttarget ground -1 -1 10 as fount_target
+		if skill "Discordance" > 0 and cooldown "Discord" = 0 and cooldown "Music" = 0 and not findbuff "Virtuoso"
+			getlabel fount_target target_label
+            wait 200
+
+			clearsysmsg
+			useskill 'Discordance'
+			waitfortarget 500
+
+			while targetexists
+				if dead fount_target
+					hotkey "Cancel Current Target"
+					wait 200
+				else
+					target fount_target
+					wait 200
+				endif
+			endwhile
+
+			wait 200
+		endif
+
+		if cooldown "Ability" = 0 and find lasttarget ground -1 -1 2
+		    say "[weaponability1"
+		    cooldown "Ability" 5000
+		endif
+	endif
+
+	if timer "clear_scavenger_timer" > clear_scavenger_timer_frequency
+		sysmsg "Clear Scavenger Cache"
+		hotkey "Clear Scavenger Cache"
+		settimer "clear_scavenger_timer" 0
+	endif
+endwhile

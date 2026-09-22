@@ -1,0 +1,135 @@
+# "Borrowed" from Jaseowns bard training scripts
+# UO Outlands
+# Version: 1.0.0
+# Description: Be at the Prevalia Zoo with instruments
+# Or, be at the new player dungeon near a corpser, or a mob tamed/released by an animal tamer
+# Update dungeonMob variable to match the correct mob if needed
+
+// Level to train skills to
+@setvar! trainSkills 120
+
+// Which skills to train
+@setvar! trainDiscordance 1
+@setvar! trainPeacemaking 1
+@setvar! trainProvocation 1
+
+// Delay settings
+@setvar! loopDelay 800
+@setvar! discordDelay 4000
+
+// Shelter Dungeon Mob (or other mob tamed/released)
+@setvar! dungeonMob "a corpser"
+
+if targetexists
+    hotkey 'Cancel Current Target'
+endif
+
+# Skill check
+if useDiscordance = 1
+    useskill "Discordance"
+    @setvar useDiscordance 0
+elseif trainDiscordance = 0 or trainPeacemaking = 0 or trainProvocation = 0
+    if skill "Peacemaking" < trainSkills and trainPeacemaking = 1
+        useskill "Peacemaking"
+    elseif skill "Provocation" < trainSkills and trainProvocation = 1
+        useskill "Provocation"
+    elseif skill "Discordance" < trainSkills and trainDiscordance = 1
+        useskill "Discordance"
+    endif
+elseif trainDiscordance = 1 and trainPeacemaking = 1 and trainProvocation = 1
+    if skill "Peacemaking" < trainSkills and skill "Peacemaking" <= skill "Provocation" and skill "Peacemaking" <= skill "Discordance"
+        useskill "Peacemaking"
+    elseif skill "Provocation" < trainSkills and skill "Provocation" <= skill "Peacemaking" and skill "Provocation" <= skill "Discordance"
+        useskill "Provocation"
+    elseif skill "Discordance" < trainSkills and skill "Discordance" <= skill "Peacemaking" and skill "Discordance" <= skill "Provocation"
+        useskill "Discordance"
+    endif
+endif
+wft 500
+
+if insysmsg "What instrument"
+    if findtype "bamboo flute" backpack as inny
+        target inny
+    elseif findtype "tambourine" backpack as inny
+        target inny
+    elseif findtype "drum" backpack as inny
+        target inny
+    elseif findtype "lute" backpack as inny
+        target inny
+    elseif findtype "lap harp" backpack as inny
+        target inny
+    else
+        overhead "I don't have an inny" 34
+        wait 2000
+        replay
+    endif
+    wft 500
+endif
+
+if findtype "an anaconda" ground -1 -1 10 as mob
+     if noto mob = hostile
+       target mob
+     else
+        ignore mob
+        replay
+     endif
+elseif findtype "a rock guar" ground -1 -1 10 as mob
+     if noto mob = hostile
+       target mob
+     else
+        ignore mob
+        replay
+     endif
+elseif findtype "a sand crawler" ground -1 -1 10 as mob
+     if noto mob = hostile
+       target mob
+     else
+        ignore mob
+        replay
+     endif
+elseif findtype "a wolfhound" ground -1 -1 10 as mob
+     if noto mob = hostile
+       target mob
+     else
+        ignore mob
+        replay
+     endif
+elseif findtype dungeonMob ground -1 -1 10 as mob
+     if noto mob = hostile
+       target mob
+     else
+        ignore mob
+        replay
+     endif
+else
+    overhead "No mob found" 34
+    wait 2000
+    replay
+endif
+
+wft 1500
+
+if insysmsg "Whom do you wish them to attack?"
+    target self
+endif
+
+wait 200
+
+if insysmsg "Your barding skill cooldowns reset."
+    replay
+endif
+
+if insysmsg "You play successfully, pacifying" or insysmsg "You play successfully, provoking"
+    if skill "Discordance" < trainSkills and trainDiscordance = 1
+        wait discordDelay
+        @setvar useDiscordance 1
+    endif
+endif
+
+clearsysmsg
+
+for 1
+    wait loopDelay
+endfor
+
+loop

@@ -1,0 +1,1384 @@
+clearall
+clearsysmsg
+cleardragdrop
+clearignore
+
+# ####################################################################################
+# # SETUP
+# ####################################################################################
+# Local tuning values used by the sustain and buff loops.
+@setvar! var_use_potion 1
+@setvar! var_cure_cooldown 750
+@setvar! var_greate_heal_cooldown 750
+@setvar! var_heal_action_cooldown 1200
+@setvar! var_bless_cooldown 1000
+@setvar! var_arch_protection_cooldown 1250
+@setvar! var_reactive_armor_cooldown 500
+@setvar! var_magic_reflection_cooldown 1500
+@setvar! var_curse_cast_delay 1300
+@setvar! var_mana_drain_cast_delay 1300
+@setvar! var_lightning_cast_delay 1250
+@setvar! var_magery_target_delay 1500
+
+if not timerexists "overhead_message_timer"
+	createtimer "overhead_message_timer"
+	settimer "overhead_message_timer" 2000
+endif
+
+if not timerexists "clear_scavenger_timer"
+	createtimer "clear_scavenger_timer"
+	settimer "clear_scavenger_timer" 30000
+endif
+
+if not timerexists "blood_oath_timer"
+	createtimer "blood_oath_timer"
+	settimer "blood_oath_timer" 30501
+endif
+
+if not timerexists "vampiric_embrace_timer"
+	createtimer "vampiric_embrace_timer"
+	settimer "vampiric_embrace_timer" 30501
+endif
+
+if not timerexists "wither_timer"
+	createtimer "wither_timer"
+	settimer "wither_timer" 30501
+endif
+
+if not timerexists "magic_target_memory_timer"
+	createtimer "magic_target_memory_timer"
+	settimer "magic_target_memory_timer" 15001
+endif
+
+if not timerexists "combat_target_grace_timer"
+	createtimer "combat_target_grace_timer"
+	settimer "combat_target_grace_timer" 501
+endif
+
+if not timerexists "control_followup_timer"
+	createtimer "control_followup_timer"
+	settimer "control_followup_timer" 8001
+endif
+
+if not timerexists "necro_hotbar_retry_timer"
+	createtimer "necro_hotbar_retry_timer"
+	settimer "necro_hotbar_retry_timer" 3001
+endif
+
+if not timerexists "necro_hotbar_notice_timer"
+	createtimer "necro_hotbar_notice_timer"
+	settimer "necro_hotbar_notice_timer" 10001
+endif
+
+if not timerexists "crook_check_timer"
+	createtimer "crook_check_timer"
+	settimer "crook_check_timer" 3001
+endif
+
+if not timerexists "provo_follower_check_timer"
+	createtimer "provo_follower_check_timer"
+	settimer "provo_follower_check_timer" 1501
+endif
+
+if not timerexists "provo_follower_notice_timer"
+	createtimer "provo_follower_notice_timer"
+	settimer "provo_follower_notice_timer" 10001
+endif
+
+if not timerexists "provo_follower_overhead_timer"
+	createtimer "provo_follower_overhead_timer"
+	settimer "provo_follower_overhead_timer" 5001
+endif
+
+if not timerexists "heal_action_timer"
+	createtimer "heal_action_timer"
+	settimer "heal_action_timer" 1201
+endif
+
+if not varexist var_my_instrument
+	@setvar! var_my_instrument 0
+endif
+
+if not varexist var_combat_target
+	@setvar! var_combat_target 0
+endif
+
+if not varexist var_magic_stage
+	@setvar! var_magic_stage 0
+endif
+
+if not varexist var_active_crook
+	@setvar! var_active_crook 0
+endif
+
+if not varexist var_bard_control_mode
+	# 0 = offensive Discord -> Peace
+	# 1 = offensive Discord -> Provo
+	@setvar! var_bard_control_mode 0
+endif
+
+if not varexist var_provo_follower_kind
+	# 1 = Vampire Thrall
+	# 2 = Ancient Mummy
+	# 3 = Rag Witch
+	# 4 = Lich
+	@setvar! var_provo_follower_kind 1
+endif
+
+if not varexist var_provo_follower
+	@setvar! var_provo_follower 0
+endif
+
+if not varexist var_control_followup_target
+	@setvar! var_control_followup_target 0
+endif
+
+if not varexist var_control_followup_ready
+	@setvar! var_control_followup_ready 0
+endif
+
+# Track which targets already received each magery opener during the current pull.
+if not listexists 'magic_cursed_targets'
+	createlist 'magic_cursed_targets'
+endif
+
+if not listexists 'magic_drained_targets'
+	createlist 'magic_drained_targets'
+endif
+
+# ####################################################################################
+# # INSTRUMENT SELECT
+# ####################################################################################
+while findtype 3740|3742|3762|3763|10245|20006|20008|20010|20012|20014|20016 backpack as found_instrument
+	getlabel found_instrument found_instrument_description
+
+	# Prefer the best instrument already in the backpack before asking for manual selection.
+	if "supremely" in found_instrument_description or "exceedingly" in found_instrument_description
+		@setvar! var_my_instrument found_instrument
+		break
+	endif
+
+	@ignore found_instrument
+endwhile
+
+@clearignore
+
+if not find var_my_instrument backpack
+	clearsysmsg
+	overhead "Select instrument:" 55
+	@setvar! var_my_instrument
+	wait 200
+
+		for 30
+			if targetexists or insysmsg "Select"
+				break
+			endif
+
+			wait 100
+		endfor
+
+		if not targetexists and not insysmsg "Select"
+			@setvar! var_my_instrument 0
+			overhead "Instrument select timed out." 32
+			stop
+		endif
+
+	wait 200
+	getlabel backpack backpack_description
+
+	if find var_my_instrument backpack as found_instrument
+		getlabel found_instrument found_instrument_description
+
+		if "flute" in found_instrument_description or "drums" in found_instrument_description or "harp" in found_instrument_description or "lute" in found_instrument_description or "tambourine" in found_instrument_description or "gemshorn" in found_instrument_description or "hurdy" in found_instrument_description or "psaltery" in found_instrument_description or "sackbut" in found_instrument_description or "shawm" in found_instrument_description or "Vielle" in found_instrument_description
+			overhead "{{found_instrument_description}}"
+			dclick var_my_instrument
+			wait 1000
+		else
+			@setvar! var_my_instrument 0
+			overhead "Not an instrument!" 33
+			stop
+		endif
+	else
+		@setvar! var_my_instrument 0
+		overhead "Not in backpack" 33
+		stop
+	endif
+endif
+
+# ####################################################################################
+# # NECRO HOTBAR SETUP
+# ####################################################################################
+if skill "Necromancy" > 0 and not gumpexists 622436516
+	if findtype 'necromancer book' backpack
+		# The hotbar gump is used as the source of truth for current symbol count.
+		for 3
+			if gumpexists 622436516
+				break
+			endif
+
+			yell '[necromancyhotbar'
+			waitforgump 622436516 500
+		endfor
+
+		if not gumpexists 622436516
+			overhead "Necro hotbar missing." 32
+			settimer "necro_hotbar_retry_timer" 0
+			settimer "necro_hotbar_notice_timer" 0
+		endif
+	else
+		overhead "Necro Book NOT Found!" 32
+	endif
+endif
+
+while not dead
+	if insysmsg "Your concentration is disturbed, thus ruining thy spell."
+		replay
+	endif
+
+	if insysmsg "That is not a musical instrument"
+		setvar var_my_instrument
+	endif
+
+	if insysmsg "What instrument shall you play" and targetexists
+		target var_my_instrument
+	endif
+
+	while queued
+		wait 100
+	endwhile
+
+	while casting
+		wait 100
+	endwhile
+
+	@setvar! var_necro_action_used 0
+
+	# ####################################################################################
+	# # COMBAT TARGET CACHE
+	# ####################################################################################
+	# Cache the last hostile ground target so self or backpack targeting
+	# does not break barding, necro, or opener follow-through.
+	if find lasttarget ground -1 -1 12 as fresh_target
+		if not dead fresh_target and var_combat_target != fresh_target
+			if noto fresh_target = "hostile" or noto fresh_target = "criminal" or noto fresh_target = "enemy" or noto fresh_target = "murderer"
+				@setvar! var_combat_target fresh_target
+				settimer "combat_target_grace_timer" 0
+
+				if inlist 'magic_drained_targets' var_combat_target
+					@setvar! var_magic_stage 2
+				elseif inlist 'magic_cursed_targets' var_combat_target
+					@setvar! var_magic_stage 1
+				else
+					@setvar! var_magic_stage 0
+				endif
+			endif
+		endif
+	endif
+
+	if find var_combat_target ground -1 -1 12 as stored_target
+		settimer "magic_target_memory_timer" 0
+		settimer "combat_target_grace_timer" 0
+
+		if inlist 'magic_drained_targets' var_combat_target
+			@setvar! var_magic_stage 2
+		elseif inlist 'magic_cursed_targets' var_combat_target and var_magic_stage = 0
+			@setvar! var_magic_stage 1
+		endif
+
+		if dead stored_target
+			@setvar! var_combat_target 0
+			@setvar! var_magic_stage 0
+		elseif noto stored_target != "hostile" and noto stored_target != "criminal" and noto stored_target != "enemy" and noto stored_target != "murderer"
+			@setvar! var_combat_target 0
+			@setvar! var_magic_stage 0
+		endif
+	elseif var_combat_target != 0 and timer "combat_target_grace_timer" > 500
+		@setvar! var_combat_target 0
+		@setvar! var_magic_stage 0
+	endif
+
+	if var_control_followup_target != 0
+		if var_combat_target = 0
+			@setvar! var_control_followup_target 0
+		elseif var_control_followup_target != var_combat_target and timer "control_followup_timer" > 500
+			@setvar! var_control_followup_target 0
+		elseif timer "control_followup_timer" > 8000
+			@setvar! var_control_followup_target 0
+		endif
+	endif
+
+	if var_combat_target = 0 and timer "magic_target_memory_timer" > 15000
+		# Treat a quiet window with no combat target as the end of the pull
+		# and forget old opener state.
+		clearlist 'magic_cursed_targets'
+		clearlist 'magic_drained_targets'
+		settimer "magic_target_memory_timer" 0
+	endif
+
+	# ####################################################################################
+	# # NECRO HOTBAR RECOVERY
+	# ####################################################################################
+	# Reopen the necro hotbar if it closes so symbol-based necro logic
+	# does not silently stop mid-session.
+	if skill "Necromancy" > 0 and not targetexists and not gumpexists 622436516
+		if timer "necro_hotbar_retry_timer" > 3000
+			if findtype 'necromancer book' backpack
+				yell '[necromancyhotbar'
+				waitforgump 622436516 250
+				settimer "necro_hotbar_retry_timer" 0
+
+				if gumpexists 622436516
+					settimer "necro_hotbar_notice_timer" 0
+				elseif timer "necro_hotbar_notice_timer" > 10000
+					overhead "Necro hotbar missing." 32
+					settimer "necro_hotbar_notice_timer" 0
+				endif
+			elseif timer "necro_hotbar_notice_timer" > 10000
+				overhead "Necro Book NOT Found!" 32
+				settimer "necro_hotbar_notice_timer" 0
+			endif
+		endif
+	endif
+
+	# ####################################################################################
+	# # CROOK SUPPORT
+	# ####################################################################################
+	# Keep an activated shepherd's crook ready while followers are active
+	# so Herding bonuses stay on summoned followers.
+	if followers > 0 and skill "Herding" > 0 and not targetexists and not casting and timer "crook_check_timer" > 3000
+		if find var_active_crook self as active_crook or find var_active_crook backpack as active_crook
+			getlabel active_crook active_crook_label
+
+			if "active" in active_crook_label or "activated" in active_crook_label
+				settimer "crook_check_timer" 0
+			else
+				@setvar! var_active_crook 0
+			endif
+		else
+			@setvar! var_active_crook 0
+		endif
+
+		if var_active_crook = 0
+			@clearignore
+
+			while findtype 3713 self as found_crook
+				getlabel found_crook found_crook_label
+
+				if "active" in found_crook_label or "activated" in found_crook_label
+					@setvar! var_active_crook found_crook
+					break
+				endif
+
+				@ignore found_crook
+			endwhile
+
+			@clearignore
+
+			if var_active_crook = 0
+				if findtype 3713 self as found_crook
+					dclick found_crook
+					getlabel backpack ping
+					wait 200
+					getlabel found_crook found_crook_label
+
+					if "active" in found_crook_label or "activated" in found_crook_label
+						@setvar! var_active_crook found_crook
+					elseif timer "overhead_message_timer" > 2000
+						overhead "Crook not active." 32
+						settimer "overhead_message_timer" 0
+					endif
+				elseif findtype 3713 backpack as found_crook
+					dclick found_crook
+					getlabel backpack ping
+					wait 200
+					getlabel found_crook found_crook_label
+
+					if "active" in found_crook_label or "activated" in found_crook_label
+						@setvar! var_active_crook found_crook
+					elseif timer "overhead_message_timer" > 2000
+						overhead "Crook not active." 32
+						settimer "overhead_message_timer" 0
+					endif
+				elseif timer "overhead_message_timer" > 2000
+					overhead "No shepherd's crook." 32
+					settimer "overhead_message_timer" 0
+				endif
+			endif
+
+			settimer "crook_check_timer" 0
+		endif
+	elseif followers = 0 and var_active_crook != 0
+		@setvar! var_active_crook 0
+	endif
+
+	# ####################################################################################
+	# # PROVO FOLLOWER CACHE
+	# ####################################################################################
+	# Track the preferred summon used as the second Provocation target so
+	# offensive control can swap between Peace and Provo without retargeting.
+	if var_bard_control_mode = 1 and followers > 0 and not targetexists and not casting and timer "provo_follower_check_timer" > 1500
+		if find var_provo_follower ground -1 -1 12 as current_provo_follower
+			if dead current_provo_follower
+				@setvar! var_provo_follower 0
+			endif
+		else
+			@setvar! var_provo_follower 0
+		endif
+
+		if var_provo_follower = 0
+			@clearignore
+
+				if var_provo_follower_kind = 1
+					while findtype 722|9 ground -1 -1 12 as found_follower
+					if not dead found_follower and noto found_follower != "hostile" and noto found_follower != "criminal" and noto found_follower != "enemy" and noto found_follower != "murderer"
+						@setvar! var_provo_follower found_follower
+						break
+					endif
+
+					@ignore found_follower
+				endwhile
+				elseif var_provo_follower_kind = 2
+					while findtype 158|14 ground -1 -1 12 as found_follower
+					if not dead found_follower and noto found_follower != "hostile" and noto found_follower != "criminal" and noto found_follower != "enemy" and noto found_follower != "murderer"
+						@setvar! var_provo_follower found_follower
+						break
+					endif
+
+					@ignore found_follower
+				endwhile
+				elseif var_provo_follower_kind = 3
+					while findtype 740|16 ground -1 -1 12 as found_follower
+					if not dead found_follower and noto found_follower != "hostile" and noto found_follower != "criminal" and noto found_follower != "enemy" and noto found_follower != "murderer"
+						@setvar! var_provo_follower found_follower
+						break
+					endif
+
+					@ignore found_follower
+				endwhile
+				elseif var_provo_follower_kind = 4
+					while findtype 24|15 ground -1 -1 12 as found_follower
+					if not dead found_follower and noto found_follower != "hostile" and noto found_follower != "criminal" and noto found_follower != "enemy" and noto found_follower != "murderer"
+						@setvar! var_provo_follower found_follower
+						break
+					endif
+
+					@ignore found_follower
+				endwhile
+			endif
+
+			@clearignore
+		endif
+
+		if find var_provo_follower ground -1 -1 12 as current_provo_follower
+			settimer "provo_follower_notice_timer" 0
+			if timer "provo_follower_overhead_timer" > 5000
+				overhead "Provo Pet" 68 current_provo_follower
+				settimer "provo_follower_overhead_timer" 0
+			endif
+		elseif timer "provo_follower_notice_timer" > 10000
+			overhead "No provo follower." 32
+			settimer "provo_follower_notice_timer" 0
+		endif
+
+		settimer "provo_follower_check_timer" 0
+	elseif var_bard_control_mode != 1 or followers = 0
+		@setvar! var_provo_follower 0
+	endif
+
+	@setvar! var_control_followup_ready 0
+
+	if not warmode and var_control_followup_target != 0 and var_control_followup_target = var_combat_target and not targetexists and not casting
+		if var_bard_control_mode = 0 and skill "Peacemaking" > 0 and cooldown "Peace" = 0 and cooldown "Music" = 0
+			@setvar! var_control_followup_ready 1
+		elseif var_bard_control_mode = 1 and skill "Provocation" > 0 and cooldown "Provo" = 0 and cooldown "Music" = 0 and var_provo_follower != 0
+			@setvar! var_control_followup_ready 1
+		endif
+	endif
+
+	if skill "Necromancy" > 0
+		# ####################################################################################
+		# # NECRO SYMBOL TRACKING
+		# ####################################################################################
+		# Rebuild symbol count from the visible necro hotbar every loop.
+		if not listexists 'necro_symbols'
+			createlist 'necro_symbols'
+		else
+			clearlist 'necro_symbols'
+		endif
+
+		if gumpexists 622436516
+			if ingump "20/" 622436516
+				for 20
+					pushlist 'necro_symbols' '1' 'back'
+				endfor
+			elseif ingump "19/" 622436516
+				for 19
+					pushlist 'necro_symbols' '1' 'back'
+				endfor
+			elseif ingump "18/" 622436516
+				for 18
+					pushlist 'necro_symbols' '1' 'back'
+				endfor
+			elseif ingump "17/" 622436516
+				for 17
+					pushlist 'necro_symbols' '1' 'back'
+				endfor
+			elseif ingump "16/" 622436516
+				for 16
+					pushlist 'necro_symbols' '1' 'back'
+				endfor
+			elseif ingump "15/" 622436516
+				for 15
+					pushlist 'necro_symbols' '1' 'back'
+				endfor
+			elseif ingump "14/" 622436516
+				for 14
+					pushlist 'necro_symbols' '1' 'back'
+				endfor
+			elseif ingump "13/" 622436516
+				for 13
+					pushlist 'necro_symbols' '1' 'back'
+				endfor
+			elseif ingump "12/" 622436516
+				for 12
+					pushlist 'necro_symbols' '1' 'back'
+				endfor
+			elseif ingump "11/" 622436516
+				for 11
+					pushlist 'necro_symbols' '1' 'back'
+				endfor
+			elseif ingump "10/" 622436516
+				for 10
+					pushlist 'necro_symbols' '1' 'back'
+				endfor
+			elseif ingump "9/" 622436516
+				for 9
+					pushlist 'necro_symbols' '1' 'back'
+				endfor
+			elseif ingump "8/" 622436516
+				for 8
+					pushlist 'necro_symbols' '1' 'back'
+				endfor
+			elseif ingump "7/" 622436516
+				for 7
+					pushlist 'necro_symbols' '1' 'back'
+				endfor
+			elseif ingump "6/" 622436516
+				for 6
+					pushlist 'necro_symbols' '1' 'back'
+				endfor
+			elseif ingump "5/" 622436516
+				for 5
+					pushlist 'necro_symbols' '1' 'back'
+				endfor
+			elseif ingump "4/" 622436516
+				for 4
+					pushlist 'necro_symbols' '1' 'back'
+				endfor
+			elseif ingump "3/" 622436516
+				for 3
+					pushlist 'necro_symbols' '1' 'back'
+				endfor
+			elseif ingump "2/" 622436516
+				for 2
+					pushlist 'necro_symbols' '1' 'back'
+				endfor
+			elseif ingump "1/" 622436516
+				for 1
+					pushlist 'necro_symbols' '1' 'back'
+				endfor
+			endif
+		endif
+	endif
+
+	# ####################################################################################
+	# # WEIGHT SAFETY
+	# ####################################################################################
+	while weight > maxweight
+		if findtype "gold coin" backpack as found_gold
+			lift found_gold 1000
+			droprelloc 0 0
+			getlabel backpack backpack_description
+
+			if insysmsg "cannot drop anything"
+				drop backpack -1 -1 -1
+				getlabel backpack backpack_description
+				wait 200
+
+				if timer "overhead_message_timer" > 2000
+					overhead "Gold drop stalled." 32
+					settimer "overhead_message_timer" 0
+				endif
+
+				break
+			endif
+
+			wait 1000
+			overhead 'You drop some gold on the ground.' 55
+		else
+			if timer "overhead_message_timer" > 2000
+				overhead "Overweight with no gold to drop." 32
+				settimer "overhead_message_timer" 0
+			endif
+
+			break
+		endif
+	endwhile
+
+	if not findbuff 'Food Satisfaction'
+		if findtype tray backpack as food
+			dclick food
+			wait 350
+		endif
+	endif
+
+
+	if paralyzed
+		if findtype 3705 backpack 38
+			yell "[Pouch"
+			getlabel backpack ping
+		else
+			overhead "You are out of pouche." 32
+		endif
+	endif
+
+	# ####################################################################################
+	# # HEAL
+	# ####################################################################################
+	if diffhits > 15 and diffhits < 35 and timer "heal_action_timer" > var_heal_action_cooldown and findtype 3972 self and findtype 3973 self and findtype 3974 self and findtype 3981 self and not casting and not targetexists
+		hotkey "> Smart Heal/Cure Self"
+		settimer "heal_action_timer" 0
+		wait var_greate_heal_cooldown
+	elseif diffhits > 35
+		if findtype "Yellow Potion" self as found_potion
+			getlabel found_potion found_potion_description
+
+			if "next usable" in found_potion_description
+				if timer "overhead_message_timer" > 2000
+					overhead found_potion_description 83
+					settimer "overhead_message_timer" 0
+				endif
+
+				if not targetexists and not casting and timer "heal_action_timer" > var_heal_action_cooldown and findtype 3972 self and findtype 3973 self and findtype 3974 self and findtype 3981 self
+					hotkey "> Greater Heal/Cure Self"
+					settimer "heal_action_timer" 0
+					wait var_greate_heal_cooldown
+				endif
+			elseif not targetexists
+				overhead "You drink a healing potion." 53
+				dclick found_potion
+				getlabel backpack ping
+				cooldown "Heal Potion" 10000
+			endif
+		else
+			if timer "overhead_message_timer" > 2000
+				overhead "You are out of healing potion." 32
+				settimer "overhead_message_timer" 0
+			endif
+
+			if not targetexists and not casting and timer "heal_action_timer" > var_heal_action_cooldown and findtype 3972 self and findtype 3973 self and findtype 3974 self and findtype 3981 self
+				hotkey "> Greater Heal/Cure Self"
+				settimer "heal_action_timer" 0
+				wait var_greate_heal_cooldown
+			endif
+		endif
+	endif
+
+	# ####################################################################################
+	# # CURE POT
+	# ####################################################################################
+	if poisoned
+		if findtype "Orange Potion" self as found_potion
+			if hidden
+				break
+			endif
+
+			if not targetexists
+				overhead "You drink a cure potion." 44
+				dclick found_potion
+				getlabel backpack ping
+			endif
+		else
+			if timer "overhead_message_timer" > 2000
+				overhead "You are out of cure potion." 32
+				settimer "overhead_message_timer" 0
+			endif
+
+			if not targetexists and not casting and timer "heal_action_timer" > var_heal_action_cooldown and findtype 3972 self and findtype 3973 self
+				hotkey "> Smart Heal/Cure Self"
+				settimer "heal_action_timer" 0
+			endif
+
+			wait var_cure_cooldown
+		endif
+	endif
+
+	# ####################################################################################
+	# # STAMINA POT
+	# ####################################################################################
+	if stam < 5 and not targetexists
+		if findtype "Red Potion" backpack as found_potion
+			dclick found_potion
+			wait 200
+		else
+			if timer "overhead_message_timer" > 2000
+				overhead "You are out of refresh potions." 32
+				settimer "overhead_message_timer" 0
+			endif
+		endif
+	endif
+
+	# ####################################################################################
+	# # STRENGTH POT
+	# ####################################################################################
+	if str <= 100 and var_use_potion = 1 and not targetexists and find var_combat_target ground -1 -1 12
+		if findtype "White Potion" backpack as found_potion
+			dclick found_potion
+			wait 200
+		else
+			if timer "overhead_message_timer" > 2000
+				overhead "You are out of strength potions." 32
+				settimer "overhead_message_timer" 0
+			endif
+		endif
+	endif
+
+	# ####################################################################################
+	# # AGILITY POT
+	# ####################################################################################
+	if dex <= 25 and var_use_potion = 1 and not targetexists and find var_combat_target ground -1 -1 12
+		if findtype "Blue Potion" backpack as found_potion
+			dclick found_potion
+			wait 200
+		else
+			if timer "overhead_message_timer" > 2000
+				overhead "You are out of agility potions." 32
+				settimer "overhead_message_timer" 0
+			endif
+		endif
+	endif
+
+	# ####################################################################################
+	# # RESIST POT
+	# ####################################################################################
+	if not findbuff 'Magic Resist Potion' and var_use_potion = 1 and not targetexists and find var_combat_target ground -1 -1 12
+		if findtype "Black Potion" backpack as found_potion
+			dclick found_potion
+			wait 200
+		else
+			if timer "overhead_message_timer" > 2000
+				overhead "You are out of magic resist potions." 32
+				settimer "overhead_message_timer" 0
+			endif
+		endif
+	endif
+
+
+	# ####################################################################################
+	# # WITHER PREP
+	# ####################################################################################
+	# Cast Wither only when the symbol spend is safe and there is enough
+	# pending non-damage work to benefit from the 30 second mana window.
+	@setvar! var_need_curse 0
+	@setvar! var_need_mana_drain 0
+	@setvar! var_pending_non_damage_ready 0
+
+	if not warmode and skill "Magery" >= 40 and find var_combat_target ground -1 -1 12 as combat_target
+		if not inlist 'magic_drained_targets' combat_target and findtype 3962 self and findtype 3974 self and findtype 3981 self
+			@setvar! var_need_mana_drain 1
+		endif
+
+		if not inlist 'magic_cursed_targets' combat_target and findtype 3972 self and findtype 3976 self and findtype 3980 self
+			@setvar! var_need_curse 1
+		endif
+	endif
+
+	if var_need_curse = 1 and var_need_mana_drain = 1
+		@setvar! var_pending_non_damage_ready 1
+	endif
+
+	if skill "Necromancy" >= 90 and var_necro_action_used = 0 and not targetexists and not casting and list 'necro_symbols' >= 8 and timer "wither_timer" > 30500 and diffhits < 25
+		if skill "Necromancy" >= 80 and followers > 0 and list 'necro_symbols' >= 4 and timer "blood_oath_timer" > 30500 and find var_combat_target ground -1 -1 12
+			# Hold symbols for Blood Oath before spending on Wither.
+		elseif skill "Necromancy" >= 70 and followers > 0 and list 'necro_symbols' >= 6 and timer "vampiric_embrace_timer" > 30500 and findtype 8198 ground -1 -1 8
+			# Hold symbols for Vampiric Embrace before spending on Wither.
+		elseif var_pending_non_damage_ready = 1
+			clearsysmsg
+			hotkey 'wither'
+			getlabel backpack ping
+			wait 200
+
+			if not insysmsg "unholy symbols remaining" and not insysmsg "seconds before you may use that ability again."
+				yell '[Wither'
+				getlabel backpack ping
+				wait 250
+			endif
+
+			if insysmsg "unholy symbols remaining"
+				overhead "You cast Wither." 44
+				settimer "wither_timer" 0
+				@setvar! var_necro_action_used 1
+				wait 450
+			elseif insysmsg "seconds before you may use that ability again."
+				settimer "wither_timer" 0
+				@setvar! var_necro_action_used 1
+			endif
+		endif
+	endif
+
+	# ####################################################################################
+	# # MAGE BUFF
+	# ####################################################################################
+	if not targetexists and var_control_followup_ready = 0
+		if mana > 30 or timer "wither_timer" < 30500
+			if not casting and cooldown "Walk" = 0 and not find var_combat_target ground -1 -1 12 and findtype 3972 self and findtype 3974 self
+				if not findbuff 'Strength' or not findbuff 'Agility' or not findbuff 'Cunning'
+					cast 'Bless'
+					wait var_bless_cooldown
+					waitfortarget 1000
+					hotkey 'Target Self'
+					wait 200
+				endif
+			endif
+			if not targetexists and not findbuff 'Protection' and cooldown "Walk" = 0 and findtype 3980 self and findtype 3972 self and findtype 3973 self and findtype 3974 self and not casting and find var_combat_target ground -1 -1 12
+				cast 'Arch Protection'
+				wait var_arch_protection_cooldown
+				waitfortarget 1000
+				hotkey 'Target Self'
+				wait 200
+			endif
+			if not targetexists and not findbuff 'Reactive Armor' and cooldown "Walk" = 0 and findtype 3980 self and findtype 3972 self and findtype 3981 self and not casting
+				cast 'Reactive Armor'
+				wait var_reactive_armor_cooldown
+				wait 200
+			endif
+			if not targetexists and not findbuff 'Magic Reflection' and cooldown "Reflect" = 0 and cooldown "Walk" = 0 and findtype 3972 self and findtype 3974 self and findtype 3981 self and not casting
+				cast 'Magic Reflection'
+				wait var_magic_reflection_cooldown
+				wait 200
+			endif
+		endif
+	endif
+
+
+	# ####################################################################################
+	# # BARD SONG BUFF
+	# ####################################################################################
+	# Song refresh targets the backpack, while combat logic continues to
+	# rely on the internal cached target instead of rewriting last target.
+	if not targetexists and not casting and var_control_followup_ready = 0 and cooldown "Discord" = 0 and cooldown "Music" = 0 and not findbuff "song of discordance"
+		useskill 'Discordance'
+		waitfortarget 1000
+
+		if insysmsg "What instrument"
+			target var_my_instrument
+			replay
+		elseif targetexists
+			target backpack
+			getlabel backpack ping
+			wait 150
+		endif
+	endif
+
+	if not targetexists and not casting and var_control_followup_ready = 0 and cooldown "Provo" = 0 and cooldown "Music" = 0 and not findbuff "song of provocation"
+		useskill 'Provocation'
+		waitfortarget 1000
+
+		if insysmsg "What instrument"
+			target var_my_instrument
+			replay
+		elseif targetexists
+			target backpack
+			getlabel backpack ping
+			wait 150
+		endif
+	endif
+
+	if not targetexists and not casting and var_control_followup_ready = 0 and cooldown "Peace" = 0 and cooldown "Music" = 0 and not findbuff "song of peacemaking"
+		useskill 'Peacemaking'
+		waitfortarget 1000
+
+		if insysmsg "What instrument"
+			target var_my_instrument
+			replay
+		elseif targetexists
+			target backpack
+			getlabel backpack ping
+			wait 150
+		endif
+	endif
+
+
+	# ####################################################################################
+	# # DISCO
+	# ####################################################################################
+	# Automatic offensive barding only runs out of warmode. In warmode,
+	# the user handles offensive targeting manually.
+	if not targetexists and not casting and not warmode and find var_combat_target ground -1 -1 10 as combat_target
+		if skill "Discordance" > 0 and cooldown "Discord" = 0 and cooldown "Music" = 0
+			getlabel combat_target target_label
+			wait 200
+
+			if "discord" in target_label
+				# Target is already discorded.
+			else
+				clearsysmsg
+				useskill 'Discordance'
+				waitfortarget 1000
+
+				while targetexists
+					if insysmsg "What instrument shall you play"
+						target var_my_instrument
+						replay
+					endif
+
+					if find lasttarget ground -1 -1 12 as fresh_target
+						if not dead fresh_target and var_combat_target != fresh_target
+							if noto fresh_target = "hostile" or noto fresh_target = "criminal" or noto fresh_target = "enemy" or noto fresh_target = "murderer"
+								@setvar! var_combat_target fresh_target
+								settimer "combat_target_grace_timer" 0
+
+								if inlist 'magic_drained_targets' var_combat_target
+									@setvar! var_magic_stage 2
+								elseif inlist 'magic_cursed_targets' var_combat_target
+									@setvar! var_magic_stage 1
+								else
+									@setvar! var_magic_stage 0
+								endif
+							endif
+						endif
+					endif
+
+					if var_combat_target != combat_target
+						hotkey "Cancel Current Target"
+						wait 200
+						break
+					endif
+
+					if dead combat_target
+						hotkey "Cancel Current Target"
+						wait 200
+					else
+						target combat_target
+						wait 200
+					endif
+				endwhile
+
+				if find combat_target ground -1 -1 12 as confirmed_target and not dead confirmed_target and var_combat_target = combat_target
+					for 4
+						getlabel confirmed_target target_label
+
+						if "discord" in target_label
+							@setvar! var_control_followup_target combat_target
+							settimer "control_followup_timer" 0
+							break
+						endif
+
+						wait 100
+					endfor
+				endif
+
+				wait 200
+			endif
+		endif
+	endif
+
+	# ####################################################################################
+	# # CONTROL FOLLOWUP
+	# ####################################################################################
+	# Once a target is Discorded, hold the magery opener until the chosen
+	# follow-up control skill (Peace or Provo) has been attempted.
+	if not targetexists and not casting and not warmode and find var_combat_target ground -1 -1 10 as combat_target
+		if var_bard_control_mode = 0 and skill "Peacemaking" > 0 and cooldown "Peace" = 0 and cooldown "Music" = 0
+			getlabel combat_target target_label
+			wait 200
+
+			if "pacified" in target_label or "barding break" in target_label
+				if var_control_followup_target = combat_target
+					@setvar! var_control_followup_target 0
+				endif
+			elseif "discord" in target_label or var_control_followup_target = combat_target
+				clearsysmsg
+				useskill 'Peacemaking'
+				waitfortarget 1000
+
+				while targetexists
+					if insysmsg "What instrument shall you play"
+						target var_my_instrument
+						replay
+					endif
+
+					if find lasttarget ground -1 -1 12 as fresh_target
+						if not dead fresh_target and var_combat_target != fresh_target
+							if noto fresh_target = "hostile" or noto fresh_target = "criminal" or noto fresh_target = "enemy" or noto fresh_target = "murderer"
+								@setvar! var_combat_target fresh_target
+								settimer "combat_target_grace_timer" 0
+
+								if inlist 'magic_drained_targets' var_combat_target
+									@setvar! var_magic_stage 2
+								elseif inlist 'magic_cursed_targets' var_combat_target
+									@setvar! var_magic_stage 1
+								else
+									@setvar! var_magic_stage 0
+								endif
+							endif
+						endif
+					endif
+
+					if var_combat_target != combat_target
+						hotkey "Cancel Current Target"
+						wait 200
+						break
+					endif
+
+					if dead combat_target
+						hotkey "Cancel Current Target"
+						wait 200
+					else
+						target combat_target
+						wait 200
+					endif
+				endwhile
+
+				if find combat_target ground -1 -1 12 as confirmed_target and not dead confirmed_target and var_combat_target = combat_target
+					for 4
+						getlabel confirmed_target target_label
+
+						if "pacified" in target_label or "barding break" in target_label
+							@setvar! var_control_followup_target 0
+							break
+						endif
+
+						wait 100
+					endfor
+				endif
+
+				wait 200
+			endif
+		elseif var_bard_control_mode = 1 and skill "Provocation" > 0 and cooldown "Provo" = 0 and cooldown "Music" = 0 and var_provo_follower != 0
+			getlabel combat_target target_label
+			wait 200
+
+			if "provoked" in target_label
+				if var_control_followup_target = combat_target
+					@setvar! var_control_followup_target 0
+				endif
+			elseif "discord" in target_label or var_control_followup_target = combat_target
+				if find var_provo_follower ground -1 -1 12 as provo_follower and not dead provo_follower and combat_target != provo_follower
+					clearsysmsg
+					useskill 'Provocation'
+					waitfortarget 1000
+
+					while targetexists
+						if insysmsg "What instrument shall you play"
+							target var_my_instrument
+							replay
+						elseif dead combat_target or dead provo_follower
+							hotkey "Cancel Current Target"
+							wait 200
+						else
+							target combat_target
+							wait 150
+
+							if targetexists
+								target provo_follower
+								wait 150
+							endif
+						endif
+					endwhile
+
+					if find combat_target ground -1 -1 12 as confirmed_target and not dead confirmed_target and var_combat_target = combat_target
+						for 4
+							getlabel confirmed_target target_label
+
+							if "provoked" in target_label
+								@setvar! var_control_followup_target 0
+								break
+							endif
+
+							wait 100
+						endfor
+					endif
+
+					wait 200
+				endif
+			endif
+		endif
+	endif
+
+	# ####################################################################################
+	# # CURSE / MANA DRAIN OPENER
+	# ####################################################################################
+	# Decide opener progress from the current combat target's memory lists
+	# so retargeting does not depend on a stale global stage value.
+	if not targetexists and not casting and not warmode and find var_combat_target ground -1 -1 12 as combat_target
+		if var_control_followup_ready = 1 and var_control_followup_target = combat_target
+			# Once Peace/Provo comes off cooldown, let it resolve before the
+			# next offensive spell grabs the loop.
+		elseif mana >= 30 or timer "wither_timer" < 30500
+			if inlist 'magic_drained_targets' combat_target
+				@setvar! var_magic_stage 2
+			elseif inlist 'magic_cursed_targets' combat_target
+				@setvar! var_magic_stage 1
+			else
+				@setvar! var_magic_stage 0
+			endif
+
+			if skill "Magery" >= 40 and cooldown "Walk" = 0
+				if not inlist 'magic_cursed_targets' combat_target and findtype 3972 self and findtype 3976 self and findtype 3980 self
+					if mana >= 11 or timer "wither_timer" < 30500
+						clearsysmsg
+						cast 'Curse'
+						wait var_curse_cast_delay
+						waitfortarget var_magery_target_delay
+
+						if targetexists
+							while targetexists
+								if find lasttarget ground -1 -1 12 as fresh_target
+									if not dead fresh_target and var_combat_target != fresh_target
+										if noto fresh_target = "hostile" or noto fresh_target = "criminal" or noto fresh_target = "enemy" or noto fresh_target = "murderer"
+											@setvar! var_combat_target fresh_target
+											settimer "combat_target_grace_timer" 0
+
+											if inlist 'magic_drained_targets' var_combat_target
+												@setvar! var_magic_stage 2
+											elseif inlist 'magic_cursed_targets' var_combat_target
+												@setvar! var_magic_stage 1
+											else
+												@setvar! var_magic_stage 0
+											endif
+										endif
+									endif
+								endif
+
+								if var_combat_target != combat_target
+									hotkey "Cancel Current Target"
+									wait 200
+									break
+								endif
+
+								if dead combat_target
+									hotkey "Cancel Current Target"
+									wait 200
+								else
+									target combat_target
+									wait 200
+								endif
+							endwhile
+
+							if find combat_target ground -1 -1 12 as confirmed_target and not dead confirmed_target and var_combat_target = combat_target
+								getlabel backpack ping
+								wait 150
+
+								if insysmsg "target cannot be seen"
+									@setvar! var_magic_stage 0
+								else
+									overhead "You cast Curse." 44
+
+									# Mark the target so returning to it later in the same pull
+									# resumes at stage 1 instead of restarting.
+									if not inlist 'magic_cursed_targets' var_combat_target
+										pushlist 'magic_cursed_targets' var_combat_target
+									endif
+
+									@setvar! var_magic_stage 1
+									wait 200
+								endif
+							endif
+						else
+							wait 200
+						endif
+					endif
+				elseif inlist 'magic_cursed_targets' combat_target and not inlist 'magic_drained_targets' combat_target and findtype 3962 self and findtype 3974 self and findtype 3981 self
+					if mana >= 11 or timer "wither_timer" < 30500
+						clearsysmsg
+						cast 'Mana Drain'
+						wait var_mana_drain_cast_delay
+						waitfortarget var_magery_target_delay
+
+						if targetexists
+							while targetexists
+								if find lasttarget ground -1 -1 12 as fresh_target
+									if not dead fresh_target and var_combat_target != fresh_target
+										if noto fresh_target = "hostile" or noto fresh_target = "criminal" or noto fresh_target = "enemy" or noto fresh_target = "murderer"
+											@setvar! var_combat_target fresh_target
+											settimer "combat_target_grace_timer" 0
+
+											if inlist 'magic_drained_targets' var_combat_target
+												@setvar! var_magic_stage 2
+											elseif inlist 'magic_cursed_targets' var_combat_target
+												@setvar! var_magic_stage 1
+											else
+												@setvar! var_magic_stage 0
+											endif
+										endif
+									endif
+								endif
+
+								if var_combat_target != combat_target
+									hotkey "Cancel Current Target"
+									wait 200
+									break
+								endif
+
+								if dead combat_target
+									hotkey "Cancel Current Target"
+									wait 200
+								else
+									target combat_target
+									wait 200
+								endif
+							endwhile
+
+							if find combat_target ground -1 -1 12 as confirmed_target and not dead confirmed_target and var_combat_target = combat_target
+								getlabel backpack ping
+								wait 150
+
+								if insysmsg "target cannot be seen"
+									@setvar! var_magic_stage 1
+								else
+									overhead "You cast Mana Drain." 44
+
+									# Mark the target as fully opened so later revisits skip
+									# the entire magery opener.
+									if not inlist 'magic_drained_targets' var_combat_target
+										pushlist 'magic_drained_targets' var_combat_target
+									endif
+
+									@setvar! var_magic_stage 2
+									wait 200
+								endif
+							endif
+						else
+							wait 200
+						endif
+					endif
+				endif
+			endif
+		endif
+	endif
+
+	# ####################################################################################
+	# # NECRO BUFF
+	# ####################################################################################
+	# Keep only the core sustain package on auto:
+	# Blood Oath first, then reactive Vampiric Embrace.
+	if skill "Necromancy" >= 60 and var_necro_action_used = 0 and not targetexists and not casting
+		if skill "Necromancy" >= 80 and followers > 0 and list 'necro_symbols' >= 4 and timer "blood_oath_timer" > 30500 and find var_combat_target ground -1 -1 12 as combat_target
+			if not dead combat_target
+				clearsysmsg
+				hotkey 'blood oath'
+				getlabel backpack ping
+				wait 250
+
+				if insysmsg "unholy symbols remaining"
+					overhead "You cast Blood Oath." 44
+					settimer "blood_oath_timer" 0
+					@setvar! var_necro_action_used 1
+					wait 450
+				elseif insysmsg "seconds before you may use that ability again."
+					settimer "blood_oath_timer" 0
+					@setvar! var_necro_action_used 1
+				endif
+			endif
+		elseif skill "Necromancy" >= 70 and followers > 0 and list 'necro_symbols' >= 6 and timer "vampiric_embrace_timer" > 30500 and findtype 8198 ground -1 -1 8 as nearby_corpse
+			clearsysmsg
+			gumpresponse 14 622436516
+			waitfortarget 500
+
+			if targetexists
+				hotkey 'Target Self'
+				getlabel backpack ping
+				wait 200
+
+				if not targetexists
+					if insysmsg "unholy symbols remaining"
+						overhead "You cast Vampiric Embrace." 44
+						settimer "vampiric_embrace_timer" 0
+						@setvar! var_necro_action_used 1
+					elseif insysmsg "seconds before you may use that ability again."
+						settimer "vampiric_embrace_timer" 0
+						@setvar! var_necro_action_used 1
+					elseif insysmsg "You do not see any corpses near that location"
+						settimer "vampiric_embrace_timer" 25000
+					elseif insysmsg "None of your followers currently require healing"
+						settimer "vampiric_embrace_timer" 25000
+					endif
+				endif
+			endif
+		endif
+	endif
+
+	# ####################################################################################
+	# # STAGE 2 LIGHTNING
+	# ####################################################################################
+	# Once a target has completed the Curse -> Mana Drain opener, use
+	# Lightning as the direct stage 2 follow-up.
+	if not targetexists and not casting and not warmode and mana >= 40 and find var_combat_target ground -1 -1 12 as combat_target
+		if var_control_followup_ready = 1 and var_control_followup_target = combat_target
+			# Once Peace/Provo is ready, keep it ahead of damage spells.
+		elseif inlist 'magic_drained_targets' combat_target
+			@setvar! var_magic_stage 2
+
+			if skill "Magery" >= 40 and cooldown "Walk" = 0 and findtype 3974 self and findtype 3980 self
+				clearsysmsg
+				cast 'Lightning'
+				wait var_lightning_cast_delay
+				waitfortarget var_magery_target_delay
+
+				if targetexists
+					while targetexists
+						if find lasttarget ground -1 -1 12 as fresh_target
+							if not dead fresh_target and var_combat_target != fresh_target
+								if noto fresh_target = "hostile" or noto fresh_target = "criminal" or noto fresh_target = "enemy" or noto fresh_target = "murderer"
+									@setvar! var_combat_target fresh_target
+									settimer "combat_target_grace_timer" 0
+
+									if inlist 'magic_drained_targets' var_combat_target
+										@setvar! var_magic_stage 2
+									elseif inlist 'magic_cursed_targets' var_combat_target
+										@setvar! var_magic_stage 1
+									else
+										@setvar! var_magic_stage 0
+									endif
+								endif
+							endif
+						endif
+
+						if var_combat_target != combat_target
+							hotkey "Cancel Current Target"
+							wait 200
+							break
+						endif
+
+						if dead combat_target
+							hotkey "Cancel Current Target"
+							wait 200
+						else
+							target combat_target
+							wait 200
+						endif
+					endwhile
+
+					if find combat_target ground -1 -1 12 as confirmed_target and not dead confirmed_target and var_combat_target = combat_target
+						getlabel backpack ping
+						wait 150
+					endif
+				endif
+			endif
+		elseif inlist 'magic_cursed_targets' combat_target
+			@setvar! var_magic_stage 1
+		else
+			@setvar! var_magic_stage 0
+		endif
+	endif
+
+	# ####################################################################################
+	# # SCAVENGER UTILITY
+	# ####################################################################################
+	if timer "clear_scavenger_timer" > 30000
+		sysmsg "Clear Scavenger Cache"
+		hotkey "Clear Scavenger Cache"
+		settimer "clear_scavenger_timer" 0
+	endif
+endwhile

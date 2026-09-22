@@ -1,0 +1,132 @@
+clearall
+clearsysmsg
+cleardragdrop
+clearignore
+
+
+if not varexist var_my_instrument
+    @setvar var_my_instrument 0
+endif
+
+@setvar! var_bard_buff_stage 0
+
+while findtype 3740|3742|3762|3763|10245|20006|20008|20010|20012|20014|20016 backpack as found_instrument
+    getlabel found_instrument found_instrument_description
+
+    if "supremely" in found_instrument_description or "exceedingly" in found_instrument_description
+        @setvar! var_my_instrument found_instrument
+        break
+    endif
+
+    @ignore found_instrument
+endwhile
+
+@clearignore
+
+if not find var_my_instrument backpack
+    clearsysmsg
+    overhead "Select instrument:" 55
+    @setvar var_my_instrument
+    wait 200
+
+    while not targetexists and not insysmsg "Select"
+        @setvar var_my_instrument
+    endwhile
+
+    wait 200
+    getlabel backpack backpack_description
+
+    if find var_my_instrument backpack as found_instrument
+        getlabel found_instrument found_instrument_description
+
+        if "flute" in found_instrument_description or "drums" in found_instrument_description or "harp" in found_instrument_description or "lute" in found_instrument_description or "tambourine" in found_instrument_description or "gemshorn" in found_instrument_description or "hurdy" in found_instrument_description or "psaltery" in found_instrument_description or "sackbut" in found_instrument_description or "shawm" in found_instrument_description or "Vielle" in found_instrument_description
+            overhead "{{found_instrument_description}}"
+            dclick var_my_instrument
+            wait 7000
+        else
+            @setvar var_my_instrument 0
+            overhead "Not an instrument!" 33
+            stop
+        endif
+    else
+        @setvar var_my_instrument 0
+        overhead "Not in backpack" 33
+        stop
+    endif
+endif
+
+while not dead
+	if insysmsg "That is not a musical instrument"
+		setvar var_my_instrument
+	endif
+
+	if insysmsg "What instrument shall you play"
+		waitfortarget 1000
+
+		if targetexists
+			target var_my_instrument
+			replay
+		endif
+	endif
+
+
+	wait 1000
+
+	if var_bard_buff_stage = 0
+		if cooldown "Discord" = 0 and cooldown "Music" = 0
+			clearsysmsg
+			useskill 'Discordance'
+			waitfortarget 1000
+
+			if insysmsg "What instrument"
+				target var_my_instrument
+				replay
+				waitfortarget 1000
+			endif
+
+			if targetexists
+				target backpack
+				wait 300
+				@setvar! var_bard_buff_stage 1
+			endif
+		endif
+	elseif var_bard_buff_stage = 1
+		if cooldown "Provo" = 0 and cooldown "Music" = 0
+			clearsysmsg
+			useskill 'Provocation'
+			waitfortarget 1000
+
+			if insysmsg "What instrument"
+				target var_my_instrument
+				replay
+				waitfortarget 1000
+			endif
+
+			if targetexists
+				target backpack
+				wait 300
+				@setvar! var_bard_buff_stage 2
+			endif
+		endif
+	elseif var_bard_buff_stage = 2
+		if cooldown "Peace" = 0 and cooldown "Music" = 0
+			clearsysmsg
+			useskill 'Peacemaking'
+			waitfortarget 1000
+
+			if insysmsg "What instrument"
+				target var_my_instrument
+				replay
+				waitfortarget 1000
+			endif
+
+			if targetexists
+				target backpack
+				wait 300
+				@setvar! var_bard_buff_stage 0
+			endif
+		endif
+	else
+		@setvar! var_bard_buff_stage 0
+	endif
+endwhile

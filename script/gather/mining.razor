@@ -1,0 +1,813 @@
+####################### WARNING ########################
+    # Verify the following Razor settings
+    # Open Razor > Filters tab > Text & Messages tab
+    # ### UNCHECK Filter repeating system messages
+    # ### UNCHECK Filter repeating Razor messages
+    # ### UNCHECK Filter repeating overhead messages
+########################################################
+
+
+##################### CHANGE LOG ######################
+    # VERSION 1.7
+    # ## Added additional non-hostile mobs to the peacemaking ignore list
+    # ## Changed the automatically gate when hostiles detected distance to 50 steps after a few "accidents"
+    # ## Added the stone grate forge object to the forge detection
+    # ### Forges inside the quarry are usable to smelt ore manually, but aren't able to be detected by scripts due to lacking an item ID with >info
+########################################################
+
+
+##################### SCRIPT SETUP #####################
+    # CUSTOMIZE THE FOLLOWING VARIABLES
+    # ## house_door_id_number_when_open
+    # ## house_door_serial_number
+    # ## resource_stockpile_serial_number
+    # ## storage_container_id_number
+
+    # ALL OTHER VARIABLES SET 1 TO ENABLE 0 TO DISABLE
+
+    # REPLACE "Home" ON LINES 301, 397, 409, 669, 680, 691
+########################################################
+
+
+
+
+
+@clearsysmsg
+@clearignore
+
+@setvar! automatically_gate_when_overweight 1
+@setvar! weight_remaining_limit 10
+@setvar! automatically_gate_when_detecting_hostile_any_distance 0
+@setvar! automatically_gate_when_detecting_hostile_within_30_steps 1
+
+@setvar! track_only_red_players 0
+@setvar! automatically_detect_popped_pouches 1
+@setvar! automatically_gate_when_pouch_popped 0
+
+@setvar! warn_if_low_pickaxe_count 1
+@setvar! low_pick_axe_count 2
+@setvar! stop_script_if_no_runebook 1
+
+@setvar! storage_container_id_number 3702
+
+
+@setvar! automatically_gate_when_large_amount_of_ingots 1
+@setvar! automatically_gate_when_large_amount_of_ore 1
+@setvar! ingots_gate_amount 5000
+@setvar! ore_gate_amount 5000
+
+
+@setvar! automatically_smelt_ore 1
+@setvar! automatically_restock_at_resource_stockpile 1
+@setvar! always_display_tracking_window 0
+@setvar! detect_hidden_during_warmode 0
+
+
+@setvar! automatically_close_house_door 1
+@setvar! house_door_id_number_when_open 1712
+@setvar! house_door_serial_number 0x5F38582E
+@setvar! resource_stockpile_serial_number 0x49C8351F
+
+
+@setvar! automatically_drink_potions 1
+@setvar! automatically_open_potion_satchel 0
+@setvar! automatically_drink_healing_potion 1
+@setvar! automatically_drink_cure_potion 1
+
+@setvar! health_value_to_drink_healing_potion 80
+@setvar! health_value_to_drink_cure_potion 80
+
+@setvar! overhead_message_frequency 10000
+@setvar! error_message_frequency 3000
+@setvar! forge_overhead_ping_frequency 4000
+@setvar! tracking_hostile_overhead_alert_frequency 5000
+
+if not timerexists "skill_cooldown_timer"
+    createtimer "skill_cooldown_timer"
+    settimer "skill_cooldown_timer" 10000
+endif
+
+
+if not timerexists "forge_ping"
+    createtimer "forge_ping"
+    settimer "forge_ping" forge_overhead_ping_frequency
+endif
+
+if not timerexists "overhead_cooldown"
+    createtimer "overhead_cooldown"
+    settimer "overhead_cooldown" overhead_message_frequency
+endif
+
+if not timerexists "tracking_hostile_overhead_alert"
+    createtimer "tracking_hostile_overhead_alert"
+    settimer "tracking_hostile_overhead_alert" tracking_hostile_overhead_alert_frequency
+endif
+
+if not timerexists "error_overhead_cooldown"
+    createtimer "error_overhead_cooldown"
+    settimer "error_overhead_cooldown" error_message_frequency
+endif
+
+removelist animalsIgnoreList
+createlist animalsIgnoreList
+pushlist animalsIgnoreList "a plover"
+pushlist animalsIgnoreList "a sheep"
+pushlist animalsIgnoreList "a frenzied ostard"
+pushlist animalsIgnoreList "a tundra ostard"
+pushlist animalsIgnoreList "a desert ostard"
+pushlist animalsIgnoreList "a forest ostard"
+pushlist animalsIgnoreList "a finch"
+pushlist animalsIgnoreList "a sparrow"
+pushlist animalsIgnoreList "a towhee"
+pushlist animalsIgnoreList "a lapwing"
+pushlist animalsIgnoreList "a silverback"
+pushlist animalsIgnoreList "a crow"
+pushlist animalsIgnoreList "a woodpecker"
+pushlist animalsIgnoreList "a horse"
+pushlist animalsIgnoreList "a swift"
+pushlist animalsIgnoreList "a skylark"
+pushlist animalsIgnoreList "a hawk"
+pushlist animalsIgnoreList "a chickadee"
+pushlist animalsIgnoreList "a cat"
+pushlist animalsIgnoreList "a dog"
+pushlist animalsIgnoreList "a black bear"
+pushlist animalsIgnoreList "a brown bear"
+pushlist animalsIgnoreList "a bull"
+pushlist animalsIgnoreList "a cow"
+pushlist animalsIgnoreList "a chicken"
+pushlist animalsIgnoreList "a bird"
+pushlist animalsIgnoreList "an eagle"
+pushlist animalsIgnoreList "a nuthatch"
+pushlist animalsIgnoreList "an elk"
+pushlist animalsIgnoreList "a great hart"
+pushlist animalsIgnoreList "a kingfisher"
+pushlist animalsIgnoreList "a hind"
+pushlist animalsIgnoreList "a llama"
+pushlist animalsIgnoreList "a sand crab"
+pushlist animalsIgnoreList "a pig"
+pushlist animalsIgnoreList "a polar bear"
+pushlist animalsIgnoreList "a walrus"
+pushlist animalsIgnoreList "a cougar"
+pushlist animalsIgnoreList "a goat"
+pushlist animalsIgnoreList "a raven"
+pushlist animalsIgnoreList "a magpie"
+pushlist animalsIgnoreList "a warbler"
+pushlist animalsIgnoreList "a tern"
+pushlist animalsIgnoreList "a nightingale"
+pushlist animalsIgnoreList "a wren"
+pushlist animalsIgnoreList "red rubble"
+pushlist animalsIgnoreList "a spirit wolf"
+pushlist animalsIgnoreList "a spirit sabertus"
+pushlist animalsIgnoreList "a death asp"
+pushlist animalsIgnoreList "a death adder"
+pushlist animalsIgnoreList "a wisp"
+pushlist animalsIgnoreList "a bison"
+pushlist animalsIgnoreList "a wolf"
+pushlist animalsIgnoreList "a cuckoo"
+pushlist animalsIgnoreList "a starling"
+
+
+if not findtype "runebook" backpack and not findtype "runetome" backpack
+    overhead "NO RUNEBOOK" 1288
+    overhead "NO RUNEBOOK" 1288
+    overhead "NO RUNEBOOK" 1288
+    overhead "NO RUNEBOOK" 1288
+    overhead "NO RUNEBOOK" 1288
+
+    if stop_script_if_no_runebook = 1
+        stop
+    endif
+endif
+
+
+if warn_if_low_pickaxe_count = 1
+    if counttype "pickaxe" =< low_pick_axe_count
+        if timer "error_overhead_cooldown" >= error_message_frequency
+            overhead "LOW ON PICKAXES" 1288
+            settimer "error_overhead_cooldown" 0
+        endif
+    endif
+endif
+
+
+
+while not dead
+    if skill "Tracking" > 0
+        if not findbuff "tracking"
+            clearsysmsg
+            if timer "skill_cooldown_timer" >= 10000
+                while not gumpexists 4267467659
+                    useskill 'tracking'
+                    getlabel backpack ping
+                    settimer "skill_cooldown_timer" 0
+                endwhile
+            endif
+            if gumpexists 4267467659
+                if track_only_red_players = 1
+                    while not insysmsg "You will now hunt murderer players"
+                        gumpresponse 8 4267467659
+                        waitforgump 4267467659 5000
+                    endwhile
+                else
+                    while not insysmsg "You will now hunt all hostile players"
+                        gumpresponse 8 4267467659
+                        waitforgump 4267467659 5000
+                    endwhile
+                endif
+                gumpresponse 6 4267467659
+                getlabel backpack ping
+            endif
+            if always_display_tracking_window = 0
+                gumpclose 4267467659
+            endif
+        endif
+    endif
+
+
+    if always_display_tracking_window = 1
+        if not gumpexists 4267467659
+            useskill 'tracking'
+            getlabel backpack ping
+        endif
+    endif
+
+
+    if timer "skill_cooldown_timer" >= 10000
+        if detect_hidden_during_warmode = 1
+            skill "detectinghidden"
+            waitfortarget 100
+            target "self"
+            settimer "skill_cooldown_timer" 0
+        endif
+    endif
+
+
+    if insysmsg "You reveal what was hidden"
+        overhead "HIDDEN REVEALED" 53
+        overhead "HIDDEN REVEALED" 53
+        overhead "HIDDEN REVEALED" 53
+        overhead "HIDDEN REVEALED" 53
+        overhead "HIDDEN REVEALED" 53
+    endif
+
+
+    if insysmsg "attempting to peak into"
+        overhead "THIEF SNOOPING" 53
+        overhead "THIEF SNOOPING" 53
+        overhead "THIEF SNOOPING" 53
+        overhead "THIEF SNOOPING" 53
+        overhead "THIEF SNOOPING" 53
+    endif
+
+
+    if automatically_detect_popped_pouches = 1
+        if findtype 3705 backpack 0 as popped_pouch
+            overhead "POUCH POPPED" 33
+            overhead "POUCH POPPED" 33
+            overhead "POUCH POPPED" 33
+            overhead "POUCH POPPED" 33
+            overhead "POUCH POPPED" 33
+            @ignore popped_pouch
+
+            if automatically_gate_when_pouch_popped = 1
+                overhead "■■ GATING HOME ■■" 88
+                say "[RecallCharge Home"
+                stop
+            endif
+        endif
+    endif
+
+    
+    if automatically_gate_when_detecting_hostile_within_30_steps = 1
+        @setvar! gate_now 0
+
+        if insysmsg "Distance to destination: 45 steps" or insysmsg "(45 spaces to target)"
+            @setvar! gate_now 1
+        elseif insysmsg "Distance to destination: 44 steps" or insysmsg "(44 spaces to target)"
+            @setvar! gate_now 1
+        elseif insysmsg "Distance to destination: 43 steps" or insysmsg "(43 spaces to target)"
+            @setvar! gate_now 1
+        elseif insysmsg "Distance to destination: 42 steps" or insysmsg "(42 spaces to target)"
+            @setvar! gate_now 1
+        elseif insysmsg "Distance to destination: 41 steps" or insysmsg "(41 spaces to target)"
+            @setvar! gate_now 1
+        elseif insysmsg "Distance to destination: 40 steps" or insysmsg "(40 spaces to target)"
+            @setvar! gate_now 1
+        elseif insysmsg "Distance to destination: 39 steps" or insysmsg "(39 spaces to target)"
+            @setvar! gate_now 1
+        elseif insysmsg "Distance to destination: 38 steps" or insysmsg "(38 spaces to target)"
+            @setvar! gate_now 1
+        elseif insysmsg "Distance to destination: 37 steps" or insysmsg "(37 spaces to target)"
+            @setvar! gate_now 1
+        elseif insysmsg "Distance to destination: 36 steps" or insysmsg "(36 spaces to target)"
+            @setvar! gate_now 1
+        elseif insysmsg "Distance to destination: 35 steps" or insysmsg "(35 spaces to target)"
+            @setvar! gate_now 1
+        elseif insysmsg "Distance to destination: 34 steps" or insysmsg "(34 spaces to target)"
+            @setvar! gate_now 1
+        elseif insysmsg "Distance to destination: 33 steps" or insysmsg "(33 spaces to target)"
+            @setvar! gate_now 1
+        elseif insysmsg "Distance to destination: 32 steps" or insysmsg "(32 spaces to target)"
+            @setvar! gate_now 1
+        elseif insysmsg "Distance to destination: 31 steps" or insysmsg "(31 spaces to target)"
+            @setvar! gate_now 1
+        elseif insysmsg "Distance to destination: 30 steps" or insysmsg "(30 spaces to target)"
+            @setvar! gate_now 1
+        elseif insysmsg "Distance to destination: 29 steps" or insysmsg "(29 spaces to target)"
+            @setvar! gate_now 1
+        elseif insysmsg "Distance to destination: 28 steps" or insysmsg "(28 spaces to target)"
+            @setvar! gate_now 1
+        elseif insysmsg "Distance to destination: 27 steps" or insysmsg "(27 spaces to target)"
+            @setvar! gate_now 1
+        elseif insysmsg "Distance to destination: 26 steps" or insysmsg "(26 spaces to target)"
+            @setvar! gate_now 1
+        elseif insysmsg "Distance to destination: 25 steps" or insysmsg "(25 spaces to target)"
+            @setvar! gate_now 1
+        elseif insysmsg "Distance to destination: 24 steps" or insysmsg "(24 spaces to target)"
+            @setvar! gate_now 1
+        elseif insysmsg "Distance to destination: 23 steps" or insysmsg "(23 spaces to target)"
+            @setvar! gate_now 1
+        elseif insysmsg "Distance to destination: 22 steps" or insysmsg "(22 spaces to target)"
+            @setvar! gate_now 1
+        elseif insysmsg "Distance to destination: 21 steps" or insysmsg "(21 spaces to target)"
+            @setvar! gate_now 1
+        elseif insysmsg "Distance to destination: 20 steps" or insysmsg "(20 spaces to target)"
+            @setvar! gate_now 1
+        elseif insysmsg "Distance to destination: 19 steps" or insysmsg "(19 spaces to target)"
+            @setvar! gate_now 1
+        elseif insysmsg "Distance to destination: 18 steps" or insysmsg "(18 spaces to target)"
+            @setvar! gate_now 1
+        elseif insysmsg "Distance to destination: 17 steps" or insysmsg "(17 spaces to target)"
+            @setvar! gate_now 1
+        elseif insysmsg "Distance to destination: 16 steps" or insysmsg "(16 spaces to target)"
+            @setvar! gate_now 1
+        elseif insysmsg "Distance to destination: 15 steps" or insysmsg "(15 spaces to target)"
+            @setvar! gate_now 1
+        elseif insysmsg "Distance to destination: 14 steps" or insysmsg "(14 spaces to target)"
+            @setvar! gate_now 1
+        elseif insysmsg "Distance to destination: 13 steps" or insysmsg "(13 spaces to target)"
+            @setvar! gate_now 1
+        elseif insysmsg "Distance to destination: 12 steps" or insysmsg "(12 spaces to target)"
+            @setvar! gate_now 1
+        elseif insysmsg "Distance to destination: 11 steps" or insysmsg "(11 spaces to target)"
+            @setvar! gate_now 1
+        elseif insysmsg "Distance to destination: 10 steps" or insysmsg "(10 spaces to target)"
+            @setvar! gate_now 1
+        elseif insysmsg "Distance to destination: 9 steps" or insysmsg "(9 spaces to target)"
+            @setvar! gate_now 1
+        elseif insysmsg "Distance to destination: 8 steps" or insysmsg "(8 spaces to target)"
+            @setvar! gate_now 1
+        elseif insysmsg "Distance to destination: 7 steps" or insysmsg "(7 spaces to target)"
+            @setvar! gate_now 1
+        elseif insysmsg "Distance to destination: 6 steps" or insysmsg "(6 spaces to target)"
+            @setvar! gate_now 1
+        elseif insysmsg "Distance to destination: 5 steps" or insysmsg "(5 spaces to target)"
+            @setvar! gate_now 1
+        elseif insysmsg "Distance to destination: 4 steps" or insysmsg "(4 spaces to target)"
+            @setvar! gate_now 1
+        elseif insysmsg "Distance to destination: 3 steps" or insysmsg "(3 spaces to target)"
+            @setvar! gate_now 1
+        elseif insysmsg "Distance to destination: 2 steps" or insysmsg "(2 spaces to target)"
+            @setvar! gate_now 1
+        elseif insysmsg "Distance to destination: 1 steps" or insysmsg "(1 spaces to target)"
+            @setvar! gate_now 1
+        endif
+        
+        if gate_now = 1          
+        overhead "HOSTILES TOO CLOSE" 33
+        overhead "HOSTILES TOO CLOSE" 33
+        overhead "HOSTILES TOO CLOSE" 33
+        overhead "■■ GATING HOME ■■" 88
+
+        say "[RecallCharge Home"
+        wait 300
+        
+            if insysmsg "Magical travel is not allowed in this location."
+                overhead "■■ USING ATLAS ■■" 88
+
+                dclicktype 'atlas' backpack
+                waitforgump 341416395
+                gumpresponse 100
+            
+                waitforgump 341416395
+                gumpresponse 20
+            
+                waitforgump 341416395
+                gumpresponse 14
+                
+                
+            elseif insysmsg "Magical travel from inside a dungeon is only possible near golden moongates."
+                overhead "■■ USING ESCAPE ■■" 88
+                script "Moongate Escape"
+            endif
+
+        stop
+        endif
+    endif
+
+
+    if automatically_gate_when_detecting_hostile_any_distance = 1
+        if insysmsg "Now tracking:"
+            overhead "HOSTILES TOO CLOSE" 33
+            overhead "HOSTILES TOO CLOSE" 33
+            overhead "HOSTILES TOO CLOSE" 33
+
+            overhead "■■ GATING HOME ■■" 88
+            say "[RecallCharge Home"
+            stop
+        endif
+    endif
+
+    if insysmsg "Now tracking:" or insysmsg "Distance to destination:"
+        if timer "tracking_hostile_overhead_alert" >= tracking_hostile_overhead_alert_frequency
+            overhead "HOSTILES DETECTED" 33
+            settimer "tracking_hostile_overhead_alert" 0
+        endif
+    endif
+
+
+    if rhandempty
+        while casting
+            wait 1000
+        endwhile
+        wait 1000
+
+        if findtype "pickaxe" backpack as found_pickaxe
+            dclick found_pickaxe
+            wait 1000
+            dclick righthand
+        elseif timer "error_overhead_cooldown" >= error_message_frequency
+            overhead "OUT OF PICKAXES" 1288
+            overhead "OUT OF PICKAXES" 1288
+            overhead "OUT OF PICKAXES" 1288
+            overhead "OUT OF PICKAXES" 1288
+            overhead "OUT OF PICKAXES" 1288
+            settimer "error_overhead_cooldown" 0        
+        endif
+    else
+        getlabel righthand righthand_description
+        if "pickaxe" in righthand_description
+            dclick righthand
+
+            if warmode
+                    # Do nothing
+            elseif counttype "pickaxe" self <= 1
+                getlabel righthand righthand_description
+
+                if "(100 uses remaining)" in righthand_description
+                    if timer "overhead_cooldown" >= overhead_message_frequency
+                        overhead "PICKAXE LOW: 100" 63
+                        settimer "overhead_cooldown" 0
+                    endif
+                elseif "(50 uses remaining)" in righthand_description
+                    if timer "overhead_cooldown" >= overhead_message_frequency
+                        overhead "PICKAXE LOW: 50" 88
+                        overhead "PICKAXE LOW: 50" 88
+                        settimer "overhead_cooldown" 0
+                    endif
+                elseif "(25 uses remaining)" in righthand_description
+                    if timer "overhead_cooldown" >= overhead_message_frequency
+                        overhead "PICKAXE LOW: 25" 53
+                        overhead "PICKAXE LOW: 25" 53
+                        overhead "PICKAXE LOW: 25" 53
+                        settimer "overhead_cooldown" 0
+                    endif
+                elseif "(10 uses remaining)" in righthand_description
+                    if timer "overhead_cooldown" >= overhead_message_frequency
+                        overhead "PICKAXE LOW: 10" 1257
+                        overhead "PICKAXE LOW: 10" 1257
+                        overhead "PICKAXE LOW: 10" 1257
+                        overhead "PICKAXE LOW: 10" 1257
+                        settimer "overhead_cooldown" 0
+                    endif
+                elseif "(5 uses remaining)" in righthand_description
+                    if timer "overhead_cooldown" >= overhead_message_frequency
+                        overhead "PICKAXE LOW: 5" 1288
+                        overhead "PICKAXE LOW: 5" 1288
+                        overhead "PICKAXE LOW: 5" 1288
+                        overhead "PICKAXE LOW: 5" 1288
+                        overhead "PICKAXE LOW: 5" 1288
+                        settimer "overhead_cooldown" 0
+                    endif
+                endif
+            endif
+        elseif findtype "pickaxe" backpack as found_pickaxe
+            dclick found_pickaxe
+            wait 600
+            dclick righthand
+        elseif timer "error_overhead_cooldown" >= error_message_frequency
+            overhead "OUT OF PICKAXES" 1288
+            overhead "OUT OF PICKAXES" 1288
+            overhead "OUT OF PICKAXES" 1288
+            overhead "OUT OF PICKAXES" 1288
+            overhead "OUT OF PICKAXES" 1288
+            settimer "error_overhead_cooldown" 0
+        endif
+    endif
+
+
+
+    if insysmsg "Harvest double yield/loot triggered"
+        overhead "◆ HARVEST ◆" 62
+    endif
+
+    if insysmsg "You loosen some rocks but fail to find any useable ore" or insysmsg "You dig some"
+        overhead "▼ MINING ▼" 1366
+    elseif insysmsg "You do not see any harvestable resources nearby"
+        overhead "▲ NEXT SPOT ▲" 53     
+    elseif insysmsg "harvesting is not allowed"
+        overhead "LEAVE TOWN" 53
+    elseif insysmsg "You have recently traveled"
+        if timer "error_overhead_cooldown" >= error_message_frequency
+            overhead "Waiting on travel cooldown"
+            overhead "▼ MINING ▼" 1366 
+            settimer "error_overhead_cooldown" 0
+        endif
+    endif
+
+
+
+//    if findtype 6585 backpack as found_ore
+//        @getlabel found_ore ore_description
+//
+//        if findtype storage_container_id_number backpack as storage_container
+//            @drop backpack -1 -1 -1
+//            getlabel backpack ping
+//            wait 500
+//            lift found_ore 9999
+//            getlabel backpack ping
+//            drop storage_container -1 -1 -1
+//            wait 500
+//            @ignore found_ore
+//        endif
+//    endif
+
+    if findtype 4017|47190 ground any any 2 as found_forge
+        if timer "forge_ping" >= forge_overhead_ping_frequency
+            overhead "▼▼ FORGE ▼▼" 88 found_forge
+            settimer "forge_ping" 0
+        endif
+        
+        if automatically_smelt_ore = 1
+            @clearignore
+            if findtype storage_container_id_number backpack as storage_container
+                while findtype 7154 storage_container as found_ingots
+                    @ignore found_ingots
+                endwhile
+            endif
+            
+            while findtype 6585 backpack as found_ore
+                overhead "◆ SMELTING ORE ◆"
+                dclick found_ore
+                @ignore found_ore
+                wait 500
+            endwhile
+        endif
+    endif
+
+
+//    if findtype 7154 backpack as found_ingots
+//        @getlabel found_ingots ingot_description
+//
+//        if findtype storage_container_id_number backpack as storage_container
+//            @drop backpack -1 -1 -1
+//            getlabel backpack ping
+//            wait 500
+//            lift found_ingots 9999
+//            getlabel backpack ping
+//            drop storage_container -1 -1 -1
+//            wait 600
+//            @ignore found_ingots
+//        endif
+//    endif
+       
+    
+    if findtype 4017|47190 ground any any 6 as found_forge
+        if timer "forge_ping" >= forge_overhead_ping_frequency
+            overhead "▼▼ FORGE ▼▼" 88 found_forge
+            settimer "forge_ping" 0
+        endif
+    elseif findtype 4017|47190 ground any any 12 as found_forge
+        if timer "forge_ping" >= forge_overhead_ping_frequency
+            overhead "▼▼ FORGE ▼▼" 88 found_forge
+            settimer "forge_ping" 0
+        endif    
+    elseif findtype 4017|47190 ground any any 18 as found_forge
+        if timer "forge_ping" >= forge_overhead_ping_frequency
+            overhead "▼▼ FORGE ▼▼" 88 found_forge
+            settimer "forge_ping" 0
+        endif
+    endif
+
+
+    if automatically_restock_at_resource_stockpile = 1
+        if find resource_stockpile_serial_number ground any any 2 as my_resource_stockpile
+            @clearignore
+            if findtype 7154 backpack as found_ingots
+                overhead "RESTOCKING INGOTS" 88
+                menu resource_stockpile_serial_number 0
+                waitfortarget 1000
+                target self
+                wait 1000
+            endif
+        endif
+    endif
+
+
+    if diffweight <= weight_remaining_limit 
+        overhead "OVERWEIGHT" 53
+
+        if automatically_gate_when_overweight = 1 and not findtype 4017|47190 ground any any 6
+            overhead "■■ GATING HOME ■■" 88
+            say "[gateTravel Home"
+            wait 300
+        
+            if insysmsg "Magical travel is not allowed in this location."
+                overhead "■■ USING ATLAS ■■" 88
+
+                dclicktype 'atlas' backpack
+                waitforgump 341416395
+                gumpresponse 100
+            
+                waitforgump 341416395
+                gumpresponse 20
+            
+                waitforgump 341416395
+                gumpresponse 14
+                
+                
+            elseif insysmsg "Magical travel from inside a dungeon is only possible near golden moongates."
+                overhead "■■ USING ESCAPE ■■" 88
+                script "Moongate Escape"
+            endif
+
+            stop
+        endif
+    endif
+
+
+    if counttype 7154 backpack >= ingots_gate_amount
+        overhead "■ TOO MANY INGOTS ■" 53
+
+        if automatically_gate_when_large_amount_of_ingots = 1
+            overhead "■■ GATING HOME ■■" 88
+            say "[gateTravel Home"
+            stop
+        endif
+    endif
+
+
+    if counttype 6585 backpack >= ore_gate_amount
+        overhead "■ TOO MANY ORE ■" 53
+        
+        if automatically_gate_when_large_amount_of_ore = 1
+            overhead "■■ GATING HOME ■■" 88
+            say "[gateTravel Home"
+            stop
+        endif
+    endif
+
+    if automatically_drink_potions = 1
+        ########## OPEN POTION SATCHEL ##########
+            if automatically_open_potion_satchel = 1
+                #Opens potion satchel to display potions on hotbar
+                if findtype 31262 self as alchemist_satchel
+                    dclick alchemist_satchel
+                endif
+            endif
+        ####################################
+
+
+        ########## HEALING POTION ##########
+            if automatically_drink_healing_potion = 1 and hp <= health_value_to_drink_healing_potion
+                if findtype "Yellow Potion" self as healing_potion
+                    getlabel healing_potion healing_potion_description
+                        
+                    if "next usable" in healing_potion_description
+                        cast 'Greater Heal'
+                        waitfortarget
+                        target 'self'
+                        wait 1000
+                    else
+                        overhead "Drinking Healing Potion" 53
+                        dclick healing_potion
+                        getlabel backpack ping
+                        cooldown "Yellow Potion" 10000
+                    endif
+                else
+                    overhead "Out of Healing Potions!" 34
+                    cast 'Greater Heal'
+                    waitfortarget
+                    target 'self'
+                    wait 1000
+                endif
+            endif
+        ####################################
+
+
+        ########## CURE POTION ##########
+            if automatically_drink_cure_potion = 1 and poisoned and hp <= health_value_to_drink_cure_potion
+                if findtype "Orange Potion" self as cure_potion
+                    overhead "Drinking Cure Potion" 44
+                    dclick cure_potion
+                    getlabel backpack ping
+                else
+                    cast 'Cure'                            
+                    waitfortarget
+                    target 'self'
+                    wait 1000
+            endif
+        #################################
+    endif
+
+    ################################# MAGERY 
+    if mana < 30 and not findbuff 'meditating'
+        useskill 'meditation'
+        wait 1000
+            
+        if findbuff 'meditating'
+            while mana < 70
+                if not findbuff 'meditating'
+                    break
+                endif
+            endwhile
+        endif
+    endif
+    
+    if mana > 50 and followers < 2
+        hotkey "Earth Elemental"
+        wait 3500
+    endif
+    
+    if mana > 30
+//        if not findbuff 'Strength' or not findbuff 'Agility' or not findbuff 'Cunning'
+//            cast 'Bless'
+//            waitfortarget
+//            hotkey 'Target Self'
+//            wait 1000
+//        endif
+//        if not findbuff 'Protection'
+//            cast 'Arch Protection'
+//            waitfortarget
+//            hotkey 'Target Self'
+//            wait 1000
+//        endif
+        if not findbuff 'Reactive Armor'
+            cast 'Reactive Armor'
+            wait 2000
+        endif
+        if not findbuff 'Magic Reflection'
+            cast 'Magic Reflection'
+            wait 2000
+        endif
+    endif
+    ################################# MAGERY
+
+    if paralyzed 
+        if findtype 3705 backpack 38 
+            yell "[Pouch"
+            getlabel backpack ping
+        else
+            overhead "Out of Pouches!" 34
+        endif
+    endif
+
+
+    #################### WORLD SAVE ######################    
+        if insysmsg "world will save"
+            overhead "World save coming soon" 53
+            @setvar! world_save_cooldown 13500
+
+            removetimer "world_save_timer"
+            if not timerexists "world_save_timer"    
+                createtimer "world_save_timer"
+                settimer "world_save_timer" 0
+            endif
+
+            clearsysmsg
+            getlabel backpack ping
+        endif
+
+
+        if timerexists "world_save_timer"
+            if timer "world_save_timer" >= world_save_cooldown
+                overhead "Waiting for world save..." 53
+                removetimer "world_save_timer"
+            endif
+        endif
+
+
+        if insysmsg "save complete"
+            overhead "World save complete!" 63                
+            clearsysmsg
+            getlabel backpack ping
+        endif
+    ######################################################
+
+    if automatically_close_house_door = 1
+        if findtype house_door_id_number_when_open ground any any 2
+            dclick house_door_serial_number
+            wait 500
+        endif
+    endif
+endwhile

@@ -1,0 +1,517 @@
+clearsysmsg
+clearall
+
+@setvar! var_use_potion 1
+@setvar! var_my_kill_target 0
+@setvar! var_last_curse_target 0
+@setvar! var_last_harm_target 0
+
+if not timerexists "overhead_message_timer"
+	setvar! overhead_message_timer_frequency 2700
+	createtimer "overhead_message_timer"
+	settimer "overhead_message_timer" overhead_message_timer_frequency
+endif
+
+if not timerexists "clear_scavenger_timer"
+	setvar! clear_scavenger_timer_frequency 30000
+	createtimer "clear_scavenger_timer"
+	settimer "clear_scavenger_timer" overhead_message_timer_frequency
+endif
+
+if not timerexists "skill_cooldown_timer"
+	setvar! skill_cooldown_timer_frequency 10000
+    createtimer "skill_cooldown_timer"
+    settimer "skill_cooldown_timer" 10000
+endif
+
+if not timerexists "lasttarget_message_timer"
+	setvar! lasttarget_message_timer_frequency 2000
+    createtimer "lasttarget_message_timer"
+    settimer "lasttarget_message_timer" 2000
+endif
+
+if not timerexists 'curse_cooldown_timer'
+    setvar! curse_cooldown_timer_frequency 60000
+    createtimer 'curse_cooldown_timer'
+    settimer 'curse_cooldown_timer' curse_cooldown_timer_frequency
+endif
+
+if not timerexists 'mana_drain_cooldown_timer'
+    setvar! mana_drain_cooldown_timer_frequency 60000
+    createtimer 'mana_drain_cooldown_timer'
+    settimer 'mana_drain_cooldown_timer' mana_drain_cooldown_timer_frequency
+endif
+
+if not timerexists "lightning_cooldown_timer"
+    setvar! lightning_cooldown_timer_frequency 20000
+    createtimer "lightning_cooldown_timer"
+    settimer "lightning_cooldown_timer" lightning_cooldown_timer_frequency
+endif
+
+if not timerexists "queue_guard_timer"
+    createtimer "queue_guard_timer"
+    settimer "queue_guard_timer" 0
+endif
+
+
+if not varexist var_my_instrument
+    @setvar! var_my_instrument 0
+endif
+
+while findtype 3740|3742|3762|3763|10245|20006|20008|20010|20012|20014|20016 backpack as found_instrument
+    getlabel found_instrument found_instrument_description
+
+    if "supremely" in found_instrument_description or "exceedingly" in found_instrument_description
+        @setvar! var_my_instrument found_instrument
+        break
+    endif
+
+    @ignore found_instrument
+endwhile
+
+if skill "Tracking" > 0
+	if not findbuff "tracking"
+		clearsysmsg
+		if timer "skill_cooldown_timer" >= skill_cooldown_timer_frequency
+		    while not gumpexists 4267467659
+		        useskill 'tracking'
+		        getlabel backpack ping
+		        settimer "skill_cooldown_timer" 0
+		    endwhile
+		endif
+		if gumpexists 4267467659
+		    while not insysmsg "You will now hunt murderer players"
+		        gumpresponse 8 4267467659
+		        waitforgump 4267467659 5000
+		    endwhile
+		    gumpresponse 6 4267467659
+		    getlabel backpack ping
+		endif
+		if always_display_tracking_window = 0
+		    gumpclose 4267467659
+		endif
+	endif
+endif
+
+@clearignore
+
+if not find var_my_instrument backpack
+    clearsysmsg
+    overhead "Select instrument:" 55
+    @setvar! var_my_instrument
+    wait 200
+
+    while not targetexists and not insysmsg "Select"
+        @setvar! var_my_instrument
+    endwhile
+
+    wait 200
+    getlabel backpack backpack_description
+
+    if find var_my_instrument backpack as found_instrument
+        getlabel found_instrument found_instrument_description
+
+        if "flute" in found_instrument_description or "drums" in found_instrument_description or "harp" in found_instrument_description or "lute" in found_instrument_description or "tambourine" in found_instrument_description or "gemshorn" in found_instrument_description or "hurdy" in found_instrument_description or "psaltery" in found_instrument_description or "sackbut" in found_instrument_description or "shawm" in found_instrument_description or "Vielle" in found_instrument_description
+            overhead "{{found_instrument_description}}"
+            dclick var_my_instrument
+            wait 1000
+        else
+            @setvar! var_my_instrument 0
+            overhead "Not an instrument!" 33
+            stop
+        endif
+    else
+        @setvar! var_my_instrument 0
+        overhead "Not in backpack" 33
+        stop
+    endif
+endif
+
+while not dead
+	if not findbuff 'Food Satisfaction'
+        if findtype tray backpack as food
+            dclick food
+            wait 350
+        endif
+    endif
+
+	if mana > 30
+		if not findbuff 'Strength' or not findbuff 'Agility' or not findbuff 'Cunning' and cooldown "Walk" = 0 and not find var_my_kill_target ground -1 -1 12 and findtype 3972 self and findtype 3974 self
+			cast 'Bless'
+			waitfortarget
+			hotkey 'Target Self'
+			while casting
+				wait 200
+			endwhile
+		endif
+		if not findbuff 'Protection' and cooldown "Walk" = 0 and not find var_my_kill_target ground -1 -1 12 and findtype 3980 self and findtype 3972 self and findtype 3973 self and findtype 3974 self
+			cast 'Arch Protection'
+			waitfortarget
+			hotkey 'Target Self'
+			while casting
+				wait 200
+			endwhile
+		endif
+		if not findbuff 'Reactive Armor' and cooldown "Walk" = 0 and not find var_my_kill_target ground -1 -1 12 and findtype 3980 self and findtype 3972 self and findtype 3981 self
+			cast 'Reactive Armor'
+			while casting
+				wait 200
+			endwhile
+		endif
+		if not findbuff 'Magic Reflection' and cooldown "Reflect" = 0 and cooldown "Walk" = 0 and not find var_my_kill_target ground -1 -1 12 and findtype 3972 self and findtype 3974 self and findtype 3981 self
+			cast 'Magic Reflection'
+			while casting
+				wait 200
+			endwhile
+		endif
+	endif
+
+	if mana < 30 and not findbuff 'meditating'
+		useskill 'meditation'
+		wait 1000
+
+		if findbuff 'meditating'
+			while mana < 70
+				if not findbuff 'meditating'
+					break
+				endif
+			endwhile
+		endif
+	endif
+
+	if paralyzed
+		if findtype 3705 backpack 38
+			yell "[Pouch"
+			getlabel backpack ping
+		else
+			overhead "You are out of pouche." 32
+		endif
+	endif
+
+	if diffhits > 15 and diffhits < 35 and cooldown "Walk" = 0
+		if not targetexists and not casting
+			hotkey "> Smart Heal/Cure Self"
+        endif
+		while casting
+			wait 200
+		endwhile
+	endif
+
+	if diffhits > 35
+		if findtype "Yellow Potion" self as found_potion
+			getlabel found_potion found_potion_description
+
+			if "next usable" in found_potion_description
+				if timer "overhead_message_timer" > overhead_message_timer_frequency
+					overhead found_potion_description 83
+					settimer "overhead_message_timer" 0
+				endif
+
+				if targetexists and not casting
+                    hotkey "Cancel Current Target"
+                    wait 50
+                endif
+
+				hotkey "> Greater Heal/Cure Self"
+				while casting
+					wait 200
+				endwhile
+			else
+				overhead "You drink a healing potion." 53
+				dclick found_potion
+				getlabel backpack ping
+				cooldown "Heal Potion" 10000
+			endif
+		else
+			if timer "overhead_message_timer" > overhead_message_timer_frequency
+				overhead "You are out of healing potion." 32
+				settimer "overhead_message_timer" 0
+			endif
+
+			if not targetexists and not casting
+				hotkey "> Greater Heal/Cure Self"
+            endif
+			while casting
+				wait 200
+			endwhile
+		endif
+	endif
+
+	if poisoned
+		if findtype "Orange Potion" self as found_potion
+			if hidden
+				break
+			endif
+
+			overhead "You drink a cure potion." 44
+			dclick found_potion
+			getlabel backpack ping
+		else
+			if timer "overhead_message_timer" > overhead_message_timer_frequency
+				overhead "You are out of cure potion." 32
+				settimer "overhead_message_timer" 0
+			endif
+
+			if not targetexists and not casting
+				hotkey "> Smart Heal/Cure Self"
+            endif
+			while casting
+				wait 200
+			endwhile
+		endif
+	endif
+
+	while weight > maxweight
+		if findtype "gold coin" backpack as found_gold
+			lift found_gold 500
+			droprelloc 0 0
+			getlabel backpack backpack_description
+
+			if insysmsg "cannot drop anything"
+				drop backpack -1 -1 -1
+			endif
+
+			wait 1000
+			overhead 'You drop some gold on the ground.' 55
+		endif
+	endwhile
+
+	if stam < 10
+		if findtype "Red Potion" backpack as found_potion
+			dclick found_potion
+			wait 200
+		else
+			if timer "overhead_message_timer" > overhead_message_timer_frequency
+				overhead "You are out of refresh potions." 32
+				settimer "overhead_message_timer" 0
+			endif
+		endif
+	endif
+
+	if not findbuff "magic resist" and var_use_potion = 1 and find var_my_kill_target ground -1 -1 12
+		if findtype "Black Potion" backpack as found_potion
+			dclick found_potion
+			wait 200
+		else
+			if timer "overhead_message_timer" > overhead_message_timer_frequency
+				overhead "You are out of magic resist potions." 32
+				settimer "overhead_message_timer" 0
+			endif
+		endif
+	endif
+
+	if cooldown "Discord" = 0 and cooldown "Music" = 0 and not findbuff "song of discordance"
+		useskill 'Discordance'
+		waitfortarget 1000
+		if targetexists
+			target backpack
+			wait 300
+		endif
+	endif
+
+	if cooldown "Provo" = 0 and cooldown "Music" = 0 and not findbuff "song of provocation"
+		useskill 'Provocation'
+		waitfortarget 1000
+		if targetexists
+			target backpack
+			wait 300
+		endif
+	endif
+
+	if cooldown "Peace" = 0 and cooldown "Music" = 0 and not findbuff "song of peacemaking"
+		useskill 'Peacemaking'
+		waitfortarget 1000
+		if targetexists
+			target backpack
+			wait 300
+		endif
+	endif
+
+	if queued
+	    settimer "queue_guard_timer" 0
+	    while queued
+	        if timer "queue_guard_timer" > 2000
+	            hotkey "Cancel Current Target"
+	            break
+	        endif
+	        wait 50
+	    endwhile
+	endif
+
+	if insysmsg "target a new"
+		if targetexists
+		    hotkey 'cancel current target'
+		endif
+
+		@setvar! var_my_kill_target
+		attack var_my_kill_target
+		getlabel backpack ping
+		clearsysmsg
+	endif
+
+	if insysmsg 'new target set'
+		@setvar! var_my_kill_target lasttarget
+		getlabel var_my_kill_target var_my_kill_target_desc
+		wait 200
+	endif
+
+	if timer "lasttarget_message_timer" > lasttarget_message_timer_frequency
+		if find lasttarget
+			getlabel lasttarget lasttarget_desc
+			overhead lasttarget_desc 66
+			settimer "lasttarget_message_timer" 0
+		endif
+	endif
+
+	if not warmode and not dead var_my_kill_target and find var_my_kill_target ground -1 -1 10 as fount_target and not casting
+		if skill "Discordance" > 0 and cooldown "Discord" = 0 and cooldown "Music" = 0
+			getlabel fount_target target_label
+            wait 200
+
+			if "discord" in target_label
+				//
+			else
+				clearsysmsg
+				useskill 'Discordance'
+                waitfortarget 1500
+
+                while targetexists
+                    if dead fount_target
+                        hotkey "Cancel Current Target"
+                    else
+                        target fount_target
+                    endif
+                endwhile
+
+				wait 500
+				if insysmsg "You play successfully, disrupting your opponent"
+					overhead "You play successfully disrupting your opponent." 25
+				elseif insysmsg "fail to discord"
+					overhead "You fail to discord your opponent." 32
+				endif
+			endif
+		endif
+	endif
+
+	if not warmode not dead var_my_kill_target and find var_my_kill_target ground -1 -1 10 as fount_target and not casting
+		if skill "Peacemaking" > 0 and cooldown "Peace" = 0 and cooldown "Music" = 0
+			getlabel fount_target target_label
+            wait 200
+
+			if "pacified" in target_label or "barding break" in target_label
+				//
+			else
+				clearsysmsg
+				useskill 'Peacemaking'
+                waitfortarget 1500
+
+                while targetexists
+                    if dead fount_target
+                        hotkey "Cancel Current Target"
+                    else
+                        target fount_target
+                    endif
+                endwhile
+
+				wait 500
+				if insysmsg "You play successfully, pacifying your target"
+					overhead "You play successfully pacifying your target." 28
+				elseif insysmsg "You fail to pacify"
+					overhead "You fail to pacify your opponent." 32
+				endif
+			endif
+		endif
+	endif
+
+	if mana >= 30 and not warmode not dead var_my_kill_target and find var_my_kill_target ground -1 -1 10 as fount_target and not casting and cooldown "Walk" = 0
+		if findtype 3972 self and findtype 3976 self and findtype 3980 self
+			if var_last_curse_target = fount_target
+	            // do nothing
+	        else
+	            @setvar! var_last_curse_target fount_target
+	            settimer 'curse_cooldown_timer' curse_cooldown_timer_frequency
+	        endif
+
+	        if timer 'curse_cooldown_timer' >= curse_cooldown_timer_frequency
+	            cast 'Curse'
+	            while casting
+	                wait 200
+	            endwhile
+                waitfortarget 1500
+
+                while targetexists
+                    if dead fount_target
+                        hotkey "Cancel Current Target"
+                    else
+                        target fount_target
+                        settimer 'curse_cooldown_timer' 0
+                    endif
+                endwhile
+                wait 300
+	        endif
+		endif
+	endif
+
+	if mana >= 30 and not warmode not dead var_my_kill_target and find var_my_kill_target ground -1 -1 10 as fount_target and not casting and cooldown "Walk" = 0
+		if findtype 3962 self and findtype 3974 self and findtype 3981 self
+			if var_last_mana_drain_target = fount_target
+	            // do nothing
+	        else
+	            @setvar! var_last_mana_drain_target fount_target
+	            settimer 'mana_drain_cooldown_timer' mana_drain_cooldown_timer_frequency
+	        endif
+
+	        if timer 'mana_drain_cooldown_timer' >= mana_drain_cooldown_timer_frequency
+	            cast 'Mana Drain'
+	            while casting
+	                wait 200
+	            endwhile
+                waitfortarget 1500
+
+                while targetexists
+                    if dead fount_target
+                        hotkey "Cancel Current Target"
+                    else
+                        target fount_target
+                        settimer 'mana_drain_cooldown_timer' 0
+                    endif
+                endwhile
+                wait 300
+	        endif
+		endif
+	endif
+
+	if mana >= 30 and not warmode not dead var_my_kill_target and find var_my_kill_target ground -1 -1 10 as fount_target and not casting and cooldown "Walk" = 0
+		if findtype 3974 self and findtype 3980 self
+	        if timer "lightning_cooldown_timer" >= lightning_cooldown_timer_frequency
+	            cast 'Lightning'
+	            while casting
+	                wait 200
+	            endwhile
+                waitfortarget 1500
+
+                while targetexists
+                    if dead fount_target
+                        hotkey "Cancel Current Target"
+                    else
+                        target fount_target
+                        settimer 'lightning_cooldown_timer' 0
+                    endif
+                endwhile
+                wait 300
+	        endif
+		endif
+    endif
+
+	if findtype 3963|3980|3974|3973|3981|3962|3976|3972 backpack
+        if findtype "reagent satchel" self as found_satchel
+            menu found_satchel 0
+        endif
+    endif
+
+	if timer "clear_scavenger_timer" > clear_scavenger_timer_frequency
+		sysmsg "Clear Scavenger Cache"
+		hotkey "Clear Scavenger Cache"
+		settimer "clear_scavenger_timer" 0
+	endif
+endwhile

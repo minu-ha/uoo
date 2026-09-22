@@ -1,0 +1,25 @@
+# OS
+.DS_Store
+
+# IDE
+.idea/
+.vscode/
+*.iml
+
+# Claude Code local settings
+.claude/settings.local.json
+
+# scratch / backups
+*.bak
+*.tmp
+*~
+tmp/
+
+# ClassicUO settings.json 은 username/password 필드가 있음
+settings.json
+*-bak/
+
+# ClassicUO per-session state and its rolling backups (window positions, not settings)
+gumps.xml
+*.bak[0-9]
+*.backup[0-9]

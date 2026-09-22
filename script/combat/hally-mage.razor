@@ -1,0 +1,438 @@
+clearsysmsg
+clearall
+
+@setvar! var_use_potion 1
+@setvar! var_max_wait_for_time 1000
+@setvar! var_bless_cooldown 1000
+@setvar! var_arch_protection_cooldown 1250
+@setvar! var_reactive_armor_cooldown 500
+@setvar! var_magic_reflection_cooldown 1500
+
+if not timerexists "overhead_message_timer"
+	setvar! overhead_message_timer_frequency 2700
+	createtimer "overhead_message_timer"
+	settimer "overhead_message_timer" overhead_message_timer_frequency
+endif
+
+if not timerexists "clear_scavenger_timer"
+	setvar! clear_scavenger_timer_frequency 30000
+	createtimer "clear_scavenger_timer"
+	settimer "clear_scavenger_timer" overhead_message_timer_frequency
+endif
+
+if not timerexists "pvp_timer"
+	setvar! pvp_timer_frequency 100000
+    createtimer "pvp_timer"
+    settimer "pvp_timer" 0
+endif
+
+@clearignore
+
+if not gumpexists 2016719803
+	say "[codexhotbar"
+endif
+
+while not dead
+	if pvp
+		overhead "You are in pvp" 33
+		stop
+	endif
+
+	while queued
+	    wait 100
+	endwhile
+
+	while casting
+		wait 100
+	endwhile
+
+	while weight > maxweight and not pvp
+		if findtype "gold coin" backpack as found_gold
+			lift found_gold 500
+			droprelloc 0 0
+			getlabel backpack backpack_description
+
+			if insysmsg "cannot drop anything"
+				drop backpack -1 -1 -1
+			endif
+
+			wait 1000
+			overhead 'You drop some gold on the ground.' 55
+		endif
+	endwhile
+
+	if not findbuff 'Food Satisfaction'
+        if findtype tray backpack as food
+            dclick food
+            wait 350
+        endif
+    endif
+
+	if paralyzed
+		if findtype 3705 backpack 38
+			yell "[Pouch"
+			getlabel backpack ping
+		else
+			overhead "You are out of pouche." 32
+		endif
+	endif
+
+	if mana > 30 and not targetexists and not casting
+		if not targetexists and not findbuff 'Protection' and cooldown "Walk" = 0 and findtype 3980 self and findtype 3972 self and findtype 3973 self and findtype 3974 self
+			cast 'Protection'
+			wait var_arch_protection_cooldown
+			waitfortarget var_max_wait_for_time
+			hotkey 'Target Self'
+		endif
+		if not targetexists and not findbuff 'Reactive Armor' and cooldown "Walk" = 0 and findtype 3980 self and findtype 3972 self and findtype 3981 self
+			cast 'Reactive Armor'
+			wait var_reactive_armor_cooldown
+		endif
+		if not targetexists and not findbuff 'Magic Reflection' and cooldown "Reflect" = 0 and cooldown "Walk" = 0 and findtype 3972 self and findtype 3974 self and findtype 3981 self
+			cast 'Magic Reflection'
+			wait var_magic_reflection_cooldown
+		endif
+	endif
+
+	if diffhits > 15 and diffhits < 35 and cooldown "Walk" = 0  and findtype 3972 self and findtype 3973 self and findtype 3974 self and findtype 3981 self
+		if not targetexists and not casting
+			hotkey "> Smart Heal/Cure Self"
+        endif
+		while casting
+			wait 200
+		endwhile
+
+		wait 200
+	endif
+
+	if diffhits > 35
+		if findtype "Yellow Potion" self as found_potion
+			getlabel found_potion found_potion_description
+
+			if "next usable" in found_potion_description
+				if timer "overhead_message_timer" > overhead_message_timer_frequency
+					overhead found_potion_description 83
+					settimer "overhead_message_timer" 0
+				endif
+
+				if targetexists and not casting
+                    hotkey "Cancel Current Target"
+                    wait 50
+                endif
+
+				if not targetexists and not casting and findtype 3972 self and findtype 3973 self and findtype 3974 self and findtype 3981 self
+					hotkey "> Greater Heal/Cure Self"
+				endif
+
+				while casting
+					wait 200
+				endwhile
+
+				wait 200
+			else
+				overhead "You drink a healing potion." 53
+				dclick found_potion
+				getlabel backpack ping
+				cooldown "Heal Potion" 10000
+			endif
+		else
+			if timer "overhead_message_timer" > overhead_message_timer_frequency
+				overhead "You are out of healing potion." 32
+				settimer "overhead_message_timer" 0
+			endif
+
+			if not targetexists and not casting and findtype 3972 self and findtype 3973 self and findtype 3974 self and findtype 3981 self
+				hotkey "> Greater Heal/Cure Self"
+            endif
+
+			while casting
+				wait 200
+			endwhile
+
+			wait 200
+		endif
+	endif
+
+	if poisoned
+		if findtype "Orange Potion" self as found_potion
+			if hidden
+				break
+			endif
+
+			overhead "You drink a cure potion." 44
+			dclick found_potion
+			getlabel backpack ping
+		else
+			if timer "overhead_message_timer" > overhead_message_timer_frequency
+				overhead "You are out of cure potion." 32
+				settimer "overhead_message_timer" 0
+			endif
+
+			if not targetexists and not casting and findtype 3972 self and findtype 3973 self
+				hotkey "> Smart Heal/Cure Self"
+            endif
+			while casting
+				wait 200
+			endwhile
+
+			wait 200
+		endif
+	endif
+
+	if stam < 5
+		if findtype "Red Potion" backpack as found_potion
+			dclick found_potion
+			wait 200
+		else
+			if timer "overhead_message_timer" > overhead_message_timer_frequency
+				overhead "You are out of refresh potions." 32
+				settimer "overhead_message_timer" 0
+			endif
+		endif
+	endif
+
+	if str <= 100 and var_use_potion = 1 and find lasttarget ground -1 -1 12
+		if findtype "White Potion" backpack as found_potion
+			dclick found_potion
+			wait 200
+		else
+			if timer "overhead_message_timer" > overhead_message_timer_frequency
+				overhead "You are out of strength potions." 32
+				settimer "overhead_message_timer" 0
+			endif
+		endif
+	endif
+
+	if dex <= 100 and var_use_potion = 1 and find lasttarget ground -1 -1 12
+		if findtype "Blue Potion" backpack as found_potion
+			dclick found_potion
+			wait 200
+		else
+			if timer "overhead_message_timer" > overhead_message_timer_frequency
+				overhead "You are out of agility potions." 32
+				settimer "overhead_message_timer" 0
+			endif
+		endif
+	endif
+
+	if not findbuff 'Magic Resist Potion' and var_use_potion = 1 and find lasttarget ground -1 -1 12
+		if findtype "Black Potion" backpack as found_potion
+			dclick found_potion
+			wait 200
+		else
+			if timer "overhead_message_timer" > overhead_message_timer_frequency
+				overhead "You are out of magic resist potions." 32
+				settimer "overhead_message_timer" 0
+			endif
+		endif
+	endif
+
+	if findtype 3963|3980|3974|3973|3981|3962|3976|3972 backpack
+        if findtype "reagent satchel" self as found_satchel
+            menu found_satchel 0
+        endif
+    endif
+
+	if timer "clear_scavenger_timer" > clear_scavenger_timer_frequency
+		sysmsg "Clear Scavenger Cache"
+		hotkey "Clear Scavenger Cache"
+		settimer "clear_scavenger_timer" 0
+	endif
+
+	while casting
+		wait 200
+	endwhile
+
+	if cooldown 'Halberd' = 0 and not casting and not targetexists
+	    if findlayer self lefthand as found_lefthand_weapon
+	        getlabel found_lefthand_weapon found_lefthand_weapon_description
+	        // overhead "{{found_lefthand_weapon_description}}"
+
+	        if 'exceptional halberd' in found_lefthand_weapon_description
+//	            if find lasttarget ground -1 -1 10
+//	                hotkey "Attack Last Target"
+//	                wait 200
+//	            endif
+	        elseif findtype "halberd" backpack as found_weapon and not casting
+	            hotkey 'Toggle Peace Only'
+	            drop backpack
+	            cast "unlock"
+	            hotkey 'Toggle Peace Only'
+	            lift found_weapon
+	            drop self lefthand
+
+	            if find lasttarget ground -1 -1 18
+	                hotkey "Attack Last Target"
+	                wait 200
+	            endif
+	        endif
+	    else
+	        if findtype "halberd" backpack as found_weapon and not casting
+	            hotkey 'Toggle Peace Only'
+	            drop backpack
+	            cast "unlock"
+	            hotkey 'Toggle Peace Only'
+	            lift found_weapon
+	            drop self lefthand
+
+	            if find lasttarget ground -1 -1 18
+	                hotkey "Attack Last Target"
+	                wait 200
+	            endif
+	        endif
+	    endif
+	elseif cooldown 'Battle Axe' = 0 and not casting and not targetexists
+	    if findlayer self lefthand as found_lefthand_weapon
+	        getlabel found_lefthand_weapon found_lefthand_weapon_description
+	        // overhead "{{found_lefthand_weapon_description}}"
+
+	        if 'exceptional battle axe' in found_lefthand_weapon_description or 'exceptional two-handed axe' in found_lefthand_weapon_description
+//	            if find lasttarget ground -1 -1 10
+//	                hotkey "Attack Last Target"
+//	                wait 200
+//	            endif
+	        elseif findtype 3911|5187 backpack as found_weapon and not casting
+	            hotkey 'Toggle Peace Only'
+	            drop backpack
+	            cast "unlock"
+	            hotkey 'Toggle Peace Only'
+	            lift found_weapon
+	            drop self lefthand
+
+	            if find lasttarget ground -1 -1 18
+	                hotkey "Attack Last Target"
+	                wait 200
+	            endif
+	        endif
+	    else
+	        if findtype 3911|5187 backpack as found_weapon and not casting
+	            hotkey 'Toggle Peace Only'
+	            drop backpack
+	            cast "unlock"
+	            hotkey 'Toggle Peace Only'
+	            lift found_weapon
+	            drop self lefthand
+
+	            if find lasttarget ground -1 -1 18
+	                hotkey "Attack Last Target"
+	                wait 200
+	            endif
+	        endif
+	    endif
+	elseif cooldown 'Viking Sword' = 0 and not casting and not targetexists
+	    if findlayer self lefthand as found_lefthand_weapon
+	        getlabel found_lefthand_weapon found_lefthand_weapon_description
+	        // overhead "{{found_lefthand_weapon_description}}"
+
+	        if 'exceptional viking sword' in found_lefthand_weapon_description
+//	            if find lasttarget ground -1 -1 10
+//	                hotkey "Attack Last Target"
+//	                wait 200
+//	            endif
+	        elseif findtype "viking sword" backpack as found_weapon and not casting
+	            hotkey 'Toggle Peace Only'
+	            drop backpack
+	            cast "unlock"
+	            hotkey 'Toggle Peace Only'
+	            lift found_weapon
+	            drop self lefthand
+
+	            if find lasttarget ground -1 -1 18
+	                hotkey "Attack Last Target"
+	                wait 200
+	            endif
+	        endif
+	    else
+	        if findtype "viking sword" backpack as found_weapon and not casting
+	            hotkey 'Toggle Peace Only'
+	            drop backpack
+	            cast "unlock"
+	            hotkey 'Toggle Peace Only'
+	            lift found_weapon
+	            drop self lefthand
+
+	            if find lasttarget ground -1 -1 18
+	                hotkey "Attack Last Target"
+	                wait 200
+	            endif
+	        endif
+	    endif
+	elseif cooldown 'Katana' = 0 and not casting and not targetexists
+	    if findlayer self lefthand as found_lefthand_weapon
+	        getlabel found_lefthand_weapon found_lefthand_weapon_description
+	        // overhead "{{found_lefthand_weapon_description}}"
+
+	        if 'exceptional katana' in found_lefthand_weapon_description
+//	            if find lasttarget ground -1 -1 10
+//	                hotkey "Attack Last Target"
+//	                wait 200
+//	            endif
+	        elseif findtype "katana" backpack as found_weapon and not casting
+	            hotkey 'Toggle Peace Only'
+	            drop backpack
+	            cast "unlock"
+	            hotkey 'Toggle Peace Only'
+	            lift found_weapon
+	            drop self lefthand
+
+	            if find lasttarget ground -1 -1 18
+	                hotkey "Attack Last Target"
+	                wait 200
+	            endif
+	        endif
+	    else
+	        if findtype "katana" backpack as found_weapon and not casting
+	            hotkey 'Toggle Peace Only'
+	            drop backpack
+	            cast "unlock"
+	            hotkey 'Toggle Peace Only'
+	            lift found_weapon
+	            drop self lefthand
+
+	            if find lasttarget ground -1 -1 18
+	                hotkey "Attack Last Target"
+	                wait 200
+	            endif
+	        endif
+	    endif
+	elseif lhandempty and cooldown 'Katana' > 0 and cooldown 'Viking Sword' > 0 and cooldown 'Battle Axe' > 0 and cooldown 'Halberd' > 0 and not casting and not targetexists
+	    if findlayer self lefthand as found_lefthand_weapon
+	        getlabel found_lefthand_weapon found_lefthand_weapon_description
+	        // overhead "{{found_lefthand_weapon_description}}"
+
+	        if 'exceptional katana' in found_lefthand_weapon_description
+//	            if find lasttarget ground -1 -1 10
+//	                hotkey "Attack Last Target"
+//	                wait 200
+//	            endif
+	        elseif findtype "katana" backpack as found_weapon and not casting
+	            hotkey 'Toggle Peace Only'
+	            drop backpack
+	            cast "unlock"
+	            hotkey 'Toggle Peace Only'
+	            lift found_weapon
+	            drop self lefthand
+
+	            if find lasttarget ground -1 -1 18
+	                hotkey "Attack Last Target"
+	                wait 200
+	            endif
+	        endif
+	    else
+	        if findtype "katana" backpack as found_weapon and not casting
+	            hotkey 'Toggle Peace Only'
+	            drop backpack
+	            cast "unlock"
+	            hotkey 'Toggle Peace Only'
+	            lift found_weapon
+	            drop self lefthand
+
+	            if find lasttarget ground -1 -1 18
+	                hotkey "Attack Last Target"
+	                wait 200
+	            endif
+	        endif
+	    endif
+	endif
+
+endwhile

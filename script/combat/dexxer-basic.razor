@@ -1,0 +1,177 @@
+clearsysmsg
+clearall
+
+@setvar! var_use_potion 0
+
+if not timerexists "overhead_message_timer"
+	setvar! overhead_message_timer_frequency 2700
+	createtimer "overhead_message_timer"
+	settimer "overhead_message_timer" overhead_message_timer_frequency
+endif
+
+if not timerexists "clear_scavenger_timer"
+	setvar! clear_scavenger_timer_frequency 30000
+	createtimer "clear_scavenger_timer"
+	settimer "clear_scavenger_timer" overhead_message_timer_frequency
+endif
+
+
+@clearignore
+
+if not gumpexists 2016719803
+	say "[codexhotbar"
+endif
+
+while not dead
+	while queued
+	    wait 100
+	endwhile
+
+	while casting
+		wait 100
+	endwhile
+
+	while weight > maxweight
+		if findtype "gold coin" backpack as found_gold
+			lift found_gold 500
+			droprelloc 0 0
+			getlabel backpack backpack_description
+
+			if insysmsg "cannot drop anything"
+				drop backpack -1 -1 -1
+			endif
+
+			wait 1000
+			overhead 'You drop some gold on the ground.' 55
+		endif
+	endwhile
+
+	if not findbuff 'Food Satisfaction'
+        if findtype tray backpack as food
+            dclick food
+            wait 350
+        endif
+    endif
+
+	if diffhits > 0 or poisoned
+		if not bandaging and skill "Healing" > 10
+			if findtype "clean bandage%s%" self
+				hotkey "Bandage Self"
+				wait 200
+			else
+				if timer "overhead_message_timer" > overhead_message_timer_frequency
+					overhead "You are out of bandage." 32
+					settimer "overhead_message_timer" 0
+				endif
+			endif
+		endif
+	endif
+
+	if paralyzed
+		if findtype 3705 backpack 38
+			yell "[Pouch"
+			getlabel backpack ping
+		else
+			overhead "You are out of pouche." 32
+		endif
+	endif
+
+	if hp <= 65
+		if findtype "Yellow Potion" self as found_potion
+				getlabel found_potion found_potion_description
+
+			if "next usable" in found_potion_description
+				if timer "overhead_message_timer" > overhead_message_timer_frequency
+					overhead found_potion_description 83
+					settimer "overhead_message_timer" 0
+				endif
+			else
+				if hidden
+					break
+				endif
+
+				overhead "You drink a healing potion." 53
+				dclick found_potion
+				getlabel backpack ping
+				cooldown "Heal Potion" 10000
+			endif
+		else
+			if timer "overhead_message_timer" > overhead_message_timer_frequency
+				overhead "You are out of healing potion." 32
+				settimer "overhead_message_timer" 0
+			endif
+		endif
+	endif
+
+	if poisoned
+		if findtype "Orange Potion" self as found_potion
+			if hidden
+				break
+			endif
+
+			overhead "You drink a cure potion." 44
+			dclick found_potion
+			getlabel backpack ping
+		else
+			if timer "overhead_message_timer" > overhead_message_timer_frequency
+				overhead "You are out of cure potion." 32
+				settimer "overhead_message_timer" 0
+			endif
+		endif
+	endif
+
+	if stam < 5
+		if findtype "Red Potion" backpack as found_potion
+			dclick found_potion
+			wait 200
+		else
+			if timer "overhead_message_timer" > overhead_message_timer_frequency
+				overhead "You are out of refresh potions." 32
+				settimer "overhead_message_timer" 0
+			endif
+		endif
+	endif
+
+	if str <= 100 and var_use_potion = 1 and find lasttarget ground -1 -1 12
+		if findtype "White Potion" backpack as found_potion
+			dclick found_potion
+			wait 200
+		else
+			if timer "overhead_message_timer" > overhead_message_timer_frequency
+				overhead "You are out of strength potions." 32
+				settimer "overhead_message_timer" 0
+			endif
+		endif
+	endif
+
+	if dex <= 100 and var_use_potion = 1 and find lasttarget ground -1 -1 12
+		if findtype "Blue Potion" backpack as found_potion
+			dclick found_potion
+			wait 200
+		else
+			if timer "overhead_message_timer" > overhead_message_timer_frequency
+				overhead "You are out of agility potions." 32
+				settimer "overhead_message_timer" 0
+			endif
+		endif
+	endif
+
+	if not findbuff 'Magic Resist Potion' and var_use_potion = 1 and find lasttarget ground -1 -1 12
+		if findtype "Black Potion" backpack as found_potion
+			dclick found_potion
+			wait 200
+		else
+			if timer "overhead_message_timer" > overhead_message_timer_frequency
+				overhead "You are out of magic resist potions." 32
+				settimer "overhead_message_timer" 0
+			endif
+		endif
+	endif
+
+
+	if timer "clear_scavenger_timer" > clear_scavenger_timer_frequency
+		sysmsg "Clear Scavenger Cache"
+		hotkey "Clear Scavenger Cache"
+		settimer "clear_scavenger_timer" 0
+	endif
+endwhile

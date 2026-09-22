@@ -1,0 +1,49 @@
+clearall
+clearsysmsg
+cleardragdrop
+clearignore
+
+setvar! gate_find_overhead_frequency 2000
+setvar! gate_found_overhead_frequency 1000
+
+if not timerexists "gate_find_overhead"
+    createtimer "gate_find_overhead"
+    settimer "gate_find_overhead" gate_find_overhead_frequency
+endif
+
+if not timerexists "gate_found_overhead"
+    createtimer "gate_found_overhead"
+    settimer "gate_found_overhead" gate_found_overhead_frequency
+endif
+
+unsetvar! var_my_moongate
+
+while not varexist var_my_moongate
+    if timer "gate_find_overhead" >= gate_find_overhead_frequency
+        overhead "finding moongate" 460
+        settimer "gate_find_overhead" 0
+    endif
+
+    if timer "gate_found_overhead" >= gate_found_overhead_frequency and findtype 3948 ground -1 -1 12 as found_moongate
+        overhead "found moongate" 88 found_moongate
+        settimer "gate_found_overhead" 0
+    endif
+
+    if findtype 3948 ground any any 2 as found_moongate
+        setvar! var_my_moongate found_moongate
+        break
+    endif
+    wait 100
+endwhile
+
+while not gumpexists 3773199800
+    dclick var_my_moongate
+    waitforgump 3773199800 1000
+endwhile
+
+while find var_my_moongate ground
+    gumpresponse 2 3773199800
+    wait 200
+endwhile
+
+overhead "escape done" 40

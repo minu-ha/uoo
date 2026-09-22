@@ -1,0 +1,23 @@
+clearignore
+
+while findtype 6464 backpack 0 as found_keg
+	lift found_keg 1
+	drop backpack 0 120 0
+
+	if findtype 3850 backpack 0 as found_green_potion
+		lift found_green_potion 100
+		drop found_keg
+		wait 500
+	endif
+
+	if findtype 64646 backpack 363 as found_green_keg
+		lift found_green_keg 1
+		drop backpack 60 120
+		wait 500
+	endif
+
+	ignore found_keg
+	ignore found_green_keg
+endwhile
+
+clearignore

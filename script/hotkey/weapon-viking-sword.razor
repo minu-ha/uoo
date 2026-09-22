@@ -1,0 +1,10 @@
+if findtype "viking sword" backpack as found_weapon
+	hotkey 'Toggle Peace Only'
+	drop backpack
+	cast "unlock"
+	hotkey 'Toggle Peace Only'
+	lift found_weapon
+	drop self lefthand
+endif
+
+attack lasttarget
