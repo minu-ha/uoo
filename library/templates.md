@@ -9,6 +9,7 @@
 | Bard Mace (Dexxer) | `bard-mace` | `bard-buff`, `weapon-*` | `bard-dexxer` | | |
 | Bard Mage | `bard-mage`, `bard-mage-summon` | `bard-buff` | | | |
 | Bard Archer | `bard-archer`, `bard-archer-no-potion` | `bard-buff` | | | |
+| Bard Throwing (Dexxer) | `bard-throwing` | `bard-buff` | | | |
 | Hally Mage | `hally-mage` | `weapon-halberd`, `weapon-katana`, `weapon-viking-sword` | `hally-mage` | | |
 | Dexxer | `dexxer-basic` | `weapon-*` | | | |
 | Thief / Backstab | `backstab-mugging` | | | | |

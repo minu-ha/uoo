@@ -3,14 +3,15 @@ clearall
 
 @setvar! var_use_potion 0
 
+setvar! overhead_message_timer_frequency 2700
+setvar! clear_scavenger_timer_frequency 30000
+
 if not timerexists "overhead_message_timer"
-	setvar! overhead_message_timer_frequency 2700
 	createtimer "overhead_message_timer"
 	settimer "overhead_message_timer" overhead_message_timer_frequency
 endif
 
 if not timerexists "clear_scavenger_timer"
-	setvar! clear_scavenger_timer_frequency 30000
 	createtimer "clear_scavenger_timer"
 	settimer "clear_scavenger_timer" overhead_message_timer_frequency
 endif

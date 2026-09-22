@@ -1,0 +1,1934 @@
+# ####################################################################################
+# VENDOR RESTOCK
+# ####################################################################################
+# Moves sellable items from a source container onto the vendor, one stack per item
+# type, prints the price you should charge, and waits while you type it.
+#
+# PREREQUISITE
+#   Vendor Settings, Use Item Pricing Menu must be ON so gump 685310710 opens.
+#   Same gump as script/restock/store-keg.razor line 10.
+#
+# WHY THE PRICE IS TYPED BY HAND
+#   Razor scripts cannot type into a gump text field. gumpresponse sends a button id
+#   only. So the script does everything except the typing, and tells you the number.
+#
+# HOW IT RUNS
+#   Phase 1 collects every sellable stack from the source container into a list, one
+#   while loop per item family so the graphic lists stay readable.
+#   Phase 2 walks that list. For each stack it reads the label, picks the price, lifts
+#   the whole stack, drops it on the vendor, waits for gump 685310710, prints
+#   item name : price , then waits until the gump is really gone.
+#   Clicking the small orb refreshes the gump, so the script confirms it stays closed
+#   for var__delay_gump_settle before moving on. Toggle war mode to abort.
+#
+# PRICES
+#   This file is the source of truth, not library/vendor-prices.md.
+#   Each PRICE block lists the variable, the searchable item name and the item id, so
+#   you can paste the name into the Outlands Portal vendor search, and still identify
+#   a price you later stop using.
+#   0 means the price is not set yet.
+#   It has to be a number. Razor coerces an interpolated variable to an integer, so a
+#   text placeholder like --- comes out as 4294967295, which is -1 unsigned.
+#
+# LABEL CASE
+#   The in operator is case sensitive. Confirmed in game that item labels are
+#   lowercase, for example  chromatic distillation , so the lowercase match strings
+#   in the PICK PRICE block are correct.
+#
+# DROP LAYOUT
+#   Razor has no arithmetic, so a fixed cell is baked into every item type at edit time.
+#   The vendor container is round, so the cells follow an ellipse centred on 190 205 with
+#   radii 148 and 168, 15 pixels apart. Each section starts on a fresh row, so a section
+#   reads as one contiguous band. An item type always lands in the same cell, so the
+#   arrangement is identical every run.
+#   Rows used 20 of 22. If items land outside the barrel, shrink the radii here.
+#
+# NOT INCLUDED
+#   Currency graphics 2539 3821 3891 5360 16898 from script/loot/distribution.razor
+#   are left out on purpose. Gold, doubloons, prevalia coins and checks are not stock.
+
+clearsysmsg
+clearall
+clearignore
+cleardragdrop
+
+# ####################################################################################
+# CONFIG - CONTAINERS
+# ####################################################################################
+#   var__vendor_container   the vendor you are stocking
+#   var__source_container   the box your sellable items are sitting in
+# Both are opened with dclick first so the client knows their contents.
+# Each is asked for once and kept in your Razor profile, so no serial sits in this
+# shared file. To point the script at something else, run  unsetvar var__vendor_container
+# from another script and rerun this one.
+# ####################################################################################
+if not varexist var__vendor_container
+    overhead "Target the vendor you are stocking" 55
+    setvar var__vendor_container
+endif
+
+if not varexist var__source_container
+    overhead "Target the box holding what you want to sell" 55
+    setvar var__source_container
+endif
+
+# ####################################################################################
+# CONFIG - BEHAVIOUR
+# ####################################################################################
+#   var__auto_place         0 stops on each gump so you can type the price
+#                           1 presses Place Item for Sale, everything lands at 99,999
+#   var__lift_amount        60000 is the UO stack cap, so this takes a whole stack
+#   var__delay_gump_settle  raise it if the script jumps ahead while you are typing
+# ####################################################################################
+@setvar! var__auto_place 0
+@setvar! var__lift_amount 60000
+@setvar! var__delay_open 700
+@setvar! var__delay_lift 600
+@setvar! var__delay_place 800
+@setvar! var__delay_poll 200
+@setvar! var__delay_gump_settle 1200
+# How often the item name and price is repeated over your head while you type.
+@setvar! var__delay_hint_repeat 2000
+
+# ####################################################################################
+# PRICE - TREASURE MAP
+#
+#   var__price_treasure_lv1  "plainly drawn treasure map"    5356
+#   var__price_treasure_lv2  "expertly drawn treasure map"   5356
+#   var__price_treasure_lv3  "adeptly drawn treasure map"    5356
+#   var__price_treasure_lv4  "cleverly drawn treasure map"   5356
+#   var__price_treasure_lv5  "deviously drawn treasure map"  5356
+# ####################################################################################
+@setvar! var__price_treasure_lv1 '5000'
+@setvar! var__price_treasure_lv2 '10000'
+@setvar! var__price_treasure_lv3 '20000'
+@setvar! var__price_treasure_lv4 '30000'
+@setvar! var__price_treasure_lv5 '50000'
+
+# ####################################################################################
+# PRICE - ORE MAP
+#
+#   Ordered so a longer material name is tested before a shorter one it contains, for
+#   example  shadow iron ore  before  iron ore . The last entry is a catch all for a
+#   base tier map whose label carries no material word.
+#
+#   var__price_ore_dull_copper  "dull copper ore map"        70154  hue 2419
+#   var__price_ore_shadow_iron  "shadow iron ore map"        70154  hue 2406
+#   var__price_ore_copper       "copper ore map"             70154  hue 2413
+#   var__price_ore_bronze       "bronze ore map"             70154  hue 2418
+#   var__price_ore_gold         "gold ore map"               70154  hue 2213
+#   var__price_ore_agapite      "agapite ore map"            70154  hue 2425
+#   var__price_ore_verite       "verite ore map"             70154  hue 2207
+#   var__price_ore_valorite     "valorite ore map"           70154  hue 2219
+#   var__price_ore_avarite      "avarite ore map"            70154  hue 1763
+#   var__price_ore_iron         "iron ore map, the base tier"  70154  hue 0
+# ####################################################################################
+@setvar! var__price_ore_dull_copper '5000'
+@setvar! var__price_ore_shadow_iron '5000'
+@setvar! var__price_ore_copper      '6000'
+@setvar! var__price_ore_bronze      '7000'
+@setvar! var__price_ore_gold        '15000'
+@setvar! var__price_ore_agapite     '25000'
+@setvar! var__price_ore_verite      '40000'
+@setvar! var__price_ore_valorite    '52000'
+@setvar! var__price_ore_avarite     '100000'
+@setvar! var__price_ore_iron        '0'
+
+# ####################################################################################
+# PRICE - LUMBER MAP
+#
+#   The last entry is a catch all for a base tier map whose label carries no material word.
+#
+#   var__price_lumber_dullwood    "dullwood lumber map"            70151  hue 2419
+#   var__price_lumber_shadowwood  "shadowwood lumber map"          70151  hue 2406
+#   var__price_lumber_copperwood  "copperwood lumber map"          70151  hue 2413
+#   var__price_lumber_bronzewood  "bronzewood lumber map"          70151  hue 2418
+#   var__price_lumber_goldenwood  "goldenwood lumber map"          70151  hue 2213
+#   var__price_lumber_rosewood    "rosewood lumber map"            70151  hue 2425
+#   var__price_lumber_verewood    "verewood lumber map"            70151  hue 2207
+#   var__price_lumber_valewood    "valewood lumber map"            70151  hue 2219
+#   var__price_lumber_avarwood    "avarwood lumber map"            70151  hue 1763
+#   var__price_lumber_board       "plain lumber map, the base tier"  70151  hue 0
+# ####################################################################################
+@setvar! var__price_lumber_dullwood   '1000'
+@setvar! var__price_lumber_shadowwood '1000'
+@setvar! var__price_lumber_copperwood '2000'
+@setvar! var__price_lumber_bronzewood '2000'
+@setvar! var__price_lumber_goldenwood '2000'
+@setvar! var__price_lumber_rosewood   '2500'
+@setvar! var__price_lumber_verewood   '5000'
+@setvar! var__price_lumber_valewood   '8000'
+@setvar! var__price_lumber_avarwood   '50000'
+@setvar! var__price_lumber_board      '0'
+
+# ####################################################################################
+# PRICE - SKINNING MAP
+#
+#   The last entry is a catch all for a base tier map whose label carries no material word.
+#
+#   var__price_hide_dullhide    "dullhide skinning map"            70157  hue 2419
+#   var__price_hide_shadowhide  "shadowhide skinning map"          70157  hue 2406
+#   var__price_hide_copperhide  "copperhide skinning map"          70157  hue 2413
+#   var__price_hide_bronzehide  "bronzehide skinning map"          70157  hue 2418
+#   var__price_hide_goldenhide  "goldenhide skinning map"          70157  hue 2213
+#   var__price_hide_rosehide    "rosehide skinning map"            70157  hue 2425
+#   var__price_hide_verehide    "verehide skinning map"            70157  hue 2207
+#   var__price_hide_valehide    "valehide skinning map"            70157  hue 2219
+#   var__price_hide_avarhide    "avarhide skinning map"            70157  hue 1763
+#   var__price_hide_leather     "plain skinning map, the base tier"  70157  hue 0
+# ####################################################################################
+@setvar! var__price_hide_dullhide   '100'
+@setvar! var__price_hide_shadowhide '100'
+@setvar! var__price_hide_copperhide '100'
+@setvar! var__price_hide_bronzehide '500'
+@setvar! var__price_hide_goldenhide '800'
+@setvar! var__price_hide_rosehide   '1000'
+@setvar! var__price_hide_verehide   '5000'
+@setvar! var__price_hide_valehide   '5000'
+@setvar! var__price_hide_avarhide   '0'
+@setvar! var__price_hide_leather    '0'
+
+# ####################################################################################
+# PRICE - FISHING MAP
+#
+#   var__price_fishing_map  "fishing map"  70148
+# ####################################################################################
+@setvar! var__price_fishing_map '100'
+
+# ####################################################################################
+# PRICE - CHROMATIC
+#
+#   var__price_chromatic_core          "a chromatic core"        4025
+#   var__price_chromatic_distillation  "chromatic distillation"  4026
+# ####################################################################################
+@setvar! var__price_chromatic_core         '35000'
+@setvar! var__price_chromatic_distillation '2000'
+
+# ####################################################################################
+# PRICE - CORE
+#
+#   var__price_core_agorawave   "Agorawave Core"   3985  hue 4221
+#   var__price_core_air         "Air Core"         3985  hue 2263
+#   var__price_core_arcane      "Arcane Core"      3985  hue 1560
+#   var__price_core_artisan     "Artisan Core"     3985  hue 2096
+#   var__price_core_blood       "Blood Core"       3985  hue 2087
+#   var__price_core_command     "Command Core"     3985  hue 1428
+#   var__price_core_death       "Death Core"       3985  hue 2155
+#   var__price_core_discipline  "Discipline Core"  3985  hue 2490
+#   var__price_core_earth       "Earth Core"       3985  hue 2767
+#   var__price_core_eldritch    "Eldritch Core"    3985  hue 2618
+#   var__price_core_fire        "Fire Core"        3985  hue 2635
+#   var__price_core_fortune     "Fortune Core"     3985  hue 2843
+#   var__price_core_frost       "Frost Core"       3985  hue 2234
+#   var__price_core_gadget      "Gadget Core"      3985  hue 2669
+#   var__price_core_harvest     "Harvest Core"     3985  hue 2208
+#   var__price_core_holy        "Holy Core"        3985  hue 2153
+#   var__price_core_lightning   "Lightning Core"   3985  hue 2650
+#   var__price_core_lyric       "Lyric Core"       3985  hue 2241
+#   var__price_core_madness     "Madness Core"     3985  hue 1060
+#   var__price_core_poison      "Poison Core"      3985  hue 2897
+#   var__price_core_shadow      "Shadow Core"      3985  hue 1757
+#   var__price_core_temporal    "Temporal Core"    3985  hue 4211
+#   var__price_core_void        "Void Core"        3985  hue 2582
+#   var__price_core_water       "Water Core"       3985  hue 2592
+#   var__price_core_war         "War Core"         3985  hue 2503
+# ####################################################################################
+@setvar! var__price_core_agorawave  '18000'
+@setvar! var__price_core_air        '15000'
+@setvar! var__price_core_arcane     '15000'
+@setvar! var__price_core_artisan    '38000'
+@setvar! var__price_core_blood      '20000'
+@setvar! var__price_core_command    '38000'
+@setvar! var__price_core_death      '5500'
+@setvar! var__price_core_discipline '6000'
+@setvar! var__price_core_earth      '4000'
+@setvar! var__price_core_eldritch   '7000'
+@setvar! var__price_core_fire       '6000'
+@setvar! var__price_core_fortune    '35000'
+@setvar! var__price_core_frost      '16000'
+@setvar! var__price_core_gadget     '3000'
+@setvar! var__price_core_harvest    '35000'
+@setvar! var__price_core_holy       '10000'
+@setvar! var__price_core_lightning  '38000'
+@setvar! var__price_core_lyric      '17000'
+@setvar! var__price_core_madness    '30000'
+@setvar! var__price_core_poison     '25000'
+@setvar! var__price_core_shadow     '23000'
+@setvar! var__price_core_temporal   '5000'
+@setvar! var__price_core_void       '25000'
+@setvar! var__price_core_water      '3000'
+@setvar! var__price_core_war        '11000'
+
+# ####################################################################################
+# PRICE - DISTILLATION
+#
+#   var__price_distillation_agorawave   "Agorawave Distillation"   17686  hue 4221
+#   var__price_distillation_air         "Air Distillation"         17686  hue 2263
+#   var__price_distillation_arcane      "Arcane Distillation"      17686  hue 1560
+#   var__price_distillation_artisan     "Artisan Distillation"     17686  hue 2096
+#   var__price_distillation_blood       "Blood Distillation"       17686  hue 2087
+#   var__price_distillation_command     "Command Distillation"     17686  hue 1782
+#   var__price_distillation_death       "Death Distillation"       17686  hue 2155
+#   var__price_distillation_discipline  "Discipline Distillation"  17686  hue 2490
+#   var__price_distillation_earth       "Earth Distillation"       17686  hue 2767
+#   var__price_distillation_eldritch    "Eldritch Distillation"    17686  hue 2615
+#   var__price_distillation_fire        "Fire Distillation"        17686  hue 2635
+#   var__price_distillation_fortune     "Fortune Distillation"     17686  hue 2843
+#   var__price_distillation_frost       "Frost Distillation"       17686  hue 2234
+#   var__price_distillation_gadget      "Gadget Distillation"      17686  hue 2669
+#   var__price_distillation_harvest     "Harvest Distillation"     17686  hue 2086
+#   var__price_distillation_holy        "Holy Distillation"        17686  hue 2153
+#   var__price_distillation_lightning   "Lightning Distillation"   17686  hue 2650
+#   var__price_distillation_lyric       "Lyric Distillation"       17686  hue 2241
+#   var__price_distillation_madness     "Madness Distillation"     17686  hue 1060
+#   var__price_distillation_poison      "Poison Distillation"      17686  hue 2897
+#   var__price_distillation_shadow      "Shadow Distillation"      17686  hue 1790
+#   var__price_distillation_temporal    "Temporal Distillation"    17686  hue 4211
+#   var__price_distillation_void        "Void Distillation"        17686  hue 2599
+#   var__price_distillation_water       "Water Distillation"       17686  hue 1788
+#   var__price_distillation_war         "War Distillation"         17686  hue 2503
+# ####################################################################################
+@setvar! var__price_distillation_agorawave  '2000'
+@setvar! var__price_distillation_air        '2000'
+@setvar! var__price_distillation_arcane     '3000'
+@setvar! var__price_distillation_artisan    '2500'
+@setvar! var__price_distillation_blood      '2000'
+@setvar! var__price_distillation_command    '5000'
+@setvar! var__price_distillation_death      '2000'
+@setvar! var__price_distillation_discipline '1500'
+@setvar! var__price_distillation_earth      '1500'
+@setvar! var__price_distillation_eldritch   '2000'
+@setvar! var__price_distillation_fire       '1500'
+@setvar! var__price_distillation_fortune    '3000'
+@setvar! var__price_distillation_frost      '2000'
+@setvar! var__price_distillation_gadget     '1500'
+@setvar! var__price_distillation_harvest    '3500'
+@setvar! var__price_distillation_holy       '2000'
+@setvar! var__price_distillation_lightning  '2000'
+@setvar! var__price_distillation_lyric      '2000'
+@setvar! var__price_distillation_madness    '3000'
+@setvar! var__price_distillation_poison     '2000'
+@setvar! var__price_distillation_shadow     '3000'
+@setvar! var__price_distillation_temporal   '1500'
+@setvar! var__price_distillation_void       '2000'
+@setvar! var__price_distillation_water      '3500'
+@setvar! var__price_distillation_war        '1500'
+
+# ####################################################################################
+# PRICE - EXTRACT
+#
+#   var__price_extract_agorawave   "Agorawave Extract"   3836  hue 4221
+#   var__price_extract_air         "Air Extract"         3836  hue 2263
+#   var__price_extract_arcane      "Arcane Extract"      3836  hue 1560
+#   var__price_extract_artisan     "Artisan Extract"     3836  hue 2096
+#   var__price_extract_blood       "Blood Extract"       3836  hue 2087
+#   var__price_extract_command     "Command Extract"     3836  hue 1782
+#   var__price_extract_death       "Death Extract"       3836  hue 2155
+#   var__price_extract_discipline  "Discipline Extract"  3836  hue 2490
+#   var__price_extract_earth       "Earth Extract"       3836  hue 2767
+#   var__price_extract_eldritch    "Eldritch Extract"    3836  hue 2615
+#   var__price_extract_fire        "Fire Extract"        3836  hue 2635
+#   var__price_extract_fortune     "Fortune Extract"     3836  hue 2843
+#   var__price_extract_frost       "Frost Extract"       3836  hue 2234
+#   var__price_extract_gadget      "Gadget Extract"      3836  hue 2669
+#   var__price_extract_harvest     "Harvest Extract"     3836  hue 2086
+#   var__price_extract_holy        "Holy Extract"        3836  hue 2153
+#   var__price_extract_lightning   "Lightning Extract"   3836  hue 2650
+#   var__price_extract_lyric       "Lyric Extract"       3836  hue 2241
+#   var__price_extract_madness     "Madness Extract"     3836  hue 1060
+#   var__price_extract_poison      "Poison Extract"      3836  hue 2897
+#   var__price_extract_shadow      "Shadow Extract"      3836  hue 1790
+#   var__price_extract_temporal    "Temporal Extract"    3836  hue 4211
+#   var__price_extract_void        "Void Extract"        3836  hue 2599
+#   var__price_extract_water       "Water Extract"       3836  hue 1788
+#   var__price_extract_war         "War Extract"         3836  hue 2503
+# ####################################################################################
+@setvar! var__price_extract_agorawave  '0'
+@setvar! var__price_extract_air        '0'
+@setvar! var__price_extract_arcane     '0'
+@setvar! var__price_extract_artisan    '0'
+@setvar! var__price_extract_blood      '0'
+@setvar! var__price_extract_command    '0'
+@setvar! var__price_extract_death      '0'
+@setvar! var__price_extract_discipline '0'
+@setvar! var__price_extract_earth      '0'
+@setvar! var__price_extract_eldritch   '0'
+@setvar! var__price_extract_fire       '0'
+@setvar! var__price_extract_fortune    '0'
+@setvar! var__price_extract_frost      '0'
+@setvar! var__price_extract_gadget     '0'
+@setvar! var__price_extract_harvest    '0'
+@setvar! var__price_extract_holy       '0'
+@setvar! var__price_extract_lightning  '0'
+@setvar! var__price_extract_lyric      '0'
+@setvar! var__price_extract_madness    '0'
+@setvar! var__price_extract_poison     '0'
+@setvar! var__price_extract_shadow     '0'
+@setvar! var__price_extract_temporal   '0'
+@setvar! var__price_extract_void       '0'
+@setvar! var__price_extract_water      '0'
+@setvar! var__price_extract_war        '0'
+
+# ####################################################################################
+# PRICE - PHYLACTERY
+#
+#   var__price_phylactery_agorawave   "Agorawave Phylactery"   576  hue 4221
+#   var__price_phylactery_air         "Air Phylactery"         576  hue 2263
+#   var__price_phylactery_arcane      "Arcane Phylactery"      576  hue 1560
+#   var__price_phylactery_artisan     "Artisan Phylactery"     576  hue 2096
+#   var__price_phylactery_blood       "Blood Phylactery"       576  hue 2087
+#   var__price_phylactery_command     "Command Phylactery"     576  hue 1782
+#   var__price_phylactery_death       "Death Phylactery"       576  hue 2155
+#   var__price_phylactery_discipline  "Discipline Phylactery"  576  hue 2490
+#   var__price_phylactery_earth       "Earth Phylactery"       576  hue 2767
+#   var__price_phylactery_eldritch    "Eldritch Phylactery"    576  hue 2615
+#   var__price_phylactery_fire        "Fire Phylactery"        576  hue 2635
+#   var__price_phylactery_fortune     "Fortune Phylactery"     576  hue 2843
+#   var__price_phylactery_frost       "Frost Phylactery"       576  hue 2234
+#   var__price_phylactery_gadget      "Gadget Phylactery"      576  hue 2669
+#   var__price_phylactery_harvest     "Harvest Phylactery"     576  hue 2207
+#   var__price_phylactery_holy        "Holy Phylactery"        576  hue 2153
+#   var__price_phylactery_lightning   "Lightning Phylactery"   576  hue 2650
+#   var__price_phylactery_lyric       "Lyric Phylactery"       576  hue 2241
+#   var__price_phylactery_madness     "Madness Phylactery"     576  hue 1060
+#   var__price_phylactery_poison      "Poison Phylactery"      576  hue 2897
+#   var__price_phylactery_shadow      "Shadow Phylactery"      576  hue 1790
+#   var__price_phylactery_temporal    "Temporal Phylactery"    576  hue 4211
+#   var__price_phylactery_void        "Void Phylactery"        576  hue 2582
+#   var__price_phylactery_water       "Water Phylactery"       576  hue 1788
+#   var__price_phylactery_war         "War Phylactery"         576  hue 2503
+# ####################################################################################
+@setvar! var__price_phylactery_agorawave  '4000'
+@setvar! var__price_phylactery_air        '4000'
+@setvar! var__price_phylactery_arcane     '4000'
+@setvar! var__price_phylactery_artisan    '7000'
+@setvar! var__price_phylactery_blood      '4000'
+@setvar! var__price_phylactery_command    '7000'
+@setvar! var__price_phylactery_death      '4000'
+@setvar! var__price_phylactery_discipline '4000'
+@setvar! var__price_phylactery_earth      '4000'
+@setvar! var__price_phylactery_eldritch   '4000'
+@setvar! var__price_phylactery_fire       '4000'
+@setvar! var__price_phylactery_fortune    '7000'
+@setvar! var__price_phylactery_frost      '4000'
+@setvar! var__price_phylactery_gadget     '4000'
+@setvar! var__price_phylactery_harvest    '6000'
+@setvar! var__price_phylactery_holy       '4000'
+@setvar! var__price_phylactery_lightning  '7000'
+@setvar! var__price_phylactery_lyric      '4000'
+@setvar! var__price_phylactery_madness    '4000'
+@setvar! var__price_phylactery_poison     '4000'
+@setvar! var__price_phylactery_shadow     '4000'
+@setvar! var__price_phylactery_temporal   '4000'
+@setvar! var__price_phylactery_void       '4000'
+@setvar! var__price_phylactery_water      '4000'
+@setvar! var__price_phylactery_war        '4000'
+
+# ####################################################################################
+# PRICE - VALUABLE AND RARE
+#
+#   var__price_rare_cloth              "rare cloth, price varies by hue"  5981
+#   var__price_spell_hue_deed          "spell hue deed"                   5359 11858
+#   var__price_mastercrafting_diagram  "mastercrafting diagram"           17087
+#   var__price_immaculate_stone        "immaculate stone"                 23997
+#   var__price_pristine_lumber         "pristine lumber"                  23996
+#   var__price_redlightning_bottle     "redlightning bottle"              25359
+#   var__price_research_materials      "research materials"               24434
+#   var__price_skill_ball              "skill ball"                       22336
+#   var__price_arcane_essence          "arcane essence"                   3901
+#   var__price_arcane_scroll           "arcane scroll"                    3827
+#   var__price_black_market_goods      "black market goods"               24343
+#   var__price_survival_gear           "survival gear"                    37181
+#   var__price_plant_chemicals         "plant chemicals"                  29030
+#   var__price_lantern                 "lantern"                          2594 lit 2597 unlit
+# ####################################################################################
+@setvar! var__price_rare_cloth             '5000'
+@setvar! var__price_spell_hue_deed         '5000'
+@setvar! var__price_mastercrafting_diagram '8000'
+@setvar! var__price_immaculate_stone       '0'
+@setvar! var__price_pristine_lumber        '0'
+@setvar! var__price_redlightning_bottle    '0'
+@setvar! var__price_research_materials     '30000'
+@setvar! var__price_skill_ball             '0'
+@setvar! var__price_arcane_essence         '20'
+@setvar! var__price_arcane_scroll          '1100'
+@setvar! var__price_black_market_goods     '0'
+@setvar! var__price_survival_gear          '15000'
+@setvar! var__price_plant_chemicals        '1900'
+@setvar! var__price_lantern                '0'
+
+# ####################################################################################
+# PRICE - CARPET AND RUG
+#
+#   var__price_carpet_tile  "carpet tile, many rotations share one price"  2750 2760 2771 2778 2799 19717 22244 43166 43179 48405 48407
+#   var__price_rug_tile     "rug tile"                                     2744 4248
+# ####################################################################################
+@setvar! var__price_carpet_tile '0'
+@setvar! var__price_rug_tile    '0'
+
+# ####################################################################################
+# PRICE - SKILL MASTERY SCROLL
+#
+#   All of these share graphic 8826, named  scroll of calling  in tiledata. That id is
+#   already documented in library/item-list.razor line 968.
+#   The label carries the skill name in lowercase, so the skill name alone is matched.
+#   Short forms are used where sources disagree on the full skill name:
+#     blacksmith  covers blacksmithy and blacksmithing
+#     forensic    covers forensic eval and forensic evaluation
+#     detect      covers detect hidden and detecting hidden
+#   Prices below marked from the in game Pricing Manifest page 1. Page 2 skills are 0.
+#
+#   var__price_mastery_alchemy        "Alchemy Skill Mastery Scroll"             8826
+#   var__price_mastery_animal_lore    "Animal Lore Skill Mastery Scroll"         8826
+#   var__price_mastery_animal_taming  "Animal Taming Skill Mastery Scroll"       8826
+#   var__price_mastery_arms_lore      "Arms Lore Skill Mastery Scroll"           8826
+#   var__price_mastery_begging        "Begging Skill Mastery Scroll"             8826
+#   var__price_mastery_blacksmith     "Blacksmithing Skill Mastery Scroll"       8826
+#   var__price_mastery_camping        "Camping Skill Mastery Scroll"             8826
+#   var__price_mastery_carpentry      "Carpentry Skill Mastery Scroll"           8826
+#   var__price_mastery_cartography    "Cartography Skill Mastery Scroll"         8826
+#   var__price_mastery_chivalry       "Chivalry Skill Mastery Scroll"            8826
+#   var__price_mastery_cooking        "Cooking Skill Mastery Scroll"             8826
+#   var__price_mastery_detect         "Detect Hidden Skill Mastery Scroll"       8826
+#   var__price_mastery_discordance    "Discordance Skill Mastery Scroll"         8826
+#   var__price_mastery_epic           "Epic Skill Mastery Scroll"                8826
+#   var__price_mastery_fishing        "Fishing Skill Mastery Scroll"             8826
+#   var__price_mastery_forensic       "Forensic Eval Skill Mastery Scroll"       8826
+#   var__price_mastery_herding        "Herding Skill Mastery Scroll"             8826
+#   var__price_mastery_inscription    "Inscription Skill Mastery Scroll"         8826
+#   var__price_mastery_item_id        "Item Identification Skill Mastery Scroll"  8826
+#   var__price_mastery_lockpicking    "Lockpicking Skill Mastery Scroll"         8826
+#   var__price_mastery_lumberjacking  "Lumberjacking Skill Mastery Scroll"       8826
+#   var__price_mastery_mining         "Mining Skill Mastery Scroll"              8826
+#   var__price_mastery_musicianship   "Musicianship Skill Mastery Scroll"        8826
+#   var__price_mastery_necromancy     "Necromancy Skill Mastery Scroll"          8826
+#   var__price_mastery_peacemaking    "Peacemaking Skill Mastery Scroll"         8826
+#   var__price_mastery_poisoning      "Poisoning Skill Mastery Scroll"           8826
+#   var__price_mastery_provocation    "Provocation Skill Mastery Scroll"         8826
+#   var__price_mastery_remove_trap    "Remove Trap Skill Mastery Scroll"         8826
+#   var__price_mastery_spirit_speak   "Spirit Speak Skill Mastery Scroll"        8826
+#   var__price_mastery_stealth        "Stealth Skill Mastery Scroll"             8826
+#   var__price_mastery_tailoring      "Tailoring Skill Mastery Scroll"           8826
+#   var__price_mastery_taste_id       "Taste Identification Skill Mastery Scroll"  8826
+#   var__price_mastery_tinkering      "Tinkering Skill Mastery Scroll"           8826
+#   var__price_mastery_tracking       "Tracking Skill Mastery Scroll"            8826
+#   var__price_mastery_veterinary     "Veterinary Skill Mastery Scroll"          8826
+# ####################################################################################
+@setvar! var__price_mastery_alchemy       '30000'
+@setvar! var__price_mastery_animal_lore   '13000'
+@setvar! var__price_mastery_animal_taming '10000'
+@setvar! var__price_mastery_arms_lore     '6000'
+@setvar! var__price_mastery_begging       '4000'
+@setvar! var__price_mastery_blacksmith    '5000'
+@setvar! var__price_mastery_camping       '5000'
+@setvar! var__price_mastery_carpentry     '5000'
+@setvar! var__price_mastery_cartography   '10000'
+@setvar! var__price_mastery_chivalry      '10000'
+@setvar! var__price_mastery_cooking       '5000'
+@setvar! var__price_mastery_detect        '5000'
+@setvar! var__price_mastery_discordance   '5000'
+@setvar! var__price_mastery_epic          '5000'
+@setvar! var__price_mastery_fishing       '5000'
+@setvar! var__price_mastery_forensic      '5000'
+@setvar! var__price_mastery_herding       '10000'
+@setvar! var__price_mastery_inscription   '10000'
+@setvar! var__price_mastery_item_id       '10000'
+@setvar! var__price_mastery_lockpicking   '5000'
+@setvar! var__price_mastery_lumberjacking '5000'
+@setvar! var__price_mastery_mining        '5000'
+@setvar! var__price_mastery_musicianship  '5000'
+@setvar! var__price_mastery_necromancy    '5000'
+@setvar! var__price_mastery_peacemaking   '5000'
+@setvar! var__price_mastery_poisoning     '5000'
+@setvar! var__price_mastery_provocation   '5000'
+@setvar! var__price_mastery_remove_trap   '5000'
+@setvar! var__price_mastery_spirit_speak  '5000'
+@setvar! var__price_mastery_stealth       '10000'
+@setvar! var__price_mastery_tailoring     '10000'
+@setvar! var__price_mastery_taste_id      '5000'
+@setvar! var__price_mastery_tinkering     '5000'
+@setvar! var__price_mastery_tracking      '5000'
+@setvar! var__price_mastery_veterinary    '5000'
+
+# ####################################################################################
+# TIMER
+# ####################################################################################
+if not timerexists "timer__hint_repeat"
+    createtimer "timer__hint_repeat"
+endif
+
+# ####################################################################################
+# OPEN CONTAINERS
+# ####################################################################################
+if warmode
+    hotkey "Toggle War/Peace"
+    wait 500
+endif
+
+dclick var__source_container
+wait var__delay_open
+dclick var__vendor_container
+wait var__delay_open
+
+# ####################################################################################
+# PHASE 1 - COLLECT
+# ####################################################################################
+removelist list__vendor_items
+createlist list__vendor_items
+
+# ### TREASURE MAP
+while findtype 5356 var__source_container as alias__found_item
+    pushlist list__vendor_items alias__found_item
+    @ignore alias__found_item
+endwhile
+
+# ### ORE MAP
+while findtype 70154 var__source_container as alias__found_item
+    pushlist list__vendor_items alias__found_item
+    @ignore alias__found_item
+endwhile
+
+# ### LUMBER MAP
+while findtype 70151 var__source_container as alias__found_item
+    pushlist list__vendor_items alias__found_item
+    @ignore alias__found_item
+endwhile
+
+# ### SKINNING MAP
+while findtype 70157 var__source_container as alias__found_item
+    pushlist list__vendor_items alias__found_item
+    @ignore alias__found_item
+endwhile
+
+# ### FISHING MAP
+while findtype 70148 var__source_container as alias__found_item
+    pushlist list__vendor_items alias__found_item
+    @ignore alias__found_item
+endwhile
+
+# ### CHROMATIC
+while findtype 4025|4026 var__source_container as alias__found_item
+    pushlist list__vendor_items alias__found_item
+    @ignore alias__found_item
+endwhile
+
+# ### CORE
+# Tagged per graphic. The label reads like  Harvest Aspect Core , so the item type
+# comes from the graphic and only the aspect name is matched in the label.
+removelist list__aspect_core
+createlist list__aspect_core
+while findtype 3985 var__source_container as alias__found_item
+    pushlist list__vendor_items alias__found_item
+    pushlist list__aspect_core alias__found_item
+    @ignore alias__found_item
+endwhile
+
+# ### DISTILLATION
+# Tagged per graphic. The label reads like  Harvest Aspect Core , so the item type
+# comes from the graphic and only the aspect name is matched in the label.
+removelist list__aspect_distillation
+createlist list__aspect_distillation
+while findtype 17686 var__source_container as alias__found_item
+    pushlist list__vendor_items alias__found_item
+    pushlist list__aspect_distillation alias__found_item
+    @ignore alias__found_item
+endwhile
+
+# ### EXTRACT
+# Tagged per graphic. The label reads like  Harvest Aspect Core , so the item type
+# comes from the graphic and only the aspect name is matched in the label.
+removelist list__aspect_extract
+createlist list__aspect_extract
+while findtype 3836 var__source_container as alias__found_item
+    pushlist list__vendor_items alias__found_item
+    pushlist list__aspect_extract alias__found_item
+    @ignore alias__found_item
+endwhile
+
+# ### PHYLACTERY
+# Tagged per graphic. The label reads like  Harvest Aspect Core , so the item type
+# comes from the graphic and only the aspect name is matched in the label.
+removelist list__aspect_phylactery
+createlist list__aspect_phylactery
+while findtype 576 var__source_container as alias__found_item
+    pushlist list__vendor_items alias__found_item
+    pushlist list__aspect_phylactery alias__found_item
+    @ignore alias__found_item
+endwhile
+
+# ### VALUABLE AND RARE
+while findtype 5981|5359|11858|17087|23997|23996|25359|24434|22336|3901|3827|24343|37181|29030|2594|2597 var__source_container as alias__found_item
+    pushlist list__vendor_items alias__found_item
+    @ignore alias__found_item
+endwhile
+
+# ### CARPET AND RUG
+while findtype 2744|2750|2760|2771|2778|2799|4248|19717|22244|43166|43179|48405|48407 var__source_container as alias__found_item
+    pushlist list__vendor_items alias__found_item
+    @ignore alias__found_item
+endwhile
+
+# ### SKILL MASTERY SCROLL
+while findtype 8826 var__source_container as alias__found_item
+    pushlist list__vendor_items alias__found_item
+    @ignore alias__found_item
+endwhile
+
+@clearignore
+
+# ####################################################################################
+# PHASE 2 - PLACE
+# ####################################################################################
+foreach alias__place_item in list__vendor_items
+    getlabel alias__place_item label__item
+
+    # ### PICK PRICE AND DROP SLOT
+    @setvar! var__price_hint '0'
+    @setvar! var__drop_x -1
+    @setvar! var__drop_y -1
+
+    # TREASURE MAP
+    if "plainly drawn" in label__item
+        @setvar! var__price_hint var__price_treasure_lv1
+        @setvar! var__drop_x 160
+        @setvar! var__drop_y 44
+    elseif "expertly drawn" in label__item
+        @setvar! var__price_hint var__price_treasure_lv2
+        @setvar! var__drop_x 175
+        @setvar! var__drop_y 44
+    elseif "adeptly drawn" in label__item
+        @setvar! var__price_hint var__price_treasure_lv3
+        @setvar! var__drop_x 190
+        @setvar! var__drop_y 44
+    elseif "cleverly drawn" in label__item
+        @setvar! var__price_hint var__price_treasure_lv4
+        @setvar! var__drop_x 205
+        @setvar! var__drop_y 44
+    elseif "deviously drawn" in label__item
+        @setvar! var__price_hint var__price_treasure_lv5
+        @setvar! var__drop_x 220
+        @setvar! var__drop_y 44
+
+    # ORE MAP
+    elseif "dull copper ore" in label__item
+        @setvar! var__price_hint var__price_ore_dull_copper
+        @setvar! var__drop_x 130
+        @setvar! var__drop_y 59
+    elseif "shadow iron ore" in label__item
+        @setvar! var__price_hint var__price_ore_shadow_iron
+        @setvar! var__drop_x 145
+        @setvar! var__drop_y 59
+    elseif "copper ore" in label__item
+        @setvar! var__price_hint var__price_ore_copper
+        @setvar! var__drop_x 160
+        @setvar! var__drop_y 59
+    elseif "bronze ore" in label__item
+        @setvar! var__price_hint var__price_ore_bronze
+        @setvar! var__drop_x 175
+        @setvar! var__drop_y 59
+    elseif "gold ore" in label__item
+        @setvar! var__price_hint var__price_ore_gold
+        @setvar! var__drop_x 190
+        @setvar! var__drop_y 59
+    elseif "agapite ore" in label__item
+        @setvar! var__price_hint var__price_ore_agapite
+        @setvar! var__drop_x 205
+        @setvar! var__drop_y 59
+    elseif "verite ore" in label__item
+        @setvar! var__price_hint var__price_ore_verite
+        @setvar! var__drop_x 220
+        @setvar! var__drop_y 59
+    elseif "valorite ore" in label__item
+        @setvar! var__price_hint var__price_ore_valorite
+        @setvar! var__drop_x 235
+        @setvar! var__drop_y 59
+    elseif "avarite ore" in label__item
+        @setvar! var__price_hint var__price_ore_avarite
+        @setvar! var__drop_x 250
+        @setvar! var__drop_y 59
+    elseif "iron ore" in label__item
+        @setvar! var__price_hint var__price_ore_iron
+        @setvar! var__drop_x 107
+        @setvar! var__drop_y 74
+
+    # LUMBER MAP
+    elseif "dullwood" in label__item
+        @setvar! var__price_hint var__price_lumber_dullwood
+        @setvar! var__drop_x 92
+        @setvar! var__drop_y 89
+    elseif "shadowwood" in label__item
+        @setvar! var__price_hint var__price_lumber_shadowwood
+        @setvar! var__drop_x 107
+        @setvar! var__drop_y 89
+    elseif "copperwood" in label__item
+        @setvar! var__price_hint var__price_lumber_copperwood
+        @setvar! var__drop_x 122
+        @setvar! var__drop_y 89
+    elseif "bronzewood" in label__item
+        @setvar! var__price_hint var__price_lumber_bronzewood
+        @setvar! var__drop_x 137
+        @setvar! var__drop_y 89
+    elseif "goldenwood" in label__item
+        @setvar! var__price_hint var__price_lumber_goldenwood
+        @setvar! var__drop_x 152
+        @setvar! var__drop_y 89
+    elseif "rosewood" in label__item
+        @setvar! var__price_hint var__price_lumber_rosewood
+        @setvar! var__drop_x 167
+        @setvar! var__drop_y 89
+    elseif "verewood" in label__item
+        @setvar! var__price_hint var__price_lumber_verewood
+        @setvar! var__drop_x 182
+        @setvar! var__drop_y 89
+    elseif "valewood" in label__item
+        @setvar! var__price_hint var__price_lumber_valewood
+        @setvar! var__drop_x 197
+        @setvar! var__drop_y 89
+    elseif "avarwood" in label__item
+        @setvar! var__price_hint var__price_lumber_avarwood
+        @setvar! var__drop_x 212
+        @setvar! var__drop_y 89
+    elseif "lumber map" in label__item
+        @setvar! var__price_hint var__price_lumber_board
+        @setvar! var__drop_x 227
+        @setvar! var__drop_y 89
+
+    # SKINNING MAP
+    elseif "dullhide" in label__item
+        @setvar! var__price_hint var__price_hide_dullhide
+        @setvar! var__drop_x 85
+        @setvar! var__drop_y 104
+    elseif "shadowhide" in label__item
+        @setvar! var__price_hint var__price_hide_shadowhide
+        @setvar! var__drop_x 100
+        @setvar! var__drop_y 104
+    elseif "copperhide" in label__item
+        @setvar! var__price_hint var__price_hide_copperhide
+        @setvar! var__drop_x 115
+        @setvar! var__drop_y 104
+    elseif "bronzehide" in label__item
+        @setvar! var__price_hint var__price_hide_bronzehide
+        @setvar! var__drop_x 130
+        @setvar! var__drop_y 104
+    elseif "goldenhide" in label__item
+        @setvar! var__price_hint var__price_hide_goldenhide
+        @setvar! var__drop_x 145
+        @setvar! var__drop_y 104
+    elseif "rosehide" in label__item
+        @setvar! var__price_hint var__price_hide_rosehide
+        @setvar! var__drop_x 160
+        @setvar! var__drop_y 104
+    elseif "verehide" in label__item
+        @setvar! var__price_hint var__price_hide_verehide
+        @setvar! var__drop_x 175
+        @setvar! var__drop_y 104
+    elseif "valehide" in label__item
+        @setvar! var__price_hint var__price_hide_valehide
+        @setvar! var__drop_x 190
+        @setvar! var__drop_y 104
+    elseif "avarhide" in label__item
+        @setvar! var__price_hint var__price_hide_avarhide
+        @setvar! var__drop_x 205
+        @setvar! var__drop_y 104
+    elseif "skinning map" in label__item
+        @setvar! var__price_hint var__price_hide_leather
+        @setvar! var__drop_x 220
+        @setvar! var__drop_y 104
+
+    # FISHING MAP
+    elseif "fishing map" in label__item
+        @setvar! var__price_hint var__price_fishing_map
+        @setvar! var__drop_x 77
+        @setvar! var__drop_y 119
+
+    # CHROMATIC
+    elseif "chromatic core" in label__item
+        @setvar! var__price_hint var__price_chromatic_core
+        @setvar! var__drop_x 70
+        @setvar! var__drop_y 134
+    elseif "chromatic distillation" in label__item
+        @setvar! var__price_hint var__price_chromatic_distillation
+        @setvar! var__drop_x 85
+        @setvar! var__drop_y 134
+
+    # CORE
+    # Two branches per aspect, one for each capitalisation. The label has been seen
+    # as  Harvest Aspect Core  but the case is not guaranteed across item types, and
+    # the in operator is case sensitive, so both spellings are matched.
+    elseif inlist list__aspect_core alias__place_item and "Agorawave" in label__item
+        @setvar! var__price_hint var__price_core_agorawave
+        @setvar! var__drop_x 62
+        @setvar! var__drop_y 149
+    elseif inlist list__aspect_core alias__place_item and "agorawave" in label__item
+        @setvar! var__price_hint var__price_core_agorawave
+        @setvar! var__drop_x 62
+        @setvar! var__drop_y 149
+    elseif inlist list__aspect_core alias__place_item and "Air" in label__item
+        @setvar! var__price_hint var__price_core_air
+        @setvar! var__drop_x 77
+        @setvar! var__drop_y 149
+    elseif inlist list__aspect_core alias__place_item and "air" in label__item
+        @setvar! var__price_hint var__price_core_air
+        @setvar! var__drop_x 77
+        @setvar! var__drop_y 149
+    elseif inlist list__aspect_core alias__place_item and "Arcane" in label__item
+        @setvar! var__price_hint var__price_core_arcane
+        @setvar! var__drop_x 92
+        @setvar! var__drop_y 149
+    elseif inlist list__aspect_core alias__place_item and "arcane" in label__item
+        @setvar! var__price_hint var__price_core_arcane
+        @setvar! var__drop_x 92
+        @setvar! var__drop_y 149
+    elseif inlist list__aspect_core alias__place_item and "Artisan" in label__item
+        @setvar! var__price_hint var__price_core_artisan
+        @setvar! var__drop_x 107
+        @setvar! var__drop_y 149
+    elseif inlist list__aspect_core alias__place_item and "artisan" in label__item
+        @setvar! var__price_hint var__price_core_artisan
+        @setvar! var__drop_x 107
+        @setvar! var__drop_y 149
+    elseif inlist list__aspect_core alias__place_item and "Blood" in label__item
+        @setvar! var__price_hint var__price_core_blood
+        @setvar! var__drop_x 122
+        @setvar! var__drop_y 149
+    elseif inlist list__aspect_core alias__place_item and "blood" in label__item
+        @setvar! var__price_hint var__price_core_blood
+        @setvar! var__drop_x 122
+        @setvar! var__drop_y 149
+    elseif inlist list__aspect_core alias__place_item and "Command" in label__item
+        @setvar! var__price_hint var__price_core_command
+        @setvar! var__drop_x 137
+        @setvar! var__drop_y 149
+    elseif inlist list__aspect_core alias__place_item and "command" in label__item
+        @setvar! var__price_hint var__price_core_command
+        @setvar! var__drop_x 137
+        @setvar! var__drop_y 149
+    elseif inlist list__aspect_core alias__place_item and "Death" in label__item
+        @setvar! var__price_hint var__price_core_death
+        @setvar! var__drop_x 152
+        @setvar! var__drop_y 149
+    elseif inlist list__aspect_core alias__place_item and "death" in label__item
+        @setvar! var__price_hint var__price_core_death
+        @setvar! var__drop_x 152
+        @setvar! var__drop_y 149
+    elseif inlist list__aspect_core alias__place_item and "Discipline" in label__item
+        @setvar! var__price_hint var__price_core_discipline
+        @setvar! var__drop_x 167
+        @setvar! var__drop_y 149
+    elseif inlist list__aspect_core alias__place_item and "discipline" in label__item
+        @setvar! var__price_hint var__price_core_discipline
+        @setvar! var__drop_x 167
+        @setvar! var__drop_y 149
+    elseif inlist list__aspect_core alias__place_item and "Earth" in label__item
+        @setvar! var__price_hint var__price_core_earth
+        @setvar! var__drop_x 182
+        @setvar! var__drop_y 149
+    elseif inlist list__aspect_core alias__place_item and "earth" in label__item
+        @setvar! var__price_hint var__price_core_earth
+        @setvar! var__drop_x 182
+        @setvar! var__drop_y 149
+    elseif inlist list__aspect_core alias__place_item and "Eldritch" in label__item
+        @setvar! var__price_hint var__price_core_eldritch
+        @setvar! var__drop_x 197
+        @setvar! var__drop_y 149
+    elseif inlist list__aspect_core alias__place_item and "eldritch" in label__item
+        @setvar! var__price_hint var__price_core_eldritch
+        @setvar! var__drop_x 197
+        @setvar! var__drop_y 149
+    elseif inlist list__aspect_core alias__place_item and "Fire" in label__item
+        @setvar! var__price_hint var__price_core_fire
+        @setvar! var__drop_x 212
+        @setvar! var__drop_y 149
+    elseif inlist list__aspect_core alias__place_item and "fire" in label__item
+        @setvar! var__price_hint var__price_core_fire
+        @setvar! var__drop_x 212
+        @setvar! var__drop_y 149
+    elseif inlist list__aspect_core alias__place_item and "Fortune" in label__item
+        @setvar! var__price_hint var__price_core_fortune
+        @setvar! var__drop_x 227
+        @setvar! var__drop_y 149
+    elseif inlist list__aspect_core alias__place_item and "fortune" in label__item
+        @setvar! var__price_hint var__price_core_fortune
+        @setvar! var__drop_x 227
+        @setvar! var__drop_y 149
+    elseif inlist list__aspect_core alias__place_item and "Frost" in label__item
+        @setvar! var__price_hint var__price_core_frost
+        @setvar! var__drop_x 242
+        @setvar! var__drop_y 149
+    elseif inlist list__aspect_core alias__place_item and "frost" in label__item
+        @setvar! var__price_hint var__price_core_frost
+        @setvar! var__drop_x 242
+        @setvar! var__drop_y 149
+    elseif inlist list__aspect_core alias__place_item and "Gadget" in label__item
+        @setvar! var__price_hint var__price_core_gadget
+        @setvar! var__drop_x 257
+        @setvar! var__drop_y 149
+    elseif inlist list__aspect_core alias__place_item and "gadget" in label__item
+        @setvar! var__price_hint var__price_core_gadget
+        @setvar! var__drop_x 257
+        @setvar! var__drop_y 149
+    elseif inlist list__aspect_core alias__place_item and "Harvest" in label__item
+        @setvar! var__price_hint var__price_core_harvest
+        @setvar! var__drop_x 272
+        @setvar! var__drop_y 149
+    elseif inlist list__aspect_core alias__place_item and "harvest" in label__item
+        @setvar! var__price_hint var__price_core_harvest
+        @setvar! var__drop_x 272
+        @setvar! var__drop_y 149
+    elseif inlist list__aspect_core alias__place_item and "Holy" in label__item
+        @setvar! var__price_hint var__price_core_holy
+        @setvar! var__drop_x 287
+        @setvar! var__drop_y 149
+    elseif inlist list__aspect_core alias__place_item and "holy" in label__item
+        @setvar! var__price_hint var__price_core_holy
+        @setvar! var__drop_x 287
+        @setvar! var__drop_y 149
+    elseif inlist list__aspect_core alias__place_item and "Lightning" in label__item
+        @setvar! var__price_hint var__price_core_lightning
+        @setvar! var__drop_x 302
+        @setvar! var__drop_y 149
+    elseif inlist list__aspect_core alias__place_item and "lightning" in label__item
+        @setvar! var__price_hint var__price_core_lightning
+        @setvar! var__drop_x 302
+        @setvar! var__drop_y 149
+    elseif inlist list__aspect_core alias__place_item and "Lyric" in label__item
+        @setvar! var__price_hint var__price_core_lyric
+        @setvar! var__drop_x 317
+        @setvar! var__drop_y 149
+    elseif inlist list__aspect_core alias__place_item and "lyric" in label__item
+        @setvar! var__price_hint var__price_core_lyric
+        @setvar! var__drop_x 317
+        @setvar! var__drop_y 149
+    elseif inlist list__aspect_core alias__place_item and "Madness" in label__item
+        @setvar! var__price_hint var__price_core_madness
+        @setvar! var__drop_x 55
+        @setvar! var__drop_y 164
+    elseif inlist list__aspect_core alias__place_item and "madness" in label__item
+        @setvar! var__price_hint var__price_core_madness
+        @setvar! var__drop_x 55
+        @setvar! var__drop_y 164
+    elseif inlist list__aspect_core alias__place_item and "Poison" in label__item
+        @setvar! var__price_hint var__price_core_poison
+        @setvar! var__drop_x 70
+        @setvar! var__drop_y 164
+    elseif inlist list__aspect_core alias__place_item and "poison" in label__item
+        @setvar! var__price_hint var__price_core_poison
+        @setvar! var__drop_x 70
+        @setvar! var__drop_y 164
+    elseif inlist list__aspect_core alias__place_item and "Shadow" in label__item
+        @setvar! var__price_hint var__price_core_shadow
+        @setvar! var__drop_x 85
+        @setvar! var__drop_y 164
+    elseif inlist list__aspect_core alias__place_item and "shadow" in label__item
+        @setvar! var__price_hint var__price_core_shadow
+        @setvar! var__drop_x 85
+        @setvar! var__drop_y 164
+    elseif inlist list__aspect_core alias__place_item and "Temporal" in label__item
+        @setvar! var__price_hint var__price_core_temporal
+        @setvar! var__drop_x 100
+        @setvar! var__drop_y 164
+    elseif inlist list__aspect_core alias__place_item and "temporal" in label__item
+        @setvar! var__price_hint var__price_core_temporal
+        @setvar! var__drop_x 100
+        @setvar! var__drop_y 164
+    elseif inlist list__aspect_core alias__place_item and "Void" in label__item
+        @setvar! var__price_hint var__price_core_void
+        @setvar! var__drop_x 115
+        @setvar! var__drop_y 164
+    elseif inlist list__aspect_core alias__place_item and "void" in label__item
+        @setvar! var__price_hint var__price_core_void
+        @setvar! var__drop_x 115
+        @setvar! var__drop_y 164
+    elseif inlist list__aspect_core alias__place_item and "Water" in label__item
+        @setvar! var__price_hint var__price_core_water
+        @setvar! var__drop_x 130
+        @setvar! var__drop_y 164
+    elseif inlist list__aspect_core alias__place_item and "water" in label__item
+        @setvar! var__price_hint var__price_core_water
+        @setvar! var__drop_x 130
+        @setvar! var__drop_y 164
+    elseif inlist list__aspect_core alias__place_item and "War" in label__item
+        @setvar! var__price_hint var__price_core_war
+        @setvar! var__drop_x 145
+        @setvar! var__drop_y 164
+    elseif inlist list__aspect_core alias__place_item and "war" in label__item
+        @setvar! var__price_hint var__price_core_war
+        @setvar! var__drop_x 145
+        @setvar! var__drop_y 164
+
+    # DISTILLATION
+    # Two branches per aspect, one for each capitalisation. The label has been seen
+    # as  Harvest Aspect Core  but the case is not guaranteed across item types, and
+    # the in operator is case sensitive, so both spellings are matched.
+    elseif inlist list__aspect_distillation alias__place_item and "Agorawave" in label__item
+        @setvar! var__price_hint var__price_distillation_agorawave
+        @setvar! var__drop_x 55
+        @setvar! var__drop_y 179
+    elseif inlist list__aspect_distillation alias__place_item and "agorawave" in label__item
+        @setvar! var__price_hint var__price_distillation_agorawave
+        @setvar! var__drop_x 55
+        @setvar! var__drop_y 179
+    elseif inlist list__aspect_distillation alias__place_item and "Air" in label__item
+        @setvar! var__price_hint var__price_distillation_air
+        @setvar! var__drop_x 70
+        @setvar! var__drop_y 179
+    elseif inlist list__aspect_distillation alias__place_item and "air" in label__item
+        @setvar! var__price_hint var__price_distillation_air
+        @setvar! var__drop_x 70
+        @setvar! var__drop_y 179
+    elseif inlist list__aspect_distillation alias__place_item and "Arcane" in label__item
+        @setvar! var__price_hint var__price_distillation_arcane
+        @setvar! var__drop_x 85
+        @setvar! var__drop_y 179
+    elseif inlist list__aspect_distillation alias__place_item and "arcane" in label__item
+        @setvar! var__price_hint var__price_distillation_arcane
+        @setvar! var__drop_x 85
+        @setvar! var__drop_y 179
+    elseif inlist list__aspect_distillation alias__place_item and "Artisan" in label__item
+        @setvar! var__price_hint var__price_distillation_artisan
+        @setvar! var__drop_x 100
+        @setvar! var__drop_y 179
+    elseif inlist list__aspect_distillation alias__place_item and "artisan" in label__item
+        @setvar! var__price_hint var__price_distillation_artisan
+        @setvar! var__drop_x 100
+        @setvar! var__drop_y 179
+    elseif inlist list__aspect_distillation alias__place_item and "Blood" in label__item
+        @setvar! var__price_hint var__price_distillation_blood
+        @setvar! var__drop_x 115
+        @setvar! var__drop_y 179
+    elseif inlist list__aspect_distillation alias__place_item and "blood" in label__item
+        @setvar! var__price_hint var__price_distillation_blood
+        @setvar! var__drop_x 115
+        @setvar! var__drop_y 179
+    elseif inlist list__aspect_distillation alias__place_item and "Command" in label__item
+        @setvar! var__price_hint var__price_distillation_command
+        @setvar! var__drop_x 130
+        @setvar! var__drop_y 179
+    elseif inlist list__aspect_distillation alias__place_item and "command" in label__item
+        @setvar! var__price_hint var__price_distillation_command
+        @setvar! var__drop_x 130
+        @setvar! var__drop_y 179
+    elseif inlist list__aspect_distillation alias__place_item and "Death" in label__item
+        @setvar! var__price_hint var__price_distillation_death
+        @setvar! var__drop_x 145
+        @setvar! var__drop_y 179
+    elseif inlist list__aspect_distillation alias__place_item and "death" in label__item
+        @setvar! var__price_hint var__price_distillation_death
+        @setvar! var__drop_x 145
+        @setvar! var__drop_y 179
+    elseif inlist list__aspect_distillation alias__place_item and "Discipline" in label__item
+        @setvar! var__price_hint var__price_distillation_discipline
+        @setvar! var__drop_x 160
+        @setvar! var__drop_y 179
+    elseif inlist list__aspect_distillation alias__place_item and "discipline" in label__item
+        @setvar! var__price_hint var__price_distillation_discipline
+        @setvar! var__drop_x 160
+        @setvar! var__drop_y 179
+    elseif inlist list__aspect_distillation alias__place_item and "Earth" in label__item
+        @setvar! var__price_hint var__price_distillation_earth
+        @setvar! var__drop_x 175
+        @setvar! var__drop_y 179
+    elseif inlist list__aspect_distillation alias__place_item and "earth" in label__item
+        @setvar! var__price_hint var__price_distillation_earth
+        @setvar! var__drop_x 175
+        @setvar! var__drop_y 179
+    elseif inlist list__aspect_distillation alias__place_item and "Eldritch" in label__item
+        @setvar! var__price_hint var__price_distillation_eldritch
+        @setvar! var__drop_x 190
+        @setvar! var__drop_y 179
+    elseif inlist list__aspect_distillation alias__place_item and "eldritch" in label__item
+        @setvar! var__price_hint var__price_distillation_eldritch
+        @setvar! var__drop_x 190
+        @setvar! var__drop_y 179
+    elseif inlist list__aspect_distillation alias__place_item and "Fire" in label__item
+        @setvar! var__price_hint var__price_distillation_fire
+        @setvar! var__drop_x 205
+        @setvar! var__drop_y 179
+    elseif inlist list__aspect_distillation alias__place_item and "fire" in label__item
+        @setvar! var__price_hint var__price_distillation_fire
+        @setvar! var__drop_x 205
+        @setvar! var__drop_y 179
+    elseif inlist list__aspect_distillation alias__place_item and "Fortune" in label__item
+        @setvar! var__price_hint var__price_distillation_fortune
+        @setvar! var__drop_x 220
+        @setvar! var__drop_y 179
+    elseif inlist list__aspect_distillation alias__place_item and "fortune" in label__item
+        @setvar! var__price_hint var__price_distillation_fortune
+        @setvar! var__drop_x 220
+        @setvar! var__drop_y 179
+    elseif inlist list__aspect_distillation alias__place_item and "Frost" in label__item
+        @setvar! var__price_hint var__price_distillation_frost
+        @setvar! var__drop_x 235
+        @setvar! var__drop_y 179
+    elseif inlist list__aspect_distillation alias__place_item and "frost" in label__item
+        @setvar! var__price_hint var__price_distillation_frost
+        @setvar! var__drop_x 235
+        @setvar! var__drop_y 179
+    elseif inlist list__aspect_distillation alias__place_item and "Gadget" in label__item
+        @setvar! var__price_hint var__price_distillation_gadget
+        @setvar! var__drop_x 250
+        @setvar! var__drop_y 179
+    elseif inlist list__aspect_distillation alias__place_item and "gadget" in label__item
+        @setvar! var__price_hint var__price_distillation_gadget
+        @setvar! var__drop_x 250
+        @setvar! var__drop_y 179
+    elseif inlist list__aspect_distillation alias__place_item and "Harvest" in label__item
+        @setvar! var__price_hint var__price_distillation_harvest
+        @setvar! var__drop_x 265
+        @setvar! var__drop_y 179
+    elseif inlist list__aspect_distillation alias__place_item and "harvest" in label__item
+        @setvar! var__price_hint var__price_distillation_harvest
+        @setvar! var__drop_x 265
+        @setvar! var__drop_y 179
+    elseif inlist list__aspect_distillation alias__place_item and "Holy" in label__item
+        @setvar! var__price_hint var__price_distillation_holy
+        @setvar! var__drop_x 280
+        @setvar! var__drop_y 179
+    elseif inlist list__aspect_distillation alias__place_item and "holy" in label__item
+        @setvar! var__price_hint var__price_distillation_holy
+        @setvar! var__drop_x 280
+        @setvar! var__drop_y 179
+    elseif inlist list__aspect_distillation alias__place_item and "Lightning" in label__item
+        @setvar! var__price_hint var__price_distillation_lightning
+        @setvar! var__drop_x 295
+        @setvar! var__drop_y 179
+    elseif inlist list__aspect_distillation alias__place_item and "lightning" in label__item
+        @setvar! var__price_hint var__price_distillation_lightning
+        @setvar! var__drop_x 295
+        @setvar! var__drop_y 179
+    elseif inlist list__aspect_distillation alias__place_item and "Lyric" in label__item
+        @setvar! var__price_hint var__price_distillation_lyric
+        @setvar! var__drop_x 310
+        @setvar! var__drop_y 179
+    elseif inlist list__aspect_distillation alias__place_item and "lyric" in label__item
+        @setvar! var__price_hint var__price_distillation_lyric
+        @setvar! var__drop_x 310
+        @setvar! var__drop_y 179
+    elseif inlist list__aspect_distillation alias__place_item and "Madness" in label__item
+        @setvar! var__price_hint var__price_distillation_madness
+        @setvar! var__drop_x 325
+        @setvar! var__drop_y 179
+    elseif inlist list__aspect_distillation alias__place_item and "madness" in label__item
+        @setvar! var__price_hint var__price_distillation_madness
+        @setvar! var__drop_x 325
+        @setvar! var__drop_y 179
+    elseif inlist list__aspect_distillation alias__place_item and "Poison" in label__item
+        @setvar! var__price_hint var__price_distillation_poison
+        @setvar! var__drop_x 55
+        @setvar! var__drop_y 194
+    elseif inlist list__aspect_distillation alias__place_item and "poison" in label__item
+        @setvar! var__price_hint var__price_distillation_poison
+        @setvar! var__drop_x 55
+        @setvar! var__drop_y 194
+    elseif inlist list__aspect_distillation alias__place_item and "Shadow" in label__item
+        @setvar! var__price_hint var__price_distillation_shadow
+        @setvar! var__drop_x 70
+        @setvar! var__drop_y 194
+    elseif inlist list__aspect_distillation alias__place_item and "shadow" in label__item
+        @setvar! var__price_hint var__price_distillation_shadow
+        @setvar! var__drop_x 70
+        @setvar! var__drop_y 194
+    elseif inlist list__aspect_distillation alias__place_item and "Temporal" in label__item
+        @setvar! var__price_hint var__price_distillation_temporal
+        @setvar! var__drop_x 85
+        @setvar! var__drop_y 194
+    elseif inlist list__aspect_distillation alias__place_item and "temporal" in label__item
+        @setvar! var__price_hint var__price_distillation_temporal
+        @setvar! var__drop_x 85
+        @setvar! var__drop_y 194
+    elseif inlist list__aspect_distillation alias__place_item and "Void" in label__item
+        @setvar! var__price_hint var__price_distillation_void
+        @setvar! var__drop_x 100
+        @setvar! var__drop_y 194
+    elseif inlist list__aspect_distillation alias__place_item and "void" in label__item
+        @setvar! var__price_hint var__price_distillation_void
+        @setvar! var__drop_x 100
+        @setvar! var__drop_y 194
+    elseif inlist list__aspect_distillation alias__place_item and "Water" in label__item
+        @setvar! var__price_hint var__price_distillation_water
+        @setvar! var__drop_x 115
+        @setvar! var__drop_y 194
+    elseif inlist list__aspect_distillation alias__place_item and "water" in label__item
+        @setvar! var__price_hint var__price_distillation_water
+        @setvar! var__drop_x 115
+        @setvar! var__drop_y 194
+    elseif inlist list__aspect_distillation alias__place_item and "War" in label__item
+        @setvar! var__price_hint var__price_distillation_war
+        @setvar! var__drop_x 130
+        @setvar! var__drop_y 194
+    elseif inlist list__aspect_distillation alias__place_item and "war" in label__item
+        @setvar! var__price_hint var__price_distillation_war
+        @setvar! var__drop_x 130
+        @setvar! var__drop_y 194
+
+    # EXTRACT
+    # Two branches per aspect, one for each capitalisation. The label has been seen
+    # as  Harvest Aspect Core  but the case is not guaranteed across item types, and
+    # the in operator is case sensitive, so both spellings are matched.
+    elseif inlist list__aspect_extract alias__place_item and "Agorawave" in label__item
+        @setvar! var__price_hint var__price_extract_agorawave
+        @setvar! var__drop_x 55
+        @setvar! var__drop_y 209
+    elseif inlist list__aspect_extract alias__place_item and "agorawave" in label__item
+        @setvar! var__price_hint var__price_extract_agorawave
+        @setvar! var__drop_x 55
+        @setvar! var__drop_y 209
+    elseif inlist list__aspect_extract alias__place_item and "Air" in label__item
+        @setvar! var__price_hint var__price_extract_air
+        @setvar! var__drop_x 70
+        @setvar! var__drop_y 209
+    elseif inlist list__aspect_extract alias__place_item and "air" in label__item
+        @setvar! var__price_hint var__price_extract_air
+        @setvar! var__drop_x 70
+        @setvar! var__drop_y 209
+    elseif inlist list__aspect_extract alias__place_item and "Arcane" in label__item
+        @setvar! var__price_hint var__price_extract_arcane
+        @setvar! var__drop_x 85
+        @setvar! var__drop_y 209
+    elseif inlist list__aspect_extract alias__place_item and "arcane" in label__item
+        @setvar! var__price_hint var__price_extract_arcane
+        @setvar! var__drop_x 85
+        @setvar! var__drop_y 209
+    elseif inlist list__aspect_extract alias__place_item and "Artisan" in label__item
+        @setvar! var__price_hint var__price_extract_artisan
+        @setvar! var__drop_x 100
+        @setvar! var__drop_y 209
+    elseif inlist list__aspect_extract alias__place_item and "artisan" in label__item
+        @setvar! var__price_hint var__price_extract_artisan
+        @setvar! var__drop_x 100
+        @setvar! var__drop_y 209
+    elseif inlist list__aspect_extract alias__place_item and "Blood" in label__item
+        @setvar! var__price_hint var__price_extract_blood
+        @setvar! var__drop_x 115
+        @setvar! var__drop_y 209
+    elseif inlist list__aspect_extract alias__place_item and "blood" in label__item
+        @setvar! var__price_hint var__price_extract_blood
+        @setvar! var__drop_x 115
+        @setvar! var__drop_y 209
+    elseif inlist list__aspect_extract alias__place_item and "Command" in label__item
+        @setvar! var__price_hint var__price_extract_command
+        @setvar! var__drop_x 130
+        @setvar! var__drop_y 209
+    elseif inlist list__aspect_extract alias__place_item and "command" in label__item
+        @setvar! var__price_hint var__price_extract_command
+        @setvar! var__drop_x 130
+        @setvar! var__drop_y 209
+    elseif inlist list__aspect_extract alias__place_item and "Death" in label__item
+        @setvar! var__price_hint var__price_extract_death
+        @setvar! var__drop_x 145
+        @setvar! var__drop_y 209
+    elseif inlist list__aspect_extract alias__place_item and "death" in label__item
+        @setvar! var__price_hint var__price_extract_death
+        @setvar! var__drop_x 145
+        @setvar! var__drop_y 209
+    elseif inlist list__aspect_extract alias__place_item and "Discipline" in label__item
+        @setvar! var__price_hint var__price_extract_discipline
+        @setvar! var__drop_x 160
+        @setvar! var__drop_y 209
+    elseif inlist list__aspect_extract alias__place_item and "discipline" in label__item
+        @setvar! var__price_hint var__price_extract_discipline
+        @setvar! var__drop_x 160
+        @setvar! var__drop_y 209
+    elseif inlist list__aspect_extract alias__place_item and "Earth" in label__item
+        @setvar! var__price_hint var__price_extract_earth
+        @setvar! var__drop_x 175
+        @setvar! var__drop_y 209
+    elseif inlist list__aspect_extract alias__place_item and "earth" in label__item
+        @setvar! var__price_hint var__price_extract_earth
+        @setvar! var__drop_x 175
+        @setvar! var__drop_y 209
+    elseif inlist list__aspect_extract alias__place_item and "Eldritch" in label__item
+        @setvar! var__price_hint var__price_extract_eldritch
+        @setvar! var__drop_x 190
+        @setvar! var__drop_y 209
+    elseif inlist list__aspect_extract alias__place_item and "eldritch" in label__item
+        @setvar! var__price_hint var__price_extract_eldritch
+        @setvar! var__drop_x 190
+        @setvar! var__drop_y 209
+    elseif inlist list__aspect_extract alias__place_item and "Fire" in label__item
+        @setvar! var__price_hint var__price_extract_fire
+        @setvar! var__drop_x 205
+        @setvar! var__drop_y 209
+    elseif inlist list__aspect_extract alias__place_item and "fire" in label__item
+        @setvar! var__price_hint var__price_extract_fire
+        @setvar! var__drop_x 205
+        @setvar! var__drop_y 209
+    elseif inlist list__aspect_extract alias__place_item and "Fortune" in label__item
+        @setvar! var__price_hint var__price_extract_fortune
+        @setvar! var__drop_x 220
+        @setvar! var__drop_y 209
+    elseif inlist list__aspect_extract alias__place_item and "fortune" in label__item
+        @setvar! var__price_hint var__price_extract_fortune
+        @setvar! var__drop_x 220
+        @setvar! var__drop_y 209
+    elseif inlist list__aspect_extract alias__place_item and "Frost" in label__item
+        @setvar! var__price_hint var__price_extract_frost
+        @setvar! var__drop_x 235
+        @setvar! var__drop_y 209
+    elseif inlist list__aspect_extract alias__place_item and "frost" in label__item
+        @setvar! var__price_hint var__price_extract_frost
+        @setvar! var__drop_x 235
+        @setvar! var__drop_y 209
+    elseif inlist list__aspect_extract alias__place_item and "Gadget" in label__item
+        @setvar! var__price_hint var__price_extract_gadget
+        @setvar! var__drop_x 250
+        @setvar! var__drop_y 209
+    elseif inlist list__aspect_extract alias__place_item and "gadget" in label__item
+        @setvar! var__price_hint var__price_extract_gadget
+        @setvar! var__drop_x 250
+        @setvar! var__drop_y 209
+    elseif inlist list__aspect_extract alias__place_item and "Harvest" in label__item
+        @setvar! var__price_hint var__price_extract_harvest
+        @setvar! var__drop_x 265
+        @setvar! var__drop_y 209
+    elseif inlist list__aspect_extract alias__place_item and "harvest" in label__item
+        @setvar! var__price_hint var__price_extract_harvest
+        @setvar! var__drop_x 265
+        @setvar! var__drop_y 209
+    elseif inlist list__aspect_extract alias__place_item and "Holy" in label__item
+        @setvar! var__price_hint var__price_extract_holy
+        @setvar! var__drop_x 280
+        @setvar! var__drop_y 209
+    elseif inlist list__aspect_extract alias__place_item and "holy" in label__item
+        @setvar! var__price_hint var__price_extract_holy
+        @setvar! var__drop_x 280
+        @setvar! var__drop_y 209
+    elseif inlist list__aspect_extract alias__place_item and "Lightning" in label__item
+        @setvar! var__price_hint var__price_extract_lightning
+        @setvar! var__drop_x 295
+        @setvar! var__drop_y 209
+    elseif inlist list__aspect_extract alias__place_item and "lightning" in label__item
+        @setvar! var__price_hint var__price_extract_lightning
+        @setvar! var__drop_x 295
+        @setvar! var__drop_y 209
+    elseif inlist list__aspect_extract alias__place_item and "Lyric" in label__item
+        @setvar! var__price_hint var__price_extract_lyric
+        @setvar! var__drop_x 310
+        @setvar! var__drop_y 209
+    elseif inlist list__aspect_extract alias__place_item and "lyric" in label__item
+        @setvar! var__price_hint var__price_extract_lyric
+        @setvar! var__drop_x 310
+        @setvar! var__drop_y 209
+    elseif inlist list__aspect_extract alias__place_item and "Madness" in label__item
+        @setvar! var__price_hint var__price_extract_madness
+        @setvar! var__drop_x 325
+        @setvar! var__drop_y 209
+    elseif inlist list__aspect_extract alias__place_item and "madness" in label__item
+        @setvar! var__price_hint var__price_extract_madness
+        @setvar! var__drop_x 325
+        @setvar! var__drop_y 209
+    elseif inlist list__aspect_extract alias__place_item and "Poison" in label__item
+        @setvar! var__price_hint var__price_extract_poison
+        @setvar! var__drop_x 55
+        @setvar! var__drop_y 224
+    elseif inlist list__aspect_extract alias__place_item and "poison" in label__item
+        @setvar! var__price_hint var__price_extract_poison
+        @setvar! var__drop_x 55
+        @setvar! var__drop_y 224
+    elseif inlist list__aspect_extract alias__place_item and "Shadow" in label__item
+        @setvar! var__price_hint var__price_extract_shadow
+        @setvar! var__drop_x 70
+        @setvar! var__drop_y 224
+    elseif inlist list__aspect_extract alias__place_item and "shadow" in label__item
+        @setvar! var__price_hint var__price_extract_shadow
+        @setvar! var__drop_x 70
+        @setvar! var__drop_y 224
+    elseif inlist list__aspect_extract alias__place_item and "Temporal" in label__item
+        @setvar! var__price_hint var__price_extract_temporal
+        @setvar! var__drop_x 85
+        @setvar! var__drop_y 224
+    elseif inlist list__aspect_extract alias__place_item and "temporal" in label__item
+        @setvar! var__price_hint var__price_extract_temporal
+        @setvar! var__drop_x 85
+        @setvar! var__drop_y 224
+    elseif inlist list__aspect_extract alias__place_item and "Void" in label__item
+        @setvar! var__price_hint var__price_extract_void
+        @setvar! var__drop_x 100
+        @setvar! var__drop_y 224
+    elseif inlist list__aspect_extract alias__place_item and "void" in label__item
+        @setvar! var__price_hint var__price_extract_void
+        @setvar! var__drop_x 100
+        @setvar! var__drop_y 224
+    elseif inlist list__aspect_extract alias__place_item and "Water" in label__item
+        @setvar! var__price_hint var__price_extract_water
+        @setvar! var__drop_x 115
+        @setvar! var__drop_y 224
+    elseif inlist list__aspect_extract alias__place_item and "water" in label__item
+        @setvar! var__price_hint var__price_extract_water
+        @setvar! var__drop_x 115
+        @setvar! var__drop_y 224
+    elseif inlist list__aspect_extract alias__place_item and "War" in label__item
+        @setvar! var__price_hint var__price_extract_war
+        @setvar! var__drop_x 130
+        @setvar! var__drop_y 224
+    elseif inlist list__aspect_extract alias__place_item and "war" in label__item
+        @setvar! var__price_hint var__price_extract_war
+        @setvar! var__drop_x 130
+        @setvar! var__drop_y 224
+
+    # PHYLACTERY
+    # Two branches per aspect, one for each capitalisation. The label has been seen
+    # as  Harvest Aspect Core  but the case is not guaranteed across item types, and
+    # the in operator is case sensitive, so both spellings are matched.
+    elseif inlist list__aspect_phylactery alias__place_item and "Agorawave" in label__item
+        @setvar! var__price_hint var__price_phylactery_agorawave
+        @setvar! var__drop_x 55
+        @setvar! var__drop_y 239
+    elseif inlist list__aspect_phylactery alias__place_item and "agorawave" in label__item
+        @setvar! var__price_hint var__price_phylactery_agorawave
+        @setvar! var__drop_x 55
+        @setvar! var__drop_y 239
+    elseif inlist list__aspect_phylactery alias__place_item and "Air" in label__item
+        @setvar! var__price_hint var__price_phylactery_air
+        @setvar! var__drop_x 70
+        @setvar! var__drop_y 239
+    elseif inlist list__aspect_phylactery alias__place_item and "air" in label__item
+        @setvar! var__price_hint var__price_phylactery_air
+        @setvar! var__drop_x 70
+        @setvar! var__drop_y 239
+    elseif inlist list__aspect_phylactery alias__place_item and "Arcane" in label__item
+        @setvar! var__price_hint var__price_phylactery_arcane
+        @setvar! var__drop_x 85
+        @setvar! var__drop_y 239
+    elseif inlist list__aspect_phylactery alias__place_item and "arcane" in label__item
+        @setvar! var__price_hint var__price_phylactery_arcane
+        @setvar! var__drop_x 85
+        @setvar! var__drop_y 239
+    elseif inlist list__aspect_phylactery alias__place_item and "Artisan" in label__item
+        @setvar! var__price_hint var__price_phylactery_artisan
+        @setvar! var__drop_x 100
+        @setvar! var__drop_y 239
+    elseif inlist list__aspect_phylactery alias__place_item and "artisan" in label__item
+        @setvar! var__price_hint var__price_phylactery_artisan
+        @setvar! var__drop_x 100
+        @setvar! var__drop_y 239
+    elseif inlist list__aspect_phylactery alias__place_item and "Blood" in label__item
+        @setvar! var__price_hint var__price_phylactery_blood
+        @setvar! var__drop_x 115
+        @setvar! var__drop_y 239
+    elseif inlist list__aspect_phylactery alias__place_item and "blood" in label__item
+        @setvar! var__price_hint var__price_phylactery_blood
+        @setvar! var__drop_x 115
+        @setvar! var__drop_y 239
+    elseif inlist list__aspect_phylactery alias__place_item and "Command" in label__item
+        @setvar! var__price_hint var__price_phylactery_command
+        @setvar! var__drop_x 130
+        @setvar! var__drop_y 239
+    elseif inlist list__aspect_phylactery alias__place_item and "command" in label__item
+        @setvar! var__price_hint var__price_phylactery_command
+        @setvar! var__drop_x 130
+        @setvar! var__drop_y 239
+    elseif inlist list__aspect_phylactery alias__place_item and "Death" in label__item
+        @setvar! var__price_hint var__price_phylactery_death
+        @setvar! var__drop_x 145
+        @setvar! var__drop_y 239
+    elseif inlist list__aspect_phylactery alias__place_item and "death" in label__item
+        @setvar! var__price_hint var__price_phylactery_death
+        @setvar! var__drop_x 145
+        @setvar! var__drop_y 239
+    elseif inlist list__aspect_phylactery alias__place_item and "Discipline" in label__item
+        @setvar! var__price_hint var__price_phylactery_discipline
+        @setvar! var__drop_x 160
+        @setvar! var__drop_y 239
+    elseif inlist list__aspect_phylactery alias__place_item and "discipline" in label__item
+        @setvar! var__price_hint var__price_phylactery_discipline
+        @setvar! var__drop_x 160
+        @setvar! var__drop_y 239
+    elseif inlist list__aspect_phylactery alias__place_item and "Earth" in label__item
+        @setvar! var__price_hint var__price_phylactery_earth
+        @setvar! var__drop_x 175
+        @setvar! var__drop_y 239
+    elseif inlist list__aspect_phylactery alias__place_item and "earth" in label__item
+        @setvar! var__price_hint var__price_phylactery_earth
+        @setvar! var__drop_x 175
+        @setvar! var__drop_y 239
+    elseif inlist list__aspect_phylactery alias__place_item and "Eldritch" in label__item
+        @setvar! var__price_hint var__price_phylactery_eldritch
+        @setvar! var__drop_x 190
+        @setvar! var__drop_y 239
+    elseif inlist list__aspect_phylactery alias__place_item and "eldritch" in label__item
+        @setvar! var__price_hint var__price_phylactery_eldritch
+        @setvar! var__drop_x 190
+        @setvar! var__drop_y 239
+    elseif inlist list__aspect_phylactery alias__place_item and "Fire" in label__item
+        @setvar! var__price_hint var__price_phylactery_fire
+        @setvar! var__drop_x 205
+        @setvar! var__drop_y 239
+    elseif inlist list__aspect_phylactery alias__place_item and "fire" in label__item
+        @setvar! var__price_hint var__price_phylactery_fire
+        @setvar! var__drop_x 205
+        @setvar! var__drop_y 239
+    elseif inlist list__aspect_phylactery alias__place_item and "Fortune" in label__item
+        @setvar! var__price_hint var__price_phylactery_fortune
+        @setvar! var__drop_x 220
+        @setvar! var__drop_y 239
+    elseif inlist list__aspect_phylactery alias__place_item and "fortune" in label__item
+        @setvar! var__price_hint var__price_phylactery_fortune
+        @setvar! var__drop_x 220
+        @setvar! var__drop_y 239
+    elseif inlist list__aspect_phylactery alias__place_item and "Frost" in label__item
+        @setvar! var__price_hint var__price_phylactery_frost
+        @setvar! var__drop_x 235
+        @setvar! var__drop_y 239
+    elseif inlist list__aspect_phylactery alias__place_item and "frost" in label__item
+        @setvar! var__price_hint var__price_phylactery_frost
+        @setvar! var__drop_x 235
+        @setvar! var__drop_y 239
+    elseif inlist list__aspect_phylactery alias__place_item and "Gadget" in label__item
+        @setvar! var__price_hint var__price_phylactery_gadget
+        @setvar! var__drop_x 250
+        @setvar! var__drop_y 239
+    elseif inlist list__aspect_phylactery alias__place_item and "gadget" in label__item
+        @setvar! var__price_hint var__price_phylactery_gadget
+        @setvar! var__drop_x 250
+        @setvar! var__drop_y 239
+    elseif inlist list__aspect_phylactery alias__place_item and "Harvest" in label__item
+        @setvar! var__price_hint var__price_phylactery_harvest
+        @setvar! var__drop_x 265
+        @setvar! var__drop_y 239
+    elseif inlist list__aspect_phylactery alias__place_item and "harvest" in label__item
+        @setvar! var__price_hint var__price_phylactery_harvest
+        @setvar! var__drop_x 265
+        @setvar! var__drop_y 239
+    elseif inlist list__aspect_phylactery alias__place_item and "Holy" in label__item
+        @setvar! var__price_hint var__price_phylactery_holy
+        @setvar! var__drop_x 280
+        @setvar! var__drop_y 239
+    elseif inlist list__aspect_phylactery alias__place_item and "holy" in label__item
+        @setvar! var__price_hint var__price_phylactery_holy
+        @setvar! var__drop_x 280
+        @setvar! var__drop_y 239
+    elseif inlist list__aspect_phylactery alias__place_item and "Lightning" in label__item
+        @setvar! var__price_hint var__price_phylactery_lightning
+        @setvar! var__drop_x 295
+        @setvar! var__drop_y 239
+    elseif inlist list__aspect_phylactery alias__place_item and "lightning" in label__item
+        @setvar! var__price_hint var__price_phylactery_lightning
+        @setvar! var__drop_x 295
+        @setvar! var__drop_y 239
+    elseif inlist list__aspect_phylactery alias__place_item and "Lyric" in label__item
+        @setvar! var__price_hint var__price_phylactery_lyric
+        @setvar! var__drop_x 310
+        @setvar! var__drop_y 239
+    elseif inlist list__aspect_phylactery alias__place_item and "lyric" in label__item
+        @setvar! var__price_hint var__price_phylactery_lyric
+        @setvar! var__drop_x 310
+        @setvar! var__drop_y 239
+    elseif inlist list__aspect_phylactery alias__place_item and "Madness" in label__item
+        @setvar! var__price_hint var__price_phylactery_madness
+        @setvar! var__drop_x 325
+        @setvar! var__drop_y 239
+    elseif inlist list__aspect_phylactery alias__place_item and "madness" in label__item
+        @setvar! var__price_hint var__price_phylactery_madness
+        @setvar! var__drop_x 325
+        @setvar! var__drop_y 239
+    elseif inlist list__aspect_phylactery alias__place_item and "Poison" in label__item
+        @setvar! var__price_hint var__price_phylactery_poison
+        @setvar! var__drop_x 62
+        @setvar! var__drop_y 254
+    elseif inlist list__aspect_phylactery alias__place_item and "poison" in label__item
+        @setvar! var__price_hint var__price_phylactery_poison
+        @setvar! var__drop_x 62
+        @setvar! var__drop_y 254
+    elseif inlist list__aspect_phylactery alias__place_item and "Shadow" in label__item
+        @setvar! var__price_hint var__price_phylactery_shadow
+        @setvar! var__drop_x 77
+        @setvar! var__drop_y 254
+    elseif inlist list__aspect_phylactery alias__place_item and "shadow" in label__item
+        @setvar! var__price_hint var__price_phylactery_shadow
+        @setvar! var__drop_x 77
+        @setvar! var__drop_y 254
+    elseif inlist list__aspect_phylactery alias__place_item and "Temporal" in label__item
+        @setvar! var__price_hint var__price_phylactery_temporal
+        @setvar! var__drop_x 92
+        @setvar! var__drop_y 254
+    elseif inlist list__aspect_phylactery alias__place_item and "temporal" in label__item
+        @setvar! var__price_hint var__price_phylactery_temporal
+        @setvar! var__drop_x 92
+        @setvar! var__drop_y 254
+    elseif inlist list__aspect_phylactery alias__place_item and "Void" in label__item
+        @setvar! var__price_hint var__price_phylactery_void
+        @setvar! var__drop_x 107
+        @setvar! var__drop_y 254
+    elseif inlist list__aspect_phylactery alias__place_item and "void" in label__item
+        @setvar! var__price_hint var__price_phylactery_void
+        @setvar! var__drop_x 107
+        @setvar! var__drop_y 254
+    elseif inlist list__aspect_phylactery alias__place_item and "Water" in label__item
+        @setvar! var__price_hint var__price_phylactery_water
+        @setvar! var__drop_x 122
+        @setvar! var__drop_y 254
+    elseif inlist list__aspect_phylactery alias__place_item and "water" in label__item
+        @setvar! var__price_hint var__price_phylactery_water
+        @setvar! var__drop_x 122
+        @setvar! var__drop_y 254
+    elseif inlist list__aspect_phylactery alias__place_item and "War" in label__item
+        @setvar! var__price_hint var__price_phylactery_war
+        @setvar! var__drop_x 137
+        @setvar! var__drop_y 254
+    elseif inlist list__aspect_phylactery alias__place_item and "war" in label__item
+        @setvar! var__price_hint var__price_phylactery_war
+        @setvar! var__drop_x 137
+        @setvar! var__drop_y 254
+
+    # VALUABLE AND RARE
+    elseif "rare cloth" in label__item
+        @setvar! var__price_hint var__price_rare_cloth
+        @setvar! var__drop_x 62
+        @setvar! var__drop_y 269
+    elseif "spell hue deed" in label__item
+        @setvar! var__price_hint var__price_spell_hue_deed
+        @setvar! var__drop_x 77
+        @setvar! var__drop_y 269
+    elseif "mastercrafting diagram" in label__item
+        @setvar! var__price_hint var__price_mastercrafting_diagram
+        @setvar! var__drop_x 92
+        @setvar! var__drop_y 269
+    elseif "immaculate stone" in label__item
+        @setvar! var__price_hint var__price_immaculate_stone
+        @setvar! var__drop_x 107
+        @setvar! var__drop_y 269
+    elseif "pristine lumber" in label__item
+        @setvar! var__price_hint var__price_pristine_lumber
+        @setvar! var__drop_x 122
+        @setvar! var__drop_y 269
+    elseif "redlightning" in label__item
+        @setvar! var__price_hint var__price_redlightning_bottle
+        @setvar! var__drop_x 137
+        @setvar! var__drop_y 269
+    elseif "research materials" in label__item
+        @setvar! var__price_hint var__price_research_materials
+        @setvar! var__drop_x 152
+        @setvar! var__drop_y 269
+    elseif "skill ball" in label__item
+        @setvar! var__price_hint var__price_skill_ball
+        @setvar! var__drop_x 167
+        @setvar! var__drop_y 269
+    elseif "arcane essence" in label__item
+        @setvar! var__price_hint var__price_arcane_essence
+        @setvar! var__drop_x 182
+        @setvar! var__drop_y 269
+    elseif "arcane scroll" in label__item
+        @setvar! var__price_hint var__price_arcane_scroll
+        @setvar! var__drop_x 197
+        @setvar! var__drop_y 269
+    elseif "black market goods" in label__item
+        @setvar! var__price_hint var__price_black_market_goods
+        @setvar! var__drop_x 212
+        @setvar! var__drop_y 269
+    elseif "survival gear" in label__item
+        @setvar! var__price_hint var__price_survival_gear
+        @setvar! var__drop_x 227
+        @setvar! var__drop_y 269
+    elseif "plant chemicals" in label__item
+        @setvar! var__price_hint var__price_plant_chemicals
+        @setvar! var__drop_x 242
+        @setvar! var__drop_y 269
+    elseif "lantern" in label__item
+        @setvar! var__price_hint var__price_lantern
+        @setvar! var__drop_x 257
+        @setvar! var__drop_y 269
+
+    # CARPET AND RUG
+    elseif "carpet" in label__item
+        @setvar! var__price_hint var__price_carpet_tile
+        @setvar! var__drop_x 70
+        @setvar! var__drop_y 284
+    elseif "rug" in label__item
+        @setvar! var__price_hint var__price_rug_tile
+        @setvar! var__drop_x 85
+        @setvar! var__drop_y 284
+
+    # SKILL MASTERY SCROLL
+    elseif "alchemy" in label__item
+        @setvar! var__price_hint var__price_mastery_alchemy
+        @setvar! var__drop_x 77
+        @setvar! var__drop_y 299
+    elseif "animal lore" in label__item
+        @setvar! var__price_hint var__price_mastery_animal_lore
+        @setvar! var__drop_x 92
+        @setvar! var__drop_y 299
+    elseif "animal taming" in label__item
+        @setvar! var__price_hint var__price_mastery_animal_taming
+        @setvar! var__drop_x 107
+        @setvar! var__drop_y 299
+    elseif "arms lore" in label__item
+        @setvar! var__price_hint var__price_mastery_arms_lore
+        @setvar! var__drop_x 122
+        @setvar! var__drop_y 299
+    elseif "begging" in label__item
+        @setvar! var__price_hint var__price_mastery_begging
+        @setvar! var__drop_x 137
+        @setvar! var__drop_y 299
+    elseif "blacksmith" in label__item
+        @setvar! var__price_hint var__price_mastery_blacksmith
+        @setvar! var__drop_x 152
+        @setvar! var__drop_y 299
+    elseif "camping" in label__item
+        @setvar! var__price_hint var__price_mastery_camping
+        @setvar! var__drop_x 167
+        @setvar! var__drop_y 299
+    elseif "carpentry" in label__item
+        @setvar! var__price_hint var__price_mastery_carpentry
+        @setvar! var__drop_x 182
+        @setvar! var__drop_y 299
+    elseif "cartography" in label__item
+        @setvar! var__price_hint var__price_mastery_cartography
+        @setvar! var__drop_x 197
+        @setvar! var__drop_y 299
+    elseif "chivalry" in label__item
+        @setvar! var__price_hint var__price_mastery_chivalry
+        @setvar! var__drop_x 212
+        @setvar! var__drop_y 299
+    elseif "cooking" in label__item
+        @setvar! var__price_hint var__price_mastery_cooking
+        @setvar! var__drop_x 227
+        @setvar! var__drop_y 299
+    elseif "detect" in label__item
+        @setvar! var__price_hint var__price_mastery_detect
+        @setvar! var__drop_x 242
+        @setvar! var__drop_y 299
+    elseif "discordance" in label__item
+        @setvar! var__price_hint var__price_mastery_discordance
+        @setvar! var__drop_x 257
+        @setvar! var__drop_y 299
+    elseif "epic" in label__item
+        @setvar! var__price_hint var__price_mastery_epic
+        @setvar! var__drop_x 272
+        @setvar! var__drop_y 299
+    elseif "fishing" in label__item
+        @setvar! var__price_hint var__price_mastery_fishing
+        @setvar! var__drop_x 287
+        @setvar! var__drop_y 299
+    elseif "forensic" in label__item
+        @setvar! var__price_hint var__price_mastery_forensic
+        @setvar! var__drop_x 302
+        @setvar! var__drop_y 299
+    elseif "herding" in label__item
+        @setvar! var__price_hint var__price_mastery_herding
+        @setvar! var__drop_x 85
+        @setvar! var__drop_y 314
+    elseif "inscription" in label__item
+        @setvar! var__price_hint var__price_mastery_inscription
+        @setvar! var__drop_x 100
+        @setvar! var__drop_y 314
+    elseif "item id" in label__item
+        @setvar! var__price_hint var__price_mastery_item_id
+        @setvar! var__drop_x 115
+        @setvar! var__drop_y 314
+    elseif "lockpicking" in label__item
+        @setvar! var__price_hint var__price_mastery_lockpicking
+        @setvar! var__drop_x 130
+        @setvar! var__drop_y 314
+    elseif "lumberjacking" in label__item
+        @setvar! var__price_hint var__price_mastery_lumberjacking
+        @setvar! var__drop_x 145
+        @setvar! var__drop_y 314
+    elseif "mining" in label__item
+        @setvar! var__price_hint var__price_mastery_mining
+        @setvar! var__drop_x 160
+        @setvar! var__drop_y 314
+    elseif "musicianship" in label__item
+        @setvar! var__price_hint var__price_mastery_musicianship
+        @setvar! var__drop_x 175
+        @setvar! var__drop_y 314
+    elseif "necromancy" in label__item
+        @setvar! var__price_hint var__price_mastery_necromancy
+        @setvar! var__drop_x 190
+        @setvar! var__drop_y 314
+    elseif "peacemaking" in label__item
+        @setvar! var__price_hint var__price_mastery_peacemaking
+        @setvar! var__drop_x 205
+        @setvar! var__drop_y 314
+    elseif "poisoning" in label__item
+        @setvar! var__price_hint var__price_mastery_poisoning
+        @setvar! var__drop_x 220
+        @setvar! var__drop_y 314
+    elseif "provocation" in label__item
+        @setvar! var__price_hint var__price_mastery_provocation
+        @setvar! var__drop_x 235
+        @setvar! var__drop_y 314
+    elseif "remove trap" in label__item
+        @setvar! var__price_hint var__price_mastery_remove_trap
+        @setvar! var__drop_x 250
+        @setvar! var__drop_y 314
+    elseif "spirit speak" in label__item
+        @setvar! var__price_hint var__price_mastery_spirit_speak
+        @setvar! var__drop_x 265
+        @setvar! var__drop_y 314
+    elseif "stealth" in label__item
+        @setvar! var__price_hint var__price_mastery_stealth
+        @setvar! var__drop_x 280
+        @setvar! var__drop_y 314
+    elseif "tailoring" in label__item
+        @setvar! var__price_hint var__price_mastery_tailoring
+        @setvar! var__drop_x 295
+        @setvar! var__drop_y 314
+    elseif "taste id" in label__item
+        @setvar! var__price_hint var__price_mastery_taste_id
+        @setvar! var__drop_x 100
+        @setvar! var__drop_y 329
+    elseif "tinkering" in label__item
+        @setvar! var__price_hint var__price_mastery_tinkering
+        @setvar! var__drop_x 115
+        @setvar! var__drop_y 329
+    elseif "tracking" in label__item
+        @setvar! var__price_hint var__price_mastery_tracking
+        @setvar! var__drop_x 130
+        @setvar! var__drop_y 329
+    elseif "veterinary" in label__item
+        @setvar! var__price_hint var__price_mastery_veterinary
+        @setvar! var__drop_x 145
+        @setvar! var__drop_y 329
+
+    endif
+
+    # ### PLACE ON VENDOR
+    lift alias__place_item var__lift_amount
+    wait var__delay_lift
+    drop var__vendor_container var__drop_x var__drop_y 0
+    waitforgump 685310710 3000
+
+    if not gumpexists 685310710
+        overhead "Pricing gump did not open." 33
+        overhead "Turn ON Use Item Pricing Menu in Vendor Settings." 33
+        @clearignore
+        stop
+    endif
+
+    if var__auto_place = 1
+        gumpresponse 16 685310710
+        wait var__delay_place
+    else
+        overhead "{{label__item}} : {{var__price_hint}}" 88
+        settimer "timer__hint_repeat" 0
+
+        @setvar! var__gump_done 0
+
+        while var__gump_done = 0
+            if timer "timer__hint_repeat" >= var__delay_hint_repeat
+                overhead "{{label__item}} : {{var__price_hint}}" 88
+                settimer "timer__hint_repeat" 0
+            endif
+
+            if warmode
+                overhead "Aborted." 33
+                @clearignore
+                stop
+            endif
+
+            if gumpexists 685310710
+                wait var__delay_poll
+            else
+                wait var__delay_gump_settle
+
+                if not gumpexists 685310710
+                    @setvar! var__gump_done 1
+                endif
+            endif
+        endwhile
+    endif
+endfor
+
+@clearignore
+overhead "All items placed." 53
