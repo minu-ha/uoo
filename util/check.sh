@@ -22,6 +22,7 @@ for f in "$@"; do
 	}
 	{
 		line = $0
+		sub(/\r$/, "", line)              # CRLF: .gitattributes checks these files out with CRLF
 		sub(/^[ \t]+/, "", line)          # indentation
 		sub(/^@/, "", line)               # silent prefix
 		if (line ~ /^(#|\/\/)/ || line == "") next
