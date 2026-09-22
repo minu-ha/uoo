@@ -725,9 +725,14 @@ while not dead
     # # BARD SONG BUFF
     # ################################################################################
     # The aspect resets the Music cooldown right after a song, so all three are tried in one pass.
-    # clearsysmsg in front of each block keeps a leftover message from the previous song out of the check.
+    #
+    # No clearsysmsg in front of the blocks. It was there to stop a leftover instrument prompt
+    # from being read as this song's own, but that case cannot really arise: the prompt only
+    # appears when the instrument is invalid, and then this useskill fails the same way, so
+    # there is no good target cursor for a stale line to hijack. Meanwhile the clear wiped the
+    # whole buffer every time a 15 minute song lapsed, which is how the planted line went
+    # missing mid fight. The check at the top of the loop already drains the prompt each pass.
     if config__use_bard_song = 1 and not targetexists and cooldown "Discord" = 0 and cooldown "Music" = 0 and not findbuff "song of discordance"
-        clearsysmsg
         useskill 'Discordance'
         waitfortarget wait__target
 
@@ -740,7 +745,6 @@ while not dead
     endif
 
     if config__use_bard_song = 1 and not targetexists and cooldown "Provo" = 0 and cooldown "Music" = 0 and not findbuff "song of provocation"
-        clearsysmsg
         useskill 'Provocation'
         waitfortarget wait__target
 
@@ -753,7 +757,6 @@ while not dead
     endif
 
     if config__use_bard_song = 1 and not targetexists and cooldown "Peace" = 0 and cooldown "Music" = 0 and not findbuff "song of peacemaking"
-        clearsysmsg
         useskill 'Peacemaking'
         waitfortarget wait__target
 
