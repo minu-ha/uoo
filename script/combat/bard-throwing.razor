@@ -30,10 +30,19 @@
 #   so no two categories share a colour family:
 #     33  red     act on this right now
 #     43  orange  a resource or a piece of gear is missing
-#     53  yellow  moving throw count
+#     53  yellow  moving throw count      (profile agent, see below)
 #     63  green   a potion was just consumed, kept to two lines so green stays rare
 #     73  aqua    neutral information, prompts and planted
-#     88  blue    a special effect fired
+#     88  blue    a special effect fired  (profile agent, see below)
+#
+# Throw status readout
+#   The moving throw count, the planted reload and the wing proc are printed by Razor's
+#   Overhead Messages agent in the profile, not by this script. They are pure display with
+#   no logic attached, and reading them here meant competing for the system message buffer:
+#   insysmsg consumes what it matches, and every clearsysmsg in the bard blocks wiped any
+#   count that had arrived since the last pass. The agent watches the journal instead, so
+#   the readout no longer depends on what this script does with the buffer.
+#   Entries live under <overheadmessages> in the Razor profile, hues as listed above.
 
 clearsysmsg
 clearall
@@ -46,9 +55,6 @@ cleardragdrop
 @setvar! config__use_potion 1
 @setvar! config__use_bard_song 1
 @setvar! config__use_weapon_ability 1
-
-# Throw status readout. 1 reports the moving throw count, the planted reload and wing procs.
-@setvar! config__show_throw_status 1
 
 # Magic item mode. 1 looks for a magic suffix on the label, 0 takes the first match and
 # skips getlabel entirely, which is the cheaper path when training with plain gear.
@@ -301,8 +307,8 @@ while not dead
     # ################################################################################
     # insysmsg consumes the matched message and everything before it, so check order matters.
     # replay restarts the whole script from line 1, which also runs the clearsysmsg at the
-    # top, so a false match here is expensive. That is why THROW STATUS sits below this
-    # block and never gets a chance to swallow one of these lines.
+    # top, so a false match here is expensive. Nothing else in this file reads the system
+    # message buffer for display, so these three checks never have to share it.
     if insysmsg "Your concentration is disturbed, thus ruining thy spell."
         replay
     endif
@@ -319,68 +325,6 @@ while not dead
         if targetexists
             target var__my_instrument
             replay
-        endif
-    endif
-
-    # ################################################################################
-    # # THROW STATUS
-    # ################################################################################
-    # Sits after the instrument checks on purpose. insysmsg consumes the matched line and
-    # everything before it, so a status match must never be able to swallow the concentration
-    # or instrument messages that drive replay, which restarts the whole script.
-    #
-    # Official wiki Throwing: the moving throw allowance is per weapon, not a flat 4.
-    #   throwing star / throwing knife 5, hurlbat / chakram 4, javelin / francisca 3.
-    #   PvP or Faction Flag is always 1, so every count from 5 down to 0 is checked.
-    # Becoming planted refills the allowance, which is why planted is reported as a reload.
-    #
-    # Check order is planted, then 5 down to 0, then wing, because that is the order the
-    # journal prints them in. insysmsg eats the matched line and everything above it, so a
-    # check placed before the line it should protect swallows it. Reading downward in
-    # journal order means each check only ever consumes its own line and nothing is lost.
-    # The substrings stop at "throw" to survive a singular "1 moving throw remaining".
-    # Nothing is cached here, so a planted readout can never go stale when the 10 second
-    # planted window lapses after movement.
-    if config__show_throw_status = 1
-        if insysmsg "now planted"
-            overhead "You are now planted." 73
-        endif
-
-        if insysmsg "5 moving throw"
-            overhead "5 moving throws left." 53
-        endif
-
-        if insysmsg "4 moving throw"
-            overhead "4 moving throws left." 53
-        endif
-
-        if insysmsg "3 moving throw"
-            overhead "3 moving throws left." 53
-        endif
-
-        if insysmsg "2 moving throw"
-            overhead "2 moving throws left." 53
-        endif
-
-        if insysmsg "1 moving throw"
-            overhead "1 moving throw left." 33
-        endif
-
-        # The 0 line does not print on every run out. The wiki documents a second way to
-        # lose the allowance, 10 seconds after planting if the player has moved, so this may
-        # only fire on that path. Treat the 1 line above as the warning that always arrives.
-        if insysmsg "0 moving throw"
-            overhead "No throws, plant now." 33
-        endif
-
-        # Wing lands on the mob so the proc reads against the thing it happened to.
-        # The fallback keeps the message visible when the target cache is empty.
-        if insysmsg "wing your target"
-            if find var__combat_target ground -1 -1 12 as alias__wing_target
-                overhead "You wing your target." 88 alias__wing_target
-            else
-                overhead "You wing your target." 88
-            endif
         endif
     endif
 
