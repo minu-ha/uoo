@@ -4,8 +4,8 @@
 #
 #   util/setup.sh                    # you = first part of your git email (jane.doe@x.com -> config/jane/)
 #   util/setup.sh <name>             # pick the folder name yourself
-#   util/setup.sh [<name>] /path/to/ClassicUO/Data/Plugins/Assistant/Razor.exe   # if Razor.exe is not under ~/Applications
-#   util/setup.sh --undo [/path/to/Razor.exe]     # put real folders back (copies, the repo keeps its files)
+#   util/setup.sh [<name>] /path/to/ClassicUO/Data/Plugins/Assistant   # if it is not under ~/Applications
+#   util/setup.sh --undo [/path/to/Assistant]     # put real folders back (copies, the repo keeps its files)
 #
 # To rename: git mv config/<old> config/<new>, then util/setup.sh <new>. It relinks the now-dangling links.
 #
@@ -20,14 +20,18 @@ set -euo pipefail
 REPO="$(cd "$(dirname "$0")/.." && pwd)"
 UNDO=0
 if [ "${1:-}" = "--undo" ]; then UNDO=1; shift; set -- "" "${1:-}"; fi
-if [ -f "${1:-}" ]; then set -- "" "$1"; fi              # only a path was given
+if [ -e "${1:-}" ]; then set -- "" "$1"; fi              # only a path was given
 NAME="${1:-$(git config user.email 2>/dev/null | cut -d@ -f1 | cut -d. -f1)}"
 NAME="${NAME:-$USER}"
 CFG="$REPO/config/$NAME"
 
-RAZOR_EXE="${2:-$(find "$HOME/Applications" -name Razor.exe -path '*/Plugins/Assistant/*' 2>/dev/null | head -1)}"
-[ -f "$RAZOR_EXE" ] || { echo "Razor.exe not found. Pass its path: util/setup.sh [<name>] <drive_c>/.../ClassicUO/Data/Plugins/Assistant/Razor.exe" >&2; exit 1; }
-ASSIST="$(cd "$(dirname "$RAZOR_EXE")" && pwd)"   # .../ClassicUO/Data/Plugins/Assistant
+# Razor's folder is .../ClassicUO/Data/Plugins/Assistant. Outlands builds Razor into
+# ClassicUO.exe, so there is no Razor.exe to look for; the folder itself is the anchor.
+# The path argument may be that folder, or any file inside it.
+ASSIST="${2:-$(find "$HOME/Applications" -type d -name Assistant -path '*/Plugins/*' 2>/dev/null | head -1)}"
+if [ -f "$ASSIST" ]; then ASSIST="$(dirname "$ASSIST")"; fi
+[ -d "$ASSIST" ] || { echo "Razor's Assistant folder not found. Pass it: util/setup.sh [<name>] <drive_c>/.../ClassicUO/Data/Plugins/Assistant" >&2; exit 1; }
+ASSIST="$(cd "$ASSIST" && pwd)"                   # .../ClassicUO/Data/Plugins/Assistant
 CUO="$(cd "$ASSIST/../../.." && pwd)"             # .../ClassicUO
 echo "game  $CUO"
 echo "repo  $REPO"

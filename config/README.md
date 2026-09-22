@@ -23,12 +23,13 @@ you `git push`.
 ```sh
 util/setup.sh                    # <name> = first part of your git email: jane.doe@example.com -> config/jane/
 util/setup.sh <name>             # or pick the name yourself
-util/setup.sh [<name>] /path/to/ClassicUO/Data/Plugins/Assistant/Razor.exe   # Razor.exe not under ~/Applications
+util/setup.sh [<name>] /path/to/ClassicUO/Data/Plugins/Assistant   # if it is not under ~/Applications
 util/setup.sh --undo             # back to plain folders
 ```
 
-On macOS (Sikarugir) it finds `Razor.exe` inside the wrapper, moves your Razor profiles and
-character folders into `config/<name>/` and leaves links behind.
+On macOS (Sikarugir) it finds the `Data/Plugins/Assistant` folder inside the wrapper, moves your
+Razor profiles and character folders into `config/<name>/` and leaves links behind. Outlands builds
+Razor into `ClassicUO.exe`, so there is no `Razor.exe`; the folder is what the script looks for.
 
 - **It asks one thing.** If `config/<name>/` already has files (second machine, a renamed folder,
   or someone else's name) it asks before pointing the game at them.
