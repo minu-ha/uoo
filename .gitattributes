@@ -1,1 +1,7 @@
 * text=auto
+
+# Razor and ClassicUO rewrite these files with CRLF. Keep the working tree matching what
+# they write, so opening a script in Razor does not show up as a change.
+*.razor text eol=crlf
+config/**/*.xml text eol=crlf
+config/**/*.json text eol=crlf
