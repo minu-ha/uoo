@@ -699,6 +699,49 @@ while not dead
     endif
 
     # ################################################################################
+    # # PEACE
+    # ################################################################################
+    # Runs before DISCO so the target stops attacking first. A barding break is rolled once
+    # per second against a pacified creature, not caused by your damage, so the pacify holds
+    # through the fight and it is worth spending the first barding window on it.
+    # The +25 effective skill for barding an already barded creature goes to whichever skill
+    # lands second, so leading with peace costs nothing: DISCO collects it on the next pass.
+    # No gate on the discord label. Peace has to be able to open on a fresh target, and the
+    # shared Music cooldown already keeps the two from firing in the same pass.
+    # The barding break label still gates: a broken creature is immune to peace for a while,
+    # and DISCO runs instead, which is correct because discordance survives a break.
+    if not warmode and not targetexists and find var__combat_target ground -1 -1 10 as alias__peace_target
+        if skill "Peacemaking" > 0 and cooldown "Peace" = 0 and cooldown "Music" = 0
+            getlabel alias__peace_target label__peace_target
+
+            if "pacified" in label__peace_target or "barding break" in label__peace_target
+                settimer "timer__combat_target_grace" 0
+            else
+                clearsysmsg
+                useskill 'Peacemaking'
+                waitfortarget wait__target
+
+                while targetexists
+                    if insysmsg "What instrument shall you play"
+                        target var__my_instrument
+                        replay
+                    endif
+
+                    if dead alias__peace_target or var__combat_target != alias__peace_target
+                        hotkey "Cancel Current Target"
+                        wait wait__short
+                    else
+                        target alias__peace_target
+                        wait wait__short
+                    endif
+                endwhile
+
+                wait wait__short
+            endif
+        endif
+    endif
+
+    # ################################################################################
     # # DISCO
     # ################################################################################
     if not warmode and not targetexists and find var__combat_target ground -1 -1 10 as alias__disco_target
@@ -723,40 +766,6 @@ while not dead
                         wait wait__short
                     else
                         target alias__disco_target
-                        wait wait__short
-                    endif
-                endwhile
-
-                wait wait__short
-            endif
-        endif
-    endif
-
-    # ################################################################################
-    # # PEACE
-    # ################################################################################
-    if not warmode and not targetexists and find var__combat_target ground -1 -1 10 as alias__peace_target
-        if skill "Peacemaking" > 0 and cooldown "Peace" = 0 and cooldown "Music" = 0
-            getlabel alias__peace_target label__peace_target
-
-            if "pacified" in label__peace_target or "barding break" in label__peace_target
-                settimer "timer__combat_target_grace" 0
-            elseif "discord" in label__peace_target
-                clearsysmsg
-                useskill 'Peacemaking'
-                waitfortarget wait__target
-
-                while targetexists
-                    if insysmsg "What instrument shall you play"
-                        target var__my_instrument
-                        replay
-                    endif
-
-                    if dead alias__peace_target or var__combat_target != alias__peace_target
-                        hotkey "Cancel Current Target"
-                        wait wait__short
-                    else
-                        target alias__peace_target
                         wait wait__short
                     endif
                 endwhile
