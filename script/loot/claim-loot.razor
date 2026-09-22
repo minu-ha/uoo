@@ -1,9 +1,17 @@
+# Put your share from the distribution chest into your own loot container.
+# Needs: var_my_loot_container (asked for on first run), container within 2 tiles
+
 clearall
 clearsysmsg
 cleardragdrop
 clearignore
 
-setvar! var_my_loot_container "0x488E31CA"
+# Personal container. Asked for once and kept in your Razor profile, so no serial sits in
+# this shared file. To point the script at something else, run unsetvar on the name and rerun.
+if not varexist var_my_loot_container
+    overhead "Target your own loot container" 55
+    setvar var_my_loot_container
+endif
 
 if not find var_my_loot_container ground -1 -1 2
     overhead "cannot find var_my_loot_container" 34

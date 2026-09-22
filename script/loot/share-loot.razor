@@ -1,11 +1,24 @@
+# Put what you looted into the party distribution chest, one stack per item type.
+# Needs: var_my_furniture_container, var_my_distribution_container (asked for on first run)
+
 clearall
 clearsysmsg
 cleardragdrop
 clearignore
 
 setvar var_global_waiting_time 300
-setvar! var_my_furniture_container "0x488AC23E"
-setvar! var_my_distribution_container "0x73CD0282"
+
+# Personal containers. Asked for once and kept in your Razor profile, so no serial sits in
+# this shared file. To point the script at something else, run unsetvar on the name and rerun.
+if not varexist var_my_furniture_container
+    overhead "Target the furniture the distribution chest sits in" 55
+    setvar var_my_furniture_container
+endif
+
+if not varexist var_my_distribution_container
+    overhead "Target the distribution chest" 55
+    setvar var_my_distribution_container
+endif
 
 dclick var_my_furniture_container
 wait var_global_waiting_time
