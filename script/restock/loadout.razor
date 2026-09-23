@@ -3,89 +3,200 @@ clearsysmsg
 cleardragdrop
 clearignore
 
-setvar wait__short 300
-setvar wait__target 2000
+@setvar! wait__short 300
+@setvar! wait__target 2000
 
+// ####################################################################################
+// # CONFIG
+// ####################################################################################
+// 1 when the stockpile, safe, bench, shelf and recycler are stored inside one furniture
+// container. 0 when they stand on the floor. Either way they must be within reach.
+@setvar! config__use_furniture_container 1
+
+// Magic instrument pickup. 1 carries one out of the supply box.
+@setvar! config__use_magic_instrument 1
+
+// Everything a hand can touch is 2 tiles away at most, so that is the range every check uses.
+@setvar! config__reach 2
+
+// ####################################################################################
+// # CONTAINERS YOU WALK UP TO
+// ####################################################################################
 // Personal containers, kept in your Razor profile so no serial sits in this shared file.
 //
 // varexist only reports that a name was declared, not that the serial still resolves, so a
-// container targeted by mistake would stay wrong forever. The four below are the ones this
-// script walks up to and opens, so find can check them for real: if the stored serial does
-// not resolve within 3 tiles the variable is dropped and asked for again.
-// The rest are nested inside those, and are checked where they are used instead.
-if not varexist global__my_barrel_container or not find global__my_barrel_container ground -1 -1 3
-    unsetvar global__my_barrel_container
-    overhead "Target the barrel container" 55
-    setvar global__my_barrel_container
+// container targeted by mistake would stay wrong forever. These sit on the floor, so find
+// can check them for real: a serial that no longer resolves within reach is dropped and
+// asked for again.
+//
+// Asked for before the dclick below, because you can target something you can see.
+if config__use_furniture_container = 1
+    if not varexist global__my_furniture_container or not find global__my_furniture_container ground -1 -1 config__reach
+        unsetvar global__my_furniture_container
+        overhead "Target the furniture the containers sit in" 55
+        setvar global__my_furniture_container
+    endif
 endif
 
-if not varexist global__my_recall_scroll_container or not find global__my_recall_scroll_container ground -1 -1 3
-    unsetvar global__my_recall_scroll_container
-    overhead "Target the recall scroll container" 55
-    setvar global__my_recall_scroll_container
-endif
-
-if not varexist global__my_furniture_container or not find global__my_furniture_container ground -1 -1 3
-    unsetvar global__my_furniture_container
-    overhead "Target the furniture the containers sit in" 55
-    setvar global__my_furniture_container
-endif
-
-if not varexist global__my_supply_box or not find global__my_supply_box ground -1 -1 3
+if not varexist global__my_supply_box or not find global__my_supply_box ground -1 -1 config__reach
     unsetvar global__my_supply_box
     overhead "Target the supply box that holds tools and instruments" 55
     setvar global__my_supply_box
 endif
 
-if not varexist global__my_resource_stockpile
-    overhead "Target the resource stockpile" 55
-    setvar global__my_resource_stockpile
-endif
-
-if not varexist global__my_magic_item_recycler
-    overhead "Target the magic item recycler" 55
-    setvar global__my_magic_item_recycler
-endif
-
-if not varexist global__my_repair_bench
-    overhead "Target the repair bench" 55
-    setvar global__my_repair_bench
-endif
-
-if not varexist global__my_storage_shelf
-    overhead "Target the storage shelf" 55
-    setvar global__my_storage_shelf
-endif
-
-if not varexist global__my_bank_deposit_safe
-    overhead "Target the bank deposit safe" 55
-    setvar global__my_bank_deposit_safe
-endif
-
-if not varexist global__my_wizard_satchel
-    overhead "Target the wizard satchel" 55
-    setvar global__my_wizard_satchel
+if not varexist global__my_recall_scroll_container or not find global__my_recall_scroll_container ground -1 -1 config__reach
+    unsetvar global__my_recall_scroll_container
+    overhead "Target the recall scroll container" 55
+    setvar global__my_recall_scroll_container
 endif
 
 setvar global__my_recall_scroll 0
-
-// Magic instrument pickup. 1 carries spares out of the wand container.
-@setvar! config__use_magic_instrument 1
 
 while queued
     wait wait__short
 endwhile
 
 
-dclick global__my_barrel_container
-wait wait__short
-dclick global__my_furniture_container
-wait wait__short
+// A container has to be open before anything can be taken from or put into it.
+if config__use_furniture_container = 1
+    dclick global__my_furniture_container
+    wait wait__short
+endif
+
 dclick global__my_recall_scroll_container
 wait wait__short
 dclick global__my_supply_box
 wait wait__short
 
+
+// ####################################################################################
+// # CONTAINERS INSIDE THE FURNITURE
+// ####################################################################################
+// Asked for only now, because with config__use_furniture_container on they cannot be
+// targeted until the furniture above has been opened.
+//
+// Each one ends up as a var__has_ flag so the work sections below do not have to repeat
+// the furniture branch. Missing gear then skips its own section instead of stopping the run.
+
+@setvar! var__has_bank_deposit_safe 0
+
+if config__use_furniture_container = 1
+    if not varexist global__my_bank_deposit_safe or not find global__my_bank_deposit_safe global__my_furniture_container
+        unsetvar global__my_bank_deposit_safe
+        overhead "Target the bank deposit safe" 55
+        setvar global__my_bank_deposit_safe
+    endif
+
+    if find global__my_bank_deposit_safe global__my_furniture_container
+        @setvar! var__has_bank_deposit_safe 1
+    endif
+else
+    if not varexist global__my_bank_deposit_safe or not find global__my_bank_deposit_safe ground -1 -1 config__reach
+        unsetvar global__my_bank_deposit_safe
+        overhead "Target the bank deposit safe" 55
+        setvar global__my_bank_deposit_safe
+    endif
+
+    if find global__my_bank_deposit_safe ground -1 -1 config__reach
+        @setvar! var__has_bank_deposit_safe 1
+    endif
+endif
+
+@setvar! var__has_resource_stockpile 0
+
+if config__use_furniture_container = 1
+    if not varexist global__my_resource_stockpile or not find global__my_resource_stockpile global__my_furniture_container
+        unsetvar global__my_resource_stockpile
+        overhead "Target the resource stockpile" 55
+        setvar global__my_resource_stockpile
+    endif
+
+    if find global__my_resource_stockpile global__my_furniture_container
+        @setvar! var__has_resource_stockpile 1
+    endif
+else
+    if not varexist global__my_resource_stockpile or not find global__my_resource_stockpile ground -1 -1 config__reach
+        unsetvar global__my_resource_stockpile
+        overhead "Target the resource stockpile" 55
+        setvar global__my_resource_stockpile
+    endif
+
+    if find global__my_resource_stockpile ground -1 -1 config__reach
+        @setvar! var__has_resource_stockpile 1
+    endif
+endif
+
+@setvar! var__has_repair_bench 0
+
+if config__use_furniture_container = 1
+    if not varexist global__my_repair_bench or not find global__my_repair_bench global__my_furniture_container
+        unsetvar global__my_repair_bench
+        overhead "Target the repair bench" 55
+        setvar global__my_repair_bench
+    endif
+
+    if find global__my_repair_bench global__my_furniture_container
+        @setvar! var__has_repair_bench 1
+    endif
+else
+    if not varexist global__my_repair_bench or not find global__my_repair_bench ground -1 -1 config__reach
+        unsetvar global__my_repair_bench
+        overhead "Target the repair bench" 55
+        setvar global__my_repair_bench
+    endif
+
+    if find global__my_repair_bench ground -1 -1 config__reach
+        @setvar! var__has_repair_bench 1
+    endif
+endif
+
+@setvar! var__has_storage_shelf 0
+
+if config__use_furniture_container = 1
+    if not varexist global__my_storage_shelf or not find global__my_storage_shelf global__my_furniture_container
+        unsetvar global__my_storage_shelf
+        overhead "Target the storage shelf" 55
+        setvar global__my_storage_shelf
+    endif
+
+    if find global__my_storage_shelf global__my_furniture_container
+        @setvar! var__has_storage_shelf 1
+    endif
+else
+    if not varexist global__my_storage_shelf or not find global__my_storage_shelf ground -1 -1 config__reach
+        unsetvar global__my_storage_shelf
+        overhead "Target the storage shelf" 55
+        setvar global__my_storage_shelf
+    endif
+
+    if find global__my_storage_shelf ground -1 -1 config__reach
+        @setvar! var__has_storage_shelf 1
+    endif
+endif
+
+@setvar! var__has_magic_item_recycler 0
+
+if config__use_furniture_container = 1
+    if not varexist global__my_magic_item_recycler or not find global__my_magic_item_recycler global__my_furniture_container
+        unsetvar global__my_magic_item_recycler
+        overhead "Target the magic item recycler" 55
+        setvar global__my_magic_item_recycler
+    endif
+
+    if find global__my_magic_item_recycler global__my_furniture_container
+        @setvar! var__has_magic_item_recycler 1
+    endif
+else
+    if not varexist global__my_magic_item_recycler or not find global__my_magic_item_recycler ground -1 -1 config__reach
+        unsetvar global__my_magic_item_recycler
+        overhead "Target the magic item recycler" 55
+        setvar global__my_magic_item_recycler
+    endif
+
+    if find global__my_magic_item_recycler ground -1 -1 config__reach
+        @setvar! var__has_magic_item_recycler 1
+    endif
+endif
 
 // ####################################################################################
 // # TOOLS
@@ -123,7 +234,7 @@ endif
 // ####################################################################################
 // # Bank Deposit safe
 // ####################################################################################
-if find global__my_bank_deposit_safe global__my_furniture_container and findtype 3821 backpack
+if var__has_bank_deposit_safe = 1 and findtype 3821 backpack
     overhead "Bank Deposit safe" 82
     menu global__my_bank_deposit_safe 0
     wait wait__short
@@ -132,7 +243,7 @@ endif
 // ####################################################################################
 // # Resource stockpile
 // ####################################################################################
-if find global__my_resource_stockpile global__my_furniture_container
+if var__has_resource_stockpile = 1
     overhead "Resource stockpile" 82
     menu global__my_resource_stockpile 0
     waitfortarget wait__target
@@ -143,7 +254,7 @@ endif
 // ####################################################################################
 // # Repair bench
 // ####################################################################################
-if find global__my_repair_bench global__my_furniture_container
+if var__has_repair_bench = 1
     dclick global__my_repair_bench
     wait 2000
 
@@ -158,7 +269,7 @@ endif
 // ####################################################################################
 // # Storage shelf
 // ####################################################################################
-if find global__my_storage_shelf global__my_furniture_container
+if var__has_storage_shelf = 1
     overhead "Storage shelf" 82
     menu global__my_storage_shelf 0
     waitfortarget wait__target
@@ -172,7 +283,7 @@ endif
 // ####################################################################################
 // # Magic item recycler
 // ####################################################################################
-if find global__my_magic_item_recycler global__my_furniture_container
+if var__has_magic_item_recycler = 1
     overhead "Magic item recycler" 82
     menu global__my_magic_item_recycler 0
 endif

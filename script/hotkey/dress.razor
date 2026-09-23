@@ -331,6 +331,14 @@ else
     endif
 endif
 
+// The satchel is an equippable item, not a container, so it is asked for here rather than
+// in loadout. find with self covers both cases: sitting in the backpack, or already worn.
+if not varexist global__my_wizard_satchel or not find global__my_wizard_satchel self
+    unsetvar global__my_wizard_satchel
+    overhead "Target your wizard satchel" 55
+    setvar global__my_wizard_satchel
+endif
+
 if find global__my_wizard_satchel backpack
     lift global__my_wizard_satchel
     drop self pants
