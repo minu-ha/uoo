@@ -3,6 +3,8 @@
 // ####################################################################################
 // Naming convention
 //   config__*  : tunable settings, kept at the top of the file
+//   wait__*    : how long the script sleeps or waits for a target cursor
+//   cooldown__*: thresholds compared against a timer__ or a named cooldown
 //   var__*     : state owned by this script
 //   alias__*   : result of an as binding from find / findtype
 //   label__*   : result of getlabel
@@ -48,8 +50,7 @@ cleardragdrop
 
 // Codex stance and weapon ability. The slot numbers follow the codex list order, so if the
 // in game order differs only these numbers change.
-// UNVERIFIED: the stance command name. Throwing uses [ThrowingStance1..5, so mace should be
-// [MaceStance1..5, but that has not been confirmed in game. Check the command list first.
+// The stance commands are [MacingStance1..5, confirmed in game.
 @setvar! config__use_codex_stance 1
 @setvar! config__stance_aggressive 1
 @setvar! config__stance_defensive 2
@@ -73,19 +74,25 @@ cleardragdrop
 @setvar! config__dex_threshold 100
 @setvar! config__gold_drop_amount 500
 
-// Delays
-@setvar! config__delay_short 200
-@setvar! config__delay_long 1000
-
-// Timer and cooldown lengths
-@setvar! config__overhead_message_delay 2700
-@setvar! config__target_grace_delay 1200
-@setvar! config__heal_potion_cooldown 10000
+// ####################################################################################
+// # WAIT AND COOLDOWN
+// ####################################################################################
+// Every value is milliseconds.
+// wait__short absorbed the old 100 poll and 200 settle, wait__target the old 500 and 1000
+// target waits, so a whole class of delay can be tuned from one line.
+// cooldown__ names mirror what they feed, so
+// settimer "timer__overhead_message" cooldown__overhead_message reads as one pair.
+@setvar! wait__short 200
+@setvar! wait__long 1000
+@setvar! wait__target 1000
+@setvar! cooldown__overhead_message 2700
+@setvar! cooldown__combat_target_grace 1200
+@setvar! cooldown__heal_potion 10000
 // Pummel, Stun and Smash share one gauge that refills in 24 to 60 seconds, so one minute is
 // the safe spacing. Shorter only wastes chat lines, it cannot fire the ability early.
-@setvar! config__ability_cooldown 60000
-@setvar! config__stance_retry_delay 3000
-@setvar! config__stance_resync_delay 30000
+@setvar! cooldown__ability 60000
+@setvar! cooldown__stance_retry 3000
+@setvar! cooldown__stance_resync 30000
 
 // ####################################################################################
 // # TIMER
@@ -94,19 +101,19 @@ if not timerexists "timer__overhead_message"
     createtimer "timer__overhead_message"
 endif
 
-settimer "timer__overhead_message" config__overhead_message_delay
+settimer "timer__overhead_message" cooldown__overhead_message
 
 if not timerexists "timer__combat_target_grace"
     createtimer "timer__combat_target_grace"
 endif
 
-settimer "timer__combat_target_grace" config__target_grace_delay
+settimer "timer__combat_target_grace" cooldown__combat_target_grace
 
 if not timerexists "timer__stance_retry"
     createtimer "timer__stance_retry"
 endif
 
-settimer "timer__stance_retry" config__stance_retry_delay
+settimer "timer__stance_retry" cooldown__stance_retry
 
 if not timerexists "timer__stance_resync"
     createtimer "timer__stance_resync"
@@ -179,7 +186,7 @@ if not find var__my_instrument backpack
     clearsysmsg
     overhead "Select instrument:" 55
     @setvar! var__my_instrument
-    wait config__delay_long
+    wait wait__long
 
     if find var__my_instrument backpack as alias__picked_instrument
         getlabel alias__picked_instrument label__picked_instrument
@@ -187,7 +194,7 @@ if not find var__my_instrument backpack
         if "flute" in label__picked_instrument or "drums" in label__picked_instrument or "harp" in label__picked_instrument or "lute" in label__picked_instrument or "tambourine" in label__picked_instrument or "gemshorn" in label__picked_instrument or "hurdy" in label__picked_instrument or "psaltery" in label__picked_instrument or "sackbut" in label__picked_instrument or "shawm" in label__picked_instrument or "vielle" in label__picked_instrument
             overhead "{{label__picked_instrument}}" 55
             dclick var__my_instrument
-            wait config__delay_long
+            wait wait__long
         else
             @setvar! var__my_instrument 0
             overhead "Not an instrument!" 33
@@ -205,11 +212,11 @@ endif
 // ####################################################################################
 while not dead
     while queued
-        wait 100
+        wait wait__short
     endwhile
 
     while casting
-        wait 100
+        wait wait__short
     endwhile
 
     // ################################################################################
@@ -250,9 +257,9 @@ while not dead
         if find var__my_weapon backpack as alias__equip_weapon
             lift alias__equip_weapon
             drop self lefthand
-            wait config__delay_long
+            wait wait__long
         else
-            if timer "timer__overhead_message" > config__overhead_message_delay
+            if timer "timer__overhead_message" > cooldown__overhead_message
                 overhead "No aspect weapon in backpack." 32
                 settimer "timer__overhead_message" 0
             endif
@@ -274,7 +281,7 @@ while not dead
     endif
 
     if insysmsg "What instrument shall you play"
-        waitfortarget 1000
+        waitfortarget wait__target
 
         if targetexists
             target var__my_instrument
@@ -303,7 +310,7 @@ while not dead
         else
             settimer "timer__combat_target_grace" 0
         endif
-    elseif var__combat_target != 0 and timer "timer__combat_target_grace" >= config__target_grace_delay
+    elseif var__combat_target != 0 and timer "timer__combat_target_grace" >= cooldown__combat_target_grace
         @setvar! var__combat_target 0
     endif
 
@@ -314,16 +321,16 @@ while not dead
         if findtype "gold coin" backpack as alias__found_gold
             lift alias__found_gold config__gold_drop_amount
             droprelloc 0 0
-            wait config__delay_short
+            wait wait__short
 
             if insysmsg "cannot drop anything"
                 drop backpack -1 -1 -1
             endif
 
-            wait config__delay_long
+            wait wait__long
             overhead 'You drop some gold on the ground.' 55
         else
-            if timer "timer__overhead_message" > config__overhead_message_delay
+            if timer "timer__overhead_message" > cooldown__overhead_message
                 overhead "Overweight and no gold to drop." 32
                 settimer "timer__overhead_message" 0
             endif
@@ -338,7 +345,7 @@ while not dead
     if not findbuff 'Food Satisfaction'
         if findtype tray backpack as alias__found_food
             dclick alias__found_food
-            wait config__delay_short
+            wait wait__short
         endif
     endif
 
@@ -349,9 +356,9 @@ while not dead
         if not bandaging and skill "Healing" > config__heal_skill_min
             if findtype "clean bandage%s%" self
                 hotkey "Bandage Self"
-                wait config__delay_short
+                wait wait__short
             else
-                if timer "timer__overhead_message" > config__overhead_message_delay
+                if timer "timer__overhead_message" > cooldown__overhead_message
                     overhead "You are out of bandages." 32
                     settimer "timer__overhead_message" 0
                 endif
@@ -365,9 +372,9 @@ while not dead
     if paralyzed
         if findtype 3705 backpack 38
             yell "[Pouch"
-            wait config__delay_short
+            wait wait__short
         else
-            if timer "timer__overhead_message" > config__overhead_message_delay
+            if timer "timer__overhead_message" > cooldown__overhead_message
                 overhead "You are out of pouches." 32
                 settimer "timer__overhead_message" 0
             endif
@@ -382,18 +389,18 @@ while not dead
             getlabel alias__heal_potion label__heal_potion
 
             if "next usable" in label__heal_potion
-                if timer "timer__overhead_message" > config__overhead_message_delay
+                if timer "timer__overhead_message" > cooldown__overhead_message
                     overhead label__heal_potion 83
                     settimer "timer__overhead_message" 0
                 endif
             else
                 overhead "You drink a healing potion." 53
                 dclick alias__heal_potion
-                wait config__delay_short
-                cooldown "Heal Potion" config__heal_potion_cooldown
+                wait wait__short
+                cooldown "Heal Potion" cooldown__heal_potion
             endif
         else
-            if timer "timer__overhead_message" > config__overhead_message_delay
+            if timer "timer__overhead_message" > cooldown__overhead_message
                 overhead "You are out of healing potion." 32
                 settimer "timer__overhead_message" 0
             endif
@@ -408,9 +415,9 @@ while not dead
         if findtype "Orange Potion" self as alias__cure_potion
             overhead "You drink a cure potion." 44
             dclick alias__cure_potion
-            wait config__delay_short
+            wait wait__short
         else
-            if timer "timer__overhead_message" > config__overhead_message_delay
+            if timer "timer__overhead_message" > cooldown__overhead_message
                 overhead "You are out of cure potion." 32
                 settimer "timer__overhead_message" 0
             endif
@@ -424,9 +431,9 @@ while not dead
     if stam < config__stam_threshold and config__use_potion = 1 and not targetexists
         if findtype "Red Potion" backpack as alias__refresh_potion
             dclick alias__refresh_potion
-            wait config__delay_short
+            wait wait__short
         else
-            if timer "timer__overhead_message" > config__overhead_message_delay
+            if timer "timer__overhead_message" > cooldown__overhead_message
                 overhead "You are out of refresh potions." 32
                 settimer "timer__overhead_message" 0
             endif
@@ -439,9 +446,9 @@ while not dead
     if not findbuff 'Strength' and str <= config__str_threshold and config__use_potion = 1 and not targetexists and find var__combat_target ground -1 -1 12
         if findtype "White Potion" backpack as alias__strength_potion
             dclick alias__strength_potion
-            wait config__delay_short
+            wait wait__short
         else
-            if timer "timer__overhead_message" > config__overhead_message_delay
+            if timer "timer__overhead_message" > cooldown__overhead_message
                 overhead "You are out of strength potions." 32
                 settimer "timer__overhead_message" 0
             endif
@@ -454,9 +461,9 @@ while not dead
     if not findbuff 'Agility' and dex <= config__dex_threshold and config__use_potion = 1 and not targetexists and find var__combat_target ground -1 -1 12
         if findtype "Blue Potion" backpack as alias__agility_potion
             dclick alias__agility_potion
-            wait config__delay_short
+            wait wait__short
         else
-            if timer "timer__overhead_message" > config__overhead_message_delay
+            if timer "timer__overhead_message" > cooldown__overhead_message
                 overhead "You are out of agility potions." 32
                 settimer "timer__overhead_message" 0
             endif
@@ -469,9 +476,9 @@ while not dead
     if not findbuff 'Magic Resist Potion' and config__use_potion = 1 and not targetexists and find var__combat_target ground -1 -1 12
         if findtype "Black Potion" backpack as alias__resist_potion
             dclick alias__resist_potion
-            wait config__delay_short
+            wait wait__short
         else
-            if timer "timer__overhead_message" > config__overhead_message_delay
+            if timer "timer__overhead_message" > cooldown__overhead_message
                 overhead "You are out of magic resist potions." 32
                 settimer "timer__overhead_message" 0
             endif
@@ -486,7 +493,7 @@ while not dead
     // stale instrument prompt cannot hijack a cursor this useskill never opened.
     if config__use_bard_song = 1 and not targetexists and cooldown "Discord" = 0 and cooldown "Music" = 0 and not findbuff "song of discordance"
         useskill 'Discordance'
-        waitfortarget 1000
+        waitfortarget wait__target
 
         if insysmsg "What instrument"
             target var__my_instrument
@@ -498,7 +505,7 @@ while not dead
 
     if config__use_bard_song = 1 and not targetexists and cooldown "Provo" = 0 and cooldown "Music" = 0 and not findbuff "song of provocation"
         useskill 'Provocation'
-        waitfortarget 1000
+        waitfortarget wait__target
 
         if insysmsg "What instrument"
             target var__my_instrument
@@ -510,7 +517,7 @@ while not dead
 
     if config__use_bard_song = 1 and not targetexists and cooldown "Peace" = 0 and cooldown "Music" = 0 and not findbuff "song of peacemaking"
         useskill 'Peacemaking'
-        waitfortarget 1000
+        waitfortarget wait__target
 
         if insysmsg "What instrument"
             target var__my_instrument
@@ -531,7 +538,7 @@ while not dead
                 settimer "timer__combat_target_grace" 0
             else
                 useskill 'Peacemaking'
-                waitfortarget 1000
+                waitfortarget wait__target
 
                 while targetexists
                     if insysmsg "What instrument shall you play"
@@ -541,14 +548,14 @@ while not dead
 
                     if dead alias__peace_target or var__combat_target != alias__peace_target
                         hotkey "Cancel Current Target"
-                        wait config__delay_short
+                        wait wait__short
                     else
                         target alias__peace_target
-                        wait config__delay_short
+                        wait wait__short
                     endif
                 endwhile
 
-                wait config__delay_short
+                wait wait__short
             endif
         endif
     endif
@@ -564,7 +571,7 @@ while not dead
                 settimer "timer__combat_target_grace" 0
             else
                 useskill 'Discordance'
-                waitfortarget 500
+                waitfortarget wait__target
 
                 while targetexists
                     if insysmsg "What instrument shall you play"
@@ -574,14 +581,14 @@ while not dead
 
                     if dead alias__disco_target or var__combat_target != alias__disco_target
                         hotkey "Cancel Current Target"
-                        wait config__delay_short
+                        wait wait__short
                     else
                         target alias__disco_target
-                        wait config__delay_short
+                        wait wait__short
                     endif
                 endwhile
 
-                wait config__delay_short
+                wait wait__short
             endif
         endif
     endif
@@ -592,7 +599,7 @@ while not dead
     if not warmode and not targetexists and find var__combat_target ground -1 -1 10 as alias__virtuoso_target
         if skill "Discordance" > 0 and cooldown "Discord" = 0 and cooldown "Music" = 0 and not findbuff "Virtuoso"
             useskill 'Discordance'
-            waitfortarget 500
+            waitfortarget wait__target
 
             while targetexists
                 if insysmsg "What instrument shall you play"
@@ -602,14 +609,14 @@ while not dead
 
                 if dead alias__virtuoso_target or var__combat_target != alias__virtuoso_target
                     hotkey "Cancel Current Target"
-                    wait config__delay_short
+                    wait wait__short
                 else
                     target alias__virtuoso_target
-                    wait config__delay_short
+                    wait wait__short
                 endif
             endwhile
 
-            wait config__delay_short
+            wait wait__short
         endif
 
     endif
@@ -625,11 +632,8 @@ while not dead
     // overhead message, not a system message, so insysmsg cannot read it. The cache is
     // refreshed from the label on a timer, which also catches a stance changed by hand.
     //
-    // UNVERIFIED: the command name below. Throwing uses [ThrowingStance1..5 and this assumes
-    // [MaceStance1..5 follows the same shape. Confirm it in the in game command list before
-    // trusting this block, and fix the five say lines if it differs.
     if config__use_codex_stance = 1 and var__stance_disabled = 0 and not pvp
-        if timer "timer__stance_resync" > config__stance_resync_delay
+        if timer "timer__stance_resync" > cooldown__stance_resync
             @setvar! var__stance_active 0
             settimer "timer__stance_resync" 0
         endif
@@ -640,7 +644,7 @@ while not dead
             @setvar! var__stance_want config__stance_sunder
         endif
 
-        if var__stance_want != var__stance_active and timer "timer__stance_retry" > config__stance_retry_delay
+        if var__stance_want != var__stance_active and timer "timer__stance_retry" > cooldown__stance_retry
             settimer "timer__stance_retry" 0
 
             if findtype 11888 backpack as alias__macing_codex
@@ -667,15 +671,15 @@ while not dead
 
                 if var__stance_disabled = 0 and var__stance_want != var__stance_active
                     if var__stance_want = 1
-                        say "[MaceStance1"
+                        say "[MacingStance1"
                     elseif var__stance_want = 2
-                        say "[MaceStance2"
+                        say "[MacingStance2"
                     elseif var__stance_want = 3
-                        say "[MaceStance3"
+                        say "[MacingStance3"
                     elseif var__stance_want = 4
-                        say "[MaceStance4"
+                        say "[MacingStance4"
                     elseif var__stance_want = 5
-                        say "[MaceStance5"
+                        say "[MacingStance5"
                     endif
 
                     // Assume it took. Saying it again before the label catches up would risk
@@ -697,7 +701,7 @@ while not dead
     // # WEAPON ABILITY
     // ################################################################################
     // Pummel, Stun and Smash share one gauge that refills in 24 to 60 seconds, so this
-    // speaks at most once per config__ability_cooldown window.
+    // speaks at most once per cooldown__ability window.
     //
     // Pummel ramps 10% per hit to a 50% cap over 15 seconds. Smash is one hit at 300% and
     // roots the player for 1.5 seconds. Both are scaled by weapon speed and that formula is
@@ -720,6 +724,6 @@ while not dead
         endif
 
         overhead "Pummel ability." 32
-        cooldown "Ability" config__ability_cooldown
+        cooldown "Ability" cooldown__ability
     endif
 endwhile
