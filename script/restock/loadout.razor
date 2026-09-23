@@ -6,16 +6,59 @@ clearignore
 setvar var_global_waiting_time 300
 setvar var_global_waiting_target_time 2000
 
-setvar var_my_barrel_container "0x450581D2"
-setvar var_my_recall_scroll_container "0x45147618"
-setvar var_my_furniture_container "0x488AC23E"
-setvar var_my_wand_container "0x45147DD7"
-setvar var_my_resource_stockpile "0x49C8351F"
-setvar var_my_magic_item_recycler "0x462490DB"
-setvar var_my_repair_bench "0x439B7713"
-setvar var_my_storage_shelf "0x41FCEC56"
-setvar var_my_bank_deposit_safe "0x4625F87C"
-setvar var_my_wizard_satchel "0x49F2F20C"
+// Personal containers. Each is asked for once and kept in your Razor profile, so no
+// serial sits in this shared file. To point one somewhere else, run unsetvar on its
+// name from another script and rerun this one.
+if not varexist var_my_barrel_container
+    overhead "Target the barrel container" 55
+    setvar var_my_barrel_container
+endif
+
+if not varexist var_my_recall_scroll_container
+    overhead "Target the recall scroll container" 55
+    setvar var_my_recall_scroll_container
+endif
+
+if not varexist var_my_furniture_container
+    overhead "Target the furniture the containers sit in" 55
+    setvar var_my_furniture_container
+endif
+
+if not varexist var_my_wand_container
+    overhead "Target the wand container" 55
+    setvar var_my_wand_container
+endif
+
+if not varexist var_my_resource_stockpile
+    overhead "Target the resource stockpile" 55
+    setvar var_my_resource_stockpile
+endif
+
+if not varexist var_my_magic_item_recycler
+    overhead "Target the magic item recycler" 55
+    setvar var_my_magic_item_recycler
+endif
+
+if not varexist var_my_repair_bench
+    overhead "Target the repair bench" 55
+    setvar var_my_repair_bench
+endif
+
+if not varexist var_my_storage_shelf
+    overhead "Target the storage shelf" 55
+    setvar var_my_storage_shelf
+endif
+
+if not varexist var_my_bank_deposit_safe
+    overhead "Target the bank deposit safe" 55
+    setvar var_my_bank_deposit_safe
+endif
+
+if not varexist var_my_wizard_satchel
+    overhead "Target the wizard satchel" 55
+    setvar var_my_wizard_satchel
+endif
+
 setvar var_my_recall_scroll 0
 
 setvar var_use_magic_instrument_item 0
@@ -53,7 +96,7 @@ endif
 // ####################################################################################
 if find var_my_bank_deposit_safe var_my_furniture_container and findtype 3821 backpack
     overhead "Bank Deposit safe" 82
-    menu 0x4625F87C 0
+    menu var_my_bank_deposit_safe 0
     wait var_global_waiting_time
 endif
 
