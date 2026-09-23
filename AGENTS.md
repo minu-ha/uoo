@@ -55,7 +55,8 @@
 
 ## Razor 스크립트 컨벤션
 
-기준 파일은 `script/combat/bard-necro-eval.razor`. 새 코드는 이 규칙을 따르고, 기존 파일을 고칠 때는 그 파일 스타일을 유지한다.
+기준 파일은 `script/combat/bard-throwing.razor` 와 `script/restock/loadout.razor`. 새 코드는 이 규칙을 따르고,
+아직 옮기지 못한 파일을 고칠 때는 그 파일 스타일을 유지한다.
 
 **헤더** — 직접 만든 스크립트는 첫 줄에 한 줄 설명, 둘째 줄에 전제조건.
 
@@ -79,18 +80,50 @@
 # ####################################################################################
 ```
 
-**변수**
-- 이름은 `var_` 접두, snake_case.
-- 스크립트 안 값은 `@setvar! var_x` (실행 중만 유지).
-- 컨테이너 serial처럼 캐릭터별로 고정되는 값만 `setvar` (영속). 처음 쓰는 곳에서 `if not varexist` 로 감싸고, 없으면 `overhead` 로 세팅을 요구한다.
-  - **serial 리터럴(`0x45147618` 같은 값)을 스크립트에 쓰지 않는다.** `script/` 는 공유 파일이라 남의 컨테이너 번호가 pull 한 사람 모두의 게임에 들어간다. 개인 값은 아래 패턴으로 프로필에 저장하고, 스크립트에는 변수 이름만 남긴다.
-    ```
-    if not varexist var_my_loot_chest
-    	overhead "Target your loot chest" 55
-    	setvar var_my_loot_chest
-    endif
-    ```
-    `setvar 이름` 은 타겟을 요구하고 그 serial 을 프로필 script variable 로 저장한다 (`setvar!` 는 실행 중에만 유지). `restock/`, `loot/`, `gather/` 일부에 아직 리터럴이 남아 있으니 그 파일을 손볼 때 이 패턴으로 바꾼다.
+**변수 이름** — 접두로 무엇인지 드러낸다. 단어는 snake_case, 접두는 **더블 언더스코어**로 끊는다.
+
+| 접두 | 무엇 | 수명 |
+|---|---|---|
+| `config__` | 손으로 조정하는 설정. 파일 맨 위에 모아 둔다 | 실행 중 |
+| `wait__` | 얼마나 쉬는지, 타겟 커서를 얼마나 기다리는지 | 실행 중 |
+| `cooldown__` | `timer__` 나 `cooldown` 과 비교하는 임계값 | 실행 중 |
+| `var__` | 이 스크립트가 들고 있는 상태 | 실행 중 |
+| `alias__` | `find` / `findtype` 의 `as` 바인딩 결과 | 실행 중 |
+| `label__` | `getlabel` 결과 | 실행 중 |
+| `timer__` | `createtimer` / `settimer` 대상 | 실행 중 |
+| `global__` | **프로필에 저장되고 스크립트 사이에서 공유되는 값** | 영속 |
+
+- 실행 중만 쓰는 값은 전부 `@setvar!`. 영속은 `global__` 뿐이고 `setvar` 를 쓴다.
+- **`global__` 이름을 바꾸면 프로필의 기존 항목과 연결이 끊긴다.** 이름이 곧 키라서, 바꾸면 전부 다시 타겟해야 하고 프로필에 옛 항목이 고아로 남는다. 같은 이름을 쓰는 파일이 여러 개면 한 커밋에서 같이 바꾼다.
+
+**serial 리터럴(`0x45147618` 같은 값)을 스크립트에 쓰지 않는다.** `script/` 는 공유 파일이라 남의 컨테이너 번호가
+pull 한 사람 모두의 게임에 들어간다. 개인 값은 프로필에 저장하고 스크립트에는 이름만 남긴다.
+
+```
+if not varexist global__my_loot_chest
+    overhead "Target your loot chest" 55
+    setvar global__my_loot_chest
+endif
+```
+
+`setvar 이름` 은 타겟을 요구하고 그 serial 을 프로필 script variable 로 저장한다.
+
+**`varexist` 는 선언 여부만 본다.** 잘못 타겟한 값이 들어 있어도 참이라 영영 안 고쳐진다. 그 물건 앞에 서 있는 것이
+보장되는 스크립트에서는 `find` 로 실제 유효성까지 확인하고, 아니면 다시 요구한다.
+
+```
+if not varexist global__my_loot_chest or not find global__my_loot_chest ground -1 -1 3
+    unsetvar global__my_loot_chest
+    overhead "Target your loot chest" 55
+    setvar global__my_loot_chest
+endif
+```
+
+`find` 는 클라이언트가 지금 인식하는 것만 찾으므로, 집에 있는 상자를 던전에서 검사하면 멀쩡한 값을 지운다.
+**대상 앞에 서 있는 것이 확실한 곳에만** 붙인다.
+
+**산술을 쓰지 않는다.** `@setvar! var__n var__n + 1` 같은 식은 저장소에 선례가 없고 Razor 가 받는지 확인되지 않았다.
+개수가 필요하면 `counttype` 으로 실제 상태를 다시 읽는다.
 
 **타이머**
 - `if not timerexists "x_timer"` → `createtimer` → `settimer`. 이름은 `_timer` 접미.
