@@ -10,8 +10,8 @@
 //   words are snake_case, the prefix is split off with a double underscore
 //
 // Gear
-//   flail in righthand, parrying gauche in lefthand. The old layout put a two handed staff
-//   in lefthand on its own and had no shield slot.
+//   a two handed Grinding Medium staff in lefthand, offhand stays empty. A two handed
+//   weapon reads as lhandempty false and rhandempty true, so the equip test uses lhandempty.
 //
 // warmode policy
 //   warmode ON is the manual control window, so barding stands down there.
@@ -33,7 +33,7 @@ cleardragdrop
 // ####################################################################################
 // # CONFIG
 // ####################################################################################
-@setvar! config__use_potion 1
+@setvar! config__use_potion 0
 @setvar! config__use_bard_song 1
 @setvar! config__use_weapon_ability 1
 
@@ -143,6 +143,10 @@ if not varexist var__stance_disabled
     @setvar! var__stance_disabled 0
 endif
 
+if not varexist var__ability_want
+    @setvar! var__ability_want 0
+endif
+
 // ####################################################################################
 // # INSTRUMENT
 // ####################################################################################
@@ -211,16 +215,19 @@ while not dead
     // ################################################################################
     // # WEAPON
     // ################################################################################
-    // 30999 / flail. It is one handed and takes righthand, so the parrying gauche in the
-    // SHIELD block below can hold lefthand. This replaces the old two handed staff layout,
-    // where the weapon sat in lefthand on its own and there was no shield slot.
+    // 3568 / 5112 / 3721 are black, gnarled and quarter staff, the two handed Grinding
+    // Medium group. Two handed is worth more here than a parrying gauche in the offhand:
+    // parry chance is 50% * (Parrying Skill / 100) and this template has no printed
+    // Parrying, so the gauche only buys what its own effective skill grants, while two
+    // handed is a flat +25% melee damage that is always on.
+    // rhandempty stays true while a two handed weapon is wielded, so test lhandempty.
     // Re-scan when the cache is empty or the weapon is gone.
-    if rhandempty
+    if lhandempty
         if not find var__my_weapon backpack
             @setvar! var__my_weapon 0
 
             if config__use_magic_weapon = 1
-                while findtype 30999 backpack config__aspect_hue as alias__found_magic_weapon
+                while findtype 3568|5112|3721 backpack config__aspect_hue as alias__found_magic_weapon
                     getlabel alias__found_magic_weapon label__found_magic_weapon
 
                     if "vanquishing" in label__found_magic_weapon or "power" in label__found_magic_weapon or "force" in label__found_magic_weapon or "might" in label__found_magic_weapon
@@ -233,8 +240,8 @@ while not dead
 
                 @clearignore
             else
-                // Plain mode takes the first flail at the aspect hue without reading its label.
-                if findtype 30999 backpack config__aspect_hue as alias__found_craft_weapon
+                // Plain mode takes the first staff at the aspect hue without reading its label.
+                if findtype 3568|5112|3721 backpack config__aspect_hue as alias__found_craft_weapon
                     @setvar! var__my_weapon alias__found_craft_weapon
                 endif
             endif
@@ -242,30 +249,11 @@ while not dead
 
         if find var__my_weapon backpack as alias__equip_weapon
             lift alias__equip_weapon
-            drop self righthand
-            wait config__delay_long
-        else
-            if timer "timer__overhead_message" > config__overhead_message_delay
-                overhead "No aspect weapon in backpack." 32
-                settimer "timer__overhead_message" 0
-            endif
-        endif
-    endif
-
-    // ################################################################################
-    // # SHIELD
-    // ################################################################################
-    // 31002 / parrying gauche, listed under Shields in library/item-list.razor:1080.
-    // Matched on graphic with no hue filter so a plain gauche still equips, and no cache is
-    // kept because this path never calls getlabel.
-    if lhandempty
-        if findtype 31002 backpack as alias__equip_shield
-            lift alias__equip_shield
             drop self lefthand
             wait config__delay_long
         else
             if timer "timer__overhead_message" > config__overhead_message_delay
-                overhead "No parrying gauche in backpack." 32
+                overhead "No aspect weapon in backpack." 32
                 settimer "timer__overhead_message" 0
             endif
         endif
@@ -711,20 +699,23 @@ while not dead
     // Pummel, Stun and Smash share one gauge that refills in 24 to 60 seconds, so this
     // speaks at most once per config__ability_cooldown window.
     //
-    // Pummel over Smash: it ramps 10% per hit to a 50% cap over 15 seconds, so a fast weapon
-    // reaches the cap early and spends most of the window there. Smash is one hit at 300%
-    // and roots the player for 1.5 seconds, which pays on a slow weapon, not a flail.
-    // Both are scaled by weapon speed, and that formula is not documented, so this is a
-    // judgement call rather than a measured one.
+    // Pummel ramps 10% per hit to a 50% cap over 15 seconds. Smash is one hit at 300% and
+    // roots the player for 1.5 seconds. Both are scaled by weapon speed and that formula is
+    // not documented, so which one wins on a Grinding Medium staff is not settled. Pummel is
+    // the pick for now. To switch, change the one line below to config__ability_smash.
     //
     // Lifted out of the DISCO and VIRTUOSO block, where it used to sit. It was only ever
     // reached on passes that block ran, and it is not a bard action.
     if config__use_weapon_ability = 1 and not pvp and cooldown "Ability" = 0 and find var__combat_target ground -1 -1 2
-        if config__ability_pummel = 1
+        @setvar! var__ability_want config__ability_pummel
+
+        // The slot number is what the command carries, so this maps slot to command. It has
+        // a branch per slot because say takes a literal, not a variable.
+        if var__ability_want = 1
             say "[WeaponAbility1"
-        elseif config__ability_pummel = 2
+        elseif var__ability_want = 2
             say "[WeaponAbility2"
-        elseif config__ability_pummel = 3
+        elseif var__ability_want = 3
             say "[WeaponAbility3"
         endif
 
