@@ -7,16 +7,23 @@
 //   alias__*   : result of an as binding from find / findtype
 //   label__*   : result of getlabel
 //   timer__*   : createtimer / settimer target
-//   words are kebab-case, the prefix is split off with a double underscore
+//   words are snake_case, the prefix is split off with a double underscore
+//
+// Gear
+//   flail in righthand, parrying gauche in lefthand. The old layout put a two handed staff
+//   in lefthand on its own and had no shield slot.
 //
 // warmode policy
-//   warmode ON is the manual control window, so barding and weapon ability both stand down.
-//   disco / peace / virtuoso / weaponability only run while warmode is OFF.
+//   warmode ON is the manual control window, so barding stands down there.
+//   disco / peace / virtuoso only run while warmode is OFF.
+//   codex stance and weapon ability ignore warmode: a stance is a passive mode, and the
+//   ability gauge fills whether or not the player drives the fight by hand.
 //
 // Literal policy
-//   wait / settimer / cooldown / lift amount / comparison right-hand sides are lifted to variables.
-//   find and findtype source / hue / quantity / range, plus waitfortarget and overhead hue,
-//   stay as numeric literals: this repo has no precedent for passing variables there.
+//   wait / settimer / cooldown / lift amount / comparison right-hand sides and the findtype
+//   aspect hue are lifted to variables.
+//   find and findtype source / quantity / range, plus waitfortarget and overhead hue, stay
+//   as numeric literals.
 
 clearsysmsg
 clearall
@@ -35,6 +42,29 @@ cleardragdrop
 @setvar! config__use_magic_weapon 0
 @setvar! config__use_magic_instrument 0
 
+// Aspect hue the weapon search filters on. Change this one value when the aspect changes.
+// 2241 - lyric , 2767 - earth
+@setvar! config__aspect_hue 2767
+
+// Codex stance and weapon ability. The slot numbers follow the codex list order, so if the
+// in game order differs only these numbers change.
+// UNVERIFIED: the stance command name. Throwing uses [ThrowingStance1..5, so mace should be
+// [MaceStance1..5, but that has not been confirmed in game. Check the command list first.
+@setvar! config__use_codex_stance 1
+@setvar! config__stance_aggressive 1
+@setvar! config__stance_defensive 2
+@setvar! config__stance_cleave 3
+@setvar! config__stance_wildswing 4
+@setvar! config__stance_sunder 5
+@setvar! config__ability_pummel 1
+@setvar! config__ability_stun 2
+@setvar! config__ability_smash 3
+
+// Defensive latches on above the enter line and only releases below the leave line, so the
+// stance cannot flap while bandages tick. Both are hit deficit, not percent.
+@setvar! config__defensive_enter_diff 60
+@setvar! config__defensive_leave_diff 48
+
 // Survival thresholds
 @setvar! config__heal_potion_diff 40
 @setvar! config__heal_skill_min 10
@@ -51,7 +81,11 @@ cleardragdrop
 @setvar! config__overhead_message_delay 2700
 @setvar! config__target_grace_delay 1200
 @setvar! config__heal_potion_cooldown 10000
-@setvar! config__ability_cooldown 5000
+// Pummel, Stun and Smash share one gauge that refills in 24 to 60 seconds, so one minute is
+// the safe spacing. Shorter only wastes chat lines, it cannot fire the ability early.
+@setvar! config__ability_cooldown 60000
+@setvar! config__stance_retry_delay 3000
+@setvar! config__stance_resync_delay 30000
 
 // ####################################################################################
 // # TIMER
@@ -68,6 +102,18 @@ endif
 
 settimer "timer__combat_target_grace" config__target_grace_delay
 
+if not timerexists "timer__stance_retry"
+    createtimer "timer__stance_retry"
+endif
+
+settimer "timer__stance_retry" config__stance_retry_delay
+
+if not timerexists "timer__stance_resync"
+    createtimer "timer__stance_resync"
+endif
+
+settimer "timer__stance_resync" 0
+
 // ####################################################################################
 // # STATE
 // ####################################################################################
@@ -81,6 +127,20 @@ endif
 
 if not varexist var__combat_target
     @setvar! var__combat_target 0
+endif
+
+// Starts on Sunder so the dead band between the two Defensive lines has a defined answer on
+// the very first pass. var__stance_active 0 means unknown, which forces a label read.
+if not varexist var__stance_want
+    @setvar! var__stance_want config__stance_sunder
+endif
+
+if not varexist var__stance_active
+    @setvar! var__stance_active 0
+endif
+
+if not varexist var__stance_disabled
+    @setvar! var__stance_disabled 0
 endif
 
 // ####################################################################################
@@ -151,15 +211,16 @@ while not dead
     // ################################################################################
     // # WEAPON
     // ################################################################################
-    // 3568 / 5112 / 3721 are staves, so the weapon takes the lefthand layer.
-    // rhandempty stays true while a two handed weapon is wielded, so test lhandempty instead.
+    // 30999 / flail. It is one handed and takes righthand, so the parrying gauche in the
+    // SHIELD block below can hold lefthand. This replaces the old two handed staff layout,
+    // where the weapon sat in lefthand on its own and there was no shield slot.
     // Re-scan when the cache is empty or the weapon is gone.
-    if lhandempty
+    if rhandempty
         if not find var__my_weapon backpack
             @setvar! var__my_weapon 0
 
             if config__use_magic_weapon = 1
-                while findtype 3568|5112|3721 backpack 2241 as alias__found_magic_weapon
+                while findtype 30999 backpack config__aspect_hue as alias__found_magic_weapon
                     getlabel alias__found_magic_weapon label__found_magic_weapon
 
                     if "vanquishing" in label__found_magic_weapon or "power" in label__found_magic_weapon or "force" in label__found_magic_weapon or "might" in label__found_magic_weapon
@@ -172,8 +233,8 @@ while not dead
 
                 @clearignore
             else
-                // Plain mode takes any staff of these graphics regardless of hue.
-                if findtype 3568|5112|3721 backpack 2241 as alias__found_craft_weapon
+                // Plain mode takes the first flail at the aspect hue without reading its label.
+                if findtype 30999 backpack config__aspect_hue as alias__found_craft_weapon
                     @setvar! var__my_weapon alias__found_craft_weapon
                 endif
             endif
@@ -181,11 +242,30 @@ while not dead
 
         if find var__my_weapon backpack as alias__equip_weapon
             lift alias__equip_weapon
-            drop self lefthand
+            drop self righthand
             wait config__delay_long
         else
             if timer "timer__overhead_message" > config__overhead_message_delay
                 overhead "No aspect weapon in backpack." 32
+                settimer "timer__overhead_message" 0
+            endif
+        endif
+    endif
+
+    // ################################################################################
+    // # SHIELD
+    // ################################################################################
+    // 31002 / parrying gauche, listed under Shields in library/item-list.razor:1080.
+    // Matched on graphic with no hue filter so a plain gauche still equips, and no cache is
+    // kept because this path never calls getlabel.
+    if lhandempty
+        if findtype 31002 backpack as alias__equip_shield
+            lift alias__equip_shield
+            drop self lefthand
+            wait config__delay_long
+        else
+            if timer "timer__overhead_message" > config__overhead_message_delay
+                overhead "No parrying gauche in backpack." 32
                 settimer "timer__overhead_message" 0
             endif
         endif
@@ -414,9 +494,9 @@ while not dead
     // # BARD SONG BUFF
     // ################################################################################
     // The aspect resets the Music cooldown right after a song, so all three are tried in one pass.
-    // clearsysmsg in front of each block keeps a leftover message from the previous song out of the check.
+    // No clearsysmsg in front of the blocks. It wiped messages other blocks still needed, and a
+    // stale instrument prompt cannot hijack a cursor this useskill never opened.
     if config__use_bard_song = 1 and not targetexists and cooldown "Discord" = 0 and cooldown "Music" = 0 and not findbuff "song of discordance"
-        clearsysmsg
         useskill 'Discordance'
         waitfortarget 1000
 
@@ -429,7 +509,6 @@ while not dead
     endif
 
     if config__use_bard_song = 1 and not targetexists and cooldown "Provo" = 0 and cooldown "Music" = 0 and not findbuff "song of provocation"
-        clearsysmsg
         useskill 'Provocation'
         waitfortarget 1000
 
@@ -442,7 +521,6 @@ while not dead
     endif
 
     if config__use_bard_song = 1 and not targetexists and cooldown "Peace" = 0 and cooldown "Music" = 0 and not findbuff "song of peacemaking"
-        clearsysmsg
         useskill 'Peacemaking'
         waitfortarget 1000
 
@@ -455,40 +533,6 @@ while not dead
     endif
 
     // ################################################################################
-    // # DISCO
-    // ################################################################################
-    if not warmode and not targetexists and find var__combat_target ground -1 -1 10 as alias__disco_target
-        if skill "Discordance" > 0 and cooldown "Discord" = 0 and cooldown "Music" = 0
-            getlabel alias__disco_target label__disco_target
-
-            if "discord" in label__disco_target
-                settimer "timer__combat_target_grace" 0
-            else
-                clearsysmsg
-                useskill 'Discordance'
-                waitfortarget 500
-
-                while targetexists
-                    if insysmsg "What instrument shall you play"
-                        target var__my_instrument
-                        replay
-                    endif
-
-                    if dead alias__disco_target or var__combat_target != alias__disco_target
-                        hotkey "Cancel Current Target"
-                        wait config__delay_short
-                    else
-                        target alias__disco_target
-                        wait config__delay_short
-                    endif
-                endwhile
-
-                wait config__delay_short
-            endif
-        endif
-    endif
-
-    // ################################################################################
     // # PEACE
     // ################################################################################
     if not warmode and not targetexists and find var__combat_target ground -1 -1 10 as alias__peace_target
@@ -497,8 +541,7 @@ while not dead
 
             if "pacified" in label__peace_target or "barding break" in label__peace_target
                 settimer "timer__combat_target_grace" 0
-            elseif "discord" in label__peace_target
-                clearsysmsg
+            else
                 useskill 'Peacemaking'
                 waitfortarget 1000
 
@@ -523,11 +566,43 @@ while not dead
     endif
 
     // ################################################################################
+    // # DISCO
+    // ################################################################################
+    if not warmode and not targetexists and find var__combat_target ground -1 -1 10 as alias__disco_target
+        if skill "Discordance" > 0 and cooldown "Discord" = 0 and cooldown "Music" = 0
+            getlabel alias__disco_target label__disco_target
+
+            if "discord" in label__disco_target
+                settimer "timer__combat_target_grace" 0
+            else
+                useskill 'Discordance'
+                waitfortarget 500
+
+                while targetexists
+                    if insysmsg "What instrument shall you play"
+                        target var__my_instrument
+                        replay
+                    endif
+
+                    if dead alias__disco_target or var__combat_target != alias__disco_target
+                        hotkey "Cancel Current Target"
+                        wait config__delay_short
+                    else
+                        target alias__disco_target
+                        wait config__delay_short
+                    endif
+                endwhile
+
+                wait config__delay_short
+            endif
+        endif
+    endif
+
+    // ################################################################################
     // # DISCO & VIRTUOSO
     // ################################################################################
     if not warmode and not targetexists and find var__combat_target ground -1 -1 10 as alias__virtuoso_target
         if skill "Discordance" > 0 and cooldown "Discord" = 0 and cooldown "Music" = 0 and not findbuff "Virtuoso"
-            clearsysmsg
             useskill 'Discordance'
             waitfortarget 500
 
@@ -549,12 +624,111 @@ while not dead
             wait config__delay_short
         endif
 
-        // ############################################################################
-        // # WEAPON ABILITY
-        // ############################################################################
-        if config__use_weapon_ability = 1 and cooldown "Ability" = 0 and find var__combat_target ground -1 -1 2
-            say "[weaponability1"
-            cooldown "Ability" config__ability_cooldown
+    endif
+
+    // ################################################################################
+    // # CODEX STANCE
+    // ################################################################################
+    // Sunder is the default: it adds armor pierce on top of a flat damage bonus, and the
+    // pierce is what a flail is for. Defensive takes over while hurt, trading damage for a
+    // resistance buff that every swing refreshes.
+    //
+    // The codex label is the only source of truth. Outlands announces a stance change as an
+    // overhead message, not a system message, so insysmsg cannot read it. The cache is
+    // refreshed from the label on a timer, which also catches a stance changed by hand.
+    //
+    // UNVERIFIED: the command name below. Throwing uses [ThrowingStance1..5 and this assumes
+    // [MaceStance1..5 follows the same shape. Confirm it in the in game command list before
+    // trusting this block, and fix the five say lines if it differs.
+    if config__use_codex_stance = 1 and var__stance_disabled = 0 and not pvp
+        if timer "timer__stance_resync" > config__stance_resync_delay
+            @setvar! var__stance_active 0
+            settimer "timer__stance_resync" 0
         endif
+
+        if diffhits > config__defensive_enter_diff
+            @setvar! var__stance_want config__stance_defensive
+        elseif diffhits < config__defensive_leave_diff
+            @setvar! var__stance_want config__stance_sunder
+        endif
+
+        if var__stance_want != var__stance_active and timer "timer__stance_retry" > config__stance_retry_delay
+            settimer "timer__stance_retry" 0
+
+            if findtype 11888 backpack as alias__macing_codex
+                getlabel alias__macing_codex label__macing_codex
+
+                // All five names are tested, not just the two this script drives. Finding
+                // one of the others means the label works and the player is parked on
+                // another stance. Finding none means the label does not carry the stance at
+                // all, and blind switching would risk toggling the active stance off.
+                if "Sunder" in label__macing_codex
+                    @setvar! var__stance_active config__stance_sunder
+                elseif "Defensive" in label__macing_codex
+                    @setvar! var__stance_active config__stance_defensive
+                elseif "Aggressive" in label__macing_codex
+                    @setvar! var__stance_active config__stance_aggressive
+                elseif "Cleave" in label__macing_codex
+                    @setvar! var__stance_active config__stance_cleave
+                elseif "Wild Swing" in label__macing_codex
+                    @setvar! var__stance_active config__stance_wildswing
+                else
+                    @setvar! var__stance_disabled 1
+                    overhead "No stance on codex label." 33
+                endif
+
+                if var__stance_disabled = 0 and var__stance_want != var__stance_active
+                    if var__stance_want = 1
+                        say "[MaceStance1"
+                    elseif var__stance_want = 2
+                        say "[MaceStance2"
+                    elseif var__stance_want = 3
+                        say "[MaceStance3"
+                    elseif var__stance_want = 4
+                        say "[MaceStance4"
+                    elseif var__stance_want = 5
+                        say "[MaceStance5"
+                    endif
+
+                    // Assume it took. Saying it again before the label catches up would risk
+                    // toggling the stance straight back off.
+                    @setvar! var__stance_active var__stance_want
+                    settimer "timer__stance_resync" 0
+
+                    if var__stance_want = config__stance_defensive
+                        overhead "Defensive stance." 32
+                    else
+                        overhead "Sunder stance." 32
+                    endif
+                endif
+            endif
+        endif
+    endif
+
+    // ################################################################################
+    // # WEAPON ABILITY
+    // ################################################################################
+    // Pummel, Stun and Smash share one gauge that refills in 24 to 60 seconds, so this
+    // speaks at most once per config__ability_cooldown window.
+    //
+    // Pummel over Smash: it ramps 10% per hit to a 50% cap over 15 seconds, so a fast weapon
+    // reaches the cap early and spends most of the window there. Smash is one hit at 300%
+    // and roots the player for 1.5 seconds, which pays on a slow weapon, not a flail.
+    // Both are scaled by weapon speed, and that formula is not documented, so this is a
+    // judgement call rather than a measured one.
+    //
+    // Lifted out of the DISCO and VIRTUOSO block, where it used to sit. It was only ever
+    // reached on passes that block ran, and it is not a bard action.
+    if config__use_weapon_ability = 1 and not pvp and cooldown "Ability" = 0 and find var__combat_target ground -1 -1 2
+        if config__ability_pummel = 1
+            say "[WeaponAbility1"
+        elseif config__ability_pummel = 2
+            say "[WeaponAbility2"
+        elseif config__ability_pummel = 3
+            say "[WeaponAbility3"
+        endif
+
+        overhead "Pummel ability." 32
+        cooldown "Ability" config__ability_cooldown
     endif
 endwhile
