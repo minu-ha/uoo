@@ -2,6 +2,8 @@
 // Original credit for the concept to Demlar
 
 // Waits and timeouts - Adjust if you have issues with aspect applying, etc.
+@setvar! wait__short 300
+
 @setvar! gumpWait 300
 @setvar! globalTimeout 300
 @setvar! chattyScript 1
@@ -329,42 +331,42 @@ else
     endif
 endif
 
-if find var_my_wizard_satchel backpack
-    lift var_my_wizard_satchel
+if find global__my_wizard_satchel backpack
+    lift global__my_wizard_satchel
     drop self pants
-    wait var_global_waiting_time
+    wait wait__short
 endif
 
 if findtype 12215 backpack as quiver
     lift quiver
     drop self pants
-    wait var_global_waiting_time
+    wait wait__short
 endif
 
 if findtype 22198 backpack as short_pipe
     lift short_pipe
     drop self pants
-    wait var_global_waiting_time
+    wait wait__short
 endif
 
 if findtype 31217 backpack as travel_backpack
     dclick travel_backpack
-    wait var_global_waiting_time
+    wait wait__short
 endif
 
 if findtype 31164 backpack as hip_lantern
     dclick hip_lantern
-    wait var_global_waiting_time
+    wait wait__short
 endif
 
 if findtype 2597 backpack as lantern
     dclick lantern
-    wait var_global_waiting_time
+    wait wait__short
 endif
 
 if findtype 31158 backpack as black_rim_glasses
     dclick black_rim_glasses
-    wait var_global_waiting_time
+    wait wait__short
 endif
 
 

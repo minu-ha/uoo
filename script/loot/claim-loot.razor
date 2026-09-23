@@ -1,5 +1,5 @@
 # Put your share from the distribution chest into your own loot container.
-# Needs: var_my_loot_container (asked for on first run), container within 2 tiles
+# Needs: global__my_loot_container (asked for on first run), container within 2 tiles
 
 clearall
 clearsysmsg
@@ -8,13 +8,13 @@ clearignore
 
 # Personal container. Asked for once and kept in your Razor profile, so no serial sits in
 # this shared file. To point the script at something else, run unsetvar on the name and rerun.
-if not varexist var_my_loot_container
+if not varexist global__my_loot_container
     overhead "Target your own loot container" 55
-    setvar var_my_loot_container
+    setvar global__my_loot_container
 endif
 
-if not find var_my_loot_container ground -1 -1 2
-    overhead "cannot find var_my_loot_container" 34
+if not find global__my_loot_container ground -1 -1 2
+    overhead "cannot find global__my_loot_container" 34
     stop
 endif
 
@@ -179,7 +179,7 @@ foreach distribute_item in distribute_item_list
     overhead distribute_item_description 11
     lift distribute_item 60000
     wait 500
-    drop var_my_loot_container -1 -1 1
+    drop global__my_loot_container -1 -1 1
     wait 500
     @ignore distribute_item
 endfor
