@@ -199,39 +199,6 @@ else
 endif
 
 // ####################################################################################
-// # TOOLS
-// ####################################################################################
-// 3997 sewing kit, 20496 item identification wand. Both live in the wand container.
-//
-// This used to call the Restock 10 agent. The agent only carried the sewing kit, so the
-// identification wand was checked for and then never actually fetched. Pulling each item
-// by graphic fixes that, and it also keeps the list in the script where it can be read,
-// instead of in one player's profile.
-if find global__my_supply_box ground -1 -1 2
-    if not findtype 3997 backpack
-        if findtype 3997 global__my_supply_box as alias__found_sewing_kit
-            lift alias__found_sewing_kit 1
-            wait wait__short
-            drop backpack
-            wait wait__short
-        else
-            overhead "No sewing kit in the wand container." 33
-        endif
-    endif
-
-    if not findtype 20496 backpack
-        if findtype 20496 global__my_supply_box as alias__found_identification_wand
-            lift alias__found_identification_wand 1
-            wait wait__short
-            drop backpack
-            wait wait__short
-        else
-            overhead "No identification wand in the wand container." 33
-        endif
-    endif
-endif
-
-// ####################################################################################
 // # Bank Deposit safe
 // ####################################################################################
 if var__has_bank_deposit_safe = 1 and findtype 3821 backpack
@@ -267,20 +234,6 @@ if var__has_repair_bench = 1
 endif
 
 // ####################################################################################
-// # Storage shelf
-// ####################################################################################
-if var__has_storage_shelf = 1
-    overhead "Storage shelf" 82
-    menu global__my_storage_shelf 0
-    waitfortarget wait__target
-    target self
-    wait wait__short
-    gumpclose
-    menu global__my_storage_shelf 1
-    wait wait__short
-endif
-
-// ####################################################################################
 // # Magic item recycler
 // ####################################################################################
 if var__has_magic_item_recycler = 1
@@ -309,6 +262,53 @@ else
             setvar global__my_looting_pouch alias__found_pouch
         else
             setvar global__my_looting_pouch
+        endif
+    endif
+endif
+
+// ####################################################################################
+// # Storage shelf
+// ####################################################################################
+if var__has_storage_shelf = 1
+    overhead "Storage shelf" 82
+    menu global__my_storage_shelf 0
+    waitfortarget wait__target
+    target self
+    wait wait__short
+    gumpclose
+    menu global__my_storage_shelf 1
+    wait wait__short
+endif
+
+// ####################################################################################
+// # TOOLS
+// ####################################################################################
+// 3997 sewing kit, 20496 item identification wand. Both live in the wand container.
+//
+// This used to call the Restock 10 agent. The agent only carried the sewing kit, so the
+// identification wand was checked for and then never actually fetched. Pulling each item
+// by graphic fixes that, and it also keeps the list in the script where it can be read,
+// instead of in one player's profile.
+if find global__my_supply_box ground -1 -1 2
+    if not findtype 3997 backpack
+        if findtype 3997 global__my_supply_box as alias__found_sewing_kit
+            lift alias__found_sewing_kit 1
+            wait wait__short
+            drop backpack
+            wait wait__short
+        else
+            overhead "No sewing kit in the wand container." 33
+        endif
+    endif
+
+    if not findtype 20496 backpack
+        if findtype 20496 global__my_supply_box as alias__found_identification_wand
+            lift alias__found_identification_wand 1
+            wait wait__short
+            drop backpack
+            wait wait__short
+        else
+            overhead "No identification wand in the wand container." 33
         endif
     endif
 endif
@@ -358,10 +358,10 @@ endif
 
 
 // ####################################################################################
-// # Soritng items
+// # Sorting items
 // ####################################################################################
-clearall
-clearsysmsg
+// cleardragdrop and clearignore only. Nothing below reads the system message buffer, and a
+// clearall here would drop every alias the sections above bound.
 cleardragdrop
 clearignore
 #bandage "clean bandage%s%" 3617
@@ -387,7 +387,6 @@ while findtype 3740|3742|3762|3763|10245|20006|20008|20010|20012|20014|20016|204
     @ignore alias__found_item
 endwhile
 
-clearsysmsg
 cleardragdrop
 clearignore
 
@@ -451,7 +450,6 @@ endif
 // ####################################################################################
 // # Dress setting
 // ####################################################################################
-clearsysmsg
 cleardragdrop
 clearignore
 setvar! config__chatty 1
@@ -885,7 +883,6 @@ while findtype 47202|62764|2473|3710|41451|41452|3646|3647|3644|3645|41449|41450
     @ignore alias__found_container
 endwhile
 
-clearsysmsg
 cleardragdrop
 clearignore
 overhead "You finish loadout" 53
