@@ -79,14 +79,34 @@ wait var_global_waiting_time
 
 
 // ####################################################################################
-// # AGENT
+// # TOOLS
 // ####################################################################################
+// 3997 sewing kit, 20496 item identification wand. Both live in the wand container.
+//
+// This used to call the Restock 10 agent. The agent only carried the sewing kit, so the
+// identification wand was checked for and then never actually fetched. Pulling each item
+// by graphic fixes that, and it also keeps the list in the script where it can be read,
+// instead of in one player's profile.
 if find var_my_wand_container ground -1 -1 2
-    if not findtype 3997 backpack or not findtype 20496 backpack
-        restock 10
-        waitfortarget var_global_waiting_target_time
-        if targetexists
-            target var_my_wand_container
+    if not findtype 3997 backpack
+        if findtype 3997 var_my_wand_container as found_sewing_kit
+            lift found_sewing_kit 1
+            wait var_global_waiting_time
+            drop backpack
+            wait var_global_waiting_time
+        else
+            overhead "No sewing kit in the wand container." 33
+        endif
+    endif
+
+    if not findtype 20496 backpack
+        if findtype 20496 var_my_wand_container as found_identification_wand
+            lift found_identification_wand 1
+            wait var_global_waiting_time
+            drop backpack
+            wait var_global_waiting_time
+        else
+            overhead "No identification wand in the wand container." 33
         endif
     endif
 endif
