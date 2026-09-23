@@ -372,41 +372,35 @@ while not dead
     # clearsysmsg further down the loop cannot wipe the planted line before it is read.
     # var__planted_step locks each mark, so a mark prints once and the pass after a planted
     # cannot reprint an earlier one.
-    #
-    # The step test and the timer test are nested rather than joined with and. Joining a
-    # plain variable equality to a timer comparison has no precedent in this file and Razor
-    # rejected it. Every line below is a shape the rest of the file already uses.
     if config__show_planted_timer = 1
         if insysmsg "now planted"
             settimer "timer__planted" 0
             @setvar! var__planted_step 0
         endif
 
-        if var__planted_step = 0
-            if timer "timer__planted" > cooldown__planted_2
-                overhead "Planted 2s." 73
-                @setvar! var__planted_step 1
-            endif
-        elseif var__planted_step = 1
-            if timer "timer__planted" > cooldown__planted_4
-                overhead "Planted 4s." 73
-                @setvar! var__planted_step 2
-            endif
-        elseif var__planted_step = 2
-            if timer "timer__planted" > cooldown__planted_6
-                overhead "Planted 6s." 73
-                @setvar! var__planted_step 3
-            endif
-        elseif var__planted_step = 3
-            if timer "timer__planted" > cooldown__planted_8
-                overhead "Planted 8s." 73
-                @setvar! var__planted_step 4
-            endif
-        elseif var__planted_step = 4
-            if timer "timer__planted" > cooldown__planted_10
-                overhead "Moving throws gone." 33
-                @setvar! var__planted_step 5
-            endif
+        if var__planted_step = 0 and timer "timer__planted" >= cooldown__planted_2
+            overhead "Planted 2s." 73
+            @setvar! var__planted_step 1
+        endif
+
+        if var__planted_step = 1 and timer "timer__planted" >= cooldown__planted_4
+            overhead "Planted 4s." 73
+            @setvar! var__planted_step 2
+        endif
+
+        if var__planted_step = 2 and timer "timer__planted" >= cooldown__planted_6
+            overhead "Planted 6s." 73
+            @setvar! var__planted_step 3
+        endif
+
+        if var__planted_step = 3 and timer "timer__planted" >= cooldown__planted_8
+            overhead "Planted 8s." 73
+            @setvar! var__planted_step 4
+        endif
+
+        if var__planted_step = 4 and timer "timer__planted" >= cooldown__planted_10
+            overhead "Moving throws gone." 33
+            @setvar! var__planted_step 5
         endif
     endif
 
