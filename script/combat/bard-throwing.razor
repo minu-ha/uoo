@@ -366,7 +366,7 @@ while not dead
     # Planted opens a 10 second window and does not refresh while you keep standing, so the
     # moving throws are gone at 10 seconds whether or not you spent them. Standing still
     # again only starts a new 3 second charge. This block reports the elapsed time so the
-    # window is visible; nothing else reads the timer or the step.
+    # window is visible. Nothing else reads the timer or the step.
     #
     # Sits directly under the instrument checks, where the old throw status block sat, so a
     # clearsysmsg further down the loop cannot wipe the planted line before it is read.
@@ -733,7 +733,7 @@ while not dead
     # # BARD SONG BUFF
     # ################################################################################
     # The aspect resets the Music cooldown right after a song, so all three are tried in one pass.
-    # No clearsysmsg in front of the blocks; see the buffer note in the file header.
+    # No clearsysmsg in front of the blocks. See the buffer note in the file header.
     if config__use_bard_song = 1 and not targetexists and cooldown "Discord" = 0 and cooldown "Music" = 0 and not findbuff "song of discordance"
         useskill 'Discordance'
         waitfortarget wait__target

@@ -64,6 +64,9 @@
 # Needs: organizer 1 (loot bag), cooldown "Skill", hotkey "Clear Scavenger Cache", var_my_loot_chest set
 ```
 
+**주석에 `;` 를 쓰지 않는다.** Razor 는 주석을 걷어내기 전에 `;` 를 구문 구분자로 보기 때문에,
+주석 안의 세미콜론도 그 뒤를 명령으로 파싱해서 그 줄에서 에러가 난다. 마침표로 문장을 끊는다.
+
 **시작 4줄** — `clearall` / `clearsysmsg` / `cleardragdrop` / `clearignore`
 
 **들여쓰기** — 탭 (`.editorconfig` 에 있음).
