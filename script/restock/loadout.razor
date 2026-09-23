@@ -450,370 +450,241 @@ endif
 // ####################################################################################
 // # Dress setting
 // ####################################################################################
-cleardragdrop
-clearignore
-setvar! config__chatty 1
+// Records what is worn, nothing else. Putting it back on is script/hotkey/dress.razor's job.
+//
+// One block per layer findlayer accepts, so nothing is addressed by item graphic any more.
+// The old version equipped a few items by graphic and sent three of them to the pants layer,
+// which only holds one thing: the quiver, the short pipe and the wizard satchel were
+// overwriting each other. hair and facialhair are left out, they are not equipment.
+//
+// @setvar! keeps these for the rest of the Razor session and any script can read them, so
+// the dress hotkey sees them later. They are gone after a client restart, which is fine:
+// this script runs again before the next trip.
+@setvar! config__chatty 1
 
-// Find equipped glove item
-if findlayer self gloves as item
-    getlabel item label__gloves
-    if config__chatty = 1
-        overhead "Gloves: {{label__gloves}}"
-    endif
-    @setvar! var__gloves item
-// Equip previous glove item if needed
-else
-    if varexist var__gloves
-        getlabel var__gloves label__gloves
-        if config__chatty = 1
-            overhead "Wearing: {{label__gloves}}"
-        endif
-        lift var__gloves
-        drop self gloves
-    endif
-endif
-
-// Find equipped inner torso item
-if findlayer self innertorso as item
-    getlabel item label__inner_torso
-    if config__chatty = 1
-        overhead "Inner Torso: {{label__inner_torso}}"
-    endif
-    @setvar! var__inner_torso item
-// Equip previous inner torso item if needed
-else
-    if varexist var__inner_torso
-        getlabel var__inner_torso label__inner_torso
-        if config__chatty = 1
-            overhead "Wearing: {{label__inner_torso}}"
-        endif
-        lift var__inner_torso
-        drop self innertorso
-    endif
-endif
-
-// Find equipped outer torso item
-if findlayer self outertorso as item
-    getlabel item label__outer_torso
-    if config__chatty = 1
-        overhead "Outer Torso: {{label__outer_torso}}"
-    endif
-    @setvar! var__outer_torso item
-// Equip previous outer torso item if needed
-else
-    if varexist var__outer_torso
-        getlabel var__outer_torso label__outer_torso
-        if config__chatty = 1
-            overhead "Wearing: {{label__outer_torso}}"
-        endif
-        lift var__outer_torso
-        drop self outertorso
-    endif
-endif
-
-// Find equipped head item
-if findlayer self head as item
-    getlabel item label__head
-    if config__chatty = 1
-        overhead "Set: {{label__head}}"
-    endif
-    @setvar! var__head item
-// Equip previous head item if needed
-else
-    if varexist var__head
-        getlabel var__head label__head
-        if config__chatty = 1
-            overhead "Wearing: {{label__head}}"
-        endif
-        lift var__head
-        drop self head
-    endif
-endif
-
-// Find equipped neck item
-if findlayer self neck as item
-    getlabel item label__neck
-    if config__chatty = 1
-        overhead "Set: {{label__neck}}"
-    endif
-    @setvar! var__neck item
-// Equip previous neck item if needed
-else
-    if varexist var__neck
-        getlabel var__neck label__neck
-        if config__chatty = 1
-            overhead "Wearing: {{label__neck}}"
-        endif
-        lift var__neck
-        drop self neck
-    endif
-endif
-
-// Find equipped innerLegs item
-if findlayer self innerLegs as item
-    getlabel item label__inner_legs
-    if config__chatty = 1
-        overhead "Set: {{label__inner_legs}}"
-    endif
-    @setvar! var__inner_legs item
-// Equip previous innerLegs item if needed
-else
-    if varexist var__inner_legs
-        getlabel var__inner_legs label__inner_legs
-        if config__chatty = 1
-            overhead "Wearing: {{label__inner_legs}}"
-        endif
-        lift var__inner_legs
-        drop self innerLegs
-    endif
-endif
-
-// Find equipped outerLegs item
-if findlayer self outerLegs as item
-    getlabel item label__outer_legs
-    if config__chatty = 1
-        overhead "Set: {{label__outer_legs}}"
-    endif
-    @setvar! var__outer_legs item
-// Equip previous outerLegs item if needed
-else
-    if varexist var__outer_legs
-        getlabel var__outer_legs label__outer_legs
-        if config__chatty = 1
-            overhead "Wearing: {{label__outer_legs}}"
-        endif
-        lift var__outer_legs
-        drop self outerLegs
-    endif
-endif
-
-// Find equipped arms item
-if findlayer self arms as item
-    getlabel item label__arms
-    if config__chatty = 1
-        overhead "Set: {{label__arms}}"
-    endif
-    @setvar! var__arms item
-// Equip previous arms item if needed
-else
-    if varexist var__arms
-        getlabel var__arms label__arms
-        if config__chatty = 1
-            overhead "Wearing: {{label__arms}}"
-        endif
-        lift var__arms
-        drop self arms
-    endif
-endif
-
-// Find equipped rightHand item
-if findlayer self rightHand as item
-    getlabel item label__right_hand
-    if config__chatty = 1
-        overhead "Set: {{label__right_hand}}"
-    endif
+if findlayer self righthand as item
     @setvar! var__right_hand item
-// Equip previous rightHand item if needed
-else
-    if varexist var__right_hand
-        getlabel var__right_hand label__right_hand
-        if config__chatty = 1
-            overhead "Wearing: {{label__right_hand}}"
-        endif
-        lift var__right_hand
-        drop self rightHand
+
+    if config__chatty = 1
+        getlabel item label__right_hand
+        overhead "righthand: {{label__right_hand}}" 88
     endif
 endif
 
-// Find equipped shoes item
-if findlayer self leftHand as item
-    getlabel item label__left_hand
-    if config__chatty = 1
-        overhead "Set: {{label__left_hand}}"
-    endif
+if findlayer self lefthand as item
     @setvar! var__left_hand item
-// Equip previous leftHand item if needed
-else
-    if varexist var__left_hand
-        getlabel var__left_hand label__left_hand
-        if config__chatty = 1
-            overhead "Wearing: {{label__left_hand}}"
-        endif
-        lift var__left_hand
-        drop self leftHand
-    endif
-endif
 
-// Find equipped shoes item
-if findlayer self shoes as item
-    getlabel item label__shoes
     if config__chatty = 1
-        overhead "Set: {{label__shoes}}"
-    endif
-    @setvar! var__shoes item
-// Equip previous shoes item if needed
-else
-    if varexist var__shoes
-        getlabel var__shoes label__shoes
-        if config__chatty = 1
-            overhead "Wearing: {{label__shoes}}"
-        endif
-        lift var__shoes
-        drop self shoes
+        getlabel item label__left_hand
+        overhead "lefthand: {{label__left_hand}}" 88
     endif
 endif
 
-// Find equipped pants item
-if findlayer self pants as item
-    getlabel item label__pants
+if findlayer self onehandedsecondary as item
+    @setvar! var__one_handed_secondary item
+
     if config__chatty = 1
-        overhead "Set: {{label__pants}}"
-    endif
-    @setvar! var__pants item
-// Equip previous pants item if needed
-else
-    if varexist var__pants
-        getlabel var__pants label__pants
-        if config__chatty = 1
-            overhead "Wearing: {{label__pants}}"
-        endif
-        lift var__pants
-        drop self pants
+        getlabel item label__one_handed_secondary
+        overhead "onehandedsecondary: {{label__one_handed_secondary}}" 88
     endif
 endif
 
-// Find equipped shirt item
+if findlayer self head as item
+    @setvar! var__head item
+
+    if config__chatty = 1
+        getlabel item label__head
+        overhead "head: {{label__head}}" 88
+    endif
+endif
+
+if findlayer self neck as item
+    @setvar! var__neck item
+
+    if config__chatty = 1
+        getlabel item label__neck
+        overhead "neck: {{label__neck}}" 88
+    endif
+endif
+
+if findlayer self earrings as item
+    @setvar! var__earrings item
+
+    if config__chatty = 1
+        getlabel item label__earrings
+        overhead "earrings: {{label__earrings}}" 88
+    endif
+endif
+
+if findlayer self face as item
+    @setvar! var__face item
+
+    if config__chatty = 1
+        getlabel item label__face
+        overhead "face: {{label__face}}" 88
+    endif
+endif
+
 if findlayer self shirt as item
-    getlabel item label__shirt
-    if config__chatty = 1
-        overhead "Set: {{label__shirt}}"
-    endif
     @setvar! var__shirt item
-// Equip previous shirt item if needed
-else
-    if varexist var__shirt
-        getlabel var__shirt label__shirt
-        if config__chatty = 1
-            overhead "Wearing: {{label__shirt}}"
-        endif
-        lift var__shirt
-        drop self shirt
+
+    if config__chatty = 1
+        getlabel item label__shirt
+        overhead "shirt: {{label__shirt}}" 88
     endif
 endif
 
-// Find equipped waist item
+if findlayer self innertorso as item
+    @setvar! var__inner_torso item
+
+    if config__chatty = 1
+        getlabel item label__inner_torso
+        overhead "innertorso: {{label__inner_torso}}" 88
+    endif
+endif
+
+if findlayer self middletorso as item
+    @setvar! var__middle_torso item
+
+    if config__chatty = 1
+        getlabel item label__middle_torso
+        overhead "middletorso: {{label__middle_torso}}" 88
+    endif
+endif
+
+if findlayer self outertorso as item
+    @setvar! var__outer_torso item
+
+    if config__chatty = 1
+        getlabel item label__outer_torso
+        overhead "outertorso: {{label__outer_torso}}" 88
+    endif
+endif
+
+if findlayer self arms as item
+    @setvar! var__arms item
+
+    if config__chatty = 1
+        getlabel item label__arms
+        overhead "arms: {{label__arms}}" 88
+    endif
+endif
+
+if findlayer self gloves as item
+    @setvar! var__gloves item
+
+    if config__chatty = 1
+        getlabel item label__gloves
+        overhead "gloves: {{label__gloves}}" 88
+    endif
+endif
+
+if findlayer self ring as item
+    @setvar! var__ring item
+
+    if config__chatty = 1
+        getlabel item label__ring
+        overhead "ring: {{label__ring}}" 88
+    endif
+endif
+
+if findlayer self bracelet as item
+    @setvar! var__bracelet item
+
+    if config__chatty = 1
+        getlabel item label__bracelet
+        overhead "bracelet: {{label__bracelet}}" 88
+    endif
+endif
+
 if findlayer self waist as item
-    getlabel item label__waist
-    if config__chatty = 1
-        overhead "Set: {{label__waist}}"
-    endif
     @setvar! var__waist item
-// Equip previous waist item if needed
-else
-    if varexist var__waist
-        getlabel var__waist label__waist
-        if config__chatty = 1
-            overhead "Wearing: {{label__waist}}"
-        endif
-        lift var__waist
-        drop self waist
+
+    if config__chatty = 1
+        getlabel item label__waist
+        overhead "waist: {{label__waist}}" 88
     endif
 endif
 
-// Find equipped cloak item
+if findlayer self pants as item
+    @setvar! var__pants item
+
+    if config__chatty = 1
+        getlabel item label__pants
+        overhead "pants: {{label__pants}}" 88
+    endif
+endif
+
+if findlayer self innerlegs as item
+    @setvar! var__inner_legs item
+
+    if config__chatty = 1
+        getlabel item label__inner_legs
+        overhead "innerlegs: {{label__inner_legs}}" 88
+    endif
+endif
+
+if findlayer self outerlegs as item
+    @setvar! var__outer_legs item
+
+    if config__chatty = 1
+        getlabel item label__outer_legs
+        overhead "outerlegs: {{label__outer_legs}}" 88
+    endif
+endif
+
+if findlayer self shoes as item
+    @setvar! var__shoes item
+
+    if config__chatty = 1
+        getlabel item label__shoes
+        overhead "shoes: {{label__shoes}}" 88
+    endif
+endif
+
 if findlayer self cloak as item
-    getlabel item label__cloak
-    if config__chatty = 1
-        overhead "Set: {{label__cloak}}"
-    endif
     @setvar! var__cloak item
-// Equip previous cloak item if needed
-else
-    if varexist var__cloak
-        getlabel var__cloak label__cloak
-        if config__chatty = 1
-            overhead "Wearing: {{label__cloak}}"
-        endif
-        lift var__cloak
-        drop self cloak
+
+    if config__chatty = 1
+        getlabel item label__cloak
+        overhead "cloak: {{label__cloak}}" 88
     endif
 endif
 
-// Find equipped talisman item
 if findlayer self talisman as item
-    getlabel item label__talisman
-    if config__chatty = 1
-        overhead "Set: {{label__talisman}}"
-    endif
     @setvar! var__talisman item
-// Equip previous talisman item if needed
-else
-    if varexist var__talisman
-        getlabel var__talisman label__talisman
-        if config__chatty = 1
-            overhead "Wearing: {{label__talisman}}"
-        endif
-        lift var__talisman
-        drop self talisman
-    endif
-endif
 
-// Find equipped backpack item
-if findlayer self backpack as item
-    getlabel item label__backpack
     if config__chatty = 1
-        overhead "Set: {{label__backpack}}"
+        getlabel item label__talisman
+        overhead "talisman: {{label__talisman}}" 88
     endif
+endif
+
+if findlayer self quiver as item
+    @setvar! var__quiver item
+
+    if config__chatty = 1
+        getlabel item label__quiver
+        overhead "quiver: {{label__quiver}}" 88
+    endif
+endif
+
+if findlayer self outerbody as item
+    @setvar! var__outer_body item
+
+    if config__chatty = 1
+        getlabel item label__outer_body
+        overhead "outerbody: {{label__outer_body}}" 88
+    endif
+endif
+
+if findlayer self backpack as item
     @setvar! var__backpack item
-// Equip previous backpack item if needed
-else
-    if varexist var__backpack
-        getlabel var__backpack label__backpack
-        if config__chatty = 1
-            overhead "Wearing: {{label__backpack}}"
-        endif
-        lift var__backpack
-        drop self backpack
+
+    if config__chatty = 1
+        getlabel item label__backpack
+        overhead "backpack: {{label__backpack}}" 88
     endif
-endif
-
-
-if find global__my_wizard_satchel backpack
-    lift global__my_wizard_satchel
-    drop self pants
-    wait wait__short
-endif
-
-if findtype 12215 backpack as alias__quiver
-    lift alias__quiver
-    drop self pants
-    wait wait__short
-endif
-
-if findtype 22198 backpack as alias__short_pipe
-    lift alias__short_pipe
-    drop self pants
-    wait wait__short
-endif
-
-if findtype 31217 backpack as alias__travel_backpack
-    dclick alias__travel_backpack
-    wait wait__short
-endif
-
-if findtype 31164 backpack as alias__hip_lantern
-    dclick alias__hip_lantern
-    wait wait__short
-endif
-
-if findtype 2597 backpack as alias__lantern
-    dclick alias__lantern
-    wait wait__short
-endif
-
-if findtype 31158 backpack as alias__black_rim_glasses
-    dclick alias__black_rim_glasses
-    wait wait__short
 endif
 
 overhead "Dress setting completed." 88
