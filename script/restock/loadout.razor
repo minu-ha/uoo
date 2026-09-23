@@ -61,7 +61,9 @@ endif
 
 setvar var_my_recall_scroll 0
 
-setvar var_use_magic_instrument_item 0
+// Magic instrument pickup. 1 carries spares out of the wand container.
+@setvar! config_use_magic_instrument 1
+@setvar! config_instrument_count 3
 
 while queued
     wait var_global_waiting_time
@@ -208,25 +210,35 @@ endif
     #shawm "shawm" 20014
     #tambourine "tambourine" 3742
     #Vielle "vielle" 20016
-if var_use_magic_instrument_item = 1
-    while findtype 3740|3742|3762|3763|10245|20006|20008|20010|20012|20014|20016 var_my_magic_item_recycler as found_instrument
+// A magic instrument carries more effective barding skill than a crafted one, and any one
+// of them will do, so this takes the first that matches and stops. The combat scripts read
+// the same two words off the label when they pick what to equip.
+//
+// Source is the wand container, the same place the tools come from. Counting up to
+// config_instrument_count leaves spares for the ones that break mid hunt.
+// The count is read back off the backpack with counttype rather than kept in a variable.
+// This file has no precedent for arithmetic, and a counter would need var = var + 1.
+// If counttype turns out not to take a graphic list, drop the count clause and the loop
+// falls back to carrying every magic instrument it finds.
+if config_use_magic_instrument = 1
+    while counttype 3740|3742|3762|3763|10245|20006|20008|20010|20012|20014|20016 backpack < config_instrument_count and findtype 3740|3742|3762|3763|10245|20006|20008|20010|20012|20014|20016 var_my_wand_container as found_instrument
         getlabel found_instrument found_instrument_description
-        overhead found_instrument_description 88
 
-        if "supremely" in found_instrument_description
-            if find found_instrument var_my_magic_item_recycler
-                lift found_instrument
-                wait var_global_waiting_time
-                drop backpack 0 0 50
-                wait var_global_waiting_time
-            endif
-            break
+        if "supremely" in found_instrument_description or "exceedingly" in found_instrument_description
+            lift found_instrument 1
+            wait var_global_waiting_time
+            drop backpack
+            wait var_global_waiting_time
         endif
 
         @ignore found_instrument
     endwhile
 
     clearignore
+
+    if not findtype 3740|3742|3762|3763|10245|20006|20008|20010|20012|20014|20016 backpack
+        overhead "No magic instrument in the wand container." 33
+    endif
 endif
 
 
