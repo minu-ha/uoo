@@ -3,10 +3,10 @@ clearsysmsg
 cleardragdrop
 clearignore
 
-// ####################################################################################
-// # SETUP
-// ####################################################################################
-// Local tuning values used by the sustain and buff loops.
+# ####################################################################################
+# # SETUP
+# ####################################################################################
+# Local tuning values used by the sustain and buff loops.
 @setvar! var_use_potion 1
 @setvar! var_cure_cooldown 750
 @setvar! var_greate_heal_cooldown 750
@@ -112,16 +112,16 @@ if not varexist var_active_crook
 endif
 
 if not varexist var_bard_control_mode
-	// 0 = offensive Discord -> Peace
-	// 1 = offensive Discord -> Provo
+	# 0 = offensive Discord -> Peace
+	# 1 = offensive Discord -> Provo
 	@setvar! var_bard_control_mode 0
 endif
 
 if not varexist var_provo_follower_kind
-	// 1 = Vampire Thrall
-	// 2 = Ancient Mummy
-	// 3 = Rag Witch
-	// 4 = Lich
+	# 1 = Vampire Thrall
+	# 2 = Ancient Mummy
+	# 3 = Rag Witch
+	# 4 = Lich
 	@setvar! var_provo_follower_kind 1
 endif
 
@@ -137,7 +137,7 @@ if not varexist var_control_followup_ready
 	@setvar! var_control_followup_ready 0
 endif
 
-// Track which targets already received each magery opener during the current pull.
+# Track which targets already received each magery opener during the current pull.
 if not listexists 'magic_cursed_targets'
 	createlist 'magic_cursed_targets'
 endif
@@ -146,13 +146,13 @@ if not listexists 'magic_drained_targets'
 	createlist 'magic_drained_targets'
 endif
 
-// ####################################################################################
-// # INSTRUMENT SELECT
-// ####################################################################################
+# ####################################################################################
+# # INSTRUMENT SELECT
+# ####################################################################################
 while findtype 3740|3742|3762|3763|10245|20006|20008|20010|20012|20014|20016 backpack as found_instrument
 	getlabel found_instrument found_instrument_description
 
-	// Prefer the best instrument already in the backpack before asking for manual selection.
+	# Prefer the best instrument already in the backpack before asking for manual selection.
 	if "supremely" in found_instrument_description or "exceedingly" in found_instrument_description
 		@setvar! var_my_instrument found_instrument
 		break
@@ -205,12 +205,12 @@ if not find var_my_instrument backpack
 	endif
 endif
 
-// ####################################################################################
-// # NECRO HOTBAR SETUP
-// ####################################################################################
+# ####################################################################################
+# # NECRO HOTBAR SETUP
+# ####################################################################################
 if skill "Necromancy" > 0 and not gumpexists 622436516
 	if findtype 'necromancer book' backpack
-		// The hotbar gump is used as the source of truth for current symbol count.
+		# The hotbar gump is used as the source of truth for current symbol count.
 		for 3
 			if gumpexists 622436516
 				break
@@ -253,11 +253,11 @@ while not dead
 
 	@setvar! var_necro_action_used 0
 
-	// ####################################################################################
-	// # COMBAT TARGET CACHE
-	// ####################################################################################
-	// Cache the last hostile ground target so self or backpack targeting
-	// does not break barding, necro, or opener follow-through.
+	# ####################################################################################
+	# # COMBAT TARGET CACHE
+	# ####################################################################################
+	# Cache the last hostile ground target so self or backpack targeting
+	# does not break barding, necro, or opener follow-through.
 	if find lasttarget ground -1 -1 12 as fresh_target
 		if not dead fresh_target and var_combat_target != fresh_target
 			if noto fresh_target = "hostile" or noto fresh_target = "criminal" or noto fresh_target = "enemy" or noto fresh_target = "murderer"
@@ -308,18 +308,18 @@ while not dead
 	endif
 
 	if var_combat_target = 0 and timer "magic_target_memory_timer" > 15000
-		// Treat a quiet window with no combat target as the end of the pull
-		// and forget old opener state.
+		# Treat a quiet window with no combat target as the end of the pull
+		# and forget old opener state.
 		clearlist 'magic_cursed_targets'
 		clearlist 'magic_drained_targets'
 		settimer "magic_target_memory_timer" 0
 	endif
 
-	// ####################################################################################
-	// # NECRO HOTBAR RECOVERY
-	// ####################################################################################
-	// Reopen the necro hotbar if it closes so symbol-based necro logic
-	// does not silently stop mid-session.
+	# ####################################################################################
+	# # NECRO HOTBAR RECOVERY
+	# ####################################################################################
+	# Reopen the necro hotbar if it closes so symbol-based necro logic
+	# does not silently stop mid-session.
 	if skill "Necromancy" > 0 and not targetexists and not gumpexists 622436516
 		if timer "necro_hotbar_retry_timer" > 3000
 			if findtype 'necromancer book' backpack
@@ -340,11 +340,11 @@ while not dead
 		endif
 	endif
 
-	// ####################################################################################
-	// # CROOK SUPPORT
-	// ####################################################################################
-	// Keep an activated shepherd's crook ready while followers are active
-	// so Herding bonuses stay on summoned followers.
+	# ####################################################################################
+	# # CROOK SUPPORT
+	# ####################################################################################
+	# Keep an activated shepherd's crook ready while followers are active
+	# so Herding bonuses stay on summoned followers.
 	if followers > 0 and skill "Herding" > 0 and not targetexists and not casting and timer "crook_check_timer" > 3000
 		if find var_active_crook self as active_crook or find var_active_crook backpack as active_crook
 			getlabel active_crook active_crook_label
@@ -411,11 +411,11 @@ while not dead
 		@setvar! var_active_crook 0
 	endif
 
-	// ####################################################################################
-	// # PROVO FOLLOWER CACHE
-	// ####################################################################################
-	// Track the preferred summon used as the second Provocation target so
-	// offensive control can swap between Peace and Provo without retargeting.
+	# ####################################################################################
+	# # PROVO FOLLOWER CACHE
+	# ####################################################################################
+	# Track the preferred summon used as the second Provocation target so
+	# offensive control can swap between Peace and Provo without retargeting.
 	if var_bard_control_mode = 1 and followers > 0 and not targetexists and not casting and timer "provo_follower_check_timer" > 1500
 		if find var_provo_follower ground -1 -1 12 as current_provo_follower
 			if dead current_provo_follower
@@ -496,10 +496,10 @@ while not dead
 	endif
 
 	if skill "Necromancy" > 0
-		// ####################################################################################
-		// # NECRO SYMBOL TRACKING
-		// ####################################################################################
-		// Rebuild symbol count from the visible necro hotbar every loop.
+		# ####################################################################################
+		# # NECRO SYMBOL TRACKING
+		# ####################################################################################
+		# Rebuild symbol count from the visible necro hotbar every loop.
 		if not listexists 'necro_symbols'
 			createlist 'necro_symbols'
 		else
@@ -591,9 +591,9 @@ while not dead
 		endif
 	endif
 
-	// ####################################################################################
-	// # WEIGHT SAFETY
-	// ####################################################################################
+	# ####################################################################################
+	# # WEIGHT SAFETY
+	# ####################################################################################
 	while weight > maxweight
 		if findtype "gold coin" backpack as found_gold
 			lift found_gold 1000
@@ -642,9 +642,9 @@ while not dead
 		endif
 	endif
 
-	// ####################################################################################
-	// # HEAL
-	// ####################################################################################
+	# ####################################################################################
+	# # HEAL
+	# ####################################################################################
 	if diffhits > 15 and diffhits < 35 and timer "heal_action_timer" > var_heal_action_cooldown and findtype 3972 self and findtype 3973 self and findtype 3974 self and findtype 3981 self and not casting and not targetexists
 		hotkey "> Smart Heal/Cure Self"
 		settimer "heal_action_timer" 0
@@ -684,9 +684,9 @@ while not dead
 		endif
 	endif
 
-	// ####################################################################################
-	// # CURE POT
-	// ####################################################################################
+	# ####################################################################################
+	# # CURE POT
+	# ####################################################################################
 	if poisoned
 		if findtype "Orange Potion" self as found_potion
 			if hidden
@@ -713,9 +713,9 @@ while not dead
 		endif
 	endif
 
-	// ####################################################################################
-	// # STAMINA POT
-	// ####################################################################################
+	# ####################################################################################
+	# # STAMINA POT
+	# ####################################################################################
 	if stam < 5 and not targetexists
 		if findtype "Red Potion" backpack as found_potion
 			dclick found_potion
@@ -728,9 +728,9 @@ while not dead
 		endif
 	endif
 
-	// ####################################################################################
-	// # STRENGTH POT
-	// ####################################################################################
+	# ####################################################################################
+	# # STRENGTH POT
+	# ####################################################################################
 	if str <= 100 and var_use_potion = 1 and not targetexists and find var_combat_target ground -1 -1 12
 		if findtype "White Potion" backpack as found_potion
 			dclick found_potion
@@ -743,9 +743,9 @@ while not dead
 		endif
 	endif
 
-	// ####################################################################################
-	// # AGILITY POT
-	// ####################################################################################
+	# ####################################################################################
+	# # AGILITY POT
+	# ####################################################################################
 	if dex <= 25 and var_use_potion = 1 and not targetexists and find var_combat_target ground -1 -1 12
 		if findtype "Blue Potion" backpack as found_potion
 			dclick found_potion
@@ -758,9 +758,9 @@ while not dead
 		endif
 	endif
 
-	// ####################################################################################
-	// # RESIST POT
-	// ####################################################################################
+	# ####################################################################################
+	# # RESIST POT
+	# ####################################################################################
 	if not findbuff 'Magic Resist Potion' and var_use_potion = 1 and not targetexists and find var_combat_target ground -1 -1 12
 		if findtype "Black Potion" backpack as found_potion
 			dclick found_potion
@@ -774,11 +774,11 @@ while not dead
 	endif
 
 
-	// ####################################################################################
-	// # WITHER PREP
-	// ####################################################################################
-	// Cast Wither only when the symbol spend is safe and there is enough
-	// pending non-damage work to benefit from the 30 second mana window.
+	# ####################################################################################
+	# # WITHER PREP
+	# ####################################################################################
+	# Cast Wither only when the symbol spend is safe and there is enough
+	# pending non-damage work to benefit from the 30 second mana window.
 	@setvar! var_need_curse 0
 	@setvar! var_need_mana_drain 0
 	@setvar! var_pending_non_damage_ready 0
@@ -799,9 +799,9 @@ while not dead
 
 	if skill "Necromancy" >= 90 and var_necro_action_used = 0 and not targetexists and not casting and list 'necro_symbols' >= 8 and timer "wither_timer" > 30500 and diffhits < 25
 		if skill "Necromancy" >= 80 and followers > 0 and list 'necro_symbols' >= 4 and timer "blood_oath_timer" > 30500 and find var_combat_target ground -1 -1 12
-			// Hold symbols for Blood Oath before spending on Wither.
+			# Hold symbols for Blood Oath before spending on Wither.
 		elseif skill "Necromancy" >= 70 and followers > 0 and list 'necro_symbols' >= 6 and timer "vampiric_embrace_timer" > 30500 and findtype 8198 ground -1 -1 8
-			// Hold symbols for Vampiric Embrace before spending on Wither.
+			# Hold symbols for Vampiric Embrace before spending on Wither.
 		elseif var_pending_non_damage_ready = 1
 			clearsysmsg
 			hotkey 'wither'
@@ -826,9 +826,9 @@ while not dead
 		endif
 	endif
 
-	// ####################################################################################
-	// # MAGE BUFF
-	// ####################################################################################
+	# ####################################################################################
+	# # MAGE BUFF
+	# ####################################################################################
 	if not targetexists and var_control_followup_ready = 0
 		if mana > 30 or timer "wither_timer" < 30500
 			if not casting and cooldown "Walk" = 0 and not find var_combat_target ground -1 -1 12 and findtype 3972 self and findtype 3974 self
@@ -861,11 +861,11 @@ while not dead
 	endif
 
 
-	// ####################################################################################
-	// # BARD SONG BUFF
-	// ####################################################################################
-	// Song refresh targets the backpack, while combat logic continues to
-	// rely on the internal cached target instead of rewriting last target.
+	# ####################################################################################
+	# # BARD SONG BUFF
+	# ####################################################################################
+	# Song refresh targets the backpack, while combat logic continues to
+	# rely on the internal cached target instead of rewriting last target.
 	if not targetexists and not casting and var_control_followup_ready = 0 and cooldown "Discord" = 0 and cooldown "Music" = 0 and not findbuff "song of discordance"
 		useskill 'Discordance'
 		waitfortarget 1000
@@ -909,18 +909,18 @@ while not dead
 	endif
 
 
-	// ####################################################################################
-	// # DISCO
-	// ####################################################################################
-	// Automatic offensive barding only runs out of warmode. In warmode,
-	// the user handles offensive targeting manually.
+	# ####################################################################################
+	# # DISCO
+	# ####################################################################################
+	# Automatic offensive barding only runs out of warmode. In warmode,
+	# the user handles offensive targeting manually.
 	if not targetexists and not casting and not warmode and find var_combat_target ground -1 -1 10 as combat_target
 		if skill "Discordance" > 0 and cooldown "Discord" = 0 and cooldown "Music" = 0
 			getlabel combat_target target_label
 			wait 200
 
 			if "discord" in target_label
-				// Target is already discorded.
+				# Target is already discorded.
 			else
 				clearsysmsg
 				useskill 'Discordance'
@@ -983,11 +983,11 @@ while not dead
 		endif
 	endif
 
-	// ####################################################################################
-	// # CONTROL FOLLOWUP
-	// ####################################################################################
-	// Once a target is Discorded, hold the magery opener until the chosen
-	// follow-up control skill (Peace or Provo) has been attempted.
+	# ####################################################################################
+	# # CONTROL FOLLOWUP
+	# ####################################################################################
+	# Once a target is Discorded, hold the magery opener until the chosen
+	# follow-up control skill (Peace or Provo) has been attempted.
 	if not targetexists and not casting and not warmode and find var_combat_target ground -1 -1 10 as combat_target
 		if var_bard_control_mode = 0 and skill "Peacemaking" > 0 and cooldown "Peace" = 0 and cooldown "Music" = 0
 			getlabel combat_target target_label
@@ -1106,15 +1106,15 @@ while not dead
 		endif
 	endif
 
-	// ####################################################################################
-	// # CURSE / MANA DRAIN OPENER
-	// ####################################################################################
-	// Decide opener progress from the current combat target's memory lists
-	// so retargeting does not depend on a stale global stage value.
+	# ####################################################################################
+	# # CURSE / MANA DRAIN OPENER
+	# ####################################################################################
+	# Decide opener progress from the current combat target's memory lists
+	# so retargeting does not depend on a stale global stage value.
 	if not targetexists and not casting and not warmode and find var_combat_target ground -1 -1 12 as combat_target
 		if var_control_followup_ready = 1 and var_control_followup_target = combat_target
-			// Once Peace/Provo comes off cooldown, let it resolve before the
-			// next offensive spell grabs the loop.
+			# Once Peace/Provo comes off cooldown, let it resolve before the
+			# next offensive spell grabs the loop.
 		elseif mana >= 30 or timer "wither_timer" < 30500
 			if inlist 'magic_drained_targets' combat_target
 				@setvar! var_magic_stage 2
@@ -1175,8 +1175,8 @@ while not dead
 								else
 									overhead "You cast Curse." 44
 
-									// Mark the target so returning to it later in the same pull
-									// resumes at stage 1 instead of restarting.
+									# Mark the target so returning to it later in the same pull
+									# resumes at stage 1 instead of restarting.
 									if not inlist 'magic_cursed_targets' var_combat_target
 										pushlist 'magic_cursed_targets' var_combat_target
 									endif
@@ -1239,8 +1239,8 @@ while not dead
 								else
 									overhead "You cast Mana Drain." 44
 
-									// Mark the target as fully opened so later revisits skip
-									// the entire magery opener.
+									# Mark the target as fully opened so later revisits skip
+									# the entire magery opener.
 									if not inlist 'magic_drained_targets' var_combat_target
 										pushlist 'magic_drained_targets' var_combat_target
 									endif
@@ -1258,11 +1258,11 @@ while not dead
 		endif
 	endif
 
-	// ####################################################################################
-	// # NECRO BUFF
-	// ####################################################################################
-	// Keep only the core sustain package on auto:
-	// Blood Oath first, then reactive Vampiric Embrace.
+	# ####################################################################################
+	# # NECRO BUFF
+	# ####################################################################################
+	# Keep only the core sustain package on auto:
+	# Blood Oath first, then reactive Vampiric Embrace.
 	if skill "Necromancy" >= 60 and var_necro_action_used = 0 and not targetexists and not casting
 		if skill "Necromancy" >= 80 and followers > 0 and list 'necro_symbols' >= 4 and timer "blood_oath_timer" > 30500 and find var_combat_target ground -1 -1 12 as combat_target
 			if not dead combat_target
@@ -1309,14 +1309,14 @@ while not dead
 		endif
 	endif
 
-	// ####################################################################################
-	// # STAGE 2 LIGHTNING
-	// ####################################################################################
-	// Once a target has completed the Curse -> Mana Drain opener, use
-	// Lightning as the direct stage 2 follow-up.
+	# ####################################################################################
+	# # STAGE 2 LIGHTNING
+	# ####################################################################################
+	# Once a target has completed the Curse -> Mana Drain opener, use
+	# Lightning as the direct stage 2 follow-up.
 	if not targetexists and not casting and not warmode and mana >= 40 and find var_combat_target ground -1 -1 12 as combat_target
 		if var_control_followup_ready = 1 and var_control_followup_target = combat_target
-			// Once Peace/Provo is ready, keep it ahead of damage spells.
+			# Once Peace/Provo is ready, keep it ahead of damage spells.
 		elseif inlist 'magic_drained_targets' combat_target
 			@setvar! var_magic_stage 2
 
@@ -1373,9 +1373,9 @@ while not dead
 		endif
 	endif
 
-	// ####################################################################################
-	// # SCAVENGER UTILITY
-	// ####################################################################################
+	# ####################################################################################
+	# # SCAVENGER UTILITY
+	# ####################################################################################
 	if timer "clear_scavenger_timer" > 30000
 		sysmsg "Clear Scavenger Cache"
 		hotkey "Clear Scavenger Cache"

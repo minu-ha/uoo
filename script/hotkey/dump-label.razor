@@ -1,20 +1,20 @@
-// ####################################################################################
-// LABEL DUMP
-// ####################################################################################
-// Target an item and see exactly what getlabel returns for it.
-//
-// Why this exists
-//   Outlands sends an item label as several messages in a row, a name line and then one
-//   line per property. Razor getlabel joins them with a space, so a single variable can
-//   hold both "bronze mastery chain link" and its property text.
-//   This tool shows the joined result so you can copy the exact substring to match on,
-//   including its capitalisation. The in operator is case sensitive, and item names come
-//   through lowercase while property lines look title cased, so guessing is unreliable.
-//
-// Use
-//   Run it, target the item, then read the overhead. The same text also goes to the
-//   journal so you can scroll back and copy it.
-// ####################################################################################
+# ####################################################################################
+# LABEL DUMP
+# ####################################################################################
+# Target an item and see exactly what getlabel returns for it.
+#
+# Why this exists
+#   Outlands sends an item label as several messages in a row, a name line and then one
+#   line per property. Razor getlabel joins them with a space, so a single variable can
+#   hold both "bronze mastery chain link" and its property text.
+#   This tool shows the joined result so you can copy the exact substring to match on,
+#   including its capitalisation. The in operator is case sensitive, and item names come
+#   through lowercase while property lines look title cased, so guessing is unreliable.
+#
+# Use
+#   Run it, target the item, then read the overhead. The same text also goes to the
+#   journal so you can scroll back and copy it.
+# ####################################################################################
 
 clearsysmsg
 clearall
