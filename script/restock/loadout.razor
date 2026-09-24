@@ -13,7 +13,7 @@ clearignore
 // container. 0 when they stand on the floor. Either way they must be within reach.
 @setvar! config__use_furniture_container 1
 
-// Magic instrument pickup. 1 carries one out of the supply box.
+// Which instrument grade to carry. 1 magic, 0 crafted. Exactly one is carried either way.
 @setvar! config__use_magic_instrument 1
 
 // Everything a hand can touch is 2 tiles away at most, so that is the range every check uses.
@@ -300,32 +300,69 @@ endif
 // ####################################################################################
 // # TOOLS
 // ####################################################################################
-// 3997 sewing kit, 20496 item identification wand. Both live in the wand container.
+// 3997 sewing kit, 20496 item identification wand. Both live in the supply box.
 //
-// This used to call the Restock 10 agent. The agent only carried the sewing kit, so the
-// identification wand was checked for and then never actually fetched. Pulling each item
-// by graphic fixes that, and it also keeps the list in the script where it can be read,
-// instead of in one player's profile.
-if find global__my_supply_box ground -1 -1 2
-    if not findtype 3997 backpack
+// Exactly one of each is carried. The backpack is walked first: the first one found stays,
+// every further copy goes back to the supply box. Only if none was carried is one fetched.
+// Runs kept stacking duplicates before, because the old check stopped at the first hit and
+// never looked at what else was already in the bag.
+//
+// This also replaced the Restock 10 agent, which only carried the sewing kit, so the
+// identification wand was checked for and then never actually fetched.
+if find global__my_supply_box ground -1 -1 config__reach
+    @setvar! var__kept_sewing_kit 0
+
+    while findtype 3997 backpack as alias__found_sewing_kit
+        if var__kept_sewing_kit = 0
+            @setvar! var__kept_sewing_kit 1
+        else
+            lift alias__found_sewing_kit 1
+            wait wait__short
+            drop global__my_supply_box
+            wait wait__short
+        endif
+
+        @ignore alias__found_sewing_kit
+    endwhile
+
+    clearignore
+
+    if var__kept_sewing_kit = 0
         if findtype 3997 global__my_supply_box as alias__found_sewing_kit
             lift alias__found_sewing_kit 1
             wait wait__short
             drop backpack
             wait wait__short
         else
-            overhead "No sewing kit in the wand container." 33
+            overhead "No sewing kit in the supply box." 33
         endif
     endif
 
-    if not findtype 20496 backpack
+    @setvar! var__kept_identification_wand 0
+
+    while findtype 20496 backpack as alias__found_identification_wand
+        if var__kept_identification_wand = 0
+            @setvar! var__kept_identification_wand 1
+        else
+            lift alias__found_identification_wand 1
+            wait wait__short
+            drop global__my_supply_box
+            wait wait__short
+        endif
+
+        @ignore alias__found_identification_wand
+    endwhile
+
+    clearignore
+
+    if var__kept_identification_wand = 0
         if findtype 20496 global__my_supply_box as alias__found_identification_wand
             lift alias__found_identification_wand 1
             wait wait__short
             drop backpack
             wait wait__short
         else
-            overhead "No identification wand in the wand container." 33
+            overhead "No identification wand in the supply box." 33
         endif
     endif
 endif
@@ -333,53 +370,71 @@ endif
 // ####################################################################################
 // # INSTRUMENT
 // ####################################################################################
-#Instruments - all serials: 3740|3742|3762|3763|10245|20006|20008|20010|20012|20014|20016
-    #bamboo flute "bamboo flute" 10245
-    #drums "drum" 3740
-    #gemshorn "gemshorn" 20006
-    #harp "lap harp" 3762
-    #hurdy-gurdy "hurdy gurdy" 20008
-    #lute "lute" 3763
-    #psaltery "psaltery" 20010
-    #sackbut "sackbut" 20012
-    #shawm "shawm" 20014
-    #tambourine "tambourine" 3742
-    #Vielle "vielle" 20016
-// A magic instrument carries more effective barding skill than a crafted one, and any one
-// of them will do, so this takes the first that matches and stops. The combat scripts read
-// the same two words off the label when they pick what to equip.
+#Instruments - all IDs: 3740|3742|3762|3763|10245|20006|20008|20010|20012|20014|20016
+    #bamboo flute 10245   #drums 3740        #gemshorn 20006    #harp 3762
+    #hurdy-gurdy 20008    #lute 3763         #psaltery 20010    #sackbut 20012
+    #shawm 20014          #tambourine 3742   #vielle 20016
+// Which grade to carry is a choice, not a preference: 1 takes a magic instrument, 0 takes a
+// crafted one. A magic instrument carries more effective barding skill, a crafted one is what
+// you train on. The combat scripts read the same two label words when they pick what to equip.
 //
-// Source is the supply box, the same place the tools come from. One is enough: the combat
-// scripts reselect from the backpack only when the carried one is gone.
-//
-// Is one already carried? findtype alone cannot tell a magic instrument from a crafted one,
-// so the backpack is walked and the label read, the same two words the combat scripts match.
-// Without this the run fetched another one every time, however many were already in the bag.
-@setvar! var__has_magic_instrument 0
+// Exactly one is carried, the same rule as the tools above. Anything of the other grade, and
+// any second copy of the right grade, goes back to the supply box.
+@setvar! var__kept_instrument 0
 
-while findtype 3740|3742|3762|3763|10245|20006|20008|20010|20012|20014|20016 backpack as alias__carried_instrument
-    getlabel alias__carried_instrument label__carried_instrument
+while findtype 3740|3742|3762|3763|10245|20006|20008|20010|20012|20014|20016 backpack as alias__found_instrument
+    getlabel alias__found_instrument label__found_instrument
+    @setvar! var__instrument_matches 0
 
-    if "supremely" in label__carried_instrument or "exceedingly" in label__carried_instrument
-        @setvar! var__has_magic_instrument 1
-        break
+    if config__use_magic_instrument = 1
+        if "supremely" in label__found_instrument or "exceedingly" in label__found_instrument
+            @setvar! var__instrument_matches 1
+        endif
+    else
+        if "supremely" in label__found_instrument or "exceedingly" in label__found_instrument
+            @setvar! var__instrument_matches 0
+        else
+            @setvar! var__instrument_matches 1
+        endif
     endif
 
-    @ignore alias__carried_instrument
+    if var__instrument_matches = 1 and var__kept_instrument = 0
+        @setvar! var__kept_instrument 1
+    else
+        lift alias__found_instrument 1
+        wait wait__short
+        drop global__my_supply_box
+        wait wait__short
+    endif
+
+    @ignore alias__found_instrument
 endwhile
 
 clearignore
 
-if config__use_magic_instrument = 1 and var__has_magic_instrument = 0
+if var__kept_instrument = 0
     while findtype 3740|3742|3762|3763|10245|20006|20008|20010|20012|20014|20016 global__my_supply_box as alias__found_instrument
         getlabel alias__found_instrument label__found_instrument
+        @setvar! var__instrument_matches 0
 
-        if "supremely" in label__found_instrument or "exceedingly" in label__found_instrument
+        if config__use_magic_instrument = 1
+            if "supremely" in label__found_instrument or "exceedingly" in label__found_instrument
+                @setvar! var__instrument_matches 1
+            endif
+        else
+            if "supremely" in label__found_instrument or "exceedingly" in label__found_instrument
+                @setvar! var__instrument_matches 0
+            else
+                @setvar! var__instrument_matches 1
+            endif
+        endif
+
+        if var__instrument_matches = 1
             lift alias__found_instrument 1
             wait wait__short
             drop backpack
             wait wait__short
-            @setvar! var__has_magic_instrument 1
+            @setvar! var__kept_instrument 1
             break
         endif
 
@@ -388,11 +443,10 @@ if config__use_magic_instrument = 1 and var__has_magic_instrument = 0
 
     clearignore
 
-    if var__has_magic_instrument = 0
-        overhead "No magic instrument in the supply box." 33
+    if var__kept_instrument = 0
+        overhead "No instrument of the chosen grade in the supply box." 33
     endif
 endif
-
 
 // ####################################################################################
 // # Sorting items
