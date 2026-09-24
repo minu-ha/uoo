@@ -3,9 +3,17 @@ clearsysmsg
 cleardragdrop
 clearignore
 
-@setvar! wait__short 300
-@setvar! wait__long 1000
-@setvar! wait__target 2000
+// Roughly a round trip each. wait__short paces a lift or a drop, wait__long lets a menu entry
+// finish its work, wait__target is only ever spent in full when no cursor turns up at all.
+// Raise them together if the run starts dropping things on a laggy day.
+@setvar! wait__short 200
+@setvar! wait__long 600
+@setvar! wait__target 1200
+
+// The repair bench is the one place that waits on a message rather than a cursor, and it has
+// to be long enough for the bench to answer before insysmsg is read. Too short and the check
+// falls through to the else, which then waits on a "Repaired" that is never coming.
+@setvar! wait__repair 2000
 
 // ####################################################################################
 // # CONFIG
@@ -219,13 +227,13 @@ if var__has_bank_deposit_safe = 1 and findtype 3821 backpack
 
     if targetexists
         target backpack
-        wait wait__short
     endif
 
     if targetexists
         hotkey "Cancel Current Target"
-        wait wait__short
     endif
+
+    wait wait__short
 endif
 
 // ####################################################################################
@@ -243,13 +251,13 @@ if var__has_resource_stockpile = 1
 
     if targetexists
         target self
-        wait wait__short
     endif
 
     if targetexists
         hotkey "Cancel Current Target"
-        wait wait__short
     endif
+
+    wait wait__short
 endif
 
 // ####################################################################################
@@ -257,7 +265,7 @@ endif
 // ####################################################################################
 if var__has_repair_bench = 1
     dclick global__my_repair_bench
-    wait 2000
+    wait wait__repair
 
     if insysmsg "You do not have any items equipped or in your backpack in need of repairs."
         overhead "Pass repair bench" 82
@@ -328,28 +336,18 @@ if var__has_storage_shelf = 1
 
     if targetexists
         hotkey "Cancel Current Target"
-        wait wait__short
     endif
 
     gumpclose
-    wait wait__short
     menu global__my_storage_shelf 0
     waitfortarget wait__target
 
     if targetexists
         target self
-        wait wait__short
     endif
 
     wait wait__long
-
-    if targetexists
-        hotkey "Cancel Current Target"
-        wait wait__short
-    endif
-
     gumpclose
-    wait wait__short
 endif
 
 // ####################################################################################
@@ -366,28 +364,18 @@ if var__has_storage_shelf = 1
     overhead "Storage shelf resupply" 82
     if targetexists
         hotkey "Cancel Current Target"
-        wait wait__short
     endif
 
     gumpclose
-    wait wait__short
     menu global__my_storage_shelf 1
     waitfortarget wait__target
 
     if targetexists
         target self
-        wait wait__short
     endif
 
     wait wait__long
-
-    if targetexists
-        hotkey "Cancel Current Target"
-        wait wait__short
-    endif
-
     gumpclose
-    wait wait__short
 endif
 
 // ####################################################################################
