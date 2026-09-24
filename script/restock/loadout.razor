@@ -218,8 +218,11 @@ endif
 // Every one of these blocks waits with waitfortarget, never with a plain wait. A fixed sleep
 // is not long enough for the server to answer: the cursor turns up after the block has moved
 // on, and then the next block's waitfortarget picks up that stale cursor instead of its own.
-// That is what kept breaking the storage shelf restock, and the guilty prompt belonged to the
-// recycler two blocks earlier.
+// That is what kept breaking the storage shelf restock.
+//
+// One rule, applied everywhere: a block clears up after itself. It answers its own cursor and
+// closes its own gump before it ends, so the block after it does not have to defend against
+// anything. That is why none of these start with a cancel or a gumpclose.
 if var__has_bank_deposit_safe = 1 and findtype 3821 backpack
     overhead "Bank Deposit safe" 82
     menu global__my_bank_deposit_safe 0
@@ -334,16 +337,17 @@ if var__has_storage_shelf = 1
         wait wait__short
     endif
 
-    if targetexists
-        hotkey "Cancel Current Target"
-    endif
-
-    gumpclose
     menu global__my_storage_shelf 0
     waitfortarget wait__target
 
     if targetexists
         target self
+    endif
+
+    // The second check is not the same as the first. The first answers the prompt, this one
+    // catches the case where the answer was refused and the cursor is still sitting there.
+    if targetexists
+        hotkey "Cancel Current Target"
     endif
 
     wait wait__long
@@ -359,16 +363,11 @@ endif
 // that the wait was what kept the restock above from colliding with this call. It was not:
 // the run was dying on an undeclared wait__long, and the context menu left on screen was the
 // symptom of that, not the cause. What this block does need is the gumpclose before the menu,
-// so the shelf gump the restock opened is gone first.
+// The restock above closes its own gump, so there is nothing to clear away here first.
 if var__has_storage_shelf = 1
     overhead "Storage shelf resupply" 82
-    if targetexists
-        hotkey "Cancel Current Target"
-    endif
-
-    gumpclose
     menu global__my_storage_shelf 1
-    wait wait__long
+    wait wait__short
     gumpclose
 endif
 
