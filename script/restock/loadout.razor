@@ -259,21 +259,23 @@ endif
 // loadout comes back out. Restock lives here with the other deposits, Resupply runs later
 // with the withdrawals.
 //
-// Both entries can raise a target cursor. It is answered only when one really came up: an
-// unguarded target self was leaving a cursor hanging, and a hanging cursor blocks every lift
-// and drop after it.
+// Restock asks what to take from, and the answer is the backpack. It used to answer self,
+// which the shelf does not accept, so the cursor and the menu both stayed up and every lift
+// and drop after that was blocked.
+//
+// 3232825965 is the shelf gump, the same one script/shelf/sailing.razor waits on. It opens
+// once the target is answered, and is closed again so the resupply below starts clean.
 if var__has_storage_shelf = 1
     overhead "Storage shelf restock" 82
     menu global__my_storage_shelf config__shelf_menu_restock
-    wait wait__short
-
     waitfortarget wait__target
 
     if targetexists
-        target self
-        wait wait__short
+        target backpack
     endif
 
+    waitforgump 3232825965
+    wait wait__short
     gumpclose
     wait wait__short
 endif
@@ -282,19 +284,14 @@ endif
 // # Storage shelf resupply
 // ####################################################################################
 // The withdrawal half. Restock ran earlier, with the other deposits.
+//
+// No target here. Resupply knows where the items go and raises no cursor, so waiting for one
+// would only burn wait__target on every run.
 if var__has_storage_shelf = 1
     overhead "Storage shelf resupply" 82
     menu global__my_storage_shelf config__shelf_menu_resupply
+    waitforgump 3232825965
     wait wait__short
-
-    // Answer a cursor only if one actually came up, and close the gump either way.
-    waitfortarget wait__target
-
-    if targetexists
-        target self
-        wait wait__short
-    endif
-
     gumpclose
     wait wait__short
 endif
