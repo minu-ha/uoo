@@ -22,7 +22,8 @@ clearignore
 // Defined here because the sorting section reads it long before the dress section runs.
 @setvar! config__chatty 1
 
-// Which instrument grade to carry. 1 magic, 0 crafted. Exactly one is carried either way.
+// 1 keeps exactly one magic instrument in the bag. 0 leaves instruments alone entirely,
+// which is what you want when a crafted one comes out of the shelf resupply instead.
 @setvar! config__use_magic_instrument 1
 
 // Everything a hand can touch is 2 tiles away at most, so that is the range every check uses.
@@ -375,76 +376,33 @@ endif
 // ####################################################################################
 // # INSTRUMENT
 // ####################################################################################
-#Instruments - all IDs: 3740|3742|3762|3763|10245|20006|20008|20010|20012|20014|20016
-    #bamboo flute 10245   #drums 3740        #gemshorn 20006    #harp 3762
-    #hurdy-gurdy 20008    #lute 3763         #psaltery 20010    #sackbut 20012
-    #shawm 20014          #tambourine 3742   #vielle 20016
-// Which grade to carry is a choice, not a preference: 1 takes a magic instrument, 0 takes a
-// crafted one. A magic instrument carries more effective barding skill, a crafted one is what
-// you train on. The combat scripts read the same two label words when they pick what to equip.
+//   #instruments   3740|3742|3762|3763|10245|20006|20008|20010|20012|20014|20016
+//   #bamboo flute 10245   #drums 3740       #gemshorn 20006   #harp 3762
+//   #hurdy-gurdy 20008    #lute 3763        #psaltery 20010   #sackbut 20012
+//   #shawm 20014          #tambourine 3742  #vielle 20016
 //
-// Exactly one is carried, the same rule as the tools above. Anything of the other grade, and
-// any second copy of the right grade, goes back to the supply box.
+// Only magic instruments are handled here. A crafted one belongs to the storage shelf: the
+// restock above puts it away and the resupply brings it back, so this section leaves every
+// crafted instrument exactly where it is and only counts the magic ones.
 //
-// Crafted instruments you came home with are gone by now: the shelf restock swept them in
-// with the other deposits. What this pass sees is what the resupply handed back, plus
-// anything the shelf did not take.
-@setvar! var__kept_instrument 0
+// Exactly one magic instrument is carried. The first one found stays, any further copy goes
+// back to the supply box, and only if none was carried is one fetched. The combat scripts
+// match the same two label words when they pick what to equip.
+if config__use_magic_instrument = 1
+    @setvar! var__kept_instrument 0
 
-while findtype 3740|3742|3762|3763|10245|20006|20008|20010|20012|20014|20016 backpack as alias__found_instrument
-    getlabel alias__found_instrument label__found_instrument
-    @setvar! var__instrument_matches 0
-
-    if config__use_magic_instrument = 1
-        if "supremely" in label__found_instrument or "exceedingly" in label__found_instrument
-            @setvar! var__instrument_matches 1
-        endif
-    else
-        if "supremely" in label__found_instrument or "exceedingly" in label__found_instrument
-            @setvar! var__instrument_matches 0
-        else
-            @setvar! var__instrument_matches 1
-        endif
-    endif
-
-    if var__instrument_matches = 1 and var__kept_instrument = 0
-        @setvar! var__kept_instrument 1
-    else
-        lift alias__found_instrument 1
-        wait wait__short
-        drop global__my_supply_box
-        wait wait__short
-    endif
-
-    @ignore alias__found_instrument
-endwhile
-
-clearignore
-
-if var__kept_instrument = 0
-    while findtype 3740|3742|3762|3763|10245|20006|20008|20010|20012|20014|20016 global__my_supply_box as alias__found_instrument
+    while findtype 3740|3742|3762|3763|10245|20006|20008|20010|20012|20014|20016 backpack as alias__found_instrument
         getlabel alias__found_instrument label__found_instrument
-        @setvar! var__instrument_matches 0
 
-        if config__use_magic_instrument = 1
-            if "supremely" in label__found_instrument or "exceedingly" in label__found_instrument
-                @setvar! var__instrument_matches 1
-            endif
-        else
-            if "supremely" in label__found_instrument or "exceedingly" in label__found_instrument
-                @setvar! var__instrument_matches 0
+        if "supremely" in label__found_instrument or "exceedingly" in label__found_instrument
+            if var__kept_instrument = 0
+                @setvar! var__kept_instrument 1
             else
-                @setvar! var__instrument_matches 1
+                lift alias__found_instrument 1
+                wait wait__short
+                drop global__my_supply_box
+                wait wait__short
             endif
-        endif
-
-        if var__instrument_matches = 1
-            lift alias__found_instrument 1
-            wait wait__short
-            drop backpack
-            wait wait__short
-            @setvar! var__kept_instrument 1
-            break
         endif
 
         @ignore alias__found_instrument
@@ -453,7 +411,26 @@ if var__kept_instrument = 0
     clearignore
 
     if var__kept_instrument = 0
-        overhead "No instrument of the chosen grade in the supply box." 33
+        while findtype 3740|3742|3762|3763|10245|20006|20008|20010|20012|20014|20016 global__my_supply_box as alias__found_instrument
+            getlabel alias__found_instrument label__found_instrument
+
+            if "supremely" in label__found_instrument or "exceedingly" in label__found_instrument
+                lift alias__found_instrument 1
+                wait wait__short
+                drop backpack
+                wait wait__short
+                @setvar! var__kept_instrument 1
+                break
+            endif
+
+            @ignore alias__found_instrument
+        endwhile
+
+        clearignore
+
+        if var__kept_instrument = 0
+            overhead "No magic instrument in the supply box." 33
+        endif
     endif
 endif
 
