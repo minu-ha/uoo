@@ -206,20 +206,9 @@ endif
 // ####################################################################################
 // # Bank Deposit safe
 // ####################################################################################
-// Every menu entry here can raise a target cursor, and one left unanswered poisons everything
-// after it: the next section's waitfortarget picks up the stale cursor instead of its own, so
-// its prompt is never answered either. The recycler below was doing exactly that and it was
-// the storage shelf restock that looked broken. Answer the cursor in the same block that
-// raised it, and guard it so a block that raises none does not target into thin air.
 if var__has_bank_deposit_safe = 1 and findtype 3821 backpack
     overhead "Bank Deposit safe" 82
     menu global__my_bank_deposit_safe 0
-    waitfortarget wait__target
-
-    if targetexists
-        target backpack
-    endif
-
     wait wait__short
 endif
 
@@ -252,17 +241,10 @@ endif
 // ####################################################################################
 // # Magic item recycler
 // ####################################################################################
-// backpack, not self. The prompt offers yourself as well, and answering self would hand the
-// recycler what is equipped too.
+// No target handling. This entry takes effect straight away and raises no cursor.
 if var__has_magic_item_recycler = 1
     overhead "Magic item recycler" 82
     menu global__my_magic_item_recycler 0
-    waitfortarget wait__target
-
-    if targetexists
-        target backpack
-    endif
-
     wait wait__short
 endif
 
@@ -274,22 +256,24 @@ endif
 // loadout comes back out. Restock lives here with the other deposits, Resupply runs later
 // with the withdrawals.
 //
-// Restock asks what to take from, and the answer is the backpack. It used to answer self,
-// which the shelf does not accept, so the cursor and the menu both stayed up and every lift
-// and drop after that was blocked.
+// The shelf is opened before the menu entry is picked, which is what happens by hand: you
+// open the shelf, then choose Restock from its menu. Calling menu on a shelf that has not
+// been opened selected something else, and the prompt that came back was
+//   "Where do you wish to restock this from? You may target yourself, a container, ..."
+// instead of the one a hand click produces,
+//   "Which container do you wish to restock this container from?"
+// Two different entries, which is why answering the cursor never finished the job.
 //
 // 3232825965 is the shelf gump, the same one script/shelf/sailing.razor waits on.
-//
-// The menu entry numbers are written out. Every other menu call in this repo passes a literal
-// there and a variable in that slot left the context menu open with nothing selected, which
-// is why the cursor never came and the run stalled. 0 is restock, 1 is resupply. Change the
-// numbers here if the right click menu on your shelf lists them the other way round.
+// 0 is restock, 1 is resupply. Change the numbers if your shelf lists them the other way.
 if var__has_storage_shelf = 1
     overhead "Storage shelf restock" 82
+    dclick global__my_storage_shelf
+    waitforgump 3232825965
+    wait wait__short
     menu global__my_storage_shelf 0
     waitfortarget wait__target
     target backpack
-    waitforgump 3232825965
     wait wait__short
     gumpclose
     wait wait__short
