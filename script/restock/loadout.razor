@@ -337,6 +337,14 @@ if var__has_storage_shelf = 1
         hotkey "Cancel Current Target"
         wait wait__short
     endif
+
+    // The shelf opens its own gump while it works and usually closes it again. gumpclose and
+    // a long wait make sure it is really gone before the resupply below sends its own menu
+    // entry, because a menu sent while the shelf gump is still up leaves the context menu
+    // open, and an open context menu blocks every lift and drop after it.
+    wait wait__long
+    gumpclose
+    wait wait__short
 endif
 
 // ####################################################################################
@@ -349,12 +357,15 @@ endif
 if var__has_storage_shelf = 1
     overhead "Storage shelf resupply" 82
     menu global__my_storage_shelf 1
-    wait wait__short
+    wait wait__long
 
     if targetexists
         hotkey "Cancel Current Target"
         wait wait__short
     endif
+
+    gumpclose
+    wait wait__short
 endif
 
 // ####################################################################################
