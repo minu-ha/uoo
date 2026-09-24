@@ -485,46 +485,97 @@ endif
 // ####################################################################################
 // # Sorting items
 // ####################################################################################
-// cleardragdrop and clearignore only. Nothing below reads the system message buffer, and a
-// clearall here would drop every alias the sections above bound.
+// Everything the backpack should hold, and where it goes. Format matches library/item-list.razor.
+//
+//   #bandage                 "clean bandage%s%"      3617
+//   #adventure pack          "adventure pack"        2726
+//   #dagger                  "dagger"                3922
+//   #pouch                   "pouch"                 3705   (hue 0 plain, hue 38 trapped)
+//   #scissors                "scissors"              3998|3999
+//   #kindling                "kindling"              3553
+//   #skinning knife          "Elven Spellblade"      11552|11564
+//   #smoke bomb              "bombs"                 52149
+//   #adventurers rope        "rope"                  5370   (hue 2799)
+//   #delectable food                                 28879|28880|28881|28883|28885|28886|28888|29773|29774
+//   #magic mushroom          "mushroom"              29012
+//   #sewing kit              "sewing kit"            3997
+//   #item identification wand "wand"                 20496
+//   #instruments                                     3740|3742|3762|3763|10245|20006|20008|20010|20012|20014|20016
+//   #reagent satchel         "reagent satchel"       30765
+//   #potion satchel          "alchemists satchel"    31262
+//
+// Placement. drop takes literal coordinates, so the numbers are inline, but they only appear
+// in this section. They are gump pixels, not grid cells, so nudge them if items overlap.
+//
+//   backpack 140 110      the pouches
+//   pouch    0 0          everything not named below
+//   pouch    130 0        identification wand, sewing kit
+//   pouch    130 80       the instrument
+//   pouch    0 80         the two satchels
+//
+// Order matters. Moving a pouch closes it, and a closed container does not report what is
+// inside: the counters for the cure and heal potions in there read zero until it is opened
+// again, and a combat script that believes it has no cure potion will not drink one. Leaving
+// the contents loose in the backpack would count fine and lose them to the first thief, so
+// the pouches move first, get reopened, and only then does anything get sorted into them.
 cleardragdrop
 clearignore
-#bandage "clean bandage%s%" 3617
-#adventure pack "adventure pack" 2726
-#dagger "dagger" 3922
-#pouch "pouch" 3705
-#scissors "scissors" 3998|3999
-#kindling "kindling" 3553
-#skinning knife "Elven Spellblade" 11552|11564
-#smoke bomb "bombs" 52149
-#adventurers rope "rope" 5370 (Hue 2799)
-#Delectable food 28879|28880|28881|28883|28885|28886|28888|29773|29774
-#potion satchel "alchemists satchel" 31262
-#item identification wand "wand" 20496
-#magic mushroom "mushroom" 29012
 
+// 1. the plain pouch, moved and reopened
+while findtype 3705 backpack 0 as alias__found_pouch
+    lift alias__found_pouch
+    wait wait__short
+    drop backpack 140 110
+    wait wait__short
+    dclick alias__found_pouch
+    wait wait__short
+    @ignore alias__found_pouch
+endwhile
+
+clearignore
+
+// 2. the trapped pouch. Not reopened on purpose, nothing reads inside it.
+while findtype 3705 backpack 38 as alias__found_trap_pouch
+    lift alias__found_trap_pouch
+    wait wait__short
+    drop backpack 140 110
+    wait wait__short
+    @ignore alias__found_trap_pouch
+endwhile
+
+clearignore
+
+// 3. the satchels, into the now open pouch. Reopened for the same counting reason.
+if findtype 30765 backpack as alias__found_reagent_satchel
+    lift alias__found_reagent_satchel
+    wait wait__short
+    drop global__my_looting_pouch 0 80
+    wait wait__short
+    dclick alias__found_reagent_satchel
+    wait wait__short
+endif
+
+if findtype 31262 backpack as alias__found_alchemists_satchel
+    lift alias__found_alchemists_satchel
+    wait wait__short
+    drop global__my_looting_pouch 0 80
+    wait wait__short
+    dclick alias__found_alchemists_satchel
+    wait wait__short
+endif
+
+// 4. everything else. Collected first, because the walk below moves items out of the
+//    backpack and a findtype loop cannot be trusted while its own source is changing.
 removelist sorting_item_list
 createlist sorting_item_list
 
 while findtype 3740|3742|3762|3763|10245|20006|20008|20010|20012|20014|20016|20496|3997|3922|3617|2726|3998|3999|3553|11552|11564|52149|5370|28879|28880|28881|28883|28885|28886|28888|29773|29774|29012 backpack as alias__found_item
-    getlabel alias__found_item label__found_item
     pushlist sorting_item_list alias__found_item
     @ignore alias__found_item
 endwhile
 
-cleardragdrop
 clearignore
 
-wait wait__short
-
-// Where each kind lands. drop takes literal coordinates, so the numbers are inline, but they
-// only appear in this one block. They are gump pixels, not grid cells, so nudge them if an
-// item lands under another one.
-//
-//   pouch top left      0 0      everything not named below
-//   pouch top right     130 0    the two tools, the things you reach for by hand
-//   pouch bottom right  130 80   the instrument, so a broken one is easy to spot and swap
-//   backpack 140 110             the pouches themselves, see the block after this loop
 foreach alias__sorting_item in sorting_item_list
     getlabel alias__sorting_item label__sorting_item
 
@@ -544,52 +595,7 @@ foreach alias__sorting_item in sorting_item_list
     endif
 
     wait wait__short
-    @ignore alias__sorting_item
 endfor
-
-// The pouches stay in the backpack, bottom right, clear of everything the loop above placed.
-//
-// Each one is reopened with dclick afterwards. A container that has been closed does not
-// report what is inside it: counters for the cure and heal potions in there read zero until
-// the pouch is opened again, and a combat script that believes it has no cure potion will not
-// drink one. Leaving the contents loose in the backpack would fix the counting and lose them
-// to the first thief instead, so they stay in a pouch and the pouch gets reopened.
-while findtype 3705 backpack 0 as alias__found_pouch
-    lift alias__found_pouch
-    wait wait__short
-    drop backpack 140 110
-    wait wait__short
-    dclick alias__found_pouch
-    @ignore alias__found_pouch
-endwhile
-
-clearignore
-
-while findtype 3705 backpack 38 as alias__found_trap_pouch
-    lift alias__found_trap_pouch
-    wait wait__short
-    drop backpack 140 110
-    wait wait__short
-    @ignore alias__found_trap_pouch
-endwhile
-
-clearignore
-
-if findtype 30765 backpack as alias__found_reagent_satchel
-    lift alias__found_reagent_satchel
-    wait wait__short
-    drop global__my_looting_pouch 150 140
-    wait wait__short
-    dclick alias__found_reagent_satchel
-endif
-
-if findtype 31262 backpack as alias__found_alchemists_satchel
-    lift alias__found_alchemists_satchel
-    wait wait__short
-    drop global__my_looting_pouch 130 140
-    wait wait__short
-    dclick alias__found_alchemists_satchel
-endif
 
 // ####################################################################################
 // # Dress setting
