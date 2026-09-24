@@ -24,7 +24,11 @@ clearignore
 
 // 1 narrates what the sorting and the dress recording are doing, 0 keeps it quiet.
 // Defined here because the sorting section reads it long before the dress section runs.
-@setvar! config__chatty 1
+//
+// Off by default now that the run is known to work. It is not only the overheads: each one
+// needs a getlabel first, which is a server round trip, and there is one per sorted item plus
+// one per equipment layer. Turn it back on when something needs watching.
+@setvar! config__chatty 0
 
 // 1 keeps exactly one magic instrument in the bag. 0 leaves instruments alone entirely,
 // which is what you want when a crafted one comes out of the shelf resupply instead.
@@ -310,33 +314,20 @@ endif
 // ####################################################################################
 // # Storage shelf restock
 // ####################################################################################
-// Restock puts things in, Resupply takes things out. They are two different menu entries and
-// both are needed: crafted gear and anything looted has to go into the shelf before the
-// loadout comes back out. Restock lives here with the other deposits, Resupply runs later
-// with the withdrawals.
+// Restock puts things in, Resupply takes things out. Two menu entries, 0 and 1, and both are
+// needed: crafted gear and anything looted goes into the shelf before the loadout comes back
+// out. Restock belongs here with the deposits, Resupply runs later with the withdrawals.
 //
-// 0 is restock, 1 is resupply, the same numbers the published shelf scripts use.
+// Restock asks what to take from and self is the answer. The two targetexists checks are not
+// the same test: the first answers the prompt, the second catches an answer that was refused
+// and left the cursor up. Nothing cancels before the menu, because every block above already
+// clears up after itself.
 //
-// Two things were going wrong here. A cursor left over from an earlier menu entry was being
-// answered instead of this one: the journal showed two prompts, the stale
-//   "Where do you wish to restock this from? You may target yourself, a container, ..."
-// swallowing the answer meant for the shelf's own
-//   "Which container do you wish to restock this container from?"
-// Cancelling first makes this block independent of whatever ran before it.
-//
-// The other was an unbounded waitforgump. Restock answers a target and reports "N items were
-// added" without the shelf gump ever opening, so waiting for that gump ended the run right
-// here, before the resupply and everything after it.
+// No waitforgump. Restock reports "N items were added" without the shelf gump necessarily
+// opening, so waiting on that gump ended the run right here. The gumpclose at the end covers
+// the times it does open.
 if var__has_storage_shelf = 1
     overhead "Storage shelf restock" 82
-
-    // An earlier menu entry may still have a cursor up. A stale one gets answered instead of
-    // this block's own prompt, so it is cancelled before anything else is asked for.
-    if targetexists
-        hotkey "Cancel Current Target"
-        wait wait__short
-    endif
-
     menu global__my_storage_shelf 0
     waitfortarget wait__target
 
@@ -344,8 +335,6 @@ if var__has_storage_shelf = 1
         target self
     endif
 
-    // The second check is not the same as the first. The first answers the prompt, this one
-    // catches the case where the answer was refused and the cursor is still sitting there.
     if targetexists
         hotkey "Cancel Current Target"
     endif
@@ -357,13 +346,10 @@ endif
 // ####################################################################################
 // # Storage shelf resupply
 // ####################################################################################
-// The withdrawal half. Restock ran earlier, with the other deposits.
-//
-// No target here, resupply raises no cursor. It used to wait for one anyway, on the theory
-// that the wait was what kept the restock above from colliding with this call. It was not:
-// the run was dying on an undeclared wait__long, and the context menu left on screen was the
-// symptom of that, not the cause. What this block does need is the gumpclose before the menu,
-// The restock above closes its own gump, so there is nothing to clear away here first.
+// The withdrawal half, and the short one: resupply raises no cursor and answers at once.
+// It used to wait on a target anyway, on the theory that the wait kept the restock above from
+// colliding with it. That was wrong. The run was dying on an undeclared wait__long, and the
+// context menu left on screen was the symptom, not the cause.
 if var__has_storage_shelf = 1
     overhead "Storage shelf resupply" 82
     menu global__my_storage_shelf 1
