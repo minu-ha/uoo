@@ -269,14 +269,31 @@ endif
 // ####################################################################################
 // # Storage shelf
 // ####################################################################################
+// One context menu entry, not two. The wiki says Begin Resupply "attempts to equip items and
+// stock resources", so it already covers what the other entry was being called for, and
+// script/train/magery.razor drives the same shelf with entry 1 alone and no target.
+//
+// The old version called entry 0 first and answered its cursor with an unguarded target self,
+// then called entry 1 and never answered anything it raised. That is where the cursor was
+// getting stuck: a target left hanging blocks every lift and drop after it.
+//
+// If your shelf has resupply on a different entry, change this one number.
+@setvar! config__shelf_menu_resupply 1
+
 if var__has_storage_shelf = 1
     overhead "Storage shelf" 82
-    menu global__my_storage_shelf 0
-    waitfortarget wait__target
-    target self
+    menu global__my_storage_shelf config__shelf_menu_resupply
     wait wait__short
+
+    // Answer a cursor only if one actually came up, and close the gump either way.
+    waitfortarget wait__target
+
+    if targetexists
+        target self
+        wait wait__short
+    endif
+
     gumpclose
-    menu global__my_storage_shelf 1
     wait wait__short
 endif
 
@@ -334,7 +351,26 @@ endif
 //
 // Source is the supply box, the same place the tools come from. One is enough: the combat
 // scripts reselect from the backpack only when the carried one is gone.
-if config__use_magic_instrument = 1
+//
+// Is one already carried? findtype alone cannot tell a magic instrument from a crafted one,
+// so the backpack is walked and the label read, the same two words the combat scripts match.
+// Without this the run fetched another one every time, however many were already in the bag.
+@setvar! var__has_magic_instrument 0
+
+while findtype 3740|3742|3762|3763|10245|20006|20008|20010|20012|20014|20016 backpack as alias__carried_instrument
+    getlabel alias__carried_instrument label__carried_instrument
+
+    if "supremely" in label__carried_instrument or "exceedingly" in label__carried_instrument
+        @setvar! var__has_magic_instrument 1
+        break
+    endif
+
+    @ignore alias__carried_instrument
+endwhile
+
+clearignore
+
+if config__use_magic_instrument = 1 and var__has_magic_instrument = 0
     while findtype 3740|3742|3762|3763|10245|20006|20008|20010|20012|20014|20016 global__my_supply_box as alias__found_instrument
         getlabel alias__found_instrument label__found_instrument
 
@@ -343,6 +379,7 @@ if config__use_magic_instrument = 1
             wait wait__short
             drop backpack
             wait wait__short
+            @setvar! var__has_magic_instrument 1
             break
         endif
 
@@ -351,8 +388,8 @@ if config__use_magic_instrument = 1
 
     clearignore
 
-    if not findtype 3740|3742|3762|3763|10245|20006|20008|20010|20012|20014|20016 backpack
-        overhead "No magic instrument in the wand container." 33
+    if var__has_magic_instrument = 0
+        overhead "No magic instrument in the supply box." 33
     endif
 endif
 
