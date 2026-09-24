@@ -222,12 +222,25 @@ endif
 // ####################################################################################
 // # Resource stockpile
 // ####################################################################################
+// This is the block that was leaking a cursor. Its prompt,
+//   "Where do you wish to restock this from? You may target yourself, a container, ..."
+// was still up when the storage shelf asked its own question, so the shelf's answer went to
+// this one and the shelf restock never ran. target self was already here, but it does not
+// always take, and the block had nothing to clean up after itself.
 if var__has_resource_stockpile = 1
     overhead "Resource stockpile" 82
     menu global__my_resource_stockpile 0
     waitfortarget wait__target
-    target self
-    wait wait__short
+
+    if targetexists
+        target self
+        wait wait__short
+    endif
+
+    if targetexists
+        hotkey "Cancel Current Target"
+        wait wait__short
+    endif
 endif
 
 // ####################################################################################
@@ -294,8 +307,16 @@ if var__has_storage_shelf = 1
 
     menu global__my_storage_shelf 0
     waitfortarget wait__target
-    target backpack
-    wait wait__short
+
+    if targetexists
+        target backpack
+        wait wait__short
+    endif
+
+    if targetexists
+        hotkey "Cancel Current Target"
+        wait wait__short
+    endif
 endif
 
 // ####################################################################################
@@ -309,6 +330,11 @@ if var__has_storage_shelf = 1
     overhead "Storage shelf resupply" 82
     menu global__my_storage_shelf 1
     wait wait__short
+
+    if targetexists
+        hotkey "Cancel Current Target"
+        wait wait__short
+    endif
 endif
 
 // ####################################################################################
