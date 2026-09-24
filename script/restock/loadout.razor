@@ -13,6 +13,11 @@ clearignore
 // container. 0 when they stand on the floor. Either way they must be within reach.
 @setvar! config__use_furniture_container 1
 
+// Storage shelf context menu entries. Restock puts in, Resupply takes out. Check the order in
+// the in game right click menu and change these two numbers if your shelf differs.
+@setvar! config__shelf_menu_restock 0
+@setvar! config__shelf_menu_resupply 1
+
 // Which instrument grade to carry. 1 magic, 0 crafted. Exactly one is carried either way.
 @setvar! config__use_magic_instrument 1
 
@@ -242,6 +247,33 @@ if var__has_magic_item_recycler = 1
 endif
 
 // ####################################################################################
+// # Storage shelf restock
+// ####################################################################################
+// Restock puts things in, Resupply takes things out. They are two different menu entries and
+// both are needed: crafted gear and anything looted has to go into the shelf before the
+// loadout comes back out. Restock lives here with the other deposits, Resupply runs later
+// with the withdrawals.
+//
+// Both entries can raise a target cursor. It is answered only when one really came up: an
+// unguarded target self was leaving a cursor hanging, and a hanging cursor blocks every lift
+// and drop after it.
+if var__has_storage_shelf = 1
+    overhead "Storage shelf restock" 82
+    menu global__my_storage_shelf config__shelf_menu_restock
+    wait wait__short
+
+    waitfortarget wait__target
+
+    if targetexists
+        target self
+        wait wait__short
+    endif
+
+    gumpclose
+    wait wait__short
+endif
+
+// ####################################################################################
 // # Looting bag
 // ####################################################################################
 if not varexist global__my_looting_pouch
@@ -267,21 +299,11 @@ else
 endif
 
 // ####################################################################################
-// # Storage shelf
+// # Storage shelf resupply
 // ####################################################################################
-// One context menu entry, not two. The wiki says Begin Resupply "attempts to equip items and
-// stock resources", so it already covers what the other entry was being called for, and
-// script/train/magery.razor drives the same shelf with entry 1 alone and no target.
-//
-// The old version called entry 0 first and answered its cursor with an unguarded target self,
-// then called entry 1 and never answered anything it raised. That is where the cursor was
-// getting stuck: a target left hanging blocks every lift and drop after it.
-//
-// If your shelf has resupply on a different entry, change this one number.
-@setvar! config__shelf_menu_resupply 1
-
+// The withdrawal half. Restock ran earlier, with the other deposits.
 if var__has_storage_shelf = 1
-    overhead "Storage shelf" 82
+    overhead "Storage shelf resupply" 82
     menu global__my_storage_shelf config__shelf_menu_resupply
     wait wait__short
 
@@ -306,6 +328,10 @@ endif
 // every further copy goes back to the supply box. Only if none was carried is one fetched.
 // Runs kept stacking duplicates before, because the old check stopped at the first hit and
 // never looked at what else was already in the bag.
+//
+// Extras go to the supply box rather than the shelf because the shelf restock already ran,
+// back with the deposits. Anything left in the bag from here on stays in the bag, so this
+// pass has to put it somewhere itself.
 //
 // This also replaced the Restock 10 agent, which only carried the sewing kit, so the
 // identification wand was checked for and then never actually fetched.
@@ -380,6 +406,10 @@ endif
 //
 // Exactly one is carried, the same rule as the tools above. Anything of the other grade, and
 // any second copy of the right grade, goes back to the supply box.
+//
+// Crafted instruments you came home with are gone by now: the shelf restock swept them in
+// with the other deposits. What this pass sees is what the resupply handed back, plus
+// anything the shelf did not take.
 @setvar! var__kept_instrument 0
 
 while findtype 3740|3742|3762|3763|10245|20006|20008|20010|20012|20014|20016 backpack as alias__found_instrument
