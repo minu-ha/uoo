@@ -355,11 +355,11 @@ endif
 // ####################################################################################
 // The withdrawal half. Restock ran earlier, with the other deposits.
 //
-// Same shape as the restock above, and as script/restock/resupply-shelf.razor, which runs this
-// entry on its own without trouble. The waitfortarget matters even though resupply raises no
-// cursor: it gives the server its two seconds to answer the previous menu before this one is
-// sent. Without it the second menu arrived while the first was still being handled and the
-// context menu was left open on screen, which blocks every lift and drop after it.
+// No target here, resupply raises no cursor. It used to wait for one anyway, on the theory
+// that the wait was what kept the restock above from colliding with this call. It was not:
+// the run was dying on an undeclared wait__long, and the context menu left on screen was the
+// symptom of that, not the cause. What this block does need is the gumpclose before the menu,
+// so the shelf gump the restock opened is gone first.
 if var__has_storage_shelf = 1
     overhead "Storage shelf resupply" 82
     if targetexists
@@ -368,12 +368,6 @@ if var__has_storage_shelf = 1
 
     gumpclose
     menu global__my_storage_shelf 1
-    waitfortarget wait__target
-
-    if targetexists
-        target self
-    endif
-
     wait wait__long
     gumpclose
 endif
