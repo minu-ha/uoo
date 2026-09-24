@@ -206,9 +206,20 @@ endif
 // ####################################################################################
 // # Bank Deposit safe
 // ####################################################################################
+// Every menu entry here can raise a target cursor, and one left unanswered poisons everything
+// after it: the next section's waitfortarget picks up the stale cursor instead of its own, so
+// its prompt is never answered either. The recycler below was doing exactly that and it was
+// the storage shelf restock that looked broken. Answer the cursor in the same block that
+// raised it, and guard it so a block that raises none does not target into thin air.
 if var__has_bank_deposit_safe = 1 and findtype 3821 backpack
     overhead "Bank Deposit safe" 82
     menu global__my_bank_deposit_safe 0
+    waitfortarget wait__target
+
+    if targetexists
+        target backpack
+    endif
+
     wait wait__short
 endif
 
@@ -241,9 +252,18 @@ endif
 // ####################################################################################
 // # Magic item recycler
 // ####################################################################################
+// backpack, not self. The prompt offers yourself as well, and answering self would hand the
+// recycler what is equipped too.
 if var__has_magic_item_recycler = 1
     overhead "Magic item recycler" 82
     menu global__my_magic_item_recycler 0
+    waitfortarget wait__target
+
+    if targetexists
+        target backpack
+    endif
+
+    wait wait__short
 endif
 
 // ####################################################################################
