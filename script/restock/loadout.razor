@@ -25,10 +25,11 @@ clearignore
 // 1 narrates what the sorting and the dress recording are doing, 0 keeps it quiet.
 // Defined here because the sorting section reads it long before the dress section runs.
 //
-// Off by default now that the run is known to work. It is not only the overheads: each one
-// needs a getlabel first, which is a server round trip, and there is one per sorted item plus
-// one per equipment layer. Turn it back on when something needs watching.
-@setvar! config__chatty 0
+// It covers every line that announces an item: what went back to the supply box, what came
+// out of it, where each pouch and satchel landed, every item the sorting placed, and every
+// equipment layer the dress recording saw. One switch for the lot, so a quiet run is quiet
+// everywhere and a noisy one accounts for every move.
+@setvar! config__chatty 1
 
 // 1 keeps exactly one magic instrument in the bag. 0 leaves instruments alone entirely,
 // which is what you want when a crafted one comes out of the shelf resupply instead.
@@ -384,6 +385,9 @@ if find global__my_supply_box ground -1 -1 config__reach
             wait wait__short
             drop global__my_supply_box
             wait wait__short
+            if config__chatty = 1
+                overhead "back: sewing kit" 88
+            endif
         endif
 
         @ignore alias__found_sewing_kit
@@ -397,6 +401,9 @@ if find global__my_supply_box ground -1 -1 config__reach
             wait wait__short
             drop backpack
             wait wait__short
+            if config__chatty = 1
+                overhead "take: sewing kit" 88
+            endif
         else
             overhead "No sewing kit in the supply box." 33
         endif
@@ -412,6 +419,9 @@ if find global__my_supply_box ground -1 -1 config__reach
             wait wait__short
             drop global__my_supply_box
             wait wait__short
+            if config__chatty = 1
+                overhead "back: identification wand" 88
+            endif
         endif
 
         @ignore alias__found_identification_wand
@@ -425,6 +435,9 @@ if find global__my_supply_box ground -1 -1 config__reach
             wait wait__short
             drop backpack
             wait wait__short
+            if config__chatty = 1
+                overhead "take: identification wand" 88
+            endif
         else
             overhead "No identification wand in the supply box." 33
         endif
@@ -460,6 +473,9 @@ if config__use_magic_instrument = 1
                 wait wait__short
                 drop global__my_supply_box
                 wait wait__short
+                if config__chatty = 1
+                    overhead "back: {{label__found_instrument}}" 88
+                endif
             endif
         endif
 
@@ -477,6 +493,9 @@ if config__use_magic_instrument = 1
                 wait wait__short
                 drop backpack
                 wait wait__short
+                if config__chatty = 1
+                    overhead "take: {{label__found_instrument}}" 88
+                endif
                 @setvar! var__kept_instrument 1
                 break
             endif
@@ -562,6 +581,9 @@ while findtype 3705 backpack 0 as alias__found_pouch
     wait wait__short
     drop backpack 140 110
     wait wait__short
+    if config__chatty = 1
+        overhead "moved: pouch" 88
+    endif
     dclick alias__found_pouch
     wait wait__short
     @ignore alias__found_pouch
@@ -575,6 +597,9 @@ while findtype 3705 backpack 38 as alias__found_trap_pouch
     wait wait__short
     drop backpack 140 110
     wait wait__short
+    if config__chatty = 1
+        overhead "moved: trapped pouch" 88
+    endif
     @ignore alias__found_trap_pouch
 endwhile
 
@@ -586,6 +611,9 @@ if findtype 30765 backpack as alias__found_reagent_satchel
     wait wait__short
     drop global__my_looting_pouch 0 80
     wait wait__short
+    if config__chatty = 1
+        overhead "moved: reagent satchel" 88
+    endif
     dclick alias__found_reagent_satchel
     wait wait__short
 endif
@@ -595,6 +623,9 @@ if findtype 31262 backpack as alias__found_alchemists_satchel
     wait wait__short
     drop global__my_looting_pouch 0 80
     wait wait__short
+    if config__chatty = 1
+        overhead "moved: alchemists satchel" 88
+    endif
     dclick alias__found_alchemists_satchel
     wait wait__short
 endif
