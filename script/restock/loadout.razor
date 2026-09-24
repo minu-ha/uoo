@@ -13,11 +13,6 @@ clearignore
 // container. 0 when they stand on the floor. Either way they must be within reach.
 @setvar! config__use_furniture_container 1
 
-// Storage shelf context menu entries. Restock puts in, Resupply takes out. Check the order in
-// the in game right click menu and change these two numbers if your shelf differs.
-@setvar! config__shelf_menu_restock 0
-@setvar! config__shelf_menu_resupply 1
-
 // 1 narrates what the sorting and the dress recording are doing, 0 keeps it quiet.
 // Defined here because the sorting section reads it long before the dress section runs.
 @setvar! config__chatty 1
@@ -263,17 +258,17 @@ endif
 // which the shelf does not accept, so the cursor and the menu both stayed up and every lift
 // and drop after that was blocked.
 //
-// 3232825965 is the shelf gump, the same one script/shelf/sailing.razor waits on. It opens
-// once the target is answered, and is closed again so the resupply below starts clean.
+// 3232825965 is the shelf gump, the same one script/shelf/sailing.razor waits on.
+//
+// The menu entry numbers are written out. Every other menu call in this repo passes a literal
+// there and a variable in that slot left the context menu open with nothing selected, which
+// is why the cursor never came and the run stalled. 0 is restock, 1 is resupply. Change the
+// numbers here if the right click menu on your shelf lists them the other way round.
 if var__has_storage_shelf = 1
     overhead "Storage shelf restock" 82
-    menu global__my_storage_shelf config__shelf_menu_restock
+    menu global__my_storage_shelf 0
     waitfortarget wait__target
-
-    if targetexists
-        target backpack
-    endif
-
+    target backpack
     waitforgump 3232825965
     wait wait__short
     gumpclose
@@ -289,7 +284,7 @@ endif
 // would only burn wait__target on every run.
 if var__has_storage_shelf = 1
     overhead "Storage shelf resupply" 82
-    menu global__my_storage_shelf config__shelf_menu_resupply
+    menu global__my_storage_shelf 1
     waitforgump 3232825965
     wait wait__short
     gumpclose
