@@ -210,6 +210,13 @@ if var__has_bank_deposit_safe = 1 and findtype 3821 backpack
     overhead "Bank Deposit safe" 82
     menu global__my_bank_deposit_safe 0
     wait wait__short
+
+    // An earlier menu entry may still have a cursor up. A stale one gets answered instead of
+    // this block's own prompt, so it is cancelled before anything else is asked for.
+    if targetexists
+        hotkey "Cancel Current Target"
+        wait wait__short
+    endif
 endif
 
 // ####################################################################################
@@ -246,6 +253,13 @@ if var__has_magic_item_recycler = 1
     overhead "Magic item recycler" 82
     menu global__my_magic_item_recycler 0
     wait wait__short
+
+    // An earlier menu entry may still have a cursor up. A stale one gets answered instead of
+    // this block's own prompt, so it is cancelled before anything else is asked for.
+    if targetexists
+        hotkey "Cancel Current Target"
+        wait wait__short
+    endif
 endif
 
 // ####################################################################################
@@ -256,26 +270,31 @@ endif
 // loadout comes back out. Restock lives here with the other deposits, Resupply runs later
 // with the withdrawals.
 //
-// The shelf is opened before the menu entry is picked, which is what happens by hand: you
-// open the shelf, then choose Restock from its menu. Calling menu on a shelf that has not
-// been opened selected something else, and the prompt that came back was
-//   "Where do you wish to restock this from? You may target yourself, a container, ..."
-// instead of the one a hand click produces,
-//   "Which container do you wish to restock this container from?"
-// Two different entries, which is why answering the cursor never finished the job.
+// 0 is restock, 1 is resupply, the same numbers the published shelf scripts use.
 //
-// 3232825965 is the shelf gump, the same one script/shelf/sailing.razor waits on.
-// 0 is restock, 1 is resupply. Change the numbers if your shelf lists them the other way.
+// Two things were going wrong here. A cursor left over from an earlier menu entry was being
+// answered instead of this one: the journal showed two prompts, the stale
+//   "Where do you wish to restock this from? You may target yourself, a container, ..."
+// swallowing the answer meant for the shelf's own
+//   "Which container do you wish to restock this container from?"
+// Cancelling first makes this block independent of whatever ran before it.
+//
+// The other was an unbounded waitforgump. Restock answers a target and reports "N items were
+// added" without the shelf gump ever opening, so waiting for that gump ended the run right
+// here, before the resupply and everything after it.
 if var__has_storage_shelf = 1
     overhead "Storage shelf restock" 82
-    dclick global__my_storage_shelf
-    waitforgump 3232825965
-    wait wait__short
+
+    // An earlier menu entry may still have a cursor up. A stale one gets answered instead of
+    // this block's own prompt, so it is cancelled before anything else is asked for.
+    if targetexists
+        hotkey "Cancel Current Target"
+        wait wait__short
+    endif
+
     menu global__my_storage_shelf 0
     waitfortarget wait__target
     target backpack
-    wait wait__short
-    gumpclose
     wait wait__short
 endif
 
@@ -289,9 +308,6 @@ endif
 if var__has_storage_shelf = 1
     overhead "Storage shelf resupply" 82
     menu global__my_storage_shelf 1
-    waitforgump 3232825965
-    wait wait__short
-    gumpclose
     wait wait__short
 endif
 
