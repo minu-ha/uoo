@@ -269,23 +269,30 @@ endif
 // ####################################################################################
 // # Magic item recycler
 // ####################################################################################
-// This one does raise a cursor, and it is the one that was arriving late:
-//   "Where do you wish to restock this from? You may target yourself, a container, ..."
-// backpack, not self, so nothing equipped is handed over.
+// The recycler takes no target. It acts on the backpack straight away.
+//
+//   0  everything in the backpack
+//   1  unidentified items only
+//
+// 1 is the default on purpose. 0 also swallows the magic instrument and any identified gear
+// you came home with, and the instrument section further down would then pull a replacement
+// out of the supply box every run. 1 takes the loot you have not looked at yet and leaves
+// your kit alone.
+//
+// If this prompts for a target, the variable is pointing at the Magic Item Vault instead of
+// the recycler. Run  unsetvar global__my_magic_item_recycler  and rerun to retarget it.
+@setvar! config__recycle_unidentified_only 1
+
 if var__has_magic_item_recycler = 1
     overhead "Magic item recycler" 82
-    menu global__my_magic_item_recycler 0
-    waitfortarget wait__target
 
-    if targetexists
-        target backpack
-        wait wait__short
+    if config__recycle_unidentified_only = 1
+        menu global__my_magic_item_recycler 1
+    else
+        menu global__my_magic_item_recycler 0
     endif
 
-    if targetexists
-        hotkey "Cancel Current Target"
-        wait wait__short
-    endif
+    wait wait__short
 endif
 
 // ####################################################################################
@@ -322,7 +329,7 @@ if var__has_storage_shelf = 1
     waitfortarget wait__target
 
     if targetexists
-        target backpack
+        target self
         wait wait__short
     endif
 
