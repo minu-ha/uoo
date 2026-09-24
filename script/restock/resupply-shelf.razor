@@ -1,0 +1,63 @@
+// Storage shelf resupply on its own, for working out why the context menu stays open.
+// Needs: stand within reach of the shelf. It asks for the shelf once and keeps it in the profile.
+//
+// The shelf context menu has two entries, Restock at 0 and Resupply at 1, so the numbers are
+// not in doubt. What is in doubt is whether the entry is being selected at all: the menu opens
+// and stays open, which is what happens when the selection does not land.
+//
+// Every step announces itself, so whichever overhead is the last one you see is the step that
+// hung. Run this with the shelf closed, then again with it already open, and compare.
+
+clearall
+clearsysmsg
+cleardragdrop
+clearignore
+
+@setvar! wait__short 300
+@setvar! wait__long 1000
+@setvar! wait__target 2000
+@setvar! config__reach 2
+
+if not varexist global__my_storage_shelf or not find global__my_storage_shelf ground -1 -1 config__reach
+    unsetvar global__my_storage_shelf
+    overhead "Target the storage shelf" 55
+    setvar global__my_storage_shelf
+endif
+
+// Start from a clean slate: a cursor or a gump left by something else would be picked up here.
+if targetexists
+    overhead "0 cancelling a cursor that was already up" 33
+    hotkey "Cancel Current Target"
+    wait wait__short
+endif
+
+gumpclose
+wait wait__short
+
+overhead "1 menu 1" 55
+menu global__my_storage_shelf 1
+
+overhead "2 waiting for a cursor" 55
+waitfortarget wait__target
+
+if targetexists
+    overhead "3 cursor came, answering self" 63
+    target self
+    wait wait__short
+else
+    overhead "3 no cursor came" 33
+endif
+
+wait wait__long
+
+if targetexists
+    overhead "4 a cursor is still up" 33
+    hotkey "Cancel Current Target"
+    wait wait__short
+else
+    overhead "4 no cursor left" 63
+endif
+
+gumpclose
+wait wait__short
+overhead "5 finished" 63
