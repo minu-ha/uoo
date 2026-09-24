@@ -325,6 +325,13 @@ if var__has_storage_shelf = 1
         wait wait__short
     endif
 
+    if targetexists
+        hotkey "Cancel Current Target"
+        wait wait__short
+    endif
+
+    gumpclose
+    wait wait__short
     menu global__my_storage_shelf 0
     waitfortarget wait__target
 
@@ -333,16 +340,13 @@ if var__has_storage_shelf = 1
         wait wait__short
     endif
 
+    wait wait__long
+
     if targetexists
         hotkey "Cancel Current Target"
         wait wait__short
     endif
 
-    // The shelf opens its own gump while it works and usually closes it again. gumpclose and
-    // a long wait make sure it is really gone before the resupply below sends its own menu
-    // entry, because a menu sent while the shelf gump is still up leaves the context menu
-    // open, and an open context menu blocks every lift and drop after it.
-    wait wait__long
     gumpclose
     wait wait__short
 endif
@@ -352,11 +356,28 @@ endif
 // ####################################################################################
 // The withdrawal half. Restock ran earlier, with the other deposits.
 //
-// No target here. Resupply knows where the items go and raises no cursor, so waiting for one
-// would only burn wait__target on every run.
+// Same shape as the restock above, and as script/restock/resupply-shelf.razor, which runs this
+// entry on its own without trouble. The waitfortarget matters even though resupply raises no
+// cursor: it gives the server its two seconds to answer the previous menu before this one is
+// sent. Without it the second menu arrived while the first was still being handled and the
+// context menu was left open on screen, which blocks every lift and drop after it.
 if var__has_storage_shelf = 1
     overhead "Storage shelf resupply" 82
+    if targetexists
+        hotkey "Cancel Current Target"
+        wait wait__short
+    endif
+
+    gumpclose
+    wait wait__short
     menu global__my_storage_shelf 1
+    waitfortarget wait__target
+
+    if targetexists
+        target self
+        wait wait__short
+    endif
+
     wait wait__long
 
     if targetexists

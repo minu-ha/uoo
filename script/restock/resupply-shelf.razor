@@ -18,8 +18,9 @@ clearignore
 @setvar! wait__target 2000
 @setvar! config__reach 2
 
-if not varexist global__my_storage_shelf or not find global__my_storage_shelf ground -1 -1 config__reach
-    unsetvar global__my_storage_shelf
+// varexist only. A shelf kept inside a furniture container is not on the ground, so a find
+// against the ground would drop the variable and ask again on every run.
+if not varexist global__my_storage_shelf
     overhead "Target the storage shelf" 55
     setvar global__my_storage_shelf
 endif
