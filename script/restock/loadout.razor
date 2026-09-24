@@ -18,6 +18,10 @@ clearignore
 @setvar! config__shelf_menu_restock 0
 @setvar! config__shelf_menu_resupply 1
 
+// 1 narrates what the sorting and the dress recording are doing, 0 keeps it quiet.
+// Defined here because the sorting section reads it long before the dress section runs.
+@setvar! config__chatty 1
+
 // Which instrument grade to carry. 1 magic, 0 crafted. Exactly one is carried either way.
 @setvar! config__use_magic_instrument 1
 
@@ -274,31 +278,6 @@ if var__has_storage_shelf = 1
 endif
 
 // ####################################################################################
-// # Looting bag
-// ####################################################################################
-if not varexist global__my_looting_pouch
-    overhead "Set looting pouch" 88
-    wait wait__short
-
-    if findtype 3705 backpack 0 as alias__found_pouch
-        setvar global__my_looting_pouch alias__found_pouch
-    else
-        setvar global__my_looting_pouch
-    endif
-else
-    if not find global__my_looting_pouch backpack
-        wait wait__short
-        overhead "Looting pouch not found."
-
-        if findtype 3705 backpack 0 as alias__found_pouch
-            setvar global__my_looting_pouch alias__found_pouch
-        else
-            setvar global__my_looting_pouch
-        endif
-    endif
-endif
-
-// ####################################################################################
 // # Storage shelf resupply
 // ####################################################################################
 // The withdrawal half. Restock ran earlier, with the other deposits.
@@ -479,6 +458,31 @@ if var__kept_instrument = 0
 endif
 
 // ####################################################################################
+// # Looting bag
+// ####################################################################################
+if not varexist global__my_looting_pouch
+    overhead "Set looting pouch" 88
+    wait wait__short
+
+    if findtype 3705 backpack 0 as alias__found_pouch
+        setvar global__my_looting_pouch alias__found_pouch
+    else
+        setvar global__my_looting_pouch
+    endif
+else
+    if not find global__my_looting_pouch backpack
+        wait wait__short
+        overhead "Looting pouch not found."
+
+        if findtype 3705 backpack 0 as alias__found_pouch
+            setvar global__my_looting_pouch alias__found_pouch
+        else
+            setvar global__my_looting_pouch
+        endif
+    endif
+endif
+
+// ####################################################################################
 // # Sorting items
 // ####################################################################################
 // cleardragdrop and clearignore only. Nothing below reads the system message buffer, and a
@@ -502,7 +506,7 @@ clearignore
 removelist sorting_item_list
 createlist sorting_item_list
 
-while findtype 3740|3742|3762|3763|10245|20006|20008|20010|20012|20014|20016|20496|3922|3617|2726|3998|3999|3553|11552|11564|52149|5370|28879|28880|28881|28883|28885|28886|28888|29773|29774|29012 backpack as alias__found_item
+while findtype 3740|3742|3762|3763|10245|20006|20008|20010|20012|20014|20016|20496|3997|3922|3617|2726|3998|3999|3553|11552|11564|52149|5370|28879|28880|28881|28883|28885|28886|28888|29773|29774|29012 backpack as alias__found_item
     getlabel alias__found_item label__found_item
     pushlist sorting_item_list alias__found_item
     @ignore alias__found_item
@@ -513,44 +517,63 @@ clearignore
 
 wait wait__short
 
+// Where each kind lands. drop takes literal coordinates, so the numbers are inline, but they
+// only appear in this one block. They are gump pixels, not grid cells, so nudge them if an
+// item lands under another one.
+//
+//   pouch top left      0 0      everything not named below
+//   pouch top right     130 0    the two tools, the things you reach for by hand
+//   pouch bottom right  130 80   the instrument, so a broken one is easy to spot and swap
+//   backpack 140 110             the pouches themselves, see the block after this loop
 foreach alias__sorting_item in sorting_item_list
     getlabel alias__sorting_item label__sorting_item
-    overhead label__sorting_item 11
 
-    if "item identification wand" in label__sorting_item
-        lift alias__sorting_item 1000
-        wait wait__short
-        drop global__my_looting_pouch 150 0
-        wait wait__short
-    elseif "supremely" in label__sorting_item or "lute" in label__sorting_item
-        lift alias__sorting_item 1000
-        wait wait__short
-        drop global__my_looting_pouch 130 0
-        wait wait__short
-    else
-        lift alias__sorting_item 1000
-        wait wait__short
-        drop global__my_looting_pouch 0 0 0
-        wait wait__short
+    if config__chatty = 1
+        overhead label__sorting_item 11
     endif
 
+    lift alias__sorting_item 1000
+    wait wait__short
+
+    if "item identification wand" in label__sorting_item or "sewing kit" in label__sorting_item
+        drop global__my_looting_pouch 130 0
+    elseif "flute" in label__sorting_item or "drum" in label__sorting_item or "harp" in label__sorting_item or "lute" in label__sorting_item or "tambourine" in label__sorting_item or "gemshorn" in label__sorting_item or "hurdy" in label__sorting_item or "psaltery" in label__sorting_item or "sackbut" in label__sorting_item or "shawm" in label__sorting_item or "vielle" in label__sorting_item
+        drop global__my_looting_pouch 130 80
+    else
+        drop global__my_looting_pouch 0 0
+    endif
+
+    wait wait__short
     @ignore alias__sorting_item
 endfor
 
+// The pouches stay in the backpack, bottom right, clear of everything the loop above placed.
+//
+// Each one is reopened with dclick afterwards. A container that has been closed does not
+// report what is inside it: counters for the cure and heal potions in there read zero until
+// the pouch is opened again, and a combat script that believes it has no cure potion will not
+// drink one. Leaving the contents loose in the backpack would fix the counting and lose them
+// to the first thief instead, so they stay in a pouch and the pouch gets reopened.
 while findtype 3705 backpack 0 as alias__found_pouch
     lift alias__found_pouch
-    drop backpack 0 0 0
-    ignore alias__found_pouch
+    wait wait__short
+    drop backpack 140 110
     wait wait__short
     dclick alias__found_pouch
+    @ignore alias__found_pouch
 endwhile
+
+clearignore
 
 while findtype 3705 backpack 38 as alias__found_trap_pouch
     lift alias__found_trap_pouch
-    drop backpack 0 0 0
-    ignore alias__found_trap_pouch
     wait wait__short
+    drop backpack 140 110
+    wait wait__short
+    @ignore alias__found_trap_pouch
 endwhile
+
+clearignore
 
 if findtype 30765 backpack as alias__found_reagent_satchel
     lift alias__found_reagent_satchel
@@ -581,8 +604,6 @@ endif
 // @setvar! keeps these for the rest of the Razor session and any script can read them, so
 // the dress hotkey sees them later. They are gone after a client restart, which is fine:
 // this script runs again before the next trip.
-@setvar! config__chatty 1
-
 if findlayer self righthand as item
     @setvar! var__right_hand item
 
