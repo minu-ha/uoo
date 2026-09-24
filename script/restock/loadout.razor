@@ -206,13 +206,21 @@ endif
 // ####################################################################################
 // # Bank Deposit safe
 // ####################################################################################
+// Every one of these blocks waits with waitfortarget, never with a plain wait. A fixed sleep
+// is not long enough for the server to answer: the cursor turns up after the block has moved
+// on, and then the next block's waitfortarget picks up that stale cursor instead of its own.
+// That is what kept breaking the storage shelf restock, and the guilty prompt belonged to the
+// recycler two blocks earlier.
 if var__has_bank_deposit_safe = 1 and findtype 3821 backpack
     overhead "Bank Deposit safe" 82
     menu global__my_bank_deposit_safe 0
-    wait wait__short
+    waitfortarget wait__target
 
-    // An earlier menu entry may still have a cursor up. A stale one gets answered instead of
-    // this block's own prompt, so it is cancelled before anything else is asked for.
+    if targetexists
+        target backpack
+        wait wait__short
+    endif
+
     if targetexists
         hotkey "Cancel Current Target"
         wait wait__short
@@ -261,14 +269,19 @@ endif
 // ####################################################################################
 // # Magic item recycler
 // ####################################################################################
-// No target handling. This entry takes effect straight away and raises no cursor.
+// This one does raise a cursor, and it is the one that was arriving late:
+//   "Where do you wish to restock this from? You may target yourself, a container, ..."
+// backpack, not self, so nothing equipped is handed over.
 if var__has_magic_item_recycler = 1
     overhead "Magic item recycler" 82
     menu global__my_magic_item_recycler 0
-    wait wait__short
+    waitfortarget wait__target
 
-    // An earlier menu entry may still have a cursor up. A stale one gets answered instead of
-    // this block's own prompt, so it is cancelled before anything else is asked for.
+    if targetexists
+        target backpack
+        wait wait__short
+    endif
+
     if targetexists
         hotkey "Cancel Current Target"
         wait wait__short
