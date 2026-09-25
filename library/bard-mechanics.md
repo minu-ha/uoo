@@ -251,7 +251,7 @@ Song     11s under the effect of a song
 ```
 
 항목 순서는 **바가 자주 뜨는 순서**로 정렬했다.
-`Skill` -> `Music` -> `Discord` -> `Peace/Provo` -> `Song`.
+`Skill` -> `Music` -> `Discord` -> `Peace/Provo` -> `Song`, 그 뒤에 이 루프가 읽는 바 순서로 `Magic Arrow` -> `Harm` -> `Fireball` -> `Lightning` -> `Mushroom` -> `Heal Potion`.
 
 ### `Skill` 과 `Music` 의 관계
 
@@ -282,7 +282,12 @@ cooldown "Music"   바드 때문에 쿨이면 1      <- 전투 루프가 쓰는 
   `script/` 의 참조 30곳도 같이 바꿨다.
 - **`Skill` 에 바드 5초 트리거를 넣었다.** 서버 스킬 게이트가 하나라
   바드가 도는 동안 다른 스킬도 막힌다.
-- 바가 자주 뜨는 순서로 **재정렬했다**: `Skill` -> `Music` -> `Discord` -> `Peace/Provo` -> `Song`.
+- 항목 이름을 **전부 PascalCase 로** 맞췄다 (49개). 스크립트가 참조하는 건 `Peace/Provo` 와 `Heal Potion` 둘이고,
+  `Heal Potion` 은 원래 XML 이 `Heal Pot`, 스크립트 11개가 `Heal Potion` 으로 **서로 어긋나 있던 것**을 맞춘 것이다.
+  임시 쿨다운으로 동작은 했지만 바는 안 뜨고 있었다.
+- `Fireball` 에 발동 트리거 `"fireball activated"` 를 넣었다. 실측 메시지는 "Wizardry fireball activated."
+  이게 없어서 바가 채워지지 않았고, 그대로 두면 프록 게이트가 매 패스 통과했다.
+- 바가 자주 뜨는 순서로 **재정렬했다**: `Skill` -> `Music` -> `Discord` -> `Peace/Provo` -> `Song`, 그 뒤에 이 루프가 읽는 바 순서로 `Magic Arrow` -> `Harm` -> `Fireball` -> `Lightning` -> `Mushroom` -> `Heal Potion`.
 
 **이 파일은 게임 종료 시 덮어쓰기 된다. 반드시 게임을 끈 상태에서 수정한다.**
 켜둔 채로 고치면 종료할 때 통째로 날아간다 (실제로 한 번 날아갔다).
@@ -426,12 +431,12 @@ Disco/Peace/Provo 가 전부 80이면 T3(120점)를 찍어도 **80밖에 못 쓴
 
 | 항목 | 프록 발동 | 다시 준비됨 |
 |---|---|---|
-| `MagicArrow` | "magic arrow activated" | "cast a wizardry magic arrow spell again" |
+| `Magic Arrow` | "magic arrow activated" | "cast a wizardry magic arrow spell again" |
 | `Harm` | "harm activated" | "cast a wizardry harm spell again" |
 | `Lightning` | "lightning spell hinders" | "cast a wizardry lightning spell again" |
 | `Fireball` | **트리거 없음** | "You may now cast a wizardy fireball spell" (게임 원문의 오타 그대로) |
 
-스크립트는 `cooldown "MagicArrow" = 0` 처럼 바로 읽으면 된다.
+스크립트는 `cooldown "Magic Arrow" = 0` 처럼 바로 읽으면 된다.
 
 > **`Fireball` 항목이 불완전하다.** 발동 메시지 트리거가 없어서 바가 채워지지 않는다.
 > 인게임에서 Fireball 프록이 터질 때 나오는 문구를 받아 적어 트리거로 넣어야 한다.
@@ -472,7 +477,7 @@ Disco/Peace/Provo 가 전부 80이면 T3(120점)를 찍어도 **80밖에 못 쓴
 | 바드 쿨은 예측 가능하다 | **"Your barding skill cooldowns reset." 프록이 있다** (Lyric 방어구). 측정할 땐 벗는다 |
 | Song 쿨은 `cooldown "Music"` 이다 | **아니다. 별도 계열이다.** `Music` 이 둘을 섞어 덮어쓰던 버그는 고쳤다 |
 | `cooldown "..."` 은 서버 값이다 | **아니다. `cooldowns.xml` 의 내 메시지 트리거다.** 숫자가 이상하면 이 파일을 본다 |
-| 프록 15초는 타이머로 센다 | **게임이 메시지로 알려준다.** `cooldown "MagicArrow"` 등을 읽는다 |
+| 프록 15초는 타이머로 센다 | **게임이 메시지로 알려준다.** `cooldown "Magic Arrow"` 등을 읽는다 |
 | 브레이크 중엔 Provo 로 Ensemble 을 살린다 | **못 한다.** 브레이크 대상엔 Peace 도 Provo 도 안 걸린다 |
 
 ## 참고 링크

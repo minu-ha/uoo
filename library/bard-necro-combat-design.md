@@ -81,7 +81,7 @@ flowchart TD
 | 4 | 바드 스킬 | `Music=0 and <슬롯>=0` | 디스코 1회 + **피스 12초마다** |
 | 5 | 네크로 | `var__symbols >= config__symbols_*` | Blood Oath → Corpse Skin → Evil Omen 순. **유휴 예약** 아래 참조 |
 | 6 | 오프닝 | 마나 + 대상별 리스트 | Mana Drain -> Curse |
-| 7 | 프록 코어 | `cooldown "MagicArrow"` 등 | 네 개가 각자 쿨 |
+| 7 | 프록 코어 | `cooldown "Magic Arrow"` 등 | 네 개가 각자 쿨 |
 | 8 | 필러 | `mana > config__filler_floor` | Energy Bolt. **여기부터 잘린다** |
 
 ### 데미지 사이클이 도는 모양
@@ -211,7 +211,7 @@ Disco 송    cooldown "Music" = 0 and cooldown "Song" = 0 and cooldown "Discord"
 Peace 송    cooldown "Music" = 0 and cooldown "Song" = 0 and cooldown "Peace/Provo" = 0
 Disco 스킬  cooldown "Music" = 0 and cooldown "Discord" = 0
 Peace 스킬  cooldown "Music" = 0 and cooldown "Peace/Provo" = 0
-프록 스펠   cooldown "MagicArrow" / "Harm" / "Fireball" / "Lightning" = 0
+프록 스펠   cooldown "Magic Arrow" / "Harm" / "Fireball" / "Lightning" = 0
 필러        mana > config__filler_floor
 ```
 
@@ -569,7 +569,7 @@ endif
 | `findbuff "song of discordance"` | `bard-mace.razor:494` |
 | `useskill` -> `waitfortarget` -> `target backpack` | `bard-mace.razor:518` |
 | `stop` | `bard-archer-no-potion.razor:58` |
-| `cooldown "MagicArrow" = 0` | `cooldowns.xml` 에 항목 존재 |
+| `cooldown "Magic Arrow" = 0` | `cooldowns.xml` 에 항목 존재 |
 | `for 25` + `break` 로 커서 폴링 | `bard-necro-eval.razor:205`, 레퍼런스 `auto-mage.razor:1160` |
 | `hotkey 'Vampiric Embrace'` + `hotkey 'Target Self'` | 위키: 자신을 타겟하면 주변 시체를 자동 탐색. **인게임 확인됨** |
 | `hotkey 'Drink Heal'` 등 포션 핫키 | Razor 핫키 목록 Potions 항목. 이름 그대로 |
