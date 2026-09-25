@@ -108,7 +108,7 @@
 #     for 25                                  poll for the cursor instead of blocking on it
 #         if targetexists or disturbed  break the cast finished, or died and its cursor is
 #                                             never coming
-#         if diffhits > emergency   hotkey "> Interrupt", break
+#         if diffhits >= emergency  hotkey "> Interrupt", break
 #                                             our own cast is the only thing standing
 #                                             between the character and a heal
 #         wait wait__poll
@@ -564,6 +564,11 @@ while not dead
     # block reopens it.
     @setvar! var__symbols 0
 
+    # Set by the necro block when an ability lands. var__symbols is read once, up here, so a
+    # block further down that also spends symbols would otherwise be looking at a bank that
+    # is already four short. Poison Strike checks this and sits out any pass that spent.
+    @setvar! var__symbols_spent 0
+
     if ingump "20/" 622436516
         @setvar! var__symbols 20
     elseif ingump "19/" 622436516
@@ -711,7 +716,7 @@ while not dead
                 endif
             endif
         endif
-    elseif diffhits > config__emergency_hits
+    elseif diffhits >= config__emergency_hits
         # No interrupt here even though this is the emergency path. By the time this block
         # runs the pass has already drained casting at the top, and every offensive cast
         # finishes inside its own block, so nothing of ours is ever in flight here. The
@@ -1108,6 +1113,7 @@ while not dead
 
                 if insysmsg "unholy symbols remaining"
                     settimer "timer__blood_oath" 0
+                    @setvar! var__symbols_spent 1
 
                     if config__chatty = 1
                         overhead "Blood Oath" 44
@@ -1121,6 +1127,7 @@ while not dead
 
                 if insysmsg "unholy symbols remaining"
                     settimer "timer__corpse_skin" 0
+                    @setvar! var__symbols_spent 1
 
                     if config__chatty = 1
                         overhead "Corpse Skin" 44
@@ -1134,6 +1141,7 @@ while not dead
 
                 if insysmsg "unholy symbols remaining"
                     settimer "timer__evil_omen" 0
+                    @setvar! var__symbols_spent 1
 
                     if config__chatty = 1
                         overhead "Evil Omen" 44
@@ -1198,7 +1206,7 @@ while not dead
                             break
                         endif
 
-                        if config__interrupt_to_heal = 1 and diffhits > config__emergency_hits
+                        if config__interrupt_to_heal = 1 and diffhits >= config__emergency_hits
                             hotkey "> Interrupt"
                             break
                         endif
@@ -1233,7 +1241,7 @@ while not dead
                             break
                         endif
 
-                        if config__interrupt_to_heal = 1 and diffhits > config__emergency_hits
+                        if config__interrupt_to_heal = 1 and diffhits >= config__emergency_hits
                             hotkey "> Interrupt"
                             break
                         endif
@@ -1309,7 +1317,7 @@ while not dead
                             break
                         endif
 
-                        if config__interrupt_to_heal = 1 and diffhits > config__emergency_hits
+                        if config__interrupt_to_heal = 1 and diffhits >= config__emergency_hits
                             hotkey "> Interrupt"
                             break
                         endif
@@ -1334,7 +1342,7 @@ while not dead
                             break
                         endif
 
-                        if config__interrupt_to_heal = 1 and diffhits > config__emergency_hits
+                        if config__interrupt_to_heal = 1 and diffhits >= config__emergency_hits
                             hotkey "> Interrupt"
                             break
                         endif
@@ -1359,7 +1367,7 @@ while not dead
                             break
                         endif
 
-                        if config__interrupt_to_heal = 1 and diffhits > config__emergency_hits
+                        if config__interrupt_to_heal = 1 and diffhits >= config__emergency_hits
                             hotkey "> Interrupt"
                             break
                         endif
@@ -1384,7 +1392,7 @@ while not dead
                             break
                         endif
 
-                        if config__interrupt_to_heal = 1 and diffhits > config__emergency_hits
+                        if config__interrupt_to_heal = 1 and diffhits >= config__emergency_hits
                             hotkey "> Interrupt"
                             break
                         endif
@@ -1414,7 +1422,7 @@ while not dead
     # that is damage that would otherwise have gone with it. It sits at the bottom of the
     # symbol ladder, only fires while Corpse Skin is actually up, and takes a filler slot
     # rather than a proc one, since it costs no mana and the procs are worth more.
-    if var__engaged = 1 and var__opener_done = 1 and var__symbols >= config__symbols_poison_strike
+    if var__engaged = 1 and var__opener_done = 1 and var__symbols_spent = 0 and var__symbols >= config__symbols_poison_strike
         if timer "timer__corpse_skin" < cooldown__necro_action and timer "timer__poison_strike" >= cooldown__necro_action
             if not targetexists and not casting and cooldown "Walk" = 0
                 if find var__combat_target ground -1 -1 config__target_range as alias__strike_target
@@ -1460,7 +1468,7 @@ while not dead
                         break
                     endif
 
-                    if config__interrupt_to_heal = 1 and diffhits > config__emergency_hits
+                    if config__interrupt_to_heal = 1 and diffhits >= config__emergency_hits
                         hotkey "> Interrupt"
                         break
                     endif
