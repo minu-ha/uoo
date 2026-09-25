@@ -11,9 +11,12 @@
 #   forward through a branch whose skill exists, so a missing one parks it.
 #   An instrument in the backpack, a necromancer book, reagents for the spell table below.
 #   Razor hotkeys "> Smart Heal/Cure Self", "> Greater Heal/Cure Self", "Eat Magic Mushroom",
-#   "blood oath", "evil omen", "vampiric embrace", "Target Self", "Cancel Current Target".
-#   "vampiric embrace" and its fallback command "[VampiricEmbrace" follow the naming of the
-#   two necro hotkeys the old scripts used, but neither has been seen working yet.
+#   "blood oath", "corpse skin", "evil omen", "vampiric embrace", "Target Self",
+#   "Cancel Current Target". "vampiric embrace" was confirmed in Razor: it opens a cursor
+#   and self is a valid answer. "corpse skin" and the [CorpseSkin fallback follow the same
+#   naming and have not been tried yet.
+#   The hotbar's own Auto-Renew must be OFF for every ability this loop drives. It spends the
+#   same symbols, and its priority is cheapest first, which is backwards for this build.
 #   cooldowns.xml carrying Music / Song / Discord / Peace-Provo and the four proc entries
 #   MagicArrow / Harm / Fireball / Lightning. Fireball's entry still lacks its "activated"
 #   trigger, so until that line is added its bar never fills and it casts every pass.
@@ -95,15 +98,19 @@
 #   wait for the cursor IS the cast. Every targeted spell here takes the same shape:
 #
 #     cast 'X'
-#     for N                                   poll for the cursor instead of blocking on it
-#         if targetexists           break     the cast finished
-#         if insysmsg disturbed     break     the cast died, stop waiting on a cursor that
-#                                             is never coming
+#     for 25                                  poll for the cursor instead of blocking on it
+#         if targetexists or disturbed  break the cast finished, or died and its cursor is
+#                                             never coming
 #         if diffhits > emergency   interrupt, break
 #                                             our own cast is the only thing standing
 #                                             between the character and a heal
 #         wait wait__poll
 #     endfor
+#
+#   A fixed wait per circle would be shorter to write and it was considered. It loses on the
+#   two things the poll is for: a cast disturbed at 0.1 seconds would still sit out the full
+#   1.75, and hit points could not be looked at until the wait ended. The poll leaves within
+#   100 ms of whichever comes first, and the per circle timing lives in the game, not here.
 #     if targetexists
 #         if dead alias__            cancel   it died during the cast
 #         else target, wait wait__cast
@@ -168,6 +175,23 @@ clearignore
 @setvar! config__mana_2nd 6
 @setvar! config__mana_3rd 9
 @setvar! config__mana_4th 11
+
+# Unholy Symbols banked before each necro ability is allowed to fire. Each figure is the
+# ability's own cost plus what the more valuable abilities above it need kept back:
+#
+#   blood oath        4       its cost, nothing held back, it is the priority
+#   corpse skin       6       2 + 4 for blood oath
+#   evil omen         8       2 + 4 + 2 for the two above
+#   vampiric embrace  7       3 + 4, walk only, so it competes with nothing else
+#
+# Symbols arrive one per five seconds and bank to Effective Necromancy / 10, ten here. One
+# thirty second cycle of all three combat abilities costs eight against six regenerated, so
+# the reserves are what keep Blood Oath castable on the next mob. Raise them if fights are
+# short and the walk between them long, lower them if the bank sits full.
+@setvar! config__symbols_blood_oath 4
+@setvar! config__symbols_corpse_skin 6
+@setvar! config__symbols_evil_omen 8
+@setvar! config__symbols_vampiric_embrace 7
 
 # Energy Bolt only fills the gaps between procs, so it stands down before the mana that the
 # next opener and the next proc cycle need. 22 for Mana Drain plus Curse, 30 for the four
@@ -268,6 +292,11 @@ endif
 if not timerexists "timer__vampiric_embrace"
     createtimer "timer__vampiric_embrace"
     settimer "timer__vampiric_embrace" cooldown__necro_action
+endif
+
+if not timerexists "timer__corpse_skin"
+    createtimer "timer__corpse_skin"
+    settimer "timer__corpse_skin" cooldown__necro_action
 endif
 
 if not timerexists "timer__evil_omen"
@@ -373,9 +402,12 @@ while not dead
     # ####################################################################################
     # # SYSTEM MESSAGE
     # ####################################################################################
-    # Read the disturb line so nothing downstream mistakes it for its own answer. There is
-    # deliberately no recovery here: the spell is gone, and the block that was casting is
-    # the only place that knows what to do about it.
+    # The two heal agents cast without a poll loop, so a disturb on one of them is read by
+    # nobody and sits in the buffer. The next cast poll below would then see it on its first
+    # look and break out while its own spell is still in flight, leaving that spell's cursor
+    # to arrive after the block has moved on and stall every guarded block behind it.
+    # Reading the line here, once per pass, is what stops that. It is the only consumer of
+    # this message outside the poll loops.
     if insysmsg "Your concentration is disturbed, thus ruining thy spell."
         # drained
     endif
@@ -514,28 +546,57 @@ while not dead
         @setvar! var__regs_energy_bolt 1
     endif
 
-    # Unholy Symbols, read off the necro hotbar gump, which prints them as "<have>/<max>".
+    # Unholy Symbols, read off the necro hotbar gump, which prints them as "<have>/<max>",
+    # into a plain number so the necro block can compare against the config reserves.
     #
-    # ingump matches a substring, so "9/" also matches inside "19/". That is harmless in
-    # this shape and it is why these are or chains rather than a descending count: every
-    # value that aliases into the set is itself in the set. "19/20" trips the "9/" term, and
-    # 19 is over both thresholds anyway. The old script spent twenty branches and a list of
-    # pushed ones on the same question because it wanted the exact number, which nothing
-    # here needs. Verified correct for every reading from 0 to 20.
-    #   blood oath 4, vampiric embrace 3, evil omen 2
-    @setvar! var__symbols_2 0
-    @setvar! var__symbols_3 0
-    @setvar! var__symbols_4 0
+    # The chain runs from the top down because ingump matches a substring: "1/" is inside
+    # "11/20", "9/" is inside "19/20" and "0/" is inside "10/20". Checking the two digit
+    # readings first means each single digit line only ever sees the count it names. Twenty
+    # is the ceiling because the bank is Effective Necromancy / 10 and no build here goes
+    # past 200. A closed gump reads as zero, which parks every ability until the hotbar
+    # block reopens it.
+    @setvar! var__symbols 0
 
-    if ingump "20/" 622436516 or ingump "19/" 622436516 or ingump "18/" 622436516 or ingump "17/" 622436516 or ingump "16/" 622436516 or ingump "15/" 622436516 or ingump "14/" 622436516 or ingump "13/" 622436516 or ingump "12/" 622436516 or ingump "11/" 622436516 or ingump "10/" 622436516 or ingump "9/" 622436516 or ingump "8/" 622436516 or ingump "7/" 622436516 or ingump "6/" 622436516 or ingump "5/" 622436516 or ingump "4/" 622436516
-        @setvar! var__symbols_4 1
-        @setvar! var__symbols_3 1
-        @setvar! var__symbols_2 1
+    if ingump "20/" 622436516
+        @setvar! var__symbols 20
+    elseif ingump "19/" 622436516
+        @setvar! var__symbols 19
+    elseif ingump "18/" 622436516
+        @setvar! var__symbols 18
+    elseif ingump "17/" 622436516
+        @setvar! var__symbols 17
+    elseif ingump "16/" 622436516
+        @setvar! var__symbols 16
+    elseif ingump "15/" 622436516
+        @setvar! var__symbols 15
+    elseif ingump "14/" 622436516
+        @setvar! var__symbols 14
+    elseif ingump "13/" 622436516
+        @setvar! var__symbols 13
+    elseif ingump "12/" 622436516
+        @setvar! var__symbols 12
+    elseif ingump "11/" 622436516
+        @setvar! var__symbols 11
+    elseif ingump "10/" 622436516
+        @setvar! var__symbols 10
+    elseif ingump "9/" 622436516
+        @setvar! var__symbols 9
+    elseif ingump "8/" 622436516
+        @setvar! var__symbols 8
+    elseif ingump "7/" 622436516
+        @setvar! var__symbols 7
+    elseif ingump "6/" 622436516
+        @setvar! var__symbols 6
+    elseif ingump "5/" 622436516
+        @setvar! var__symbols 5
+    elseif ingump "4/" 622436516
+        @setvar! var__symbols 4
     elseif ingump "3/" 622436516
-        @setvar! var__symbols_3 1
-        @setvar! var__symbols_2 1
+        @setvar! var__symbols 3
     elseif ingump "2/" 622436516
-        @setvar! var__symbols_2 1
+        @setvar! var__symbols 2
+    elseif ingump "1/" 622436516
+        @setvar! var__symbols 1
     endif
 
     # The Grimoire riders on Curse and Mana Drain run 60 seconds while the debuff icon runs
@@ -982,17 +1043,23 @@ while not dead
     # ####################################################################################
     # # NECRO BURST
     # ####################################################################################
-    # Unholy Symbols regenerate at one per five seconds. Both abilities live on the necro
-    # hotbar and answer with a message, so success is read rather than assumed.
+    # Each ability is a hotbar button, resolves without a cursor, and answers with either
+    # "unholy symbols remaining" or the cooldown line, so success is read rather than
+    # assumed. The combat three run as one chain in value order, one per pass, so the bank
+    # is re-read between them and a lower one never spends what a higher one was saving.
     #
-    # Blood Oath wants followers out and a live target, and costs the player 5 hit points.
-    # Vampiric Embrace heals the undead followers off a corpse: the wiki says to target an
-    # enemy or yourself and it searches the surrounding area for one, so the cursor is
-    # answered with self. It only makes sense between pulls, when a corpse is what is left of
-    # the last one, and the corpse check keeps it from burning a 30 second cooldown on air.
-    if var__symbols_4 = 1 and var__engaged = 1 and followers > 0
-        if timer "timer__blood_oath" >= cooldown__necro_action
-            if not targetexists and not casting and cooldown "Walk" = 0
+    #   blood oath     +30% follower damage, 5 self damage. The followers are 63% of the
+    #                  damage, so this outweighs everything else in this block
+    #   corpse skin    every damaging spell adds a disease worth 25% over 30 seconds
+    #   evil omen      +20% spell damage, and a 25% chance per spell of half its mana in
+    #                  self damage. Below Corpse Skin: smaller bonus with a cost attached
+    #
+    # Of the rest, Strangle (4) competes with Blood Oath for symbols and delays every hit by
+    # five seconds, Wither (5) buys mana only for spells that do no damage, and Pain Spike
+    # (5) wants a corpse next to the next mob. None earn a place here.
+    if var__engaged = 1
+        if not targetexists and not casting and cooldown "Walk" = 0
+            if var__symbols >= config__symbols_blood_oath and followers > 0 and timer "timer__blood_oath" >= cooldown__necro_action
                 hotkey 'blood oath'
                 wait wait__long
 
@@ -1005,18 +1072,59 @@ while not dead
                 elseif insysmsg "seconds before you may use that ability again."
                     settimer "timer__blood_oath" 0
                 endif
+            elseif var__symbols >= config__symbols_corpse_skin and timer "timer__corpse_skin" >= cooldown__necro_action
+                hotkey 'corpse skin'
+                wait wait__long
+
+                if not insysmsg "unholy symbols remaining" and not insysmsg "seconds before you may use that ability again."
+                    yell '[CorpseSkin'
+                    wait wait__long
+                endif
+
+                if insysmsg "unholy symbols remaining"
+                    settimer "timer__corpse_skin" 0
+
+                    if config__chatty = 1
+                        overhead "Corpse Skin" 44
+                    endif
+                elseif insysmsg "seconds before you may use that ability again."
+                    settimer "timer__corpse_skin" 0
+                endif
+            elseif var__symbols >= config__symbols_evil_omen and timer "timer__evil_omen" >= cooldown__necro_action
+                hotkey 'evil omen'
+                wait wait__long
+
+                # The old script found the hotkey does not always answer. The server
+                # command is the same ability by another door.
+                if not insysmsg "unholy symbols remaining" and not insysmsg "seconds before you may use that ability again."
+                    yell '[EvilOmen'
+                    wait wait__long
+                endif
+
+                if insysmsg "unholy symbols remaining"
+                    settimer "timer__evil_omen" 0
+
+                    if config__chatty = 1
+                        overhead "Evil Omen" 44
+                    endif
+                elseif insysmsg "seconds before you may use that ability again."
+                    settimer "timer__evil_omen" 0
+                endif
             endif
         endif
     endif
 
-    if var__symbols_3 = 1 and var__engaged = 0 and followers > 0
+    # Vampiric Embrace heals the undead followers off a corpse. Target an enemy or yourself
+    # and it searches the surrounding area for one, so the cursor is answered with self. Walk
+    # only, when a corpse is what is left of the last pull, and the corpse check keeps it from
+    # burning a thirty second cooldown on air.
+    if var__symbols >= config__symbols_vampiric_embrace and var__engaged = 0 and followers > 0
         if timer "timer__vampiric_embrace" >= cooldown__necro_action
             if not targetexists and not casting and cooldown "Walk" = 0
                 if findtype 8198 ground -1 -1 8
                     hotkey 'vampiric embrace'
                     waitfortarget wait__target
 
-                    # Same fallback as Evil Omen: the server command by its own name.
                     if not targetexists
                         yell '[VampiricEmbrace'
                         waitfortarget wait__target
@@ -1044,7 +1152,7 @@ while not dead
     # ####################################################################################
     # # OPENER
     # ####################################################################################
-    # Mana Drain then Curse, once per target, then Evil Omen before the damage starts.
+    # Mana Drain then Curse, once per target.
     #
     # Both spells carry a Grimoire rider that is scoped to the creature they were cast on:
     # Curse gives every spell of ours +30% against that target for 60 seconds, Mana Drain
@@ -1060,11 +1168,7 @@ while not dead
                     cast 'Mana Drain'
 
                     for 25
-                        if targetexists
-                            break
-                        endif
-
-                        if insysmsg "Your concentration is disturbed, thus ruining thy spell."
+                        if targetexists or insysmsg "Your concentration is disturbed, thus ruining thy spell."
                             break
                         endif
 
@@ -1099,11 +1203,7 @@ while not dead
                     cast 'Curse'
 
                     for 25
-                        if targetexists
-                            break
-                        endif
-
-                        if insysmsg "Your concentration is disturbed, thus ruining thy spell."
+                        if targetexists or insysmsg "Your concentration is disturbed, thus ruining thy spell."
                             break
                         endif
 
@@ -1135,40 +1235,24 @@ while not dead
                             endif
                         endif
                     endif
-                elseif var__symbols_2 = 1 and timer "timer__evil_omen" >= cooldown__necro_action
-                    hotkey 'evil omen'
-                    wait wait__long
-
-                    # The old script found the hotkey does not always answer. The server
-                    # command is the same ability by another door.
-                    if not insysmsg "unholy symbols remaining" and not insysmsg "seconds before you may use that ability again."
-                        yell '[EvilOmen'
-                        wait wait__long
-                    endif
-
-                    if insysmsg "unholy symbols remaining"
-                        settimer "timer__evil_omen" 0
-
-                        if config__chatty = 1
-                            overhead "Evil Omen" 44
-                        endif
-                    elseif insysmsg "seconds before you may use that ability again."
-                        settimer "timer__evil_omen" 0
-                    endif
                 endif
             endif
         endif
     endif
 
     # The rotation waits for Curse, because everything after it is worth 30% more once it
-    # has landed. It does not wait forever: with no Curse reagents, or too little mana to
-    # cast a fourth circle at all, the damage goes out without the rider rather than the
-    # script standing still in front of a live target.
+    # has landed. The one thing it does not wait for is a reagent that is not coming back
+    # until the next restock: with no Curse reagents the damage goes out without the rider
+    # rather than the script standing still in front of a live target.
+    #
+    # Low mana is deliberately NOT an escape. It regenerates, the followers carry the fight
+    # meanwhile, and every point dribbled into an uncursed Magic Arrow is a point the next
+    # opener does not have. Waiting for 22 mana and casting with the rider is the better trade.
     @setvar! var__opener_done 0
 
     if inlist 'magic_cursed_targets' var__combat_target
         @setvar! var__opener_done 1
-    elseif var__regs_curse = 0 or mana < config__mana_4th
+    elseif var__regs_curse = 0
         @setvar! var__opener_done 1
     endif
 
@@ -1195,11 +1279,7 @@ while not dead
                     cast 'Magic Arrow'
 
                     for 25
-                        if targetexists
-                            break
-                        endif
-
-                        if insysmsg "Your concentration is disturbed, thus ruining thy spell."
+                        if targetexists or insysmsg "Your concentration is disturbed, thus ruining thy spell."
                             break
                         endif
 
@@ -1224,11 +1304,7 @@ while not dead
                     cast 'Harm'
 
                     for 25
-                        if targetexists
-                            break
-                        endif
-
-                        if insysmsg "Your concentration is disturbed, thus ruining thy spell."
+                        if targetexists or insysmsg "Your concentration is disturbed, thus ruining thy spell."
                             break
                         endif
 
@@ -1253,11 +1329,7 @@ while not dead
                     cast 'Fireball'
 
                     for 25
-                        if targetexists
-                            break
-                        endif
-
-                        if insysmsg "Your concentration is disturbed, thus ruining thy spell."
+                        if targetexists or insysmsg "Your concentration is disturbed, thus ruining thy spell."
                             break
                         endif
 
@@ -1282,11 +1354,7 @@ while not dead
                     cast 'Lightning'
 
                     for 25
-                        if targetexists
-                            break
-                        endif
-
-                        if insysmsg "Your concentration is disturbed, thus ruining thy spell."
+                        if targetexists or insysmsg "Your concentration is disturbed, thus ruining thy spell."
                             break
                         endif
 
@@ -1328,11 +1396,7 @@ while not dead
                 cast 'Energy Bolt'
 
                 for 25
-                    if targetexists
-                        break
-                    endif
-
-                    if insysmsg "Your concentration is disturbed, thus ruining thy spell."
+                    if targetexists or insysmsg "Your concentration is disturbed, thus ruining thy spell."
                         break
                     endif
 
