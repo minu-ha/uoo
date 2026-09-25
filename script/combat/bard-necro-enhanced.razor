@@ -233,12 +233,19 @@ clearignore
 # ####################################################################################
 # # WAIT AND COOLDOWN
 # ####################################################################################
-# Roughly a round trip each. wait__short paces a dclick, wait__long lets a heal agent
-# resolve, wait__target is how long a skill cursor gets before the block gives up on it.
+# Roughly a round trip each. wait__short paces a dclick, wait__long lets a dropped stack
+# settle, wait__target is how long a skill cursor gets before the block gives up on it.
 # A skill cursor is instant, so that one is only ever spent in full on a failure.
 @setvar! wait__short 200
 @setvar! wait__long 750
 @setvar! wait__target 1000
+
+# How long an ability gets to answer before its reply is read. One round trip plus the
+# server's turn, so a little over wait__short. Deliberately not generous: a reply that
+# arrives late is not lost, the next pass fires the ability again and reads the cooldown
+# refusal instead, which resets the same timer. Too long costs every pass, too short costs
+# one extra press now and then.
+@setvar! wait__message 400
 
 # Cast polling. A cursor for a spell arrives after the cast time, 0.5 seconds for a first
 # circle up to 1.75 for Energy Bolt, so each poll loop runs for 25 x wait__poll at most and
@@ -1171,7 +1178,7 @@ while not dead
         if not targetexists and not casting
             if var__symbols >= config__symbols_blood_oath and followers > 0 and timer "timer__blood_oath" >= cooldown__necro_action
                 hotkey 'Blood Oath'
-                wait wait__long
+                wait wait__message
 
                 if insysmsg "unholy symbols remaining"
                     settimer "timer__blood_oath" 0
@@ -1185,7 +1192,7 @@ while not dead
                 endif
             elseif var__symbols >= config__symbols_corpse_skin and timer "timer__corpse_skin" >= cooldown__necro_action
                 hotkey 'Corpse Skin'
-                wait wait__long
+                wait wait__message
 
                 if insysmsg "unholy symbols remaining"
                     settimer "timer__corpse_skin" 0
@@ -1199,7 +1206,7 @@ while not dead
                 endif
             elseif var__symbols >= config__symbols_evil_omen and timer "timer__evil_omen" >= cooldown__necro_action
                 hotkey 'Evil Omen'
-                wait wait__long
+                wait wait__message
 
                 if insysmsg "unholy symbols remaining"
                     settimer "timer__evil_omen" 0
@@ -1228,7 +1235,7 @@ while not dead
 
                     if targetexists
                         hotkey 'Target Self'
-                        wait wait__long
+                        wait wait__message
 
                         if insysmsg "unholy symbols remaining"
                             settimer "timer__vampiric_embrace" 0
@@ -1565,7 +1572,7 @@ while not dead
 
                     if targetexists
                         target alias__strike_target
-                        wait wait__long
+                        wait wait__message
 
                         if insysmsg "unholy symbols remaining"
                             settimer "timer__poison_strike" 0
