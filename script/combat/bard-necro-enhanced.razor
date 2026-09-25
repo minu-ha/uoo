@@ -107,9 +107,9 @@
 #
 #     cast 'X'
 #     for 25                                  poll for the cursor instead of blocking on it
-#         if targetexists or disturbed  break the cast finished, or died and its cursor is
-#                                             never coming
-#         if diffhits >= emergency  hotkey "> Interrupt", break
+#         if targetexists           break     the cast finished
+#         if disturbed              say, break the cast died and its cursor is never coming
+#         if diffhits >= emergency  say, hotkey "> Interrupt", break
 #                                             our own cast is the only thing standing
 #                                             between the character and a heal
 #         wait wait__poll
@@ -150,7 +150,8 @@ clearignore
 @setvar! config__use_potion 1
 
 # 1 narrates what the script is doing, 0 keeps it quiet. Covers every 32 hue line: target
-# changes, potions drunk, gold dropped. Warnings and errors ignore this switch.
+# changes, potions drunk, gold dropped, and every cast that was disturbed or cut short for a
+# heal, named by spell. Warnings and errors ignore this switch.
 @setvar! config__chatty 1
 
 # Magic instrument mode. 1 reads labels and holds out for a supremely or exceedingly
@@ -708,9 +709,8 @@ while not dead
                     endfor
 
                     if insysmsg "Your concentration is disturbed, thus ruining thy spell."
-                        if timer "timer__message" >= cooldown__message
-                            overhead "Heal, disturbed" 33
-                            settimer "timer__message" 0
+                        if config__chatty = 1
+                            overhead "Cure, disturbed" 32
                         endif
                     endif
                 endif
@@ -748,9 +748,8 @@ while not dead
                 endfor
 
                 if insysmsg "Your concentration is disturbed, thus ruining thy spell."
-                    if timer "timer__message" >= cooldown__message
-                        overhead "Heal, disturbed" 33
-                        settimer "timer__message" 0
+                    if config__chatty = 1
+                        overhead "Heal, disturbed" 32
                     endif
                 endif
             endif
@@ -805,9 +804,8 @@ while not dead
                     endfor
 
                     if insysmsg "Your concentration is disturbed, thus ruining thy spell."
-                        if timer "timer__message" >= cooldown__message
-                            overhead "Heal, disturbed" 33
-                            settimer "timer__message" 0
+                        if config__chatty = 1
+                            overhead "Greater Heal, disturbed" 32
                         endif
                     endif
                 endif
@@ -954,9 +952,8 @@ while not dead
                 endfor
 
                 if insysmsg "Your concentration is disturbed, thus ruining thy spell."
-                    if timer "timer__message" >= cooldown__message
-                        overhead "Create Food, disturbed" 33
-                        settimer "timer__message" 0
+                    if config__chatty = 1
+                        overhead "Create Food, disturbed" 32
                     endif
                 endif
             endif
@@ -1045,6 +1042,10 @@ while not dead
     # Discordance runs about two minutes and does not break, so it is applied once per
     # target and then left alone. It goes before Peace because Ensemble wants Discord AND
     # Peace on the same creature, and the one that does not break is worth landing first.
+    # bard-mace leads with Peace instead, and for a dexxer that is right: Peace is what stops
+    # the mob hitting the player in melee. Here the followers hold the mob and the player is
+    # ten tiles back, so the debuff outranks the pacify. Skill is 80 on both, so the odds are
+    # the same either way and the order is only about which effect is worth more.
     #
     # Music is shared, so whichever of these two blocks fires first stands the other down
     # until the next pass. That is the arbitration, no extra state needed.
@@ -1164,8 +1165,10 @@ while not dead
     # Of the rest, Strangle (4) competes with Blood Oath for symbols and delays every hit by
     # five seconds, Wither (5) buys mana only for spells that do no damage, and Pain Spike
     # (5) wants a corpse next to the next mob. None earn a place here.
+    # No walk guard here or on Vampiric Embrace below: these are instant abilities with no
+    # cast to break, and the embrace is walk only, so a walk guard would have parked it for good.
     if var__engaged = 1
-        if not targetexists and not casting and cooldown "Walk" = 0
+        if not targetexists and not casting
             if var__symbols >= config__symbols_blood_oath and followers > 0 and timer "timer__blood_oath" >= cooldown__necro_action
                 hotkey 'Blood Oath'
                 wait wait__long
@@ -1218,7 +1221,7 @@ while not dead
     # burning a thirty second cooldown on air.
     if var__symbols >= config__symbols_vampiric_embrace and var__engaged = 0 and followers > 0
         if timer "timer__vampiric_embrace" >= cooldown__necro_action
-            if not targetexists and not casting and cooldown "Walk" = 0
+            if not targetexists and not casting
                 if findtype 8198 ground -1 -1 8
                     hotkey 'Vampiric Embrace'
                     waitfortarget wait__target
@@ -1261,11 +1264,23 @@ while not dead
                     cast 'Mana Drain'
 
                     for 25
-                        if targetexists or insysmsg "Your concentration is disturbed, thus ruining thy spell."
+                        if targetexists
+                            break
+                        endif
+
+                        if insysmsg "Your concentration is disturbed, thus ruining thy spell."
+                            if config__chatty = 1
+                                overhead "Mana Drain, disturbed" 32
+                            endif
+
                             break
                         endif
 
                         if config__interrupt_to_heal = 1 and diffhits >= config__emergency_hits
+                            if config__chatty = 1
+                                overhead "Mana Drain, cut for a heal" 32
+                            endif
+
                             hotkey "> Interrupt"
                             break
                         endif
@@ -1296,11 +1311,23 @@ while not dead
                     cast 'Curse'
 
                     for 25
-                        if targetexists or insysmsg "Your concentration is disturbed, thus ruining thy spell."
+                        if targetexists
+                            break
+                        endif
+
+                        if insysmsg "Your concentration is disturbed, thus ruining thy spell."
+                            if config__chatty = 1
+                                overhead "Curse, disturbed" 32
+                            endif
+
                             break
                         endif
 
                         if config__interrupt_to_heal = 1 and diffhits >= config__emergency_hits
+                            if config__chatty = 1
+                                overhead "Curse, cut for a heal" 32
+                            endif
+
                             hotkey "> Interrupt"
                             break
                         endif
@@ -1372,11 +1399,23 @@ while not dead
                     cast 'Magic Arrow'
 
                     for 25
-                        if targetexists or insysmsg "Your concentration is disturbed, thus ruining thy spell."
+                        if targetexists
+                            break
+                        endif
+
+                        if insysmsg "Your concentration is disturbed, thus ruining thy spell."
+                            if config__chatty = 1
+                                overhead "Magic Arrow, disturbed" 32
+                            endif
+
                             break
                         endif
 
                         if config__interrupt_to_heal = 1 and diffhits >= config__emergency_hits
+                            if config__chatty = 1
+                                overhead "Magic Arrow, cut for a heal" 32
+                            endif
+
                             hotkey "> Interrupt"
                             break
                         endif
@@ -1397,11 +1436,23 @@ while not dead
                     cast 'Harm'
 
                     for 25
-                        if targetexists or insysmsg "Your concentration is disturbed, thus ruining thy spell."
+                        if targetexists
+                            break
+                        endif
+
+                        if insysmsg "Your concentration is disturbed, thus ruining thy spell."
+                            if config__chatty = 1
+                                overhead "Harm, disturbed" 32
+                            endif
+
                             break
                         endif
 
                         if config__interrupt_to_heal = 1 and diffhits >= config__emergency_hits
+                            if config__chatty = 1
+                                overhead "Harm, cut for a heal" 32
+                            endif
+
                             hotkey "> Interrupt"
                             break
                         endif
@@ -1422,11 +1473,23 @@ while not dead
                     cast 'Fireball'
 
                     for 25
-                        if targetexists or insysmsg "Your concentration is disturbed, thus ruining thy spell."
+                        if targetexists
+                            break
+                        endif
+
+                        if insysmsg "Your concentration is disturbed, thus ruining thy spell."
+                            if config__chatty = 1
+                                overhead "Fireball, disturbed" 32
+                            endif
+
                             break
                         endif
 
                         if config__interrupt_to_heal = 1 and diffhits >= config__emergency_hits
+                            if config__chatty = 1
+                                overhead "Fireball, cut for a heal" 32
+                            endif
+
                             hotkey "> Interrupt"
                             break
                         endif
@@ -1447,11 +1510,23 @@ while not dead
                     cast 'Lightning'
 
                     for 25
-                        if targetexists or insysmsg "Your concentration is disturbed, thus ruining thy spell."
+                        if targetexists
+                            break
+                        endif
+
+                        if insysmsg "Your concentration is disturbed, thus ruining thy spell."
+                            if config__chatty = 1
+                                overhead "Lightning, disturbed" 32
+                            endif
+
                             break
                         endif
 
                         if config__interrupt_to_heal = 1 and diffhits >= config__emergency_hits
+                            if config__chatty = 1
+                                overhead "Lightning, cut for a heal" 32
+                            endif
+
                             hotkey "> Interrupt"
                             break
                         endif
@@ -1483,7 +1558,7 @@ while not dead
     # rather than a proc one, since it costs no mana and the procs are worth more.
     if var__engaged = 1 and var__opener_done = 1 and var__symbols_spent = 0 and var__symbols >= config__symbols_poison_strike
         if timer "timer__corpse_skin" < cooldown__necro_action and timer "timer__poison_strike" >= cooldown__necro_action
-            if not targetexists and not casting and cooldown "Walk" = 0
+            if not targetexists and not casting
                 if find var__combat_target ground -1 -1 config__target_range as alias__strike_target
                     hotkey 'Poison Strike'
                     waitfortarget wait__target
@@ -1523,11 +1598,23 @@ while not dead
                 cast 'Energy Bolt'
 
                 for 25
-                    if targetexists or insysmsg "Your concentration is disturbed, thus ruining thy spell."
+                    if targetexists
+                        break
+                    endif
+
+                    if insysmsg "Your concentration is disturbed, thus ruining thy spell."
+                        if config__chatty = 1
+                            overhead "Energy Bolt, disturbed" 32
+                        endif
+
                         break
                     endif
 
                     if config__interrupt_to_heal = 1 and diffhits >= config__emergency_hits
+                        if config__chatty = 1
+                            overhead "Energy Bolt, cut for a heal" 32
+                        endif
+
                         hotkey "> Interrupt"
                         break
                     endif
