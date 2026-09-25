@@ -488,9 +488,9 @@ while not dead
 	@setvar! var_control_followup_ready 0
 
 	if not warmode and var_control_followup_target != 0 and var_control_followup_target = var_combat_target and not targetexists and not casting
-		if var_bard_control_mode = 0 and skill "Peacemaking" > 0 and cooldown "Peace" = 0 and cooldown "Music" = 0
+		if var_bard_control_mode = 0 and skill "Peacemaking" > 0 and cooldown "Peace/Provo" = 0 and cooldown "Music" = 0
 			@setvar! var_control_followup_ready 1
-		elseif var_bard_control_mode = 1 and skill "Provocation" > 0 and cooldown "Provo" = 0 and cooldown "Music" = 0 and var_provo_follower != 0
+		elseif var_bard_control_mode = 1 and skill "Provocation" > 0 and cooldown "Peace/Provo" = 0 and cooldown "Music" = 0 and var_provo_follower != 0
 			@setvar! var_control_followup_ready 1
 		endif
 	endif
@@ -880,7 +880,7 @@ while not dead
 		endif
 	endif
 
-	if not targetexists and not casting and var_control_followup_ready = 0 and cooldown "Provo" = 0 and cooldown "Music" = 0 and not findbuff "song of provocation"
+	if not targetexists and not casting and var_control_followup_ready = 0 and cooldown "Peace/Provo" = 0 and cooldown "Music" = 0 and not findbuff "song of provocation"
 		useskill 'Provocation'
 		waitfortarget 1000
 
@@ -894,7 +894,7 @@ while not dead
 		endif
 	endif
 
-	if not targetexists and not casting and var_control_followup_ready = 0 and cooldown "Peace" = 0 and cooldown "Music" = 0 and not findbuff "song of peacemaking"
+	if not targetexists and not casting and var_control_followup_ready = 0 and cooldown "Peace/Provo" = 0 and cooldown "Music" = 0 and not findbuff "song of peacemaking"
 		useskill 'Peacemaking'
 		waitfortarget 1000
 
@@ -989,7 +989,7 @@ while not dead
 	# Once a target is Discorded, hold the magery opener until the chosen
 	# follow-up control skill (Peace or Provo) has been attempted.
 	if not targetexists and not casting and not warmode and find var_combat_target ground -1 -1 10 as combat_target
-		if var_bard_control_mode = 0 and skill "Peacemaking" > 0 and cooldown "Peace" = 0 and cooldown "Music" = 0
+		if var_bard_control_mode = 0 and skill "Peacemaking" > 0 and cooldown "Peace/Provo" = 0 and cooldown "Music" = 0
 			getlabel combat_target target_label
 			wait 200
 
@@ -1055,7 +1055,7 @@ while not dead
 
 				wait 200
 			endif
-		elseif var_bard_control_mode = 1 and skill "Provocation" > 0 and cooldown "Provo" = 0 and cooldown "Music" = 0 and var_provo_follower != 0
+		elseif var_bard_control_mode = 1 and skill "Provocation" > 0 and cooldown "Peace/Provo" = 0 and cooldown "Music" = 0 and var_provo_follower != 0
 			getlabel combat_target target_label
 			wait 200
 

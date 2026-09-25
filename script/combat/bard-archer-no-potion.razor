@@ -222,7 +222,7 @@ while not dead
 		endif
 	endif
 
-	if cooldown "Provo" = 0 and cooldown "Music" = 0 and not findbuff "song of provocation"
+	if cooldown "Peace/Provo" = 0 and cooldown "Music" = 0 and not findbuff "song of provocation"
 		useskill 'Provocation'
 		waitfortarget 1000
 		if targetexists
@@ -230,7 +230,7 @@ while not dead
 		endif
 	endif
 
-	if cooldown "Peace" = 0 and cooldown "Music" = 0 and not findbuff "song of peacemaking"
+	if cooldown "Peace/Provo" = 0 and cooldown "Music" = 0 and not findbuff "song of peacemaking"
 		useskill 'Peacemaking'
 		waitfortarget 1000
 		if targetexists
@@ -278,7 +278,7 @@ while not dead
 
 			endif
 
-			if skill "Peacemaking" > 0 and cooldown "Peace" = 0 and cooldown "Music" = 0
+			if skill "Peacemaking" > 0 and cooldown "Peace/Provo" = 0 and cooldown "Music" = 0
 				getlabel fount_target target_label
 	            wait 200
 

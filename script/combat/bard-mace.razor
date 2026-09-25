@@ -503,7 +503,7 @@ while not dead
         endif
     endif
 
-    if config__use_bard_song = 1 and not targetexists and cooldown "Provo" = 0 and cooldown "Music" = 0 and not findbuff "song of provocation"
+    if config__use_bard_song = 1 and not targetexists and cooldown "Peace/Provo" = 0 and cooldown "Music" = 0 and not findbuff "song of provocation"
         useskill 'Provocation'
         waitfortarget wait__target
 
@@ -515,7 +515,7 @@ while not dead
         endif
     endif
 
-    if config__use_bard_song = 1 and not targetexists and cooldown "Peace" = 0 and cooldown "Music" = 0 and not findbuff "song of peacemaking"
+    if config__use_bard_song = 1 and not targetexists and cooldown "Peace/Provo" = 0 and cooldown "Music" = 0 and not findbuff "song of peacemaking"
         useskill 'Peacemaking'
         waitfortarget wait__target
 
@@ -531,7 +531,7 @@ while not dead
     // # PEACE
     // ################################################################################
     if not warmode and not targetexists and find var__combat_target ground -1 -1 10 as alias__peace_target
-        if skill "Peacemaking" > 0 and cooldown "Peace" = 0 and cooldown "Music" = 0
+        if skill "Peacemaking" > 0 and cooldown "Peace/Provo" = 0 and cooldown "Music" = 0
             getlabel alias__peace_target label__peace_target
 
             if "pacified" in label__peace_target or "barding break" in label__peace_target
