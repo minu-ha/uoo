@@ -10,13 +10,20 @@
 #   Discordance, Peacemaking and Provocation all trained: the song round robin only moves
 #   forward through a branch whose skill exists, so a missing one parks it.
 #   An instrument in the backpack, a necromancer book, reagents for the spell table below.
-#   Razor hotkeys "> Smart Heal/Cure Self", "> Greater Heal/Cure Self", "Eat Magic Mushroom",
-#   "blood oath", "corpse skin", "evil omen", "vampiric embrace", "Target Self",
-#   "Cancel Current Target". "vampiric embrace" was confirmed in Razor: it opens a cursor
-#   and self is a valid answer. "corpse skin" and the [CorpseSkin fallback follow the same
-#   naming and have not been tried yet.
+#   Razor hotkeys, named exactly as Razor's hotkey list shows them:
+#     agents      "> Smart Heal/Cure Self", "> Greater Heal/Cure Self", "> Interrupt"
+#     potions     "Drink Heal", "Drink Cure", "Drink Refresh", "Drink Strength",
+#                 "Drink Agility", "Drink Magic Resist", "Eat Magic Mushroom"
+#     necromancy  "Blood Oath", "Corpse Skin", "Evil Omen", "Poison Strike",
+#                 "Vampiric Embrace"
+#     targeting   "Target Self", "Cancel Current Target"
 #   The hotbar's own Auto-Renew must be OFF for every ability this loop drives. It spends the
 #   same symbols, and its priority is cheapest first, which is backwards for this build.
+#
+# Hotkey policy
+#   Anything Razor exposes as a hotkey is driven through the hotkey, so one convention covers
+#   potions, abilities and agents alike. findtype still answers "is there one to drink", it
+#   just no longer does the drinking.
 #   cooldowns.xml carrying Music / Song / Discord / Peace-Provo and the four proc entries
 #   MagicArrow / Harm / Fireball / Lightning. Fireball's entry still lacks its "activated"
 #   trigger, so until that line is added its bar never fills and it casts every pass.
@@ -101,7 +108,7 @@
 #     for 25                                  poll for the cursor instead of blocking on it
 #         if targetexists or disturbed  break the cast finished, or died and its cursor is
 #                                             never coming
-#         if diffhits > emergency   interrupt, break
+#         if diffhits > emergency   hotkey "> Interrupt", break
 #                                             our own cast is the only thing standing
 #                                             between the character and a heal
 #         wait wait__poll
@@ -121,8 +128,11 @@
 #   real. With a blocking waitfortarget the loop cannot look at hit points until the cursor
 #   turns up, which for Energy Bolt is 1.75 seconds after the hit that mattered.
 #
-#   The disturb line also gets drained at the top of every pass, so one left over from a
-#   cast nobody was polling cannot be read by a later block as its own answer.
+#   Casts that take no target, the heal agents and Create Food, cannot be polled for a cursor.
+#   They wait out casting where they stand and then read the disturb line themselves, so a
+#   disturb on one of them is consumed at the site and never reaches a later poll loop as a
+#   stale answer. Every cast in the file therefore handles its own disturb, and nothing at
+#   the top of the loop has to.
 #
 #   Abilities on the necro hotbar are not spells: they resolve without a cursor and answer
 #   with a message, so success is read from "unholy symbols remaining" rather than assumed.
@@ -157,8 +167,7 @@ clearignore
 @setvar! config__emergency_hits 35
 
 # 1 cancels a spell already in flight when damage crosses config__emergency_hits, 0 lets it
-# finish. The Razor command is documented as "interrupt a casting action" but has no
-# precedent in this repo, so it sits behind a switch until it is seen working.
+# finish. Goes through the "> Interrupt" hotkey, the same one the wheel is bound to.
 @setvar! config__interrupt_to_heal 1
 
 # How much gold one lift moves when shedding weight.
@@ -182,15 +191,19 @@ clearignore
 #   blood oath        4       its cost, nothing held back, it is the priority
 #   corpse skin       6       2 + 4 for blood oath
 #   evil omen         8       2 + 4 + 2 for the two above
+#   poison strike     9       1 + the three above
 #   vampiric embrace  7       3 + 4, walk only, so it competes with nothing else
 #
-# Symbols arrive one per five seconds and bank to Effective Necromancy / 10, ten here. One
-# thirty second cycle of all three combat abilities costs eight against six regenerated, so
-# the reserves are what keep Blood Oath castable on the next mob. Raise them if fights are
-# short and the walk between them long, lower them if the bank sits full.
+# Symbols arrive one per five seconds and bank to Effective Necromancy / 10, ten here. A
+# thirty second cycle regenerates six, and Blood Oath plus Corpse Skin spend exactly six, so
+# at Necromancy 100 those two are the sustainable rotation. Evil Omen and Poison Strike only
+# ever fire from surplus a walk has banked or a fight in which Blood Oath had no followers to
+# buff. That is the intent, not a bug: lower their reserves and they starve the two above.
+# Raise everything if fights are short and walks long, lower if the bank sits full.
 @setvar! config__symbols_blood_oath 4
 @setvar! config__symbols_corpse_skin 6
 @setvar! config__symbols_evil_omen 8
+@setvar! config__symbols_poison_strike 9
 @setvar! config__symbols_vampiric_embrace 7
 
 # Energy Bolt only fills the gaps between procs, so it stands down before the mana that the
@@ -304,6 +317,11 @@ if not timerexists "timer__evil_omen"
     settimer "timer__evil_omen" cooldown__necro_action
 endif
 
+if not timerexists "timer__poison_strike"
+    createtimer "timer__poison_strike"
+    settimer "timer__poison_strike" cooldown__necro_action
+endif
+
 if not timerexists "timer__magic_window"
     createtimer "timer__magic_window"
     settimer "timer__magic_window" cooldown__magic_window
@@ -400,19 +418,8 @@ while not dead
     endwhile
 
     # ####################################################################################
-    # # SYSTEM MESSAGE
+    # # INSTRUMENT RECOVERY
     # ####################################################################################
-    # The two heal agents cast without a poll loop, so a disturb on one of them is read by
-    # nobody and sits in the buffer. The next cast poll below would then see it on its first
-    # look and break out while its own spell is still in flight, leaving that spell's cursor
-    # to arrive after the block has moved on and stall every guarded block behind it.
-    # Reading the line here, once per pass, is what stops that. It is the only consumer of
-    # this message outside the poll loops.
-    if insysmsg "Your concentration is disturbed, thus ruining thy spell."
-        # drained
-    endif
-
-
     # Mid run recovery is auto detect only. A manual pick would block the loop on a cursor
     # the player is not looking at, in the middle of a fight.
     if var__my_instrument = 0
@@ -684,12 +691,24 @@ while not dead
     #
     # The walk guard sits on the two casting lines rather than on the block, because the
     # middle path drinks and drinking while walking is fine.
+    #
+    # Both agents cast without a cursor, so each waits out casting where it stands and then
+    # reads the disturb line itself. That is what keeps a disturbed heal from leaving a stale
+    # line for a later cast poll to trip on.
     if diffhits > config__light_hits and diffhits < config__emergency_hits and var__regs_heal = 1
         if timer "timer__heal_action" >= cooldown__heal_action
             if not targetexists and not casting and cooldown "Walk" = 0
                 hotkey "> Smart Heal/Cure Self"
                 settimer "timer__heal_action" 0
-                wait wait__long
+                wait wait__short
+
+                while casting
+                    wait wait__poll
+                endwhile
+
+                if insysmsg "Your concentration is disturbed, thus ruining thy spell."
+                    # it died, and the next pass will try again
+                endif
             endif
         endif
     elseif diffhits > config__emergency_hits
@@ -707,7 +726,7 @@ while not dead
                 if "next usable" in label__heal_potion
                     @setvar! var__greater_heal_ready 1
                 else
-                    dclick alias__heal_potion
+                    hotkey 'Drink Heal'
                     cooldown "Heal Pot" cooldown__heal_potion
                     wait wait__short
 
@@ -731,7 +750,15 @@ while not dead
                     hotkey "> Greater Heal/Cure Self"
                     settimer "timer__heal_action" 0
                     settimer "timer__greater_heal_retry" 0
-                    wait wait__long
+                    wait wait__short
+
+                    while casting
+                        wait wait__poll
+                    endwhile
+
+                    if insysmsg "Your concentration is disturbed, thus ruining thy spell."
+                        # it died, and the next pass will try again
+                    endif
                 endif
             endif
         endif
@@ -743,8 +770,8 @@ while not dead
     # Cure potions have no cooldown, so the spell is only ever the fallback.
     if poisoned
         if not targetexists and not casting
-            if findtype "Orange Potion" self as alias__cure_potion
-                dclick alias__cure_potion
+            if findtype "Orange Potion" self
+                hotkey 'Drink Cure'
                 wait wait__short
 
                 if config__chatty = 1
@@ -759,7 +786,15 @@ while not dead
                 if var__regs_cure = 1 and timer "timer__heal_action" >= cooldown__heal_action and cooldown "Walk" = 0
                     hotkey "> Smart Heal/Cure Self"
                     settimer "timer__heal_action" 0
-                    wait wait__long
+                    wait wait__short
+
+                    while casting
+                        wait wait__poll
+                    endwhile
+
+                    if insysmsg "Your concentration is disturbed, thus ruining thy spell."
+                        # it died, and the next pass will try again
+                    endif
                 endif
             endif
         endif
@@ -772,8 +807,8 @@ while not dead
     # single engagement guard so an idle walk does not burn them.
     if stam < 5
         if not targetexists and not casting
-            if findtype "Red Potion" backpack as alias__refresh_potion
-                dclick alias__refresh_potion
+            if findtype "Red Potion" backpack
+                hotkey 'Drink Refresh'
                 wait wait__short
             elseif timer "timer__message" >= cooldown__message
                 overhead "Refresh potions, none left" 33
@@ -785,8 +820,8 @@ while not dead
     if config__use_potion = 1 and var__engaged = 1
         if not targetexists and not casting
             if str <= 100
-                if findtype "White Potion" backpack as alias__strength_potion
-                    dclick alias__strength_potion
+                if findtype "White Potion" backpack
+                    hotkey 'Drink Strength'
                     wait wait__short
                 elseif timer "timer__message" >= cooldown__message
                     overhead "Strength potions, none left" 33
@@ -795,8 +830,8 @@ while not dead
             endif
 
             if dex <= 25
-                if findtype "Blue Potion" backpack as alias__agility_potion
-                    dclick alias__agility_potion
+                if findtype "Blue Potion" backpack
+                    hotkey 'Drink Agility'
                     wait wait__short
                 elseif timer "timer__message" >= cooldown__message
                     overhead "Agility potions, none left" 33
@@ -805,8 +840,8 @@ while not dead
             endif
 
             if not findbuff 'Magic Resist Potion'
-                if findtype "Black Potion" backpack as alias__resist_potion
-                    dclick alias__resist_potion
+                if findtype "Black Potion" backpack
+                    hotkey 'Drink Magic Resist'
                     wait wait__short
                 elseif timer "timer__message" >= cooldown__message
                     overhead "Magic resist potions, none left" 33
@@ -851,7 +886,15 @@ while not dead
                 wait wait__short
             elseif counttype "mushroom" backpack < config__mushroom_min_count and mana >= config__mushroom_create_mana and var__regs_create_food = 1
                 cast 'Create Food'
-                wait wait__long
+                wait wait__short
+
+                while casting
+                    wait wait__poll
+                endwhile
+
+                if insysmsg "Your concentration is disturbed, thus ruining thy spell."
+                    # it died, and the next pass will try again
+                endif
             endif
         endif
     endif
@@ -1060,7 +1103,7 @@ while not dead
     if var__engaged = 1
         if not targetexists and not casting and cooldown "Walk" = 0
             if var__symbols >= config__symbols_blood_oath and followers > 0 and timer "timer__blood_oath" >= cooldown__necro_action
-                hotkey 'blood oath'
+                hotkey 'Blood Oath'
                 wait wait__long
 
                 if insysmsg "unholy symbols remaining"
@@ -1073,13 +1116,8 @@ while not dead
                     settimer "timer__blood_oath" 0
                 endif
             elseif var__symbols >= config__symbols_corpse_skin and timer "timer__corpse_skin" >= cooldown__necro_action
-                hotkey 'corpse skin'
+                hotkey 'Corpse Skin'
                 wait wait__long
-
-                if not insysmsg "unholy symbols remaining" and not insysmsg "seconds before you may use that ability again."
-                    yell '[CorpseSkin'
-                    wait wait__long
-                endif
 
                 if insysmsg "unholy symbols remaining"
                     settimer "timer__corpse_skin" 0
@@ -1091,15 +1129,8 @@ while not dead
                     settimer "timer__corpse_skin" 0
                 endif
             elseif var__symbols >= config__symbols_evil_omen and timer "timer__evil_omen" >= cooldown__necro_action
-                hotkey 'evil omen'
+                hotkey 'Evil Omen'
                 wait wait__long
-
-                # The old script found the hotkey does not always answer. The server
-                # command is the same ability by another door.
-                if not insysmsg "unholy symbols remaining" and not insysmsg "seconds before you may use that ability again."
-                    yell '[EvilOmen'
-                    wait wait__long
-                endif
 
                 if insysmsg "unholy symbols remaining"
                     settimer "timer__evil_omen" 0
@@ -1122,13 +1153,8 @@ while not dead
         if timer "timer__vampiric_embrace" >= cooldown__necro_action
             if not targetexists and not casting and cooldown "Walk" = 0
                 if findtype 8198 ground -1 -1 8
-                    hotkey 'vampiric embrace'
+                    hotkey 'Vampiric Embrace'
                     waitfortarget wait__target
-
-                    if not targetexists
-                        yell '[VampiricEmbrace'
-                        waitfortarget wait__target
-                    endif
 
                     if targetexists
                         hotkey 'Target Self'
@@ -1173,7 +1199,7 @@ while not dead
                         endif
 
                         if config__interrupt_to_heal = 1 and diffhits > config__emergency_hits
-                            interrupt
+                            hotkey "> Interrupt"
                             break
                         endif
 
@@ -1208,7 +1234,7 @@ while not dead
                         endif
 
                         if config__interrupt_to_heal = 1 and diffhits > config__emergency_hits
-                            interrupt
+                            hotkey "> Interrupt"
                             break
                         endif
 
@@ -1284,7 +1310,7 @@ while not dead
                         endif
 
                         if config__interrupt_to_heal = 1 and diffhits > config__emergency_hits
-                            interrupt
+                            hotkey "> Interrupt"
                             break
                         endif
 
@@ -1309,7 +1335,7 @@ while not dead
                         endif
 
                         if config__interrupt_to_heal = 1 and diffhits > config__emergency_hits
-                            interrupt
+                            hotkey "> Interrupt"
                             break
                         endif
 
@@ -1334,7 +1360,7 @@ while not dead
                         endif
 
                         if config__interrupt_to_heal = 1 and diffhits > config__emergency_hits
-                            interrupt
+                            hotkey "> Interrupt"
                             break
                         endif
 
@@ -1359,7 +1385,7 @@ while not dead
                         endif
 
                         if config__interrupt_to_heal = 1 and diffhits > config__emergency_hits
-                            interrupt
+                            hotkey "> Interrupt"
                             break
                         endif
 
@@ -1373,6 +1399,40 @@ while not dead
                         else
                             target alias__proc_target
                             wait wait__cast
+                        endif
+                    endif
+                endif
+            endif
+        endif
+    endif
+
+    # ####################################################################################
+    # # POISON STRIKE
+    # ####################################################################################
+    # One symbol to resolve the disease Corpse Skin has been layering on the target: up to
+    # eight ticks land at once instead of over the next thirty seconds. On a mob about to die
+    # that is damage that would otherwise have gone with it. It sits at the bottom of the
+    # symbol ladder, only fires while Corpse Skin is actually up, and takes a filler slot
+    # rather than a proc one, since it costs no mana and the procs are worth more.
+    if var__engaged = 1 and var__opener_done = 1 and var__symbols >= config__symbols_poison_strike
+        if timer "timer__corpse_skin" < cooldown__necro_action and timer "timer__poison_strike" >= cooldown__necro_action
+            if not targetexists and not casting and cooldown "Walk" = 0
+                if find var__combat_target ground -1 -1 config__target_range as alias__strike_target
+                    hotkey 'Poison Strike'
+                    waitfortarget wait__target
+
+                    if targetexists
+                        target alias__strike_target
+                        wait wait__long
+
+                        if insysmsg "unholy symbols remaining"
+                            settimer "timer__poison_strike" 0
+
+                            if config__chatty = 1
+                                overhead "Poison Strike" 44
+                            endif
+                        elseif insysmsg "seconds before you may use that ability again."
+                            settimer "timer__poison_strike" 0
                         endif
                     endif
                 endif
@@ -1401,7 +1461,7 @@ while not dead
                     endif
 
                     if config__interrupt_to_heal = 1 and diffhits > config__emergency_hits
-                        interrupt
+                        hotkey "> Interrupt"
                         break
                     endif
 
