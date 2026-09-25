@@ -186,9 +186,11 @@ Spirit Pact    T3   5
 - `Revolution Song` (프로보한 몹이 `40/120/200%` 추가 피해) 은 Provocation 을 찍었으므로
   선택지에 들어온다. 다만 코덱스 20점 안에서 다른 것과 경쟁한다.
 - `Air` 를 쓰려면 소환수 감지 `findtype` 목록에 그래픽을 추가해야 한다.
-- 소환수 추적은 타입이 아니라 **serial** 로 한다. Lich 2마리처럼 같은 종류를 둘 데리고 다니면
-  타입 슬롯으로는 한 마리만 잡힌다. `bard-necro-combat-design.md` 의 `sung_followers` 참조.
-- **적 Lich 와 내 Lich 가 같은 그래픽이다.** `noto` 필터가 필수다 (`bard-necro.razor:433`).
+- **`bard-necro-enhanced` 는 소환수를 추적하지 않는다.** 송을 이동 중에 계속 갱신하므로
+  재소환을 감지할 필요가 없다. 구식 스크립트의 타입별 슬롯 추적과 `noto` 필터도 같이 사라진다.
+  자세한 이유는 `bard-necro-combat-design.md` 의 "설계 결정" 참조.
+- **적 Lich 와 내 Lich 는 그래픽이 같다.** 소환수를 타입으로 찾는 코드를 새로 쓸 일이 있으면
+  `noto` 필터가 필수다 (`bard-necro.razor:433`).
 
 ## 참고 링크
 

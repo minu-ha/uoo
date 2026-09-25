@@ -13,12 +13,12 @@
 | Provocation | **10초 성공 / 5초 실패** | "Skill usage cooldown is 10 seconds on success and 5 seconds on failure" |
 | Barding Song | 10초 | "Casting a Barding Song has a 10 second cooldown that is independent of normal bard skill usage" |
 
-**Peace 와 Provo 는 쿨다운을 공유하지 않는다** (probe 확인. 아래 참조).
+**Peace 와 Provo 는 슬롯을 공유한다.** `cooldowns.xml` 에서 `Peace/Provo` 한 항목으로 합쳤다.
 
 **글로벌과 개별은 AND 조건이다.** Music 5초가 지나도 Peace 자기 쿨 10초가 안 지났으면 못 쓴다.
 
 ```
-if cooldown "Music" = 0 and cooldown "Peace" = 0
+if cooldown "Music" = 0 and cooldown "Peace/Provo" = 0
 ```
 
 가능한 사이클:
@@ -188,13 +188,11 @@ Song   ->  Song 11초만 세운다        <- Music 도 슬롯도 건드리지 �
 
 #### 루프에 주는 규칙
 
-**송을 불러야 하는 상황에서는 바드 스킬을 참는다.**
-송 쿨이 풀리기 직전에 디스코를 쓰면 Music 5초가 걸려 송이 그만큼 더 밀린다.
-재소환 감지로 3곡을 다시 불러야 할 때가 정확히 이 경우다.
+**전투 중에는 송이 거의 안 나간다.** 디스코와 피스가 `Music` 을 5초씩 계속 세우기 때문이다.
+게다가 악기 연주는 시전을 끊어 주문을 날려먹는다.
 
-```
-var__resing = 1 이면  ->  Song 블록만 돌리고 바드 스킬 블록은 건너뛴다
-```
+그래서 `bard-necro-enhanced` 는 **송을 이동 구간에서만 부른다.**
+이동 10~20초 동안 `Music` 이 비어 있고 어차피 아무것도 안 하고 있다.
 
 ### Peace 와 Provo 는 슬롯을 공유한다
 
@@ -459,23 +457,20 @@ Disco/Peace/Provo 가 전부 80이면 T3(120점)를 찍어도 **80밖에 못 쓴
 |---|---|
 | 피스는 데미지를 받으면 풀린다 | **아니다.** Barding Break 로만 풀린다 |
 | Provocation 은 안 찍었다 | **찍었다.** Self Taught 가 Musicianship 을 대체해서 Disco/Peace/Provo 80/80/80 구성이다 |
-| Musicianship 은 Self Taught 로 완전히 대체된다 | **"requirements" 대체다.** 보너스 상한에도 적용되는지 미확인 |
 | Vampire Thrall 은 근접딜러다 | **주문딜러다.** "Spell Damage: 26 - 32" |
 | Fury 는 분당 5% | **30초당 5%, 최대 +30%** -- 3분이면 캡 |
 | Music 쿨만 보면 된다 | **글로벌 5초 + 개별 쿨의 AND 조건이다** |
 | Discordance 는 Effective 로 스케일 | **printed 스킬로 스케일한다** (`printed / 120 x 25%`) |
 | 소환수도 Virtuoso / Ensemble 을 받는다 | **팔로워 명시는 `Sing Your Own Praises` 뿐이다** |
-| 송은 스킬 쿨과 완전히 무관하다 | **단방향이다.** 송->스킬은 되고 스킬->송은 안 된다 |
 | Discordance 도 barding break 로 끊긴다 | **안 끊긴다.** 브레이크는 Peace / Provo 만 끊는다 |
 | Self Taught 는 요구조건만 대체한다 | **Effective Barding 보너스 상한에도 적용된다.** 실측 170 |
-| Peace 와 Provo 는 쿨을 공유한다 | **공유하지 않는다.** Peace 성공 직후에도 provo READY |
 | Song 은 별도 명령이다 | **스킬을 백팩에 타겟한 것이다.** 땅에 타겟하면 group effect |
 | Song 과 Skill 은 서로 막는다 | **비대칭이다.** 송은 Music 과 슬롯을 읽기만 하고 쓰지 않는다 |
-| Peace 와 Provo 는 슬롯이 따로다 | **공유한다.** 로컬 엔트리가 서로를 반영하지 않아 착각했다 |
+| Peace 와 Provo 는 슬롯이 따로다 | **공유한다.** 로컬 엔트리가 서로를 반영하지 않아 한 번 착각했다 |
 | 차단된 시도는 아무 쿨도 안 태운다 | **Music 을 태운다.** 차단된 송 다음의 스킬 판정을 믿지 말 것 |
 | Ensemble 은 디스코만 있으면 된다 | **Discord AND (Peace OR Provo).** 두 개가 걸려야 한다 |
 | 바드 쿨은 예측 가능하다 | **"Your barding skill cooldowns reset." 프록이 있다** (Lyric 방어구). 측정할 땐 벗는다 |
-| Song 쿨은 `cooldown "Music"` 이다 | **아니다. 별도 계열이다.** 지금 `Music` 항목이 둘을 섞어서 덮어쓰기 버그가 있다 |
+| Song 쿨은 `cooldown "Music"` 이다 | **아니다. 별도 계열이다.** `Music` 이 둘을 섞어 덮어쓰던 버그는 고쳤다 |
 | `cooldown "..."` 은 서버 값이다 | **아니다. `cooldowns.xml` 의 내 메시지 트리거다.** 숫자가 이상하면 이 파일을 본다 |
 | 프록 15초는 타이머로 센다 | **게임이 메시지로 알려준다.** `cooldown "MagicArrow"` 등을 읽는다 |
 | 브레이크 중엔 Provo 로 Ensemble 을 살린다 | **못 한다.** 브레이크 대상엔 Peace 도 Provo 도 안 걸린다 |

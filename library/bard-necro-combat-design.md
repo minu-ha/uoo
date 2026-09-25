@@ -8,6 +8,14 @@
 
 바드 숫자와 공식은 전부 **`bard-mechanics.md`** 에 있다. 이 문서에서 다시 추론하지 않는다.
 
+**완성되면 할 일 두 가지.**
+
+- `library/templates.md` 에 `Bard Necro (Enhanced)` 행을 추가한다.
+- 구식 `bard-necro` / `bard-necro-eval` 행을 지우고 파일도 지운다. **인게임 검증이 끝난 뒤에.**
+
+**핫키 `bard-buff` 는 이 템플릿에서 필요 없어진다.** 루프가 이동 중에 세 곡을 알아서 돌린다.
+다른 템플릿은 계속 쓰므로 파일 자체는 남긴다.
+
 ## 루프 한 장
 
 한 패스에 **한 동작만** 한다. 위에서부터 조건이 맞는 첫 블록이 실행되고 나머지는 다음 패스로 넘어간다.
@@ -403,6 +411,11 @@ inlist cursed                       -> Evil Omen -> 프록 코어
 
 분기 자체가 상태라 `var_magic_stage` 같은 단계 변수가 필요 없다.
 
+**이 두 리스트는 새로 만드는 것이 아니다.** 구식 `bard-necro.razor` 가 이미
+`magic_drained_targets` 와 `magic_cursed_targets` 를 둘 다 쓰고 있다
+(`bard-necro.razor:145`, `:787`). **새 스크립트를 짜기 전에 그 파일의 오프닝 블록을 읽는다.**
+`bard-necro-eval.razor` 쪽에만 Mana Drain 이 빠져 있다.
+
 **트레이드오프**: sweep 이 전역이라 방금 건 대상까지 지운다. 동시 교전 1~2마리면 가끔 22마나 손해다.
 **대상별 타임스탬프는 산술이 필요해서 못 쓴다.**
 
@@ -410,9 +423,12 @@ inlist cursed                       -> Evil Omen -> 프록 코어
 
 ### 구식 스크립트의 버그 (반복하지 말 것)
 
-`bard-necro-eval.razor:379` 의 `clearlist` 는 **전투 대상이 사라지고 조용해졌을 때만** 돌았다.
+**두 구식 스크립트가 같은 버그를 갖고 있다.** `clearlist` 가 **전투 대상이 사라지고
+조용해졌을 때만** 돈다 (`bard-necro-eval.razor:379`, `bard-necro.razor:310`).
+
 한 마리와 60초 넘게 싸우면 Curse 의 `+30%` 가 꺼졌는데도 리스트가 "걸려 있음" 이라고 답해서
-**영영 재시전하지 않았다.**
+**영영 재시전하지 않는다.** 난이도 300~500 몹은 대부분 여기 걸린다.
+**만료는 교전 종료가 아니라 시간으로 재야 한다.**
 
 ## 꼬이는 지점
 
@@ -493,6 +509,7 @@ endif
 | 구문 | 선례 |
 |---|---|
 | `not inlist '이름' alias` | `bard-necro.razor:787` |
+| `magic_drained_targets` + `magic_cursed_targets` 2단 오프닝 | `bard-necro.razor:145`, `:787` |
 | `createlist` / `removelist` / `clearlist` / `pushlist` | 여러 파일 |
 | `while findtype ... ground -1 -1 12 as` + `@ignore` | `bard-necro.razor:432` |
 | `not dead X and noto X != "hostile" ...` | `bard-necro.razor:433` |
@@ -517,8 +534,8 @@ endif
 - **Effective Barding = 170** (송 메시지 8.5% 실측)
 - **Discordance 는 barding break 로 안 끊긴다**
 - **Peacemaking 은 데미지로 안 풀린다.** 브레이크로만 풀린다
-- **Peace 와 Provo 는 쿨을 공유하지 않는다**
-- **Song = 스킬을 백팩에 타겟.** Music 을 안 세우지만 자기 스킬 슬롯은 쓴다
+- **Peace 와 Provo 는 슬롯을 공유한다.** `Peace/Provo` 한 항목으로 합쳤다
+- **Song = 스킬을 백팩에 타겟.** Music 도 슬롯도 세우지 않고, 읽기만 한다
 - **Ensemble 조건은 `Discord AND (Peace OR Provo)`**
 - **"Your barding skill cooldowns reset." 프록이 존재한다**
 
