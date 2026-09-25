@@ -52,11 +52,11 @@ flowchart TD
     SKILL -->|no| NECRO
 
     NECRO{"Unholy Symbol<br/>충분한가"}
-    NECRO -->|yes| ANECRO["Blood Oath<br/>Vampiric Embrace"] --> E
+    NECRO -->|yes| ANECRO["Blood Oath → Corpse Skin → Evil Omen<br/>Vampiric Embrace (이동 중)"] --> E
     NECRO -->|no| OPEN
 
     OPEN{"이 대상에<br/>오프닝 완료"}
-    OPEN -->|no| AOPEN["Mana Drain → Curse → Evil Omen"] --> E
+    OPEN -->|no| AOPEN["Mana Drain → Curse"] --> E
     OPEN -->|yes| PROC
 
     PROC{"프록 중<br/>쿨 끝난 것"}
@@ -79,8 +79,8 @@ flowchart TD
 | 2 | 타겟 캐시 | `lasttarget` + `noto` | `var__combat_target` 갱신 |
 | 3 | Barding Song | `Music=0 and Song=0 and <슬롯>=0` | **몹이 없을 때만.** 라운드로빈 |
 | 4 | 바드 스킬 | `Music=0 and <슬롯>=0` | 디스코 1회 + **피스 12초마다** |
-| 5 | 네크로 | Unholy Symbol | Blood Oath 4, Vampiric Embrace 3 |
-| 6 | 오프닝 | 마나 + 대상별 리스트 | Mana Drain -> Curse -> Evil Omen |
+| 5 | 네크로 | `var__symbols >= config__symbols_*` | Blood Oath → Corpse Skin → Evil Omen 순. **유휴 예약** 아래 참조 |
+| 6 | 오프닝 | 마나 + 대상별 리스트 | Mana Drain -> Curse |
 | 7 | 프록 코어 | `cooldown "MagicArrow"` 등 | 네 개가 각자 쿨 |
 | 8 | 필러 | `mana > config__filler_floor` | Energy Bolt. **여기부터 잘린다** |
 
@@ -145,7 +145,7 @@ flowchart TD
 | `cooldown "Discord"` | Disco | 단독 슬롯 5초 |
 | `cooldown "Peace/Provo"` | Peace 와 Provo | **공유 슬롯 10초.** 합친 항목 하나 |
 | **Barding Song 쿨** | 3곡 전체 | **별도 계열. `cooldown "Music"` 이 아니다.** 세 곡이 공유 |
-| Unholy Symbol | Blood Oath(4), Vampiric Embrace(3), Evil Omen | 5초당 1개 |
+| Unholy Symbol | Blood Oath(4), Corpse Skin(2), Evil Omen(2), Vampiric Embrace(3) | 5초당 1개, 최대 Effective Necro/10 = **10** |
 | 마나 | 버프 + 오프닝 + 스팸 + 필러 | 메디가 없어 가장 빡빡하다 |
 
 **자원이 독립이어도 행동 슬롯은 하나다.** 교전 중 블록의 전체 가드는 이렇다.
@@ -375,6 +375,40 @@ Peace 를 가끔 쓰는 제어 수단으로만 다루면 `Ensemble` + `Virtuoso`
 한쪽으로 다른 쪽을 대신할 수 없으므로, 브레이크가 뜨면 난이도 400 기준
 **40초 동안 `Ensemble` 과 `Virtuoso` 가 통째로 꺼진다.** `Refrain` 이 막아주는 것이 바로 이 40초다.
 
+## Unholy Symbol 경제
+
+5초당 1개, 최대 `Effective Necro / 10` = **10개**. 30초 사이클에 6개가 차는데
+전투용 세 개(4 + 2 + 2 = 8)를 다 쓰면 **사이클당 2개씩 마이너스**다.
+그래서 개수만 되면 바로 쓰지 않고, **위에 있는 능력 몫을 남기고** 쓴다.
+
+| 능력 | 비용 | 발동 조건 | 남겨두는 것 |
+|---|---|---|---|
+| **Blood Oath** | 4 | `>= 4` | 없음. 최우선 |
+| **Corpse Skin** | 2 | `>= 6` | Blood Oath 4 |
+| Evil Omen | 2 | `>= 8` | Blood Oath 4 + Corpse Skin 2 |
+| Vampiric Embrace | 3 | `>= 7`, 이동 중만 | Blood Oath 4 |
+
+전부 `config__symbols_*` 라 사냥터에 맞춰 조정한다. 전투가 짧고 이동이 길면 올리고, 은행이 늘 차 있으면 내린다.
+
+**우선순위 근거** (Necro 100):
+
+| | 효과 | 전체 딜 기여 |
+|---|---|---|
+| Blood Oath | 팔로워 딜 **+30%** | 63% × 30% = **+18.9%** |
+| Corpse Skin | 모든 주문에 25% 질병 DoT | 37% × 25% = +9.3%, **자해 없음** |
+| Evil Omen | 주문 +20%, 주문당 25% 확률로 마나/2 자해 | 37% × 20% = +7.4%, 자해 있음 |
+
+**Corpse Skin 이 Evil Omen 보다 위다.** 보너스가 크고 대가가 없다. 둘 다 30초 자기 버프라 중첩 가능 여부는 미확인.
+
+**안 넣은 것**: Strangle(4)은 Blood Oath 와 심볼을 다투고 모든 딜을 5초 지연시킨다.
+Wither(5)는 비공격 주문용 마나만 준다. Pain Spike(5)는 **다음 몹 옆에** 시체가 있어야 한다.
+
+**핫바 Auto-Renew 는 전부 끈다.** 게임이 같은 심볼을 쓰고, 우선순위가 **"least expensive first"** 라
+이 빌드엔 정반대다 — Blood Oath 가 맨 마지막에 돈다.
+
+**심볼 개수는 `ingump` 로 숫자로 읽는다.** `"<have>/<max>"` 형식이고 `ingump` 가 부분문자열 매칭이라
+`"1/"` 이 `"11/20"` 안에도 잡히므로 **20부터 내려오는 체인**으로 읽는다. 0~20 전수 시뮬레이션으로 검증했다.
+
 ## 오프닝은 대상마다 다시 건다
 
 > Curse T3: "Spells cast by caster **against target** have their damage increased by 30%"
@@ -406,7 +440,7 @@ endif
 
 not inlist drained                  -> Mana Drain
 inlist drained, not inlist cursed   -> Curse   (안착하면 settimer 0)
-inlist cursed                       -> Evil Omen -> 프록 코어
+inlist cursed                       -> 프록 코어
 ```
 
 타이머는 **Curse 가 안착할 때마다 0으로** 돌아간다. 한 마리와 싸우는 보통의 경우 만료가 정확히
