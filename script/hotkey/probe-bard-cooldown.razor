@@ -1,0 +1,249 @@
+# Probe the barding cooldowns. One mode, one question. Verdicts come from server messages,
+# so modes 2 and 3 work even before cooldowns.xml is corrected.
+# Needs: instrument in backpack, a CREATURE as lasttarget, and LYRIC ASPECT ARMOR OFF.
+# Do not touch anything while it runs.
+#
+# The Lyric armor proc "Your barding skill cooldowns reset." clears every bard cooldown the
+# instant it fires, so any run where it shows up measured the proc, not the cooldown.
+# The song message is the tell: 8.5% means Lyric is still on, 6.8% means it is off.
+# The probe aborts by itself when it sees the reset.
+#
+# Known trap: an attempt that the SONG cooldown rejects still burns the bard skill cooldown.
+# Never read a skill verdict that follows a blocked song in the same run.
+#
+# config__probe 1   interaction. Answered already: songs share a cooldown, and a song DOES lock bard skills
+# config__probe 2   how long is the shared SONG cooldown
+#                   song -> wait config__gap -> another song.  Run 6000, 8000, 10000
+# config__probe 3   how long does a song lock bard SKILLS      <- this sets Music's song trigger duration
+#                   song -> wait config__gap -> a bard skill.  Run 3000, 5500, 8000, 11000
+#                   config__same_skill 1 uses the same skill the song came from, 0 uses a different one
+#
+# Block messages name the family that rejected the action:
+#   "another barding song"  -> shared song cooldown
+#   "use another skill"     -> bard skill cooldown
+# Delete this file once library/bard-mechanics.md records the answers.
+
+clearall
+clearsysmsg
+cleardragdrop
+clearignore
+
+@setvar! config__probe 3
+@setvar! config__gap 1500
+@setvar! config__same_skill 1
+
+@setvar! wait__target 1200
+@setvar! wait__settle 700
+
+# ####################################################################################
+# # SETUP
+# ####################################################################################
+if not varexist var__my_instrument
+    @setvar! var__my_instrument 0
+endif
+
+if not find var__my_instrument backpack
+    if findtype 3740|3742|3762|3763|10245|20006|20008|20010|20012|20014|20016 backpack as alias__instrument
+        @setvar! var__my_instrument alias__instrument
+    else
+        overhead "No instrument in backpack" 34
+        stop
+    endif
+endif
+
+# A creature, not the backpack. Targeting the backpack turns a skill into a song.
+if find lasttarget ground -1 -1 12 as alias__probe_target
+    @setvar! var__probe_target alias__probe_target
+else
+    overhead "Target a creature first, then rerun" 34
+    stop
+endif
+
+if cooldown "Music" = 0 and cooldown "Discord" = 0 and cooldown "Peace/Provo" = 0 and cooldown "Song" = 0
+    overhead "probe {{config__probe}} start, all idle" 55
+else
+    overhead "not idle, wait 15s and rerun" 34
+    stop
+endif
+
+# ####################################################################################
+# # STEP 1   Discordance SONG   baseline for every mode
+# ####################################################################################
+clearsysmsg
+useskill 'Discordance'
+waitfortarget wait__target
+
+if insysmsg "What instrument"
+    target var__my_instrument
+    replay
+endif
+
+if targetexists
+    target backpack
+endif
+
+wait wait__settle
+
+if insysmsg "barding skill cooldowns"
+    overhead "Lyric reset fired, run is void" 34
+    overhead "take the Lyric armor off and rerun" 34
+    stop
+endif
+
+if insysmsg "under the effect of a Song"
+    overhead "1 disco SONG ok" 32
+elseif insysmsg "another barding song"
+    overhead "1 blocked by SONG cd, rerun later" 34
+    stop
+elseif insysmsg "use another skill"
+    overhead "1 blocked by SKILL cd, rerun later" 34
+    stop
+else
+    overhead "1 no verdict, rerun" 33
+    stop
+endif
+
+if config__probe = 1
+    # ############################################################################
+    # # MODE 1   songs share a cooldown, and does a song lock skills
+    # ############################################################################
+    clearsysmsg
+    useskill 'Peacemaking'
+    waitfortarget wait__target
+
+    if insysmsg "What instrument"
+        target var__my_instrument
+        replay
+    endif
+
+    if targetexists
+        target backpack
+    endif
+
+    wait wait__settle
+
+    if insysmsg "under the effect of a Song"
+        overhead "2 peace SONG ok, songs do NOT share" 32
+    elseif insysmsg "another barding song"
+        overhead "2 blocked by SONG cd, songs SHARE" 34
+    else
+        overhead "2 no verdict" 33
+    endif
+
+    clearsysmsg
+    useskill 'Peacemaking'
+    waitfortarget wait__target
+
+    if insysmsg "What instrument"
+        target var__my_instrument
+        replay
+    endif
+
+    if targetexists
+        target var__probe_target
+    endif
+
+    wait wait__settle
+
+    if insysmsg "pacifying your target" or insysmsg "fail to pacify"
+        overhead "3 peace SKILL rolled, song does NOT lock skills" 32
+    elseif insysmsg "use another skill"
+        overhead "3 blocked by SKILL cd, song DOES lock skills" 34
+    elseif insysmsg "another barding song"
+        overhead "3 target was not a creature" 34
+    else
+        overhead "3 no verdict" 33
+    endif
+elseif config__probe = 2
+    # ############################################################################
+    # # MODE 2   how long is the shared song cooldown
+    # ############################################################################
+    overhead "waiting {{config__gap}} ms" 55
+    wait config__gap
+
+    clearsysmsg
+    useskill 'Provocation'
+    waitfortarget wait__target
+
+    if insysmsg "What instrument"
+        target var__my_instrument
+        replay
+    endif
+
+    if targetexists
+        target backpack
+    endif
+
+    wait wait__settle
+
+    if insysmsg "barding skill cooldowns"
+        overhead "Lyric reset fired during the gap, run is void" 34
+    elseif insysmsg "under the effect of a Song"
+        overhead "SONG ok at {{config__gap}} ms, song cd is under this" 32
+    elseif insysmsg "another barding song"
+        overhead "still blocked at {{config__gap}} ms, song cd is over this" 34
+    elseif insysmsg "use another skill"
+        overhead "blocked by SKILL cd at {{config__gap}} ms" 33
+    else
+        overhead "no verdict" 33
+    endif
+else
+    # ############################################################################
+    # # MODE 3   how long does a song lock bard skills
+    # ############################################################################
+    overhead "waiting {{config__gap}} ms" 55
+    wait config__gap
+
+    clearsysmsg
+
+    if config__same_skill = 1
+        useskill 'Discordance'
+    else
+        useskill 'Peacemaking'
+    endif
+
+    waitfortarget wait__target
+
+    if insysmsg "What instrument"
+        target var__my_instrument
+        replay
+    endif
+
+    if targetexists
+        target var__probe_target
+    endif
+
+    wait wait__settle
+
+    if insysmsg "barding skill cooldowns"
+        overhead "Lyric reset fired during the gap, run is void" 34
+    elseif insysmsg "disrupting your opponent" or insysmsg "fail to discord"
+        overhead "disco SKILL rolled at {{config__gap}} ms, lock is under this" 32
+    elseif insysmsg "pacifying your target" or insysmsg "fail to pacify"
+        overhead "peace SKILL rolled at {{config__gap}} ms, lock is under this" 32
+    elseif insysmsg "use another skill"
+        overhead "still locked at {{config__gap}} ms, lock is over this" 34
+    elseif insysmsg "another barding song"
+        overhead "target was not a creature" 34
+    else
+        overhead "no verdict" 33
+    endif
+endif
+
+if targetexists
+    hotkey "Cancel Current Target"
+endif
+
+if cooldown "Music" = 0
+    overhead "end music READY" 32
+else
+    overhead "end music BUSY" 33
+endif
+
+if cooldown "Song" = 0
+    overhead "end song READY" 32
+else
+    overhead "end song BUSY" 33
+endif
+
+overhead "probe done" 55
