@@ -570,47 +570,45 @@ endif
 
 ## 재소환 -- 설계만, 구현 보류
 
-소환수가 죽으면 딜의 63%가 빠지므로 자동 재소환은 당연한 후보다. 그런데 확인된 숫자가 반대로 말한다.
+소환수가 죽으면 딜의 63%가 빠진다. 그런데 사실을 다 모으니 **자동화의 값이 생각보다 작다.**
+
+### 확정 사실 (`bard-mechanics.md`)
+
+- 언데드는 **Vengeful Spirit(심볼 1) 을 켠 뒤** 소환해야 나온다. Fire -> Lich, Earth -> Mummy, Daemon -> Vampire
+- 8서클: **마나 50, 시전 6초**, Bloodmoss 필요
+- 소환수는 **10초마다 최대 체력 1% 씩 썩어** 맞지 않아도 죽는다. 즉 재소환은 반응이 아니라 **주기 정비**다
+- `followers` 는 슬롯 수. Lich 2 = 4
 
 ### 판단: 지금은 수동
 
 | 근거 | 내용 |
 |---|---|
-| **시전 6초, 마나 50** | 8서클 소환은 Outlands 에서 6.00초다. 교전 중엔 6초 동안 로테이션이 서고 긴급 힐 폴링이 그걸 끊으면 50마나가 날아간다. 이동 중엔 **서 있어야** 하는데(`cooldown "Walk" = 0`) 이동 구간은 정의상 걷는 중이라, 실제로는 다음 몹 앞에 멈춘 순간에만 나간다 -- 수동으로 할 때와 같은 타이밍이다 |
-| **뭘 뽑을지는 상황이 정한다** | 테이머 듀오면 Lich 2, 솔플이면 Mummy + Lich, 고 MR 이면 Mummy + Air. 스크립트는 지금 파티 구성을 모른다 |
-| **언데드 변환 규칙이 확정 안 됨** | 위키에서 찾은 건 "Vengeful Spirit 활성 중 소환하면 언데드"뿐이고, 그 변형은 10초마다 체력 1%씩 깎인다. Spirit Speak 만으로 Lich 가 나오는 건지, VS 를 먼저 켜야 하는 건지 문서로 확인 못 했다. 틀리면 썩어가는 변형이나 맨 엘리멘탈을 뽑는다 |
-| **`followers` 가 뭘 세는지 모른다** | Lich 2마리면 창 수로는 2, 슬롯으로는 4. 임계값을 잘못 잡으면 한 마리 죽어도 안 뽑거나, 멀쩡한데 뽑으려 든다 |
-| **죽는 일 자체가 드물다** | Peace 가 걸린 몹은 공격을 못 하고 테이머 펫이 어그로를 잡는다. 죽었을 때의 뒷정리는 이미 자동이다 -- 송은 다음 이동에서 다시 걸리고, Blood Oath 와 Vampiric Embrace 는 `followers > 0` 으로 알아서 선다 |
+| **한 세트가 VS + 6초 + 6초, 마나 101** | 교전 중엔 로테이션이 12초 서고 긴급 힐이 끊으면 50 씩 날아간다. 이동 중엔 서 있어야 하므로(`cooldown "Walk"`) 다음 몹 앞에 멈춘 순간에만 나간다 -- 수동과 같은 타이밍이다 |
+| **뭘 뽑을지는 상황이 정한다** | 듀오 Lich 2 / 솔플 Mummy + Lich / 고 MR Mummy + Air. 스크립트는 파티 구성을 모른다 |
+| **썩는 속도가 결정을 사람에게 준다** | 1%/10초면 체력 반이 되는 데 8분이다. "언제 갈아끼울지"는 남은 체력과 다음 몹을 보고 정하는 문제라 임계값 하나로 대신하기 어렵다 |
+| **없을 때의 뒷정리는 이미 자동이다** | 송은 다음 이동에서 다시 걸리고, Blood Oath / Vampiric Embrace 는 `followers > 0` 으로 선다. 본체 로테이션은 그대로 돈다 |
 
-**사람이 알아채고 한 번 시전하는 것**이 위 다섯을 전부 우회한다. 구식 두 스크립트도 재소환을 안 했고, 그게 맞았다.
+구식 두 스크립트도 재소환을 안 했다.
 
 ### 나중에 넣는다면 이 모양
 
-이동 중 전용, 마나·시약·정지 조건을 다 만족할 때만, 소환 종류는 config 로.
+이동 중 전용, 소환 종류는 config, VS 를 먼저 켠다.
 
 ```
 config__resummon 0                      기본 꺼짐
 config__summon_spell 'Fire Elemental'
-config__followers_want 2                followers 가 창 수를 셀 때. 슬롯을 세면 4
+config__followers_want 4                슬롯 수. Lich 2마리
 
 RESUMMON   [MUSHROOM 뒤, BARD SONG 앞]
   var__engaged = 0 and followers < config__followers_want
     mana >= 50 and var__regs_summon = 1          bloodmoss, mandrake, silk, ash
       not targetexists and not casting and cooldown "Walk" = 0
-        cast config__summon_spell
-        for 70                                    6초 + 여유. 다른 시전과 같은 폴링
-          ...
-        target ground                             소환은 지점을 찍는다 (미확인)
+        timer "timer__vengeful_spirit" >= 30000  -> hotkey 'Vengeful Spirit', 메시지 확인
+        else                                     -> cast config__summon_spell, for 70 폴링, target
 ```
 
-**넣기 전에 인게임에서 확정할 것 세 가지**: `followers` 가 세는 단위, Fire Elemental 이 Spirit Speak 만으로
-Lich 가 되는지, 소환 커서가 지점인지 자동 배치인지. 셋 중 하나라도 틀리면 이 블록은 해롭다.
-
-### 지금 스크립트가 소환수 없이도 안전한 이유
-
-- `NECRO BURST` 의 Blood Oath, Vampiric Embrace 는 `followers > 0` 이 가드다
-- 송은 이동 중 라운드로빈이라 새 소환수가 다음 이동에서 자동으로 받는다
-- 본체 로테이션은 소환수와 무관하게 돈다 -- 딜이 37%로 줄 뿐 멈추지 않는다
+Bloodmoss 플래그 하나와 `Vengeful Spirit` 핫키(목록에 있음)만 추가하면 된다. 남은 미확인은 **소환 커서가
+지점 지정인지 자동 배치인지** 하나뿐이다.
 
 ## 쓸 수 있는 구문 (전부 저장소에 선례 있음)
 

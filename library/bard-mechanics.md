@@ -425,6 +425,29 @@ Disco/Peace/Provo 가 전부 80이면 T3(120점)를 찍어도 **80밖에 못 쓴
 | 바딩 최소 성공률 | **56.1%**, Perfect Pitch T3 포함 **72.9%** | |
 | Barding Break (난이도 400) | 초당 **4%**, 걸리면 **40초** | **Peace / Provo 만** 끊는다 |
 
+## 네크로 소환 (Vengeful Spirit)
+
+**언데드 소환수는 `Vengeful Spirit` 을 켠 뒤에 소환 주문을 시전해야 나온다.** Spirit Speak 만으로는 안 된다.
+
+> "For next 30 seconds all summon spells cast will instead create an Undead follower that loses 1% health &
+> max health every 10 seconds but has damage increased by (20% * (Necromancy / 100))"
+
+| Magery 소환 | 언데드 |
+|---|---|
+| Fire Elemental | **Lich** |
+| Earth Elemental | **Ancient Mummy** |
+| Air Elemental | Skeletal Fiend |
+| Water Elemental | Rag Witch |
+| Summon Daemon | **Vampire Thrall** |
+| Blade Spirits | Skeletal Husk |
+| Energy Vortex | Jackal Spirit |
+| Summon Creature | 무작위 언데드 |
+
+- 8서클 소환 전부 **마나 50, 시전 6.00초**, 시약에 **Bloodmoss** 포함 (`item-list.razor`)
+- **타이머는 없지만 최대 체력이 10초마다 1% 깎여 결국 죽는다.** 재소환은 "죽었을 때"가 아니라 주기적 정비다
+- **`followers` 는 컨트롤 슬롯 수다.** 위 소환수는 각 **2**, Summon Creature 는 1 (인게임 확인됨)
+- Vengeful Spirit 은 심볼 1, 30초. 소환 둘을 뽑으려면 VS -> 소환 -> 소환 을 30초 안에
+
 ## Magery 프록은 게임이 메시지로 알려준다
 
 `cooldowns.xml` 에 이미 잡혀 있다. **자체 `timer__` 로 15초를 세지 않는다.**
@@ -479,6 +502,9 @@ Disco/Peace/Provo 가 전부 80이면 T3(120점)를 찍어도 **80밖에 못 쓴
 | `cooldown "..."` 은 서버 값이다 | **아니다. `cooldowns.xml` 의 내 메시지 트리거다.** 숫자가 이상하면 이 파일을 본다 |
 | 프록 15초는 타이머로 센다 | **게임이 메시지로 알려준다.** `cooldown "Magic Arrow"` 등을 읽는다 |
 | 브레이크 중엔 Provo 로 Ensemble 을 살린다 | **못 한다.** 브레이크 대상엔 Peace 도 Provo 도 안 걸린다 |
+| Spirit Speak 만 있으면 언데드 소환이 나온다 | **Vengeful Spirit 을 먼저 켜야 한다.** 매핑은 위 표 |
+| `followers` 는 소환수 마릿수다 | **컨트롤 슬롯 수다.** Lich 2마리 = 4 |
+| 소환수는 안 맞으면 안 죽는다 | **10초마다 최대 체력 1% 씩 썩는다.** 재소환은 주기적이다 |
 
 ## 참고 링크
 
