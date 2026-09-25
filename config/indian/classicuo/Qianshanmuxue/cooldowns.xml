@@ -23,12 +23,16 @@
 		<trigger triggertype="OverheadMessage" duration="10" triggertext="You gather a handful of plants and fashion an herbal poultice" />
 		<trigger triggertype="SysMessage" duration="10" triggertext="You are unable to find any useful plants nearby." />
 		<trigger triggertype="SysMessage" duration="5" triggertext="What do you wish to track?" />
+		<trigger triggertype="SysMessage" duration="5" triggertext="play successfully" />
+		<trigger triggertype="SysMessage" duration="5" triggertext="fail to incite anger" />
+		<trigger triggertype="SysMessage" duration="5" triggertext="fail to discord" />
+		<trigger triggertype="SysMessage" duration="5" triggertext="fail to pacify" />
+		<trigger triggertype="OverheadMessage" duration="0" triggertext="Your barding skill cooldowns" />
 	</cooldownentry>
 	<cooldownentry name="Music" defaultcooldown="0" cooldownbartype="Regular" hue="53" hidewheninactive="False">
 		<trigger triggertype="SysMessage" duration="5" triggertext="play successfully" />
 		<trigger triggertype="SysMessage" duration="5" triggertext="fail to incite anger" />
 		<trigger triggertype="SysMessage" duration="5" triggertext="fail to discord" />
-		<trigger triggertype="SysMessage" duration="10" triggertext="under the effect of a song" />
 		<trigger triggertype="SysMessage" duration="5" triggertext="fail to pacify" />
 		<trigger triggertype="OverheadMessage" duration="0" triggertext="Your barding skill cooldowns" />
 	</cooldownentry>
@@ -36,22 +40,19 @@
 		<trigger triggertype="SysMessage" duration="5" triggertext="successfully, disrupting your opponent" />
 		<trigger triggertype="SysMessage" duration="5" triggertext="fail to discord" />
 		<trigger triggertype="SysMessage" duration="5" triggertext="play successfully, briefly discording" />
-		<trigger triggertype="SysMessage" duration="11" triggertext="effect of a song of discordance" />
 		<trigger triggertype="OverheadMessage" duration="0" triggertext="Your barding skill cooldowns" />
 	</cooldownentry>
-	<cooldownentry name="Peace" defaultcooldown="0" cooldownbartype="Regular" hue="53" hidewheninactive="False">
+	<cooldownentry name="Peace/Provo" defaultcooldown="0" cooldownbartype="Regular" hue="53" hidewheninactive="False">
 		<trigger triggertype="SysMessage" duration="11" triggertext="You play successfully, pacifying your target." />
-		<trigger triggertype="SysMessage" duration="5" triggertext="You play successfully, briefly pacifying one or more nearby creatures." />
+		<trigger triggertype="SysMessage" duration="11" triggertext="successfully, briefly pacifying" />
+		<trigger triggertype="SysMessage" duration="11" triggertext="play successfully, provoking" />
 		<trigger triggertype="SysMessage" duration="5" triggertext="You fail to pacify any nearby creatures." />
 		<trigger triggertype="SysMessage" duration="5" triggertext="You fail to pacify your opponent." />
-		<trigger triggertype="SysMessage" duration="11" triggertext="effect of a song of peace" />
-		<trigger triggertype="SysMessage" duration="11" triggertext="successfully, briefly pacifying" />
+		<trigger triggertype="SysMessage" duration="5" triggertext="fail to incite anger" />
 		<trigger triggertype="OverheadMessage" duration="0" triggertext="Your barding skill cooldowns" />
 	</cooldownentry>
-	<cooldownentry name="Provo" defaultcooldown="0" cooldownbartype="Regular" hue="53" hidewheninactive="False">
-		<trigger triggertype="SysMessage" duration="11" triggertext="play successfully, provoking" />
-		<trigger triggertype="SysMessage" duration="5" triggertext="fail to incite anger" />
-		<trigger triggertype="SysMessage" duration="11" triggertext="effect of a song of provocation" />
+	<cooldownentry name="Song" defaultcooldown="0" cooldownbartype="Regular" hue="53" hidewheninactive="False">
+		<trigger triggertype="SysMessage" duration="11" triggertext="under the effect of a song" />
 		<trigger triggertype="OverheadMessage" duration="0" triggertext="Your barding skill cooldowns" />
 	</cooldownentry>
 	<cooldownentry name="Steal" defaultcooldown="0" cooldownbartype="Regular" hue="66" hidewheninactive="True">
