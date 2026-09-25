@@ -386,6 +386,7 @@ Peace 를 가끔 쓰는 제어 수단으로만 다루면 `Ensemble` + `Virtuoso`
 | **Blood Oath** | 4 | `>= 4` | 없음. 최우선 |
 | **Corpse Skin** | 2 | `>= 6` | Blood Oath 4 |
 | Evil Omen | 2 | `>= 8` | Blood Oath 4 + Corpse Skin 2 |
+| Poison Strike | 1 | `>= 9`, Corpse Skin 켜진 동안만 | 위 셋 전부 |
 | Vampiric Embrace | 3 | `>= 7`, 이동 중만 | Blood Oath 4 |
 
 전부 `config__symbols_*` 라 사냥터에 맞춰 조정한다. 전투가 짧고 이동이 길면 올리고, 은행이 늘 차 있으면 내린다.
@@ -398,7 +399,14 @@ Peace 를 가끔 쓰는 제어 수단으로만 다루면 `Ensemble` + `Virtuoso`
 | Corpse Skin | 모든 주문에 25% 질병 DoT | 37% × 25% = +9.3%, **자해 없음** |
 | Evil Omen | 주문 +20%, 주문당 25% 확률로 마나/2 자해 | 37% × 20% = +7.4%, 자해 있음 |
 
-**Corpse Skin 이 Evil Omen 보다 위다.** 보너스가 크고 대가가 없다. 둘 다 30초 자기 버프라 중첩 가능 여부는 미확인.
+**Corpse Skin 이 Evil Omen 보다 위다.** 보너스가 크고 대가가 없다. **둘은 동시에 유지된다** (인게임 확인됨).
+
+**Poison Strike** 는 Corpse Skin 이 깔아둔 질병 틱을 최대 8개 한 번에 터뜨린다. 곧 죽을 몹에서는
+같이 사라졌을 딜을 회수하는 셈이라 값을 하고, 마나가 안 들어 **필러 자리**를 쓴다.
+
+**Necro 100 의 실제 순환은 Blood Oath + Corpse Skin 이다.** 30초에 6개가 차고 그 둘이 정확히 6개를 쓴다.
+Evil Omen 과 Poison Strike 는 **이동 중에 쌓인 잉여**나 소환수가 없어 Blood Oath 가 못 나가는
+전투에서만 돈다. 의도한 것이다 — 예약을 낮추면 위의 둘이 굶는다.
 
 **안 넣은 것**: Strangle(4)은 Blood Oath 와 심볼을 다투고 모든 딜을 5초 지연시킨다.
 Wither(5)는 비공격 주문용 마나만 준다. Pain Spike(5)는 **다음 몹 옆에** 시체가 있어야 한다.
@@ -563,8 +571,9 @@ endif
 | `stop` | `bard-archer-no-potion.razor:58` |
 | `cooldown "MagicArrow" = 0` | `cooldowns.xml` 에 항목 존재 |
 | `for 25` + `break` 로 커서 폴링 | `bard-necro-eval.razor:205`, 레퍼런스 `auto-mage.razor:1160` |
-| `interrupt` | Razor CE 문서. **저장소 첫 사용**, `config__interrupt_to_heal` 뒤에 둠 |
-| `hotkey 'vampiric embrace'` + `hotkey 'Target Self'` | 위키: 자신을 타겟하면 주변 시체를 자동 탐색. 핫키명은 `'blood oath'` / `'evil omen'` 패턴 추론, **미검증** |
+| `hotkey 'Vampiric Embrace'` + `hotkey 'Target Self'` | 위키: 자신을 타겟하면 주변 시체를 자동 탐색. **인게임 확인됨** |
+| `hotkey 'Drink Heal'` 등 포션 핫키 | Razor 핫키 목록 Potions 항목. 이름 그대로 |
+| `hotkey "> Interrupt"` | 휠다운에 물려 쓰던 것. 시전 폴링 안에서 긴급 힐용 |
 
 ## 쓰면 안 되는 구문 (선례 없음, 실제로 깨졌던 것들)
 
