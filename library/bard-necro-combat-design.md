@@ -396,7 +396,7 @@ Peace 를 가끔 쓰는 제어 수단으로만 다루면 `Ensemble` + `Virtuoso`
 ```
 list 'magic_drained_targets'    Mana Drain 완료 serial
 list 'magic_cursed_targets'     Curse 완료 serial
-timer__magic_window             마지막 sweep 이후 경과
+timer__magic_window             마지막 Curse 안착 이후 경과
 
 if timer "timer__magic_window" >= cooldown__magic_window        60000
 	clearlist 'magic_drained_targets'
@@ -405,9 +405,12 @@ if timer "timer__magic_window" >= cooldown__magic_window        60000
 endif
 
 not inlist drained                  -> Mana Drain
-inlist drained, not inlist cursed   -> Curse
+inlist drained, not inlist cursed   -> Curse   (안착하면 settimer 0)
 inlist cursed                       -> Evil Omen -> 프록 코어
 ```
+
+타이머는 **Curse 가 안착할 때마다 0으로** 돌아간다. 한 마리와 싸우는 보통의 경우 만료가 정확히
+60초에 맞고, 두 마리면 먼저 건 쪽이 몇 초 일찍 sweep 된다. 주기적 sweep 보다 낫다.
 
 분기 자체가 상태라 `var_magic_stage` 같은 단계 변수가 필요 없다.
 
@@ -419,7 +422,15 @@ inlist cursed                       -> Evil Omen -> 프록 코어
 **트레이드오프**: sweep 이 전역이라 방금 건 대상까지 지운다. 동시 교전 1~2마리면 가끔 22마나 손해다.
 **대상별 타임스탬프는 산술이 필요해서 못 쓴다.**
 
-**막힘 방지**: `timer__opener_attempt` 를 두고 일정 시간 안에 못 걸면 리스트에 강제로 넣고 넘어간다.
+**막힘 방지**: 타이머가 아니라 **조건**으로 푼다. Curse 시약이 없거나 4서클 마나가 안 되면
+`var__opener_done` 이 그냥 1이 되어 프록과 필러가 라이더 없이 나간다.
+살아있는 몹 앞에서 스크립트가 서 있는 것보다 30% 덜 아프게 때리는 쪽이 낫다.
+
+```
+var__opener_done = 1  <-  inlist cursed
+                     or  var__regs_curse = 0
+                     or  mana < config__mana_4th
+```
 
 ### 구식 스크립트의 버그 (반복하지 말 것)
 
@@ -517,6 +528,9 @@ endif
 | `useskill` -> `waitfortarget` -> `target backpack` | `bard-mace.razor:518` |
 | `stop` | `bard-archer-no-potion.razor:58` |
 | `cooldown "MagicArrow" = 0` | `cooldowns.xml` 에 항목 존재 |
+| `for 25` + `break` 로 커서 폴링 | `bard-necro-eval.razor:205`, 레퍼런스 `auto-mage.razor:1160` |
+| `interrupt` | Razor CE 문서. **저장소 첫 사용**, `config__interrupt_to_heal` 뒤에 둠 |
+| `hotkey 'vampiric embrace'` + `hotkey 'Target Self'` | 위키: 자신을 타겟하면 주변 시체를 자동 탐색. 핫키명은 `'blood oath'` / `'evil omen'` 패턴 추론, **미검증** |
 
 ## 쓰면 안 되는 구문 (선례 없음, 실제로 깨졌던 것들)
 
