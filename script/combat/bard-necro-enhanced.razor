@@ -7,6 +7,7 @@
 # Full loop: sustain, bard control, necro burst, spell opener and damage rotation.
 #
 # Needs
+#   A shepherd's crook in the backpack, for the passive follower bonus Herding gives.
 #   Discordance, Peacemaking and Provocation all trained: the song round robin only moves
 #   forward through a branch whose skill exists, so a missing one parks it.
 #   An instrument in the backpack, a necromancer book, reagents for the spell table below.
@@ -129,10 +130,10 @@
 #   turns up, which for Energy Bolt is 1.75 seconds after the hit that mattered.
 #
 #   Casts that take no target, the heal agents and Create Food, cannot be polled for a cursor.
-#   They wait out casting where they stand and then read the disturb line themselves, so a
-#   disturb on one of them is consumed at the site and never reaches a later poll loop as a
-#   stale answer. Every cast in the file therefore handles its own disturb, and nothing at
-#   the top of the loop has to.
+#   They poll casting instead, bounded the same way, then read the disturb line themselves
+#   and say so on screen. A disturb on one of them is consumed at the site and never reaches
+#   a later poll loop as a stale answer. Every cast in the file therefore handles its own
+#   disturb, and nothing at the top of the loop has to.
 #
 #   Abilities on the necro hotbar are not spells: they resolve without a cursor and answer
 #   with a message, so success is read from "unholy symbols remaining" rather than assumed.
@@ -156,6 +157,11 @@ clearignore
 # prefix, 0 takes the first instrument found and skips getlabel entirely, which is the
 # cheaper path when the shelf only stocks crafted instruments.
 @setvar! config__use_magic_instrument 1
+
+# 1 activates the shepherd's crook at startup. Herding is passive once a crook is set as
+# the active one, and at Herding 80 it is worth 17.6% follower damage and 8.8% follower
+# resistance against creatures, on the 63% of the damage the followers do.
+@setvar! config__use_herding 1
 
 # How far a mob may be and still count as engaged. Everything that asks "am I fighting"
 # goes through this one number, so the bard and spell stages inherit it unchanged.
@@ -404,6 +410,21 @@ if not find var__my_instrument backpack
     endif
 endif
 
+# ####################################################################################
+# # HERDING
+# ####################################################################################
+# A double click sets the crook as the active one, and it only has to be in the backpack.
+# The wiki gives it no duration, so this runs once here and never in the loop. Setting an
+# already active crook again is harmless, which is why there is no "is it already" check.
+if config__use_herding = 1
+    if findtype "shepherd's crook" backpack as alias__crook
+        dclick alias__crook
+        wait wait__short
+    else
+        overhead "Crook, none in backpack, followers lose the herding bonus" 33
+    endif
+endif
+
 overhead "Bard Necro Enhanced running" 32
 
 while not dead
@@ -416,6 +437,22 @@ while not dead
     while casting
         wait wait__short
     endwhile
+
+    # ####################################################################################
+    # # PARALYZE
+    # ####################################################################################
+    # First thing in the pass, ahead of every lookup, because it is the one state in which
+    # nothing below can act at all. No act window on purpose: paralysed means nothing else is
+    # going out anyway, and the pouch is worth spending the pass on the moment it is needed.
+    if paralyzed
+        if findtype 3705 backpack 38
+            yell "[Pouch"
+            wait wait__short
+        elseif timer "timer__message" >= cooldown__message
+            overhead "Pouches, none left" 34
+            settimer "timer__message" 0
+        endif
+    endif
 
     # ####################################################################################
     # # INSTRUMENT RECOVERY
@@ -517,6 +554,9 @@ while not dead
         @setvar! var__regs_create_food 1
     endif
 
+    # The offensive list is only read by blocks that need a target, so on the walk it is
+    # fourteen findtype calls answering a question nobody asks. Zeroed every pass, filled
+    # only while engaged.
     @setvar! var__regs_magic_arrow 0
     @setvar! var__regs_harm 0
     @setvar! var__regs_fireball 0
@@ -525,32 +565,34 @@ while not dead
     @setvar! var__regs_mana_drain 0
     @setvar! var__regs_energy_bolt 0
 
-    if findtype 3980 self
-        @setvar! var__regs_magic_arrow 1
-    endif
+    if var__engaged = 1
+        if findtype 3980 self
+            @setvar! var__regs_magic_arrow 1
+        endif
 
-    if findtype 3976 self and findtype 3981 self
-        @setvar! var__regs_harm 1
-    endif
+        if findtype 3976 self and findtype 3981 self
+            @setvar! var__regs_harm 1
+        endif
 
-    if findtype 3962 self
-        @setvar! var__regs_fireball 1
-    endif
+        if findtype 3962 self
+            @setvar! var__regs_fireball 1
+        endif
 
-    if findtype 3974 self and findtype 3980 self
-        @setvar! var__regs_lightning 1
-    endif
+        if findtype 3974 self and findtype 3980 self
+            @setvar! var__regs_lightning 1
+        endif
 
-    if findtype 3972 self and findtype 3976 self and findtype 3980 self
-        @setvar! var__regs_curse 1
-    endif
+        if findtype 3972 self and findtype 3976 self and findtype 3980 self
+            @setvar! var__regs_curse 1
+        endif
 
-    if findtype 3962 self and findtype 3974 self and findtype 3981 self
-        @setvar! var__regs_mana_drain 1
-    endif
+        if findtype 3962 self and findtype 3974 self and findtype 3981 self
+            @setvar! var__regs_mana_drain 1
+        endif
 
-    if findtype 3962 self and findtype 3976 self
-        @setvar! var__regs_energy_bolt 1
+        if findtype 3962 self and findtype 3976 self
+            @setvar! var__regs_energy_bolt 1
+        endif
     endif
 
     # Unholy Symbols, read off the necro hotbar gump, which prints them as "<have>/<max>",
@@ -632,59 +674,47 @@ while not dead
     endif
 
     # ####################################################################################
-    # # OVERWEIGHT
+    # # CURE
     # ####################################################################################
-    if not targetexists and not casting
-        while weight > maxweight
-            if findtype "gold coin" backpack as alias__found_gold
-                lift alias__found_gold config__gold_drop_amount
-                droprelloc 0 0
+    # Ahead of the heal on purpose: a cure is instant and stops the damage that is still
+    # coming, a heal spent under poison is partly spent on ticks that have not landed yet.
+    # Cure potions have no cooldown, so the spell is only ever the fallback.
+    if poisoned
+        if not targetexists and not casting
+            if findtype "Orange Potion" self
+                hotkey 'Drink Cure'
                 wait wait__short
 
-                if insysmsg "cannot drop anything"
-                    drop backpack -1 -1 -1
-                endif
-
-                wait wait__long
-
                 if config__chatty = 1
-                    overhead "Gold, dropped some on the ground" 32
+                    overhead "Cure potion" 32
                 endif
             else
                 if timer "timer__message" >= cooldown__message
-                    overhead "Weight, over the cap with no gold to drop" 33
+                    overhead "Cure potions, none left" 33
                     settimer "timer__message" 0
                 endif
 
-                break
-            endif
-        endwhile
-    endif
+                if var__regs_cure = 1 and timer "timer__heal_action" >= cooldown__heal_action and cooldown "Walk" = 0
+                    hotkey "> Smart Heal/Cure Self"
+                    settimer "timer__heal_action" 0
+                    wait wait__short
 
-    # ####################################################################################
-    # # FOOD
-    # ####################################################################################
-    if not findbuff 'Food Satisfaction'
-        if not targetexists and not casting
-            if findtype tray backpack as alias__found_food
-                dclick alias__found_food
-                wait wait__short
-            endif
-        endif
-    endif
+                    for 25
+                        if not casting
+                            break
+                        endif
 
-    # ####################################################################################
-    # # PARALYZE
-    # ####################################################################################
-    # No act window here on purpose. Paralysed means nothing else is going out anyway, and
-    # the pouch is the one thing worth spending a pass on the moment it is needed.
-    if paralyzed
-        if findtype 3705 backpack 38
-            yell "[Pouch"
-            wait wait__short
-        elseif timer "timer__message" >= cooldown__message
-            overhead "Pouches, none left" 34
-            settimer "timer__message" 0
+                        wait wait__poll
+                    endfor
+
+                    if insysmsg "Your concentration is disturbed, thus ruining thy spell."
+                        if timer "timer__message" >= cooldown__message
+                            overhead "Heal, disturbed" 33
+                            settimer "timer__message" 0
+                        endif
+                    endif
+                endif
+            endif
         endif
     endif
 
@@ -699,7 +729,9 @@ while not dead
     #
     # Both agents cast without a cursor, so each waits out casting where it stands and then
     # reads the disturb line itself. That is what keeps a disturbed heal from leaving a stale
-    # line for a later cast poll to trip on.
+    # line for a later cast poll to trip on. The wait is a bounded poll, not a bare while:
+    # a disturb drops casting and the poll leaves at once, and if Razor ever left casting
+    # stuck the poll still leaves after 2.5 seconds instead of hanging the loop.
     if diffhits > config__light_hits and diffhits < config__emergency_hits and var__regs_heal = 1
         if timer "timer__heal_action" >= cooldown__heal_action
             if not targetexists and not casting and cooldown "Walk" = 0
@@ -707,12 +739,19 @@ while not dead
                 settimer "timer__heal_action" 0
                 wait wait__short
 
-                while casting
+                for 25
+                    if not casting
+                        break
+                    endif
+
                     wait wait__poll
-                endwhile
+                endfor
 
                 if insysmsg "Your concentration is disturbed, thus ruining thy spell."
-                    # it died, and the next pass will try again
+                    if timer "timer__message" >= cooldown__message
+                        overhead "Heal, disturbed" 33
+                        settimer "timer__message" 0
+                    endif
                 endif
             endif
         endif
@@ -757,12 +796,19 @@ while not dead
                     settimer "timer__greater_heal_retry" 0
                     wait wait__short
 
-                    while casting
+                    for 25
+                        if not casting
+                            break
+                        endif
+
                         wait wait__poll
-                    endwhile
+                    endfor
 
                     if insysmsg "Your concentration is disturbed, thus ruining thy spell."
-                        # it died, and the next pass will try again
+                        if timer "timer__message" >= cooldown__message
+                            overhead "Heal, disturbed" 33
+                            settimer "timer__message" 0
+                        endif
                     endif
                 endif
             endif
@@ -770,37 +816,43 @@ while not dead
     endif
 
     # ####################################################################################
-    # # CURE
+    # # OVERWEIGHT
     # ####################################################################################
-    # Cure potions have no cooldown, so the spell is only ever the fallback.
-    if poisoned
-        if not targetexists and not casting
-            if findtype "Orange Potion" self
-                hotkey 'Drink Cure'
+    if not targetexists and not casting
+        while weight > maxweight
+            if findtype "gold coin" backpack as alias__found_gold
+                lift alias__found_gold config__gold_drop_amount
+                droprelloc 0 0
                 wait wait__short
 
+                if insysmsg "cannot drop anything"
+                    drop backpack -1 -1 -1
+                endif
+
+                wait wait__long
+
                 if config__chatty = 1
-                    overhead "Cure potion" 32
+                    overhead "Gold, dropped some on the ground" 32
                 endif
             else
                 if timer "timer__message" >= cooldown__message
-                    overhead "Cure potions, none left" 33
+                    overhead "Weight, over the cap with no gold to drop" 33
                     settimer "timer__message" 0
                 endif
 
-                if var__regs_cure = 1 and timer "timer__heal_action" >= cooldown__heal_action and cooldown "Walk" = 0
-                    hotkey "> Smart Heal/Cure Self"
-                    settimer "timer__heal_action" 0
-                    wait wait__short
+                break
+            endif
+        endwhile
+    endif
 
-                    while casting
-                        wait wait__poll
-                    endwhile
-
-                    if insysmsg "Your concentration is disturbed, thus ruining thy spell."
-                        # it died, and the next pass will try again
-                    endif
-                endif
+    # ####################################################################################
+    # # FOOD
+    # ####################################################################################
+    if not findbuff 'Food Satisfaction'
+        if not targetexists and not casting
+            if findtype tray backpack as alias__found_food
+                dclick alias__found_food
+                wait wait__short
             endif
         endif
     endif
@@ -893,12 +945,19 @@ while not dead
                 cast 'Create Food'
                 wait wait__short
 
-                while casting
+                for 25
+                    if not casting
+                        break
+                    endif
+
                     wait wait__poll
-                endwhile
+                endfor
 
                 if insysmsg "Your concentration is disturbed, thus ruining thy spell."
-                    # it died, and the next pass will try again
+                    if timer "timer__message" >= cooldown__message
+                        overhead "Create Food, disturbed" 33
+                        settimer "timer__message" 0
+                    endif
                 endif
             endif
         endif
