@@ -727,7 +727,7 @@ while not dead
                     @setvar! var__greater_heal_ready 1
                 else
                     hotkey 'Drink Heal'
-                    cooldown "Heal Pot" cooldown__heal_potion
+                    cooldown "Heal Potion" cooldown__heal_potion
                     wait wait__short
 
                     if config__chatty = 1
@@ -1301,7 +1301,7 @@ while not dead
     if var__engaged = 1 and var__opener_done = 1
         if not targetexists and not casting and cooldown "Walk" = 0
             if find var__combat_target ground -1 -1 config__target_range as alias__proc_target
-                if cooldown "MagicArrow" = 0 and var__regs_magic_arrow = 1 and mana >= config__mana_1st
+                if cooldown "Magic Arrow" = 0 and var__regs_magic_arrow = 1 and mana >= config__mana_1st
                     cast 'Magic Arrow'
 
                     for 25

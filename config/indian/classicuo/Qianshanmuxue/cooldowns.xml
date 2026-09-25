@@ -55,6 +55,26 @@
 		<trigger triggertype="SysMessage" duration="11" triggertext="under the effect of a song" />
 		<trigger triggertype="OverheadMessage" duration="0" triggertext="Your barding skill cooldowns" />
 	</cooldownentry>
+	<cooldownentry name="Magic Arrow" defaultcooldown="0" cooldownbartype="Regular" hue="578" hidewheninactive="True">
+		<trigger triggertype="SysMessage" duration="60" triggertext="magic arrow activated" />
+		<trigger triggertype="SysMessage" duration="0" triggertext="cast a wizardry magic arrow spell again" />
+	</cooldownentry>
+	<cooldownentry name="Harm" defaultcooldown="0" cooldownbartype="Regular" hue="438" hidewheninactive="True">
+		<trigger triggertype="SysMessage" duration="60" triggertext="harm activated" />
+		<trigger triggertype="SysMessage" duration="0" triggertext="cast a wizardry harm spell again" />
+	</cooldownentry>
+	<cooldownentry name="Fireball" defaultcooldown="60" cooldownbartype="Regular" hue="143" hidewheninactive="True">
+		<trigger triggertype="SysMessage" duration="60" triggertext="fireball activated" />
+		<trigger triggertype="SysMessage" duration="0" triggertext="You may now cast a wizardy fireball spell" />
+	</cooldownentry>
+	<cooldownentry name="Lightning" defaultcooldown="20" cooldownbartype="Regular" hue="93" hidewheninactive="True">
+		<trigger triggertype="SysMessage" duration="20" triggertext="lightning spell hinders" />
+		<trigger triggertype="SysMessage" duration="0" triggertext="cast a wizardry lightning spell again" />
+	</cooldownentry>
+	<cooldownentry name="Mushroom" defaultcooldown="0" cooldownbartype="Regular" hue="72" hidewheninactive="True">
+		<trigger triggertype="SysMessage" duration="60" triggertext="consume a magic mushroom" />
+	</cooldownentry>
+	<cooldownentry name="Heal Potion" defaultcooldown="0" cooldownbartype="Regular" hue="153" hidewheninactive="True" />
 	<cooldownentry name="Steal" defaultcooldown="0" cooldownbartype="Regular" hue="66" hidewheninactive="True">
 		<trigger triggertype="SysMessage" duration="10" triggertext="You can't steal from that" />
 		<trigger triggertype="SysMessage" duration="10" triggertext="You steal" />
@@ -68,13 +88,6 @@
 	</cooldownentry>
 	<cooldownentry name="Stealth" defaultcooldown="0" cooldownbartype="Regular" hue="66" hidewheninactive="True">
 		<trigger triggertype="SysMessage" duration="10" triggertext="You begin to move quietly" />
-	</cooldownentry>
-	<cooldownentry name="Lightning" defaultcooldown="20" cooldownbartype="Regular" hue="93" hidewheninactive="True">
-		<trigger triggertype="SysMessage" duration="20" triggertext="lightning spell hinders" />
-		<trigger triggertype="SysMessage" duration="0" triggertext="cast a wizardry lightning spell again" />
-	</cooldownentry>
-	<cooldownentry name="Mushroom" defaultcooldown="0" cooldownbartype="Regular" hue="72" hidewheninactive="True">
-		<trigger triggertype="SysMessage" duration="60" triggertext="consume a magic mushroom" />
 	</cooldownentry>
 	<cooldownentry name="Void Mana" defaultcooldown="0" cooldownbartype="Regular" hue="9" hidewheninactive="True">
 		<trigger triggertype="SysMessage" duration="60" triggertext="mana restored (next" />
@@ -108,21 +121,14 @@
 		<trigger triggertype="SysMessage" duration="30" triggertext="aspect armor activated" />
 	</cooldownentry>
 	<cooldownentry name="P.Strike" defaultcooldown="0" cooldownbartype="Regular" hue="668" hidewheninactive="True" />
-	<cooldownentry name="Fireball" defaultcooldown="60" cooldownbartype="Regular" hue="143" hidewheninactive="True">
-		<trigger triggertype="SysMessage" duration="0" triggertext="You may now cast a wizardy fireball spell" />
-	</cooldownentry>
 	<cooldownentry name="Curse" defaultcooldown="60" cooldownbartype="Regular" hue="438" hidewheninactive="True" />
-	<cooldownentry name="Harm" defaultcooldown="0" cooldownbartype="Regular" hue="438" hidewheninactive="True">
-		<trigger triggertype="SysMessage" duration="60" triggertext="harm activated" />
-		<trigger triggertype="SysMessage" duration="0" triggertext="cast a wizardry harm spell again" />
-	</cooldownentry>
-	<cooldownentry name="ChainLightin" defaultcooldown="0" cooldownbartype="Regular" hue="293" hidewheninactive="True">
+	<cooldownentry name="Chain Lightning" defaultcooldown="0" cooldownbartype="Regular" hue="293" hidewheninactive="True">
 		<trigger triggertype="SysMessage" duration="60" triggertext="Wizardry chain lightning activated" />
 	</cooldownentry>
-	<cooldownentry name="MeteoSwarm" defaultcooldown="0" cooldownbartype="Regular" hue="48" hidewheninactive="True">
+	<cooldownentry name="Meteor Swarm" defaultcooldown="0" cooldownbartype="Regular" hue="48" hidewheninactive="True">
 		<trigger triggertype="SysMessage" duration="60" triggertext="meteor swarm activated" />
 	</cooldownentry>
-	<cooldownentry name="MassCurse" defaultcooldown="60" cooldownbartype="Regular" hue="0" hidewheninactive="True" />
+	<cooldownentry name="Mass Curse" defaultcooldown="60" cooldownbartype="Regular" hue="0" hidewheninactive="True" />
 	<cooldownentry name="Boarding" defaultcooldown="17" cooldownbartype="Regular" hue="220" hidewheninactive="True">
 		<trigger triggertype="SysMessage" duration="" triggertext="Your boarding party fails" />
 		<trigger triggertype="SysMessage" duration="" triggertext="board the ship" />
@@ -139,7 +145,7 @@
 	<cooldownentry name="Cannons" defaultcooldown="0" cooldownbartype="Regular" hue="806" hidewheninactive="True">
 		<trigger triggertype="SysMessage" duration="9" triggertext="Hull Remaining:" />
 	</cooldownentry>
-	<cooldownentry name="ManaVampire" defaultcooldown="0" cooldownbartype="Regular" hue="124" hidewheninactive="True">
+	<cooldownentry name="Mana Vampire" defaultcooldown="0" cooldownbartype="Regular" hue="124" hidewheninactive="True">
 		<trigger triggertype="OverheadMessage" duration="300" triggertext="MV ON" />
 	</cooldownentry>
 	<cooldownentry name="Herding" defaultcooldown="0" cooldownbartype="Regular" hue="199" hidewheninactive="True">
@@ -151,13 +157,13 @@
 	<cooldownentry name="Tick" defaultcooldown="0" cooldownbartype="Regular" hue="598" hidewheninactive="True">
 		<trigger triggertype="SysMessage" duration="30" triggertext="control points" />
 	</cooldownentry>
-	<cooldownentry name="TK PLAYER" defaultcooldown="0" cooldownbartype="Regular" hue="133" hidewheninactive="True">
+	<cooldownentry name="TK Player" defaultcooldown="0" cooldownbartype="Regular" hue="133" hidewheninactive="True">
 		<trigger triggertype="SysMessage" duration="30" triggertext="Your next explosion potion thrown at that player" />
 	</cooldownentry>
 	<cooldownentry name="Telekinesis" defaultcooldown="0" cooldownbartype="Regular" hue="123" hidewheninactive="True">
 		<trigger triggertype="SysMessage" duration="30" triggertext="applied telekinesis to you" />
 	</cooldownentry>
-	<cooldownentry name="DETONATE" defaultcooldown="21" cooldownbartype="Regular" hue="253" hidewheninactive="True">
+	<cooldownentry name="Detonate" defaultcooldown="21" cooldownbartype="Regular" hue="253" hidewheninactive="True">
 		<trigger triggertype="SysMessage" duration="" triggertext="You may now detonate another trap" />
 	</cooldownentry>
 	<cooldownentry name="Reflect" defaultcooldown="30" cooldownbartype="Regular" hue="153" hidewheninactive="True">
@@ -168,26 +174,22 @@
 		<trigger triggertype="SysMessage" duration="10" triggertext="You retrieve" />
 		<trigger triggertype="OverheadMessage" duration="10" triggertext="You catch" />
 	</cooldownentry>
-	<cooldownentry name="MagicArrow" defaultcooldown="0" cooldownbartype="Regular" hue="578" hidewheninactive="True">
-		<trigger triggertype="SysMessage" duration="60" triggertext="magic arrow activated" />
-		<trigger triggertype="SysMessage" duration="0" triggertext="cast a wizardry magic arrow spell again" />
-	</cooldownentry>
 	<cooldownentry name="S.P.KEG" defaultcooldown="60" cooldownbartype="Regular" hue="573" hidewheninactive="True">
 		<trigger triggertype="OverheadMessage" duration="" triggertext="spkeg" />
 	</cooldownentry>
-	<cooldownentry name="DEFENSIVE" defaultcooldown="0" cooldownbartype="Regular" hue="118" hidewheninactive="True">
+	<cooldownentry name="Defensive" defaultcooldown="0" cooldownbartype="Regular" hue="118" hidewheninactive="True">
 		<trigger triggertype="OverheadMessage" duration="30000" triggertext="Defensive stance activated." />
 		<trigger triggertype="OverheadMessage" duration="0" triggertext="Sunder stance" />
 		<trigger triggertype="OverheadMessage" duration="0" triggertext="Cleave stance" />
 		<trigger triggertype="OverheadMessage" duration="0" triggertext="Wild Swing" />
 	</cooldownentry>
-	<cooldownentry name="SUNDER" defaultcooldown="0" cooldownbartype="Regular" hue="118" hidewheninactive="True">
+	<cooldownentry name="Sunder" defaultcooldown="0" cooldownbartype="Regular" hue="118" hidewheninactive="True">
 		<trigger triggertype="OverheadMessage" duration="30000" triggertext="Sunder stance activated" />
 		<trigger triggertype="OverheadMessage" duration="0" triggertext="Defensive stance" />
 		<trigger triggertype="OverheadMessage" duration="0" triggertext="Cleave stance" />
 		<trigger triggertype="OverheadMessage" duration="0" triggertext="Wild Swing" />
 	</cooldownentry>
-	<cooldownentry name="CLEAVE" defaultcooldown="0" cooldownbartype="Regular" hue="118" hidewheninactive="True">
+	<cooldownentry name="Cleave" defaultcooldown="0" cooldownbartype="Regular" hue="118" hidewheninactive="True">
 		<trigger triggertype="OverheadMessage" duration="30000" triggertext="Cleave stance activated" />
 		<trigger triggertype="OverheadMessage" duration="0" triggertext="Defensive stance" />
 		<trigger triggertype="OverheadMessage" duration="0" triggertext="Sunder stance" />
@@ -272,32 +274,31 @@
 		<trigger triggertype="OverheadMessage" duration="0" triggertext="Longshot ammunition" />
 	</cooldownentry>
 	<cooldownentry name="Walk" defaultcooldown="1" cooldownbartype="Walk" hue="1001" hidewheninactive="True" />
-	<cooldownentry name="Explo Pot" defaultcooldown="15" cooldownbartype="Regular" hue="333" hidewheninactive="True">
+	<cooldownentry name="Explosion Potion" defaultcooldown="15" cooldownbartype="Regular" hue="333" hidewheninactive="True">
 		<trigger triggertype="SysMessage" duration="" triggertext="Where should I throw this potion" />
 	</cooldownentry>
-	<cooldownentry name="Heal Pot" defaultcooldown="0" cooldownbartype="Regular" hue="153" hidewheninactive="True" />
 	<cooldownentry name="Bandage" defaultcooldown="0" cooldownbartype="Bandage" hue="88" hidewheninactive="True" />
-	<cooldownentry name="PVP TIMER" defaultcooldown="0" cooldownbartype="PvP" hue="33" hidewheninactive="True" />
-	<cooldownentry name="CRIM TIMER" defaultcooldown="0" cooldownbartype="Criminal" hue="1001" hidewheninactive="True" />
-	<cooldownentry name="DivineFury" defaultcooldown="0" cooldownbartype="Regular" hue="1001" hidewheninactive="True" />
-	<cooldownentry name="NobleSacrifice" defaultcooldown="0" cooldownbartype="Regular" hue="1001" hidewheninactive="True" />
-	<cooldownentry name="HolyLight" defaultcooldown="0" cooldownbartype="Regular" hue="1001" hidewheninactive="True" />
-	<cooldownentry name="SHRINE EVENT" defaultcooldown="1200" cooldownbartype="Regular" hue="488" hidewheninactive="True">
+	<cooldownentry name="PvP Timer" defaultcooldown="0" cooldownbartype="PvP" hue="33" hidewheninactive="True" />
+	<cooldownentry name="Crim Timer" defaultcooldown="0" cooldownbartype="Criminal" hue="1001" hidewheninactive="True" />
+	<cooldownentry name="Divine Fury" defaultcooldown="0" cooldownbartype="Regular" hue="1001" hidewheninactive="True" />
+	<cooldownentry name="Noble Sacrifice" defaultcooldown="0" cooldownbartype="Regular" hue="1001" hidewheninactive="True" />
+	<cooldownentry name="Holy Light" defaultcooldown="0" cooldownbartype="Regular" hue="1001" hidewheninactive="True" />
+	<cooldownentry name="Shrine Event" defaultcooldown="1200" cooldownbartype="Regular" hue="488" hidewheninactive="True">
 		<trigger triggertype="SysMessage" duration="" triggertext="fallen to corruption" />
 	</cooldownentry>
-	<cooldownentry name="STICKY-POT" defaultcooldown="5" cooldownbartype="Regular" hue="118" hidewheninactive="True">
+	<cooldownentry name="Sticky Pot" defaultcooldown="5" cooldownbartype="Regular" hue="118" hidewheninactive="True">
 		<trigger triggertype="SysMessage" duration="" triggertext="Your explosion potion sticks" />
 	</cooldownentry>
-	<cooldownentry name="CONTESTED" defaultcooldown="1200" cooldownbartype="Regular" hue="488" hidewheninactive="True">
+	<cooldownentry name="Contested" defaultcooldown="1200" cooldownbartype="Regular" hue="488" hidewheninactive="True">
 		<trigger triggertype="SysMessage" duration="" triggertext="contested" />
 	</cooldownentry>
-	<cooldownentry name="EJECT" defaultcooldown="30" cooldownbartype="Regular" hue="523" hidewheninactive="True">
+	<cooldownentry name="Eject" defaultcooldown="30" cooldownbartype="Regular" hue="523" hidewheninactive="True">
 		<trigger triggertype="SysMessage" duration="" triggertext="you have been eject" />
 	</cooldownentry>
 	<cooldownentry name="CCC" defaultcooldown="1800" cooldownbartype="Regular" hue="588" hidewheninactive="True">
 		<trigger triggertype="SysMessage" duration="" triggertext="The Corpse Creek Contest has begun" />
 	</cooldownentry>
-	<cooldownentry name="VIP ARRIVED" defaultcooldown="600" cooldownbartype="Regular" hue="588" hidewheninactive="True">
+	<cooldownentry name="VIP Arrived" defaultcooldown="600" cooldownbartype="Regular" hue="588" hidewheninactive="True">
 		<trigger triggertype="SysMessage" duration="" triggertext="A faction VIP has arrived" />
 	</cooldownentry>
 	<cooldownentry name="DFP" defaultcooldown="1800" cooldownbartype="Regular" hue="588" hidewheninactive="True">
@@ -365,13 +366,13 @@
 	<cooldownentry name="Frost CD" defaultcooldown="0" cooldownbartype="Regular" hue="83" hidewheninactive="True">
 		<trigger triggertype="SysMessage" duration="19" triggertext="Frost shell" />
 	</cooldownentry>
-	<cooldownentry name="Frost UP" defaultcooldown="0" cooldownbartype="Regular" hue="88" hidewheninactive="True">
+	<cooldownentry name="Frost Up" defaultcooldown="0" cooldownbartype="Regular" hue="88" hidewheninactive="True">
 		<trigger triggertype="SysMessage" duration="5" triggertext="Frost shell" />
 	</cooldownentry>
 	<cooldownentry name="Aspect CD" defaultcooldown="0" cooldownbartype="Regular" hue="1001" hidewheninactive="True">
 		<trigger triggertype="OverheadMessage" duration="30" triggertext="aspect armor activated" />
 	</cooldownentry>
-	<cooldownentry name="Wep Swing" defaultcooldown="5" cooldownbartype="WeaponSwing" hue="1001" hidewheninactive="True" />
+	<cooldownentry name="Weapon Swing" defaultcooldown="5" cooldownbartype="WeaponSwing" hue="1001" hidewheninactive="True" />
 	<cooldownentry name="ConsWeapon" defaultcooldown="0" cooldownbartype="Regular" hue="1001" hidewheninactive="True" />
 	<cooldownentry name="Pedestal" defaultcooldown="0" cooldownbartype="Regular" hue="222" hidewheninactive="True">
 		<trigger triggertype="SysMessage" duration="900" triggertext="You disable the item for the next 15" />
@@ -379,22 +380,22 @@
 	<cooldownentry name="Bank Access" defaultcooldown="0" cooldownbartype="Regular" hue="273" hidewheninactive="True">
 		<trigger triggertype="OverheadMessage" duration="120" triggertext="Timely Bank Note consumed." />
 	</cooldownentry>
-	<cooldownentry name="PANACEA" defaultcooldown="0" cooldownbartype="Regular" hue="363" hidewheninactive="True">
+	<cooldownentry name="Panacea" defaultcooldown="0" cooldownbartype="Regular" hue="363" hidewheninactive="True">
 		<trigger triggertype="SysMessage" duration="0" triggertext="Panacea upgrade is now ready" />
 	</cooldownentry>
-	<cooldownentry name="SHOOT" defaultcooldown="0" cooldownbartype="Regular" hue="68" hidewheninactive="True">
+	<cooldownentry name="Shoot" defaultcooldown="0" cooldownbartype="Regular" hue="68" hidewheninactive="True">
 		<trigger triggertype="SysMessage" duration="120" triggertext="You will automatically stealth when out of steps" />
 		<trigger triggertype="SysMessage" duration="0" triggertext="You strike your target from the shadows" />
 		<trigger triggertype="SysMessage" duration="0" triggertext="You begin to move quitely" />
 	</cooldownentry>
-	<cooldownentry name="SpamTimer" defaultcooldown="0" cooldownbartype="Regular" hue="618" hidewheninactive="True" />
-	<cooldownentry name="CREW HEAL" defaultcooldown="5" cooldownbartype="Regular" hue="1001" hidewheninactive="True" />
-	<cooldownentry name="QuestTimer" defaultcooldown="10" cooldownbartype="Regular" hue="633" hidewheninactive="True" />
-	<cooldownentry name="BOOM" defaultcooldown="60" cooldownbartype="Regular" hue="153" hidewheninactive="True">
+	<cooldownentry name="Spam Timer" defaultcooldown="0" cooldownbartype="Regular" hue="618" hidewheninactive="True" />
+	<cooldownentry name="Crew Heal" defaultcooldown="5" cooldownbartype="Regular" hue="1001" hidewheninactive="True" />
+	<cooldownentry name="Quest Timer" defaultcooldown="10" cooldownbartype="Regular" hue="633" hidewheninactive="True" />
+	<cooldownentry name="Boom" defaultcooldown="60" cooldownbartype="Regular" hue="153" hidewheninactive="True">
 		<trigger triggertype="SysMessage" duration="60" triggertext="You may now detonate another trap" />
 		<trigger triggertype="SysMessage" duration="0" triggertext="You detonate a ground trap" />
 	</cooldownentry>
-	<cooldownentry name="Omni Pot" defaultcooldown="0" cooldownbartype="Regular" hue="293" hidewheninactive="True">
+	<cooldownentry name="Omni Potion" defaultcooldown="0" cooldownbartype="Regular" hue="293" hidewheninactive="True">
 		<trigger triggertype="OverheadMessage" duration="30" triggertext="+60 Hits" />
 	</cooldownentry>
 	<cooldownentry name="Ability" defaultcooldown="0" cooldownbartype="Regular" hue="1001" hidewheninactive="True" />
