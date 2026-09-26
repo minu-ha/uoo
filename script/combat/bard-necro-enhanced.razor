@@ -150,9 +150,11 @@ clearignore
 # Potions are consumables. Turn this off when farming somewhere that does not need them.
 @setvar! config__use_potion 1
 
-# 1 narrates what the script is doing, 0 keeps it quiet. Covers every 32 hue line: target
-# changes, potions drunk, gold dropped, and every cast that was disturbed or cut short for a
-# heal, named by spell. Warnings and errors ignore this switch.
+# 1 narrates what the script is doing, 0 keeps it quiet. Covers every 53 hue line: target
+# changes, potions drunk, gold dropped, and every cast cut short for a heal, named by spell.
+# A cast the server disturbs is not reported here: the profile's "[ cast, disturbed ]"
+# overhead already says so, the script only consumes the line. Warnings and errors ignore
+# this switch.
 @setvar! config__chatty 1
 
 # Magic instrument mode. 1 reads labels and holds out for a supremely or exceedingly
@@ -713,14 +715,12 @@ while not dead
                             break
                         endif
 
+                        if insysmsg "Your concentration is disturbed, thus ruining thy spell."
+                            break
+                        endif
+
                         wait wait__poll
                     endfor
-
-                    if insysmsg "Your concentration is disturbed, thus ruining thy spell."
-                        if config__chatty = 1
-                            overhead "[ cure, disturbed ]" 43
-                        endif
-                    endif
                 endif
             endif
         endif
@@ -752,14 +752,12 @@ while not dead
                         break
                     endif
 
+                    if insysmsg "Your concentration is disturbed, thus ruining thy spell."
+                        break
+                    endif
+
                     wait wait__poll
                 endfor
-
-                if insysmsg "Your concentration is disturbed, thus ruining thy spell."
-                    if config__chatty = 1
-                        overhead "[ heal, disturbed ]" 43
-                    endif
-                endif
             endif
         endif
     elseif diffhits >= config__emergency_hits
@@ -808,14 +806,12 @@ while not dead
                             break
                         endif
 
+                        if insysmsg "Your concentration is disturbed, thus ruining thy spell."
+                            break
+                        endif
+
                         wait wait__poll
                     endfor
-
-                    if insysmsg "Your concentration is disturbed, thus ruining thy spell."
-                        if config__chatty = 1
-                            overhead "[ gheal, disturbed ]" 43
-                        endif
-                    endif
                 endif
             endif
         endif
@@ -956,14 +952,12 @@ while not dead
                         break
                     endif
 
+                    if insysmsg "Your concentration is disturbed, thus ruining thy spell."
+                        break
+                    endif
+
                     wait wait__poll
                 endfor
-
-                if insysmsg "Your concentration is disturbed, thus ruining thy spell."
-                    if config__chatty = 1
-                        overhead "[ food, disturbed ]" 43
-                    endif
-                endif
             endif
         endif
     endif
@@ -1277,10 +1271,6 @@ while not dead
                         endif
 
                         if insysmsg "Your concentration is disturbed, thus ruining thy spell."
-                            if config__chatty = 1
-                                overhead "[ drain, disturbed ]" 43
-                            endif
-
                             break
                         endif
 
@@ -1324,10 +1314,6 @@ while not dead
                         endif
 
                         if insysmsg "Your concentration is disturbed, thus ruining thy spell."
-                            if config__chatty = 1
-                                overhead "[ curse, disturbed ]" 43
-                            endif
-
                             break
                         endif
 
@@ -1412,10 +1398,6 @@ while not dead
                         endif
 
                         if insysmsg "Your concentration is disturbed, thus ruining thy spell."
-                            if config__chatty = 1
-                                overhead "[ magic arrow, disturbed ]" 43
-                            endif
-
                             break
                         endif
 
@@ -1449,10 +1431,6 @@ while not dead
                         endif
 
                         if insysmsg "Your concentration is disturbed, thus ruining thy spell."
-                            if config__chatty = 1
-                                overhead "[ harm, disturbed ]" 43
-                            endif
-
                             break
                         endif
 
@@ -1486,10 +1464,6 @@ while not dead
                         endif
 
                         if insysmsg "Your concentration is disturbed, thus ruining thy spell."
-                            if config__chatty = 1
-                                overhead "[ fireball, disturbed ]" 43
-                            endif
-
                             break
                         endif
 
@@ -1523,10 +1497,6 @@ while not dead
                         endif
 
                         if insysmsg "Your concentration is disturbed, thus ruining thy spell."
-                            if config__chatty = 1
-                                overhead "[ lightning, disturbed ]" 43
-                            endif
-
                             break
                         endif
 
@@ -1611,10 +1581,6 @@ while not dead
                     endif
 
                     if insysmsg "Your concentration is disturbed, thus ruining thy spell."
-                        if config__chatty = 1
-                            overhead "[ eb, disturbed ]" 43
-                        endif
-
                         break
                     endif
 
