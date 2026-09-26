@@ -16,7 +16,7 @@
 아래 표의 **Ctrl 은 엄지로 누르는 Cmd**, Alt 는 Option 이다. `Ctrl+Space` 는 macOS 가 먹으므로 쓰지 않는다.
 `Alt+`` ` ``` 도 안 된다 — Option+` 은 macOS 가 악센트 dead key 로 잡아서 Razor 에 안 들어오고, Razor 는 종료할 때 그 바인딩을 지워 버린다. Alt 줄은 `1` 부터 쓴다.
 
-**어디에 거는가.** 주문 = ClassicUO `macros.xml`. 나머지(타겟 · 펫 · 포션 · Pouch · 힐 · VS · 스킬 · 스크립트) = Razor 프로필 `<hotkeys>`.
+**어디에 거는가.** 주문 = ClassicUO `macros.xml` (Vengeful Spirit 도 여기, `[VengefulSpirit` Say 매크로). 나머지(타겟 · 펫 · 포션 · Pouch · 힐 · VS · 스킬 · 스크립트) = Razor 프로필 `<hotkeys>`.
 **같은 키를 양쪽에 걸지 않는다** — 프로필이 `HotKeyStop=False` 라 Razor 키가 CUO 로도 넘어가서 두 번 나간다.
 인게임 카운터·핫바에도 걸지 않는다. 파일에 없는 바인딩은 저장소가 못 지킨다.
 
@@ -107,7 +107,7 @@
 | 1060 | Set Last Target | 2054 / 2057 | Next / Previous Non-Friendly Player Target |
 | 1332 | Cancel Current Target | 2052 / 2055 | Next / Previous Friendly Player Target |
 | 1391 | > Smart Heal/Cure Self | 2101 | > Stop Current Script |
-| 1395 | Attack Last Target | 2124 | Vengeful Spirit |
+| 1395 | Attack Last Target | 2124 | Vengeful Spirit — **쓰지 않는다.** 프로필에 넣어도 Razor 가 종료할 때 지운다. VS 는 CUO 매크로 `[VengefulSpirit` 로 건다 |
 | 1028 ~ 1034 | Drink Heal / Cure / Refresh / Magic Resist / Explosion / Strength / Agility | 2527 | Pouch |
 | 1994 | > Interrupt | 1044060 + 스킬번호 | 스킬 사용 (Disco 1044075, Peace 1044069, Provo 1044082) |
 
