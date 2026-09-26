@@ -464,9 +464,13 @@ Disco/Peace/Provo 가 전부 80이면 T3(120점)를 찍어도 **80밖에 못 쓴
 > **`fireball` 항목이 불완전하다.** 발동 메시지 트리거가 없어서 바가 채워지지 않는다.
 > 인게임에서 Fireball 프록이 터질 때 나오는 문구를 받아 적어 트리거로 넣어야 한다.
 
-**`Energy Bolt` 는 쿨다운 항목이 필요 없다.** 업그레이드가
-"Damage increased by 30%, recovers 15 mana" 로 **조건 없는 상시 효과**다.
-15초 창 같은 것이 없어서 순수 필러로 쓸 수 있다.
+**`Energy Bolt` 는 쿨다운 항목이 필요 없다.** 15초 창 같은 것이 없어서 순수 필러로 쓸 수 있다. 다만 환급은 조건부다.
+
+> "Damage increased by (6% / 18% / 30%). Player recovers (3 / 9 / 15) mana **if target is killed within next 5 seconds**" -- Wizard's Grimoire, Energy Bolt
+> "Inflicts an additional (7%, 21%, 35%) of final spell damage to target over 15 seconds" -- Wizard's Grimoire, Flamestrike
+
+- 15 마나는 **볼트 뒤 5초 안에 대상이 죽을 때만** 돌아온다. 잡몹 마무리에는 거의 공짜, 체력 큰 몹에는 20 그대로다.
+- 이전 판의 "조건 없는 상시 효과" 는 틀렸다. `bard-necro-combat-design.md` 의 마나 예산도 이 조건으로 고쳤다.
 
 ## Magery 시전 시간 (마나 예산 계산용)
 
@@ -966,6 +970,7 @@ PvP 근접 데미지 기대 감소 = 막을 확률 x 감소율.
 | Song 쿨은 `cooldown "music"` 이다 | **아니다. 별도 계열이다.** `music` 이 둘을 섞어 덮어쓰던 버그는 고쳤다 |
 | `cooldown "..."` 은 서버 값이다 | **아니다. `cooldowns.xml` 의 내 메시지 트리거다.** 숫자가 이상하면 이 파일을 본다 |
 | 프록 15초는 타이머로 센다 | **게임이 메시지로 알려준다.** `cooldown "magic arrow"` 등을 읽는다 |
+| Energy Bolt 는 시전마다 15 마나가 돌아온다 | **5초 안에 대상이 죽을 때만.** 잡몹에서만 실질 5 다 |
 | 브레이크 중엔 Provo 로 Ensemble 을 살린다 | **못 한다.** 브레이크 대상엔 Peace 도 Provo 도 안 걸린다 |
 | Spirit Speak 만 있으면 언데드 소환이 나온다 | **Vengeful Spirit 을 먼저 켜야 한다.** 매핑은 위 표 |
 | `followers` 는 소환수 마릿수다 | **컨트롤 슬롯 수다.** Lich 2마리 = 4 |
