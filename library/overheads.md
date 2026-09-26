@@ -60,7 +60,8 @@
 | str / agi / resist 포션 | `str` `agi` `resist` | heal / cure 포션 | `heal pot` `cure pot` | refresh 포션 | `refresh` |
 | explosion 포션 | `explo pot` | 나에게 붙은 폭탄 | `bomb` | trapped pouch | `pouch` |
 | smoke bomb | `smoke` | reagent satchel | `reg satchel` | alchemists satchel | `alch satchel` |
-| identification wand | `id wand` | necromancy book | `necro book` | 그 외 | 온전한 단어 |
+| identification wand | `id wand` | necromancy book | `necro book` | reactive armor | `reactive` |
+| 그 외 | 온전한 단어 | | | | |
 
 `heal` `cure` 는 주문이라 포션은 `heal pot` `cure pot`. 힘·민·레지는 주문을 안 쓰니 `str` `agi` `resist` 그대로.
 
@@ -88,6 +89,8 @@ hue 번호는 이 뜻으로 이미 쓰이고 있던 값을 골랐다. 실제 색
 - `cooldownbartype="Criminal"` 과 `"PvP"` 는 **클라이언트가 서버 타이머로 직접 채우는 특수 바**다. 트리거를 달지 않는다.
   Heat of Battle 은 `pvp` 바가 그 자리다.
 - 자기한테 TK 를 걸면 `teleki, target` 과 `teleki, me` 가 둘 다 뜬다. 서버가 시전자 문장과 대상 문장을 둘 다 보내므로 맞는 동작이다.
+- `reflect` 바는 "Magic reflect removed." 로 시작하는 30초, 서버의 재시전 잠금 그대로다. 자기 주문으로 없애면
+  "You remove your magic reflect spell." 이 한 줄 더 오는데 그건 트리거가 아니다.
 - 스크립트가 읽는 이름은 `cooldown "이름"` 과 **정확히 일치**해야 한다. 바를 다시 이름 바꿀 때는 `grep -rn 'cooldown "' script/` 부터.
 
 ### 바 이름표 (2026-09-26 이전 → 지금)
@@ -386,6 +389,7 @@ hue 번호는 이 뜻으로 이미 쓰이고 있던 값을 골랐다. 실제 색
 | 1 moving throws | `1 moving throw left.` | `[ throws, 1 ] (33)` |
 | 0 moving throws | `No throws, plant now.` | `[ throws, 0 ] (33)` |
 | wing your target | `You wing your target.` | `[ wing, target ] (63)` |
+| Magic reflect removed. | (신규) | `[ reflect, off ] (43)` |
 
 ## 스크립트 오버헤드
 
@@ -629,7 +633,6 @@ hue 번호는 이 뜻으로 이미 쓰이고 있던 값을 골랐다. 실제 색
 | 폭탄이 나에게 붙음 | 대상이 보는 문장, 퓨즈 초 | 바 `bomb, me` + `[ bomb, me ]` |
 | TK 건 사람 이름 | 문장 형식 (이름이 몇 번째 단어인지 → `{n}`) | `[ teleki, me ]` 에 이름 |
 | Disarm On Me | 문장은 있음 "Their attack disarms you!" — **재장착까지 몇 초**인지 | 바 `disarm, me` |
-| Magic Reflection 소모 | 반사됐을 때 문장 | `[ reflect, off ]` |
 | Mana Drain / Vampire 맞음 | 문장 | `[ drain, me ]` (레지 -10 / -20, 2분) |
 | Curse / Weaken / Clumsy 맞음 | 문장 | `[ curse, me ]` 등 |
 | Cure · Refresh 포션 마심 | 문장 (힐은 "You drink a healing potion" 으로 잡음) | 바 `cure pot` `refresh` |

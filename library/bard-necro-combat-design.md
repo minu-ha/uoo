@@ -35,8 +35,12 @@ flowchart TD
     M2["타겟 캐시<br/>lasttarget → noto 검사"] --> M3
 
     M3{"몹이 근처에<br/>있나"}
-    M3 -->|"없음 · 이동 중"| SONG
+    M3 -->|"없음 · 이동 중"| BUFF
     M3 -->|"있음 · 교전 중"| SKILL
+
+    BUFF{"Reactive Armor 나<br/>Magic Reflection 이<br/>빠졌나"}
+    BUFF -->|yes| ABUFF["다시 건다<br/>Reflect 는 반사 후 30초 쿨"] --> E
+    BUFF -->|no| SONG
 
     SONG{"Music = 0 and<br/>Song = 0 and<br/>그 곡의 슬롯 = 0"}
     SONG -->|yes| ASONG["라운드로빈 한 곡<br/>Disco → Peace → Provo"] --> E
@@ -72,12 +76,13 @@ flowchart TD
 | 0 | 시스템 메시지 | `insysmsg` | 방해 -> `replay`, 악기 분실 -> 재선택 |
 | 1 | 생존 | 마비 → 독 → HP → 무게 → 음식 → 포션 → 마나 | **아래 전부를 막는다.** 마비가 맨 앞: 그 상태에선 아래가 아무것도 못 한다. 큐어가 힐보다 앞: 큐어는 즉시고 힐은 독 틱에 일부가 샌다. 무게는 그 뒤: 과체중은 다음 1초에 죽지 않는다 |
 | 2 | 타겟 캐시 | `lasttarget` + `noto` | `var__combat_target` 갱신 |
-| 3 | Barding Song | `Music=0 and Song=0 and <슬롯>=0` | **몹이 없을 때만.** 라운드로빈 |
-| 4 | 바드 스킬 | `Music=0 and <슬롯>=0` | 디스코 1회 + **피스 12초마다** |
-| 5 | 네크로 | `var__symbols >= config__symbols_*` | Blood Oath → Corpse Skin → Evil Omen 순. **유휴 예약** 아래 참조 |
-| 6 | 오프닝 | 마나 + 대상별 리스트 | Mana Drain -> Curse |
-| 7 | 프록 코어 | `cooldown "magic arrow"` 등 | 네 개가 각자 쿨 |
-| 8 | 필러 | `mana > config__filler_floor` | Energy Bolt. **여기부터 잘린다** |
+| 3 | 자기 버프 | `not findbuff` + `cooldown "reflect"` | **몹이 없을 때만.** 둘 다 시간이 아니라 소모로 끝난다. RA 는 25 흡수, Reflect 는 한 번 반사 뒤 30초 쿨 (반사 시점부터) |
+| 4 | Barding Song | `Music=0 and Song=0 and <슬롯>=0` | **몹이 없을 때만.** 라운드로빈 |
+| 5 | 바드 스킬 | `Music=0 and <슬롯>=0` | 디스코 1회 + **피스 12초마다** |
+| 6 | 네크로 | `var__symbols >= config__symbols_*` | Blood Oath → Corpse Skin → Evil Omen 순. **유휴 예약** 아래 참조 |
+| 7 | 오프닝 | 마나 + 대상별 리스트 | Mana Drain -> Curse |
+| 8 | 프록 코어 | `cooldown "magic arrow"` 등 | 네 개가 각자 쿨 |
+| 9 | 필러 | `mana > config__filler_floor` | Energy Bolt. **여기부터 잘린다** |
 
 **`PASS FLAGS` 는 교전 중에만 공격 시약 7종을 읽는다.** 이동 중엔 아무도 안 묻는 질문에 findtype 14회를
 쓰고 있었다. 생존용 4종(큐어·힐·그레이터힐·음식)은 항상 읽는다.

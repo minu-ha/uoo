@@ -164,8 +164,18 @@ clearignore
 
 # 1 activates the shepherd's crook at startup. Herding is passive once a crook is set as
 # the active one, and at Herding 80 it is worth 17.6% follower damage and 8.8% follower
-# resistance against creatures, on the 63% of the damage the followers do.
-@setvar! config__use_herding 1
+# resistance against creatures, on the 63% of the damage the followers do. 0 while the
+# skill slot is Resisting Spells instead: a crook without Herding does nothing.
+@setvar! config__use_herding 0
+
+# Self buffs kept up on the walk. Neither runs on a clock, both last until used up:
+# Reactive Armor takes 20% off physical hits until 25 damage is prevented at Magery 100,
+# Magic Reflection turns back the next hostile spell and then cannot be recast for 30
+# seconds counted from the reflection, which the reflect bar tracks. 1 recasts each as soon as findbuff no
+# longer sees it, so both are already up when the next pull, or a red, arrives. 0 leaves
+# them to the Ctrl+Q / Ctrl+W keys.
+@setvar! config__use_reactive_armor 1
+@setvar! config__use_magic_reflect 1
 
 # How far a mob may be and still count as engaged. Everything that asks "am I fighting"
 # goes through this one number, so the bard and spell stages inherit it unchanged.
@@ -189,11 +199,13 @@ clearignore
 #   2nd   harm
 #   3rd   fireball
 #   4th   lightning, curse, mana drain, greater heal
+#   5th   magic reflection
 # Energy Bolt has no entry: config__filler_floor below is a higher bar and covers it.
 @setvar! config__mana_1st 4
 @setvar! config__mana_2nd 6
 @setvar! config__mana_3rd 9
 @setvar! config__mana_4th 11
+@setvar! config__mana_5th 14
 
 # Unholy Symbols banked before each necro ability is allowed to fire. Each figure is the
 # ability's own cost plus what the more valuable abilities above it need kept back:
@@ -544,10 +556,14 @@ while not dead
     #   curse          4th   11    garlic, nightshade, sulfurous ash
     #   mana drain     4th   11    black pearl, mandrake root, spider silk
     #   energy bolt    6th   20    black pearl, nightshade
+    #   reactive armor 1st    4    garlic, spider silk, sulfurous ash
+    #   magic reflect  5th   14    garlic, mandrake root, spider silk
     @setvar! var__regs_cure 0
     @setvar! var__regs_heal 0
     @setvar! var__regs_greater_heal 0
     @setvar! var__regs_create_food 0
+    @setvar! var__regs_reactive_armor 0
+    @setvar! var__regs_magic_reflect 0
 
     if findtype 3972 self and findtype 3973 self
         @setvar! var__regs_cure 1
@@ -563,6 +579,14 @@ while not dead
 
     if findtype 3972 self and findtype 3973 self and findtype 3974 self
         @setvar! var__regs_create_food 1
+    endif
+
+    if findtype 3972 self and findtype 3980 self and findtype 3981 self
+        @setvar! var__regs_reactive_armor 1
+    endif
+
+    if findtype 3972 self and findtype 3974 self and findtype 3981 self
+        @setvar! var__regs_magic_reflect 1
     endif
 
     # The offensive list is only read by blocks that need a target, so on the walk it is
@@ -945,6 +969,53 @@ while not dead
                 wait wait__short
             elseif counttype "mushroom" backpack < config__mushroom_min_count and mana >= config__mushroom_create_mana and var__regs_create_food = 1
                 cast 'Create Food'
+                wait wait__short
+
+                for 25
+                    if not casting
+                        break
+                    endif
+
+                    if insysmsg "Your concentration is disturbed, thus ruining thy spell."
+                        break
+                    endif
+
+                    wait wait__poll
+                endfor
+            endif
+        endif
+    endif
+
+    # ####################################################################################
+    # # SELF BUFFS
+    # ####################################################################################
+    # Reactive Armor and Magic Reflection stay up until they are used up, so each needs a
+    # cast only when findbuff no longer sees it. On the walk only: in a fight the cast would
+    # take a slot from the rotation, and what matters is that both are up when the next
+    # pull, or a red, arrives. Reactive Armor is 1st circle and goes first, Magic Reflection
+    # waits its turn on the next pass. Both are self-only, so no cursor: the same no-cursor
+    # shape as Create Food above.
+    # The reflect bar is the server's 30 second recast lock. It starts on the system line
+    # "Magic reflect removed." that the reflection sends, so the bar is the real clock.
+    if var__engaged = 0
+        if not targetexists and not casting and cooldown "walk" = 0
+            if config__use_reactive_armor = 1 and not findbuff 'Reactive Armor' and var__regs_reactive_armor = 1 and mana >= config__mana_1st
+                cast 'Reactive Armor'
+                wait wait__short
+
+                for 25
+                    if not casting
+                        break
+                    endif
+
+                    if insysmsg "Your concentration is disturbed, thus ruining thy spell."
+                        break
+                    endif
+
+                    wait wait__poll
+                endfor
+            elseif config__use_magic_reflect = 1 and not findbuff 'Magic Reflection' and cooldown "reflect" = 0 and var__regs_magic_reflect = 1 and mana >= config__mana_5th
+                cast 'Magic Reflection'
                 wait wait__short
 
                 for 25
