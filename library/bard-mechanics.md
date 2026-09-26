@@ -834,6 +834,28 @@ Bard Necro 기준으로 Herding 80 -> Resisting Spells 80 을 따져 본 결과�
 | 3 | Golden Moongate 8타일 안이면 리콜 | 던전 리콜 제한 |
 | 4 | 싸울 거면 그때 공격 | 이 순간부터 Heat of Battle. Bard Necro 는 Resist 0 |
 
+**싸우는 것이 기본이면 결론이 뒤집힌다.** Heat of Battle 이 켜진 뒤의 방어는 printed Resist 뿐이고,
+갈리는 것은 "한 방 덜 맞느냐" 가 아니라 **표준 덤프가 풀피에서 죽이느냐**다.
+
+| PK 메이지 덤프 (Eval 100) | Resist 0 | Resist 80 (주문 -10~30%, 평균 -20%) |
+|---|---|---|
+| Explosion 31~40 + Energy Bolt 31~40 | 62~80 | 50~64 |
+| + 붙은 폭발 포션 22~37 (Alchemy 80, 저항 안 됨) | **84~117** | **72~101** |
+
+체력 100 언저리면 Resist 0 은 덤프 한 번에 죽고, 80 은 남아서 힐 포션·Greater Heal 이 들어간다.
+잃는 것은 PvE 전체 딜 약 9.5% 다. **PK 를 만나면 싸우는 것이 기본인 캐릭터는 Resist 80 이 맞다.**
+
+**TK 순서 규칙.** 시전자 글로벌 쿨 "at most once every 30 seconds to any player" 에 자기 자신이 들어가면
+자기 TK 와 공격 TK 는 30초 안에 하나만 된다 (미확인, 길드원에게 시험하면 바로 안다).
+
+| 상황 | 행동 | 왜 |
+|---|---|---|
+| 내가 먼저 움직일 수 있다 | **자기 TK** | 30초 동안 상대 폭탄이 안 붙는다. 붙지 않은 포션은 걸어서 피한다 |
+| 이미 상대 TK 에 맞았다 | **상대에게 TK** | 자기 TK 는 어차피 안 걸린다 (한 사람은 30초에 한 번만 맞는다). 내 글로벌 쿨은 아직 안 썼다 |
+| 30초 지남 | 다시 위 판단 | 싸움은 보통 30초를 넘긴다 |
+
+자기 TK 는 붙는 것만 막고 던지는 것은 못 막는다. 상대가 자기 TK 를 걸어 두었으면 내 TK 는 30초 동안 안 걸린다.
+
 ### Parrying
 
 > "Players may parry melee attacks with shields, two-handed weapons, paired weapons (wrestling/dual wielding) and parry daggers."
