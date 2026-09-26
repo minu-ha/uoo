@@ -26,7 +26,7 @@
 
 | 폴더 | 언제 | 파일명 규칙 | 예 |
 |---|---|---|---|
-| `script/combat/` | 사냥 중 계속 돌리는 메인 루프 | `<템플릿>[-<변형>]` | `bard-necro`, `bard-necro-eval`, `hally-mage` |
+| `script/combat/` | 사냥 중 계속 돌리는 메인 루프 | `<템플릿>[-<변형>]` | `bard-necro-enhanced`, `bard-mace`, `hally-mage` |
 | `script/hotkey/` | 키에 물려 한 번 실행하는 매크로 | `<동작>[-<대상>]`, 무기 스왑은 `weapon-<무기>` | `weapon-katana`, `cancel-target`, `dress`, `moongate` |
 | `script/train/` | 스킬 트레이닝 | `<스킬>` | `magery`, `carto` |
 | `script/gather/` | 채집 루프 | `<채집>` | `mining`, `lumberjack` |

@@ -43,7 +43,7 @@ target backpack          <- Song (AoE)
 target lasttarget        <- Skill (단일 대상 디버프)
 ```
 
-저장소의 기존 구현이 이미 이 형태다 (`bard-mace.razor:518`, `bard-archer.razor:228`).
+저장소의 기존 구현이 이미 이 형태다 (`bard-mace.razor:518`, `bard-necro-enhanced.razor` BARD SONG).
 
 ### 세 가지 쿨다운 계열
 

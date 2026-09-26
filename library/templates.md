@@ -4,15 +4,12 @@
 
 | 템플릿 | 전투 루프 `script/combat/` | 핫키 `script/hotkey/` | Shelf `script/shelf/` | Razor 프로필 `config/<이름>/razor/profiles/` | CUO 캐릭 `config/<이름>/classicuo/` |
 |---|---|---|---|---|---|
-| Bard Necro | `bard-necro` | `bard-buff` | | | |
-| Bard Necro (Eval) | `bard-necro-eval` | `bard-buff` | | | |
+| Bard Necro | `bard-necro-enhanced` | | | `bard mace` | `Qianshanmuxue` |
 | Bard Mace (Dexxer) | `bard-mace` | `bard-buff`, `weapon-*` | `bard-dexxer` | | |
-| Bard Mage | `bard-mage`, `bard-mage-summon` | `bard-buff` | | | |
-| Bard Archer | `bard-archer`, `bard-archer-no-potion` | `bard-buff` | | | |
 | Bard Throwing (Dexxer) | `bard-throwing` | `bard-buff` | | | |
 | Hally Mage | `hally-mage` | `weapon-halberd`, `weapon-katana`, `weapon-viking-sword` | `hally-mage` | | |
 | Dexxer | `dexxer-basic` | `weapon-*` | | | |
 | Thief / Backstab | `backstab-mugging` | | | | |
-| Sailing | `sea-cleaner` | | `sailing` | | |
+| Sailing | | | `sailing` | | |
 
 공용: `hotkey/cancel-target`, `hotkey/dress`, `hotkey/moongate`, `loot/*`, `restock/*`

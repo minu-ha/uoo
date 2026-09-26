@@ -2,16 +2,11 @@
 
 대상 파일: **`script/combat/bard-necro-enhanced.razor` (신규)**
 
-구식 `bard-necro.razor` / `bard-necro-eval.razor` 를 대체한다. 기존 파일을 고치는 것이 아니라
-**새로 구현한다.** 컨벤션은 `bard-throwing.razor` 와 `loadout.razor` 를 따른다
+구식 `bard-necro.razor` / `bard-necro-eval.razor` 를 대체했다. 둘은 지웠고 git 이력에만 남아 있다.
+기존 파일을 고친 것이 아니라 **새로 구현했다.** 컨벤션은 `bard-throwing.razor` 와 `loadout.razor` 를 따른다
 (`config__` / `wait__` / `cooldown__` / `var__` / `alias__` / `label__` / `timer__` / `global__`).
 
 바드 숫자와 공식은 전부 **`bard-mechanics.md`** 에 있다. 이 문서에서 다시 추론하지 않는다.
-
-**완성되면 할 일 두 가지.**
-
-- `library/templates.md` 에 `Bard Necro (Enhanced)` 행을 추가한다.
-- 구식 `bard-necro` / `bard-necro-eval` 행을 지우고 파일도 지운다. **인게임 검증이 끝난 뒤에.**
 
 **핫키 `bard-buff` 는 이 템플릿에서 필요 없어진다.** 루프가 이동 중에 세 곡을 알아서 돌린다.
 다른 템플릿은 계속 쓰므로 파일 자체는 남긴다.
@@ -467,10 +462,8 @@ inlist cursed                       -> 프록 코어
 
 분기 자체가 상태라 `var_magic_stage` 같은 단계 변수가 필요 없다.
 
-**이 두 리스트는 새로 만드는 것이 아니다.** 구식 `bard-necro.razor` 가 이미
-`magic_drained_targets` 와 `magic_cursed_targets` 를 둘 다 쓰고 있다
-(`bard-necro.razor:145`, `:787`). **새 스크립트를 짜기 전에 그 파일의 오프닝 블록을 읽는다.**
-`bard-necro-eval.razor` 쪽에만 Mana Drain 이 빠져 있다.
+**이 두 리스트는 구식 `bard-necro.razor` 에서 가져온 것이다.** 그 파일은 지웠고 (git 이력),
+같은 두 리스트가 `bard-necro-enhanced.razor` 의 `OPENER` 에 그대로 산다.
 
 **트레이드오프**: sweep 이 전역이라 방금 건 대상까지 지운다. 동시 교전 1~2마리면 가끔 22마나 손해다.
 **대상별 타임스탬프는 산술이 필요해서 못 쓴다.**
@@ -487,8 +480,8 @@ var__opener_done = 1  <-  inlist cursed
 
 ### 구식 스크립트의 버그 (반복하지 말 것)
 
-**두 구식 스크립트가 같은 버그를 갖고 있다.** `clearlist` 가 **전투 대상이 사라지고
-조용해졌을 때만** 돈다 (`bard-necro-eval.razor:379`, `bard-necro.razor:310`).
+**두 구식 스크립트가 같은 버그를 갖고 있었다** (둘 다 지웠다, git 이력). `clearlist` 가
+**전투 대상이 사라지고 조용해졌을 때만** 돌았다.
 
 한 마리와 60초 넘게 싸우면 Curse 의 `+30%` 가 꺼졌는데도 리스트가 "걸려 있음" 이라고 답해서
 **영영 재시전하지 않는다.** 난이도 300~500 몹은 대부분 여기 걸린다.
@@ -614,16 +607,16 @@ Bloodmoss 플래그 하나와 `Vengeful Spirit` 핫키(목록에 있음)만 추�
 
 | 구문 | 선례 |
 |---|---|
-| `not inlist '이름' alias` | `bard-necro.razor:787` |
-| `magic_drained_targets` + `magic_cursed_targets` 2단 오프닝 | `bard-necro.razor:145`, `:787` |
+| `not inlist '이름' alias` | `bard-necro-enhanced.razor` OPENER |
+| `magic_drained_targets` + `magic_cursed_targets` 2단 오프닝 | `bard-necro-enhanced.razor` OPENER |
 | `createlist` / `removelist` / `clearlist` / `pushlist` | 여러 파일 |
-| `while findtype ... ground -1 -1 12 as` + `@ignore` | `bard-necro.razor:432` |
-| `not dead X and noto X != "hostile" ...` | `bard-necro.razor:433` |
+| `while findtype ... backpack as` + `@ignore` | `bard-necro-enhanced.razor` INSTRUMENT |
+| `not dead X and noto X != "hostile" ...` | `bard-necro-enhanced.razor` COMBAT TARGET CACHE |
 | `findbuff "song of discordance"` | `bard-mace.razor:494` |
 | `useskill` -> `waitfortarget` -> `target backpack` | `bard-mace.razor:518` |
-| `stop` | `bard-archer-no-potion.razor:58` |
+| `stop` | `bard-necro-enhanced.razor` INSTRUMENT |
 | `cooldown "Magic Arrow" = 0` | `cooldowns.xml` 에 항목 존재 |
-| `for 25` + `break` 로 커서 폴링 | `bard-necro-eval.razor:205`, 레퍼런스 `auto-mage.razor:1160` |
+| `for 25` + `break` 로 커서 폴링 | `bard-necro-enhanced.razor` PROC CORE, 레퍼런스 `auto-mage.razor:1160` |
 | `hotkey 'Vampiric Embrace'` + `hotkey 'Target Self'` | 위키: 자신을 타겟하면 주변 시체를 자동 탐색. **인게임 확인됨** |
 | `hotkey 'Drink Heal'` 등 포션 핫키 | Razor 핫키 목록 Potions 항목. 이름 그대로 |
 | `hotkey "> Interrupt"` | 휠다운에 물려 쓰던 것. 시전 폴링 안에서 긴급 힐용 |
@@ -666,7 +659,8 @@ Bloodmoss 플래그 하나와 `Vengeful Spirit` 핫키(목록에 있음)만 추�
 **남은 측정**
 
 3. **Song 이 바드 스킬 슬롯까지 잠그는가.**
-   `script/hotkey/probe-bard-cooldown.razor` 를 **Lyric 방어구 벗고** 한 번 돌린다.
+   probe 스크립트는 답을 얻고 지웠다 (git 이력). 다시 재려면 `bard-mechanics.md` 의 테스트 절차대로
+   **Lyric 방어구 벗고** 한 번 돌린다.
    실행 중 수동 조작을 하지 않는다 -- 지난 로그가 그것 때문에 오염됐다.
 4. **Song 쿨의 정확한 길이.** 위 probe 4단계(약 11초 후 시도)가 답한다.
 5. **`Energy Bolt` 의 15마나 회수가 환급 확률과 중첩되는지.**

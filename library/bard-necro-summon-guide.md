@@ -187,9 +187,8 @@ Spirit Pact    T3   5
 
 ## 스크립트 메모
 
-- **Provocation 을 찍었으므로 provo anchor 경로가 살아 있다.** 구식 `bard-necro.razor` 의
-  `var_provo_follower_kind` 는 `vampire / mummy / rag / lich` 만 인식했다.
-  새 스크립트에서는 serial 추적으로 바꾼다 (`bard-necro-combat-design.md` 참조).
+- Provocation 은 찍었지만 한 마리 사이클에서는 쓸 대상이 둘 없어 루프에 넣지 않았다.
+  Provocation 송(팔로워 딜 +8.5%)만 이동 중 라운드로빈으로 받는다.
 - `Revolution Song` (프로보한 몹이 `40/120/200%` 추가 피해) 은 Provocation 을 찍었으므로
   선택지에 들어온다. 다만 코덱스 20점 안에서 다른 것과 경쟁한다.
 - `Air` 를 쓰려면 소환수 감지 `findtype` 목록에 그래픽을 추가해야 한다.
@@ -197,7 +196,7 @@ Spirit Pact    T3   5
   재소환을 감지할 필요가 없다. 구식 스크립트의 타입별 슬롯 추적과 `noto` 필터도 같이 사라진다.
   자세한 이유는 `bard-necro-combat-design.md` 의 "설계 결정" 참조.
 - **적 Lich 와 내 Lich 는 그래픽이 같다.** 소환수를 타입으로 찾는 코드를 새로 쓸 일이 있으면
-  `noto` 필터가 필수다 (`bard-necro.razor:433`).
+  `noto` 필터가 필수다. `bard-necro-enhanced.razor` 의 `COMBAT TARGET CACHE` 가 그 형태다.
 
 ## 참고 링크
 

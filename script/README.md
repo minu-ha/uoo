@@ -19,15 +19,12 @@ Combat loops are named after the template (`bard-necro`, `hally-mage`), variants
 
 | Script | Template |
 |---|---|
-| `bard-necro`, `bard-necro-eval` | Discord / Peace / Provo + Necromancy + Spirit Speak; `-eval` adds an Eval Int damage rotation |
+| `bard-necro-enhanced` | Discord / Peace / Provo + Necromancy summons + Spirit Speak, with the Grimoire proc rotation |
 | `bard-mace` | Bard dexxer with maces |
-| `bard-mage`, `bard-mage-summon` | Bard mage, without and with summons |
-| `bard-archer`, `bard-archer-no-potion` | Bard archer |
 | `bard-throwing` | Bard dexxer with throwing weapons: Throwing Codex stances, moving-throw readout |
 | `hally-mage` | Weapon-swap mage: halberd / katana / viking sword |
 | `dexxer-basic` | Minimal dexxer sustain: bandages, potions, healing |
 | `backstab-mugging` | Stealth backstab thief |
-| `sea-cleaner` | Stealth dexxer for sailing |
 
 Every loop has the same shape: setup (variables, timers) → instrument / hotbar checks → one
 `while not dead` loop for sustain, control and damage.
@@ -52,7 +49,7 @@ converted.
 
 ```sh
 util/check.sh                       # every script
-util/check.sh script/combat/bard-necro.razor
+util/check.sh script/combat/bard-necro-enhanced.razor
 ```
 
 Razor has no linter and a missing `endif` is the usual way a script silently misbehaves. `check.sh`
