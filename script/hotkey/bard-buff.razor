@@ -25,7 +25,7 @@ endwhile
 
 if not find var_my_instrument backpack
     clearsysmsg
-    overhead "Select instrument:" 55
+    overhead "[ inst, pick ]" 55
     @setvar var_my_instrument
     wait 200
 
@@ -40,17 +40,17 @@ if not find var_my_instrument backpack
         getlabel found_instrument found_instrument_description
 
         if "flute" in found_instrument_description or "drums" in found_instrument_description or "harp" in found_instrument_description or "lute" in found_instrument_description or "tambourine" in found_instrument_description or "gemshorn" in found_instrument_description or "hurdy" in found_instrument_description or "psaltery" in found_instrument_description or "sackbut" in found_instrument_description or "shawm" in found_instrument_description or "Vielle" in found_instrument_description
-            overhead "{{found_instrument_description}}"
+            overhead "[ inst, {{found_instrument_description}} ]" 55
             dclick var_my_instrument
             wait 7000
         else
             @setvar var_my_instrument 0
-            overhead "Not an instrument!" 33
+            overhead "[ inst, wrong ]" 43
             stop
         endif
     else
         @setvar var_my_instrument 0
-        overhead "Not in backpack" 33
+        overhead "[ inst, out ]" 43
         stop
     endif
 endif
@@ -73,7 +73,7 @@ while not dead
 	wait 1000
 
 	if var_bard_buff_stage = 0
-		if cooldown "Discord" = 0 and cooldown "Music" = 0 and cooldown "Song" = 0
+		if cooldown "disco" = 0 and cooldown "music" = 0 and cooldown "song" = 0
 			clearsysmsg
 			useskill 'Discordance'
 			waitfortarget 1000
@@ -91,7 +91,7 @@ while not dead
 			endif
 		endif
 	elseif var_bard_buff_stage = 1
-		if cooldown "Peace/Provo" = 0 and cooldown "Music" = 0 and cooldown "Song" = 0
+		if cooldown "peace/provo" = 0 and cooldown "music" = 0 and cooldown "song" = 0
 			clearsysmsg
 			useskill 'Provocation'
 			waitfortarget 1000
@@ -109,7 +109,7 @@ while not dead
 			endif
 		endif
 	elseif var_bard_buff_stage = 2
-		if cooldown "Peace/Provo" = 0 and cooldown "Music" = 0 and cooldown "Song" = 0
+		if cooldown "peace/provo" = 0 and cooldown "music" = 0 and cooldown "song" = 0
 			clearsysmsg
 			useskill 'Peacemaking'
 			waitfortarget 1000

@@ -46,11 +46,12 @@
 #   in config__target_range, the same way loadout.razor carries config__reach.
 #
 # Overhead policy
-#   Hues follow the table in AGENTS.md, not the ladder bard-throwing defines for itself.
-#     32  status and information, suppressed by config__chatty
-#     33  warning, a resource is running out but the run continues
-#     34  error, something is missing and the block cannot do its job
+#   Every message is "[ subject, state ]" in lowercase, see library/overheads.md. Hues follow AGENTS.md.
+#     53  status and information, suppressed by config__chatty
+#     43  warning, a resource is running out but the run continues
+#     33  error, something is missing and the block cannot do its job
 #     55  a prompt waiting on the player
+#     44 / 83  a necro ability or a magery spell going out, subject only, the hue is the state
 #   A resource problem leads with the noun so it reads at a glance. No exclamation marks.
 #
 # System message buffer
@@ -61,16 +62,16 @@
 #   useskill also answers the prompt inline, because that is where it normally appears.
 #
 # Action guards
-#   casting, cooldown "Walk" and targetexists are live server state, not facts a pass can
+#   casting, cooldown "walk" and targetexists are live server state, not facts a pass can
 #   establish once. The drains at the top of the loop only prove they were clear when the
 #   pass began: the player can start walking, open a cursor, or an earlier block can begin a
 #   cast, all before a later block runs. So every block re-checks what applies to it.
 #
-#     a block that casts        not casting, cooldown "Walk" = 0, not targetexists
+#     a block that casts        not casting, cooldown "walk" = 0, not targetexists
 #     a block that moves items  not casting, not targetexists
 #     a block that only reads   nothing
 #
-#   cooldown "Walk" is the manual control signal. While the player is steering, a cast would
+#   cooldown "walk" is the manual control signal. While the player is steering, a cast would
 #   either break on the step or fight the player for control, so casts stand down and item
 #   use does not: drinking a potion while walking is fine, casting while walking is not.
 #   casting is the opposite direction: our own spell in flight is what any other action
@@ -93,7 +94,7 @@
 #   every pass into travel or combat and throws half the blocks away. Category 4 trails
 #   because an alias binding is worthless unless everything above it already passed.
 #
-#   cooldown "Walk" = 0 joins line 3 only where the whole block casts. Where a block mixes a
+#   cooldown "walk" = 0 joins line 3 only where the whole block casts. Where a block mixes a
 #   drink with a cast it stays on the casting line, because drinking while walking is fine
 #   and casting while walking is not.
 #
@@ -397,7 +398,7 @@ endif
 # If auto detect found nothing, ask for a manual pick exactly once. A barding script with
 # no instrument has nothing to do, so a failed pick stops rather than limping on.
 if not find var__my_instrument backpack
-    overhead "Select instrument:" 55
+    overhead "[ inst, pick ]" 55
     @setvar! var__my_instrument
     wait wait__long
 
@@ -405,15 +406,15 @@ if not find var__my_instrument backpack
         getlabel alias__picked_instrument label__picked_instrument
 
         if "flute" in label__picked_instrument or "drums" in label__picked_instrument or "harp" in label__picked_instrument or "lute" in label__picked_instrument or "tambourine" in label__picked_instrument or "gemshorn" in label__picked_instrument or "hurdy" in label__picked_instrument or "psaltery" in label__picked_instrument or "sackbut" in label__picked_instrument or "shawm" in label__picked_instrument or "vielle" in label__picked_instrument
-            overhead "{{label__picked_instrument}}" 55
+            overhead "[ inst, {{label__picked_instrument}} ]" 55
         else
             @setvar! var__my_instrument 0
-            overhead "Instrument, that is not one" 34
+            overhead "[ inst, wrong ]" 33
             stop
         endif
     else
         @setvar! var__my_instrument 0
-        overhead "Instrument, not in backpack" 34
+        overhead "[ inst, out ]" 33
         stop
     endif
 endif
@@ -429,11 +430,11 @@ if config__use_herding = 1
         dclick alias__crook
         wait wait__short
     else
-        overhead "Crook, none in backpack, followers lose the herding bonus" 33
+        overhead "[ crook, out ]" 43
     endif
 endif
 
-overhead "Bard Necro Enhanced running" 32
+overhead "[ bard necro, on ]" 53
 
 while not dead
     # Let anything already in flight finish before the pass reads state. Both reference
@@ -457,7 +458,7 @@ while not dead
             yell "[Pouch"
             wait wait__short
         elseif timer "timer__message" >= cooldown__message
-            overhead "Pouches, none left" 34
+            overhead "[ pouch, out ]" 33
             settimer "timer__message" 0
         endif
     endif
@@ -473,10 +474,10 @@ while not dead
                 @setvar! var__my_instrument alias__spare_instrument
 
                 if config__chatty = 1
-                    overhead "Instrument, switched to a spare" 32
+                    overhead "[ inst, set ]" 53
                 endif
             elseif timer "timer__message" >= cooldown__message
-                overhead "Instrument, none in backpack" 34
+                overhead "[ inst, out ]" 33
                 settimer "timer__message" 0
             endif
         endif
@@ -495,7 +496,7 @@ while not dead
                 settimer "timer__target_grace" 0
 
                 if config__chatty = 1
-                    overhead "Target set" 32
+                    overhead "[ target, set ]" 53
                 endif
             endif
         endif
@@ -694,15 +695,15 @@ while not dead
                 wait wait__short
 
                 if config__chatty = 1
-                    overhead "Cure potion" 32
+                    overhead "[ cure pot, on ]" 53
                 endif
             else
                 if timer "timer__message" >= cooldown__message
-                    overhead "Cure potions, none left" 33
+                    overhead "[ cure pot, out ]" 43
                     settimer "timer__message" 0
                 endif
 
-                if var__regs_cure = 1 and timer "timer__heal_action" >= cooldown__heal_action and cooldown "Walk" = 0
+                if var__regs_cure = 1 and timer "timer__heal_action" >= cooldown__heal_action and cooldown "walk" = 0
                     hotkey "> Smart Heal/Cure Self"
                     settimer "timer__heal_action" 0
                     wait wait__short
@@ -717,7 +718,7 @@ while not dead
 
                     if insysmsg "Your concentration is disturbed, thus ruining thy spell."
                         if config__chatty = 1
-                            overhead "Cure, disturbed" 32
+                            overhead "[ cure, disturbed ]" 43
                         endif
                     endif
                 endif
@@ -741,7 +742,7 @@ while not dead
     # stuck the poll still leaves after 2.5 seconds instead of hanging the loop.
     if diffhits > config__light_hits and diffhits < config__emergency_hits and var__regs_heal = 1
         if timer "timer__heal_action" >= cooldown__heal_action
-            if not targetexists and not casting and cooldown "Walk" = 0
+            if not targetexists and not casting and cooldown "walk" = 0
                 hotkey "> Smart Heal/Cure Self"
                 settimer "timer__heal_action" 0
                 wait wait__short
@@ -756,7 +757,7 @@ while not dead
 
                 if insysmsg "Your concentration is disturbed, thus ruining thy spell."
                     if config__chatty = 1
-                        overhead "Heal, disturbed" 32
+                        overhead "[ heal, disturbed ]" 43
                     endif
                 endif
             endif
@@ -777,16 +778,16 @@ while not dead
                     @setvar! var__greater_heal_ready 1
                 else
                     hotkey 'Drink Heal'
-                    cooldown "Heal Potion" cooldown__heal_potion
+                    cooldown "heal pot" cooldown__heal_potion
                     wait wait__short
 
                     if config__chatty = 1
-                        overhead "Heal potion" 32
+                        overhead "[ heal pot, on ]" 53
                     endif
                 endif
             else
                 if timer "timer__message" >= cooldown__message
-                    overhead "Heal potions, none left" 33
+                    overhead "[ heal pot, out ]" 43
                     settimer "timer__message" 0
                 endif
 
@@ -796,7 +797,7 @@ while not dead
 
         if var__greater_heal_ready = 1 and var__regs_greater_heal = 1
             if timer "timer__heal_action" >= cooldown__heal_action and timer "timer__greater_heal_retry" >= cooldown__greater_heal_retry
-                if not targetexists and not casting and cooldown "Walk" = 0
+                if not targetexists and not casting and cooldown "walk" = 0
                     hotkey "> Greater Heal/Cure Self"
                     settimer "timer__heal_action" 0
                     settimer "timer__greater_heal_retry" 0
@@ -812,7 +813,7 @@ while not dead
 
                     if insysmsg "Your concentration is disturbed, thus ruining thy spell."
                         if config__chatty = 1
-                            overhead "Greater Heal, disturbed" 32
+                            overhead "[ gheal, disturbed ]" 43
                         endif
                     endif
                 endif
@@ -837,11 +838,11 @@ while not dead
                 wait wait__long
 
                 if config__chatty = 1
-                    overhead "Gold, dropped some on the ground" 32
+                    overhead "[ gold, dropped ]" 53
                 endif
             else
                 if timer "timer__message" >= cooldown__message
-                    overhead "Weight, over the cap with no gold to drop" 33
+                    overhead "[ weight, over ]" 43
                     settimer "timer__message" 0
                 endif
 
@@ -873,7 +874,7 @@ while not dead
                 hotkey 'Drink Refresh'
                 wait wait__short
             elseif timer "timer__message" >= cooldown__message
-                overhead "Refresh potions, none left" 33
+                overhead "[ refresh, out ]" 43
                 settimer "timer__message" 0
             endif
         endif
@@ -886,7 +887,7 @@ while not dead
                     hotkey 'Drink Strength'
                     wait wait__short
                 elseif timer "timer__message" >= cooldown__message
-                    overhead "Strength potions, none left" 33
+                    overhead "[ str, out ]" 43
                     settimer "timer__message" 0
                 endif
             endif
@@ -896,7 +897,7 @@ while not dead
                     hotkey 'Drink Agility'
                     wait wait__short
                 elseif timer "timer__message" >= cooldown__message
-                    overhead "Agility potions, none left" 33
+                    overhead "[ agi, out ]" 43
                     settimer "timer__message" 0
                 endif
             endif
@@ -906,7 +907,7 @@ while not dead
                     hotkey 'Drink Magic Resist'
                     wait wait__short
                 elseif timer "timer__message" >= cooldown__message
-                    overhead "Magic resist potions, none left" 33
+                    overhead "[ resist, out ]" 43
                     settimer "timer__message" 0
                 endif
             endif
@@ -928,7 +929,7 @@ while not dead
                     yell '[necromancyhotbar'
                     waitforgump 622436516 wait__target
                 elseif timer "timer__message" >= cooldown__message
-                    overhead "Necro book, none in backpack" 34
+                    overhead "[ necro book, out ]" 33
                     settimer "timer__message" 0
                 endif
             endif
@@ -942,7 +943,7 @@ while not dead
     # a fight where the cast would compete with the spell rotation. The whole block either
     # eats or casts, so the walk guard rides on the act window line.
     if var__engaged = 0
-        if not targetexists and not casting and cooldown "Walk" = 0
+        if not targetexists and not casting and cooldown "walk" = 0
             if mana <= config__mushroom_eat_mana and not findbuff 'Magic Mushroom Cooldown' and findtype "mushroom" backpack
                 hotkey 'Eat Magic Mushroom'
                 wait wait__short
@@ -960,7 +961,7 @@ while not dead
 
                 if insysmsg "Your concentration is disturbed, thus ruining thy spell."
                     if config__chatty = 1
-                        overhead "Create Food, disturbed" 32
+                        overhead "[ food, disturbed ]" 43
                     endif
                 endif
             endif
@@ -985,9 +986,9 @@ while not dead
     # A branch only advances var__song_next once the cursor was actually delivered, so a song
     # that could not go out, for any reason, is retried next pass instead of being skipped.
     if var__bard_ready = 1 and var__engaged = 0
-        if cooldown "Music" = 0 and cooldown "Song" = 0
+        if cooldown "music" = 0 and cooldown "song" = 0
             if not targetexists and not casting
-                if var__song_next = 1 and skill "Discordance" > 0 and cooldown "Discord" = 0
+                if var__song_next = 1 and skill "Discordance" > 0 and cooldown "disco" = 0
                     useskill 'Discordance'
                     waitfortarget wait__target
 
@@ -1004,7 +1005,7 @@ while not dead
                         target backpack
                         @setvar! var__song_next 2
                     endif
-                elseif var__song_next = 2 and skill "Peacemaking" > 0 and cooldown "Peace/Provo" = 0
+                elseif var__song_next = 2 and skill "Peacemaking" > 0 and cooldown "peace/provo" = 0
                     useskill 'Peacemaking'
                     waitfortarget wait__target
 
@@ -1021,7 +1022,7 @@ while not dead
                         target backpack
                         @setvar! var__song_next 3
                     endif
-                elseif var__song_next = 3 and skill "Provocation" > 0 and cooldown "Peace/Provo" = 0
+                elseif var__song_next = 3 and skill "Provocation" > 0 and cooldown "peace/provo" = 0
                     useskill 'Provocation'
                     waitfortarget wait__target
 
@@ -1059,7 +1060,7 @@ while not dead
     #
     # warmode is the manual control window, folded into var__bard_ready.
     if var__bard_ready = 1 and skill "Discordance" > 0
-        if cooldown "Discord" = 0 and cooldown "Music" = 0
+        if cooldown "disco" = 0 and cooldown "music" = 0
             if not targetexists and not casting
                 if find var__combat_target ground -1 -1 config__target_range as alias__disco_target
                     getlabel alias__disco_target label__disco_target
@@ -1113,7 +1114,7 @@ while not dead
     # barding break does, and while one is running neither Peace nor Provocation can land on
     # that creature, which is why a broken target is left alone until it clears.
     if var__bard_ready = 1 and skill "Peacemaking" > 0
-        if cooldown "Peace/Provo" = 0 and cooldown "Music" = 0
+        if cooldown "peace/provo" = 0 and cooldown "music" = 0
             if not targetexists and not casting
                 if find var__combat_target ground -1 -1 config__target_range as alias__peace_target
                     getlabel alias__peace_target label__peace_target
@@ -1185,7 +1186,7 @@ while not dead
                     @setvar! var__symbols_spent 1
 
                     if config__chatty = 1
-                        overhead "Blood Oath" 44
+                        overhead "[ blood oath ]" 44
                     endif
                 elseif insysmsg "seconds before you may use that ability again."
                     settimer "timer__blood_oath" 0
@@ -1199,7 +1200,7 @@ while not dead
                     @setvar! var__symbols_spent 1
 
                     if config__chatty = 1
-                        overhead "Corpse Skin" 44
+                        overhead "[ corpse skin ]" 44
                     endif
                 elseif insysmsg "seconds before you may use that ability again."
                     settimer "timer__corpse_skin" 0
@@ -1213,7 +1214,7 @@ while not dead
                     @setvar! var__symbols_spent 1
 
                     if config__chatty = 1
-                        overhead "Evil Omen" 44
+                        overhead "[ evil omen ]" 44
                     endif
                 elseif insysmsg "seconds before you may use that ability again."
                     settimer "timer__evil_omen" 0
@@ -1241,7 +1242,7 @@ while not dead
                             settimer "timer__vampiric_embrace" 0
 
                             if config__chatty = 1
-                                overhead "Vampiric Embrace" 44
+                                overhead "[ vampiric embrace ]" 44
                             endif
                         elseif insysmsg "seconds before you may use that ability again."
                             settimer "timer__vampiric_embrace" 0
@@ -1265,7 +1266,7 @@ while not dead
     # Two lists, so the branch itself is the state. A target that was retargeted mid fight
     # answers correctly with no extra bookkeeping.
     if var__engaged = 1
-        if not targetexists and not casting and cooldown "Walk" = 0
+        if not targetexists and not casting and cooldown "walk" = 0
             if find var__combat_target ground -1 -1 config__target_range as alias__opener_target
                 if not inlist 'magic_drained_targets' var__combat_target and var__regs_mana_drain = 1 and mana >= config__mana_4th
                     cast 'Mana Drain'
@@ -1277,7 +1278,7 @@ while not dead
 
                         if insysmsg "Your concentration is disturbed, thus ruining thy spell."
                             if config__chatty = 1
-                                overhead "Mana Drain, disturbed" 32
+                                overhead "[ drain, disturbed ]" 43
                             endif
 
                             break
@@ -1285,7 +1286,7 @@ while not dead
 
                         if config__interrupt_to_heal = 1 and diffhits >= config__emergency_hits
                             if config__chatty = 1
-                                overhead "Mana Drain, cut for a heal" 32
+                                overhead "[ drain, cut ]" 43
                             endif
 
                             hotkey "> Interrupt"
@@ -1309,7 +1310,7 @@ while not dead
                                 pushlist 'magic_drained_targets' var__combat_target
 
                                 if config__chatty = 1
-                                    overhead "Mana Drain" 83
+                                    overhead "[ drain ]" 83
                                 endif
                             endif
                         endif
@@ -1324,7 +1325,7 @@ while not dead
 
                         if insysmsg "Your concentration is disturbed, thus ruining thy spell."
                             if config__chatty = 1
-                                overhead "Curse, disturbed" 32
+                                overhead "[ curse, disturbed ]" 43
                             endif
 
                             break
@@ -1332,7 +1333,7 @@ while not dead
 
                         if config__interrupt_to_heal = 1 and diffhits >= config__emergency_hits
                             if config__chatty = 1
-                                overhead "Curse, cut for a heal" 32
+                                overhead "[ curse, cut ]" 43
                             endif
 
                             hotkey "> Interrupt"
@@ -1357,7 +1358,7 @@ while not dead
                                 settimer "timer__magic_window" 0
 
                                 if config__chatty = 1
-                                    overhead "Curse" 83
+                                    overhead "[ curse ]" 83
                                 endif
                             endif
                         endif
@@ -1400,9 +1401,9 @@ while not dead
     # only one asking, but when two are ready together the cheap one going first keeps more
     # mana available for the opener on the next mob.
     if var__engaged = 1 and var__opener_done = 1
-        if not targetexists and not casting and cooldown "Walk" = 0
+        if not targetexists and not casting and cooldown "walk" = 0
             if find var__combat_target ground -1 -1 config__target_range as alias__proc_target
-                if cooldown "Magic Arrow" = 0 and var__regs_magic_arrow = 1 and mana >= config__mana_1st
+                if cooldown "magic arrow" = 0 and var__regs_magic_arrow = 1 and mana >= config__mana_1st
                     cast 'Magic Arrow'
 
                     for 25
@@ -1412,7 +1413,7 @@ while not dead
 
                         if insysmsg "Your concentration is disturbed, thus ruining thy spell."
                             if config__chatty = 1
-                                overhead "Magic Arrow, disturbed" 32
+                                overhead "[ magic arrow, disturbed ]" 43
                             endif
 
                             break
@@ -1420,7 +1421,7 @@ while not dead
 
                         if config__interrupt_to_heal = 1 and diffhits >= config__emergency_hits
                             if config__chatty = 1
-                                overhead "Magic Arrow, cut for a heal" 32
+                                overhead "[ magic arrow, cut ]" 43
                             endif
 
                             hotkey "> Interrupt"
@@ -1439,7 +1440,7 @@ while not dead
                             wait wait__cast
                         endif
                     endif
-                elseif cooldown "Harm" = 0 and var__regs_harm = 1 and mana >= config__mana_2nd
+                elseif cooldown "harm" = 0 and var__regs_harm = 1 and mana >= config__mana_2nd
                     cast 'Harm'
 
                     for 25
@@ -1449,7 +1450,7 @@ while not dead
 
                         if insysmsg "Your concentration is disturbed, thus ruining thy spell."
                             if config__chatty = 1
-                                overhead "Harm, disturbed" 32
+                                overhead "[ harm, disturbed ]" 43
                             endif
 
                             break
@@ -1457,7 +1458,7 @@ while not dead
 
                         if config__interrupt_to_heal = 1 and diffhits >= config__emergency_hits
                             if config__chatty = 1
-                                overhead "Harm, cut for a heal" 32
+                                overhead "[ harm, cut ]" 43
                             endif
 
                             hotkey "> Interrupt"
@@ -1476,7 +1477,7 @@ while not dead
                             wait wait__cast
                         endif
                     endif
-                elseif cooldown "Fireball" = 0 and var__regs_fireball = 1 and mana >= config__mana_3rd
+                elseif cooldown "fireball" = 0 and var__regs_fireball = 1 and mana >= config__mana_3rd
                     cast 'Fireball'
 
                     for 25
@@ -1486,7 +1487,7 @@ while not dead
 
                         if insysmsg "Your concentration is disturbed, thus ruining thy spell."
                             if config__chatty = 1
-                                overhead "Fireball, disturbed" 32
+                                overhead "[ fireball, disturbed ]" 43
                             endif
 
                             break
@@ -1494,7 +1495,7 @@ while not dead
 
                         if config__interrupt_to_heal = 1 and diffhits >= config__emergency_hits
                             if config__chatty = 1
-                                overhead "Fireball, cut for a heal" 32
+                                overhead "[ fireball, cut ]" 43
                             endif
 
                             hotkey "> Interrupt"
@@ -1513,7 +1514,7 @@ while not dead
                             wait wait__cast
                         endif
                     endif
-                elseif cooldown "Lightning" = 0 and var__regs_lightning = 1 and mana >= config__mana_4th
+                elseif cooldown "lightning" = 0 and var__regs_lightning = 1 and mana >= config__mana_4th
                     cast 'Lightning'
 
                     for 25
@@ -1523,7 +1524,7 @@ while not dead
 
                         if insysmsg "Your concentration is disturbed, thus ruining thy spell."
                             if config__chatty = 1
-                                overhead "Lightning, disturbed" 32
+                                overhead "[ lightning, disturbed ]" 43
                             endif
 
                             break
@@ -1531,7 +1532,7 @@ while not dead
 
                         if config__interrupt_to_heal = 1 and diffhits >= config__emergency_hits
                             if config__chatty = 1
-                                overhead "Lightning, cut for a heal" 32
+                                overhead "[ lightning, cut ]" 43
                             endif
 
                             hotkey "> Interrupt"
@@ -1578,7 +1579,7 @@ while not dead
                             settimer "timer__poison_strike" 0
 
                             if config__chatty = 1
-                                overhead "Poison Strike" 44
+                                overhead "[ poison strike ]" 44
                             endif
                         elseif insysmsg "seconds before you may use that ability again."
                             settimer "timer__poison_strike" 0
@@ -1600,7 +1601,7 @@ while not dead
     # It is also the first thing to stand down when mana runs short, which is what
     # config__filler_floor is for: the opener and one full proc cycle come first.
     if var__engaged = 1 and var__opener_done = 1 and mana > config__filler_floor and var__regs_energy_bolt = 1
-        if not targetexists and not casting and cooldown "Walk" = 0
+        if not targetexists and not casting and cooldown "walk" = 0
             if find var__combat_target ground -1 -1 config__target_range as alias__filler_target
                 cast 'Energy Bolt'
 
@@ -1611,7 +1612,7 @@ while not dead
 
                     if insysmsg "Your concentration is disturbed, thus ruining thy spell."
                         if config__chatty = 1
-                            overhead "Energy Bolt, disturbed" 32
+                            overhead "[ eb, disturbed ]" 43
                         endif
 
                         break
@@ -1619,7 +1620,7 @@ while not dead
 
                     if config__interrupt_to_heal = 1 and diffhits >= config__emergency_hits
                         if config__chatty = 1
-                            overhead "Energy Bolt, cut for a heal" 32
+                            overhead "[ eb, cut ]" 43
                         endif
 
                         hotkey "> Interrupt"

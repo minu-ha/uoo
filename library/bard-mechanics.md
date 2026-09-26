@@ -13,12 +13,12 @@
 | Provocation | **10초 성공 / 5초 실패** | "Skill usage cooldown is 10 seconds on success and 5 seconds on failure" |
 | Barding Song | 10초 | "Casting a Barding Song has a 10 second cooldown that is independent of normal bard skill usage" |
 
-**Peace 와 Provo 는 슬롯을 공유한다.** `cooldowns.xml` 에서 `Peace/Provo` 한 항목으로 합쳤다.
+**Peace 와 Provo 는 슬롯을 공유한다.** `cooldowns.xml` 에서 `peace/provo` 한 항목으로 합쳤다.
 
 **글로벌과 개별은 AND 조건이다.** Music 5초가 지나도 Peace 자기 쿨 10초가 안 지났으면 못 쓴다.
 
 ```
-if cooldown "Music" = 0 and cooldown "Peace/Provo" = 0
+if cooldown "music" = 0 and cooldown "peace/provo" = 0
 ```
 
 가능한 사이클:
@@ -53,7 +53,7 @@ target lasttarget        <- Skill (단일 대상 디버프)
 |---|---|---|
 | **Music 글로벌** | "You must wait a few moments to **use another skill**." | 모든 바드 스킬. 5초 |
 | **Barding Song** | "You must wait a few moments before performing **another barding song**." | **세 곡 전체가 공유.** 11초 |
-| **Peace / Provo 슬롯** | "You must wait a few moments before you may **provoke or pacify another creature**." | **공유.** 10초. `cooldowns.xml` 에서 `Peace/Provo` 한 항목으로 합쳤다 |
+| **Peace / Provo 슬롯** | "You must wait a few moments before you may **provoke or pacify another creature**." | **공유.** 10초. `cooldowns.xml` 에서 `peace/provo` 한 항목으로 합쳤다 |
 
 Discordance 는 자기 슬롯 5초를 따로 쓴다 (전용 차단 메시지는 확인되지 않았다).
 
@@ -63,15 +63,15 @@ Discordance 는 자기 슬롯 5초를 따로 쓴다 (전용 차단 메시지는 
 ### `cooldown "..."` 은 서버 값이 아니다
 
 `config/<이름>/classicuo/<캐릭터>/cooldowns.xml` 에 **직접 정의한 메시지 트리거 타이머**다.
-`cooldown "Music"` 이 알려주는 것은 서버 쿨이 아니라 **내가 설정한 값**이다.
+`cooldown "music"` 이 알려주는 것은 서버 쿨이 아니라 **내가 설정한 값**이다.
 숫자가 이상하면 서버가 아니라 이 파일을 의심한다.
 
 **파일은 게임 종료 시 덮어쓰기 되므로 게임을 끈 상태에서만 수정한다.**
 
-#### 현재 `Music` 엔트리에 버그가 있다
+#### 현재 `music` 엔트리에 버그가 있다
 
 ```xml
-<cooldownentry name="Music" ...>
+<cooldownentry name="music" ...>
   <trigger duration="5"  triggertext="play successfully" />        <- 바드 스킬 성공
   <trigger duration="5"  triggertext="fail to incite anger" />
   <trigger duration="5"  triggertext="fail to discord" />
@@ -93,19 +93,19 @@ t=6   Song 시도     -> "another barding song"      X
 
 **"Music 이 0인데 송이 안 나간다" 의 원인이 정확히 이것이다.**
 
-반대 방향 피해도 있다. 송을 부르면 `Music` 이 10초 잡히므로,
-`cooldown "Music" = 0` 으로 게이트한 스크립트는 **서버가 허용하는 바드 스킬을 10초 동안 참는다.**
+반대 방향 피해도 있다. 송을 부르면 `music` 이 10초 잡히므로,
+`cooldown "music" = 0` 으로 게이트한 스크립트는 **서버가 허용하는 바드 스킬을 10초 동안 참는다.**
 
 #### 고칠 형태 (게임 끄고 수정)
 
-`Music` 에서 송 트리거를 빼고, 송 전용 항목을 새로 만든다.
+`music` 에서 송 트리거를 빼고, 송 전용 항목을 새로 만든다.
 
 ```xml
 <!-- Music 에서 이 줄을 삭제 -->
 <trigger triggertype="SysMessage" duration="10" triggertext="under the effect of a song" />
 
 <!-- 새 항목 추가 -->
-<cooldownentry name="Song" defaultcooldown="0" cooldownbartype="Regular" hue="53" hidewheninactive="False">
+<cooldownentry name="song" defaultcooldown="0" cooldownbartype="Regular" hue="53" hidewheninactive="False">
   <trigger triggertype="SysMessage" duration="11" triggertext="under the effect of a song" />
 </cooldownentry>
 ```
@@ -113,17 +113,17 @@ t=6   Song 시도     -> "another barding song"      X
 결과:
 
 ```
-cooldown "Music"   바드 스킬 글로벌 5초만
-cooldown "Song"    세 곡이 공유하는 11초
+cooldown "music"   바드 스킬 글로벌 5초만
+cooldown "song"    세 곡이 공유하는 11초
 ```
 
-`Song` 에 Lyric 리셋 트리거(`"Your barding skill cooldowns"`)를 **넣지 않는다.**
+`song` 에 Lyric 리셋 트리거(`"Your barding skill cooldowns"`)를 **넣지 않는다.**
 메시지가 "barding **skill** cooldowns" 라 송까지 리셋하는지 확인되지 않았다.
 넣지 않으면 가끔 조금 더 기다릴 뿐이고, 잘못 넣으면 매번 헛시전한다.
 
 #### 개별 스킬 항목의 송 트리거는 보류
 
-`Discord` / `Peace` / `Provo` 에는 각각 자기 곡 트리거가 11초로 들어가 있다.
+`disco` / `Peace` / `Provo` 에는 각각 자기 곡 트리거가 11초로 들어가 있다.
 
 ```xml
 <trigger duration="11" triggertext="effect of a song of discordance" />
@@ -188,11 +188,11 @@ Song   ->  Song 11초만 세운다        <- Music 도 슬롯도 건드리지 �
 
 #### 루프에 주는 규칙
 
-**전투 중에는 송이 거의 안 나간다.** 디스코와 피스가 `Music` 을 5초씩 계속 세우기 때문이다.
+**전투 중에는 송이 거의 안 나간다.** 디스코와 피스가 `music` 을 5초씩 계속 세우기 때문이다.
 게다가 악기 연주는 시전을 끊어 주문을 날려먹는다.
 
 그래서 `bard-necro-enhanced` 는 **송을 이동 구간에서만 부른다.**
-이동 10~20초 동안 `Music` 이 비어 있고 어차피 아무것도 안 하고 있다.
+이동 10~20초 동안 `music` 이 비어 있고 어차피 아무것도 안 하고 있다.
 
 ### Peace 와 Provo 는 슬롯을 공유한다
 
@@ -204,12 +204,12 @@ Song   ->  Song 11초만 세운다        <- Music 도 슬롯도 건드리지 �
 `Provo` 엔트리가 Peace 메시지에 반응하지 않으니 `provo READY` 로 보였을 뿐, **서버는 막는다.**
 위키의 원래 서술이 맞았다.
 
-**`cooldowns.xml` 에서 `Peace/Provo` 한 항목으로 합쳤다.** 서버가 타이머 하나를 쓰는데
+**`cooldowns.xml` 에서 `peace/provo` 한 항목으로 합쳤다.** 서버가 타이머 하나를 쓰는데
 칸을 둘로 두면 화면만 차지하고 값도 틀린다.
 
 합치기 전에는 기존 스크립트가 **틀린 값을 읽고 있었다** -- 직전에 Peace 를 썼는데
-`Provo` 가 READY 로 나와서 헛시전하고 `Music` 만 태웠다.
-`script/` 전체의 `cooldown "Peace"` / `cooldown "Provo"` 30곳을 `cooldown "Peace/Provo"` 로 바꿨다.
+`Provo` 가 READY 로 나와서 헛시전하고 `music` 만 태웠다.
+`script/` 전체의 `cooldown "Peace"` / `cooldown "Provo"` 30곳을 `cooldown "peace/provo"` 로 바꿨다.
 
 ### "Your barding skill cooldowns reset."
 
@@ -251,43 +251,43 @@ Song     11s under the effect of a song
 ```
 
 항목 순서는 **바가 자주 뜨는 순서**로 정렬했다.
-`Skill` -> `Music` -> `Discord` -> `Peace/Provo` -> `Song`, 그 뒤에 이 루프가 읽는 바 순서로 `Magic Arrow` -> `Harm` -> `Fireball` -> `Lightning` -> `Mushroom` -> `Heal Potion`.
+`skill` -> `music` -> `disco` -> `peace/provo` -> `song`, 그 뒤에 이 루프가 읽는 바 순서로 `magic arrow` -> `harm` -> `fireball` -> `lightning` -> `mush` -> `heal pot`.
 
-### `Skill` 과 `Music` 의 관계
+### `skill` 과 `music` 의 관계
 
-**서버는 스킬 게이트가 하나다.** `Music` 은 그중 바드 부분만 따로 보는 이름일 뿐이다.
+**서버는 스킬 게이트가 하나다.** `music` 은 그중 바드 부분만 따로 보는 이름일 뿐이다.
 실제로 **Music 이 도는 동안 Animal Lore 같은 다른 스킬도 안 먹는다.**
 
-그래서 `Skill` 항목에도 바드 5초 트리거 네 개와 리셋을 넣었다.
+그래서 `skill` 항목에도 바드 5초 트리거 네 개와 리셋을 넣었다.
 
 ```
-cooldown "Skill"   아무 스킬이라도 쿨이면 1
-cooldown "Music"   바드 때문에 쿨이면 1      <- 전투 루프가 쓰는 것
+cooldown "skill"   아무 스킬이라도 쿨이면 1
+cooldown "music"   바드 때문에 쿨이면 1      <- 전투 루프가 쓰는 것
 ```
 
-전투 루프는 바드 외 스킬을 안 쓰므로 `Music` 으로 충분하다.
-**루프에 Animal Lore 나 Herding 크룩 같은 비바드 스킬을 넣게 되면 `Skill` 로 바꿔야 한다.**
+전투 루프는 바드 외 스킬을 안 쓰므로 `music` 으로 충분하다.
+**루프에 Animal Lore 나 Herding 크룩 같은 비바드 스킬을 넣게 되면 `skill` 로 바꿔야 한다.**
 
 고친 내역과 이유:
 
-- `Music` 에서 `"under the effect of a song" 10초` 를 **뺐다.** 스킬 글로벌 항목에 송 쿨 값이
+- `music` 에서 `"under the effect of a song" 10초` 를 **뺐다.** 스킬 글로벌 항목에 송 쿨 값이
   들어가 있어서, 뒤따르는 5초 스킬 트리거와 서로 덮어썼다.
   이것이 "Music 이 0인데 송이 안 나간다" 의 원인이었다.
-- `Song` 을 **신설했다.** 곡끼리 공유하는 11초 + Lyric 리셋.
-- `Discord` / `Peace` / `Provo` 에서 각자의 `"effect of a song of ..." 11초` 를 **뺐다.**
+- `song` 을 **신설했다.** 곡끼리 공유하는 11초 + Lyric 리셋.
+- `disco` / `Peace` / `Provo` 에서 각자의 `"effect of a song of ..." 11초` 를 **뺐다.**
   송은 자기 스킬을 잠그지 않는다. 두면 서버가 1.5초에 허용하는 것을 11초 참는다.
 - `Peace` 에서 `"You play successfully, briefly pacifying one or more nearby creatures." 5초` 를 **뺐다.**
   같은 메시지에 `"successfully, briefly pacifying" 11초` 가 이미 걸려 있어 둘이 충돌했다.
-- `Peace` 와 `Provo` 를 **`Peace/Provo` 한 항목으로 합쳤다.** 서버가 슬롯을 공유한다.
+- `Peace` 와 `Provo` 를 **`peace/provo` 한 항목으로 합쳤다.** 서버가 슬롯을 공유한다.
   `script/` 의 참조 30곳도 같이 바꿨다.
-- **`Skill` 에 바드 5초 트리거를 넣었다.** 서버 스킬 게이트가 하나라
+- **`skill` 에 바드 5초 트리거를 넣었다.** 서버 스킬 게이트가 하나라
   바드가 도는 동안 다른 스킬도 막힌다.
-- 항목 이름을 **전부 PascalCase 로** 맞췄다 (49개). 스크립트가 참조하는 건 `Peace/Provo` 와 `Heal Potion` 둘이고,
-  `Heal Potion` 은 원래 XML 이 `Heal Pot`, 스크립트 11개가 `Heal Potion` 으로 **서로 어긋나 있던 것**을 맞춘 것이다.
+- 항목 이름을 **전부 PascalCase 로** 맞췄다 (49개). 스크립트가 참조하는 건 `peace/provo` 와 `heal pot` 둘이고,
+  `heal pot` 은 원래 XML 이 `Heal Pot`, 스크립트 11개가 `heal pot` 으로 **서로 어긋나 있던 것**을 맞춘 것이다.
   임시 쿨다운으로 동작은 했지만 바는 안 뜨고 있었다.
-- `Fireball` 에 발동 트리거 `"fireball activated"` 를 넣었다. 실측 메시지는 "Wizardry fireball activated."
+- `fireball` 에 발동 트리거 `"fireball activated"` 를 넣었다. 실측 메시지는 "Wizardry fireball activated."
   이게 없어서 바가 채워지지 않았고, 그대로 두면 프록 게이트가 매 패스 통과했다.
-- 바가 자주 뜨는 순서로 **재정렬했다**: `Skill` -> `Music` -> `Discord` -> `Peace/Provo` -> `Song`, 그 뒤에 이 루프가 읽는 바 순서로 `Magic Arrow` -> `Harm` -> `Fireball` -> `Lightning` -> `Mushroom` -> `Heal Potion`.
+- 바가 자주 뜨는 순서로 **재정렬했다**: `skill` -> `music` -> `disco` -> `peace/provo` -> `song`, 그 뒤에 이 루프가 읽는 바 순서로 `magic arrow` -> `harm` -> `fireball` -> `lightning` -> `mush` -> `heal pot`.
 
 **이 파일은 게임 종료 시 덮어쓰기 된다. 반드시 게임을 끈 상태에서 수정한다.**
 켜둔 채로 고치면 종료할 때 통째로 날아간다 (실제로 한 번 날아갔다).
@@ -454,14 +454,14 @@ Disco/Peace/Provo 가 전부 80이면 T3(120점)를 찍어도 **80밖에 못 쓴
 
 | 항목 | 프록 발동 | 다시 준비됨 |
 |---|---|---|
-| `Magic Arrow` | "magic arrow activated" | "cast a wizardry magic arrow spell again" |
-| `Harm` | "harm activated" | "cast a wizardry harm spell again" |
-| `Lightning` | "lightning spell hinders" | "cast a wizardry lightning spell again" |
-| `Fireball` | **트리거 없음** | "You may now cast a wizardy fireball spell" (게임 원문의 오타 그대로) |
+| `magic arrow` | "magic arrow activated" | "cast a wizardry magic arrow spell again" |
+| `harm` | "harm activated" | "cast a wizardry harm spell again" |
+| `lightning` | "lightning spell hinders" | "cast a wizardry lightning spell again" |
+| `fireball` | **트리거 없음** | "You may now cast a wizardy fireball spell" (게임 원문의 오타 그대로) |
 
-스크립트는 `cooldown "Magic Arrow" = 0` 처럼 바로 읽으면 된다.
+스크립트는 `cooldown "magic arrow" = 0` 처럼 바로 읽으면 된다.
 
-> **`Fireball` 항목이 불완전하다.** 발동 메시지 트리거가 없어서 바가 채워지지 않는다.
+> **`fireball` 항목이 불완전하다.** 발동 메시지 트리거가 없어서 바가 채워지지 않는다.
 > 인게임에서 Fireball 프록이 터질 때 나오는 문구를 받아 적어 트리거로 넣어야 한다.
 
 **`Energy Bolt` 는 쿨다운 항목이 필요 없다.** 업그레이드가
@@ -963,9 +963,9 @@ PvP 근접 데미지 기대 감소 = 막을 확률 x 감소율.
 | 차단된 시도는 아무 쿨도 안 태운다 | **Music 을 태운다.** 차단된 송 다음의 스킬 판정을 믿지 말 것 |
 | Ensemble 은 디스코만 있으면 된다 | **Discord AND (Peace OR Provo).** 두 개가 걸려야 한다 |
 | 바드 쿨은 예측 가능하다 | **"Your barding skill cooldowns reset." 프록이 있다** (Lyric 방어구). 측정할 땐 벗는다 |
-| Song 쿨은 `cooldown "Music"` 이다 | **아니다. 별도 계열이다.** `Music` 이 둘을 섞어 덮어쓰던 버그는 고쳤다 |
+| Song 쿨은 `cooldown "music"` 이다 | **아니다. 별도 계열이다.** `music` 이 둘을 섞어 덮어쓰던 버그는 고쳤다 |
 | `cooldown "..."` 은 서버 값이다 | **아니다. `cooldowns.xml` 의 내 메시지 트리거다.** 숫자가 이상하면 이 파일을 본다 |
-| 프록 15초는 타이머로 센다 | **게임이 메시지로 알려준다.** `cooldown "Magic Arrow"` 등을 읽는다 |
+| 프록 15초는 타이머로 센다 | **게임이 메시지로 알려준다.** `cooldown "magic arrow"` 등을 읽는다 |
 | 브레이크 중엔 Provo 로 Ensemble 을 살린다 | **못 한다.** 브레이크 대상엔 Peace 도 Provo 도 안 걸린다 |
 | Spirit Speak 만 있으면 언데드 소환이 나온다 | **Vengeful Spirit 을 먼저 켜야 한다.** 매핑은 위 표 |
 | `followers` 는 소환수 마릿수다 | **컨트롤 슬롯 수다.** Lich 2마리 = 4 |

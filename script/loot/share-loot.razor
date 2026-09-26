@@ -11,12 +11,12 @@ setvar var_global_waiting_time 300
 # Personal containers. Asked for once and kept in your Razor profile, so no serial sits in
 # this shared file. To point the script at something else, run unsetvar on the name and rerun.
 if not varexist global__my_furniture_container
-    overhead "Target the furniture the distribution chest sits in" 55
+    overhead "[ furniture, pick ]" 55
     setvar global__my_furniture_container
 endif
 
 if not varexist global__my_distribution_container
-    overhead "Target the distribution chest" 55
+    overhead "[ share chest, pick ]" 55
     setvar global__my_distribution_container
 endif
 
@@ -26,7 +26,7 @@ dclick global__my_distribution_container
 wait var_global_waiting_time
 
 if not find global__my_distribution_container global__my_furniture_container
-    overhead "cannot find global__my_distribution_container" 34
+    overhead "[ share chest, out ]" 33
     stop
 endif
 
@@ -188,7 +188,7 @@ clearignore
 
 foreach distribute_item in distribute_item_list
     getlabel distribute_item distribute_item_description
-    overhead distribute_item_description 11
+    overhead "[ share, {{distribute_item_description}} ]" 53
     lift distribute_item 60000
     wait 500
     drop global__my_distribution_container -1 -1 1
@@ -201,4 +201,4 @@ clearsysmsg
 cleardragdrop
 clearignore
 
-overhead "DONE DONE DONE"
+overhead "[ share loot, done ]" 53

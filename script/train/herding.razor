@@ -1,12 +1,12 @@
 if skill "Herding" = 120
-    overhead "Maxed Skill" 88
+    overhead "[ herding, done ]" 53
     stop
 endif
 
 if findtype "shepherd's crook" backpack as crook
     dclick crook
 else
-    overhead "Need a crook" 34
+    overhead "[ crook, out ]" 33
     wait 5000
 endif
 replay

@@ -43,7 +43,7 @@ while not dead
             endif
 
             wait 1000
-            overhead 'You drop some gold on the ground.' 55
+            overhead "[ gold, dropped ]" 53
         endif
     endwhile
 
@@ -61,7 +61,7 @@ while not dead
                 wait 200
             else
                 if timer "overhead_message_timer" > overhead_message_timer_frequency
-                    overhead "You are out of bandage." 32
+                    overhead "[ bandage, out ]" 43
                     settimer "overhead_message_timer" 0
                 endif
             endif
@@ -73,7 +73,7 @@ while not dead
             yell "[Pouch"
             getlabel backpack ping
         else
-            overhead "You are out of pouche." 32
+            overhead "[ pouch, out ]" 43
         endif
     endif
 
@@ -83,7 +83,7 @@ while not dead
 
             if "next usable" in found_potion_description
                 if timer "overhead_message_timer" > overhead_message_timer_frequency
-                    overhead found_potion_description 83
+                    overhead "[ heal pot, {{found_potion_description}} ]" 53
                     settimer "overhead_message_timer" 0
                 endif
             else
@@ -91,14 +91,14 @@ while not dead
                     break
                 endif
 
-                overhead "You drink a healing potion." 53
+                overhead "[ heal pot, on ]" 53
                 dclick found_potion
                 getlabel backpack ping
-                cooldown "Heal Potion" 10000
+                cooldown "heal pot" 10000
             endif
         else
             if timer "overhead_message_timer" > overhead_message_timer_frequency
-                overhead "You are out of healing potion." 32
+                overhead "[ heal pot, out ]" 43
                 settimer "overhead_message_timer" 0
             endif
         endif
@@ -110,12 +110,12 @@ while not dead
                 break
             endif
 
-            overhead "You drink a cure potion." 44
+            overhead "[ cure pot, on ]" 53
             dclick found_potion
             getlabel backpack ping
         else
             if timer "overhead_message_timer" > overhead_message_timer_frequency
-                overhead "You are out of cure potion." 32
+                overhead "[ cure pot, out ]" 43
                 settimer "overhead_message_timer" 0
             endif
         endif
@@ -127,7 +127,7 @@ while not dead
             wait 200
         else
             if timer "overhead_message_timer" > overhead_message_timer_frequency
-                overhead "You are out of refresh potions." 32
+                overhead "[ refresh, out ]" 43
                 settimer "overhead_message_timer" 0
             endif
         endif
@@ -139,7 +139,7 @@ while not dead
             wait 200
         else
             if timer "overhead_message_timer" > overhead_message_timer_frequency
-                overhead "You are out of strength potions." 32
+                overhead "[ str, out ]" 43
                 settimer "overhead_message_timer" 0
             endif
         endif
@@ -151,7 +151,7 @@ while not dead
             wait 200
         else
             if timer "overhead_message_timer" > overhead_message_timer_frequency
-                overhead "You are out of agility potions." 32
+                overhead "[ agi, out ]" 43
                 settimer "overhead_message_timer" 0
             endif
         endif
@@ -163,7 +163,7 @@ while not dead
             wait 200
         else
             if timer "overhead_message_timer" > overhead_message_timer_frequency
-                overhead "You are out of magic resist potions." 32
+                overhead "[ resist, out ]" 43
                 settimer "overhead_message_timer" 0
             endif
         endif

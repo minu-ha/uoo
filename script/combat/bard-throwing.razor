@@ -235,7 +235,7 @@ endif
 # If auto detect fails, ask for a manual pick exactly once.
 if not find var__my_instrument backpack
     clearsysmsg
-    overhead "Select instrument:" 73
+    overhead "[ inst, pick ]" 55
     @setvar! var__my_instrument
     wait wait__long
 
@@ -243,17 +243,17 @@ if not find var__my_instrument backpack
         getlabel alias__picked_instrument label__picked_instrument
 
         if "flute" in label__picked_instrument or "drums" in label__picked_instrument or "harp" in label__picked_instrument or "lute" in label__picked_instrument or "tambourine" in label__picked_instrument or "gemshorn" in label__picked_instrument or "hurdy" in label__picked_instrument or "psaltery" in label__picked_instrument or "sackbut" in label__picked_instrument or "shawm" in label__picked_instrument or "vielle" in label__picked_instrument
-            overhead "{{label__picked_instrument}}" 73
+            overhead "[ inst, {{label__picked_instrument}} ]" 55
             dclick var__my_instrument
             wait wait__long
         else
             @setvar! var__my_instrument 0
-            overhead "Not an instrument" 33
+            overhead "[ inst, wrong ]" 43
             stop
         endif
     else
         @setvar! var__my_instrument 0
-        overhead "Not in backpack" 33
+        overhead "[ inst, out ]" 43
         stop
     endif
 endif
@@ -309,7 +309,7 @@ while not dead
             wait wait__long
         else
             if timer "timer__overhead_message" > cooldown__overhead_message
-                overhead "No throwing weapon in backpack." 43
+                overhead "[ weapon, out ]" 43
                 settimer "timer__overhead_message" 0
             endif
         endif
@@ -328,7 +328,7 @@ while not dead
             wait wait__long
         else
             if timer "timer__overhead_message" > cooldown__overhead_message
-                overhead "No parrying gauche in backpack." 43
+                overhead "[ gauche, out ]" 43
                 settimer "timer__overhead_message" 0
             endif
         endif
@@ -347,7 +347,7 @@ while not dead
 
     if insysmsg "That is not a musical instrument"
         @setvar! var__my_instrument 0
-        overhead "Instrument invalid, reselecting." 33
+        overhead "[ inst, wrong ]" 43
         replay
     endif
 
@@ -379,27 +379,27 @@ while not dead
         endif
 
         if var__planted_step = 0 and timer "timer__planted" >= cooldown__planted_2
-            overhead "Planted 2s." 73
+            overhead "[ planted, 2s ]" 53
             @setvar! var__planted_step 1
         endif
 
         if var__planted_step = 1 and timer "timer__planted" >= cooldown__planted_4
-            overhead "Planted 4s." 73
+            overhead "[ planted, 4s ]" 53
             @setvar! var__planted_step 2
         endif
 
         if var__planted_step = 2 and timer "timer__planted" >= cooldown__planted_6
-            overhead "Planted 6s." 73
+            overhead "[ planted, 6s ]" 53
             @setvar! var__planted_step 3
         endif
 
         if var__planted_step = 3 and timer "timer__planted" >= cooldown__planted_8
-            overhead "Planted 8s." 73
+            overhead "[ planted, 8s ]" 53
             @setvar! var__planted_step 4
         endif
 
         if var__planted_step = 4 and timer "timer__planted" >= cooldown__planted_10
-            overhead "Moving throws gone." 33
+            overhead "[ throws, out ]" 43
             @setvar! var__planted_step 5
         endif
     endif
@@ -443,10 +443,10 @@ while not dead
             endif
 
             wait wait__long
-            overhead "You drop some gold on the ground." 73
+            overhead "[ gold, dropped ]" 53
         else
             if timer "timer__overhead_message" > cooldown__overhead_message
-                overhead "Overweight, no gold to drop." 43
+                overhead "[ weight, over ]" 43
                 settimer "timer__overhead_message" 0
             endif
 
@@ -474,7 +474,7 @@ while not dead
                 wait wait__short
             else
                 if timer "timer__overhead_message" > cooldown__overhead_message
-                    overhead "No bandages left." 43
+                    overhead "[ bandage, out ]" 43
                     settimer "timer__overhead_message" 0
                 endif
             endif
@@ -490,7 +490,7 @@ while not dead
             wait wait__short
         else
             if timer "timer__overhead_message" > cooldown__overhead_message
-                overhead "No pouches left." 43
+                overhead "[ pouch, out ]" 43
                 settimer "timer__overhead_message" 0
             endif
         endif
@@ -505,18 +505,18 @@ while not dead
 
             if "next usable" in label__heal_potion
                 if timer "timer__overhead_message" > cooldown__overhead_message
-                    overhead label__heal_potion 73
+                    overhead "[ heal pot, {{label__heal_potion}} ]" 53
                     settimer "timer__overhead_message" 0
                 endif
             else
-                overhead "You drink a healing potion." 63
+                overhead "[ heal pot, on ]" 53
                 dclick alias__heal_potion
                 wait wait__short
-                cooldown "Heal Potion" cooldown__heal_potion
+                cooldown "heal pot" cooldown__heal_potion
             endif
         else
             if timer "timer__overhead_message" > cooldown__overhead_message
-                overhead "No healing potions left." 43
+                overhead "[ heal pot, out ]" 43
                 settimer "timer__overhead_message" 0
             endif
         endif
@@ -528,12 +528,12 @@ while not dead
     # While hidden, skip only the potion. The old break terminated the whole main loop.
     if poisoned and config__use_potion = 1 and not targetexists and not hidden
         if findtype "Orange Potion" self as alias__cure_potion
-            overhead "You drink a cure potion." 63
+            overhead "[ cure pot, on ]" 53
             dclick alias__cure_potion
             wait wait__short
         else
             if timer "timer__overhead_message" > cooldown__overhead_message
-                overhead "No cure potions left." 43
+                overhead "[ cure pot, out ]" 43
                 settimer "timer__overhead_message" 0
             endif
         endif
@@ -549,7 +549,7 @@ while not dead
             wait wait__short
         else
             if timer "timer__overhead_message" > cooldown__overhead_message
-                overhead "No refresh potions left." 43
+                overhead "[ refresh, out ]" 43
                 settimer "timer__overhead_message" 0
             endif
         endif
@@ -564,7 +564,7 @@ while not dead
             wait wait__short
         else
             if timer "timer__overhead_message" > cooldown__overhead_message
-                overhead "No strength potions left." 43
+                overhead "[ str, out ]" 43
                 settimer "timer__overhead_message" 0
             endif
         endif
@@ -579,7 +579,7 @@ while not dead
             wait wait__short
         else
             if timer "timer__overhead_message" > cooldown__overhead_message
-                overhead "No agility potions left." 43
+                overhead "[ agi, out ]" 43
                 settimer "timer__overhead_message" 0
             endif
         endif
@@ -594,7 +594,7 @@ while not dead
             wait wait__short
         else
             if timer "timer__overhead_message" > cooldown__overhead_message
-                overhead "No magic resist potions left." 43
+                overhead "[ resist, out ]" 43
                 settimer "timer__overhead_message" 0
             endif
         endif
@@ -657,7 +657,7 @@ while not dead
                     @setvar! var__stance_active config__stance_kite
                 else
                     @setvar! var__stance_disabled 1
-                    overhead "No stance on codex label." 43
+                    overhead "[ stance, out ]" 43
                 endif
 
                 if var__stance_disabled = 0 and var__stance_want != var__stance_active
@@ -679,9 +679,9 @@ while not dead
                     settimer "timer__stance_resync" 0
 
                     if var__stance_want = config__stance_suppress
-                        overhead "Suppress stance." 73
+                        overhead "[ stance, suppress ]" 53
                     else
-                        overhead "Rake stance." 73
+                        overhead "[ stance, rake ]" 53
                     endif
                 endif
             endif
@@ -705,7 +705,7 @@ while not dead
     # only thing spacing these lines out, so a restricted cooldown would read 0 every pass
     # and turn this into chat spam. Timers are restricted too, so there is no second guard
     # to fall back on. This script is not a PvP script.
-    if config__use_weapon_ability = 1 and not pvp and cooldown "Ability" = 0 and find var__combat_target ground -1 -1 12
+    if config__use_weapon_ability = 1 and not pvp and cooldown "ability" = 0 and find var__combat_target ground -1 -1 12
         if find var__combat_target ground -1 -1 2
             @setvar! var__ability_want config__ability_clash
         else
@@ -721,12 +721,12 @@ while not dead
         endif
 
         if var__ability_want = config__ability_clash
-            overhead "Clash ability." 73
+            overhead "[ clash ]" 44
         else
-            overhead "Blitz ability." 73
+            overhead "[ blitz ]" 44
         endif
 
-        cooldown "Ability" cooldown__ability
+        cooldown "ability" cooldown__ability
     endif
 
     # ################################################################################
@@ -734,7 +734,7 @@ while not dead
     # ################################################################################
     # The aspect resets the Music cooldown right after a song, so all three are tried in one pass.
     # No clearsysmsg in front of the blocks. See the buffer note in the file header.
-    if config__use_bard_song = 1 and not targetexists and cooldown "Discord" = 0 and cooldown "Music" = 0 and not findbuff "song of discordance"
+    if config__use_bard_song = 1 and not targetexists and cooldown "disco" = 0 and cooldown "music" = 0 and not findbuff "song of discordance"
         useskill 'Discordance'
         waitfortarget wait__target
 
@@ -746,7 +746,7 @@ while not dead
         endif
     endif
 
-    if config__use_bard_song = 1 and not targetexists and cooldown "Peace/Provo" = 0 and cooldown "Music" = 0 and not findbuff "song of provocation"
+    if config__use_bard_song = 1 and not targetexists and cooldown "peace/provo" = 0 and cooldown "music" = 0 and not findbuff "song of provocation"
         useskill 'Provocation'
         waitfortarget wait__target
 
@@ -758,7 +758,7 @@ while not dead
         endif
     endif
 
-    if config__use_bard_song = 1 and not targetexists and cooldown "Peace/Provo" = 0 and cooldown "Music" = 0 and not findbuff "song of peacemaking"
+    if config__use_bard_song = 1 and not targetexists and cooldown "peace/provo" = 0 and cooldown "music" = 0 and not findbuff "song of peacemaking"
         useskill 'Peacemaking'
         waitfortarget wait__target
 
@@ -783,7 +783,7 @@ while not dead
     # The barding break label still gates: a broken creature is immune to peace for a while,
     # and DISCO runs instead, which is correct because discordance survives a break.
     if not warmode and not targetexists and find var__combat_target ground -1 -1 10 as alias__peace_target
-        if skill "Peacemaking" > 0 and cooldown "Peace/Provo" = 0 and cooldown "Music" = 0
+        if skill "Peacemaking" > 0 and cooldown "peace/provo" = 0 and cooldown "music" = 0
             getlabel alias__peace_target label__peace_target
 
             if "pacified" in label__peace_target or "barding break" in label__peace_target
@@ -816,7 +816,7 @@ while not dead
     # # DISCO
     # ################################################################################
     if not warmode and not targetexists and find var__combat_target ground -1 -1 10 as alias__disco_target
-        if skill "Discordance" > 0 and cooldown "Discord" = 0 and cooldown "Music" = 0
+        if skill "Discordance" > 0 and cooldown "disco" = 0 and cooldown "music" = 0
             getlabel alias__disco_target label__disco_target
 
             if "discord" in label__disco_target
@@ -849,7 +849,7 @@ while not dead
     # # DISCO & VIRTUOSO
     # ################################################################################
     if not warmode and not targetexists and find var__combat_target ground -1 -1 10 as alias__virtuoso_target
-        if skill "Discordance" > 0 and cooldown "Discord" = 0 and cooldown "Music" = 0 and not findbuff "Virtuoso"
+        if skill "Discordance" > 0 and cooldown "disco" = 0 and cooldown "music" = 0 and not findbuff "Virtuoso"
             useskill 'Discordance'
             waitfortarget wait__target
 

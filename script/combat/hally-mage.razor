@@ -34,7 +34,7 @@ endif
 
 while not dead
 	if pvp
-		overhead "You are in pvp" 33
+		overhead "[ pvp, on ]" 33
 		stop
 	endif
 
@@ -57,7 +57,7 @@ while not dead
 			endif
 
 			wait 1000
-			overhead 'You drop some gold on the ground.' 55
+			overhead "[ gold, dropped ]" 53
 		endif
 	endwhile
 
@@ -73,28 +73,28 @@ while not dead
 			yell "[Pouch"
 			getlabel backpack ping
 		else
-			overhead "You are out of pouche." 32
+			overhead "[ pouch, out ]" 43
 		endif
 	endif
 
 	if mana > 30 and not targetexists and not casting
-		if not targetexists and not findbuff 'Protection' and cooldown "Walk" = 0 and findtype 3980 self and findtype 3972 self and findtype 3973 self and findtype 3974 self
+		if not targetexists and not findbuff 'Protection' and cooldown "walk" = 0 and findtype 3980 self and findtype 3972 self and findtype 3973 self and findtype 3974 self
 			cast 'Protection'
 			wait var_arch_protection_cooldown
 			waitfortarget var_max_wait_for_time
 			hotkey 'Target Self'
 		endif
-		if not targetexists and not findbuff 'Reactive Armor' and cooldown "Walk" = 0 and findtype 3980 self and findtype 3972 self and findtype 3981 self
+		if not targetexists and not findbuff 'Reactive Armor' and cooldown "walk" = 0 and findtype 3980 self and findtype 3972 self and findtype 3981 self
 			cast 'Reactive Armor'
 			wait var_reactive_armor_cooldown
 		endif
-		if not targetexists and not findbuff 'Magic Reflection' and cooldown "Reflect" = 0 and cooldown "Walk" = 0 and findtype 3972 self and findtype 3974 self and findtype 3981 self
+		if not targetexists and not findbuff 'Magic Reflection' and cooldown "reflect" = 0 and cooldown "walk" = 0 and findtype 3972 self and findtype 3974 self and findtype 3981 self
 			cast 'Magic Reflection'
 			wait var_magic_reflection_cooldown
 		endif
 	endif
 
-	if diffhits > 15 and diffhits < 35 and cooldown "Walk" = 0  and findtype 3972 self and findtype 3973 self and findtype 3974 self and findtype 3981 self
+	if diffhits > 15 and diffhits < 35 and cooldown "walk" = 0  and findtype 3972 self and findtype 3973 self and findtype 3974 self and findtype 3981 self
 		if not targetexists and not casting
 			hotkey "> Smart Heal/Cure Self"
         endif
@@ -111,7 +111,7 @@ while not dead
 
 			if "next usable" in found_potion_description
 				if timer "overhead_message_timer" > overhead_message_timer_frequency
-					overhead found_potion_description 83
+					overhead "[ heal pot, {{found_potion_description}} ]" 53
 					settimer "overhead_message_timer" 0
 				endif
 
@@ -130,14 +130,14 @@ while not dead
 
 				wait 200
 			else
-				overhead "You drink a healing potion." 53
+				overhead "[ heal pot, on ]" 53
 				dclick found_potion
 				getlabel backpack ping
-				cooldown "Heal Potion" 10000
+				cooldown "heal pot" 10000
 			endif
 		else
 			if timer "overhead_message_timer" > overhead_message_timer_frequency
-				overhead "You are out of healing potion." 32
+				overhead "[ heal pot, out ]" 43
 				settimer "overhead_message_timer" 0
 			endif
 
@@ -159,12 +159,12 @@ while not dead
 				break
 			endif
 
-			overhead "You drink a cure potion." 44
+			overhead "[ cure pot, on ]" 53
 			dclick found_potion
 			getlabel backpack ping
 		else
 			if timer "overhead_message_timer" > overhead_message_timer_frequency
-				overhead "You are out of cure potion." 32
+				overhead "[ cure pot, out ]" 43
 				settimer "overhead_message_timer" 0
 			endif
 
@@ -185,7 +185,7 @@ while not dead
 			wait 200
 		else
 			if timer "overhead_message_timer" > overhead_message_timer_frequency
-				overhead "You are out of refresh potions." 32
+				overhead "[ refresh, out ]" 43
 				settimer "overhead_message_timer" 0
 			endif
 		endif
@@ -197,7 +197,7 @@ while not dead
 			wait 200
 		else
 			if timer "overhead_message_timer" > overhead_message_timer_frequency
-				overhead "You are out of strength potions." 32
+				overhead "[ str, out ]" 43
 				settimer "overhead_message_timer" 0
 			endif
 		endif
@@ -209,7 +209,7 @@ while not dead
 			wait 200
 		else
 			if timer "overhead_message_timer" > overhead_message_timer_frequency
-				overhead "You are out of agility potions." 32
+				overhead "[ agi, out ]" 43
 				settimer "overhead_message_timer" 0
 			endif
 		endif
@@ -221,7 +221,7 @@ while not dead
 			wait 200
 		else
 			if timer "overhead_message_timer" > overhead_message_timer_frequency
-				overhead "You are out of magic resist potions." 32
+				overhead "[ resist, out ]" 43
 				settimer "overhead_message_timer" 0
 			endif
 		endif

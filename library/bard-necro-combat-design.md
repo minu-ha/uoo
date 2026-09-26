@@ -76,7 +76,7 @@ flowchart TD
 | 4 | 바드 스킬 | `Music=0 and <슬롯>=0` | 디스코 1회 + **피스 12초마다** |
 | 5 | 네크로 | `var__symbols >= config__symbols_*` | Blood Oath → Corpse Skin → Evil Omen 순. **유휴 예약** 아래 참조 |
 | 6 | 오프닝 | 마나 + 대상별 리스트 | Mana Drain -> Curse |
-| 7 | 프록 코어 | `cooldown "Magic Arrow"` 등 | 네 개가 각자 쿨 |
+| 7 | 프록 코어 | `cooldown "magic arrow"` 등 | 네 개가 각자 쿨 |
 | 8 | 필러 | `mana > config__filler_floor` | Energy Bolt. **여기부터 잘린다** |
 
 **`PASS FLAGS` 는 교전 중에만 공격 시약 7종을 읽는다.** 이동 중엔 아무도 안 묻는 질문에 findtype 14회를
@@ -147,10 +147,10 @@ flowchart TD
 
 | 자원 | 쓰는 곳 | 성격 |
 |---|---|---|
-| `cooldown "Music"` | 바드 **스킬** 사용 | 글로벌 5초. **Song 은 이것을 세우지 않는다** |
-| `cooldown "Discord"` | Disco | 단독 슬롯 5초 |
-| `cooldown "Peace/Provo"` | Peace 와 Provo | **공유 슬롯 10초.** 합친 항목 하나 |
-| **Barding Song 쿨** | 3곡 전체 | **별도 계열. `cooldown "Music"` 이 아니다.** 세 곡이 공유 |
+| `cooldown "music"` | 바드 **스킬** 사용 | 글로벌 5초. **Song 은 이것을 세우지 않는다** |
+| `cooldown "disco"` | Disco | 단독 슬롯 5초 |
+| `cooldown "peace/provo"` | Peace 와 Provo | **공유 슬롯 10초.** 합친 항목 하나 |
+| **Barding Song 쿨** | 3곡 전체 | **별도 계열. `cooldown "music"` 이 아니다.** 세 곡이 공유 |
 | Unholy Symbol | Blood Oath(4), Corpse Skin(2), Evil Omen(2), Vampiric Embrace(3) | 5초당 1개, 최대 Effective Necro/10 = **10** |
 | 마나 | 버프 + 오프닝 + 스팸 + 필러 | 메디가 없어 가장 빡빡하다 |
 
@@ -179,8 +179,8 @@ Song    요구:  Music = 0   AND   Song = 0   AND   <그 곡의 슬롯> = 0
 Skill   요구:  Music = 0   AND   <그 스킬의 슬롯> = 0
         설정:  Music 5초   +   <그 스킬의 슬롯>
 
-슬롯:   cooldown "Discord"       5초   단독
-        cooldown "Peace/Provo"   10초  Peace 와 Provo 가 공유
+슬롯:   cooldown "disco"       5초   단독
+        cooldown "peace/provo"   10초  Peace 와 Provo 가 공유
 ```
 
 **읽는 조건은 거의 같고, 다른 것은 무엇을 세우느냐뿐이다.**
@@ -188,18 +188,18 @@ Skill   요구:  Music = 0   AND   <그 스킬의 슬롯> = 0
 차단 메시지 세 종류와 실측 로그는 `bard-mechanics.md` 참조.
 
 **Peace 와 Provo 는 서버에서 슬롯을 공유한다.**
-`cooldowns.xml` 에서 **`Peace/Provo` 한 항목으로 합쳤다.**
+`cooldowns.xml` 에서 **`peace/provo` 한 항목으로 합쳤다.**
 
-**차단된 시도도 `Music` 을 태운다.** 송 쿨에 막힌 시전이 스킬 쿨을 소비하므로,
+**차단된 시도도 `music` 을 태운다.** 송 쿨에 막힌 시전이 스킬 쿨을 소비하므로,
 실패한 송 뒤에 스킬을 바로 밀어넣으면 그 스킬도 막힌다.
 
 #### 루프 규칙 하나
 
 **송은 전투 중에 부르지 않는다. 이동 중에만 부른다.**
 
-전투 중에는 디스코와 피스가 `Music` 을 5초씩 계속 세워서 송이 거의 안 나간다.
+전투 중에는 디스코와 피스가 `music` 을 5초씩 계속 세워서 송이 거의 안 나간다.
 게다가 악기 연주는 시전을 끊어서 프록 주문을 날려먹는다.
-반대로 이동 구간(10~20초)에는 `Music` 이 비어 있고 어차피 아무것도 안 하고 있다.
+반대로 이동 구간(10~20초)에는 `music` 이 비어 있고 어차피 아무것도 안 하고 있다.
 
 ```
 not targetexists and not casting and 근처에 몹 없음  ->  송 한 곡
@@ -213,18 +213,18 @@ not targetexists and not casting and 근처에 몹 없음  ->  송 한 곡
 따라서 스크립트는 게임 값을 그대로 읽으면 된다. **자체 타이머가 하나도 필요 없다.**
 
 ```
-Disco 송    cooldown "Music" = 0 and cooldown "Song" = 0 and cooldown "Discord" = 0
-Peace 송    cooldown "Music" = 0 and cooldown "Song" = 0 and cooldown "Peace/Provo" = 0
-Disco 스킬  cooldown "Music" = 0 and cooldown "Discord" = 0
-Peace 스킬  cooldown "Music" = 0 and cooldown "Peace/Provo" = 0
-프록 스펠   cooldown "Magic Arrow" / "Harm" / "Fireball" / "Lightning" = 0
+Disco 송    cooldown "music" = 0 and cooldown "song" = 0 and cooldown "disco" = 0
+Peace 송    cooldown "music" = 0 and cooldown "song" = 0 and cooldown "peace/provo" = 0
+Disco 스킬  cooldown "music" = 0 and cooldown "disco" = 0
+Peace 스킬  cooldown "music" = 0 and cooldown "peace/provo" = 0
+프록 스펠   cooldown "magic arrow" / "harm" / "fireball" / "lightning" = 0
 필러        mana > config__filler_floor
 ```
 
-**바드 외 스킬을 루프에 넣게 되면 `Music` 대신 `Skill` 을 봐야 한다.**
+**바드 외 스킬을 루프에 넣게 되면 `music` 대신 `skill` 을 봐야 한다.**
 서버 스킬 게이트가 하나라 Animal Lore 같은 것도 같은 타이머를 쓴다.
 
-Lyric Aspect 방어구의 리셋 프록이 `Music` / 스킬 슬롯 / `Song` 을 전부 0으로 만드는데,
+Lyric Aspect 방어구의 리셋 프록이 `music` / 스킬 슬롯 / `song` 을 전부 0으로 만드는데,
 게임 값을 직접 읽으므로 그 이득이 자동으로 따라온다.
 
 
@@ -496,8 +496,8 @@ var__opener_done = 1  <-  inlist cursed
 | **Peace x Barding Break** | **꼬임** | 끊기면 `Ensemble` 조건이 같이 꺼진다. `Refrain` 이 이걸 막는다 |
 | 피스 x 공격 | 안 꼬임 | **피스는 데미지로 안 풀린다.** 걸어두고 때려도 된다 |
 | **Song x Song** | **꼬임** | **세 곡이 쿨 하나를 공유한다.** 3곡 연창은 곡당 11초씩 걸린다 |
-| **Skill -> Song** | **꼬임** | 스킬이 `Music` 5초를 세워 송을 밀어낸다. 송이 급하면 스킬을 참는다 |
-| Song -> Skill | 안 꼬임 | 송은 `Music` 도 스킬 슬롯도 안 세운다. 1.5초 뒤 디스코가 나간다 |
+| **Skill -> Song** | **꼬임** | 스킬이 `music` 5초를 세워 송을 밀어낸다. 송이 급하면 스킬을 참는다 |
+| Song -> Skill | 안 꼬임 | 송은 `music` 도 스킬 슬롯도 안 세운다. 1.5초 뒤 디스코가 나간다 |
 | `clearsysmsg` x `insysmsg` | 위험 | 한 패스 안에서 시전->판정을 끝낸다 |
 | 송 x 시전 | **꼬임** | 악기 연주가 시전을 끊는다. `not casting` 필수. 그래서 전투 중엔 안 부른다 |
 | **Peace 스킬 x Peace/Provo 송** | **꼬임** | 슬롯 공유. 전투 직후 10초간 두 곡이 막힌다 |
@@ -540,18 +540,18 @@ endif
 ```
 
 `findbuff "song of ..."` 로 게이트하지 않는다. 15분 버프라 늘 참이어서 갱신이 영영 안 돈다.
-**`cooldown "Song" = 0` 을 보고 다음 곡을 부른다.**
+**`cooldown "song" = 0` 을 보고 다음 곡을 부른다.**
 
 다만 **곡마다 자기 슬롯을 함께 봐야 한다.** 전투가 막 끝났으면 Peace 슬롯이 10초 남아 있어서
 Peace 송과 Provo 송이 둘 다 막힌다. 그때는 그 패스를 거르고 다음 패스에 다시 온다.
 
 ```
-if cooldown "Music" = 0 and cooldown "Song" = 0
-	if var__song_next = 1 and cooldown "Discord" = 0
+if cooldown "music" = 0 and cooldown "song" = 0
+	if var__song_next = 1 and cooldown "disco" = 0
 		... Disco 송 ...   @setvar! var__song_next 2
-	elseif var__song_next = 2 and cooldown "Peace/Provo" = 0
+	elseif var__song_next = 2 and cooldown "peace/provo" = 0
 		... Peace 송 ...   @setvar! var__song_next 3
-	elseif var__song_next = 3 and cooldown "Peace/Provo" = 0
+	elseif var__song_next = 3 and cooldown "peace/provo" = 0
 		... Provo 송 ...   @setvar! var__song_next 1
 	endif
 endif
@@ -576,7 +576,7 @@ endif
 
 | 근거 | 내용 |
 |---|---|
-| **한 세트가 VS + 6초 + 6초, 마나 101** | 교전 중엔 로테이션이 12초 서고 긴급 힐이 끊으면 50 씩 날아간다. 이동 중엔 서 있어야 하므로(`cooldown "Walk"`) 다음 몹 앞에 멈춘 순간에만 나간다 -- 수동과 같은 타이밍이다 |
+| **한 세트가 VS + 6초 + 6초, 마나 101** | 교전 중엔 로테이션이 12초 서고 긴급 힐이 끊으면 50 씩 날아간다. 이동 중엔 서 있어야 하므로(`cooldown "walk"`) 다음 몹 앞에 멈춘 순간에만 나간다 -- 수동과 같은 타이밍이다 |
 | **뭘 뽑을지는 상황이 정한다** | 듀오 Lich 2 / 솔플 Mummy + Lich / 고 MR Mummy + Air. 스크립트는 파티 구성을 모른다 |
 | **썩는 속도가 결정을 사람에게 준다** | 1%/10초면 체력 반이 되는 데 8분이다. "언제 갈아끼울지"는 남은 체력과 다음 몹을 보고 정하는 문제라 임계값 하나로 대신하기 어렵다 |
 | **없을 때의 뒷정리는 이미 자동이다** | 송은 다음 이동에서 다시 걸리고, Blood Oath / Vampiric Embrace 는 `followers > 0` 으로 선다. 본체 로테이션은 그대로 돈다 |
@@ -595,7 +595,7 @@ config__followers_want 4                슬롯 수. Lich 2마리
 RESUMMON   [MUSHROOM 뒤, BARD SONG 앞]
   var__engaged = 0 and followers < config__followers_want
     mana >= 50 and var__regs_summon = 1          bloodmoss, mandrake, silk, ash
-      not targetexists and not casting and cooldown "Walk" = 0
+      not targetexists and not casting and cooldown "walk" = 0
         timer "timer__vengeful_spirit" >= 30000  -> hotkey 'Vengeful Spirit', 메시지 확인
         else                                     -> cast config__summon_spell, for 70 폴링, target
 ```
@@ -615,7 +615,7 @@ Bloodmoss 플래그 하나와 `Vengeful Spirit` 핫키(목록에 있음)만 추�
 | `findbuff "song of discordance"` | `bard-mace.razor:494` |
 | `useskill` -> `waitfortarget` -> `target backpack` | `bard-mace.razor:518` |
 | `stop` | `bard-necro-enhanced.razor` INSTRUMENT |
-| `cooldown "Magic Arrow" = 0` | `cooldowns.xml` 에 항목 존재 |
+| `cooldown "magic arrow" = 0` | `cooldowns.xml` 에 항목 존재 |
 | `for 25` + `break` 로 커서 폴링 | `bard-necro-enhanced.razor` PROC CORE, 레퍼런스 `auto-mage.razor:1160` |
 | `hotkey 'Vampiric Embrace'` + `hotkey 'Target Self'` | 위키: 자신을 타겟하면 주변 시체를 자동 탐색. **인게임 확인됨** |
 | `hotkey 'Drink Heal'` 등 포션 핫키 | Razor 핫키 목록 Potions 항목. 이름 그대로 |
@@ -637,7 +637,7 @@ Bloodmoss 플래그 하나와 `Vengeful Spirit` 핫키(목록에 있음)만 추�
 - **Effective Barding = 170** (송 메시지 8.5% 실측)
 - **Discordance 는 barding break 로 안 끊긴다**
 - **Peacemaking 은 데미지로 안 풀린다.** 브레이크로만 풀린다
-- **Peace 와 Provo 는 슬롯을 공유한다.** `Peace/Provo` 한 항목으로 합쳤다
+- **Peace 와 Provo 는 슬롯을 공유한다.** `peace/provo` 한 항목으로 합쳤다
 - **Song = 스킬을 백팩에 타겟.** Music 도 슬롯도 세우지 않고, 읽기만 한다
 - **Ensemble 조건은 `Discord AND (Peace OR Provo)`**
 - **"Your barding skill cooldowns reset." 프록이 존재한다**
@@ -647,13 +647,13 @@ Bloodmoss 플래그 하나와 `Vengeful Spirit` 핫키(목록에 있음)만 추�
 - **리셋 프록의 출처는 Lyric Aspect 방어구다.** 쿨 측정할 때는 벗는다
 - **브레이크 대상에는 Peace / Provo 둘 다 못 건다**
 - **시전 시간은 서클별 고정** (1서클 0.50 ~ 8서클 2.50, 회복 0.2초)
-- **Song 쿨은 세 곡이 공유하는 별도 계열이다.** `cooldown "Music"` 이 아니다
+- **Song 쿨은 세 곡이 공유하는 별도 계열이다.** `cooldown "music"` 이 아니다
 
 **코드 작성 전에 먼저 할 일**
 
-1. **`cooldowns.xml` 의 `Music` 항목을 고친다** (게임 끄고).
-   송 트리거를 빼고 `Song` 항목을 신설한다. 이걸 안 하면 게이트가 애초에 틀린 값을 읽는다.
-2. **`Fireball` 항목에 발동 트리거를 넣는다.** 지금은 "다시 준비됨" 메시지만 있어서
+1. **`cooldowns.xml` 의 `music` 항목을 고친다** (게임 끄고).
+   송 트리거를 빼고 `song` 항목을 신설한다. 이걸 안 하면 게이트가 애초에 틀린 값을 읽는다.
+2. **`fireball` 항목에 발동 트리거를 넣는다.** 지금은 "다시 준비됨" 메시지만 있어서
    바가 채워지지 않는다. 인게임에서 Fireball 프록이 터질 때 나오는 문구를 받아 적는다.
 
 **남은 측정**

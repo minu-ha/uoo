@@ -49,6 +49,7 @@
 |---|---|
 | `templates.md` | 템플릿 ↔ 전투 스크립트 ↔ 핫키 ↔ shelf ↔ 프로필 매핑. 새 템플릿 만들면 한 줄 추가 |
 | `hotkeys.md` | 키 배치와 주문 데미지 메모 |
+| `overheads.md` | 쿨다운 바 · 오버헤드 알림. 이름 규칙(Out / On Me), 컨벤션, 아직 문장을 못 잡은 구멍 목록 |
 | `item-list.razor` | 아이템 이름·graphic id·hue 목록. `findtype` 인자 찍을 때 참조 |
 | `vendor-prices.md` | 상점 가격표 |
 | `bard-necro-summon-guide.md` | Bard Necro 소환 조합·Tome 투자 가이드 |
@@ -64,7 +65,7 @@
 
 ```
 # Bard Necro main loop: sustain, bard control, necro rotation.
-# Needs: organizer 1 (loot bag), cooldown "Skill", hotkey "Clear Scavenger Cache", var_my_loot_chest set
+# Needs: organizer 1 (loot bag), cooldown "skill", hotkey "Clear Scavenger Cache", var_my_loot_chest set
 ```
 
 **주석에 `;` 를 쓰지 않는다.** Razor 는 주석을 걷어내기 전에 `;` 를 구문 구분자로 보기 때문에,
@@ -103,7 +104,7 @@ pull 한 사람 모두의 게임에 들어간다. 개인 값은 프로필에 저
 
 ```
 if not varexist global__my_loot_chest
-    overhead "Target your loot chest" 55
+    overhead "[ loot chest, pick ]" 55
     setvar global__my_loot_chest
 endif
 ```
@@ -116,7 +117,7 @@ endif
 ```
 if not varexist global__my_loot_chest or not find global__my_loot_chest ground -1 -1 3
     unsetvar global__my_loot_chest
-    overhead "Target your loot chest" 55
+    overhead "[ loot chest, pick ]" 55
     setvar global__my_loot_chest
 endif
 ```
@@ -138,16 +139,18 @@ endif
 - 검프·핫바는 `gumpexists` / `ingump` 확인 후 `gumpresponse`.
 - 디버그 출력은 `{{var}}` 보간. 확인 끝나면 지운다.
 
-**`overhead` 색상**
+**`overhead` 형식** — 전부 `[ 대상, 상태 ]` 소문자. 시전 알림만 `[ 대상 ]`. 단어와 hue 는 `library/overheads.md` 의
+글로서리와 팔레트를 따르고, 쿨다운 바 이름(`cooldown "heal pot"`)도 같은 단어를 쓴다. 새 단어를 만들기 전에 그 문서를 본다.
 
-| 색 | 용도 |
-|---|---|
-| 32 | 상태, 정보 |
-| 33 | 경고 |
-| 34 | 에러, 못 찾음 |
-| 44 | 네크로 캐스팅 알림 |
-| 83 | 매저리 캐스팅 알림 |
-| 55 | 선택 프롬프트, 라벨 출력 |
+| 색 | 용도 | 예 |
+|---|---|---|
+| 53 | 상태, 정보. `config__chatty` 로 끈다 | `[ target, set ]` |
+| 43 | 경고, 재고 없음, 시전 끊김 | `[ heal pot, out ]` `[ heal, disturbed ]` |
+| 33 | 에러, 그것 없이는 못 도는 것 | `[ inst, out ]` |
+| 68 | 준비됨 | `[ hide, ready ]` |
+| 44 | 능력 · 네크로 시전 알림 | `[ blood oath ]` |
+| 83 | 매저리 시전 알림 | `[ curse ]` |
+| 55 | 선택 프롬프트, 라벨 출력 | `[ inst, pick ]` |
 
 ## Outlands 확장 문법
 

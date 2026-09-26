@@ -67,11 +67,11 @@ while not dead
 
 		if is_stealth = 1 or is_stealth = 2
 			if insysmsg "Vanish activated."
-				overhead "Vanish activated." 89
+				overhead "[ vanish, on ]" 53
 				setvar is_stealth 2
 				break
 			else
-				overhead "You are no longer hidden." 32
+				overhead "[ hide, off ]" 43
                 setvar is_stealth 0
 			endif
 
@@ -84,7 +84,7 @@ while not dead
 				yell "[Pouch"
 				getlabel backpack ping
 			else
-				overhead "You are out of pouche." 32
+				overhead "[ pouch, out ]" 43
 			endif
 		endif
 
@@ -94,7 +94,7 @@ while not dead
 
 				if "next usable" in found_potion_description
 					if timer "overhead_message_timer" > overhead_message_timer_frequency
-						overhead found_potion_description 83
+						overhead "[ heal pot, {{found_potion_description}} ]" 53
 						settimer "overhead_message_timer" 0
 					endif
 				else
@@ -102,14 +102,14 @@ while not dead
 						break
 					endif
 
-					overhead "You drink a healing potion." 53
+					overhead "[ heal pot, on ]" 53
 					dclick found_potion
 					getlabel backpack ping
-					cooldown "Heal Potion" 10000
+					cooldown "heal pot" 10000
 				endif
 			else
 				if timer "overhead_message_timer" > overhead_message_timer_frequency
-					overhead "You are out of healing potion." 32
+					overhead "[ heal pot, out ]" 43
 					settimer "overhead_message_timer" 0
 				endif
 			endif
@@ -121,12 +121,12 @@ while not dead
 					break
 				endif
 
-				overhead "You drink a cure potion." 44
+				overhead "[ cure pot, on ]" 53
 				dclick found_potion
 				getlabel backpack ping
 			else
 				if timer "overhead_message_timer" > overhead_message_timer_frequency
-					overhead "You are out of cure potion." 32
+					overhead "[ cure pot, out ]" 43
 					settimer "overhead_message_timer" 0
 				endif
 			endif
@@ -134,7 +134,7 @@ while not dead
 
 		if findtype 8198 ground -1 -1 2 as found_corpse
 			if findtype "Elven Spellblade" backpack as found_spellblade
-				if cooldown "corpseSkin" = 0
+				if cooldown "corpse skin" = 0
 					if hidden
 						break
 					endif
@@ -142,17 +142,17 @@ while not dead
 					dclick found_spellblade
 					waitfortarget
 					target 'self'
-					cooldown "corpseSkin" 1000
+					cooldown "corpse skin" 1000
 
 					if insysmsg "You carve materials from the corpse"
 						if timer "corpse_carving_timer" >= corpse_carving_timer_frequency
-							overhead 'You carve materials from the corpse.' 49
+							overhead "[ carve, done ]" 53
 							settimer "corpse_carving_timer" 0
 							ignore found_corpse
 						endif
 					elseif insysmsg "You dont see anything nearby worth carving or investigating."
 						if timer "corpse_carving_timer" >= corpse_carving_timer_frequency
-							overhead 'You dont see anything nearby worth carving or investigating.' 42
+							overhead "[ corpse, out ]" 43
 							settimer "corpse_carving_timer" 0
 							ignore found_corpse
 						endif
@@ -160,7 +160,7 @@ while not dead
 				endif
 			else
 				if timer "overhead_message_timer" >= overhead_message_timer_frequency
-					overhead 'You must have a bladed weapon to carve this corpse.' 32
+					overhead "[ blade, out ]" 43
 					settimer "overhead_message_timer" 0
 				endif
 			endif
@@ -177,12 +177,12 @@ while not dead
 				endif
 
 				wait 1000
-				overhead 'You drop some gold on the ground.' 55
+				overhead "[ gold, dropped ]" 53
 			endif
 		endwhile
 
-		if cooldown "Skill" = 0 and timer "hide_reminder_timer" > hide_reminder_timer_frequency
-			overhead "You are able to hide again." 1303
+		if cooldown "skill" = 0 and timer "hide_reminder_timer" > hide_reminder_timer_frequency
+			overhead "[ hide, ready ]" 68
 			settimer "hide_reminder_timer" 0
 		endif
 
@@ -203,7 +203,7 @@ while not dead
 		endif
 
 		if findbuff "Stationary Penalty" and timer "overhead_message_timer" >= overhead_message_timer_frequency
-			overhead "You are under a stationary penalty." 33
+			overhead "[ penalty, on ]" 43
 			settimer "overhead_message_timer" 0
 		endif
 
@@ -230,7 +230,7 @@ while not dead
             endif
 
 			if timer "overhead_message_timer" > overhead_message_timer_frequency
-				overhead "You must wait for stealth." 32
+				overhead "[ stealth, off ]" 43
 				settimer "overhead_message_timer" 0
 			endif
 		endif
@@ -240,12 +240,12 @@ while not dead
 		endif
 
 		if is_stealth = 1 and timer "overhead_message_timer" > overhead_message_timer_frequency
-			overhead "You may now move into position." 25
+			overhead "[ position, ready ]" 68
 			settimer "overhead_message_timer" 0
 		endif
 
 		if is_stealth = 2 and timer "overhead_message_timer" > overhead_message_timer_frequency
-			overhead "You feel ready to conitunue stealthing." 28
+			overhead "[ stealth, ready ]" 68
 			settimer "overhead_message_timer" 0
 		endif
 
@@ -253,13 +253,13 @@ while not dead
 			clearsysmsg
 
 			for 5
-				if cooldown "Skill" = 0 or cooldown "Stealth" = 0
+				if cooldown "skill" = 0 or cooldown "stealth" = 0
 					hotkey "Stealth"
                     setvar is_stealth 1
                     clearsysmsg
                     break
 				else
-					overhead "You must wait a few moments to use another skill." 83
+					overhead "[ skill, off ]" 43
 				endif
 
 				wait 1000
@@ -277,12 +277,12 @@ while not dead
 
 				if find lasttarget ground -1 -1 1
 					hotkey "Attack Last Target"
-					cooldown "corpseSkin" 1000
+					cooldown "corpse skin" 1000
 					clearsysmsg
 					wait 300
 					break
 				elseif timer "target_timer" > target_timer_frequency
-					overhead "That target is out of range." 32 lasttarget
+					overhead "[ range, out ]" 43 lasttarget
 					settimer "target_timer" 0
 				endif
 			endwhile
