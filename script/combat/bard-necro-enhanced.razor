@@ -213,8 +213,8 @@ clearignore
 # ability's own cost plus what the more valuable abilities above it need kept back:
 #
 #   blood oath        4       its cost, nothing held back, it is the priority
-#   corpse skin       5       2 + 3, enough that a Blood Oath is never more than a tick away
-#   evil omen         5       2 + 3, same footing as Corpse Skin
+#   corpse skin       4       same bar as Blood Oath, the chain order settles who goes first
+#   evil omen         4       same again, so it only ever fires from a walk's surplus
 #   poison strike     1       its cost. It only fires while Corpse Skin is up and after the
 #                             opener, a filler slot, so the bank has already been spent above
 #   vampiric embrace  9       3 + 6, walk only, so it competes with nothing else
@@ -224,8 +224,8 @@ clearignore
 # at Necromancy 100 those two are the sustainable rotation. Raise everything if fights are
 # short and walks long, lower if the bank sits full.
 @setvar! config__symbols_blood_oath 4
-@setvar! config__symbols_corpse_skin 5
-@setvar! config__symbols_evil_omen 5
+@setvar! config__symbols_corpse_skin 4
+@setvar! config__symbols_evil_omen 4
 @setvar! config__symbols_poison_strike 1
 @setvar! config__symbols_vampiric_embrace 9
 

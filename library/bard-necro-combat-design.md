@@ -412,12 +412,12 @@ Peace 를 가끔 쓰는 제어 수단으로만 다루면 `Ensemble` + `Virtuoso`
 | 능력 | 비용 | 발동 조건 | 남겨두는 것 |
 |---|---|---|---|
 | **Blood Oath** | 4 | `>= 4` | 없음. 최우선 |
-| **Corpse Skin** | 2 | `>= 5` | 3. Blood Oath 가 한 틱 안에 다시 찬다 |
-| Evil Omen | 2 | `>= 5` | 3, Corpse Skin 과 같은 발판 |
+| **Corpse Skin** | 2 | `>= 4` | 없음. Blood Oath 와 같은 4 라 체인 순서가 우선순위 |
+| Evil Omen | 2 | `>= 4` | 없음. 위 둘이 30초에 6개를 다 쓰니 사실상 이동 잉여에서만 |
 | Poison Strike | 1 | `>= 1`, Corpse Skin 켜진 동안 + 오프너 뒤 | 없음. 필러 자리라 위는 이미 썼다 |
 | Vampiric Embrace | 3 | `>= 9`, 이동 중만 | 6 |
 
-2026-09-27 에 6/8/9/7 에서 이렇게 낮췄다. 은행이 늘 차 있어서 Evil Omen 과 Poison Strike 가 거의 안 나가던 것.
+2026-09-27 에 6/8/9/7 → 4/4/1/9. 은행이 늘 차 있어서 Evil Omen 과 Poison Strike 가 거의 안 나가던 것, 그리고 Poison Strike 가 Corpse Skin 을 기다리는 시간을 줄이려고.
 
 전부 `config__symbols_*` 라 사냥터에 맞춰 조정한다. 전투가 짧고 이동이 길면 올리고, 은행이 늘 차 있으면 내린다.
 
@@ -435,8 +435,8 @@ Peace 를 가끔 쓰는 제어 수단으로만 다루면 `Ensemble` + `Virtuoso`
 같이 사라졌을 딜을 회수하는 셈이라 값을 하고, 마나가 안 들어 **필러 자리**를 쓴다.
 
 **Necro 100 의 실제 순환은 Blood Oath + Corpse Skin 이다.** 30초에 6개가 차고 그 둘이 정확히 6개를 쓴다.
-Evil Omen 은 Corpse Skin 과 같은 5 에서 나가므로 순서(Corpse Skin 먼저)가 곧 우선순위고, Poison Strike 는
-1개만 있으면 EB 자리에서 터진다. 은행이 비면 Blood Oath 가 한 틱(5초) 기다리는 정도.
+셋이 전부 4 에서 나가므로 체인 순서(Blood Oath → Corpse Skin → Evil Omen)가 곧 우선순위다. Blood Oath 뒤
+20초면 Corpse Skin 이 나가고 그때부터 Poison Strike 가 열린다. Evil Omen 은 이동 중 쌓인 잉여로만 돈다.
 
 **안 넣은 것**: Strangle(4)은 Blood Oath 와 심볼을 다투고 모든 딜을 5초 지연시킨다.
 Wither(5)는 비공격 주문용 마나만 준다. Pain Spike(5)는 **다음 몹 옆에** 시체가 있어야 한다.
