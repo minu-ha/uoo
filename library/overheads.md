@@ -23,7 +23,7 @@
 | 폭 | 대괄호 포함 **18자 목표, 22자 상한.** 넘으면 대상을 줄인다 (`No Longer Paralyzed` → `[ para, off ]`) |
 | 구분 | 서버 문장은 절대 `[` 로 시작하지 않는다. 대괄호가 곧 "커스텀" 표시다 |
 | 검색 | 부분 문자열, **대소문자 안 가림** (인게임 확인: `Trapped pouches` 가 "trapped pouches" 에 걸렸다). 정규식·와일드카드 없음 |
-| 한계 | 같은 꼬리를 가진 두 문장이 숫자 자리만 다르면 (포션 대기의 "1 minute 59 seconds" 와 "56 seconds") 부분 문자열로는 못 가른다. 그래서 포션 대기는 `{4} {5}` = "1 minute" / "56 seconds" 로 초를 버린다 |
+| 기다림 | 기다리라는 문장은 전부 `[ wait, … ]`. "wait another N" 꼴은 숫자 자리가 고정이라 `4m 17s` / `2m` / `59s`, 포션처럼 "wait N" 꼴은 혼합 형태와 초 형태를 부분 문자열로 못 갈라서 문장의 단위 단어를 그대로 쓴 `{4} {5}` = "1 minute" / "56 seconds" |
 | 순서 | 한 문장에 항목 여러 개가 걸리면 **파일에서 앞의 것 하나만** 뜬다 (인게임 확인, `[ wait, 4m 53s ]` 가 `[ wait, 4s ]` 를 눌렀다). 구체적인 검색어를 범용 검색어보다 **앞에** 둔다 |
 | 쿨다운 바 이름 | 같은 단어, **대괄호 없이**. 방향이 있을 때만 쉼표: `hams, me` / `teleki, target`. 그 외는 한 단어: `music` `heal pot` |
 
@@ -231,8 +231,8 @@ hue 번호는 이 뜻으로 이미 쓰이고 있던 값을 골랐다. 실제 색
 | You increase your damage resistance to creature-casted spells | `[ - Drinking MR Potion -]` | `[ resist, on ] (53)` |
 | You cannot move! | `[ - You are Paralyzed! - ]` | `[ para, on ] (33)` |
 | You can move! | `[ - No Longer Paralyzed! - ]` | `[ para, off ] (65)` |
-| before you may use another strength potion | `[ - Can't use Str Pot - ]` | `[ str, {4} {5} ] (43)` → "1 minute" / "56 seconds" / "2 minutes". 네 가지 문장 형태를 다 받는다 |
-| before you may use another agility potion | `[ - Can't use Agi Pot - ]` | `[ agi, {4} {5} ] (43)` |
+| before you may use another strength potion | `[ - Can't use Str Pot - ]` | `[ wait, {4} {5} ] (43)` → "1 minute" / "56 seconds" / "2 minutes". 뭘 기다리는지는 아는 것이니 대상은 전부 `wait` |
+| before you may use another agility potion | `[ - Can't use Agi Pot - ]` | `[ wait, {4} {5} ] (43)` |
 | you are already at full stamina. | `[ - TR Not Needed - ]` | `[ stam, full ] (53)` |
 | You are not poisoned. | `[ - Not Poisoned! - ]` | `[ poison, off ] (53)` |
 | You may now use a strength potion. | `[ - Str Pot is Ready - ]` | `[ str, ready ] (68)` |
