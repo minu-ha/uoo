@@ -1207,6 +1207,21 @@ while not dead
                             endif
                         endif
 
+                        if find lasttarget ground -1 -1 config__target_range as alias__fresh_target
+                            if not dead alias__fresh_target and var__combat_target != alias__fresh_target
+                                if noto alias__fresh_target = "hostile" or noto alias__fresh_target = "criminal" or noto alias__fresh_target = "enemy" or noto alias__fresh_target = "murderer"
+                                    @setvar! var__combat_target alias__fresh_target
+                                    settimer "timer__target_grace" 0
+
+                                    if find var__combat_target ground -1 -1 config__target_range as alias__disco_target
+                                        if config__chatty = 1
+                                            overhead "[ target, set ]" 90
+                                        endif
+                                    endif
+                                endif
+                            endif
+                        endif
+
                         while targetexists
                             if dead alias__disco_target or var__combat_target != alias__disco_target
                                 hotkey "Cancel Current Target"
@@ -1258,6 +1273,21 @@ while not dead
 
                             if insysmsg "That is not a musical instrument"
                                 @setvar! var__my_instrument 0
+                            endif
+                        endif
+
+                        if find lasttarget ground -1 -1 config__target_range as alias__fresh_target
+                            if not dead alias__fresh_target and var__combat_target != alias__fresh_target
+                                if noto alias__fresh_target = "hostile" or noto alias__fresh_target = "criminal" or noto alias__fresh_target = "enemy" or noto alias__fresh_target = "murderer"
+                                    @setvar! var__combat_target alias__fresh_target
+                                    settimer "timer__target_grace" 0
+
+                                    if find var__combat_target ground -1 -1 config__target_range as alias__peace_target
+                                        if config__chatty = 1
+                                            overhead "[ target, set ]" 90
+                                        endif
+                                    endif
+                                endif
                             endif
                         endif
 
