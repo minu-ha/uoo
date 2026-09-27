@@ -1,7 +1,7 @@
 # 핫키 배치
 
 두 캐릭터(Qianshanmuxue 바드 네크로, xuezhonglian PK 메이지)가 **같은 자리에 같은 역할**을 둔다.
-템플릿이 채우는 칸은 `1 2 3`, `F1`, Alt 줄뿐이다.
+템플릿이 채우는 칸은 `1 2 3`, `F1`, `F4`, Alt 줄뿐이다.
 
 ## 규칙
 
@@ -24,7 +24,7 @@
 
 | | Esc | F1 | F2 | F3 | F4 | F5 | F6 | F7 | F8 | F9 | F10 | F11 | F12 |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| 무수정 | 스크립트 정지 | **전투 루프** | cancel-target | recycle | dress | 이름 표시 | 투명 | 하이드 | 명상 | — | share-loot | claim-loot | loadout |
+| 무수정 | 스크립트 정지 | **전투 루프** | cancel-target | recycle | **PvP 루프** | 이름 표시 | 투명 | 하이드 | 명상 | — | share-loot | claim-loot | loadout |
 | Shift | — | — | — | — | — | — | — | — | — | — | — | — | — |
 | Ctrl | — | — | — | — | — | — | — | — | — | — | — | — | — |
 | Alt | — | — | — | — | — | — | — | — | — | — | — | — | — |
@@ -37,6 +37,8 @@
 | Shift | — | — | — | — | — | — | — |
 | Ctrl | **Greater Heal** (커서 → 펫·동료) | 힐 포션 | 큐어 포션 | 리프 포션 | 힘 포션 | 민 포션 | 레지 포션 |
 | Alt | — | **Vengeful Spirit** | Fire El → Lich | Earth El → Mummy | Daemon → Vampire | Water El → Rag Witch | Summon Creature |
+
+`Alt+0` = dress. 소환 줄에 붙어 있지만 소환은 아니고, 자주 안 누르는 자리라 거기 둔 것. `F4` 는 PK 를 만났을 때: PvE 루프가 멈추고 `bard-necro-pvp` 가 돈다, `F1` 로 복귀.
 
 ## 윗줄
 
@@ -76,13 +78,14 @@
 
 ## 템플릿이 채우는 칸
 
-| | 1 2 3 | F1 | Alt 줄 |
-|---|---|---|---|
-| Bard Necro (Qianshanmuxue, 프로필 `bard mace`) | Disco / Peace / Provo | bard-necro-enhanced | 소환 5 + VS |
-| PK 메이지 (xuezhonglian, 프로필 `default`) | Curse / Weaken / Clumsy | hally-mage | Earth El · Water El 만 (Alt+3 5) |
+| | 1 2 3 | F1 | F4 | Alt 줄 |
+|---|---|---|---|---|
+| Bard Necro (Qianshanmuxue, 프로필 `bard mace`) | Disco / Peace / Provo | bard-necro-enhanced | bard-necro-pvp | 소환 5 + VS |
+| PK 메이지 (xuezhonglian, 프로필 `default`) | Curse / Weaken / Clumsy | hally-mage | — | Earth El · Water El 만 (Alt+3 5) |
 
 ## 손에 잡히는 흐름
 
+- **PvP**: `F4` → PvE 루프 정지 + PvP 루프. 타겟은 `Q` / `Shift+X C` / `C` 로 잡은 라타 하나. `F1` 로 복귀.
 - **PvE 수동**: `V` (라타 = 근접 몹) → `1 E` `2 E` → `4 E` `5 E`. 펫은 `C V` — All Kill 커서를 V 가 채운다.
 - **PvP**: `Shift+C` (다음 플레이어 = 라타) → `6 E` → `4 E` `5 E`.
 - **폭탄**: `T` `E` (상대가 30초 끈끈이) → `G` `E`. Telekinesis 가 먼저다.

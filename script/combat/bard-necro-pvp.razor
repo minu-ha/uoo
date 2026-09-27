@@ -1,0 +1,458 @@
+# Bard Necro PvP loop: keep the buffs and potions up, follow the player you last targeted, Explosion into Energy Bolt, a bomb when a telekinesis is on them.
+# Needs: hotkeys "> Smart Heal/Cure Self", "Cancel Current Target", "Target Self", "Pouch", "Drink Heal", "Drink Cure", "Drink Explosion", "Drink Strength", "Drink Agility", "Drink Magic Resist", "Eat Magic Mushroom". Cooldown bars "heal pot", "reflect", "explo pot", "teleki, me", "teleki, target".
+#
+# Conventions are bard-necro-enhanced's: names, overheads, the act window, the cast poll shape.
+# What is different, and why:
+#   The target is only ever what you last targeted, by Q, Shift+X/C, or C and a click. Nothing
+#   is picked up on its own, and a blue is left alone unless config__attack_blue says otherwise.
+#   No songs, no bard skills, no necro abilities, no Grimoire procs, no Curse, no Mana Drain:
+#   against a player none of them is worth the cast, and the necro ones do nothing at all.
+#   Explosion is cast ahead of time and its cursor held until the target is inside
+#   config__pvp_range. Then Energy Bolt follows at once: Explosion lands 2.5 seconds after the
+#   target, Energy Bolt 1.95 seconds of cast plus 0.5 later, so the two hit together.
+#   Telekinesis is one cast per 30 seconds per caster, self or enemy. The first goes on self
+#   unless the enemy already stuck one on us, the next goes on the enemy and opens the bomb.
+# Not for structured PvP or factions: there find, timers and player serials are restricted.
+clearall
+clearsysmsg
+cleardragdrop
+clearignore
+
+# ####################################################################################
+# # CONFIG
+# ####################################################################################
+# 1 narrates target changes and the held Explosion, 0 keeps it quiet.
+@setvar! config__chatty 1
+
+# Spells reach 12 tiles. Two tiles of margin for a target that is moving away.
+@setvar! config__pvp_range 10
+
+# How far the target may be and still be worth arming an Explosion for.
+@setvar! config__sight_range 18
+
+# 1 lets a blue you targeted be attacked. 0 ignores blues, a wrong click on one is two minutes
+# of criminal.
+@setvar! config__attack_blue 0
+
+# 1 spends the first telekinesis on self, so no potion sticks to us for 30 seconds. 0 goes
+# straight for the enemy.
+@setvar! config__use_self_tk 1
+
+# 1 throws an explosion potion at the target while our telekinesis is on them.
+@setvar! config__use_bomb 1
+
+# Hit points below maximum that drink a heal potion, and that drop a held cursor for a heal.
+@setvar! config__heal_hits 25
+@setvar! config__emergency_hits 35
+
+# Explosion plus Energy Bolt. Below this the loop waits for mana rather than half a dump.
+@setvar! config__dump_mana 40
+@setvar! config__mushroom_eat_mana 45
+
+# ####################################################################################
+# # WAIT AND COOLDOWN
+# ####################################################################################
+@setvar! wait__short 200
+@setvar! wait__poll 100
+@setvar! wait__target 1000
+@setvar! wait__cast 300
+@setvar! wait__message 400
+
+# Telekinesis: at most one successful cast on any player every 30 seconds, self included.
+@setvar! cooldown__tk 30500
+@setvar! cooldown__heal_potion 10000
+@setvar! cooldown__cure_retry 3000
+@setvar! cooldown__stat_potion 125000
+# How often the followers are pointed at the target again.
+@setvar! cooldown__pets 15000
+# How long a held Explosion cursor waits for the target to come into range.
+@setvar! cooldown__arm 20000
+@setvar! cooldown__message 2000
+
+# ####################################################################################
+# # STATE
+# ####################################################################################
+@setvar! var__target 0
+@setvar! var__engaged 0
+@setvar! var__in_range 0
+@setvar! var__armed 0
+@setvar! var__self_tk_done 0
+@setvar! var__fresh_ok 0
+
+if not timerexists "timer__tk"
+    createtimer "timer__tk"
+    settimer "timer__tk" cooldown__tk
+endif
+
+if not timerexists "timer__pets"
+    createtimer "timer__pets"
+    settimer "timer__pets" cooldown__pets
+endif
+
+if not timerexists "timer__arm"
+    createtimer "timer__arm"
+    settimer "timer__arm" 0
+endif
+
+if not timerexists "timer__cure"
+    createtimer "timer__cure"
+    settimer "timer__cure" cooldown__cure_retry
+endif
+
+if not timerexists "timer__strength"
+    createtimer "timer__strength"
+    settimer "timer__strength" cooldown__stat_potion
+endif
+
+if not timerexists "timer__agility"
+    createtimer "timer__agility"
+    settimer "timer__agility" cooldown__stat_potion
+endif
+
+if not timerexists "timer__message"
+    createtimer "timer__message"
+    settimer "timer__message" cooldown__message
+endif
+
+overhead "[ pvp, on ]" 90
+
+while not dead
+    # ####################################################################################
+    # # TARGET
+    # ####################################################################################
+    # Only what you last targeted, and only players by notoriety. Read every pass so a Q
+    # mid fight moves the whole loop from the next cast on.
+    if find lasttarget ground -1 -1 config__sight_range as alias__fresh_target
+        if not dead alias__fresh_target and var__target != alias__fresh_target
+            @setvar! var__fresh_ok 0
+
+            if noto alias__fresh_target = "murderer" or noto alias__fresh_target = "criminal" or noto alias__fresh_target = "enemy" or noto alias__fresh_target = "hostile"
+                @setvar! var__fresh_ok 1
+            endif
+
+            if config__attack_blue = 1 and noto alias__fresh_target = "innocent"
+                @setvar! var__fresh_ok 1
+            endif
+
+            if var__fresh_ok = 1
+                @setvar! var__target alias__fresh_target
+                @setvar! var__self_tk_done 0
+                settimer "timer__pets" cooldown__pets
+
+                if config__chatty = 1
+                    overhead "[ target, set ]" 90
+                endif
+            endif
+        endif
+    endif
+
+    @setvar! var__engaged 0
+    @setvar! var__in_range 0
+
+    if find var__target ground -1 -1 config__sight_range as alias__target
+        if dead alias__target
+            @setvar! var__target 0
+        else
+            @setvar! var__engaged 1
+
+            if find var__target ground -1 -1 config__pvp_range as alias__near_target
+                @setvar! var__in_range 1
+            endif
+        endif
+    endif
+
+    # ####################################################################################
+    # # PASS FLAGS
+    # ####################################################################################
+    #   reactive armor  garlic, spider silk, sulfurous ash
+    #   reflection      garlic, mandrake root, spider silk
+    #   telekinesis     bloodmoss, mandrake root
+    #   explosion       black pearl, mandrake root, nightshade
+    #   energy bolt     black pearl, nightshade
+    @setvar! var__regs_reactive 0
+    @setvar! var__regs_reflect 0
+    @setvar! var__regs_tk 0
+    @setvar! var__regs_explo 0
+    @setvar! var__regs_eb 0
+
+    if findtype 3972 self and findtype 3981 self and findtype 3980 self
+        @setvar! var__regs_reactive 1
+    endif
+
+    if findtype 3972 self and findtype 3974 self and findtype 3981 self
+        @setvar! var__regs_reflect 1
+    endif
+
+    if findtype 3963 self and findtype 3974 self
+        @setvar! var__regs_tk 1
+    endif
+
+    if findtype 3962 self and findtype 3974 self and findtype 3976 self
+        @setvar! var__regs_explo 1
+    endif
+
+    if findtype 3962 self and findtype 3976 self
+        @setvar! var__regs_eb 1
+    endif
+
+    # ####################################################################################
+    # # SURVIVAL
+    # ####################################################################################
+    # Potions and the pouch need no cursor and no cast, so they run even while an Explosion
+    # cursor is held. A cast heal has to drop that cursor first.
+    if paralyzed
+        hotkey 'Pouch'
+        wait wait__short
+    endif
+
+    if poisoned and timer "timer__cure" >= cooldown__cure_retry
+        hotkey 'Drink Cure'
+        settimer "timer__cure" 0
+        wait wait__short
+    endif
+
+    if diffhits >= config__heal_hits and cooldown "heal pot" = 0
+        hotkey 'Drink Heal'
+        cooldown "heal pot" cooldown__heal_potion
+        wait wait__short
+    elseif diffhits >= config__emergency_hits and not casting
+        if targetexists
+            hotkey "Cancel Current Target"
+            @setvar! var__armed 0
+            wait wait__short
+        endif
+
+        hotkey "> Smart Heal/Cure Self"
+        wait wait__short
+
+        for 25
+            if not casting
+                break
+            endif
+
+            if insysmsg "Your concentration is disturbed, thus ruining thy spell."
+                break
+            endif
+
+            wait wait__poll
+        endfor
+    endif
+
+    if mana <= config__mushroom_eat_mana and not findbuff 'Magic Mushroom Cooldown' and findtype "mushroom" backpack
+        hotkey 'Eat Magic Mushroom'
+        wait wait__short
+    endif
+
+    # ####################################################################################
+    # # KEEP
+    # ####################################################################################
+    # Reactive Armor and Magic Reflection whenever they are down, the stat potions on their own
+    # clock. Reflection outranks the dump: fourteen mana that eats one of their spells.
+    if not targetexists and not casting
+        if not findbuff 'Reactive Armor' and var__regs_reactive = 1 and mana >= 4
+            cast 'Reactive Armor'
+            wait wait__short
+
+            for 25
+                if not casting
+                    break
+                endif
+
+                if insysmsg "Your concentration is disturbed, thus ruining thy spell."
+                    break
+                endif
+
+                wait wait__poll
+            endfor
+        elseif not findbuff 'Magic Reflection' and cooldown "reflect" = 0 and var__regs_reflect = 1 and mana >= 14
+            cast 'Magic Reflection'
+            wait wait__short
+
+            for 25
+                if not casting
+                    break
+                endif
+
+                if insysmsg "Your concentration is disturbed, thus ruining thy spell."
+                    break
+                endif
+
+                wait wait__poll
+            endfor
+        endif
+    endif
+
+    if timer "timer__strength" >= cooldown__stat_potion
+        hotkey 'Drink Strength'
+        settimer "timer__strength" 0
+        wait wait__short
+    endif
+
+    if timer "timer__agility" >= cooldown__stat_potion
+        hotkey 'Drink Agility'
+        settimer "timer__agility" 0
+        wait wait__short
+    endif
+
+    if not findbuff 'Magic Resist Potion'
+        hotkey 'Drink Magic Resist'
+        wait wait__short
+    endif
+
+    # ####################################################################################
+    # # PETS
+    # ####################################################################################
+    if var__engaged = 1 and timer "timer__pets" >= cooldown__pets
+        if not targetexists and not casting
+            say 'all kill'
+            waitfortarget wait__target
+
+            if targetexists
+                target var__target
+                settimer "timer__pets" 0
+                wait wait__short
+            endif
+        endif
+    endif
+
+    # ####################################################################################
+    # # TELEKINESIS
+    # ####################################################################################
+    # One cast per 30 seconds, whoever it goes on. Self first, unless the enemy already stuck
+    # one on us, in which case ours would not land and the enemy gets it straight away.
+    if var__engaged = 1 and timer "timer__tk" >= cooldown__tk and var__regs_tk = 1 and mana >= 9
+        if not targetexists and not casting
+            if cooldown "teleki, me" > 0
+                @setvar! var__self_tk_done 1
+            endif
+
+            if config__use_self_tk = 1 and var__self_tk_done = 0
+                cast 'Telekinesis'
+
+                for 25
+                    if targetexists
+                        break
+                    endif
+
+                    if insysmsg "Your concentration is disturbed, thus ruining thy spell."
+                        break
+                    endif
+
+                    wait wait__poll
+                endfor
+
+                if targetexists
+                    hotkey 'Target Self'
+                    settimer "timer__tk" 0
+                    @setvar! var__self_tk_done 1
+                    wait wait__cast
+                endif
+            elseif var__in_range = 1 and cooldown "teleki, target" = 0
+                cast 'Telekinesis'
+
+                for 25
+                    if targetexists
+                        break
+                    endif
+
+                    if insysmsg "Your concentration is disturbed, thus ruining thy spell."
+                        break
+                    endif
+
+                    wait wait__poll
+                endfor
+
+                if targetexists
+                    target var__target
+                    settimer "timer__tk" 0
+                    wait wait__cast
+                endif
+            endif
+        endif
+    endif
+
+    # ####################################################################################
+    # # BOMB
+    # ####################################################################################
+    # Only while our telekinesis is on them: a potion that does not stick is walked away from.
+    # Thrown right before the dump, so the five second fuse ends as Explosion and Energy Bolt
+    # land.
+    if config__use_bomb = 1 and var__in_range = 1 and cooldown "teleki, target" > 0 and cooldown "explo pot" = 0
+        if not targetexists and not casting and var__armed = 0 and mana >= config__dump_mana
+            hotkey 'Drink Explosion'
+            waitfortarget wait__target
+
+            if targetexists
+                target var__target
+                wait wait__short
+            endif
+        endif
+    endif
+
+    # ####################################################################################
+    # # DUMP
+    # ####################################################################################
+    # Arm: cast Explosion as soon as there is a target anywhere in sight and hold the cursor.
+    # Fire: the moment the target is in range, deliver it and cast Energy Bolt on top.
+    if var__engaged = 1 and var__armed = 0 and mana >= config__dump_mana and var__regs_explo = 1 and var__regs_eb = 1
+        if not targetexists and not casting
+            cast 'Explosion'
+
+            for 25
+                if targetexists
+                    @setvar! var__armed 1
+                    settimer "timer__arm" 0
+
+                    if config__chatty = 1
+                        overhead "[ explo, on ]" 90
+                    endif
+
+                    break
+                endif
+
+                if insysmsg "Your concentration is disturbed, thus ruining thy spell."
+                    break
+                endif
+
+                wait wait__poll
+            endfor
+        endif
+    endif
+
+    if var__armed = 1
+        if not targetexists
+            @setvar! var__armed 0
+        elseif var__engaged = 1 and var__in_range = 1
+            target var__target
+            @setvar! var__armed 0
+            cast 'Energy Bolt'
+
+            for 25
+                if targetexists
+                    break
+                endif
+
+                if insysmsg "Your concentration is disturbed, thus ruining thy spell."
+                    break
+                endif
+
+                wait wait__poll
+            endfor
+
+            if targetexists
+                target var__target
+                wait wait__cast
+            endif
+        elseif timer "timer__arm" >= cooldown__arm
+            hotkey "Cancel Current Target"
+            @setvar! var__armed 0
+            wait wait__short
+
+            if config__chatty = 1
+                overhead "[ explo, cut ]" 53
+            endif
+        endif
+    endif
+
+    wait wait__poll
+endwhile
