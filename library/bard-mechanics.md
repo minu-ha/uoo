@@ -819,6 +819,42 @@ Herding 과 Necromancy 가 PvP 에서 대신 주는 것:
   Heat of Battle 은 버프바에 뜨므로 ("The Heat of Battle flag is now a visible buff on players in the Buff Bar") 실전에서 소환수가 공격을 시작한 직후 버프바를 보면 확인된다.
 - **소환수 데미지가 Resisting Spells 의 "Creature/Environment Damage" 에 들어가는지.** 들어간다면 Resist 100 PK 는 소환수에게 맞아도 시전이 끊기지 않는다. 그러면 PK 의 콤보를 끊는 것은 **내 주문뿐**이다.
 
+#### PvP 에서 어떤 소환수인가
+
+> "Any summon that is cast while the Necromancy "Vengeful Spirit" ability is active will be summoned as an undead summon with the same stats, skills and abilities as their normal counterparts." -- Spirit Speak
+> "Like the Energy Vortex, the Jackal Spirit are now "non-hostile" to players and tamed creatures and will never attack them" -- Jackal Spirit
+> "Like Blade Spirits, Skeletal Husks are now "non-hostile" to players and tamed creatures and will never attack them" -- Skeletal Husk
+> "Mana Drain - Casting on a monster will reduce its magic resistance by 20 * Magery/100 (halved in PvP)" -- Magery
+
+팔로워 PvP 규칙 (Animal Taming. "Tamed/Summoned" 로 적힌 것만 옮겼다):
+
+> "Tamed/Summoned follower PvP damage scalar has been increased to 30% (previously was 25%)"
+> "Tamed/Summoned follower maximum melee hit chance in PvP is now 66%. (previously was 50%)"
+> "Tamed/Summoned followers now have a 60% reduced chance in PvP to trigger abilities against players (previously was 90% reduction)"
+> "Tamed/Summoned follower ability cooldowns in PvP are now only increased by 50% (previously were increased by 100%)"
+> "Capped at inflicting at most 10 Damage Per Control Slot over a 3 second window to individual players in PvP" -- 근접
+> "Capped at inflicting at most 7 Damage Per Control Slot over a 3 second window to individual players in PvP. Capped at 8 tiles distance." -- 원거리 / 주문
+> "Player pets move at 80% speed while attacking a player target" -- 소환수에도 해당하는지는 적혀 있지 않다
+
+위키 소환수 데이터 (`Module:SummonableCreatureData`. 기본 스탯이라 SS 120 스케일 전 값이다):
+
+| 언데드 (원본) | 슬롯 | 공격 | HP | 데미지 | Wrestling | AR | MR | 능력 | PvP |
+|---|---|---|---|---|---|---|---|---|---|
+| Lich (Fire Elemental) | 2 | 주문 | 400 | 28-34 | 85 | 25 | 100 | Epic Barrage | 가장 약하다 |
+| Vampire Thrall (Daemon) | 2 | 주문 | **600** | 26-32 | 95 | 50 | 100 | Fury (3분에 +30%) | |
+| Rag Witch (Water Elemental) | 2 | 주문 | 550 | 24-30 | 100 | 50 | **150** | Mirror, Flux (parry 25) | 주문에 가장 강하다 |
+| Ancient Mummy (Earth Elemental) | 2 | 근접 | 550 | 30-36 | 95 | 75 | 50 | Rooted | 따라가야 한다 |
+| Skeletal Fiend (Air Elemental) | 2 | 근접 | 500 | 34-40 | 100 | 50 | 100 | Cleave | 따라가야 한다 |
+| Jackal Spirit (Energy Vortex) | 2 | 근접 | 500 | 38-46 | 105 | 50 | 100 | Discharge | **플레이어를 안 친다** |
+| Skeletal Husk (Blade Spirit) | 1 | 근접 | 250 | 20-24 | 90 | 50 | 100 | Diversion | **플레이어를 안 친다** |
+
+- **PvP 에서는 소환수끼리 딜 차이가 줄어든다.** 2슬롯 소환수 하나가 플레이어에게 넣는 양은 3초에 주문 14 · 근접 20 이 상한이다.
+- **Lich 를 PvM 기본으로 쓰는 이유가 PvP 에서는 사라진다.** Hex 는 Fire Tome 업그레이드이고 Tome 은 플레이어 상대로 적용되지 않는다. Mana Drain 도 절반이다.
+- 그러면 남는 차이는 **버티는 힘**이다. Vampire (HP 600) 와 Rag Witch (MR 150) 가 Lich (HP 400, AR 25) 보다 낫다.
+- 주문형 소환수는 PK 의 Magic Resist 포션 (-10 / 20 / 30%) 에 깎인다. 근접형은 안 깎이지만, 거리를 두는 메이지 PK 에게 붙어야 딜이 들어간다.
+- Dispel 은 어느 소환수든 같은 확률로 막는다 (Spirit Speak 120 이면 60%).
+- **PK 앞에서 다시 부를 수는 없다고 본다.** 5초 시전에 상대 4서클 이상 주문은 100% 끊고, Vengeful Spirit 도 다시 켜야 한다. 그러므로 PK 전에 쓰는 소환수는 **사냥하던 소환수**다.
+
 #### Herding 을 Resist 로 바꿀 것인가
 
 Bard Necro 기준으로 Herding 80 -> Resisting Spells 80 을 따져 본 결과다.

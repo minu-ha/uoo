@@ -55,6 +55,7 @@
 | 테이머 듀오 + 장기 교전 | `Vampire 2마리`. Fury 가 3분이면 캡이라 실전성이 있다 |
 | 솔플 | `Mummy + Lich`. 탱커 없이 후열만 세울 수 없다 |
 | 고 Magic Resist 맵 | `Mummy + Air`. **물리 딜이 필요한 유일한 경우다** |
+| PK 를 만났을 때 | 사냥하던 조합 그대로. 근거와 소환수별 PvP 비교는 `bard-mechanics.md` 의 "PvP 에서 어떤 소환수인가" |
 
 **Lich 와 Vampire 는 둘 다 주문 딜러다.** Vampire 위키에 `Spell Damage: 26 - 32` 로 명시돼 있다.
 따라서 본체의 `Mana Drain` (`-20 Magic Resist`) 과 Fire Tome 의 `Hex` 가 **두 조합 모두에 걸린다.**
