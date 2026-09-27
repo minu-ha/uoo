@@ -143,6 +143,7 @@ endif
 - 라벨 분기는 `getlabel` → `if "문자열" in label`.
 - 검프·핫바는 `gumpexists` / `ingump` 확인 후 `gumpresponse`.
 - 디버그 출력은 `{{var}}` 보간. 확인 끝나면 지운다.
+- **한 줄이 5~10ms, `findtype` 은 20~40ms 다** (2026-09-28 측정, `bard-necro-combat-design.md` "명령문 비용"). 엔진이 틱마다 한 줄씩 돌리므로 비용은 패스에서 밟는 줄 수다. 시약처럼 천천히 변하는 상태는 매 패스 찾지 말고 타이머로 몇 초에 한 번만 읽는다.
 
 **`overhead` 형식** — 전부 `[ 대상, 상태 ]` 소문자. 시전 알림만 `[ 대상 ]`. 단어와 hue 는 `library/overheads.md` 의
 글로서리와 팔레트를 따르고, 쿨다운 바 이름(`cooldown "heal pot"`)도 같은 단어를 쓴다. 새 단어를 만들기 전에 그 문서를 본다.

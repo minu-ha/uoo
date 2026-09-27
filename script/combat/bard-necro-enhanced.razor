@@ -309,6 +309,12 @@ pushlist 'list__summon_names' 'nomeeheh'
 # How long a lost necro hotbar waits before the next yell.
 @setvar! cooldown__hotbar_retry 3000
 
+# How often the reagent flags are re-read. On this Razor a plain statement costs 5 to 10
+# ms and a findtype 20 to 40 (probe, 2026-09-28), so the old read of up to 32 findtype
+# on every pass was most of a second per pass. A flag that is stale for a few seconds
+# costs one refused cast at worst, and the next refresh corrects it.
+@setvar! cooldown__regs_refresh 5000
+
 # How often the summon name block looks for a fresh summon. One rename per window, so a
 # pair summoned back to back gets its names in the order they appeared.
 @setvar! cooldown__summon_name 3000
@@ -427,6 +433,14 @@ if not timerexists "timer__hotbar_retry"
     createtimer "timer__hotbar_retry"
     settimer "timer__hotbar_retry" cooldown__hotbar_retry
 endif
+
+if not timerexists "timer__regs_refresh"
+    createtimer "timer__regs_refresh"
+endif
+
+# Expired at every start, whatever a previous run left, so the first pass reads the
+# reagents before any block asks for a flag.
+settimer "timer__regs_refresh" cooldown__regs_refresh
 
 if not timerexists "timer__summon_name"
     createtimer "timer__summon_name"
@@ -610,75 +624,111 @@ while not dead
     #   energy bolt    6th   20    black pearl, nightshade
     #   reactive armor 1st    4    garlic, spider silk, sulfurous ash
     #   magic reflect  5th   14    garlic, mandrake root, spider silk
-    @setvar! var__regs_cure 0
-    @setvar! var__regs_heal 0
-    @setvar! var__regs_greater_heal 0
-    @setvar! var__regs_create_food 0
-    @setvar! var__regs_reactive_armor 0
-    @setvar! var__regs_magic_reflect 0
-    @setvar! var__regs_magic_arrow 0
+    # Read on timer__regs_refresh, not every pass. Each reagent is looked up once, the
+    # spell flags are derived from those seven with plain comparisons, and between
+    # refreshes the flags simply keep their last value.
+    if timer "timer__regs_refresh" >= cooldown__regs_refresh
+        settimer "timer__regs_refresh" 0
 
-    if findtype 3972 self and findtype 3973 self
-        @setvar! var__regs_cure 1
-    endif
+        @setvar! var__has_black_pearl 0
+        @setvar! var__has_garlic 0
+        @setvar! var__has_ginseng 0
+        @setvar! var__has_mandrake 0
+        @setvar! var__has_nightshade 0
+        @setvar! var__has_ash 0
+        @setvar! var__has_silk 0
 
-    if findtype 3972 self and findtype 3973 self and findtype 3981 self
-        @setvar! var__regs_heal 1
-    endif
+        if findtype 3962 self
+            @setvar! var__has_black_pearl 1
+        endif
 
-    if findtype 3972 self and findtype 3973 self and findtype 3974 self and findtype 3981 self
-        @setvar! var__regs_greater_heal 1
-    endif
+        if findtype 3972 self
+            @setvar! var__has_garlic 1
+        endif
 
-    if findtype 3972 self and findtype 3973 self and findtype 3974 self
-        @setvar! var__regs_create_food 1
-    endif
+        if findtype 3973 self
+            @setvar! var__has_ginseng 1
+        endif
 
-    if findtype 3972 self and findtype 3980 self and findtype 3981 self
-        @setvar! var__regs_reactive_armor 1
-    endif
+        if findtype 3974 self
+            @setvar! var__has_mandrake 1
+        endif
 
-    if findtype 3972 self and findtype 3974 self and findtype 3981 self
-        @setvar! var__regs_magic_reflect 1
-    endif
+        if findtype 3976 self
+            @setvar! var__has_nightshade 1
+        endif
 
-    # Magic Arrow sits with the survival group: on the walk it is the siphon arrow on self.
-    if findtype 3980 self
-        @setvar! var__regs_magic_arrow 1
-    endif
+        if findtype 3980 self
+            @setvar! var__has_ash 1
+        endif
 
-    # The offensive list is only read by blocks that need a target, so on the walk it is
-    # thirteen findtype calls answering a question nobody asks. Zeroed every pass, filled
-    # only while engaged.
-    @setvar! var__regs_harm 0
-    @setvar! var__regs_fireball 0
-    @setvar! var__regs_lightning 0
-    @setvar! var__regs_curse 0
-    @setvar! var__regs_mana_drain 0
-    @setvar! var__regs_energy_bolt 0
+        if findtype 3981 self
+            @setvar! var__has_silk 1
+        endif
 
-    if var__engaged = 1
-        if findtype 3976 self and findtype 3981 self
+        @setvar! var__regs_cure 0
+        @setvar! var__regs_heal 0
+        @setvar! var__regs_greater_heal 0
+        @setvar! var__regs_create_food 0
+        @setvar! var__regs_reactive_armor 0
+        @setvar! var__regs_magic_reflect 0
+        @setvar! var__regs_magic_arrow 0
+        @setvar! var__regs_harm 0
+        @setvar! var__regs_fireball 0
+        @setvar! var__regs_lightning 0
+        @setvar! var__regs_curse 0
+        @setvar! var__regs_mana_drain 0
+        @setvar! var__regs_energy_bolt 0
+
+        if var__has_garlic = 1 and var__has_ginseng = 1
+            @setvar! var__regs_cure 1
+        endif
+
+        if var__has_garlic = 1 and var__has_ginseng = 1 and var__has_silk = 1
+            @setvar! var__regs_heal 1
+        endif
+
+        if var__has_garlic = 1 and var__has_ginseng = 1 and var__has_mandrake = 1 and var__has_silk = 1
+            @setvar! var__regs_greater_heal 1
+        endif
+
+        if var__has_garlic = 1 and var__has_ginseng = 1 and var__has_mandrake = 1
+            @setvar! var__regs_create_food 1
+        endif
+
+        if var__has_garlic = 1 and var__has_silk = 1 and var__has_ash = 1
+            @setvar! var__regs_reactive_armor 1
+        endif
+
+        if var__has_garlic = 1 and var__has_mandrake = 1 and var__has_silk = 1
+            @setvar! var__regs_magic_reflect 1
+        endif
+
+        if var__has_ash = 1
+            @setvar! var__regs_magic_arrow 1
+        endif
+
+        if var__has_nightshade = 1 and var__has_silk = 1
             @setvar! var__regs_harm 1
         endif
 
-        if findtype 3962 self
+        if var__has_black_pearl = 1
             @setvar! var__regs_fireball 1
         endif
 
-        if findtype 3974 self and findtype 3980 self
+        if var__has_mandrake = 1 and var__has_ash = 1
             @setvar! var__regs_lightning 1
         endif
 
-        if findtype 3972 self and findtype 3976 self and findtype 3980 self
+        if var__has_garlic = 1 and var__has_nightshade = 1 and var__has_ash = 1
             @setvar! var__regs_curse 1
         endif
 
-        if findtype 3962 self and findtype 3974 self and findtype 3981 self
+        if var__has_black_pearl = 1 and var__has_mandrake = 1 and var__has_silk = 1
             @setvar! var__regs_mana_drain 1
         endif
 
-        if findtype 3962 self and findtype 3976 self
+        if var__has_black_pearl = 1 and var__has_nightshade = 1
             @setvar! var__regs_energy_bolt 1
         endif
     endif

@@ -79,6 +79,9 @@ clearignore
 # How long a held Explosion cursor waits for the target to come into range.
 @setvar! cooldown__arm 20000
 @setvar! cooldown__message 2000
+# How often the reagent flags are re-read. A findtype costs 20 to 40 ms here, so the old
+# read of 14 per pass was a third of a second on every pass of a fight loop.
+@setvar! cooldown__regs_refresh 5000
 
 # ####################################################################################
 # # STATE
@@ -114,6 +117,13 @@ if not timerexists "timer__message"
     createtimer "timer__message"
     settimer "timer__message" cooldown__message
 endif
+
+if not timerexists "timer__regs_refresh"
+    createtimer "timer__regs_refresh"
+endif
+
+# Expired at every start, so the first pass reads the reagents before any block asks.
+settimer "timer__regs_refresh" cooldown__regs_refresh
 
 overhead "[ pvp, on ]" 90
 
@@ -175,35 +185,77 @@ while not dead
     #   explosion       black pearl, mandrake root, nightshade
     #   energy bolt     black pearl, nightshade
     #   magic arrow     sulfurous ash, the siphon arrow on self
-    @setvar! var__regs_reactive 0
-    @setvar! var__regs_reflect 0
-    @setvar! var__regs_tk 0
-    @setvar! var__regs_explo 0
-    @setvar! var__regs_eb 0
-    @setvar! var__regs_magic_arrow 0
+    # Read on timer__regs_refresh, not every pass: one lookup per reagent, the spell
+    # flags derived from those with plain comparisons, kept between refreshes.
+    if timer "timer__regs_refresh" >= cooldown__regs_refresh
+        settimer "timer__regs_refresh" 0
 
-    if findtype 3972 self and findtype 3981 self and findtype 3980 self
-        @setvar! var__regs_reactive 1
-    endif
+        @setvar! var__has_black_pearl 0
+        @setvar! var__has_bloodmoss 0
+        @setvar! var__has_garlic 0
+        @setvar! var__has_mandrake 0
+        @setvar! var__has_nightshade 0
+        @setvar! var__has_ash 0
+        @setvar! var__has_silk 0
 
-    if findtype 3972 self and findtype 3974 self and findtype 3981 self
-        @setvar! var__regs_reflect 1
-    endif
+        if findtype 3962 self
+            @setvar! var__has_black_pearl 1
+        endif
 
-    if findtype 3963 self and findtype 3974 self
-        @setvar! var__regs_tk 1
-    endif
+        if findtype 3963 self
+            @setvar! var__has_bloodmoss 1
+        endif
 
-    if findtype 3962 self and findtype 3974 self and findtype 3976 self
-        @setvar! var__regs_explo 1
-    endif
+        if findtype 3972 self
+            @setvar! var__has_garlic 1
+        endif
 
-    if findtype 3962 self and findtype 3976 self
-        @setvar! var__regs_eb 1
-    endif
+        if findtype 3974 self
+            @setvar! var__has_mandrake 1
+        endif
 
-    if findtype 3980 self
-        @setvar! var__regs_magic_arrow 1
+        if findtype 3976 self
+            @setvar! var__has_nightshade 1
+        endif
+
+        if findtype 3980 self
+            @setvar! var__has_ash 1
+        endif
+
+        if findtype 3981 self
+            @setvar! var__has_silk 1
+        endif
+
+        @setvar! var__regs_reactive 0
+        @setvar! var__regs_reflect 0
+        @setvar! var__regs_tk 0
+        @setvar! var__regs_explo 0
+        @setvar! var__regs_eb 0
+        @setvar! var__regs_magic_arrow 0
+
+        if var__has_garlic = 1 and var__has_silk = 1 and var__has_ash = 1
+            @setvar! var__regs_reactive 1
+        endif
+
+        if var__has_garlic = 1 and var__has_mandrake = 1 and var__has_silk = 1
+            @setvar! var__regs_reflect 1
+        endif
+
+        if var__has_bloodmoss = 1 and var__has_mandrake = 1
+            @setvar! var__regs_tk 1
+        endif
+
+        if var__has_black_pearl = 1 and var__has_mandrake = 1 and var__has_nightshade = 1
+            @setvar! var__regs_explo 1
+        endif
+
+        if var__has_black_pearl = 1 and var__has_nightshade = 1
+            @setvar! var__regs_eb 1
+        endif
+
+        if var__has_ash = 1
+            @setvar! var__regs_magic_arrow 1
+        endif
     endif
 
     # ####################################################################################
