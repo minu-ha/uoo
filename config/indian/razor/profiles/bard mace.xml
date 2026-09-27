@@ -13,8 +13,8 @@
 	<property name="SortCounters" type="System.Boolean">True</property>
 	<property name="QueueActions" type="System.Boolean">False</property>
 	<property name="QueueTargets" type="System.Boolean">False</property>
-	<property name="WindowX" type="System.Int32">2606</property>
-	<property name="WindowY" type="System.Int32">1652</property>
+	<property name="WindowX" type="System.Int32">2578</property>
+	<property name="WindowY" type="System.Int32">1611</property>
 	<property name="CountStealthSteps" type="System.Boolean">True</property>
 	<property name="SysColor" type="System.Int32">68</property>
 	<property name="WarningColor" type="System.Int32">37</property>
@@ -27,8 +27,8 @@
 	<property name="ImageFormat" type="System.String">jpg</property>
 	<property name="UndressConflicts" type="System.Boolean">True</property>
 	<property name="Systray" type="System.Boolean">False</property>
-	<property name="RazorWidth" type="System.Int32">546</property>
-	<property name="RazorHeight" type="System.Int32">394</property>
+	<property name="RazorWidth" type="System.Int32">1346</property>
+	<property name="RazorHeight" type="System.Int32">917</property>
 	<property name="SellAgentMax" type="System.Int32">99</property>
 	<property name="SkillListCol" type="System.Int32">1</property>
 	<property name="SkillListAsc" type="System.Boolean">True</property>
@@ -407,6 +407,11 @@
 		<overheadmessage searchtext="You are now under the effect of a Song" message="[ song, on ]" hue="53" />
 		<overheadmessage searchtext="You fail to discord" message="[ disco, miss ]" hue="43" />
 		<overheadmessage searchtext="You fail to pacify" message="[ peace, miss ]" hue="43" />
+		<overheadmessage searchtext="disrupting your opponent" message="[ disco, target ]" hue="63" />
+		<overheadmessage searchtext="briefly discording" message="[ disco, target ]" hue="63" />
+		<overheadmessage searchtext="pacifying" message="[ peace, target ]" hue="63" />
+		<overheadmessage searchtext="provoking" message="[ provo, target ]" hue="63" />
+		<overheadmessage searchtext="fail to incite anger" message="[ provo, miss ]" hue="43" />
 		<overheadmessage searchtext="You play successfully" message="[ bard, target ]" hue="63" />
 		<overheadmessage searchtext="additional energy" message="[ spell, charged ]" hue="63" />
 		<overheadmessage searchtext="What instrument shall you play" message="[ inst, out ]" hue="33" />
@@ -422,6 +427,12 @@
 		<overheadmessage searchtext="Spell siphon active." message="[ siphon, on ]" hue="68" />
 		<overheadmessage searchtext="Your spell siphon bonus has expired" message="[ siphon, off ]" hue="43" />
 		<overheadmessage searchtext="You absorb their spell." message="[ spell, absorbed ]" hue="68" />
+		<overheadmessage searchtext="You mana drain your target." message="[ drain, target ]" hue="63" />
+		<overheadmessage searchtext="You curse your target." message="[ curse, target ]" hue="63" />
+		<overheadmessage searchtext="Your reactive armor spell has been nullified." message="[ reactive, off ]" hue="43" />
+		<overheadmessage searchtext="You generate mana for your spell." message="[ mana, refund ]" hue="53" />
+		<overheadmessage searchtext="recovered from energy bolt kill" message="[ eb, +{1} ]" hue="53" />
+		<overheadmessage searchtext="That is too far away." message="[ range, out ]" hue="43" />
 	</overheadmessages>
 	<containerlabels />
 	<macrovariables />

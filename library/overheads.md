@@ -386,7 +386,11 @@ hue 번호는 이 뜻으로 이미 쓰이고 있던 값을 골랐다. 실제 색
 | You are now under the effect of a Song | `++` | `[ song, on ] (53)` |
 | You fail to discord | `--` | `[ disco, miss ] (43)` |
 | You fail to pacify | `--` | `[ peace, miss ] (43)` |
-| You play successfully | `++` | `[ bard, target ] (63)` |
+| disrupting your opponent / briefly discording | (신규) | `[ disco, target ] (63)` — 범용 `You play successfully` 보다 앞 |
+| pacifying | (신규) | `[ peace, target ] (63)` |
+| provoking | (신규) | `[ provo, target ] (63)` |
+| fail to incite anger | (신규) | `[ provo, miss ] (43)` |
+| You play successfully | `++` | `[ bard, target ] (63)` — 위 셋에 안 걸린 성공만 남는다 |
 | additional energy | `+++` | `[ spell, charged ] (63)` |
 | What instrument shall you play | `[ - INSTRUMENT BROKE - ]` | `[ inst, out ] (33)` |
 | now planted | `You are now planted.` | `[ planted, on ] (53)` |
@@ -403,6 +407,11 @@ hue 번호는 이 뜻으로 이미 쓰이고 있던 값을 골랐다. 실제 색
 | Your explosion potion sticks to your target | (신규) | `[ bomb, target ] (63)` |
 | You drink a healing potion | (신규) | `[ heal pot, on ] (53)` — 스크립트의 같은 줄은 뺐다 |
 | You drink a cure potion | (신규) | `[ cure pot, on ] (53)`. 리프레시는 서버가 아무 문장도 안 보내서 없고, 힘·민은 "Your strength has changed by 20" 뿐이라 안 잡는다 — Weaken 을 맞아도 같은 문장이다 |
+| You mana drain your target. / You curse your target. | (신규) | `[ drain, target ]` / `[ curse, target ] (63)` — 스크립트의 `[ drain ]` `[ curse ]` 시전 알림은 뺐다 |
+| Your reactive armor spell has been nullified. | (신규) | `[ reactive, off ] (43)` — 25 흡수하고 빠짐, 다음 정지 구간에 다시 건다 |
+| You generate mana for your spell. | (신규) | `[ mana, refund ] (53)` — 기존 `generates mana` 는 이 문장을 못 잡았다 |
+| recovered from energy bolt kill | (신규) | `[ eb, +{1} ] (53)` — "15 mana recovered from energy bolt kill." |
+| That is too far away. | (신규) | `[ range, out ] (43)` |
 | Spell siphon active. | (신규) | `[ siphon, on ] (68)` — 5분마다 첫 주문 피격에 켜지는 60분 PvM 버프. 바 `siphon` 과 짝 |
 | Your spell siphon bonus has expired | (신규) | `[ siphon, off ] (43)` |
 | You absorb their spell. | (신규) | `[ spell, absorbed ] (68)` — Resist 의 `25% x Resist/100` 확률, 피해 -75% |

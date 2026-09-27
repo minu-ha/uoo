@@ -1367,9 +1367,6 @@ while not dead
                             else
                                 pushlist 'magic_drained_targets' var__combat_target
 
-                                if config__chatty = 1
-                                    overhead "[ drain ]" 83
-                                endif
                             endif
                         endif
                     endif
@@ -1411,9 +1408,6 @@ while not dead
                                 pushlist 'magic_cursed_targets' var__combat_target
                                 settimer "timer__magic_window" 0
 
-                                if config__chatty = 1
-                                    overhead "[ curse ]" 83
-                                endif
                             endif
                         endif
                     endif
