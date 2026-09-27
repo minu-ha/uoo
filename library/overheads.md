@@ -24,7 +24,7 @@
 | 구분 | 서버 문장은 절대 `[` 로 시작하지 않는다. 대괄호가 곧 "커스텀" 표시다 |
 | 검색 | 부분 문자열, **대소문자 안 가림** (인게임 확인: `Trapped pouches` 가 "trapped pouches" 에 걸렸다). 정규식·와일드카드 없음 |
 | 기다림 | 기다리라는 문장은 `[ wait, … ]`. "wait another N" 꼴은 숫자 자리가 고정이라 `4m 17s` / `2m` / `59s`. 포션 대기("wait N" 꼴)는 혼합 형태와 초 형태를 못 갈라 `1m 59s` 를 못 만들고, 버프창이 이미 보여주므로 **빈 메시지로 삼킨다** |
-| 위치 | 스크립트 `overhead` 는 셋째 인자에 serial 을 주면 그 대상 머리 위에 뜬다. 상대에 관한 줄(`[ target, set ]`, 들고 있는 `[ explo, on ]`)은 상대 위에, 나머지는 내 위에. 프로필 오버헤드는 항상 내 위다 |
+| 위치 | 스크립트 `overhead` 는 셋째 인자에 serial 을 주면 그 대상 머리 위에 뜬다. 상대에 관한 줄(`[ target, set ]`, 들고 있는 `[ explo, on ]`)은 상대 위에, 소환수에 붙인 이름 `[ name, nomeehei ]` 은 그 소환수 위에, 나머지는 내 위에. 프로필 오버헤드는 항상 내 위다 |
 | 순서 | 한 문장에 항목 여러 개가 걸리면 **파일에서 앞의 것 하나만** 뜬다 (인게임 확인, `[ wait, 4m 53s ]` 가 `[ wait, 4s ]` 를 눌렀다). 구체적인 검색어를 범용 검색어보다 **앞에** 둔다 |
 | 쿨다운 바 이름 | 같은 단어, **대괄호 없이**. 방향이 있을 때만 쉼표: `hams, me` / `teleki, target`. 그 외는 한 단어: `music` `heal pot` |
 
@@ -46,6 +46,7 @@
 | 끝남 | `done` | `[ lock, done ]` `[ loadout, done ]` |
 | 시전이 끊김 | `disturbed` / `cut` | `[ heal, disturbed ]` (서버가 끊음) / `[ curse, cut ]` (힐하려고 내가 끊음) |
 | 수량 · 초 | 숫자 | `[ stealth, 3 ]` `[ mush, {5} ]` `[ planted, 2s ]` `[ murder, +1 ]` |
+| 붙인 이름 | 이름 그대로 | `[ name, nomeehei ]` (소환수에 붙인 이름, 그 소환수 머리 위) |
 | 드문 상태 | 한 단어 | `full` `over` `free` `blocked` `near` `slow` `clear` `deadly` `lethal` `refund` `charged` `extended` `moved` `worn` `back` `take` `skip` `dropped` |
 
 `target` 은 방향에만 쓴다. "찍어라" 는 `pick`.
@@ -82,7 +83,7 @@
 | 90 | 하늘 `#60e0f0` | 정보 · 카운터 · 진행 | `on` 숫자 `refund` `set` | `[ unholy, 6/10 ]` `[ mana, refund ]` `[ mush, on ]` `[ target, set ]` |
 | 68 | 초록 `#18e800` | 준비됨 · 끝남 · 내 것 성공 | `ready` `done` | `[ str, ready ]` `[ lock, done ]` `[ siphon, on ]` |
 | 65 | 연두 `#98f060` | 나쁜 것이 풀림 | 나쁜 효과의 `off` | `[ para, off ]` `[ poison, off ]` `[ hams, off ]` |
-| 9 | 남보라 `#6830e8` | 아군 · 파티 | `coming` | `[ heal, coming ]` `[ party, on ]` |
+| 9 | 남보라 `#6830e8` | 아군 · 파티 · 내 소환수 | `coming` 붙인 이름 | `[ heal, coming ]` `[ party, on ]` `[ name, nomeehei ]` (소환수 머리 위) |
 | 118 | 보라 `#c010d8` | 네크로 능력 시전 (대상만) | — | `[ blood oath ]` `[ pummel ]` |
 | 83 | 청록 `#00e8b8` | 매저리 시전 (대상만) | — | `[ drain ]` `[ curse ]` |
 | 55 | 연노랑 `#f0f060` | 프롬프트 | `pick` | `[ inst, pick ]` `[ shelf, pick ]` |

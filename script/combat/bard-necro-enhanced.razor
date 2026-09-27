@@ -179,6 +179,17 @@ clearignore
 @setvar! config__use_reactive_armor 1
 @setvar! config__use_magic_reflect 1
 
+# Fresh summons are renamed, in the order they appear, to lookalikes of the character's
+# name, so a PK reading nameplates has to guess which of the four is the player. Each name
+# is one slot: a resummon takes over the first name whose summon is gone. 0 leaves the
+# stock names. config__summon_range is how far the block looks for summons, the whole
+# screen, so a summon that lagged behind still holds its name.
+@setvar! config__name_summons 1
+@setvar! config__summon_name_1 'nomeehei'
+@setvar! config__summon_name_2 'nomeehel'
+@setvar! config__summon_name_3 'nomeeheh'
+@setvar! config__summon_range 18
+
 # How far a mob may be and still count as engaged. Everything that asks "am I fighting"
 # goes through this one number, so the bard and spell stages inherit it unchanged.
 @setvar! config__target_range 10
@@ -287,6 +298,10 @@ clearignore
 # How long a lost necro hotbar waits before the next yell.
 @setvar! cooldown__hotbar_retry 3000
 
+# How often the summon name block looks for a fresh summon. One rename per window, so a
+# pair summoned back to back gets its names in the order they appeared.
+@setvar! cooldown__summon_name 3000
+
 # How long the cache keeps a target that has stepped out of range before dropping it.
 @setvar! cooldown__target_grace 500
 
@@ -315,6 +330,20 @@ endif
 
 if not varexist var__greater_heal_ready
     @setvar! var__greater_heal_ready 0
+endif
+
+# Serial of the summon wearing each lookalike name, 0 while that name is free. Rechecked
+# with find every window, so a summon that died or was dismissed frees its name.
+if not varexist var__summon_named_1
+    @setvar! var__summon_named_1 0
+endif
+
+if not varexist var__summon_named_2
+    @setvar! var__summon_named_2 0
+endif
+
+if not varexist var__summon_named_3
+    @setvar! var__summon_named_3 0
 endif
 
 # Targets that already carry each half of the opener. Two lists rather than a stage counter,
@@ -386,6 +415,11 @@ endif
 if not timerexists "timer__hotbar_retry"
     createtimer "timer__hotbar_retry"
     settimer "timer__hotbar_retry" cooldown__hotbar_retry
+endif
+
+if not timerexists "timer__summon_name"
+    createtimer "timer__summon_name"
+    settimer "timer__summon_name" cooldown__summon_name
 endif
 
 # ####################################################################################
@@ -1039,6 +1073,113 @@ while not dead
 
                     wait wait__poll
                 endfor
+            endif
+        endif
+    endif
+
+    # ####################################################################################
+    # # SUMMON NAMES
+    # ####################################################################################
+    # A fresh summon still wears its stock name, "a lich" and so on, and gets the first free
+    # lookalike of the character's name. Nothing here casts or opens a cursor, so it runs
+    # engaged or not, once per window, one rename per window: a pair summoned back to back
+    # gets its names in the order they appeared.
+    #
+    # How the pieces hold together. findtype with a text argument falls through to mobiles
+    # by name when no item matches (Razor CE FindType), so the stock names below are enough
+    # and no body id is needed. 'a skeletal' covers the Skeletal Fiend and the skeletal
+    # knight, mage and marksman of the Summon Creature pool in one line. The client asks the
+    # server for every new mobile's status, and that reply is what gives Razor both the name
+    # and the "this is your pet" flag rename checks, so a summon is known the moment it
+    # appears. The noto test is the old bard-necro follower filter: a wild lich never passes
+    # it, and rename would refuse it anyway. Razor may keep the stock name cached after the
+    # rename, so a renamed summon can still match here. The three slot variables carry the
+    # serials instead, a match already sitting in a slot is skipped, and a slot frees itself
+    # when find no longer sees its summon alive. findtype picks one match at random, so a
+    # window that lands on a wild or already named one simply waits for the next.
+    if config__name_summons = 1 and followers > 0 and timer "timer__summon_name" >= cooldown__summon_name
+        settimer "timer__summon_name" 0
+
+        if var__summon_named_1 != 0
+            if find var__summon_named_1 ground -1 -1 config__summon_range as alias__named_summon
+                if dead alias__named_summon
+                    @setvar! var__summon_named_1 0
+                endif
+            else
+                @setvar! var__summon_named_1 0
+            endif
+        endif
+
+        if var__summon_named_2 != 0
+            if find var__summon_named_2 ground -1 -1 config__summon_range as alias__named_summon
+                if dead alias__named_summon
+                    @setvar! var__summon_named_2 0
+                endif
+            else
+                @setvar! var__summon_named_2 0
+            endif
+        endif
+
+        if var__summon_named_3 != 0
+            if find var__summon_named_3 ground -1 -1 config__summon_range as alias__named_summon
+                if dead alias__named_summon
+                    @setvar! var__summon_named_3 0
+                endif
+            else
+                @setvar! var__summon_named_3 0
+            endif
+        endif
+
+        @setvar! var__fresh_summon 0
+
+        if findtype 'a lich' ground -1 -1 config__summon_range as alias__fresh_summon
+            @setvar! var__fresh_summon 1
+        elseif findtype 'a vampire thrall' ground -1 -1 config__summon_range as alias__fresh_summon
+            @setvar! var__fresh_summon 1
+        elseif findtype 'an ancient mummy' ground -1 -1 config__summon_range as alias__fresh_summon
+            @setvar! var__fresh_summon 1
+        elseif findtype 'a rag witch' ground -1 -1 config__summon_range as alias__fresh_summon
+            @setvar! var__fresh_summon 1
+        elseif findtype 'a skeletal' ground -1 -1 config__summon_range as alias__fresh_summon
+            @setvar! var__fresh_summon 1
+        elseif findtype 'a skeleton' ground -1 -1 config__summon_range as alias__fresh_summon
+            @setvar! var__fresh_summon 1
+        elseif findtype 'a zombie' ground -1 -1 config__summon_range as alias__fresh_summon
+            @setvar! var__fresh_summon 1
+        elseif findtype 'a ghoul' ground -1 -1 config__summon_range as alias__fresh_summon
+            @setvar! var__fresh_summon 1
+        elseif findtype 'a ghost' ground -1 -1 config__summon_range as alias__fresh_summon
+            @setvar! var__fresh_summon 1
+        elseif findtype 'rotting flesh' ground -1 -1 config__summon_range as alias__fresh_summon
+            @setvar! var__fresh_summon 1
+        endif
+
+        if var__fresh_summon = 1
+            if alias__fresh_summon != var__summon_named_1 and alias__fresh_summon != var__summon_named_2 and alias__fresh_summon != var__summon_named_3
+                if not dead alias__fresh_summon and noto alias__fresh_summon != "hostile" and noto alias__fresh_summon != "criminal" and noto alias__fresh_summon != "enemy" and noto alias__fresh_summon != "murderer"
+                    if var__summon_named_1 = 0
+                        @rename alias__fresh_summon config__summon_name_1
+                        @setvar! var__summon_named_1 alias__fresh_summon
+
+                        if config__chatty = 1
+                            overhead "[ name, {{config__summon_name_1}} ]" 9 alias__fresh_summon
+                        endif
+                    elseif var__summon_named_2 = 0
+                        @rename alias__fresh_summon config__summon_name_2
+                        @setvar! var__summon_named_2 alias__fresh_summon
+
+                        if config__chatty = 1
+                            overhead "[ name, {{config__summon_name_2}} ]" 9 alias__fresh_summon
+                        endif
+                    elseif var__summon_named_3 = 0
+                        @rename alias__fresh_summon config__summon_name_3
+                        @setvar! var__summon_named_3 alias__fresh_summon
+
+                        if config__chatty = 1
+                            overhead "[ name, {{config__summon_name_3}} ]" 9 alias__fresh_summon
+                        endif
+                    endif
+                endif
             endif
         endif
     endif

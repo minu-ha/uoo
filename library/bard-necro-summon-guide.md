@@ -197,7 +197,11 @@ Spirit Pact    T3   5
   재소환을 감지할 필요가 없다. 구식 스크립트의 타입별 슬롯 추적과 `noto` 필터도 같이 사라진다.
   자세한 이유는 `bard-necro-combat-design.md` 의 "설계 결정" 참조.
 - **적 Lich 와 내 Lich 는 그래픽이 같다.** 소환수를 타입으로 찾는 코드를 새로 쓸 일이 있으면
-  `noto` 필터가 필수다. `bard-necro-enhanced.razor` 의 `COMBAT TARGET CACHE` 가 그 형태다.
+  `noto` 필터가 필수다. `bard-necro-enhanced.razor` 의 `COMBAT TARGET CACHE` 와 `SUMMON NAMES` 가 그 형태다.
+- **소환수 이름은 자동으로 바뀐다.** `SUMMON NAMES` 블록이 새 소환수를 나온 순서대로 `nomeehei` / `nomeehel` /
+  `nomeeheh` 로 바꾼다. 본체 `nomeehej` 와 한 글자 차이라 PK 가 네임태그로 본체를 고르기 어렵다.
+  종류와 무관하게 순서다. 바디 번호 없이 기본 이름(`a lich` 등)으로 찾고, 죽은 소환수의 이름은 다음 소환이 이어받는다.
+  설계와 실패 증상은 `bard-necro-combat-design.md` 의 "소환수 이름".
 
 ## 참고 링크
 

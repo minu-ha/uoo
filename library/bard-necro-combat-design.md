@@ -627,6 +627,46 @@ RESUMMON   [MUSHROOM 뒤, BARD SONG 앞]
 Bloodmoss 플래그 하나와 `Vengeful Spirit` 핫키(목록에 있음)만 추가하면 된다. 남은 미확인은 **소환 커서가
 지점 지정인지 자동 배치인지** 하나뿐이다.
 
+## 소환수 이름 -- SUMMON NAMES 블록
+
+새로 나온 소환수는 기본 이름(`a lich` 등)을 달고 있다. 블록이 그것을 **내 이름의 닮은꼴** 셋 중
+비어 있는 첫 번째로 바꾼다. PK 가 네임태그를 읽어도 넷 중 누가 본체인지 한 번 더 봐야 한다.
+
+| 슬롯 | 이름 | 비고 |
+|---|---|---|
+| 본체 | `nomeehej` | |
+| 1 | `nomeehei` | 먼저 나온 소환수 |
+| 2 | `nomeehel` | 두 번째 |
+| 3 | `nomeeheh` | 세 번째 (Summon Creature 같은 1슬롯짜리를 셋째로 뽑았을 때) |
+
+이름은 `config__summon_name_1..3`, 끄는 스위치는 `config__name_summons 0`.
+
+### 왜 이 모양인가
+
+- **바디 번호가 필요 없다.** `findtype` 에 문자열을 주면 아이템에 없을 때 **모빌 이름(부분 일치, 대소문자 무시)** 으로
+  내려간다 (Razor CE `Expressions.FindType` -> `GetMobilesByName`). 그래서 기본 이름 열 개로 다섯 언데드와
+  Summon Creature 풀(zombie, skeleton, skeletal knight/mage/marksman, ghoul, ghost, rotting flesh)을 전부 잡는다.
+  `'a skeletal'` 한 줄이 Skeletal Fiend 와 풀의 skeletal 셋을 같이 덮는다.
+- **이름과 "내 펫" 플래그는 상태 패킷(0x11)에서 온다.** ClassicUO 는 새 모빌이 보일 때마다 상태를 요청하므로
+  (`PacketHandlers.UpdateMobile`: "a way to get all Hp from all new mobiles") Razor 는 소환 직후 이름과
+  `CanRename` 을 둘 다 안다. `rename` 은 이 플래그가 선 모빌에만 패킷을 보낸다. 체력바를 열 필요가 없다.
+- **`noto` 필터는 구식 스크립트의 팔로워 필터 그대로.** 야생 리치는 통과 못 하고, 통과해도 `rename` 이 거부한다.
+- **Razor 는 이름 바꾼 뒤에도 옛 이름을 캐시할 수 있다** (CE 에는 0x98 MobileName 핸들러가 없다). 그래서
+  "이미 바꿨는가"를 이름으로 묻지 않고 **슬롯 변수 셋(`var__summon_named_1..3`)에 serial 을 든다.** 슬롯에 있는
+  serial 은 건너뛰고, `find` 가 살아 있는 걸 못 보면 슬롯을 비운다. 죽거나 해제된 소환수의 이름을 다음 소환이 이어받는다.
+- **한 윈도(3초)에 한 마리.** `findtype` 은 일치하는 것 중 **무작위 하나**를 돌려주므로, 야생이나 이미 바꾼 것을
+  집으면 그 윈도는 넘기고 다음에 다시 본다. 연달아 둘을 뽑아도 먼저 나온 쪽이 먼저 잡힌다 -- 시전 6초 동안 혼자 있으니까.
+- 시전도 커서도 없어서 교전 여부와 무관하게 돈다. `followers > 0` 일 때만.
+
+### 실패하면 이렇게 보인다
+
+| 증상 | 뜻 |
+|---|---|
+| 소환 후 3초 안에 `[ name, nomeehei ]` 가 소환수 머리 위에 뜨고 네임태그가 바뀐다 | 정상 |
+| 오버헤드는 뜨는데 네임태그가 그대로 | 서버가 이름을 거부했거나 `rename` 이 로컬에서 막힘. 시스템 메시지 확인. 슬롯은 찼다고 보므로 스크립트를 다시 켜야 재시도한다 |
+| 오버헤드가 아예 안 뜬다 | `findtype` 문자열이 Outlands 포크에서 모빌까지 안 내려가는 것. 그때는 구식 스크립트의 바디 번호 (Vampire Thrall 722, Ancient Mummy 158, Rag Witch 740, Lich 24) 로 찾고 `getlabel` 로 기본 이름인지 본다 |
+| 두 마리가 같은 이름 | 슬롯 변수가 비워진 것. 소환수가 `config__summon_range` (18) 밖으로 나갔다가 돌아온 경우. 값을 키운다 |
+
 ## 쓸 수 있는 구문 (전부 저장소에 선례 있음)
 
 | 구문 | 선례 |
@@ -644,6 +684,9 @@ Bloodmoss 플래그 하나와 `Vengeful Spirit` 핫키(목록에 있음)만 추�
 | `hotkey 'Vampiric Embrace'` + `hotkey 'Target Self'` | 위키: 자신을 타겟하면 주변 시체를 자동 탐색. **인게임 확인됨** |
 | `hotkey 'Drink Heal'` 등 포션 핫키 | Razor 핫키 목록 Potions 항목. 이름 그대로 |
 | `hotkey "> Interrupt"` | 휠다운에 물려 쓰던 것. 시전 폴링 안에서 긴급 힐용 |
+| `findtype 'a lich' ground -1 -1 <range> as` -- 문자열로 모빌 찾기 | `bard-necro-enhanced.razor` SUMMON NAMES. Razor CE `FindType` 이 아이템에 없으면 모빌 이름으로 내려간다 |
+| `@rename <alias> <var>` | `bard-necro-enhanced.razor` SUMMON NAMES. 위키 `rename`, CE 는 `CanRename` 인 펫에만 보낸다 |
+| `find <var> ground -1 -1 <range> as` + `dead` 로 슬롯 비우기 | `bard-necro-enhanced.razor` SUMMON NAMES, 구식 `bard-necro` PROVO FOLLOWER CACHE |
 
 ## 쓰면 안 되는 구문 (선례 없음, 실제로 깨졌던 것들)
 
@@ -701,6 +744,9 @@ Bloodmoss 플래그 하나와 `Vengeful Spirit` 핫키(목록에 있음)만 추�
 - **SELF BUFFS.** 몹이 없고 서 있을 때 (`var__engaged = 0`, `cooldown "walk" = 0`) Reactive Armor 와 Magic Reflection 을 건다.
   통과: 사냥 사이에 버프바에 둘이 붙고, 붙어 있는 동안은 다시 걸지 않는다. 실패: 매 패스 다시 건다 → `findbuff` 이름이 다른 것.
   리플렉트가 소모되면 `[ reflect, off ]` 와 `reflect` 바 30초, 바가 꺼진 뒤 다음 정지 구간에 다시 건다.
+- **SUMMON NAMES.** VS 를 켜고 소환하면 3초 안에 소환수 머리 위에 `[ name, nomeehei ]` (hue 9), 네임태그가 `nomeehei` 로 바뀐다.
+  둘째는 `nomeehel`, 셋째는 `nomeeheh`. 통과: 네임태그가 바뀌고, 야생 언데드 옆에서도 야생 쪽은 그대로다.
+  실패 표는 위 "소환수 이름" 절. 서버가 이름을 거부하면 그 문구를 받아 적는다 -- `overheads.md` 의 구멍 목록에 넣는다.
 - **loadout 배치.** 우하단 한 자리에 새첼 → 루팅 파우치 → 트랩 파우치 5개(x 120~140) 순으로 쌓인다.
   새첼이나 루팅 파우치가 삐져나오면 `loadout.razor` 의 좌표만 조정 (`y 200`, `x 120~140` 은 감으로 잡은 값).
 
