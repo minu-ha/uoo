@@ -566,14 +566,13 @@ while not dead
     #   energy bolt    6th   20    black pearl, nightshade
     #   reactive armor 1st    4    garlic, spider silk, sulfurous ash
     #   magic reflect  5th   14    garlic, mandrake root, spider silk
-    #   siphon arrow   1st    4    sulfurous ash, a magic arrow on self
     @setvar! var__regs_cure 0
     @setvar! var__regs_heal 0
     @setvar! var__regs_greater_heal 0
     @setvar! var__regs_create_food 0
     @setvar! var__regs_reactive_armor 0
     @setvar! var__regs_magic_reflect 0
-    @setvar! var__regs_siphon 0
+    @setvar! var__regs_magic_arrow 0
 
     if findtype 3972 self and findtype 3973 self
         @setvar! var__regs_cure 1
@@ -599,14 +598,14 @@ while not dead
         @setvar! var__regs_magic_reflect 1
     endif
 
+    # Magic Arrow sits with the survival group: on the walk it is the siphon arrow on self.
     if findtype 3980 self
-        @setvar! var__regs_siphon 1
+        @setvar! var__regs_magic_arrow 1
     endif
 
     # The offensive list is only read by blocks that need a target, so on the walk it is
-    # fourteen findtype calls answering a question nobody asks. Zeroed every pass, filled
+    # thirteen findtype calls answering a question nobody asks. Zeroed every pass, filled
     # only while engaged.
-    @setvar! var__regs_magic_arrow 0
     @setvar! var__regs_harm 0
     @setvar! var__regs_fireball 0
     @setvar! var__regs_lightning 0
@@ -615,10 +614,6 @@ while not dead
     @setvar! var__regs_energy_bolt 0
 
     if var__engaged = 1
-        if findtype 3980 self
-            @setvar! var__regs_magic_arrow 1
-        endif
-
         if findtype 3976 self and findtype 3981 self
             @setvar! var__regs_harm 1
         endif
@@ -1092,7 +1087,7 @@ while not dead
 
                     wait wait__poll
                 endfor
-            elseif not findbuff 'Spell Siphon' and not findbuff 'Magic Reflection' and var__regs_siphon = 1 and mana >= config__mana_1st
+            elseif not findbuff 'Spell Siphon' and not findbuff 'Magic Reflection' and var__regs_magic_arrow = 1 and mana >= config__mana_1st
                 # Spell Siphon: the first spell to hit us starts a sixty minute buff that shows on the
                 # buff bar. A Magic Arrow on self is that hit. Never with Magic Reflection up, the
                 # arrow would only bounce off it and burn the reflection.
