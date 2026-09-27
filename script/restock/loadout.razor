@@ -561,9 +561,9 @@ endif
 // Placement. drop takes literal coordinates, so the numbers are inline, but they only appear
 // in this section. They are gump pixels, not grid cells, so nudge them if items overlap.
 //
-//   backpack 140 0        the looting pouch, top right
-//   backpack 130 200      the two satchels, bottom right
-//   backpack 120..140 200 the trapped pouches, on top of the satchels, five pixels apart
+//   backpack 130 200      the two satchels, bottom right, first
+//   backpack 130 200      the looting pouch, on the satchels
+//   backpack 120..140 200 the trapped pouches, on top of all of it, five pixels apart
 //   pouch    0 0          everything not named below
 //   pouch    130 0        identification wand, sewing kit
 //   pouch    130 80       the instrument
@@ -572,33 +572,19 @@ endif
 // inside: the counters for the cure and heal potions in there read zero until it is opened
 // again, and a combat script that believes it has no cure potion will not drink one. Leaving
 // the contents loose in the backpack would count fine and lose them to the first thief, so
-// the pouch moves first, gets reopened, and only then does anything get sorted into it.
+// the pouch is moved and reopened before anything gets sorted into it.
 //
 // The satchels sit in the backpack itself, not in the pouch: a pouch that gets closed by
 // accident and reopened does not reopen what is nested in it, and the reagent and potion
 // counters go dark until each satchel is opened by hand. In the backpack they stay open.
-// The trapped pouches are dropped last so they lie over the satchels. A thief has to target
-// the satchel to steal it, and what is under the cursor there is a pouch.
+// Everything worth stealing is stacked on one spot, satchels first, the looting pouch on
+// them, the trapped pouches on top: a thief has to put the cursor on the thing, and what is
+// under the cursor there is always a trapped pouch. The looting pouch is opened by serial
+// and filled by serial, so being covered costs nothing.
 cleardragdrop
 clearignore
 
-// 1. the plain pouch, moved and reopened
-while findtype 3705 backpack 0 as alias__found_pouch
-    lift alias__found_pouch
-    wait wait__short
-    drop backpack 140 0
-    wait wait__short
-    if config__chatty = 1
-        overhead "[ pouch, moved ]" 53
-    endif
-    dclick alias__found_pouch
-    wait wait__short
-    @ignore alias__found_pouch
-endwhile
-
-clearignore
-
-// 2. the satchels, bottom right of the backpack. Reopened for the same counting reason.
+// 1. the satchels, bottom right of the backpack. Reopened for the same counting reason.
 if findtype 30765 backpack as alias__found_reagent_satchel
     lift alias__found_reagent_satchel
     wait wait__short
@@ -623,7 +609,23 @@ if findtype 31262 backpack as alias__found_alchemists_satchel
     wait wait__short
 endif
 
-// 3. the trapped pouches, over the satchels, five pixels apart so they cover its width.
+// 2. the looting pouch, on the satchels, moved and reopened
+while findtype 3705 backpack 0 as alias__found_pouch
+    lift alias__found_pouch
+    wait wait__short
+    drop backpack 130 200
+    wait wait__short
+    if config__chatty = 1
+        overhead "[ pouch, moved ]" 53
+    endif
+    dclick alias__found_pouch
+    wait wait__short
+    @ignore alias__found_pouch
+endwhile
+
+clearignore
+
+// 3. the trapped pouches, over the satchels and the looting pouch, five pixels apart.
 // drop takes literal coordinates, so five blocks instead of a loop. Not reopened on purpose,
 // nothing reads inside them. Any sixth pouch lands with the fifth.
 if findtype 3705 backpack 38 as alias__found_trap_pouch

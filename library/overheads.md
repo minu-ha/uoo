@@ -645,10 +645,14 @@ hue 번호는 이 뜻으로 이미 쓰이고 있던 값을 골랐다. 실제 색
 
 ## 아직 확인 안 된 것
 
-- `para` 10s 바가 파우치로 깼을 때 "You can move!" 로 같이 꺼지는지
 - `hams, me` 두 문장 중 실제로 오는 쪽 ("You have been hamstrung" / "Their attack hamstrings you!")
 - `heal pot` 트리거 "You drink a healing potion" 이 실제 문장인지. 스크립트의 `cooldown "heal pot"` 과 겹쳐도 같은 시각에 다시 시작할 뿐이다
 - 범죄자가 될 때 `crim` 바가 트리거 없이 저절로 뜨는지 (특수 바 타입)
+- Heat of Battle 이 켜질 때 `pvp` 바가 트리거 없이 저절로 뜨는지 (같은 특수 바 타입)
+- 저널에서 잡아 올 문장 셋. 잡히면 바 + 오버헤드 짝으로 넣는다
+  - 디스암 당한 뒤 재장착까지 몇 초인지 (문장은 "Their attack disarms you!")
+  - 마나 드레인 / 마나 뱀파이어 맞았을 때
+  - 큐어 포션 · 리프레시 포션 마셨을 때 (힐은 "You drink a healing potion")
 
 ## 출처
 

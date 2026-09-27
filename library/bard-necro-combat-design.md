@@ -690,6 +690,14 @@ Bloodmoss 플래그 하나와 `Vengeful Spirit` 핫키(목록에 있음)만 추�
 6. **`Ensemble` / `Reverb` / `Virtuoso` 가 정말 본체 전용인가.**
    포인트 변경 전후로 데미지 트래커의 **소환수 딜 절대값**을 비교한다.
 
+### 확인 대기 (2026-09-27)
+
+- **SELF BUFFS.** 몹이 없고 서 있을 때 (`var__engaged = 0`, `cooldown "walk" = 0`) Reactive Armor 와 Magic Reflection 을 건다.
+  통과: 사냥 사이에 버프바에 둘이 붙고, 붙어 있는 동안은 다시 걸지 않는다. 실패: 매 패스 다시 건다 → `findbuff` 이름이 다른 것.
+  리플렉트가 소모되면 `[ reflect, off ]` 와 `reflect` 바 30초, 바가 꺼진 뒤 다음 정지 구간에 다시 건다.
+- **loadout 배치.** 우하단 한 자리에 새첼 → 루팅 파우치 → 트랩 파우치 5개(x 120~140) 순으로 쌓인다.
+  새첼이나 루팅 파우치가 삐져나오면 `loadout.razor` 의 좌표만 조정 (`y 200`, `x 120~140` 은 감으로 잡은 값).
+
 ## 참고 링크
 
 - [Magery](https://wiki.uooutlands.com/Magery)
