@@ -205,6 +205,7 @@ hue 번호는 이 뜻으로 이미 쓰이고 있던 값을 골랐다. 실제 색
 | `Ability` | `ability` |
 | (신설) | `corpse skin` — backstab-mugging 이 `cooldown "corpse skin"` 으로 직접 세운다 |
 | (신설) | `bomb, me` 5s — "An explosion potion has stuck to you" |
+| (신설) | `siphon` 3600s — "Spell siphon active.", 만료 문장에 리셋 |
 
 ## 오버헤드 표 (Razor 프로필 두 개, 같은 내용)
 
@@ -294,7 +295,7 @@ hue 번호는 이 뜻으로 이미 쓰이고 있던 값을 골랐다. 실제 색
 | Criminal looting will now be allowed | `[ - Loot ON - ]` | `[ crim loot, on ] (53)` |
 | Criminal looting will now be prevented | `[ - Loot OFF - ]` | `[ crim loot, off ] (53)` |
 | Your lightning spell hinders your target | `[ - HINDER - ]` | `[ hinder, target ] (63)` |
-| MagicResist skillgain | `!!! INCOMING !!!` | `[ spell, me ] (33)` |
+| MagicResist skillgain | `!!! INCOMING !!!` | (삭제) — 스킬 오름 줄이라 사냥 중 주문 맞을 때마다 떴다. 피해 숫자가 이미 보여준다 |
 | Your attack cripples your target, lowering their defense | `[ - Target CRIPPLED! - ]` | `[ cripple, target ] (63)` |
 | You smash through | `[ - Target SMASHED! - ]` | `[ smash, target ] (63)` |
 | susceptible to special | `[ - Target BLEEDING! - ]` | `[ bleed, target ] (63)` |
@@ -397,6 +398,9 @@ hue 번호는 이 뜻으로 이미 쓰이고 있던 값을 골랐다. 실제 색
 | has applied telekinesis to you | (신규) | `[ teleki, me ] (33)` — "Qianshanmuxue has applied telekinesis to you." 건 사람 이름은 저널에 |
 | An explosion potion has stuck to you | (신규) | `[ bomb, me ] (33)` — 퓨즈 5초, 바 `bomb, me` 와 짝 |
 | Your explosion potion sticks to your target | (신규) | `[ bomb, target ] (63)` |
+| Spell siphon active. | (신규) | `[ siphon, on ] (68)` — 5분마다 첫 주문 피격에 켜지는 60분 PvM 버프. 바 `siphon` 과 짝 |
+| Your spell siphon bonus has expired | (신규) | `[ siphon, off ] (43)` |
+| You absorb their spell. | (신규) | `[ spell, absorbed ] (68)` — Resist 의 `25% x Resist/100` 확률, 피해 -75% |
 
 ## 스크립트 오버헤드
 

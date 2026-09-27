@@ -304,6 +304,10 @@
 	<cooldownentry name="bomb, me" defaultcooldown="5" cooldownbartype="Regular" hue="33" hidewheninactive="True">
 		<trigger triggertype="SysMessage" duration="" triggertext="An explosion potion has stuck to you" />
 	</cooldownentry>
+	<cooldownentry name="siphon" defaultcooldown="0" cooldownbartype="Regular" hue="68" hidewheninactive="True">
+		<trigger triggertype="SysMessage" duration="3600" triggertext="Spell siphon active." />
+		<trigger triggertype="SysMessage" duration="0" triggertext="Your spell siphon bonus has expired" />
+	</cooldownentry>
 	<cooldownentry name="contested" defaultcooldown="1200" cooldownbartype="Regular" hue="488" hidewheninactive="True">
 		<trigger triggertype="SysMessage" duration="" triggertext="contested" />
 	</cooldownentry>

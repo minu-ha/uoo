@@ -13,8 +13,8 @@
 	<property name="SortCounters" type="System.Boolean">True</property>
 	<property name="QueueActions" type="System.Boolean">False</property>
 	<property name="QueueTargets" type="System.Boolean">False</property>
-	<property name="WindowX" type="System.Int32">2595</property>
-	<property name="WindowY" type="System.Int32">1621</property>
+	<property name="WindowX" type="System.Int32">2572</property>
+	<property name="WindowY" type="System.Int32">1629</property>
 	<property name="CountStealthSteps" type="System.Boolean">True</property>
 	<property name="SysColor" type="System.Int32">68</property>
 	<property name="WarningColor" type="System.Int32">37</property>
@@ -27,8 +27,8 @@
 	<property name="ImageFormat" type="System.String">jpg</property>
 	<property name="UndressConflicts" type="System.Boolean">True</property>
 	<property name="Systray" type="System.Boolean">False</property>
-	<property name="RazorWidth" type="System.Int32">546</property>
-	<property name="RazorHeight" type="System.Int32">394</property>
+	<property name="RazorWidth" type="System.Int32">1226</property>
+	<property name="RazorHeight" type="System.Int32">827</property>
 	<property name="SellAgentMax" type="System.Int32">99</property>
 	<property name="SkillListCol" type="System.Int32">1</property>
 	<property name="SkillListAsc" type="System.Boolean">True</property>
@@ -309,7 +309,6 @@
 		<overheadmessage searchtext="Criminal looting will now be allowed" message="[ crim loot, on ]" hue="53" />
 		<overheadmessage searchtext="Criminal looting will now be prevented" message="[ crim loot, off ]" hue="53" />
 		<overheadmessage searchtext="Your lightning spell hinders your target" message="[ hinder, target ]" hue="63" />
-		<overheadmessage searchtext="MagicResist skillgain" message="[ spell, me ]" hue="33" />
 		<overheadmessage searchtext="Your attack cripples your target, lowering their defense" message="[ cripple, target ]" hue="63" />
 		<overheadmessage searchtext="You smash through" message="[ smash, target ]" hue="63" />
 		<overheadmessage searchtext="susceptible to special" message="[ bleed, target ]" hue="63" />
@@ -411,6 +410,9 @@
 		<overheadmessage searchtext="0 moving throws" message="[ throws, 0 ]" hue="33" />
 		<overheadmessage searchtext="wing your target" message="[ wing, target ]" hue="63" />
 		<overheadmessage searchtext="Magic reflect removed." message="[ reflect, off ]" hue="43" />
+		<overheadmessage searchtext="Spell siphon active." message="[ siphon, on ]" hue="68" />
+		<overheadmessage searchtext="Your spell siphon bonus has expired" message="[ siphon, off ]" hue="43" />
+		<overheadmessage searchtext="You absorb their spell." message="[ spell, absorbed ]" hue="68" />
 	</overheadmessages>
 	<containerlabels />
 	<macrovariables />
