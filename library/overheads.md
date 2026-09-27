@@ -411,7 +411,7 @@
 | 0 moving throws | `No throws, plant now.` | `[ throws, 0 ] (33)` |
 | wing your target | `You wing your target.` | `[ wing, target ] (43)` |
 | Magic reflect removed | (신규) | `[ reflect, off ] (53)` — 바 `reflect` 는 "Magic reflect removed." 30초 (몹), "Magic reflect removed (PvP)" 60초 (플레이어) |
-| has applied telekinesis to you | (신규) | `[ teleki, me ] (33)` — "Qianshanmuxue has applied telekinesis to you." 건 사람 이름은 저널에 |
+| has applied telekinesis to you | (신규) | `[ teleki, me ] (33)` — "nomeehej has applied telekinesis to you." 건 사람 이름은 저널에 |
 | An explosion potion has stuck to you | (신규) | `[ bomb, me ] (33)` — 퓨즈 5초, 바 `bomb, me` 와 짝 |
 | Your explosion potion sticks to your target | (신규) | `[ bomb, target ] (43)` |
 | You drink a healing potion | (신규) | `[ heal pot, on ] (90)` — 스크립트의 같은 줄은 뺐다 |

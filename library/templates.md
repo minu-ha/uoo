@@ -4,7 +4,7 @@
 
 | 템플릿 | 전투 루프 `script/combat/` | 핫키 `script/hotkey/` | Shelf `script/shelf/` | Razor 프로필 `config/<이름>/razor/profiles/` | CUO 캐릭 `config/<이름>/classicuo/` |
 |---|---|---|---|---|---|
-| Bard Necro | `bard-necro-enhanced`, `bard-necro-pvp` (F4, PK 전용) | | | `bard mace` | `Qianshanmuxue` |
+| Bard Necro | `bard-necro-enhanced`, `bard-necro-pvp` (F4, PK 전용) | | | `bard mace` | `nomeehej` |
 | Bard Mace (Dexxer) | `bard-mace` | `bard-buff`, `weapon-*` | `bard-dexxer` | | |
 | Bard Throwing (Dexxer) | `bard-throwing` | `bard-buff` | | | |
 | Hally Mage | `hally-mage` | `weapon-halberd`, `weapon-katana`, `weapon-viking-sword` | `hally-mage` | | |

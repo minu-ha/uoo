@@ -212,7 +212,7 @@ not targetexists and not casting and 근처에 몹 없음  ->  송 한 곡
 
 #### `cooldowns.xml` 은 이미 정리했다
 
-`config/indian/classicuo/Qianshanmuxue/cooldowns.xml` 을 다섯 군데 고쳤다.
+`config/indian/classicuo/nomeehej/cooldowns.xml` 을 다섯 군데 고쳤다.
 내역과 이유는 `bard-mechanics.md` 의 "이 저장소의 `cooldowns.xml` 최종 형태" 에 있다.
 
 따라서 스크립트는 게임 값을 그대로 읽으면 된다. **자체 타이머가 하나도 필요 없다.**

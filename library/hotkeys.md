@@ -1,6 +1,6 @@
 # 핫키 배치
 
-두 캐릭터(Qianshanmuxue 바드 네크로, xuezhonglian PK 메이지)가 **같은 자리에 같은 역할**을 둔다.
+두 캐릭터(nomeehej 바드 네크로, xuezhonglian PK 메이지)가 **같은 자리에 같은 역할**을 둔다.
 템플릿이 채우는 칸은 `1 2 3`, `F1`, `F4`, Alt 줄뿐이다.
 
 ## 규칙
@@ -80,7 +80,7 @@
 
 | | 1 2 3 | F1 | F4 | Alt 줄 |
 |---|---|---|---|---|
-| Bard Necro (Qianshanmuxue, 프로필 `bard mace`) | Disco / Peace / Provo | bard-necro-enhanced | bard-necro-pvp | 소환 5 + VS |
+| Bard Necro (nomeehej, 프로필 `bard mace`) | Disco / Peace / Provo | bard-necro-enhanced | bard-necro-pvp | 소환 5 + VS |
 | PK 메이지 (xuezhonglian, 프로필 `default`) | Curse / Weaken / Clumsy | hally-mage | — | Earth El · Water El 만 (Alt+3 5) |
 
 ## 손에 잡히는 흐름
