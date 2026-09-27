@@ -758,6 +758,16 @@ while not dead
         @setvar! var__bard_ready 1
     endif
 
+    # Manual mode. warmode on means the player is casting by hand: every block that opens a
+    # cursor stands down so its cursor cannot land on top of theirs, and the last target they
+    # set stays theirs. Cures, heals, potions, mushrooms and the necro commands keep running,
+    # none of them opens a cursor. Turning warmode off hands the same target back to the loop.
+    @setvar! var__manual 0
+
+    if warmode
+        @setvar! var__manual 1
+    endif
+
     # ####################################################################################
     # # CURE
     # ####################################################################################
@@ -1014,7 +1024,7 @@ while not dead
             if mana <= config__mushroom_eat_mana and not findbuff 'Magic Mushroom Cooldown' and findtype "mushroom" backpack
                 hotkey 'Eat Magic Mushroom'
                 wait wait__short
-            elseif counttype "mushroom" backpack < config__mushroom_min_count and mana >= config__mushroom_create_mana and var__regs_create_food = 1
+            elseif counttype "mushroom" backpack < config__mushroom_min_count and mana >= config__mushroom_create_mana and var__regs_create_food = 1 and var__manual = 0
                 cast 'Create Food'
                 wait wait__short
 
@@ -1044,7 +1054,7 @@ while not dead
     # shape as Create Food above.
     # The reflect bar is the server's 30 second recast lock. It starts on the system line
     # "Magic reflect removed." that the reflection sends, so the bar is the real clock.
-    if var__engaged = 0
+    if var__engaged = 0 and var__manual = 0
         if not targetexists and not casting and cooldown "walk" = 0
             if config__use_reactive_armor = 1 and not findbuff 'Reactive Armor' and var__regs_reactive_armor = 1 and mana >= config__mana_1st
                 cast 'Reactive Armor'
@@ -1339,7 +1349,7 @@ while not dead
     # and it searches the surrounding area for one, so the cursor is answered with self. Walk
     # only, when a corpse is what is left of the last pull, and the corpse check keeps it from
     # burning a thirty second cooldown on air.
-    if list 'necro_symbols' >= config__symbols_vampiric_embrace and var__engaged = 0 and followers > 0
+    if list 'necro_symbols' >= config__symbols_vampiric_embrace and var__engaged = 0 and var__manual = 0 and followers > 0
         if timer "timer__vampiric_embrace" >= cooldown__necro_action
             if not targetexists and not casting
                 if findtype 8198 ground -1 -1 8
@@ -1377,7 +1387,7 @@ while not dead
     #
     # Two lists, so the branch itself is the state. A target that was retargeted mid fight
     # answers correctly with no extra bookkeeping.
-    if var__engaged = 1
+    if var__engaged = 1 and var__manual = 0
         if not targetexists and not casting and cooldown "walk" = 0
             if find var__combat_target ground -1 -1 config__target_range as alias__opener_target
                 if not inlist 'magic_drained_targets' var__combat_target and var__regs_mana_drain = 1 and mana >= config__mana_4th
@@ -1528,7 +1538,7 @@ while not dead
     # Ordered cheapest first. They rarely compete, because a spell whose bar is up is the
     # only one asking, but when two are ready together the cheap one going first keeps more
     # mana available for the opener on the next mob.
-    if var__engaged = 1 and var__opener_done = 1
+    if var__engaged = 1 and var__opener_done = 1 and var__manual = 0
         if not targetexists and not casting and cooldown "walk" = 0
             if find var__combat_target ground -1 -1 config__target_range as alias__proc_target
                 if cooldown "magic arrow" = 0 and var__regs_magic_arrow = 1 and mana >= config__mana_1st
@@ -1736,7 +1746,7 @@ while not dead
     # that is damage that would otherwise have gone with it. It sits at the bottom of the
     # symbol ladder, only fires while Corpse Skin is actually up, and takes a filler slot
     # rather than a proc one, since it costs no mana and the procs are worth more.
-    if var__engaged = 1 and var__opener_done = 1 and var__symbols_spent = 0 and list 'necro_symbols' >= config__symbols_poison_strike
+    if var__engaged = 1 and var__opener_done = 1 and var__manual = 0 and var__symbols_spent = 0 and list 'necro_symbols' >= config__symbols_poison_strike
         if timer "timer__corpse_skin" < cooldown__necro_action and timer "timer__poison_strike" >= cooldown__necro_action
             if not targetexists and not casting
                 if find var__combat_target ground -1 -1 config__target_range as alias__strike_target
@@ -1787,7 +1797,7 @@ while not dead
     #
     # It is also the first thing to stand down when mana runs short, which is what
     # config__filler_floor is for: the opener and one full proc cycle come first.
-    if var__engaged = 1 and var__opener_done = 1 and mana > config__filler_floor and var__regs_energy_bolt = 1
+    if var__engaged = 1 and var__opener_done = 1 and var__manual = 0 and mana > config__filler_floor and var__regs_energy_bolt = 1
         if not targetexists and not casting and cooldown "walk" = 0
             if find var__combat_target ground -1 -1 config__target_range as alias__filler_target
                 cast 'Energy Bolt'
