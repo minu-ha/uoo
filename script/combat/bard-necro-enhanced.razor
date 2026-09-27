@@ -777,14 +777,53 @@ while not dead
 
     # The gates compare against a list, list 'x' >= n being the one size comparison a
     # script variable takes part in. Rebuilt only when the reading changed: at ten symbols
-    # the old rebuild on every pass was some twenty statements, and this is two. The list
-    # is filled with a while on its own length, because a for count cannot be a variable.
+    # the old rebuild on every pass was some twenty statements, and this is two. The fill
+    # is a chain of literal for counts: a for count cannot be a variable, and a while on
+    # the list's own length does not parse with not in front of list.
     if var__symbols != var__symbols_listed
         clearlist 'list__necro_symbols'
 
-        while not list 'list__necro_symbols' >= var__symbols
-            pushlist 'list__necro_symbols' '1' 'back'
-        endwhile
+        if var__symbols = 10
+            for 10
+                pushlist 'list__necro_symbols' '1' 'back'
+            endfor
+        elseif var__symbols = 9
+            for 9
+                pushlist 'list__necro_symbols' '1' 'back'
+            endfor
+        elseif var__symbols = 8
+            for 8
+                pushlist 'list__necro_symbols' '1' 'back'
+            endfor
+        elseif var__symbols = 7
+            for 7
+                pushlist 'list__necro_symbols' '1' 'back'
+            endfor
+        elseif var__symbols = 6
+            for 6
+                pushlist 'list__necro_symbols' '1' 'back'
+            endfor
+        elseif var__symbols = 5
+            for 5
+                pushlist 'list__necro_symbols' '1' 'back'
+            endfor
+        elseif var__symbols = 4
+            for 4
+                pushlist 'list__necro_symbols' '1' 'back'
+            endfor
+        elseif var__symbols = 3
+            for 3
+                pushlist 'list__necro_symbols' '1' 'back'
+            endfor
+        elseif var__symbols = 2
+            for 2
+                pushlist 'list__necro_symbols' '1' 'back'
+            endfor
+        elseif var__symbols = 1
+            for 1
+                pushlist 'list__necro_symbols' '1' 'back'
+            endfor
+        endif
 
         @setvar! var__symbols_listed var__symbols
     endif
