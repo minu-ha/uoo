@@ -643,9 +643,11 @@ Bloodmoss 플래그 하나와 `Vengeful Spirit` 핫키(목록에 있음)만 추�
 
 ### 왜 이 모양인가
 
-- **바디 번호로 찾는다.** 처음엔 기본 이름(`findtype 'a lich' … as`)으로 짰는데, 이 Razor 는 문자열 검색이
-  모빌에 **참은 돌려주면서 `as` alias 에 serial 을 안 넣는다.** 뒤따르는 `noto` 가 전부
-  `Mobile '4294967295' not found` 로 실패했다 (2026-09-28 인게임). 바디 번호는 `>info` 로 읽는다: Lich 24,
+- **바디 번호로 찾는다.** 프로브(2026-09-28)로 확인한 것: `findtype` 은 바디 번호로도 기본 이름으로도 소환수를 잡고
+  `as` alias 에 serial 이 들어간다. 처음 두 판이 `noto - Mobile '4294967295' not found` 로 죽은 건 검색이 아니라
+  **alias 를 `endif` 밖에서 읽어서**였다. alias 는 묶은 블록 안에서만 살므로 안에서 `@setvar! var__fresh_summon alias__fresh_summon`
+  로 복사하고 밖에서는 변수만 읽는다. 이름 대신 바디를 쓰는 이유는 이름을 바꾼 뒤 Razor 캐시가 갱신되는지 모르기
+  때문이다. 바디 번호는 `>info` 로 읽는다: Lich 24,
   Ancient Mummy 158 (hue 2340). Vampire Thrall 722, Rag Witch 740 은 구식 `bard-necro` 의 팔로워 캐시 값이다.
   VS 없이 나온 맨 엘리멘탈(9 13 14 15 16)과 Summon Creature 풀의 표준 언데드(3 26 50 56 57 147 148 153 155)도
   같이 넣었다. **Skeletal Fiend, skeletal marksman, rotting flesh 는 Outlands 바디라 번호를 모른다.**
@@ -699,8 +701,10 @@ Bloodmoss 플래그 하나와 `Vengeful Spirit` 핫키(목록에 있음)만 추�
   네크로가 한 번도 안 나가던 원인. 수를 세려면 옛 스크립트처럼 **리스트에 항목을 밀어 넣고 `list 'name' >= n`** 으로 비교한다.
   `mana >= config__x` 처럼 **내장 식이 왼쪽**이면 된다.
 
-- **`findtype '문자열' … as alias`.** 모빌 이름으로 검색하면 참은 돌아오지만 alias 가 안 묶인다.
-  뒤의 `noto alias` 가 `Mobile '4294967295' not found` 를 낸다. 모빌은 바디 번호로 찾는다.
+- **`as` alias 를 묶은 블록 밖에서 읽기.** `if findtype … as alias__x` / `endif` 뒤에서 `alias__x` 를 읽으면
+  `4294967295` 가 되어 `noto` 가 `Mobile … not found` 를 낸다. 안에서 `@setvar! var__x alias__x` 로 복사해 나온다.
+  이 파일의 다른 alias 가 전부 블록 안에서만 쓰이는 이유다.
+- **`findtypelist` 를 명령으로 쓰기.** `Unknown command`. 쓴다면 `findtype` 처럼 `if` 안의 표현식일 것이다 (미확인).
 - 산술 `@setvar! var__n var__n + 1`
 - `while <스크립트 변수> <`
 - `menu <serial> <변수>` -- 인덱스는 반드시 리터럴

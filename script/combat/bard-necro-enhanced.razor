@@ -1085,9 +1085,11 @@ while not dead
     # engaged or not, once per window, one rename per window: a pair summoned back to back
     # gets its names in the order they appeared.
     #
-    # How the pieces hold together. Summons are found by body id: findtype with a text
-    # argument does answer true for a mobile name on this Razor, but leaves the as alias
-    # unbound, so every noto read after it failed with mobile 4294967295. The client asks the
+    # How the pieces hold together. Summons are found by body id. A stock name would find
+    # them too, but Razor may keep the old name cached after the rename, and the body never
+    # changes. The as alias lives only inside the block that bound it, like every other
+    # alias in this file, so the serial is copied into var__fresh_summon before anything
+    # reads it: read outside, the alias came back as mobile 4294967295. The client asks the
     # server for every new mobile's status, and that reply is what gives Razor the "this is
     # your pet" flag rename checks, so a summon is known the moment it appears. The noto
     # test is the old bard-necro follower filter: an own summon reads notoriety 2, friend,
@@ -1139,32 +1141,32 @@ while not dead
         # rotting corpse 155. Skeletal Fiend, skeletal marksman and rotting flesh are Outlands
         # bodies: read theirs with >info when one is out and add the number here.
         if findtype 24|158|722|740|9|13|14|15|16|3|26|50|56|57|147|148|153|155 ground -1 -1 config__summon_range as alias__fresh_summon
-            @setvar! var__fresh_summon 1
+            @setvar! var__fresh_summon alias__fresh_summon
         endif
 
-        if var__fresh_summon = 1
-            if alias__fresh_summon != var__summon_named_1 and alias__fresh_summon != var__summon_named_2 and alias__fresh_summon != var__summon_named_3
-                if not dead alias__fresh_summon and noto alias__fresh_summon != "hostile" and noto alias__fresh_summon != "criminal" and noto alias__fresh_summon != "enemy" and noto alias__fresh_summon != "murderer"
+        if var__fresh_summon != 0
+            if var__fresh_summon != var__summon_named_1 and var__fresh_summon != var__summon_named_2 and var__fresh_summon != var__summon_named_3
+                if not dead var__fresh_summon and noto var__fresh_summon != "hostile" and noto var__fresh_summon != "criminal" and noto var__fresh_summon != "enemy" and noto var__fresh_summon != "murderer"
                     if var__summon_named_1 = 0
-                        @rename alias__fresh_summon config__summon_name_1
-                        @setvar! var__summon_named_1 alias__fresh_summon
+                        @rename var__fresh_summon config__summon_name_1
+                        @setvar! var__summon_named_1 var__fresh_summon
 
                         if config__chatty = 1
-                            overhead "[ name, {{config__summon_name_1}} ]" 9 alias__fresh_summon
+                            overhead "[ name, {{config__summon_name_1}} ]" 9 var__fresh_summon
                         endif
                     elseif var__summon_named_2 = 0
-                        @rename alias__fresh_summon config__summon_name_2
-                        @setvar! var__summon_named_2 alias__fresh_summon
+                        @rename var__fresh_summon config__summon_name_2
+                        @setvar! var__summon_named_2 var__fresh_summon
 
                         if config__chatty = 1
-                            overhead "[ name, {{config__summon_name_2}} ]" 9 alias__fresh_summon
+                            overhead "[ name, {{config__summon_name_2}} ]" 9 var__fresh_summon
                         endif
                     elseif var__summon_named_3 = 0
-                        @rename alias__fresh_summon config__summon_name_3
-                        @setvar! var__summon_named_3 alias__fresh_summon
+                        @rename var__fresh_summon config__summon_name_3
+                        @setvar! var__summon_named_3 var__fresh_summon
 
                         if config__chatty = 1
-                            overhead "[ name, {{config__summon_name_3}} ]" 9 alias__fresh_summon
+                            overhead "[ name, {{config__summon_name_3}} ]" 9 var__fresh_summon
                         endif
                     endif
                 endif
