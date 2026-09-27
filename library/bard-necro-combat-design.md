@@ -703,8 +703,8 @@ Razor CE 원본은 스크립트 엔진이 **타이머 틱마다 명령문 하나
 - 소환수 이름 블록의 3초당 `findtype` 3번은 60 ~ 120ms 로, 시약 읽기에 비하면 작다.
 - 남은 매 패스 검색: `find lasttarget`, `find var__combat_target`, `find var__my_instrument`, 포션·버섯 `findtype`.
   각각 한 번이고 상태가 빨리 변하는 것들이라 둔다.
-- 심볼 수 읽기: 사슬은 `ingump` 로 수를 `var__symbols` 에 읽고 (한 줄), 리스트는 **읽은 값이 `var__symbols_listed` 와
-  다를 때만** 다시 만든다. 채우기는 `var__symbols = N` 별 리터럴 `for N` 사슬. `for` 횟수는 변수가 안 되고
+- 심볼 수 읽기: `ingump` 사슬 한 줄, 각 갈래 안에서 **읽은 값이 `var__symbols_listed` 와 다를 때만** 리스트를
+  다시 채운다 (패스당 사슬 + 안쪽 `if` 두 줄). 채우기는 갈래별 리터럴 `for N`. `for` 횟수는 변수가 안 되고
   (`Invalid for loop syntax`), `while not list … >= var` 는 파싱이 안 된다 (둘 다 2026-09-28). 읽기 사슬은 20갈래에서 10갈래로 줄였다.
   Necromancy 100 이면 최대 10이고, 핫바가 그 이상을 보이면 위에 줄을 더한다.
 

@@ -373,8 +373,8 @@ if not listexists 'list__necro_symbols'
     createlist 'list__necro_symbols'
 endif
 
-# What the symbol list was last built from. 99 matches no reading, so the first pass
-# always rebuilds the list, whatever a previous run left in it.
+# The reading the symbol list was last filled from. 99 matches no reading, so the first
+# pass always fills the list, whatever a previous run left in it.
 @setvar! var__symbols_listed 99
 
 if not listexists 'list__magic_cursed_targets'
@@ -744,88 +744,123 @@ while not dead
     # Necromancy / 10 and this character sits at 100. Should
     # the hotbar ever show more than ten, add the higher readings above the 10/ line, or a
     # two digit reading falls into "1/". A closed gump reads as zero, which parks every
-    # ability until the hotbar block reopens it. One statement per pass: an elseif chain
-    # is evaluated in a single tick.
+    # ability until the hotbar block reopens it. An elseif chain is evaluated in a single
+    # tick, whatever its length.
     #
     # Set by the necro block when an ability lands. Poison Strike checks this and sits out
     # any pass that spent, since the list below is only rebuilt on the next pass.
     @setvar! var__symbols_spent 0
 
+    # The gates compare against the list, list 'x' >= n being the one size comparison a
+    # script variable takes part in. Each reading refills the list only when it differs
+    # from the last fill: at ten symbols the old refill on every pass was some twenty
+    # statements, this is two, the chain and the inner if. The fill is a literal for
+    # count per reading because a for count cannot be a variable.
     if ingump "10/" 622436516
-        @setvar! var__symbols 10
-    elseif ingump "9/" 622436516
-        @setvar! var__symbols 9
-    elseif ingump "8/" 622436516
-        @setvar! var__symbols 8
-    elseif ingump "7/" 622436516
-        @setvar! var__symbols 7
-    elseif ingump "6/" 622436516
-        @setvar! var__symbols 6
-    elseif ingump "5/" 622436516
-        @setvar! var__symbols 5
-    elseif ingump "4/" 622436516
-        @setvar! var__symbols 4
-    elseif ingump "3/" 622436516
-        @setvar! var__symbols 3
-    elseif ingump "2/" 622436516
-        @setvar! var__symbols 2
-    elseif ingump "1/" 622436516
-        @setvar! var__symbols 1
-    else
-        @setvar! var__symbols 0
-    endif
+        if var__symbols_listed != 10
+            clearlist 'list__necro_symbols'
 
-    # The gates compare against a list, list 'x' >= n being the one size comparison a
-    # script variable takes part in. Rebuilt only when the reading changed: at ten symbols
-    # the old rebuild on every pass was some twenty statements, and this is two. The fill
-    # is a chain of literal for counts: a for count cannot be a variable, and a while on
-    # the list's own length does not parse with not in front of list.
-    if var__symbols != var__symbols_listed
-        clearlist 'list__necro_symbols'
-
-        if var__symbols = 10
             for 10
                 pushlist 'list__necro_symbols' '1' 'back'
             endfor
-        elseif var__symbols = 9
+
+            @setvar! var__symbols_listed 10
+        endif
+    elseif ingump "9/" 622436516
+        if var__symbols_listed != 9
+            clearlist 'list__necro_symbols'
+
             for 9
                 pushlist 'list__necro_symbols' '1' 'back'
             endfor
-        elseif var__symbols = 8
+
+            @setvar! var__symbols_listed 9
+        endif
+    elseif ingump "8/" 622436516
+        if var__symbols_listed != 8
+            clearlist 'list__necro_symbols'
+
             for 8
                 pushlist 'list__necro_symbols' '1' 'back'
             endfor
-        elseif var__symbols = 7
+
+            @setvar! var__symbols_listed 8
+        endif
+    elseif ingump "7/" 622436516
+        if var__symbols_listed != 7
+            clearlist 'list__necro_symbols'
+
             for 7
                 pushlist 'list__necro_symbols' '1' 'back'
             endfor
-        elseif var__symbols = 6
+
+            @setvar! var__symbols_listed 7
+        endif
+    elseif ingump "6/" 622436516
+        if var__symbols_listed != 6
+            clearlist 'list__necro_symbols'
+
             for 6
                 pushlist 'list__necro_symbols' '1' 'back'
             endfor
-        elseif var__symbols = 5
+
+            @setvar! var__symbols_listed 6
+        endif
+    elseif ingump "5/" 622436516
+        if var__symbols_listed != 5
+            clearlist 'list__necro_symbols'
+
             for 5
                 pushlist 'list__necro_symbols' '1' 'back'
             endfor
-        elseif var__symbols = 4
+
+            @setvar! var__symbols_listed 5
+        endif
+    elseif ingump "4/" 622436516
+        if var__symbols_listed != 4
+            clearlist 'list__necro_symbols'
+
             for 4
                 pushlist 'list__necro_symbols' '1' 'back'
             endfor
-        elseif var__symbols = 3
+
+            @setvar! var__symbols_listed 4
+        endif
+    elseif ingump "3/" 622436516
+        if var__symbols_listed != 3
+            clearlist 'list__necro_symbols'
+
             for 3
                 pushlist 'list__necro_symbols' '1' 'back'
             endfor
-        elseif var__symbols = 2
+
+            @setvar! var__symbols_listed 3
+        endif
+    elseif ingump "2/" 622436516
+        if var__symbols_listed != 2
+            clearlist 'list__necro_symbols'
+
             for 2
                 pushlist 'list__necro_symbols' '1' 'back'
             endfor
-        elseif var__symbols = 1
+
+            @setvar! var__symbols_listed 2
+        endif
+    elseif ingump "1/" 622436516
+        if var__symbols_listed != 1
+            clearlist 'list__necro_symbols'
+
             for 1
                 pushlist 'list__necro_symbols' '1' 'back'
             endfor
-        endif
 
-        @setvar! var__symbols_listed var__symbols
+            @setvar! var__symbols_listed 1
+        endif
+    else
+        if var__symbols_listed != 0
+            clearlist 'list__necro_symbols'
+            @setvar! var__symbols_listed 0
+        endif
     endif
 
     # The Grimoire riders on Curse and Mana Drain run 60 seconds while the debuff icon runs
