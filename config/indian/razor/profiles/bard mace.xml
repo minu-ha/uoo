@@ -27,8 +27,8 @@
 	<property name="ImageFormat" type="System.String">jpg</property>
 	<property name="UndressConflicts" type="System.Boolean">True</property>
 	<property name="Systray" type="System.Boolean">False</property>
-	<property name="RazorWidth" type="System.Int32">1346</property>
-	<property name="RazorHeight" type="System.Int32">917</property>
+	<property name="RazorWidth" type="System.Int32">1274</property>
+	<property name="RazorHeight" type="System.Int32">827</property>
 	<property name="SellAgentMax" type="System.Int32">99</property>
 	<property name="SkillListCol" type="System.Int32">1</property>
 	<property name="SkillListAsc" type="System.Boolean">True</property>
@@ -360,7 +360,7 @@
 		<overheadmessage searchtext="struck by an evil omen" message="[ omen, target ]" hue="63" />
 		<overheadmessage searchtext="enough unholy" message="[ unholy, out ]" hue="43" />
 		<overheadmessage searchtext="unholy symbols remaining" message="[ unholy, {4} ]" hue="53" />
-		<overheadmessage searchtext="max unholy" message="[ unholy, {5} ]" hue="68" />
+		<overheadmessage searchtext="max unholy" message="[ unholy, max ]" hue="68" />
 		<overheadmessage searchtext="You consume" message="[ essence, +{3} ]" hue="53" />
 		<overheadmessage searchtext="generates mana" message="[ mana, refund ]" hue="53" />
 		<overheadmessage searchtext="progress on the lock" message="[ lock, {8} ]" hue="53" />
@@ -406,13 +406,17 @@
 		<overheadmessage searchtext="You increase your [EventScore" message="[ event, +{6} ]" hue="53" />
 		<overheadmessage searchtext="You are now under the effect of a Song" message="[ song, on ]" hue="53" />
 		<overheadmessage searchtext="You fail to discord" message="[ disco, miss ]" hue="43" />
-		<overheadmessage searchtext="You fail to pacify" message="[ peace, miss ]" hue="43" />
+		<overheadmessage searchtext="fail to pacify any nearby creatures" message="[ peace, area miss ]" hue="43" />
+		<overheadmessage searchtext="fail to pacify your opponent" message="[ peace, miss ]" hue="43" />
 		<overheadmessage searchtext="disrupting your opponent" message="[ disco, target ]" hue="63" />
-		<overheadmessage searchtext="briefly discording" message="[ disco, target ]" hue="63" />
-		<overheadmessage searchtext="pacifying" message="[ peace, target ]" hue="63" />
-		<overheadmessage searchtext="provoking" message="[ provo, target ]" hue="63" />
+		<overheadmessage searchtext="briefly discording" message="[ disco, area ]" hue="63" />
+		<overheadmessage searchtext="pacifying your target" message="[ peace, target ]" hue="63" />
+		<overheadmessage searchtext="briefly pacifying" message="[ peace, area ]" hue="63" />
+		<overheadmessage searchtext="play successfully, provoking" message="[ provo, target ]" hue="63" />
 		<overheadmessage searchtext="fail to incite anger" message="[ provo, miss ]" hue="43" />
-		<overheadmessage searchtext="You play successfully" message="[ bard, target ]" hue="63" />
+		<overheadmessage searchtext="Song of Discordance effect ends" message="[ disco song, off ]" hue="43" />
+		<overheadmessage searchtext="Song of Peacemaking effect ends" message="[ peace song, off ]" hue="43" />
+		<overheadmessage searchtext="Song of Provocation effect ends" message="[ provo song, off ]" hue="43" />
 		<overheadmessage searchtext="additional energy" message="[ spell, charged ]" hue="63" />
 		<overheadmessage searchtext="What instrument shall you play" message="[ inst, out ]" hue="33" />
 		<overheadmessage searchtext="now planted" message="[ planted, on ]" hue="53" />
@@ -431,7 +435,7 @@
 		<overheadmessage searchtext="You curse your target." message="[ curse, target ]" hue="63" />
 		<overheadmessage searchtext="Your reactive armor spell has been nullified." message="[ reactive, off ]" hue="43" />
 		<overheadmessage searchtext="You generate mana for your spell." message="[ mana, refund ]" hue="53" />
-		<overheadmessage searchtext="recovered from energy bolt kill" message="[ eb, +{1} ]" hue="53" />
+		<overheadmessage searchtext="recovered from energy bolt kill" message="[ eb, refund ]" hue="53" />
 		<overheadmessage searchtext="That is too far away." message="[ range, out ]" hue="43" />
 	</overheadmessages>
 	<containerlabels />

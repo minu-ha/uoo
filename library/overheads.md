@@ -342,7 +342,7 @@ hue 번호는 이 뜻으로 이미 쓰이고 있던 값을 골랐다. 실제 색
 | struck by an evil omen | `[ - Omen Damage - ]` | `[ omen, target ] (63)` |
 | enough unholy | `[ - Insufficient Unholy - ]` | `[ unholy, out ] (43)` |
 | unholy symbols remaining | `[ - Unholy : {4} - ]` | `[ unholy, {4} ] (53)` |
-| max unholy | `[ - Unholy Maxed: {5} - ]` | `[ unholy, {5} ] (68)` |
+| max unholy | `Unholy Maxed: {5}` | `[ unholy, max ] (68)` — "Max unholy symbols earned (10/10)", 괄호가 그대로 뜨는 `{5}` 대신 |
 | You consume | `+{3} Arcane Essence` | `[ essence, +{3} ] (53)` |
 | generates mana | `[ - Mana REFUNDED! - ]` | `[ mana, refund ] (53)` |
 | progress on the lock | `[ - Lock: {8} - ]` | `[ lock, {8} ] (53)` |
@@ -385,12 +385,15 @@ hue 번호는 이 뜻으로 이미 쓰이고 있던 값을 골랐다. 실제 색
 | You increase your [EventScore | `+ {6}` | `[ event, +{6} ] (53)` |
 | You are now under the effect of a Song | `++` | `[ song, on ] (53)` |
 | You fail to discord | `--` | `[ disco, miss ] (43)` |
-| You fail to pacify | `--` | `[ peace, miss ] (43)` |
-| disrupting your opponent / briefly discording | (신규) | `[ disco, target ] (63)` — 범용 `You play successfully` 보다 앞 |
-| pacifying | (신규) | `[ peace, target ] (63)` |
-| provoking | (신규) | `[ provo, target ] (63)` |
+| fail to pacify your opponent | `--` | `[ peace, miss ] (43)` |
+| fail to pacify any nearby creatures | (신규) | `[ peace, area miss ] (43)` — 범용 `fail to pacify` 보다 앞 |
+| disrupting your opponent | (신규) | `[ disco, target ] (63)` |
+| briefly discording | (신규) | `[ disco, area ] (63)` — 자기 타겟 = 8타일 광역, 각 5초 |
+| pacifying your target | (신규) | `[ peace, target ] (63)` |
+| briefly pacifying | (신규) | `[ peace, area ] (63)` — 자기 타겟 = 8타일 광역, 각 2초 |
+| play successfully, provoking | (신규) | `[ provo, target ] (63)` — 프로보는 광역이 없다. 자기 타겟은 송 |
 | fail to incite anger | (신규) | `[ provo, miss ] (43)` |
-| You play successfully | `++` | `[ bard, target ] (63)` — 위 셋에 안 걸린 성공만 남는다 |
+| Song of Discordance / Peacemaking / Provocation effect ends | (신규) | `[ disco song / peace song / provo song, off ] (43)` — 15분 송이 끝남. 범용 `You play successfully` 는 뺐다 |
 | additional energy | `+++` | `[ spell, charged ] (63)` |
 | What instrument shall you play | `[ - INSTRUMENT BROKE - ]` | `[ inst, out ] (33)` |
 | now planted | `You are now planted.` | `[ planted, on ] (53)` |
@@ -410,7 +413,7 @@ hue 번호는 이 뜻으로 이미 쓰이고 있던 값을 골랐다. 실제 색
 | You mana drain your target. / You curse your target. | (신규) | `[ drain, target ]` / `[ curse, target ] (63)` — 스크립트의 `[ drain ]` `[ curse ]` 시전 알림은 뺐다 |
 | Your reactive armor spell has been nullified. | (신규) | `[ reactive, off ] (43)` — 25 흡수하고 빠짐, 다음 정지 구간에 다시 건다 |
 | You generate mana for your spell. | (신규) | `[ mana, refund ] (53)` — 기존 `generates mana` 는 이 문장을 못 잡았다 |
-| recovered from energy bolt kill | (신규) | `[ eb, +{1} ] (53)` — "15 mana recovered from energy bolt kill." |
+| recovered from energy bolt kill | (신규) | `[ eb, refund ] (53)` — 티어마다 5/10/15 라 숫자는 안 보인다 |
 | That is too far away. | (신규) | `[ range, out ] (43)` |
 | Spell siphon active. | (신규) | `[ siphon, on ] (68)` — 5분마다 첫 주문 피격에 켜지는 60분 PvM 버프. 바 `siphon` 과 짝 |
 | Your spell siphon bonus has expired | (신규) | `[ siphon, off ] (43)` |
