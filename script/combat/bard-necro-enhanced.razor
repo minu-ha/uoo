@@ -507,8 +507,10 @@ while not dead
     # # COMBAT TARGET CACHE
     # ####################################################################################
     # Songs target the backpack every few seconds, so lasttarget is never safe to act on.
-    # This is the only block that reads it, and var__engaged is the answer everything else
-    # asks for afterwards.
+    # This block reads it once a pass, and var__engaged is the answer everything else asks
+    # for afterwards. Every targeted cast reads it once more just before delivering, because
+    # the script's own target calls overwrite it: a Q pressed between this read and that
+    # delivery would otherwise be lost, and the loop would stay on the old mob.
     if find lasttarget ground -1 -1 config__target_range as alias__fresh_target
         if not dead alias__fresh_target and var__combat_target != alias__fresh_target
             if noto alias__fresh_target = "hostile" or noto alias__fresh_target = "criminal" or noto alias__fresh_target = "enemy" or noto alias__fresh_target = "murderer"
@@ -1403,6 +1405,21 @@ while not dead
                     endfor
 
                     if targetexists
+                        if find lasttarget ground -1 -1 config__target_range as alias__fresh_target
+                            if not dead alias__fresh_target and var__combat_target != alias__fresh_target
+                                if noto alias__fresh_target = "hostile" or noto alias__fresh_target = "criminal" or noto alias__fresh_target = "enemy" or noto alias__fresh_target = "murderer"
+                                    @setvar! var__combat_target alias__fresh_target
+                                    settimer "timer__target_grace" 0
+
+                                    if find var__combat_target ground -1 -1 config__target_range as alias__opener_target
+                                        if config__chatty = 1
+                                            overhead "[ target, set ]" 90
+                                        endif
+                                    endif
+                                endif
+                            endif
+                        endif
+
                         if dead alias__opener_target
                             hotkey "Cancel Current Target"
                             wait wait__short
@@ -1443,6 +1460,21 @@ while not dead
                     endfor
 
                     if targetexists
+                        if find lasttarget ground -1 -1 config__target_range as alias__fresh_target
+                            if not dead alias__fresh_target and var__combat_target != alias__fresh_target
+                                if noto alias__fresh_target = "hostile" or noto alias__fresh_target = "criminal" or noto alias__fresh_target = "enemy" or noto alias__fresh_target = "murderer"
+                                    @setvar! var__combat_target alias__fresh_target
+                                    settimer "timer__target_grace" 0
+
+                                    if find var__combat_target ground -1 -1 config__target_range as alias__opener_target
+                                        if config__chatty = 1
+                                            overhead "[ target, set ]" 90
+                                        endif
+                                    endif
+                                endif
+                            endif
+                        endif
+
                         if dead alias__opener_target
                             hotkey "Cancel Current Target"
                             wait wait__short
@@ -1524,6 +1556,21 @@ while not dead
                     endfor
 
                     if targetexists
+                        if find lasttarget ground -1 -1 config__target_range as alias__fresh_target
+                            if not dead alias__fresh_target and var__combat_target != alias__fresh_target
+                                if noto alias__fresh_target = "hostile" or noto alias__fresh_target = "criminal" or noto alias__fresh_target = "enemy" or noto alias__fresh_target = "murderer"
+                                    @setvar! var__combat_target alias__fresh_target
+                                    settimer "timer__target_grace" 0
+
+                                    if find var__combat_target ground -1 -1 config__target_range as alias__proc_target
+                                        if config__chatty = 1
+                                            overhead "[ target, set ]" 90
+                                        endif
+                                    endif
+                                endif
+                            endif
+                        endif
+
                         if dead alias__proc_target
                             hotkey "Cancel Current Target"
                             wait wait__short
@@ -1557,6 +1604,21 @@ while not dead
                     endfor
 
                     if targetexists
+                        if find lasttarget ground -1 -1 config__target_range as alias__fresh_target
+                            if not dead alias__fresh_target and var__combat_target != alias__fresh_target
+                                if noto alias__fresh_target = "hostile" or noto alias__fresh_target = "criminal" or noto alias__fresh_target = "enemy" or noto alias__fresh_target = "murderer"
+                                    @setvar! var__combat_target alias__fresh_target
+                                    settimer "timer__target_grace" 0
+
+                                    if find var__combat_target ground -1 -1 config__target_range as alias__proc_target
+                                        if config__chatty = 1
+                                            overhead "[ target, set ]" 90
+                                        endif
+                                    endif
+                                endif
+                            endif
+                        endif
+
                         if dead alias__proc_target
                             hotkey "Cancel Current Target"
                             wait wait__short
@@ -1590,6 +1652,21 @@ while not dead
                     endfor
 
                     if targetexists
+                        if find lasttarget ground -1 -1 config__target_range as alias__fresh_target
+                            if not dead alias__fresh_target and var__combat_target != alias__fresh_target
+                                if noto alias__fresh_target = "hostile" or noto alias__fresh_target = "criminal" or noto alias__fresh_target = "enemy" or noto alias__fresh_target = "murderer"
+                                    @setvar! var__combat_target alias__fresh_target
+                                    settimer "timer__target_grace" 0
+
+                                    if find var__combat_target ground -1 -1 config__target_range as alias__proc_target
+                                        if config__chatty = 1
+                                            overhead "[ target, set ]" 90
+                                        endif
+                                    endif
+                                endif
+                            endif
+                        endif
+
                         if dead alias__proc_target
                             hotkey "Cancel Current Target"
                             wait wait__short
@@ -1623,6 +1700,21 @@ while not dead
                     endfor
 
                     if targetexists
+                        if find lasttarget ground -1 -1 config__target_range as alias__fresh_target
+                            if not dead alias__fresh_target and var__combat_target != alias__fresh_target
+                                if noto alias__fresh_target = "hostile" or noto alias__fresh_target = "criminal" or noto alias__fresh_target = "enemy" or noto alias__fresh_target = "murderer"
+                                    @setvar! var__combat_target alias__fresh_target
+                                    settimer "timer__target_grace" 0
+
+                                    if find var__combat_target ground -1 -1 config__target_range as alias__proc_target
+                                        if config__chatty = 1
+                                            overhead "[ target, set ]" 90
+                                        endif
+                                    endif
+                                endif
+                            endif
+                        endif
+
                         if dead alias__proc_target
                             hotkey "Cancel Current Target"
                             wait wait__short
@@ -1652,6 +1744,21 @@ while not dead
                     waitfortarget wait__target
 
                     if targetexists
+                        if find lasttarget ground -1 -1 config__target_range as alias__fresh_target
+                            if not dead alias__fresh_target and var__combat_target != alias__fresh_target
+                                if noto alias__fresh_target = "hostile" or noto alias__fresh_target = "criminal" or noto alias__fresh_target = "enemy" or noto alias__fresh_target = "murderer"
+                                    @setvar! var__combat_target alias__fresh_target
+                                    settimer "timer__target_grace" 0
+
+                                    if find var__combat_target ground -1 -1 config__target_range as alias__strike_target
+                                        if config__chatty = 1
+                                            overhead "[ target, set ]" 90
+                                        endif
+                                    endif
+                                endif
+                            endif
+                        endif
+
                         target alias__strike_target
                         wait wait__message
 
@@ -1707,6 +1814,21 @@ while not dead
                 endfor
 
                 if targetexists
+                    if find lasttarget ground -1 -1 config__target_range as alias__fresh_target
+                        if not dead alias__fresh_target and var__combat_target != alias__fresh_target
+                            if noto alias__fresh_target = "hostile" or noto alias__fresh_target = "criminal" or noto alias__fresh_target = "enemy" or noto alias__fresh_target = "murderer"
+                                @setvar! var__combat_target alias__fresh_target
+                                settimer "timer__target_grace" 0
+
+                                if find var__combat_target ground -1 -1 config__target_range as alias__filler_target
+                                    if config__chatty = 1
+                                        overhead "[ target, set ]" 90
+                                    endif
+                                endif
+                            endif
+                        endif
+                    endif
+
                     if dead alias__filler_target
                         hotkey "Cancel Current Target"
                         wait wait__short
