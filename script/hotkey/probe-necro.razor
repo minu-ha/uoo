@@ -1,0 +1,89 @@
+# Probe the necro plumbing bard-necro-enhanced relies on: hotbar gump, symbol read, hotkey vs command.
+# Needs: necromancer book in backpack, at least 4 Unholy Symbols banked. Run once, read the overheads, delete this file.
+clearall
+clearsysmsg
+cleardragdrop
+clearignore
+
+# 1. is the hotbar gump the id the script waits for
+if gumpexists 622436516
+    overhead "[ hotbar, on ]" 68
+else
+    overhead "[ hotbar, off ]" 33
+    yell '[necromancyhotbar'
+    waitforgump 622436516 2000
+
+    if gumpexists 622436516
+        overhead "[ hotbar, set ]" 68
+    else
+        overhead "[ hotbar, miss ]" 33
+    endif
+endif
+
+wait 500
+
+# 2. what the symbol read sees, same chain as the script, ten is the ceiling at Necromancy 100
+@setvar! var__symbols 0
+
+if ingump "10/" 622436516
+    @setvar! var__symbols 10
+elseif ingump "9/" 622436516
+    @setvar! var__symbols 9
+elseif ingump "8/" 622436516
+    @setvar! var__symbols 8
+elseif ingump "7/" 622436516
+    @setvar! var__symbols 7
+elseif ingump "6/" 622436516
+    @setvar! var__symbols 6
+elseif ingump "5/" 622436516
+    @setvar! var__symbols 5
+elseif ingump "4/" 622436516
+    @setvar! var__symbols 4
+elseif ingump "3/" 622436516
+    @setvar! var__symbols 3
+elseif ingump "2/" 622436516
+    @setvar! var__symbols 2
+elseif ingump "1/" 622436516
+    @setvar! var__symbols 1
+endif
+
+overhead "[ unholy, {{var__symbols}} ]" 53
+wait 500
+
+# 3. does followers count the summons
+if followers > 0
+    overhead "[ followers, on ]" 68
+else
+    overhead "[ followers, off ]" 33
+endif
+
+wait 500
+
+# 4. does the Razor hotkey fire the ability, and if not, does the chat command
+clearsysmsg
+hotkey 'Blood Oath'
+wait 800
+
+if insysmsg "unholy symbols remaining"
+    overhead "[ hotkey, target ]" 68
+elseif insysmsg "seconds before you may use that ability again."
+    overhead "[ hotkey, wait ]" 43
+elseif insysmsg "enough unholy"
+    overhead "[ hotkey, out ]" 43
+else
+    overhead "[ hotkey, miss ]" 33
+    wait 500
+    clearsysmsg
+    yell '[BloodOath'
+    wait 800
+
+    if insysmsg "unholy symbols remaining"
+        overhead "[ command, target ]" 68
+    elseif insysmsg "seconds before you may use that ability again."
+        overhead "[ command, wait ]" 43
+    elseif insysmsg "enough unholy"
+        overhead "[ command, out ]" 43
+    else
+        overhead "[ command, miss ]" 33
+    endif
+endif
