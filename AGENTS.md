@@ -51,9 +51,7 @@
 | `hotkeys.md` | 키 배치와 주문 데미지 메모 |
 | `overheads.md` | 쿨다운 바 · 오버헤드 알림. 이름 규칙(Out / On Me), 컨벤션, 아직 문장을 못 잡은 구멍 목록 |
 | `item-list.txt` | 아이템 이름·graphic id·hue 목록. `findtype` 인자 찍을 때 참조. 상점 가격은 `script/loot/stock-vendor.razor` 상단이 정본 |
-| `bard-necro-summon-guide.md` | Bard Necro 소환 조합·Tome 투자 가이드 |
-| `bard-necro-combat-design.md` | `bard-necro-enhanced` 전투 루프 설계. 우선순위 사다리, 마나 예산, Grimoire·Codex 배분 |
-| `bard-mechanics.md` | **바드 메커니즘 레퍼런스.** 쿨다운·송·바딩 브레이크·코덱스 원문. 바드 숫자는 여기서 인용한다 |
+| `bard-necro-handbook.md` | **Bard Necro 통합본.** 1 캐릭터 · 2 바드 메커니즘 · 3 마법과 네크로 · 4 소환수 · 5 전투 루프 설계 · 6 PvP · 7 스크립트 구문 근거 · 8 인게임 확인 · 9 자주 틀렸던 것. 바드·네크로·PvP 숫자는 여기서 인용하고, 없으면 위키를 읽고 여기에 더한다 |
 
 ## Razor 스크립트 컨벤션
 
