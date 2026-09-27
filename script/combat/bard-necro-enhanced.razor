@@ -959,7 +959,7 @@ while not dead
 
     if config__use_potion = 1 and var__engaged = 1
         if not targetexists and not casting
-            if str <= 100
+            if not findbuff 'Strength'
                 if findtype "White Potion" backpack
                     hotkey 'Drink Strength'
                     wait wait__short
@@ -969,7 +969,7 @@ while not dead
                 endif
             endif
 
-            if dex <= 25
+            if not findbuff 'Agility'
                 if findtype "Blue Potion" backpack
                     hotkey 'Drink Agility'
                     wait wait__short
