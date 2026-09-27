@@ -182,12 +182,11 @@ clearignore
 # Fresh summons are renamed, in the order they appear, to lookalikes of the character's
 # name, so a PK reading nameplates has to guess which of the four is the player. Each name
 # is one slot: a resummon takes over the first name whose summon is gone. 0 leaves the
-# stock names. config__summon_range is how far the block looks for summons, the whole
-# screen, so a summon that lagged behind still holds its name.
+# stock names. The names themselves, nomeehei, nomeehel, nomeeheh, are literals on the
+# rename lines of the SUMMON NAMES block: the server answers "That name is unacceptable"
+# to a name passed through a variable. config__summon_range is how far the block looks
+# for summons, the whole screen, so a summon that lagged behind still holds its name.
 @setvar! config__name_summons 1
-@setvar! config__summon_name_1 'nomeehei'
-@setvar! config__summon_name_2 'nomeehel'
-@setvar! config__summon_name_3 'nomeeheh'
 @setvar! config__summon_range 18
 
 # How far a mob may be and still count as engaged. Everything that asks "am I fighting"
@@ -1148,25 +1147,25 @@ while not dead
             if var__fresh_summon != var__summon_named_1 and var__fresh_summon != var__summon_named_2 and var__fresh_summon != var__summon_named_3
                 if not dead var__fresh_summon and noto var__fresh_summon != "hostile" and noto var__fresh_summon != "criminal" and noto var__fresh_summon != "enemy" and noto var__fresh_summon != "murderer"
                     if var__summon_named_1 = 0
-                        @rename var__fresh_summon config__summon_name_1
+                        @rename var__fresh_summon 'nomeehei'
                         @setvar! var__summon_named_1 var__fresh_summon
 
                         if config__chatty = 1
-                            overhead "[ name, {{config__summon_name_1}} ]" 9 var__fresh_summon
+                            overhead "[ name, nomeehei ]" 9 var__fresh_summon
                         endif
                     elseif var__summon_named_2 = 0
-                        @rename var__fresh_summon config__summon_name_2
+                        @rename var__fresh_summon 'nomeehel'
                         @setvar! var__summon_named_2 var__fresh_summon
 
                         if config__chatty = 1
-                            overhead "[ name, {{config__summon_name_2}} ]" 9 var__fresh_summon
+                            overhead "[ name, nomeehel ]" 9 var__fresh_summon
                         endif
                     elseif var__summon_named_3 = 0
-                        @rename var__fresh_summon config__summon_name_3
+                        @rename var__fresh_summon 'nomeeheh'
                         @setvar! var__summon_named_3 var__fresh_summon
 
                         if config__chatty = 1
-                            overhead "[ name, {{config__summon_name_3}} ]" 9 var__fresh_summon
+                            overhead "[ name, nomeeheh ]" 9 var__fresh_summon
                         endif
                     endif
                 endif

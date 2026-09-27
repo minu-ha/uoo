@@ -639,7 +639,7 @@ Bloodmoss 플래그 하나와 `Vengeful Spirit` 핫키(목록에 있음)만 추�
 | 2 | `nomeehel` | 두 번째 |
 | 3 | `nomeeheh` | 세 번째 (Summon Creature 같은 1슬롯짜리를 셋째로 뽑았을 때) |
 
-이름은 `config__summon_name_1..3`, 끄는 스위치는 `config__name_summons 0`.
+이름은 `SUMMON NAMES` 블록의 `rename` 줄 세 개에 리터럴로 있다 (변수로 넘기면 서버가 거부한다, 아래). 끄는 스위치는 `config__name_summons 0`.
 
 ### 왜 이 모양인가
 
@@ -670,7 +670,7 @@ Bloodmoss 플래그 하나와 `Vengeful Spirit` 핫키(목록에 있음)만 추�
 | 증상 | 뜻 |
 |---|---|
 | 소환 후 3초 안에 `[ name, nomeehei ]` 가 소환수 머리 위에 뜨고 네임태그가 바뀐다 | 정상 |
-| 오버헤드는 뜨는데 네임태그가 그대로 | 서버가 이름을 거부했거나 `rename` 이 로컬에서 막힘. 시스템 메시지 확인. 슬롯은 찼다고 보므로 스크립트를 다시 켜야 재시도한다 |
+| 오버헤드는 뜨는데 네임태그가 그대로 | 서버가 이름을 거부한 것 (`That name is unacceptable.`). 이름 인자가 변수면 이렇게 된다. 슬롯은 찼다고 보므로 스크립트를 다시 켜야 재시도한다 |
 | 오버헤드가 아예 안 뜬다 | 그 소환수의 바디 번호가 `findtype` 줄에 없는 것. `>info` 로 읽어서 더한다 |
 | 두 마리가 같은 이름 | 슬롯 변수가 비워진 것. 소환수가 `config__summon_range` (18) 밖으로 나갔다가 돌아온 경우. 값을 키운다 |
 
@@ -705,6 +705,8 @@ Bloodmoss 플래그 하나와 `Vengeful Spirit` 핫키(목록에 있음)만 추�
   `4294967295` 가 되어 `noto` 가 `Mobile … not found` 를 낸다. 안에서 `@setvar! var__x alias__x` 로 복사해 나온다.
   이 파일의 다른 alias 가 전부 블록 안에서만 쓰이는 이유다.
 - **`findtypelist` 를 명령으로 쓰기.** `Unknown command`. 쓴다면 `findtype` 처럼 `if` 안의 표현식일 것이다 (미확인).
+- **`rename <serial> <변수>`.** 서버가 `That name is unacceptable.` 로 거부한다 (2026-09-28 프로브, 같은 이름을
+  리터럴 `'nomeehei'` 로 주면 통과). 이름은 따옴표 리터럴로만 넘긴다. serial 쪽은 변수여도 된다.
 - 산술 `@setvar! var__n var__n + 1`
 - `while <스크립트 변수> <`
 - `menu <serial> <변수>` -- 인덱스는 반드시 리터럴
