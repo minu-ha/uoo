@@ -639,7 +639,7 @@ Bloodmoss 플래그 하나와 `Vengeful Spirit` 핫키(목록에 있음)만 추�
 | 2 | `nomeehel` | 두 번째 |
 | 3 | `nomeeheh` | 세 번째 (Summon Creature 같은 1슬롯짜리를 셋째로 뽑았을 때) |
 
-이름은 `SUMMON NAMES` 블록의 `rename` 줄 세 개에 리터럴로 있다. 변수는 단어를 못 담아서 config 로 못 뺀다 (아래 "쓰면 안 되는 구문"). 끄는 스위치는 `config__name_summons 0`.
+이름은 CONFIG 의 `summon_names` 리스트 (`pushlist` 세 줄). 변수는 단어를 못 담지만 리스트 항목은 글자를 유지하고 `foreach` 변수가 그대로 `rename` 에 넘어간다 (2026-09-28 프로브). 끄는 스위치는 `config__name_summons 0`.
 
 ### 왜 이 모양인가
 
@@ -661,6 +661,9 @@ Bloodmoss 플래그 하나와 `Vengeful Spirit` 핫키(목록에 있음)만 추�
   serial** 로 묻는다. 슬롯에 있는 serial 은 건너뛰고, `find` 가 살아 있는 걸 못 보면 슬롯을 비운다.
   죽거나 해제된 소환수의 이름을 다음 소환이 이어받는다. 스크립트를 다시 켜면 슬롯이 비므로 이미 이름 붙은
   소환수도 한 번 더 이름을 받는다 (같은 세 이름 안에서 순서만 바뀔 수 있다).
+- **이름은 리스트에서 슬롯 번호로 꺼낸다.** 빈 슬롯을 `var__free_slot` (0 1 2, 3 은 없음) 로 고르고 그 자리에서 슬롯 변수에 serial 을
+  넣은 뒤, `foreach summon_name in summon_names` 안에서 `index = var__free_slot` 인 항목으로 `rename` 한다. 내장 `index` 가
+  왼쪽이라 변수와 비교해도 된다.
 - **한 윈도(3초)에 한 마리.** `findtype` 은 일치하는 것 중 **무작위 하나**를 돌려주므로, 야생이나 이미 바꾼 것을
   집으면 그 윈도는 넘기고 다음에 다시 본다. 연달아 둘을 뽑아도 먼저 나온 쪽이 먼저 잡힌다 -- 시전 6초 동안 혼자 있으니까.
 - 시전도 커서도 없어서 교전 여부와 무관하게 돈다. `followers > 0` 일 때만.
@@ -670,7 +673,7 @@ Bloodmoss 플래그 하나와 `Vengeful Spirit` 핫키(목록에 있음)만 추�
 | 증상 | 뜻 |
 |---|---|
 | 소환 후 3초 안에 `[ name, nomeehei ]` 가 소환수 머리 위에 뜨고 네임태그가 바뀐다 | 정상 |
-| 오버헤드는 뜨는데 네임태그가 그대로 | 서버가 이름을 거부한 것 (`That name is unacceptable.`). 이름 인자가 변수면 이렇게 된다. 슬롯은 찼다고 보므로 스크립트를 다시 켜야 재시도한다 |
+| 오버헤드는 뜨는데 네임태그가 그대로 | 서버가 이름을 거부한 것 (`That name is unacceptable.`). 이름이 변수를 거쳤거나 숫자면 이렇게 된다. 슬롯은 찼다고 보므로 스크립트를 다시 켜야 재시도한다 |
 | 오버헤드가 아예 안 뜬다 | 그 소환수의 바디 번호가 `findtype` 줄에 없는 것. `>info` 로 읽어서 더한다 |
 | 두 마리가 같은 이름 | 슬롯 변수가 비워진 것. 소환수가 `config__summon_range` (18) 밖으로 나갔다가 돌아온 경우. 값을 키운다 |
 
@@ -694,6 +697,7 @@ Bloodmoss 플래그 하나와 `Vengeful Spirit` 핫키(목록에 있음)만 추�
 | `findtype 24\|158\|… ground -1 -1 <range> as` -- 바디 번호로 모빌 찾기 | `bard-necro-enhanced.razor` SUMMON NAMES, 구식 `bard-necro` PROVO FOLLOWER CACHE |
 | `@rename <alias> <var>` | `bard-necro-enhanced.razor` SUMMON NAMES. 위키 `rename`, CE 는 `CanRename` 인 펫에만 보낸다 |
 | `find <var> ground -1 -1 <range> as` + `dead` 로 슬롯 비우기 | `bard-necro-enhanced.razor` SUMMON NAMES, 구식 `bard-necro` PROVO FOLLOWER CACHE |
+| `pushlist '리스트' '단어'` + `foreach x in 리스트` + `index = <변수>` -- 단어를 문자열 인자로 넘기기 | `bard-necro-enhanced.razor` SUMMON NAMES. 2026-09-28 프로브: 항목이 글자 그대로 읽히고 `rename` 이 받는다 |
 
 ## 쓰면 안 되는 구문 (선례 없음, 실제로 깨졌던 것들)
 
@@ -707,7 +711,8 @@ Bloodmoss 플래그 하나와 `Vengeful Spirit` 핫키(목록에 있음)만 추�
 - **`findtypelist` 를 명령으로 쓰기.** `Unknown command`. 쓴다면 `findtype` 처럼 `if` 안의 표현식일 것이다 (미확인).
 - **단어를 변수에 담기.** `@setvar! var__x nomeeheh` 는 따옴표가 있든 없든 `4294967295` 로 읽힌다 (2026-09-28 프로브.
   숫자 `5000` 은 `5000`, `0x622396` 은 10진수 `6431638`). 변수는 숫자와 serial 전용이다. 그래서 `rename <serial> <변수>` 는
-  서버에 쓰레기 이름이 가서 `That name is unacceptable.` 이 되고, 이름은 리터럴로만 넘긴다. serial 쪽은 변수여도 된다.
+  서버에 쓰레기 이름이 가서 `That name is unacceptable.` 이 된다. 단어는 리스트에 담아 `foreach` 로 꺼낸다. serial 쪽은 변수여도 된다.
+- **숫자를 펫 이름으로.** serial 을 그대로 이름으로 주면 `That name is unacceptable.` (2026-09-28 프로브). 이름에 숫자는 안 된다.
 - 산술 `@setvar! var__n var__n + 1`
 - `while <스크립트 변수> <`
 - `menu <serial> <변수>` -- 인덱스는 반드시 리터럴
