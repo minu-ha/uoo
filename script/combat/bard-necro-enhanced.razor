@@ -1106,9 +1106,8 @@ while not dead
     # in >info, a wild lich never passes, and rename would refuse it anyway. A renamed summon
     # still matches its body, so the three slot variables carry the serials, a match already
     # sitting in a slot is skipped, and a slot frees itself when find no longer sees its
-    # summon alive. findtype picks one match at random, so a window that lands on a wild or
-    # already named one simply waits for the next. The name comes out of the summon_names
-    # list by slot index: foreach carries a list entry as text, which a variable cannot.
+    # summon alive. The name comes out of the summon_names list by slot index: foreach
+    # carries a list entry as text, which a variable cannot.
     if config__name_summons = 1 and followers > 0 and timer "timer__summon_name" >= cooldown__summon_name
         settimer "timer__summon_name" 0
 
@@ -1151,39 +1150,49 @@ while not dead
         # ghost 26, skeleton 50, 56, 57, skeletal knight 147, skeletal mage 148, ghoul 153,
         # rotting corpse 155. Skeletal Fiend, skeletal marksman and rotting flesh are Outlands
         # bodies: read theirs with >info when one is out and add the number here.
-        if findtype 24|158|722|740|9|13|14|15|16|3|26|50|56|57|147|148|153|155 ground -1 -1 config__summon_range as alias__fresh_summon
-            @setvar! var__fresh_summon alias__fresh_summon
-        endif
-
-        if var__fresh_summon != 0
-            if var__fresh_summon != var__summon_named_1 and var__fresh_summon != var__summon_named_2 and var__fresh_summon != var__summon_named_3
-                if not dead var__fresh_summon and noto var__fresh_summon != "hostile" and noto var__fresh_summon != "criminal" and noto var__fresh_summon != "enemy" and noto var__fresh_summon != "murderer"
-                    # The first free slot, as an index into summon_names. 3 is past the end,
-                    # so with every name taken the loop below matches nothing.
-                    if var__summon_named_1 = 0
-                        @setvar! var__free_slot 0
-                        @setvar! var__summon_named_1 var__fresh_summon
-                    elseif var__summon_named_2 = 0
-                        @setvar! var__free_slot 1
-                        @setvar! var__summon_named_2 var__fresh_summon
-                    elseif var__summon_named_3 = 0
-                        @setvar! var__free_slot 2
-                        @setvar! var__summon_named_3 var__fresh_summon
-                    else
-                        @setvar! var__free_slot 3
-                    endif
-
-                    foreach summon_name in summon_names
-                        if index = var__free_slot
-                            @rename var__fresh_summon summon_name
-
-                            if config__chatty = 1
-                                overhead "[ name, {{summon_name}} ]" 9 var__fresh_summon
-                            endif
-                        endif
-                    endfor
+        # Walk every match, not just the first: this Razor hands back the same mobile on
+        # every call, so a single findtype would return the summon already named and never
+        # reach the second one. Each rejected match is ignored for the rest of the walk, the
+        # first fresh own summon is copied out, and the ignore list is emptied again so the
+        # slot checks above and the rest of the loop see everything.
+        while findtype 24|158|722|740|9|13|14|15|16|3|26|50|56|57|147|148|153|155 ground -1 -1 config__summon_range as alias__fresh_summon
+            if alias__fresh_summon != var__summon_named_1 and alias__fresh_summon != var__summon_named_2 and alias__fresh_summon != var__summon_named_3
+                if not dead alias__fresh_summon and noto alias__fresh_summon != "hostile" and noto alias__fresh_summon != "criminal" and noto alias__fresh_summon != "enemy" and noto alias__fresh_summon != "murderer"
+                    @setvar! var__fresh_summon alias__fresh_summon
+                    break
                 endif
             endif
+
+            @ignore alias__fresh_summon
+        endwhile
+
+        @clearignore
+
+        if var__fresh_summon != 0
+            # The first free slot, as an index into summon_names. 3 is past the end, so with
+            # every name taken the loop below matches nothing.
+            if var__summon_named_1 = 0
+                @setvar! var__free_slot 0
+                @setvar! var__summon_named_1 var__fresh_summon
+            elseif var__summon_named_2 = 0
+                @setvar! var__free_slot 1
+                @setvar! var__summon_named_2 var__fresh_summon
+            elseif var__summon_named_3 = 0
+                @setvar! var__free_slot 2
+                @setvar! var__summon_named_3 var__fresh_summon
+            else
+                @setvar! var__free_slot 3
+            endif
+
+            foreach summon_name in summon_names
+                if index = var__free_slot
+                    @rename var__fresh_summon summon_name
+
+                    if config__chatty = 1
+                        overhead "[ name, {{summon_name}} ]" 9 var__fresh_summon
+                    endif
+                endif
+            endfor
         endif
     endif
 
