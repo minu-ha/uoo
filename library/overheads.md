@@ -408,7 +408,7 @@
 | 1 moving throws | `1 moving throw left.` | `[ throws, 1 ] (33)` |
 | 0 moving throws | `No throws, plant now.` | `[ throws, 0 ] (33)` |
 | wing your target | `You wing your target.` | `[ wing, target ] (43)` |
-| Magic reflect removed. | (신규) | `[ reflect, off ] (53)` |
+| Magic reflect removed | (신규) | `[ reflect, off ] (53)` — PvP 는 "Magic reflect removed (PvP)." 라 마침표 없이 잡는다. 바 `reflect` 도 같은 검색어 |
 | has applied telekinesis to you | (신규) | `[ teleki, me ] (33)` — "Qianshanmuxue has applied telekinesis to you." 건 사람 이름은 저널에 |
 | An explosion potion has stuck to you | (신규) | `[ bomb, me ] (33)` — 퓨즈 5초, 바 `bomb, me` 와 짝 |
 | Your explosion potion sticks to your target | (신규) | `[ bomb, target ] (43)` |
@@ -670,6 +670,8 @@
 
 ## 아직 확인 안 된 것
 
+- "You must wait another N seconds before you may cast that again." 은 주문 재시전 잠금 공통 문장 (리플렉트 30초 등). 어느 주문인지는 안 알려준다
+- PvP 에서 `paralyzed` 가 "You are frozen and cannot move." 상태를 잡는지, 파우치가 나가는지
 - `message=""` 인 항목이 정말 아무것도 안 띄우는지, Razor 가 종료 때 그 항목을 지우지 않는지 (힘·민 포션 대기). 빈 줄이 뜨거나 항목이 사라지면 다른 방법을 찾는다
 - `hams, me` 두 문장 중 실제로 오는 쪽 ("You have been hamstrung" / "Their attack hamstrings you!")
 - `heal pot` 트리거 "You drink a healing potion" 이 실제 문장인지. 스크립트의 `cooldown "heal pot"` 과 겹쳐도 같은 시각에 다시 시작할 뿐이다
