@@ -318,7 +318,7 @@ while not dead
     # ################################################################################
     # # SHIELD
     # ################################################################################
-    # 31002 / parrying gauche, listed under Shields in library/item-list.razor:1080.
+    # 31002 / parrying gauche, listed under Shields in library/item-list.txt:1080.
     # Matched on graphic with no hue filter so a plain gauche still equips, and no cache is
     # kept because this path never calls getlabel.
     if lhandempty
@@ -509,6 +509,7 @@ while not dead
                     settimer "timer__overhead_message" 0
                 endif
             else
+
                 dclick alias__heal_potion
                 wait wait__short
                 cooldown "heal pot" cooldown__heal_potion

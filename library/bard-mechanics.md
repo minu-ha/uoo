@@ -443,7 +443,7 @@ Disco/Peace/Provo 가 전부 80이면 T3(120점)를 찍어도 **80밖에 못 쓴
 | Energy Vortex | Jackal Spirit |
 | Summon Creature | 무작위 언데드 |
 
-- 8서클 소환 전부 **마나 50, 시전 6.00초**, 시약에 **Bloodmoss** 포함 (`item-list.razor`)
+- 8서클 소환 전부 **마나 50, 시전 6.00초**, 시약에 **Bloodmoss** 포함 (`item-list.txt`)
 - **타이머는 없지만 최대 체력이 10초마다 1% 깎여 결국 죽는다.** 재소환은 "죽었을 때"가 아니라 주기적 정비다
 - **`followers` 는 컨트롤 슬롯 수다.** 위 소환수는 각 **2**, Summon Creature 는 1 (인게임 확인됨)
 - Vengeful Spirit 은 심볼 1, 30초. 소환 둘을 뽑으려면 VS -> 소환 -> 소환 을 30초 안에
@@ -793,7 +793,7 @@ Wizard's Grimoire:
 | Necromancy 어빌리티 | 적용 | **안 됨** |
 | 소환수 주문 데미지 | 그대로 | PK 가 Magic Resist 포션을 마시면 **-10 / 20 / 30%** |
 | 상대 Dispel | -- | Spirit Speak 120 이면 **60% 무시, 40% 로 지워진다** |
-| 다시 부르기 | -- | 5초 시전 (`item-list.razor` 는 6.00초), 마나 환급 없음, 상대 4서클+ 주문에 끊긴다 |
+| 다시 부르기 | -- | 5초 시전 (`item-list.txt` 는 6.00초), 마나 환급 없음, 상대 4서클+ 주문에 끊긴다 |
 
 Herding 과 Necromancy 가 PvP 에서 대신 주는 것:
 

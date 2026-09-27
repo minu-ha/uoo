@@ -50,8 +50,7 @@
 | `templates.md` | 템플릿 ↔ 전투 스크립트 ↔ 핫키 ↔ shelf ↔ 프로필 매핑. 새 템플릿 만들면 한 줄 추가 |
 | `hotkeys.md` | 키 배치와 주문 데미지 메모 |
 | `overheads.md` | 쿨다운 바 · 오버헤드 알림. 이름 규칙(Out / On Me), 컨벤션, 아직 문장을 못 잡은 구멍 목록 |
-| `item-list.razor` | 아이템 이름·graphic id·hue 목록. `findtype` 인자 찍을 때 참조 |
-| `vendor-prices.md` | 상점 가격표 |
+| `item-list.txt` | 아이템 이름·graphic id·hue 목록. `findtype` 인자 찍을 때 참조. 상점 가격은 `script/loot/stock-vendor.razor` 상단이 정본 |
 | `bard-necro-summon-guide.md` | Bard Necro 소환 조합·Tome 투자 가이드 |
 | `bard-necro-combat-design.md` | `bard-necro-enhanced` 전투 루프 설계. 우선순위 사다리, 마나 예산, Grimoire·Codex 배분 |
 | `bard-mechanics.md` | **바드 메커니즘 레퍼런스.** 쿨다운·송·바딩 브레이크·코덱스 원문. 바드 숫자는 여기서 인용한다 |
