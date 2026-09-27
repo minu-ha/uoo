@@ -41,12 +41,15 @@ clearignore
 # 1 throws an explosion potion at the target while our telekinesis is on them.
 @setvar! config__use_bomb 1
 
-# Hit points below maximum that drink a heal potion, and that drop a held cursor for a heal.
-@setvar! config__heal_hits 25
-@setvar! config__emergency_hits 35
+# Hit points below maximum that drink a heal potion, and that drop a held cursor for a cast
+# heal. The potion first: it cannot be interrupted, a heal cast can. A greater heal potion
+# restores around thirty, so drinking earlier than this wastes part of it.
+@setvar! config__heal_hits 35
+@setvar! config__emergency_hits 45
 
 # Explosion plus Energy Bolt. Below this the loop waits for mana rather than half a dump.
 @setvar! config__dump_mana 40
+@setvar! config__mana_6th 20
 @setvar! config__mushroom_eat_mana 45
 
 # ####################################################################################
@@ -248,7 +251,8 @@ while not dead
     # ####################################################################################
     # Reactive Armor and Magic Reflection whenever they are down, the stat potions on their own
     # clock. Reflection outranks the dump: fourteen mana that eats one of their spells.
-    if not targetexists and not casting
+    # Casts wait for the feet to stop, a step breaks them.
+    if not targetexists and not casting and cooldown "walk" = 0
         if not findbuff 'Reactive Armor' and var__regs_reactive = 1 and mana >= 4
             cast 'Reactive Armor'
             wait wait__short
@@ -294,7 +298,7 @@ while not dead
         wait wait__short
     endif
 
-    if not findbuff 'Magic Resist Potion'
+    if not findbuff 'Magic Resist Potion' and findtype "Black Potion" backpack
         hotkey 'Drink Magic Resist'
         wait wait__short
     endif
@@ -302,8 +306,10 @@ while not dead
     # ####################################################################################
     # # PETS
     # ####################################################################################
-    if var__engaged = 1 and timer "timer__pets" >= cooldown__pets
-        if not targetexists and not casting
+    # Only with followers out, and only standing: the command opens a cursor, and answering
+    # it mid step is what kept firing on the move.
+    if var__engaged = 1 and followers > 0 and timer "timer__pets" >= cooldown__pets
+        if not targetexists and not casting and cooldown "walk" = 0
             say 'all kill'
             waitfortarget wait__target
 
@@ -321,7 +327,7 @@ while not dead
     # One cast per 30 seconds, whoever it goes on. Self first, unless the enemy already stuck
     # one on us, in which case ours would not land and the enemy gets it straight away.
     if var__engaged = 1 and timer "timer__tk" >= cooldown__tk and var__regs_tk = 1 and mana >= 9
-        if not targetexists and not casting
+        if not targetexists and not casting and cooldown "walk" = 0
             if cooldown "teleki, me" > 0
                 @setvar! var__self_tk_done 1
             endif
@@ -375,8 +381,10 @@ while not dead
     # # BOMB
     # ####################################################################################
     # Only while our telekinesis is on them: a potion that does not stick is walked away from.
-    # Thrown right before the dump, so the five second fuse ends as Explosion and Energy Bolt
-    # land.
+    # The five second fuse starts on the drink, not the throw, and the cursor has to be
+    # answered inside it or the potion goes off in hand. Thrown right before the dump, so the
+    # fuse ends as Explosion and Energy Bolt land: drink at t, Explosion delivered at t+2.3
+    # lands at t+4.8, Energy Bolt cast then lands at t+4.75, potion at t+5.
     if config__use_bomb = 1 and var__in_range = 1 and cooldown "teleki, target" > 0 and cooldown "explo pot" = 0
         if not targetexists and not casting and var__armed = 0 and mana >= config__dump_mana
             hotkey 'Drink Explosion'
@@ -395,7 +403,7 @@ while not dead
     # Arm: cast Explosion as soon as there is a target anywhere in sight and hold the cursor.
     # Fire: the moment the target is in range, deliver it and cast Energy Bolt on top.
     if var__engaged = 1 and var__armed = 0 and mana >= config__dump_mana and var__regs_explo = 1 and var__regs_eb = 1
-        if not targetexists and not casting
+        if not targetexists and not casting and cooldown "walk" = 0
             cast 'Explosion'
 
             for 25
@@ -425,23 +433,28 @@ while not dead
         elseif var__engaged = 1 and var__in_range = 1
             target var__target
             @setvar! var__armed 0
-            cast 'Energy Bolt'
 
-            for 25
+            # Delivering the held Explosion is a click, fine on the move. The Energy Bolt on top
+            # is a cast, so it waits for the feet: if they are moving, the next pass arms again.
+            if cooldown "walk" = 0 and mana >= config__mana_6th
+                cast 'Energy Bolt'
+
+                for 25
+                    if targetexists
+                        break
+                    endif
+
+                    if insysmsg "Your concentration is disturbed, thus ruining thy spell."
+                        break
+                    endif
+
+                    wait wait__poll
+                endfor
+
                 if targetexists
-                    break
+                    target var__target
+                    wait wait__cast
                 endif
-
-                if insysmsg "Your concentration is disturbed, thus ruining thy spell."
-                    break
-                endif
-
-                wait wait__poll
-            endfor
-
-            if targetexists
-                target var__target
-                wait wait__cast
             endif
         elseif timer "timer__arm" >= cooldown__arm
             hotkey "Cancel Current Target"
