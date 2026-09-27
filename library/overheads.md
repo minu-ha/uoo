@@ -22,6 +22,7 @@
 | 값 | 서버 문장의 n 번째 단어는 `{n}` 으로 그대로 넣는다 (**1부터**, 공백 기준): "You must wait another 4 minutes" 의 `{5}` 가 4. 스크립트 변수는 `{{var}}` |
 | 폭 | 대괄호 포함 **18자 목표, 22자 상한.** 넘으면 대상을 줄인다 (`No Longer Paralyzed` → `[ para, off ]`) |
 | 구분 | 서버 문장은 절대 `[` 로 시작하지 않는다. 대괄호가 곧 "커스텀" 표시다 |
+| 검색 | 부분 문자열, **대소문자 안 가림** (인게임 확인: `Trapped pouches` 가 "trapped pouches" 에 걸렸다). 정규식·와일드카드 없음 |
 | 순서 | 한 문장에 항목 여러 개가 걸리면 **파일에서 앞의 것 하나만** 뜬다 (인게임 확인, `[ wait, 4m 53s ]` 가 `[ wait, 4s ]` 를 눌렀다). 구체적인 검색어를 범용 검색어보다 **앞에** 둔다 |
 | 쿨다운 바 이름 | 같은 단어, **대괄호 없이**. 방향이 있을 때만 쉼표: `hams, me` / `teleki, target`. 그 외는 한 단어: `music` `heal pot` |
 
@@ -396,7 +397,6 @@ hue 번호는 이 뜻으로 이미 쓰이고 있던 값을 골랐다. 실제 색
 | has applied telekinesis to you | (신규) | `[ teleki, me ] (33)` — "Qianshanmuxue has applied telekinesis to you." 건 사람 이름은 저널에 |
 | An explosion potion has stuck to you | (신규) | `[ bomb, me ] (33)` — 퓨즈 5초, 바 `bomb, me` 와 짝 |
 | Your explosion potion sticks to your target | (신규) | `[ bomb, target ] (63)` |
-| Trapped pouches remaining | (신규) | `[ pouch, {1} ] (53)` — "4 Trapped pouches remaining." (파우치 쓸 때 두 줄 중 둘째). `0 Trapped pouches remain` 이 앞에 있어 0 은 `[ pouch, out ]` |
 
 ## 스크립트 오버헤드
 
@@ -645,8 +645,6 @@ hue 번호는 이 뜻으로 이미 쓰이고 있던 값을 골랐다. 실제 색
 
 ## 아직 확인 안 된 것
 
-- 검색이 대소문자를 가리는지. 파우치를 쓰면 "You now have 4 trapped pouches remaining." 과 "4 Trapped pouches remaining." 두 줄이 오는데,
-  `[ pouch, 4 ]` 한 줄이면 가린다 (둘째 줄만 맞음), `[ pouch, You ]` 가 같이 뜨면 안 가린다 → 그때는 검색어를 "You now have" 로 바꾸고 `{4}` 를 쓴다
 - `para` 10s 바가 파우치로 깼을 때 "You can move!" 로 같이 꺼지는지
 - `hams, me` 두 문장 중 실제로 오는 쪽 ("You have been hamstrung" / "Their attack hamstrings you!")
 - `heal pot` 트리거 "You drink a healing potion" 이 실제 문장인지. 스크립트의 `cooldown "heal pot"` 과 겹쳐도 같은 시각에 다시 시작할 뿐이다
