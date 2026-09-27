@@ -117,7 +117,7 @@ flowchart TD
 | | |
 |---|---|
 | 악기 | 캐시 → 자동 탐색 → 수동 선택. 없으면 `stop` |
-| **크룩 활성화** | `dclick`. 위키: "double-click a shepherd's crook to set it as their Activated shepherd's crook". 지속시간 없음, 백팩에만 있으면 됨. Herding 80 = 팔로워 딜 +17.6%, 저항 +8.8% |
+| 크룩 활성화 | `config__use_herding 0`. Herding 이 템플릿에서 빠져서 (Resisting Spells 80) 크룩은 아무것도 안 한다. 다시 찍으면 1 로 |
 | 네크로 핫바 | 루프 안 `NECRO HOTBAR` 가 첫 패스에 연다 (타이머가 만료 상태로 시작) |
 
 ## 캐릭터 전제
@@ -127,7 +127,7 @@ flowchart TD
 | Discordance / Peacemaking / Provocation | 80 / 80 / 80 |
 | Musicianship | 0 (Bard Codex `Self Taught` T2 로 대체) |
 | Spirit Speak | 120 |
-| Herding | 80 |
+| Resisting Spells | 80 (Herding 에서 바꿈, 2026-09-27) |
 | Necromancy | 100 |
 | Magery | 100 |
 | Eval Int | 80 |

@@ -9,7 +9,7 @@
 | Discordance / Peacemaking / Provocation | 80 / 80 / 80 |
 | Musicianship | **0 (Bard Codex `Self Taught` T2 로 대체)** |
 | Spirit Speak | 120 |
-| Herding | 80 |
+| Resisting Spells | 80 (Herding 에서 바꿈, 2026-09-27) |
 | Necromancy | 100 |
 | Magery | 100 |
 | Eval Int | 80 |
@@ -37,8 +37,8 @@
 - 바딩 최소 성공률은 `33% x (유효/100)` 이라 80 에서도 실용 구간이 나온다.
 - 바딩 지속시간은 난이도 300~500 구간에서 바닥값 `15초 x (Musicianship/100)` 이 지배한다.
   Musicianship 을 120으로 올려도 이 구간에서는 체감이 작다.
-- Herding 80 이 팔로워 데미지 `22% x (유효 Herding/100)` 과 저항 `11%` 를 얹는다.
-  크룩을 활성화해두면 패시브로 붙는다.
+- Herding 은 뺐다 (2026-09-27, Resisting Spells 80). 있을 때는 팔로워 데미지 `22% x (유효 Herding/100)` 과 저항 `11%` 를 얹었다.
+  PK 와 싸우는 것이 기본이라 Heat of Battle 중의 printed Resist 가 더 급했다. 근거는 `bard-mechanics.md` "Herding 을 Resist 로 바꿀 것인가".
 
 ## 소환 절차
 
@@ -62,7 +62,7 @@
 물리 딜러는 `Mummy` 와 `Air` 뿐이다.
 
 **소환수 스탯은 반드시 SS 120 기준 스케일 표로 본다.** 위키의 기본 스탯은 낮은 SS 기준이라
-실제 수치와 다르다. Herding 80 의 `+22% 팔로워 데미지` 도 그 위에 얹힌다.
+실제 수치와 다르다.
 
 ## 왜 Lich 2마리인가 (테이머 듀오 기준)
 

@@ -881,6 +881,8 @@ Bard Necro 기준으로 Herding 80 -> Resisting Spells 80 을 따져 본 결과�
 체력 100 언저리면 Resist 0 은 덤프 한 번에 죽고, 80 은 남아서 힐 포션·Greater Heal 이 들어간다.
 잃는 것은 PvE 전체 딜 약 9.5% 다. **PK 를 만나면 싸우는 것이 기본인 캐릭터는 Resist 80 이 맞다.**
 
+2026-09-27 에 그렇게 바꿨다. 스크립트는 `config__use_herding 0`, 두 문서의 캐릭터 전제는 Resisting Spells 80.
+
 **TK 순서 규칙.** 시전자 글로벌 쿨 "at most once every 30 seconds to any player" 에 자기 자신이 들어가면
 자기 TK 와 공격 TK 는 30초 안에 하나만 된다 (미확인, 길드원에게 시험하면 바로 안다).
 
