@@ -200,8 +200,10 @@ Spirit Pact    T3   5
   `noto` 필터가 필수다. `bard-necro-enhanced.razor` 의 `COMBAT TARGET CACHE` 와 `SUMMON NAMES` 가 그 형태다.
 - **소환수 이름은 자동으로 바뀐다.** `SUMMON NAMES` 블록이 새 소환수를 나온 순서대로 `nomeehei` / `nomeehel` /
   `nomeeheh` 로 바꾼다. 본체 `nomeehej` 와 한 글자 차이라 PK 가 네임태그로 본체를 고르기 어렵다.
-  종류와 무관하게 순서다. 바디 번호 없이 기본 이름(`a lich` 등)으로 찾고, 죽은 소환수의 이름은 다음 소환이 이어받는다.
+  종류와 무관하게 순서다. 바디 번호로 찾고, 죽은 소환수의 이름은 다음 소환이 이어받는다.
   설계와 실패 증상은 `bard-necro-combat-design.md` 의 "소환수 이름".
+- **바디 번호 (`>info`).** Lich 24 (hue 0), Ancient Mummy 158 (hue 2340), Vampire Thrall 722, Rag Witch 740.
+  내 소환수의 Notoriety 는 2 (friend). Skeletal Fiend 와 Summon Creature 풀의 Outlands 언데드는 아직 못 읽었다.
 
 ## 참고 링크
 

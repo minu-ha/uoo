@@ -643,17 +643,22 @@ Bloodmoss 플래그 하나와 `Vengeful Spirit` 핫키(목록에 있음)만 추�
 
 ### 왜 이 모양인가
 
-- **바디 번호가 필요 없다.** `findtype` 에 문자열을 주면 아이템에 없을 때 **모빌 이름(부분 일치, 대소문자 무시)** 으로
-  내려간다 (Razor CE `Expressions.FindType` -> `GetMobilesByName`). 그래서 기본 이름 열 개로 다섯 언데드와
-  Summon Creature 풀(zombie, skeleton, skeletal knight/mage/marksman, ghoul, ghost, rotting flesh)을 전부 잡는다.
-  `'a skeletal'` 한 줄이 Skeletal Fiend 와 풀의 skeletal 셋을 같이 덮는다.
-- **이름과 "내 펫" 플래그는 상태 패킷(0x11)에서 온다.** ClassicUO 는 새 모빌이 보일 때마다 상태를 요청하므로
-  (`PacketHandlers.UpdateMobile`: "a way to get all Hp from all new mobiles") Razor 는 소환 직후 이름과
-  `CanRename` 을 둘 다 안다. `rename` 은 이 플래그가 선 모빌에만 패킷을 보낸다. 체력바를 열 필요가 없다.
-- **`noto` 필터는 구식 스크립트의 팔로워 필터 그대로.** 야생 리치는 통과 못 하고, 통과해도 `rename` 이 거부한다.
-- **Razor 는 이름 바꾼 뒤에도 옛 이름을 캐시할 수 있다** (CE 에는 0x98 MobileName 핸들러가 없다). 그래서
-  "이미 바꿨는가"를 이름으로 묻지 않고 **슬롯 변수 셋(`var__summon_named_1..3`)에 serial 을 든다.** 슬롯에 있는
-  serial 은 건너뛰고, `find` 가 살아 있는 걸 못 보면 슬롯을 비운다. 죽거나 해제된 소환수의 이름을 다음 소환이 이어받는다.
+- **바디 번호로 찾는다.** 처음엔 기본 이름(`findtype 'a lich' … as`)으로 짰는데, 이 Razor 는 문자열 검색이
+  모빌에 **참은 돌려주면서 `as` alias 에 serial 을 안 넣는다.** 뒤따르는 `noto` 가 전부
+  `Mobile '4294967295' not found` 로 실패했다 (2026-09-28 인게임). 바디 번호는 `>info` 로 읽는다: Lich 24,
+  Ancient Mummy 158 (hue 2340). Vampire Thrall 722, Rag Witch 740 은 구식 `bard-necro` 의 팔로워 캐시 값이다.
+  VS 없이 나온 맨 엘리멘탈(9 13 14 15 16)과 Summon Creature 풀의 표준 언데드(3 26 50 56 57 147 148 153 155)도
+  같이 넣었다. **Skeletal Fiend, skeletal marksman, rotting flesh 는 Outlands 바디라 번호를 모른다.**
+  나오면 `>info` 로 읽어 `findtype` 줄에 더한다.
+- **"내 펫" 플래그는 상태 패킷(0x11)에서 온다.** ClassicUO 는 새 모빌이 보일 때마다 상태를 요청하므로
+  (`PacketHandlers.UpdateMobile`: "a way to get all Hp from all new mobiles") Razor 는 소환 직후
+  `CanRename` 을 안다. `rename` 은 이 플래그가 선 모빌에만 패킷을 보낸다. 체력바를 열 필요가 없다.
+- **`noto` 필터는 구식 스크립트의 팔로워 필터 그대로.** 내 소환수는 `>info` 에 Notoriety 2 (friend, 초록) 로
+  읽힌다. 야생 리치는 통과 못 하고, 통과해도 `rename` 이 거부한다.
+- **이름을 바꿔도 바디는 그대로 매치된다.** 그래서 "이미 바꿨는가"를 **슬롯 변수 셋(`var__summon_named_1..3`)의
+  serial** 로 묻는다. 슬롯에 있는 serial 은 건너뛰고, `find` 가 살아 있는 걸 못 보면 슬롯을 비운다.
+  죽거나 해제된 소환수의 이름을 다음 소환이 이어받는다. 스크립트를 다시 켜면 슬롯이 비므로 이미 이름 붙은
+  소환수도 한 번 더 이름을 받는다 (같은 세 이름 안에서 순서만 바뀔 수 있다).
 - **한 윈도(3초)에 한 마리.** `findtype` 은 일치하는 것 중 **무작위 하나**를 돌려주므로, 야생이나 이미 바꾼 것을
   집으면 그 윈도는 넘기고 다음에 다시 본다. 연달아 둘을 뽑아도 먼저 나온 쪽이 먼저 잡힌다 -- 시전 6초 동안 혼자 있으니까.
 - 시전도 커서도 없어서 교전 여부와 무관하게 돈다. `followers > 0` 일 때만.
@@ -664,7 +669,7 @@ Bloodmoss 플래그 하나와 `Vengeful Spirit` 핫키(목록에 있음)만 추�
 |---|---|
 | 소환 후 3초 안에 `[ name, nomeehei ]` 가 소환수 머리 위에 뜨고 네임태그가 바뀐다 | 정상 |
 | 오버헤드는 뜨는데 네임태그가 그대로 | 서버가 이름을 거부했거나 `rename` 이 로컬에서 막힘. 시스템 메시지 확인. 슬롯은 찼다고 보므로 스크립트를 다시 켜야 재시도한다 |
-| 오버헤드가 아예 안 뜬다 | `findtype` 문자열이 Outlands 포크에서 모빌까지 안 내려가는 것. 그때는 구식 스크립트의 바디 번호 (Vampire Thrall 722, Ancient Mummy 158, Rag Witch 740, Lich 24) 로 찾고 `getlabel` 로 기본 이름인지 본다 |
+| 오버헤드가 아예 안 뜬다 | 그 소환수의 바디 번호가 `findtype` 줄에 없는 것. `>info` 로 읽어서 더한다 |
 | 두 마리가 같은 이름 | 슬롯 변수가 비워진 것. 소환수가 `config__summon_range` (18) 밖으로 나갔다가 돌아온 경우. 값을 키운다 |
 
 ## 쓸 수 있는 구문 (전부 저장소에 선례 있음)
@@ -684,7 +689,7 @@ Bloodmoss 플래그 하나와 `Vengeful Spirit` 핫키(목록에 있음)만 추�
 | `hotkey 'Vampiric Embrace'` + `hotkey 'Target Self'` | 위키: 자신을 타겟하면 주변 시체를 자동 탐색. **인게임 확인됨** |
 | `hotkey 'Drink Heal'` 등 포션 핫키 | Razor 핫키 목록 Potions 항목. 이름 그대로 |
 | `hotkey "> Interrupt"` | 휠다운에 물려 쓰던 것. 시전 폴링 안에서 긴급 힐용 |
-| `findtype 'a lich' ground -1 -1 <range> as` -- 문자열로 모빌 찾기 | `bard-necro-enhanced.razor` SUMMON NAMES. Razor CE `FindType` 이 아이템에 없으면 모빌 이름으로 내려간다 |
+| `findtype 24\|158\|… ground -1 -1 <range> as` -- 바디 번호로 모빌 찾기 | `bard-necro-enhanced.razor` SUMMON NAMES, 구식 `bard-necro` PROVO FOLLOWER CACHE |
 | `@rename <alias> <var>` | `bard-necro-enhanced.razor` SUMMON NAMES. 위키 `rename`, CE 는 `CanRename` 인 펫에만 보낸다 |
 | `find <var> ground -1 -1 <range> as` + `dead` 로 슬롯 비우기 | `bard-necro-enhanced.razor` SUMMON NAMES, 구식 `bard-necro` PROVO FOLLOWER CACHE |
 
@@ -694,6 +699,8 @@ Bloodmoss 플래그 하나와 `Vengeful Spirit` 핫키(목록에 있음)만 추�
   네크로가 한 번도 안 나가던 원인. 수를 세려면 옛 스크립트처럼 **리스트에 항목을 밀어 넣고 `list 'name' >= n`** 으로 비교한다.
   `mana >= config__x` 처럼 **내장 식이 왼쪽**이면 된다.
 
+- **`findtype '문자열' … as alias`.** 모빌 이름으로 검색하면 참은 돌아오지만 alias 가 안 묶인다.
+  뒤의 `noto alias` 가 `Mobile '4294967295' not found` 를 낸다. 모빌은 바디 번호로 찾는다.
 - 산술 `@setvar! var__n var__n + 1`
 - `while <스크립트 변수> <`
 - `menu <serial> <변수>` -- 인덱스는 반드시 리터럴

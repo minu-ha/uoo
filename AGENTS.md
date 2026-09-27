@@ -137,6 +137,7 @@ endif
 **그 외**
 - 시스템 메시지 띄우면 안 되는 명령은 `@` 접두.
 - 검색은 `if findtype "name" backpack as found_x` 로 alias에 담아 재사용. 반복 검색은 `ignore` / `clearignore`.
+- **모빌은 바디 번호로 찾는다.** `findtype '문자열'` 은 모빌 이름에 참을 돌려주지만 `as` alias 가 안 묶인다. 번호는 인게임 `>info` 로 읽는다.
 - 라벨 분기는 `getlabel` → `if "문자열" in label`.
 - 검프·핫바는 `gumpexists` / `ingump` 확인 후 `gumpresponse`.
 - 디버그 출력은 `{{var}}` 보간. 확인 끝나면 지운다.

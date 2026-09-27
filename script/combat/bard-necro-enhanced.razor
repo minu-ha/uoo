@@ -1085,18 +1085,17 @@ while not dead
     # engaged or not, once per window, one rename per window: a pair summoned back to back
     # gets its names in the order they appeared.
     #
-    # How the pieces hold together. findtype with a text argument falls through to mobiles
-    # by name when no item matches (Razor CE FindType), so the stock names below are enough
-    # and no body id is needed. 'a skeletal' covers the Skeletal Fiend and the skeletal
-    # knight, mage and marksman of the Summon Creature pool in one line. The client asks the
-    # server for every new mobile's status, and that reply is what gives Razor both the name
-    # and the "this is your pet" flag rename checks, so a summon is known the moment it
-    # appears. The noto test is the old bard-necro follower filter: a wild lich never passes
-    # it, and rename would refuse it anyway. Razor may keep the stock name cached after the
-    # rename, so a renamed summon can still match here. The three slot variables carry the
-    # serials instead, a match already sitting in a slot is skipped, and a slot frees itself
-    # when find no longer sees its summon alive. findtype picks one match at random, so a
-    # window that lands on a wild or already named one simply waits for the next.
+    # How the pieces hold together. Summons are found by body id: findtype with a text
+    # argument does answer true for a mobile name on this Razor, but leaves the as alias
+    # unbound, so every noto read after it failed with mobile 4294967295. The client asks the
+    # server for every new mobile's status, and that reply is what gives Razor the "this is
+    # your pet" flag rename checks, so a summon is known the moment it appears. The noto
+    # test is the old bard-necro follower filter: an own summon reads notoriety 2, friend,
+    # in >info, a wild lich never passes, and rename would refuse it anyway. A renamed summon
+    # still matches its body, so the three slot variables carry the serials, a match already
+    # sitting in a slot is skipped, and a slot frees itself when find no longer sees its
+    # summon alive. findtype picks one match at random, so a window that lands on a wild or
+    # already named one simply waits for the next.
     if config__name_summons = 1 and followers > 0 and timer "timer__summon_name" >= cooldown__summon_name
         settimer "timer__summon_name" 0
 
@@ -1132,25 +1131,14 @@ while not dead
 
         @setvar! var__fresh_summon 0
 
-        if findtype 'a lich' ground -1 -1 config__summon_range as alias__fresh_summon
-            @setvar! var__fresh_summon 1
-        elseif findtype 'a vampire thrall' ground -1 -1 config__summon_range as alias__fresh_summon
-            @setvar! var__fresh_summon 1
-        elseif findtype 'an ancient mummy' ground -1 -1 config__summon_range as alias__fresh_summon
-            @setvar! var__fresh_summon 1
-        elseif findtype 'a rag witch' ground -1 -1 config__summon_range as alias__fresh_summon
-            @setvar! var__fresh_summon 1
-        elseif findtype 'a skeletal' ground -1 -1 config__summon_range as alias__fresh_summon
-            @setvar! var__fresh_summon 1
-        elseif findtype 'a skeleton' ground -1 -1 config__summon_range as alias__fresh_summon
-            @setvar! var__fresh_summon 1
-        elseif findtype 'a zombie' ground -1 -1 config__summon_range as alias__fresh_summon
-            @setvar! var__fresh_summon 1
-        elseif findtype 'a ghoul' ground -1 -1 config__summon_range as alias__fresh_summon
-            @setvar! var__fresh_summon 1
-        elseif findtype 'a ghost' ground -1 -1 config__summon_range as alias__fresh_summon
-            @setvar! var__fresh_summon 1
-        elseif findtype 'rotting flesh' ground -1 -1 config__summon_range as alias__fresh_summon
+        # Bodies. Lich 24 and ancient mummy 158 read off >info, vampire thrall 722 and rag
+        # witch 740 from the old bard-necro follower cache, then the plain elementals a summon
+        # cast without Vengeful Spirit gives, daemon 9, air 13, earth 14, fire 15, water 16,
+        # and the Summon Creature undead pool as far as the stock client art goes, zombie 3,
+        # ghost 26, skeleton 50, 56, 57, skeletal knight 147, skeletal mage 148, ghoul 153,
+        # rotting corpse 155. Skeletal Fiend, skeletal marksman and rotting flesh are Outlands
+        # bodies: read theirs with >info when one is out and add the number here.
+        if findtype 24|158|722|740|9|13|14|15|16|3|26|50|56|57|147|148|153|155 ground -1 -1 config__summon_range as alias__fresh_summon
             @setvar! var__fresh_summon 1
         endif
 
