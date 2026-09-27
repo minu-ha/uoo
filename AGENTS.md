@@ -137,7 +137,7 @@ endif
 **그 외**
 - 시스템 메시지 띄우면 안 되는 명령은 `@` 접두.
 - 검색은 `if findtype "name" backpack as found_x` 로 alias에 담아 재사용. 반복 검색은 `ignore` / `clearignore`.
-- **`rename` 의 이름 인자는 따옴표 리터럴만.** 변수로 넘기면 서버가 `That name is unacceptable.` 로 거부한다.
+- **스크립트 변수는 숫자와 serial 만 담는다.** 단어를 넣으면 (따옴표 유무와 무관하게) `4294967295` 가 된다. 그래서 `rename` 의 이름 같은 문자열 인자는 리터럴로만 넘긴다. 문자열 변수는 `getlabel` 결과뿐이다.
 - **`as` alias 는 그것을 묶은 `if` / `while` 블록 안에서만 산다.** 밖에서 읽으면 `4294967295` (없는 serial) 가 된다. 블록 밖으로 가져가려면 안에서 `@setvar! var__x alias__x` 로 복사한다. 모빌도 `findtype` 으로 잡힌다 (바디 번호나 이름, 둘 다 `as` 가 묶인다). 바디 번호는 인게임 `>info` 로 읽는다.
 - 라벨 분기는 `getlabel` → `if "문자열" in label`.
 - 검프·핫바는 `gumpexists` / `ingump` 확인 후 `gumpresponse`.

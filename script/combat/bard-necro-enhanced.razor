@@ -183,9 +183,10 @@ clearignore
 # name, so a PK reading nameplates has to guess which of the four is the player. Each name
 # is one slot: a resummon takes over the first name whose summon is gone. 0 leaves the
 # stock names. The names themselves, nomeehei, nomeehel, nomeeheh, are literals on the
-# rename lines of the SUMMON NAMES block: the server answers "That name is unacceptable"
-# to a name passed through a variable. config__summon_range is how far the block looks
-# for summons, the whole screen, so a summon that lagged behind still holds its name.
+# rename lines of the SUMMON NAMES block, not settings here: a script variable holds
+# numbers and serials only, a word stored in one reads back as 4294967295, and the server
+# answers "That name is unacceptable" to that. config__summon_range is how far the block
+# looks for summons, the whole screen, so a summon that lagged behind still holds its name.
 @setvar! config__name_summons 1
 @setvar! config__summon_range 18
 
