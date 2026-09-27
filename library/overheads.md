@@ -343,6 +343,8 @@ hue 번호는 이 뜻으로 이미 쓰이고 있던 값을 골랐다. 실제 색
 | enough unholy | `[ - Insufficient Unholy - ]` | `[ unholy, out ] (43)` |
 | unholy symbols remaining | `[ - Unholy : {4} - ]` | `[ unholy, {4} ] (53)` |
 | max unholy | `Unholy Maxed: {5}` | `[ unholy, max ] (68)` — "Max unholy symbols earned (10/10)", 괄호가 그대로 뜨는 `{5}` 대신 |
+| consume a magic mushroom | (신규) | `[ mush, on ] (53)` — "You consume a magic mushroom and restore some mana." 범용 `You consume` 보다 앞, 안 그러면 `[ essence, +a ]` 가 뜬다 |
+| mana from your mana well | (신규) | `[ eldritch, +{3} ] (53)` — "You draw 11 mana from your mana well." Eldritch 아스펙트 |
 | You consume | `+{3} Arcane Essence` | `[ essence, +{3} ] (53)` |
 | generates mana | `[ - Mana REFUNDED! - ]` | `[ mana, refund ] (53)` |
 | progress on the lock | `[ - Lock: {8} - ]` | `[ lock, {8} ] (53)` |
