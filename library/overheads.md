@@ -230,8 +230,8 @@ hue 번호는 이 뜻으로 이미 쓰이고 있던 값을 골랐다. 실제 색
 | You increase your damage resistance to creature-casted spells | `[ - Drinking MR Potion -]` | `[ resist, on ] (53)` |
 | You cannot move! | `[ - You are Paralyzed! - ]` | `[ para, on ] (33)` |
 | You can move! | `[ - No Longer Paralyzed! - ]` | `[ para, off ] (65)` |
-| seconds before you may use another strength potion. | `[ - Can't use Str Pot - ]` | `[ str, {4} {5} ] (43)` → "1 minute" / "25 seconds" |
-| seconds before you may use another agility potion. | `[ - Can't use Agi Pot - ]` | `[ agi, {4} {5} ] (43)` |
+| before you may use another strength potion | `[ - Can't use Str Pot - ]` | `[ str, {4} {5} ] (43)` → "1 minute" / "56 seconds" / "2 minutes". 네 가지 문장 형태를 다 받는다 |
+| before you may use another agility potion | `[ - Can't use Agi Pot - ]` | `[ agi, {4} {5} ] (43)` |
 | you are already at full stamina. | `[ - TR Not Needed - ]` | `[ stam, full ] (53)` |
 | You are not poisoned. | `[ - Not Poisoned! - ]` | `[ poison, off ] (53)` |
 | You may now use a strength potion. | `[ - Str Pot is Ready - ]` | `[ str, ready ] (68)` |
@@ -301,7 +301,8 @@ hue 번호는 이 뜻으로 이미 쓰이고 있던 값을 골랐다. 실제 색
 | susceptible to special | `[ - Target BLEEDING! - ]` | `[ bleed, target ] (63)` |
 | armslore skillgain | `SWING!` | `[ swing ] (53)` |
 | attack causes your target to bleed | `[ - TARGET BLEEDING - ]` | `[ bleed, target ] (63)` |
-| minutes  / minute  (뒤 공백) | (신규) | `[ wait, {5}m {7}s ]` (43)` — "You must wait another 4 minutes 17 seconds …" |
+| minutes before / minute before | (신규) | `[ wait, {5}m ] (43)` — "…wait another 2 minutes before…" 처럼 초가 없는 형태. 초가 있는 형태보다 앞에 둔다 |
+| minutes  / minute  (뒤 공백) | (신규) | `[ wait, {5}m {7}s ] (43)` — "You must wait another 4 minutes 17 seconds …" |
 | must wait another | `[ - WAIT {5}s - ]` | `[ wait, {5}s ] (43)` |
 | 0 Trapped pouches remain | `[ - Out of TPs! - ]` | `[ pouch, out ] (33)` |
 | No trapped pouches found | `[ - Out of TPs! - ]` | `[ pouch, out ] (33)` |
@@ -400,7 +401,7 @@ hue 번호는 이 뜻으로 이미 쓰이고 있던 값을 골랐다. 실제 색
 | An explosion potion has stuck to you | (신규) | `[ bomb, me ] (33)` — 퓨즈 5초, 바 `bomb, me` 와 짝 |
 | Your explosion potion sticks to your target | (신규) | `[ bomb, target ] (63)` |
 | You drink a healing potion | (신규) | `[ heal pot, on ] (53)` — 스크립트의 같은 줄은 뺐다 |
-| You drink a cure / refresh / strength / an agility potion | (신규, **문장 미확인**) | `[ cure pot / refresh / str / agi, on ] (53)` |
+| You drink a cure / refresh potion | (신규, **문장 미확인**) | `[ cure pot / refresh, on ] (53)`. 힘·민은 "Your strength has changed by 20" 뿐이라 안 잡는다 — Weaken 을 맞아도 같은 문장이다 |
 | Spell siphon active. | (신규) | `[ siphon, on ] (68)` — 5분마다 첫 주문 피격에 켜지는 60분 PvM 버프. 바 `siphon` 과 짝 |
 | Your spell siphon bonus has expired | (신규) | `[ siphon, off ] (43)` |
 | You absorb their spell. | (신규) | `[ spell, absorbed ] (68)` — Resist 의 `25% x Resist/100` 확률, 피해 -75% |
@@ -652,7 +653,7 @@ hue 번호는 이 뜻으로 이미 쓰이고 있던 값을 골랐다. 실제 색
 
 ## 아직 확인 안 된 것
 
-- 큐어 · 리프 · 힘 · 민 포션의 "You drink …" 문장. 힐만 확인됐다. 안 뜨면 저널에서 잡아 온다
+- 큐어 · 리프 포션의 "You drink …" 문장. 힐만 확인됐다. 안 뜨면 저널에서 잡아 온다
 - `hams, me` 두 문장 중 실제로 오는 쪽 ("You have been hamstrung" / "Their attack hamstrings you!")
 - `heal pot` 트리거 "You drink a healing potion" 이 실제 문장인지. 스크립트의 `cooldown "heal pot"` 과 겹쳐도 같은 시각에 다시 시작할 뿐이다
 - 범죄자가 될 때 `crim` 바가 트리거 없이 저절로 뜨는지 (특수 바 타입)

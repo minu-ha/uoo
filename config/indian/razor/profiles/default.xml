@@ -241,8 +241,8 @@
 		<overheadmessage searchtext="You increase your damage resistance to creature-casted spells" message="[ resist, on ]" hue="53" />
 		<overheadmessage searchtext="You cannot move!" message="[ para, on ]" hue="33" />
 		<overheadmessage searchtext="You can move!" message="[ para, off ]" hue="65" />
-		<overheadmessage searchtext="seconds before you may use another strength potion." message="[ str, {4} {5} ]" hue="43" />
-		<overheadmessage searchtext="seconds before you may use another agility potion." message="[ agi, {4} {5} ]" hue="43" />
+		<overheadmessage searchtext="before you may use another strength potion" message="[ str, {4} {5} ]" hue="43" />
+		<overheadmessage searchtext="before you may use another agility potion" message="[ agi, {4} {5} ]" hue="43" />
 		<overheadmessage searchtext="you are already at full stamina." message="[ stam, full ]" hue="53" />
 		<overheadmessage searchtext="You are not poisoned." message="[ poison, off ]" hue="53" />
 		<overheadmessage searchtext="You may now use a strength potion." message="[ str, ready ]" hue="68" />
@@ -309,6 +309,8 @@
 		<overheadmessage searchtext="susceptible to special" message="[ bleed, target ]" hue="63" />
 		<overheadmessage searchtext="armslore skillgain" message="[ swing ]" hue="53" />
 		<overheadmessage searchtext="attack causes your target to bleed" message="[ bleed, target ]" hue="63" />
+		<overheadmessage searchtext="minutes before" message="[ wait, {5}m ]" hue="43" />
+		<overheadmessage searchtext="minute before" message="[ wait, {5}m ]" hue="43" />
 		<overheadmessage searchtext="minutes " message="[ wait, {5}m {7}s ]" hue="43" />
 		<overheadmessage searchtext="minute " message="[ wait, {5}m {7}s ]" hue="43" />
 		<overheadmessage searchtext="must wait another" message="[ wait, {5}s ]" hue="43" />
@@ -366,8 +368,6 @@
 		<overheadmessage searchtext="You drink a healing potion" message="[ heal pot, on ]" hue="53" />
 		<overheadmessage searchtext="You drink a cure potion" message="[ cure pot, on ]" hue="53" />
 		<overheadmessage searchtext="You drink a refresh potion" message="[ refresh, on ]" hue="53" />
-		<overheadmessage searchtext="You drink a strength potion" message="[ str, on ]" hue="53" />
-		<overheadmessage searchtext="You drink an agility potion" message="[ agi, on ]" hue="53" />
 		<overheadmessage searchtext="You will now automatically" message="[ scroll mode, on ]" hue="53" />
 		<overheadmessage searchtext="You may only cast that spell on a player once every 30 seconds." message="[ limit, 30s ]" hue="43" />
 		<overheadmessage searchtext="Your boarding party fails to board the ship" message="[ boarding, miss ]" hue="43" />
