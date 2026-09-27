@@ -79,7 +79,7 @@ flowchart TD
 | 3 | 자기 버프 | `not findbuff` + `cooldown "reflect"` | **몹이 없을 때만.** 둘 다 시간이 아니라 소모로 끝난다. RA 는 25 흡수, Reflect 는 한 번 반사 뒤 30초 쿨 (반사 시점부터) |
 | 4 | Barding Song | `Music=0 and Song=0 and <슬롯>=0` | **몹이 없을 때만.** 라운드로빈 |
 | 5 | 바드 스킬 | `Music=0 and <슬롯>=0` | 디스코 1회 + **피스 12초마다** |
-| 6 | 네크로 | `var__symbols >= config__symbols_*` | Blood Oath → Corpse Skin → Evil Omen 순. **유휴 예약** 아래 참조 |
+| 6 | 네크로 | `list 'necro_symbols' >= config__symbols_*` | Blood Oath → Corpse Skin → Evil Omen 순. **유휴 예약** 아래 참조 |
 | 7 | 오프닝 | 마나 + 대상별 리스트 | Mana Drain -> Curse |
 | 8 | 프록 코어 | `cooldown "magic arrow"` 등 | 네 개가 각자 쿨 |
 | 9 | 필러 | `mana > config__filler_floor` | Energy Bolt. **여기부터 잘린다** |
@@ -644,6 +644,10 @@ Bloodmoss 플래그 하나와 `Vengeful Spirit` 핫키(목록에 있음)만 추�
 | `hotkey "> Interrupt"` | 휠다운에 물려 쓰던 것. 시전 폴링 안에서 긴급 힐용 |
 
 ## 쓰면 안 되는 구문 (선례 없음, 실제로 깨졌던 것들)
+
+- **변수끼리, 또는 변수와 숫자의 크기 비교** (`var__symbols >= config__symbols_blood_oath`). 조건에서 변수는 `=` 만 된다.
+  네크로가 한 번도 안 나가던 원인. 수를 세려면 옛 스크립트처럼 **리스트에 항목을 밀어 넣고 `list 'name' >= n`** 으로 비교한다.
+  `mana >= config__x` 처럼 **내장 식이 왼쪽**이면 된다.
 
 - 산술 `@setvar! var__n var__n + 1`
 - `while <스크립트 변수> <`

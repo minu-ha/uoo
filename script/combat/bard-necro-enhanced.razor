@@ -324,6 +324,10 @@ if not listexists 'magic_drained_targets'
     createlist 'magic_drained_targets'
 endif
 
+if not listexists 'necro_symbols'
+    createlist 'necro_symbols'
+endif
+
 if not listexists 'magic_cursed_targets'
     createlist 'magic_cursed_targets'
 endif
@@ -633,7 +637,9 @@ while not dead
     endif
 
     # Unholy Symbols, read off the necro hotbar gump, which prints them as "<have>/<max>",
-    # into a plain number so the necro block can compare against the config reserves.
+    # into a list with one entry per symbol. Not a number: a script variable only supports
+    # "=" in a condition, "var >= config" never fires, which is why the retired scripts kept
+    # the count as a list and compared list 'necro_symbols' >= n. Same trick here.
     #
     # The chain runs from the top down because ingump matches a substring: "1/" is inside
     # "11/20", "9/" is inside "19/20" and "0/" is inside "10/20". Checking the two digit
@@ -641,53 +647,93 @@ while not dead
     # is the ceiling because the bank is Effective Necromancy / 10 and no build here goes
     # past 200. A closed gump reads as zero, which parks every ability until the hotbar
     # block reopens it.
-    @setvar! var__symbols 0
+    clearlist 'necro_symbols'
 
-    # Set by the necro block when an ability lands. var__symbols is read once, up here, so a
+    # Set by the necro block when an ability lands. The list is filled once, up here, so a
     # block further down that also spends symbols would otherwise be looking at a bank that
     # is already four short. Poison Strike checks this and sits out any pass that spent.
     @setvar! var__symbols_spent 0
 
     if ingump "20/" 622436516
-        @setvar! var__symbols 20
+        for 20
+            pushlist 'necro_symbols' '1' 'back'
+        endfor
     elseif ingump "19/" 622436516
-        @setvar! var__symbols 19
+        for 19
+            pushlist 'necro_symbols' '1' 'back'
+        endfor
     elseif ingump "18/" 622436516
-        @setvar! var__symbols 18
+        for 18
+            pushlist 'necro_symbols' '1' 'back'
+        endfor
     elseif ingump "17/" 622436516
-        @setvar! var__symbols 17
+        for 17
+            pushlist 'necro_symbols' '1' 'back'
+        endfor
     elseif ingump "16/" 622436516
-        @setvar! var__symbols 16
+        for 16
+            pushlist 'necro_symbols' '1' 'back'
+        endfor
     elseif ingump "15/" 622436516
-        @setvar! var__symbols 15
+        for 15
+            pushlist 'necro_symbols' '1' 'back'
+        endfor
     elseif ingump "14/" 622436516
-        @setvar! var__symbols 14
+        for 14
+            pushlist 'necro_symbols' '1' 'back'
+        endfor
     elseif ingump "13/" 622436516
-        @setvar! var__symbols 13
+        for 13
+            pushlist 'necro_symbols' '1' 'back'
+        endfor
     elseif ingump "12/" 622436516
-        @setvar! var__symbols 12
+        for 12
+            pushlist 'necro_symbols' '1' 'back'
+        endfor
     elseif ingump "11/" 622436516
-        @setvar! var__symbols 11
+        for 11
+            pushlist 'necro_symbols' '1' 'back'
+        endfor
     elseif ingump "10/" 622436516
-        @setvar! var__symbols 10
+        for 10
+            pushlist 'necro_symbols' '1' 'back'
+        endfor
     elseif ingump "9/" 622436516
-        @setvar! var__symbols 9
+        for 9
+            pushlist 'necro_symbols' '1' 'back'
+        endfor
     elseif ingump "8/" 622436516
-        @setvar! var__symbols 8
+        for 8
+            pushlist 'necro_symbols' '1' 'back'
+        endfor
     elseif ingump "7/" 622436516
-        @setvar! var__symbols 7
+        for 7
+            pushlist 'necro_symbols' '1' 'back'
+        endfor
     elseif ingump "6/" 622436516
-        @setvar! var__symbols 6
+        for 6
+            pushlist 'necro_symbols' '1' 'back'
+        endfor
     elseif ingump "5/" 622436516
-        @setvar! var__symbols 5
+        for 5
+            pushlist 'necro_symbols' '1' 'back'
+        endfor
     elseif ingump "4/" 622436516
-        @setvar! var__symbols 4
+        for 4
+            pushlist 'necro_symbols' '1' 'back'
+        endfor
     elseif ingump "3/" 622436516
-        @setvar! var__symbols 3
+        for 3
+            pushlist 'necro_symbols' '1' 'back'
+        endfor
     elseif ingump "2/" 622436516
-        @setvar! var__symbols 2
+        for 2
+            pushlist 'necro_symbols' '1' 'back'
+        endfor
     elseif ingump "1/" 622436516
-        @setvar! var__symbols 1
+        for 1
+            pushlist 'necro_symbols' '1' 'back'
+        endfor
     endif
 
     # The Grimoire riders on Curse and Mana Drain run 60 seconds while the debuff icon runs
@@ -1241,7 +1287,7 @@ while not dead
     # cast to break, and the embrace is walk only, so a walk guard would have parked it for good.
     if var__engaged = 1
         if not targetexists and not casting
-            if var__symbols >= config__symbols_blood_oath and followers > 0 and timer "timer__blood_oath" >= cooldown__necro_action
+            if list 'necro_symbols' >= config__symbols_blood_oath and followers > 0 and timer "timer__blood_oath" >= cooldown__necro_action
                 yell '[BloodOath'
                 wait wait__message
 
@@ -1255,7 +1301,7 @@ while not dead
                 elseif insysmsg "seconds before you may use that ability again."
                     settimer "timer__blood_oath" 0
                 endif
-            elseif var__symbols >= config__symbols_corpse_skin and timer "timer__corpse_skin" >= cooldown__necro_action
+            elseif list 'necro_symbols' >= config__symbols_corpse_skin and timer "timer__corpse_skin" >= cooldown__necro_action
                 yell '[CorpseSkin'
                 wait wait__message
 
@@ -1269,7 +1315,7 @@ while not dead
                 elseif insysmsg "seconds before you may use that ability again."
                     settimer "timer__corpse_skin" 0
                 endif
-            elseif var__symbols >= config__symbols_evil_omen and timer "timer__evil_omen" >= cooldown__necro_action
+            elseif list 'necro_symbols' >= config__symbols_evil_omen and timer "timer__evil_omen" >= cooldown__necro_action
                 yell '[EvilOmen'
                 wait wait__message
 
@@ -1291,7 +1337,7 @@ while not dead
     # and it searches the surrounding area for one, so the cursor is answered with self. Walk
     # only, when a corpse is what is left of the last pull, and the corpse check keeps it from
     # burning a thirty second cooldown on air.
-    if var__symbols >= config__symbols_vampiric_embrace and var__engaged = 0 and followers > 0
+    if list 'necro_symbols' >= config__symbols_vampiric_embrace and var__engaged = 0 and followers > 0
         if timer "timer__vampiric_embrace" >= cooldown__necro_action
             if not targetexists and not casting
                 if findtype 8198 ground -1 -1 8
@@ -1598,7 +1644,7 @@ while not dead
     # that is damage that would otherwise have gone with it. It sits at the bottom of the
     # symbol ladder, only fires while Corpse Skin is actually up, and takes a filler slot
     # rather than a proc one, since it costs no mana and the procs are worth more.
-    if var__engaged = 1 and var__opener_done = 1 and var__symbols_spent = 0 and var__symbols >= config__symbols_poison_strike
+    if var__engaged = 1 and var__opener_done = 1 and var__symbols_spent = 0 and list 'necro_symbols' >= config__symbols_poison_strike
         if timer "timer__corpse_skin" < cooldown__necro_action and timer "timer__poison_strike" >= cooldown__necro_action
             if not targetexists and not casting
                 if find var__combat_target ground -1 -1 config__target_range as alias__strike_target

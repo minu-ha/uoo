@@ -127,6 +127,8 @@ endif
 
 **산술을 쓰지 않는다.** `@setvar! var__n var__n + 1` 같은 식은 저장소에 선례가 없고 Razor 가 받는지 확인되지 않았다.
 개수가 필요하면 `counttype` 으로 실제 상태를 다시 읽는다.
+**변수의 크기 비교도 안 된다.** `if var__a >= var__b` 는 조용히 거짓이다 (네크로 로테이션이 그래서 한 번도 안 나갔다). 변수는 `=` 만 쓰고,
+세어야 하면 리스트에 밀어 넣고 `list 'name' >= n` 으로 비교한다. `mana >= config__x` 처럼 **내장 식이 왼쪽**에 오는 비교는 된다.
 
 **타이머**
 - `if not timerexists "x_timer"` → `createtimer` → `settimer`. 이름은 `_timer` 접미.
