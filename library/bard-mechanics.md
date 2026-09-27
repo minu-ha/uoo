@@ -457,12 +457,11 @@ Disco/Peace/Provo 가 전부 80이면 T3(120점)를 찍어도 **80밖에 못 쓴
 | `magic arrow` | "magic arrow activated" | "cast a wizardry magic arrow spell again" |
 | `harm` | "harm activated" | "cast a wizardry harm spell again" |
 | `lightning` | "lightning spell hinders" | "cast a wizardry lightning spell again" |
-| `fireball` | **트리거 없음** | "You may now cast a wizardy fireball spell" (게임 원문의 오타 그대로) |
+| `fireball` | "fireball activated" | "cast a wizardry fireball spell again" |
+
+바 길이는 15초 (인게임 관찰). 준비 문장에 리셋되므로 길이가 조금 틀려도 문장이 바로잡는다.
 
 스크립트는 `cooldown "magic arrow" = 0` 처럼 바로 읽으면 된다.
-
-> **`fireball` 항목이 불완전하다.** 발동 메시지 트리거가 없어서 바가 채워지지 않는다.
-> 인게임에서 Fireball 프록이 터질 때 나오는 문구를 받아 적어 트리거로 넣어야 한다.
 
 **`Energy Bolt` 는 쿨다운 항목이 필요 없다.** 15초 창 같은 것이 없어서 순수 필러로 쓸 수 있다. 다만 환급은 조건부다.
 

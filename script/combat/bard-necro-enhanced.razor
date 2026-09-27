@@ -803,9 +803,6 @@ while not dead
                     cooldown "heal pot" cooldown__heal_potion
                     wait wait__short
 
-                    if config__chatty = 1
-                        overhead "[ heal pot, on ]" 53
-                    endif
                 endif
             else
                 if timer "timer__message" >= cooldown__message

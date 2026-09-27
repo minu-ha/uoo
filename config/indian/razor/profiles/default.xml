@@ -241,8 +241,8 @@
 		<overheadmessage searchtext="You increase your damage resistance to creature-casted spells" message="[ resist, on ]" hue="53" />
 		<overheadmessage searchtext="You cannot move!" message="[ para, on ]" hue="33" />
 		<overheadmessage searchtext="You can move!" message="[ para, off ]" hue="65" />
-		<overheadmessage searchtext="seconds before you may use another strength potion." message="[ str, off ]" hue="43" />
-		<overheadmessage searchtext="seconds before you may use another agility potion." message="[ agi, off ]" hue="43" />
+		<overheadmessage searchtext="seconds before you may use another strength potion." message="[ str, {4} {5} ]" hue="43" />
+		<overheadmessage searchtext="seconds before you may use another agility potion." message="[ agi, {4} {5} ]" hue="43" />
 		<overheadmessage searchtext="you are already at full stamina." message="[ stam, full ]" hue="53" />
 		<overheadmessage searchtext="You are not poisoned." message="[ poison, off ]" hue="53" />
 		<overheadmessage searchtext="You may now use a strength potion." message="[ str, ready ]" hue="68" />
@@ -303,7 +303,7 @@
 		<overheadmessage searchtext="Criminal healing will now be prevented" message="[ crim heal, off ]" hue="53" />
 		<overheadmessage searchtext="Criminal looting will now be allowed" message="[ crim loot, on ]" hue="53" />
 		<overheadmessage searchtext="Criminal looting will now be prevented" message="[ crim loot, off ]" hue="53" />
-		<overheadmessage searchtext="Your lightning spell hinders your target" message="[ hinder, target ]" hue="63" />
+		<overheadmessage searchtext="Your lightning spell hinders your target" message="[ lightning, target ]" hue="63" />
 		<overheadmessage searchtext="Your attack cripples your target, lowering their defense" message="[ cripple, target ]" hue="63" />
 		<overheadmessage searchtext="You smash through" message="[ smash, target ]" hue="63" />
 		<overheadmessage searchtext="susceptible to special" message="[ bleed, target ]" hue="63" />
@@ -328,12 +328,17 @@
 		<overheadmessage searchtext="kill points earned" message="[ kill, +{2} {9} ]" hue="53" />
 		<overheadmessage searchtext="DF A Dungeon Flashpoint will begin in 15 minutes." message="[ flashpoint, coming ]" hue="9" />
 		<overheadmessage searchtext="cured the target of all poisons" message="[ cure, target ]" hue="68" />
-		<overheadmessage searchtext="wizardry magic arrow" message="[ magic arrow, ready ]" hue="68" />
-		<overheadmessage searchtext="wizardry harm" message="[ harm, ready ]" hue="68" />
-		<overheadmessage searchtext="wizardry fireball" message="[ fireball, ready ]" hue="68" />
-		<overheadmessage searchtext="wizardry lightning" message="[ lightning, ready ]" hue="68" />
-		<overheadmessage searchtext="wizardry chain" message="[ chain, ready ]" hue="68" />
-		<overheadmessage searchtext="wizardry meteor" message="[ meteor, ready ]" hue="68" />
+		<overheadmessage searchtext="cast a wizardry magic arrow spell again" message="[ magic arrow, ready ]" hue="68" />
+		<overheadmessage searchtext="cast a wizardry harm spell again" message="[ harm, ready ]" hue="68" />
+		<overheadmessage searchtext="cast a wizardry fireball spell again" message="[ fireball, ready ]" hue="68" />
+		<overheadmessage searchtext="cast a wizardry lightning spell again" message="[ lightning, ready ]" hue="68" />
+		<overheadmessage searchtext="cast a wizardry chain lightning spell again" message="[ chain, ready ]" hue="68" />
+		<overheadmessage searchtext="cast a wizardry meteor swarm spell again" message="[ meteor, ready ]" hue="68" />
+		<overheadmessage searchtext="magic arrow activated" message="[ magic arrow, target ]" hue="63" />
+		<overheadmessage searchtext="harm activated" message="[ harm, target ]" hue="63" />
+		<overheadmessage searchtext="fireball activated" message="[ fireball, target ]" hue="63" />
+		<overheadmessage searchtext="chain lightning activated" message="[ chain, target ]" hue="63" />
+		<overheadmessage searchtext="meteor swarm activated" message="[ meteor, target ]" hue="63" />
 		<overheadmessage searchtext="upgraded to Deadly" message="[ poison, deadly ]" hue="63" />
 		<overheadmessage searchtext="upgraded to Lethal" message="[ poison, lethal ]" hue="63" />
 		<overheadmessage searchtext="Triggered (Epic)" message="[ aspect, on ]" hue="68" />
@@ -358,6 +363,11 @@
 		<overheadmessage searchtext="An explosion potion has stuck to you" message="[ bomb, me ]" hue="33" />
 		<overheadmessage searchtext="Your explosion potion sticks to your target" message="[ bomb, target ]" hue="63" />
 		<overheadmessage searchtext="free hand to drink" message="[ hands, full ]" hue="43" />
+		<overheadmessage searchtext="You drink a healing potion" message="[ heal pot, on ]" hue="53" />
+		<overheadmessage searchtext="You drink a cure potion" message="[ cure pot, on ]" hue="53" />
+		<overheadmessage searchtext="You drink a refresh potion" message="[ refresh, on ]" hue="53" />
+		<overheadmessage searchtext="You drink a strength potion" message="[ str, on ]" hue="53" />
+		<overheadmessage searchtext="You drink an agility potion" message="[ agi, on ]" hue="53" />
 		<overheadmessage searchtext="You will now automatically" message="[ scroll mode, on ]" hue="53" />
 		<overheadmessage searchtext="You may only cast that spell on a player once every 30 seconds." message="[ limit, 30s ]" hue="43" />
 		<overheadmessage searchtext="Your boarding party fails to board the ship" message="[ boarding, miss ]" hue="43" />

@@ -56,19 +56,19 @@
 		<trigger triggertype="OverheadMessage" duration="0" triggertext="Your barding skill cooldowns" />
 	</cooldownentry>
 	<cooldownentry name="magic arrow" defaultcooldown="0" cooldownbartype="Regular" hue="578" hidewheninactive="True">
-		<trigger triggertype="SysMessage" duration="60" triggertext="magic arrow activated" />
+		<trigger triggertype="SysMessage" duration="15" triggertext="magic arrow activated" />
 		<trigger triggertype="SysMessage" duration="0" triggertext="cast a wizardry magic arrow spell again" />
 	</cooldownentry>
 	<cooldownentry name="harm" defaultcooldown="0" cooldownbartype="Regular" hue="438" hidewheninactive="True">
-		<trigger triggertype="SysMessage" duration="60" triggertext="harm activated" />
+		<trigger triggertype="SysMessage" duration="15" triggertext="harm activated" />
 		<trigger triggertype="SysMessage" duration="0" triggertext="cast a wizardry harm spell again" />
 	</cooldownentry>
-	<cooldownentry name="fireball" defaultcooldown="60" cooldownbartype="Regular" hue="143" hidewheninactive="True">
-		<trigger triggertype="SysMessage" duration="60" triggertext="fireball activated" />
-		<trigger triggertype="SysMessage" duration="0" triggertext="You may now cast a wizardy fireball spell" />
+	<cooldownentry name="fireball" defaultcooldown="0" cooldownbartype="Regular" hue="143" hidewheninactive="True">
+		<trigger triggertype="SysMessage" duration="15" triggertext="fireball activated" />
+		<trigger triggertype="SysMessage" duration="0" triggertext="cast a wizardry fireball spell again" />
 	</cooldownentry>
-	<cooldownentry name="lightning" defaultcooldown="20" cooldownbartype="Regular" hue="93" hidewheninactive="True">
-		<trigger triggertype="SysMessage" duration="20" triggertext="lightning spell hinders" />
+	<cooldownentry name="lightning" defaultcooldown="0" cooldownbartype="Regular" hue="93" hidewheninactive="True">
+		<trigger triggertype="SysMessage" duration="15" triggertext="lightning spell hinders" />
 		<trigger triggertype="SysMessage" duration="0" triggertext="cast a wizardry lightning spell again" />
 	</cooldownentry>
 	<cooldownentry name="mush" defaultcooldown="0" cooldownbartype="Regular" hue="72" hidewheninactive="True">
@@ -133,10 +133,12 @@
 	<cooldownentry name="corpse skin" defaultcooldown="0" cooldownbartype="Regular" hue="44" hidewheninactive="True" />
 	<cooldownentry name="curse" defaultcooldown="60" cooldownbartype="Regular" hue="438" hidewheninactive="True" />
 	<cooldownentry name="chain" defaultcooldown="0" cooldownbartype="Regular" hue="293" hidewheninactive="True">
-		<trigger triggertype="SysMessage" duration="60" triggertext="Wizardry chain lightning activated" />
+		<trigger triggertype="SysMessage" duration="15" triggertext="chain lightning activated" />
+		<trigger triggertype="SysMessage" duration="0" triggertext="cast a wizardry chain lightning spell again" />
 	</cooldownentry>
 	<cooldownentry name="meteor" defaultcooldown="0" cooldownbartype="Regular" hue="48" hidewheninactive="True">
-		<trigger triggertype="SysMessage" duration="60" triggertext="meteor swarm activated" />
+		<trigger triggertype="SysMessage" duration="15" triggertext="meteor swarm activated" />
+		<trigger triggertype="SysMessage" duration="0" triggertext="cast a wizardry meteor swarm spell again" />
 	</cooldownentry>
 	<cooldownentry name="mass curse" defaultcooldown="60" cooldownbartype="Regular" hue="0" hidewheninactive="True" />
 	<cooldownentry name="boarding" defaultcooldown="17" cooldownbartype="Regular" hue="220" hidewheninactive="True">
@@ -287,7 +289,7 @@
 		<trigger triggertype="OverheadMessage" duration="0" triggertext="Incendiary ammunition" />
 		<trigger triggertype="OverheadMessage" duration="0" triggertext="Longshot ammunition" />
 	</cooldownentry>
-	<cooldownentry name="walk" defaultcooldown="1" cooldownbartype="Walk" hue="1001" hidewheninactive="True" />
+	<cooldownentry name="walk" defaultcooldown="0.5" cooldownbartype="Walk" hue="1001" hidewheninactive="True" />
 	<cooldownentry name="explo pot" defaultcooldown="15" cooldownbartype="Regular" hue="333" hidewheninactive="True">
 		<trigger triggertype="SysMessage" duration="" triggertext="Where should I throw this potion" />
 	</cooldownentry>

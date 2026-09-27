@@ -230,8 +230,8 @@ hue 번호는 이 뜻으로 이미 쓰이고 있던 값을 골랐다. 실제 색
 | You increase your damage resistance to creature-casted spells | `[ - Drinking MR Potion -]` | `[ resist, on ] (53)` |
 | You cannot move! | `[ - You are Paralyzed! - ]` | `[ para, on ] (33)` |
 | You can move! | `[ - No Longer Paralyzed! - ]` | `[ para, off ] (65)` |
-| seconds before you may use another strength potion. | `[ - Can't use Str Pot - ]` | `[ str, off ] (43)` |
-| seconds before you may use another agility potion. | `[ - Can't use Agi Pot - ]` | `[ agi, off ] (43)` |
+| seconds before you may use another strength potion. | `[ - Can't use Str Pot - ]` | `[ str, {4} {5} ] (43)` → "1 minute" / "25 seconds" |
+| seconds before you may use another agility potion. | `[ - Can't use Agi Pot - ]` | `[ agi, {4} {5} ] (43)` |
 | you are already at full stamina. | `[ - TR Not Needed - ]` | `[ stam, full ] (53)` |
 | You are not poisoned. | `[ - Not Poisoned! - ]` | `[ poison, off ] (53)` |
 | You may now use a strength potion. | `[ - Str Pot is Ready - ]` | `[ str, ready ] (68)` |
@@ -294,7 +294,7 @@ hue 번호는 이 뜻으로 이미 쓰이고 있던 값을 골랐다. 실제 색
 | Criminal healing will now be prevented | `[ - Crim Heal OFF - ]` | `[ crim heal, off ] (53)` |
 | Criminal looting will now be allowed | `[ - Loot ON - ]` | `[ crim loot, on ] (53)` |
 | Criminal looting will now be prevented | `[ - Loot OFF - ]` | `[ crim loot, off ] (53)` |
-| Your lightning spell hinders your target | `[ - HINDER - ]` | `[ hinder, target ] (63)` |
+| Your lightning spell hinders your target | `[ - HINDER - ]` | `[ lightning, target ] (63)` — 라이트닝 프록 |
 | MagicResist skillgain | `!!! INCOMING !!!` | (삭제) — 스킬 오름 줄이라 사냥 중 주문 맞을 때마다 떴다. 피해 숫자가 이미 보여준다 |
 | Your attack cripples your target, lowering their defense | `[ - Target CRIPPLED! - ]` | `[ cripple, target ] (63)` |
 | You smash through | `[ - Target SMASHED! - ]` | `[ smash, target ] (63)` |
@@ -319,12 +319,13 @@ hue 번호는 이 뜻으로 이미 쓰이고 있던 값을 골랐다. 실제 색
 | kill points earned | `[ - +{2} points {9} - ]` | `[ kill, +{2} {9} ] (53)` |
 | DF A Dungeon Flashpoint will begin in 15 minutes. | `[ - FP Comin - ]` | `[ flashpoint, coming ] (9)` |
 | cured the target of all poisons | `[ - Target CURED! - ]` | `[ cure, target ] (68)` |
-| wizardry magic arrow | `[ - Magic Arrow Ready! - ]` | `[ magic arrow, ready ] (68)` |
-| wizardry harm | `[ - Harm Ready! - ]` | `[ harm, ready ] (68)` |
-| wizardry fireball | `[ - Fireball Ready! - ]` | `[ fireball, ready ] (68)` |
-| wizardry lightning | `[ - Lightning Ready! - ]` | `[ lightning, ready ] (68)` |
-| wizardry chain | `[ - Chain Light Ready! - ]` | `[ chain, ready ] (68)` |
-| wizardry meteor | `[ - Meteo Swo Ready! - ]` | `[ meteor, ready ] (68)` |
+| cast a wizardry magic arrow spell again | `[ - Magic Arrow Ready! - ]` | `[ magic arrow, ready ] (68)` — 검색어를 준비 문장으로 좁힘, "activated" 는 아래 |
+| cast a wizardry harm spell again | `[ - Harm Ready! - ]` | `[ harm, ready ] (68)` |
+| cast a wizardry fireball spell again | `[ - Fireball Ready! - ]` | `[ fireball, ready ] (68)` |
+| cast a wizardry lightning spell again | `[ - Lightning Ready! - ]` | `[ lightning, ready ] (68)` |
+| cast a wizardry chain lightning spell again | `[ - Chain Light Ready! - ]` | `[ chain, ready ] (68)` |
+| cast a wizardry meteor swarm spell again | `[ - Meteo Swo Ready! - ]` | `[ meteor, ready ] (68)` |
+| magic arrow / harm / fireball / chain lightning / meteor swarm activated | (신규) | `[ 주문, target ] (63)` — 프록이 터졌다, 15초 바 시작 |
 | upgraded to Deadly | `[ - DEADLY Poi - ]` | `[ poison, deadly ] (63)` |
 | upgraded to Lethal | `[ - LETHAL Poi - ]` | `[ poison, lethal ] (63)` |
 | Triggered (Epic) | `[ - ASPECT ACTIVATED! - ]` | `[ aspect, on ] (68)` |
@@ -398,6 +399,8 @@ hue 번호는 이 뜻으로 이미 쓰이고 있던 값을 골랐다. 실제 색
 | has applied telekinesis to you | (신규) | `[ teleki, me ] (33)` — "Qianshanmuxue has applied telekinesis to you." 건 사람 이름은 저널에 |
 | An explosion potion has stuck to you | (신규) | `[ bomb, me ] (33)` — 퓨즈 5초, 바 `bomb, me` 와 짝 |
 | Your explosion potion sticks to your target | (신규) | `[ bomb, target ] (63)` |
+| You drink a healing potion | (신규) | `[ heal pot, on ] (53)` — 스크립트의 같은 줄은 뺐다 |
+| You drink a cure / refresh / strength / an agility potion | (신규, **문장 미확인**) | `[ cure pot / refresh / str / agi, on ] (53)` |
 | Spell siphon active. | (신규) | `[ siphon, on ] (68)` — 5분마다 첫 주문 피격에 켜지는 60분 PvM 버프. 바 `siphon` 과 짝 |
 | Your spell siphon bonus has expired | (신규) | `[ siphon, off ] (43)` |
 | You absorb their spell. | (신규) | `[ spell, absorbed ] (68)` — Resist 의 `25% x Resist/100` 확률, 피해 -75% |
@@ -649,6 +652,7 @@ hue 번호는 이 뜻으로 이미 쓰이고 있던 값을 골랐다. 실제 색
 
 ## 아직 확인 안 된 것
 
+- 큐어 · 리프 · 힘 · 민 포션의 "You drink …" 문장. 힐만 확인됐다. 안 뜨면 저널에서 잡아 온다
 - `hams, me` 두 문장 중 실제로 오는 쪽 ("You have been hamstrung" / "Their attack hamstrings you!")
 - `heal pot` 트리거 "You drink a healing potion" 이 실제 문장인지. 스크립트의 `cooldown "heal pot"` 과 겹쳐도 같은 시각에 다시 시작할 뿐이다
 - 범죄자가 될 때 `crim` 바가 트리거 없이 저절로 뜨는지 (특수 바 타입)
