@@ -183,7 +183,8 @@
 		<trigger triggertype="SysMessage" duration="" triggertext="You may now detonate another trap" />
 	</cooldownentry>
 	<cooldownentry name="reflect" defaultcooldown="0" cooldownbartype="Regular" hue="153" hidewheninactive="True">
-		<trigger triggertype="SysMessage" duration="30" triggertext="Magic reflect removed" />
+		<trigger triggertype="SysMessage" duration="60" triggertext="Magic reflect removed (PvP)" />
+		<trigger triggertype="SysMessage" duration="30" triggertext="Magic reflect removed." />
 	</cooldownentry>
 	<cooldownentry name="fish" defaultcooldown="0" cooldownbartype="Regular" hue="1001" hidewheninactive="True">
 		<trigger triggertype="SysMessage" duration="10" triggertext="fish" />

@@ -1,5 +1,5 @@
 # Bard Necro PvP loop: keep the buffs and potions up, follow the player you last targeted, Explosion into Energy Bolt, a bomb when a telekinesis is on them.
-# Needs: hotkeys "> Smart Heal/Cure Self", "Cancel Current Target", "Target Self", "Pouch", "Drink Heal", "Drink Cure", "Drink Explosion", "Drink Strength", "Drink Agility", "Drink Magic Resist", "Eat Magic Mushroom". Cooldown bars "heal pot", "reflect", "siphon", "explo pot", "teleki, me", "teleki, target".
+# Needs: hotkeys "> Smart Heal/Cure Self", "Cancel Current Target", "Target Self", "Pouch", "Drink Heal", "Drink Cure", "Drink Explosion", "Drink Strength", "Drink Agility", "Drink Magic Resist", "Eat Magic Mushroom". Cooldown bars "heal pot", "reflect", "explo pot", "teleki, me", "teleki, target".
 #
 # Conventions are bard-necro-enhanced's: names, overheads, the act window, the cast poll shape.
 # What is different, and why:
@@ -65,10 +65,6 @@ clearignore
 @setvar! cooldown__tk 30500
 @setvar! cooldown__heal_potion 10000
 @setvar! cooldown__cure_retry 3000
-# A reflect recast the server refuses carries no clock, so the bar gets this much.
-@setvar! cooldown__reflect_lock 30500
-# The server re-arms Spell Siphon every five minutes, so a self arrow is tried no more often.
-@setvar! cooldown__siphon_retry 301000
 # How often the followers are pointed at the target again.
 @setvar! cooldown__pets 15000
 # How long a held Explosion cursor waits for the target to come into range.
@@ -108,11 +104,6 @@ endif
 if not timerexists "timer__message"
     createtimer "timer__message"
     settimer "timer__message" cooldown__message
-endif
-
-if not timerexists "timer__siphon"
-    createtimer "timer__siphon"
-    settimer "timer__siphon" cooldown__siphon_retry
 endif
 
 overhead "[ pvp, on ]" 90
@@ -285,16 +276,11 @@ while not dead
 
                 wait wait__poll
             endfor
-
-            if insysmsg "before you may cast that again"
-                cooldown "reflect" cooldown__reflect_lock
-            endif
-        elseif cooldown "siphon" = 0 and timer "timer__siphon" >= cooldown__siphon_retry and not findbuff 'Magic Reflection' and findtype 3980 self and mana >= 4
-            # Spell Siphon: the first spell to hit us every five minutes starts a sixty minute
-            # buff. A Magic Arrow on self is that hit. Never with Magic Reflection up, the
+        elseif not findbuff 'Spell Siphon' and not findbuff 'Magic Reflection' and findtype 3980 self and mana >= 4
+            # Spell Siphon: the first spell to hit us starts a sixty minute buff that shows on the
+            # buff bar. A Magic Arrow on self is that hit. Never with Magic Reflection up, the
             # arrow would only bounce off it and burn the reflection.
             cast 'Magic Arrow'
-            settimer "timer__siphon" 0
 
             for 25
                 if targetexists
