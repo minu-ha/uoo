@@ -286,6 +286,10 @@ clearignore
 @setvar! cooldown__necro_action 30500
 
 # How long a lost necro hotbar waits before the next yell.
+# A reflect recast the server refuses carries no clock, so the bar gets this much.
+@setvar! cooldown__reflect_lock 30500
+# The server re-arms Spell Siphon every five minutes, so a self arrow is tried no more often.
+@setvar! cooldown__siphon_retry 301000
 @setvar! cooldown__hotbar_retry 3000
 
 # How long the cache keeps a target that has stepped out of range before dropping it.
@@ -387,6 +391,11 @@ endif
 if not timerexists "timer__hotbar_retry"
     createtimer "timer__hotbar_retry"
     settimer "timer__hotbar_retry" cooldown__hotbar_retry
+endif
+
+if not timerexists "timer__siphon"
+    createtimer "timer__siphon"
+    settimer "timer__siphon" cooldown__siphon_retry
 endif
 
 # ####################################################################################
@@ -1053,7 +1062,8 @@ while not dead
     # waits its turn on the next pass. Both are self-only, so no cursor: the same no-cursor
     # shape as Create Food above.
     # The reflect bar is the server's 30 second recast lock. It starts on the system line
-    # "Magic reflect removed." that the reflection sends, so the bar is the real clock.
+    # "Magic reflect removed" that the reflection sends, so the bar is the real clock. Should a
+    # recast still be refused, the refusal line locks the bar for a full thirty seconds.
     if var__engaged = 0 and var__manual = 0
         if not targetexists and not casting and cooldown "walk" = 0
             if config__use_reactive_armor = 1 and not findbuff 'Reactive Armor' and var__regs_reactive_armor = 1 and mana >= config__mana_1st
@@ -1086,6 +1096,33 @@ while not dead
 
                     wait wait__poll
                 endfor
+
+                if insysmsg "before you may cast that again"
+                    cooldown "reflect" cooldown__reflect_lock
+                endif
+            elseif cooldown "siphon" = 0 and timer "timer__siphon" >= cooldown__siphon_retry and not findbuff 'Magic Reflection' and findtype 3980 self and mana >= 4
+                # Spell Siphon: the first spell to hit us every five minutes starts a sixty minute
+                # buff. A Magic Arrow on self is that hit. Never with Magic Reflection up, the
+                # arrow would only bounce off it and burn the reflection.
+                cast 'Magic Arrow'
+                settimer "timer__siphon" 0
+
+                for 25
+                    if targetexists
+                        break
+                    endif
+
+                    if insysmsg "Your concentration is disturbed, thus ruining thy spell."
+                        break
+                    endif
+
+                    wait wait__poll
+                endfor
+
+                if targetexists
+                    hotkey 'Target Self'
+                    wait wait__cast
+                endif
             endif
         endif
     endif
