@@ -311,9 +311,9 @@ pushlist 'list__summon_names' 'nomeeheh'
 
 # How often the reagent flags are re-read. On this Razor a plain statement costs 5 to 10
 # ms and a findtype 20 to 40 (probe, 2026-09-28), so the old read of up to 32 findtype
-# on every pass was most of a second per pass. A flag that is stale for a few seconds
+# on every pass was most of a second per pass. A flag that is stale for half a minute
 # costs one refused cast at worst, and the next refresh corrects it.
-@setvar! cooldown__regs_refresh 5000
+@setvar! cooldown__regs_refresh 30000
 
 # How often the summon name block looks for a fresh summon. One rename per window, so a
 # pair summoned back to back gets its names in the order they appeared.
