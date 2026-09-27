@@ -19,9 +19,10 @@
 | 대상 | 아래 글로서리 단어. 없으면 온전한 단어. 줄임말은 **말로 할 때도 줄이는 것만** (`hams` `teleki` `inst` `explo` `eb` …). `magic arrow` `fireball` `lightning` 은 안 줄인다 |
 | 상태 | 아래 어휘. 드문 상태는 한 단어 |
 | 시전 알림 | `[ blood oath ]` 처럼 **대상만**. hue 44 / 83 이 "지금 나간다" 를 말하므로 상태가 필요 없다 |
-| 값 | 서버 문장의 n 번째 단어는 `{n}` 으로 그대로 넣는다: `[ unholy, {4} ]`. 스크립트 변수는 `{{var}}` |
+| 값 | 서버 문장의 n 번째 단어는 `{n}` 으로 그대로 넣는다 (**1부터**, 공백 기준): "You must wait another 4 minutes" 의 `{5}` 가 4. 스크립트 변수는 `{{var}}` |
 | 폭 | 대괄호 포함 **18자 목표, 22자 상한.** 넘으면 대상을 줄인다 (`No Longer Paralyzed` → `[ para, off ]`) |
 | 구분 | 서버 문장은 절대 `[` 로 시작하지 않는다. 대괄호가 곧 "커스텀" 표시다 |
+| 순서 | 한 문장에 항목 여러 개가 걸리면 **파일에서 앞의 것 하나만** 뜬다 (인게임 확인, `[ wait, 4m 53s ]` 가 `[ wait, 4s ]` 를 눌렀다). 구체적인 검색어를 범용 검색어보다 **앞에** 둔다 |
 | 쿨다운 바 이름 | 같은 단어, **대괄호 없이**. 방향이 있을 때만 쉼표: `hams, me` / `teleki, target`. 그 외는 한 단어: `music` `heal pot` |
 
 ## 상태 어휘
@@ -297,6 +298,7 @@ hue 번호는 이 뜻으로 이미 쓰이고 있던 값을 골랐다. 실제 색
 | susceptible to special | `[ - Target BLEEDING! - ]` | `[ bleed, target ] (63)` |
 | armslore skillgain | `SWING!` | `[ swing ] (53)` |
 | attack causes your target to bleed | `[ - TARGET BLEEDING - ]` | `[ bleed, target ] (63)` |
+| minutes  / minute  (뒤 공백) | (신규) | `[ wait, {5}m {7}s ]` (43)` — "You must wait another 4 minutes 17 seconds …" |
 | must wait another | `[ - WAIT {5}s - ]` | `[ wait, {5}s ] (43)` |
 | 0 Trapped pouches remain | `[ - Out of TPs! - ]` | `[ pouch, out ] (33)` |
 | No trapped pouches found | `[ - Out of TPs! - ]` | `[ pouch, out ] (33)` |
@@ -645,7 +647,6 @@ hue 번호는 이 뜻으로 이미 쓰이고 있던 값을 골랐다. 실제 색
 - `hams, me` 두 문장 중 실제로 오는 쪽 ("You have been hamstrung" / "Their attack hamstrings you!")
 - `heal pot` 트리거 "You drink a healing potion" 이 실제 문장인지. 스크립트의 `cooldown "heal pot"` 과 겹쳐도 같은 시각에 다시 시작할 뿐이다
 - 범죄자가 될 때 `crim` 바가 트리거 없이 저절로 뜨는지 (특수 바 타입)
-- `{n}` 이 0부터인지 1부터인지 — `[ track, {3} {4} {5} ]` 가 원래 쓰던 자리라 그대로 뒀다
 
 ## 출처
 
