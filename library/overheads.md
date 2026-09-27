@@ -393,10 +393,10 @@ hue 번호는 이 뜻으로 이미 쓰이고 있던 값을 골랐다. 실제 색
 | 0 moving throws | `No throws, plant now.` | `[ throws, 0 ] (33)` |
 | wing your target | `You wing your target.` | `[ wing, target ] (63)` |
 | Magic reflect removed. | (신규) | `[ reflect, off ] (43)` |
-| has applied telekinesis to you | (신규) | `[ teleki, {1} ] (33)` — "Qianshanmuxue has applied telekinesis to you.", `{1}` 이 건 사람 |
+| has applied telekinesis to you | (신규) | `[ teleki, me ] (33)` — "Qianshanmuxue has applied telekinesis to you." 건 사람 이름은 저널에 |
 | An explosion potion has stuck to you | (신규) | `[ bomb, me ] (33)` — 퓨즈 5초, 바 `bomb, me` 와 짝 |
 | Your explosion potion sticks to your target | (신규) | `[ bomb, target ] (63)` |
-| You now have | (신규) | `[ pouch, {4} ] (53)` — "You now have 4 trapped pouches remaining." |
+| Trapped pouches remaining | (신규) | `[ pouch, {1} ] (53)` — "4 Trapped pouches remaining." (파우치 쓸 때 두 줄 중 둘째). `0 Trapped pouches remain` 이 앞에 있어 0 은 `[ pouch, out ]` |
 
 ## 스크립트 오버헤드
 
@@ -645,8 +645,8 @@ hue 번호는 이 뜻으로 이미 쓰이고 있던 값을 골랐다. 실제 색
 
 ## 아직 확인 안 된 것
 
-- `[ pouch, {4} ]` 는 "You now have N trapped pouches remaining." 만 노린 것. "You now have" 로 시작하는 다른 문장이 있으면 엉뚱한 단어가 뜬다
-- `[ teleki, {1} ]` 는 이름이 한 단어일 때 온전하다. 두 단어 이름은 앞 단어만 뜬다
+- 검색이 대소문자를 가리는지. 파우치를 쓰면 "You now have 4 trapped pouches remaining." 과 "4 Trapped pouches remaining." 두 줄이 오는데,
+  `[ pouch, 4 ]` 한 줄이면 가린다 (둘째 줄만 맞음), `[ pouch, You ]` 가 같이 뜨면 안 가린다 → 그때는 검색어를 "You now have" 로 바꾸고 `{4}` 를 쓴다
 - `para` 10s 바가 파우치로 깼을 때 "You can move!" 로 같이 꺼지는지
 - `hams, me` 두 문장 중 실제로 오는 쪽 ("You have been hamstrung" / "Their attack hamstrings you!")
 - `heal pot` 트리거 "You drink a healing potion" 이 실제 문장인지. 스크립트의 `cooldown "heal pot"` 과 겹쳐도 같은 시각에 다시 시작할 뿐이다
