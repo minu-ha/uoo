@@ -7,7 +7,7 @@
 @setvar! globalTimeout 650
 
 if not varexist recall_scroll_chest
-	overhead "[ chest, set ]" 53
+	overhead "[ chest, set ]" 90
 	setvar! recall_scroll_chest
 endif
 
@@ -33,7 +33,7 @@ endif
 # Backpack
 while findtype "runetome|runebook" backpack as tome
     getlabel recallScrolls desc
-    overhead "[ scroll, {{desc}} ]" 53
+    overhead "[ scroll, {{desc}} ]" 90
 
     lift recallScrolls 60000
     if insysmsg 'not found or out of range'
@@ -48,7 +48,7 @@ endwhile
 # Nearby tomes
 while findtype "runetome|runebook" ground -1 -1 2 as tome
     getlabel recallScrolls desc
-    overhead "[ scroll, {{desc}} ]" 53
+    overhead "[ scroll, {{desc}} ]" 90
 
     lift recallScrolls 60000
     if insysmsg 'not found or out of range'
@@ -64,7 +64,7 @@ endwhile
 while findtype 62764|2473|3710|41451|41452|3646|3647|3644|3645|41449|41450|29832|29833|2472|29077|29078|2475|3648|3649|3708|3650|3651|41453|41454|2474|3709|3650|3651|41455|41456|29086|29087 true as chest
     while findtype "runetome|runebook" chest as tome
         getlabel recallScrolls desc
-        overhead "[ scroll, {{desc}} ]" 53
+        overhead "[ scroll, {{desc}} ]" 90
 
         lift recallScrolls 60000
         if insysmsg 'not found or out of range'

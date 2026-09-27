@@ -1902,8 +1902,8 @@ foreach alias__place_item in list__vendor_items
     waitforgump 685310710 3000
 
     if not gumpexists 685310710
-        overhead "[ pricing, out ]" 43
-        overhead "[ pricing menu, off ]" 43
+        overhead "[ pricing, out ]" 53
+        overhead "[ pricing menu, off ]" 53
         @clearignore
         stop
     endif
@@ -1912,19 +1912,19 @@ foreach alias__place_item in list__vendor_items
         gumpresponse 16 685310710
         wait var__delay_place
     else
-        overhead "[ {{label__item}}, {{var__price_hint}} ]" 53
+        overhead "[ {{label__item}}, {{var__price_hint}} ]" 90
         settimer "timer__hint_repeat" 0
 
         @setvar! var__gump_done 0
 
         while var__gump_done = 0
             if timer "timer__hint_repeat" >= var__delay_hint_repeat
-                overhead "[ {{label__item}}, {{var__price_hint}} ]" 53
+                overhead "[ {{label__item}}, {{var__price_hint}} ]" 90
                 settimer "timer__hint_repeat" 0
             endif
 
             if warmode
-                overhead "[ vendor, cut ]" 43
+                overhead "[ vendor, cut ]" 53
                 @clearignore
                 stop
             endif
@@ -1943,4 +1943,4 @@ foreach alias__place_item in list__vendor_items
 endfor
 
 @clearignore
-overhead "[ vendor, done ]" 53
+overhead "[ vendor, done ]" 90

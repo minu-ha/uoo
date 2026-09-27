@@ -70,22 +70,24 @@
 
 ## hue 팔레트
 
-| hue | 뜻 | XML | 스크립트 |
-|---|---|---|---|
-| 33 | 위험 — 나에게 걸린 것, 없으면 못 싸우는 것 | `[ para, on ]` `[ hams, me ]` `[ pouch, out ]` | 에러, 못 찾음 (`[ inst, out ]`) |
-| 43 | 경고 — 실패 · 막힘 · 재고 없음 | `[ hams, miss ]` `[ field, out ]` | 경고 (`[ heal pot, out ]` `[ heal, disturbed ]`) |
-| 53 | 정보 · 카운터 · 진행 | `[ unholy, {4} ]` `[ medi, on ]` | 상태, 정보. `config__chatty` 로 끔 |
-| 55 | 프롬프트 | `[ rope, pick ]` `[ herd, pick ]` | `[ inst, pick ]` `[ shelf, pick ]` |
-| 68 | 준비됨 · 내 것 성공 | `[ str, ready ]` `[ lock, done ]` | `[ hide, ready ]` |
-| 65 | 해제 — 나쁜 게 풀림 | `[ para, off ]` `[ poison, off ]` | — |
-| 63 | 내 공격이 먹힘 | `[ hams, target ]` `[ bleed, target ]` | — |
-| 93 | 아군 · 파티 | `[ heal, coming ]` `[ party, on ]` | — |
-| 44 | 능력 · 네크로 시전 | — | `[ blood oath ]` `[ pummel ]` |
-| 83 | 매저리 시전 | — | `[ drain ]` `[ curse ]` |
-| 9 | 월드 이벤트 | `[ world, saving ]` `[ boss, {7} ]` | — |
+상태 단어가 색을 정한다. 색은 [Razor 색표](https://outlands.uorazorscripts.com/hues) 에서 골랐고, 뜻이 다르면 색 계열도 다르게 했다.
+따뜻한 색은 전투, 차가운 색은 정보, 초록은 준비·해제.
 
-hue 번호는 이 뜻으로 이미 쓰이고 있던 값을 골랐다. 실제 색은 게임에서 본다.
+| hue | 색 | 뜻 | 상태 단어 | 예 |
+|---|---|---|---|---|
+| 33 | 진홍 `#e80030` | **나에게 걸린 것**, 그것 없이는 못 싸우는 것 | `me`, 치명적 `out` | `[ hams, me ]` `[ teleki, me ]` `[ pouch, out ]` `[ inst, out ]` |
+| 43 | 주황 `#e86000` | **내 공격·스킬이 먹힘** | `target` `area` | `[ disco, target ]` `[ fireball, target ]` `[ bleed, target ]` |
+| 53 | 노랑 `#e8e800` | 경고 — 실패 · 막힘 · 재고 없음 · 버프 빠짐 | `miss` `wrong` `out` `disturbed` `cut` `over` `blocked`, 버프의 `off` | `[ hams, miss ]` `[ heal pot, out ]` `[ reflect, off ]` `[ wait, 4m ]` |
+| 90 | 하늘 `#60e0f0` | 정보 · 카운터 · 진행 | `on` 숫자 `refund` `set` | `[ unholy, 6/10 ]` `[ mana, refund ]` `[ mush, on ]` `[ target, set ]` |
+| 68 | 초록 `#18e800` | 준비됨 · 끝남 · 내 것 성공 | `ready` `done` | `[ str, ready ]` `[ lock, done ]` `[ siphon, on ]` |
+| 65 | 연두 `#98f060` | 나쁜 것이 풀림 | 나쁜 효과의 `off` | `[ para, off ]` `[ poison, off ]` `[ hams, off ]` |
+| 9 | 남보라 `#6830e8` | 아군 · 파티 | `coming` | `[ heal, coming ]` `[ party, on ]` |
+| 118 | 보라 `#c010d8` | 네크로 능력 시전 (대상만) | — | `[ blood oath ]` `[ pummel ]` |
+| 83 | 청록 `#00e8b8` | 매저리 시전 (대상만) | — | `[ drain ]` `[ curse ]` |
+| 55 | 연노랑 `#f0f060` | 프롬프트 | `pick` | `[ inst, pick ]` `[ shelf, pick ]` |
+| 123 | 자홍 `#d810b0` | 월드 이벤트 | — | `[ world, saving ]` `[ boss, {7} ]` |
 
+옛 번호와의 대응: 63 → 43 (target 이 초록에서 주황으로), 43 → 53, 53 → 90, 93 → 9, 44 → 118, 9 → 123. 33 · 65 · 68 · 83 은 그대로.
 ## 쿨다운 바
 
 - 이름은 소문자 글로서리 단어. 방향이 있을 때만 `, me` / `, target` / `, immune` / `, on`.
@@ -214,112 +216,112 @@ hue 번호는 이 뜻으로 이미 쓰이고 있던 값을 골랐다. 실제 색
 
 | 서버 문장 | 이전 | 지금 (hue) |
 |---|---|---|
-|  : Attempting to heal you. | `[ - HEAL COMING - ]` | `[ heal, coming ] (93)` |
-| You do not have a full suit of armor | `[ - Armor Missing.. - ]` | `[ armor, out ] (43)` |
-| Now tracking | `Tracking ALERT ! {3} {4} {5}` | `[ track, {3} {4} {5} ] (53)` |
-| spaces to target | `Tracking! {3} {4} {5}` | `[ track, {3} {4} {5} ] (53)` |
+|  : Attempting to heal you. | `[ - HEAL COMING - ]` | `[ heal, coming ] (9)` |
+| You do not have a full suit of armor | `[ - Armor Missing.. - ]` | `[ armor, out ] (53)` |
+| Now tracking | `Tracking ALERT ! {3} {4} {5}` | `[ track, {3} {4} {5} ] (90)` |
+| spaces to target | `Tracking! {3} {4} {5}` | `[ track, {3} {4} {5} ] (90)` |
 | You search the home and find no one hiding within. | `[ - CLEAR - ]` | `[ house, clear ] (68)` |
-| script variable updated | `[ - Var SET - ]` | `[ var, set ] (53)` |
-| Your attack hamstrings your target | `2-1 DROP` | `[ hams, target ] (63)` |
-| There's not enough wood here to harvest. | `NO WOOD` | `[ wood, out ] (43)` |
+| script variable updated | `[ - Var SET - ]` | `[ var, set ] (90)` |
+| Your attack hamstrings your target | `2-1 DROP` | `[ hams, target ] (43)` |
+| There's not enough wood here to harvest. | `NO WOOD` | `[ wood, out ] (53)` |
 | you notice | `[ - THIEF - ]` | `[ thief, me ] (33)` |
-| you have already used the maximum | `[ - MAX FIELD - ]` | `[ field, out ] (43)` |
+| you have already used the maximum | `[ - MAX FIELD - ]` | `[ field, out ] (53)` |
 | You have been poisoned! | `[ - Poisoned! - ]` | `[ poison, on ] (33)` |
 | You have been cured of all poisons. | `[ - Cured - ]` | `[ poison, off ] (65)` |
 | You have been cured of all poisons! | `[ - Cured! - ]` | `[ poison, off ] (65)` |
-| You are already at full health. | `[ - Full Health! - ]` | `[ hits, full ] (53)` |
-| You increase your damage resistance to creature-casted spells | `[ - Drinking MR Potion -]` | `[ resist, on ] (53)` |
+| You are already at full health. | `[ - Full Health! - ]` | `[ hits, full ] (90)` |
+| You increase your damage resistance to creature-casted spells | `[ - Drinking MR Potion -]` | `[ resist, on ] (90)` |
 | You cannot move! | `[ - You are Paralyzed! - ]` | `[ para, on ] (33)` |
 | You can move! | `[ - No Longer Paralyzed! - ]` | `[ para, off ] (65)` |
 | before you may use another strength potion | `[ - Can't use Str Pot - ]` | **빈 메시지** — 버프창이 지속시간을 보여주니 안 띄운다. 항목을 지우면 뒤의 범용 `minutes ` 가 잡아 `[ wait, minutem secondss ]` 가 되므로, 앞에서 **삼키는 용도**로 남긴다 |
 | before you may use another agility potion | `[ - Can't use Agi Pot - ]` | 빈 메시지, 위와 같음 |
-| you are already at full stamina. | `[ - TR Not Needed - ]` | `[ stam, full ] (53)` |
-| You are not poisoned. | `[ - Not Poisoned! - ]` | `[ poison, off ] (53)` |
+| you are already at full stamina. | `[ - TR Not Needed - ]` | `[ stam, full ] (90)` |
+| You are not poisoned. | `[ - Not Poisoned! - ]` | `[ poison, off ] (90)` |
 | You may now use a strength potion. | `[ - Str Pot is Ready - ]` | `[ str, ready ] (68)` |
 | You may now use an agility potion. | `[ - Agi Pot is Ready - ]` | `[ agi, ready ] (68)` |
-| Looting this corpse will be a criminal act! | `[ - Looting Is A Crime! - ]` | `[ loot, crim ] (43)` |
-| Looting this monster corpse will be a criminal act! | `[ - Looting is a Crime! - ]` | `[ loot, crim ] (43)` |
+| Looting this corpse will be a criminal act! | `[ - Looting Is A Crime! - ]` | `[ loot, crim ] (53)` |
+| Looting this monster corpse will be a criminal act! | `[ - Looting is a Crime! - ]` | `[ loot, crim ] (53)` |
 | You are now a criminal. | `[ - Criminal! - ]` | `[ crim, on ] (33)` |
 | You have been reported for a murder! | `+1 Murder Count` | `[ murder, +1 ] (33)` |
 | You summon an ancient | `[ - Ancient Summoned - ]` | `[ ancient, on ] (68)` |
-| Your spellbook generates mana for your spell. | `[ - You Regen Mana - ]` | `[ mana, refund ] (53)` |
-| You fail to ignite the campfire. | `[ - Remake Campfire - ]` | `[ camp, miss ] (43)` |
+| Your spellbook generates mana for your spell. | `[ - You Regen Mana - ]` | `[ mana, refund ] (90)` |
+| You fail to ignite the campfire. | `[ - Remake Campfire - ]` | `[ camp, miss ] (53)` |
 | Your campfire is now secure. | `[ - Camp Secure - ]` | `[ camp, on ] (68)` |
-| You feel it would take a few moments to secure your camp. | `[ - Securing Camp! - ]` | `[ camp, coming ] (53)` |
-| You enter a meditative trance. | `[ - Meditating.. - ]` | `[ medi, on ] (53)` |
-| Your concentration is disturbed, thus ruining thy spell. | `[ - Interrupted - ]` | `[ cast, disturbed ] (43)` |
-| Being perfectly rested, you shove something invisible out of the way. | `[ - Reveal Here! - ]` | `[ hidden, near ] (43)` |
+| You feel it would take a few moments to secure your camp. | `[ - Securing Camp! - ]` | `[ camp, coming ] (90)` |
+| You enter a meditative trance. | `[ - Meditating.. - ]` | `[ medi, on ] (90)` |
+| Your concentration is disturbed, thus ruining thy spell. | `[ - Interrupted - ]` | `[ cast, disturbed ] (53)` |
+| Being perfectly rested, you shove something invisible out of the way. | `[ - Reveal Here! - ]` | `[ hidden, near ] (53)` |
 | You may now attempt to | `[ - Hamstring: Ready - ]` | `[ hams, ready ] (68)` |
-| You refrain from making hamstring attempts. | `[ - Hamstring: OFF - ]` | `[ hams mode, off ] (53)` |
-| You will now attempt to hamstring your opponents. | `[ - Hamstring: ON - ]` | `[ hams mode, on ] (53)` |
-| You fail to hamstring your opponent. | `[ - Failed Hamstring - ]` | `[ hams, miss ] (43)` |
+| You refrain from making hamstring attempts. | `[ - Hamstring: OFF - ]` | `[ hams mode, off ] (90)` |
+| You will now attempt to hamstring your opponents. | `[ - Hamstring: ON - ]` | `[ hams mode, on ] (90)` |
+| You fail to hamstring your opponent. | `[ - Failed Hamstring - ]` | `[ hams, miss ] (53)` |
 | Their attack hamstrings you! | `[ - HAMSTRUNG! - ]` | `[ hams, me ] (33)` |
 | You are no longer hamstrung | `[ - No Longer Hamstrung! - ]` | `[ hams, off ] (65)` |
-| You will now attempt to disarm your opponents. | `[ - Disarm: ON - ]` | `[ disarm mode, on ] (53)` |
-| You refrain from making disarm attempts. | `[ - Disarm: OFF - ]` | `[ disarm mode, off ] (53)` |
-| Your strike disarms your target! | `[ - TARGET DISARMED - ]` | `[ disarm, target ] (63)` |
-| You fail to disarm your opponent. | `[ - FAILED Disarm - ]` | `[ disarm, miss ] (43)` |
+| You will now attempt to disarm your opponents. | `[ - Disarm: ON - ]` | `[ disarm mode, on ] (90)` |
+| You refrain from making disarm attempts. | `[ - Disarm: OFF - ]` | `[ disarm mode, off ] (90)` |
+| Your strike disarms your target! | `[ - TARGET DISARMED - ]` | `[ disarm, target ] (43)` |
+| You fail to disarm your opponent. | `[ - FAILED Disarm - ]` | `[ disarm, miss ] (53)` |
 | Their attack disarms you! | `[ - DISARMED! - ]` | `[ disarm, me ] (33)` |
 | Where do you wish to traverse to? | `[ - Using Rope! - ]` | `[ rope, pick ] (55)` |
-| That location is blocked. | `[ - Location Blocked! - ]` | `[ spot, blocked ] (43)` |
-| Target cannot be seen. | `[ - Out of Range! - ]` | `[ range, out ] (43)` |
-| You are now under the protection of the town guards. | `[ - In Guardzone! - ]` | `[ guard, on ] (53)` |
-| You have left the protection of the town guards. | `[ - Left Guardzone! - ]` | `[ guard, off ] (43)` |
+| That location is blocked. | `[ - Location Blocked! - ]` | `[ spot, blocked ] (53)` |
+| Target cannot be seen. | `[ - Out of Range! - ]` | `[ range, out ] (53)` |
+| You are now under the protection of the town guards. | `[ - In Guardzone! - ]` | `[ guard, on ] (90)` |
+| You have left the protection of the town guards. | `[ - Left Guardzone! - ]` | `[ guard, off ] (53)` |
 | Someone tried to steal from you. | `[ - There is a Thief! - ]` | `[ thief, me ] (33)` |
 | You have been revealed! | `[ - You were REVEALED! - ]` | `[ reveal, me ] (33)` |
-| You have been banned from this house. | `[ - Banned from House! - ]` | `[ ban, me ] (43)` |
-| You have been ejected from this house! | `[ - Ejecting! - ]` | `[ eject, me ] (43)` |
-| You have been added to the party. | `[ - Joined Party! - ]` | `[ party, on ] (93)` |
-| You have been removed from the party. | `[ - Left Party! - ]` | `[ party, off ] (93)` |
+| You have been banned from this house. | `[ - Banned from House! - ]` | `[ ban, me ] (53)` |
+| You have been ejected from this house! | `[ - Ejecting! - ]` | `[ eject, me ] (53)` |
+| You have been added to the party. | `[ - Joined Party! - ]` | `[ party, on ] (9)` |
+| You have been removed from the party. | `[ - Left Party! - ]` | `[ party, off ] (9)` |
 | You feel ready to continue stealthing | `[ - STEALTH READY - ]` | `[ stealth, ready ] (68)` |
 | You feel comfortable enough to begin stealthing | `[ - Start Stealthing - ]` | `[ stealth, ready ] (68)` |
-| You have 5 stealth steps remaining | `[ - 5 STEPS LEFT! - ]` | `[ stealth, 5 ] (53)` |
+| You have 5 stealth steps remaining | `[ - 5 STEPS LEFT! - ]` | `[ stealth, 5 ] (90)` |
 | You have 3 stealth steps remaining | `[ - 3 STEPS LEFT!! - ]` | — |
 | You have 1 stealth steps remaining | `[ - 1 STEPS LEFT!!! - ]` | — |
 | You have successfully cleared it of traps | `[ - Removed Traps - ]` | `[ trap, done ] (68)` |
 | You successfully pick the lock | `[ - Chest DONE - ]` | `[ lock, done ] (68)` |
-| You fail to make any progress on the lock | `[ - Failed L/P - ]` | `[ lock, miss ] (43)` |
-| You fail to make any progress towards removing traps | `[ - Failed R/T - ]` | `[ trap, miss ] (43)` |
+| You fail to make any progress on the lock | `[ - Failed L/P - ]` | `[ lock, miss ] (53)` |
+| You fail to make any progress towards removing traps | `[ - Failed R/T - ]` | `[ trap, miss ] (53)` |
 | You finish using veterinary supplies | `[ - Vet Finished - ]` | `[ vet, done ] (68)` |
-| You begin using veterinary supplies | `[ - Vet Started - ]` | `[ vet, on ] (53)` |
+| You begin using veterinary supplies | `[ - Vet Started - ]` | `[ vet, on ] (90)` |
 | What do you wish to focus your follower's aggression towards? | `[ - Herd Target - ]` | `[ herd, pick ] (55)` |
-| you extend the life of your creature | `[ - Extend Life - ]` | `[ summon, extended ] (53)` |
-| you are now under the effect of herbal poultice | `[ - Herbal Effect: ON - ]` | `[ herb, on ] (53)` |
-| Your herbal poultice has lost its effectiveness. | `[ - Herbal Effect: OFF - ]` | `[ herb, off ] (43)` |
-| That spell is already currently in effect. | `[ - Already Active - ]` | `[ buff, on ] (53)` |
-| already at full repair | `[ - Repair DONE - ]` | `[ repair, done ] (53)` |
+| you extend the life of your creature | `[ - Extend Life - ]` | `[ summon, extended ] (90)` |
+| you are now under the effect of herbal poultice | `[ - Herbal Effect: ON - ]` | `[ herb, on ] (90)` |
+| Your herbal poultice has lost its effectiveness. | `[ - Herbal Effect: OFF - ]` | `[ herb, off ] (53)` |
+| That spell is already currently in effect. | `[ - Already Active - ]` | `[ buff, on ] (90)` |
+| already at full repair | `[ - Repair DONE - ]` | `[ repair, done ] (90)` |
 | You may now use another magic mushroom | `[ - Mushroom Ready ! - ]` | `[ mush, ready ] (68)` |
-| before you may consume another magic mushroom | `Mushroom: {5}` | `[ mush, {5} ] (53)` |
+| before you may consume another magic mushroom | `Mushroom: {5}` | `[ mush, {5} ] (90)` |
 | One of more of your ship crewmembers | `[ - CREW READY UPG ! - ]` | `[ crew, ready ] (68)` |
-| Criminal healing will now be allowed | `[ - Crim Heal ON - ]` | `[ crim heal, on ] (53)` |
-| Criminal healing will now be prevented | `[ - Crim Heal OFF - ]` | `[ crim heal, off ] (53)` |
-| Criminal looting will now be allowed | `[ - Loot ON - ]` | `[ crim loot, on ] (53)` |
-| Criminal looting will now be prevented | `[ - Loot OFF - ]` | `[ crim loot, off ] (53)` |
-| Your lightning spell hinders your target | `[ - HINDER - ]` | `[ lightning, target ] (63)` — 라이트닝 프록 |
+| Criminal healing will now be allowed | `[ - Crim Heal ON - ]` | `[ crim heal, on ] (90)` |
+| Criminal healing will now be prevented | `[ - Crim Heal OFF - ]` | `[ crim heal, off ] (90)` |
+| Criminal looting will now be allowed | `[ - Loot ON - ]` | `[ crim loot, on ] (90)` |
+| Criminal looting will now be prevented | `[ - Loot OFF - ]` | `[ crim loot, off ] (90)` |
+| Your lightning spell hinders your target | `[ - HINDER - ]` | `[ lightning, target ] (43)` — 라이트닝 프록 |
 | MagicResist skillgain | `!!! INCOMING !!!` | (삭제) — 스킬 오름 줄이라 사냥 중 주문 맞을 때마다 떴다. 피해 숫자가 이미 보여준다 |
-| Your attack cripples your target, lowering their defense | `[ - Target CRIPPLED! - ]` | `[ cripple, target ] (63)` |
-| You smash through | `[ - Target SMASHED! - ]` | `[ smash, target ] (63)` |
-| susceptible to special | `[ - Target BLEEDING! - ]` | `[ bleed, target ] (63)` |
-| armslore skillgain | `SWING!` | `[ swing ] (53)` |
-| attack causes your target to bleed | `[ - TARGET BLEEDING - ]` | `[ bleed, target ] (63)` |
-| minutes before / minute before | (신규) | `[ wait, {5}m ] (43)` — "…wait another 2 minutes before…" 처럼 초가 없는 형태. 초가 있는 형태보다 앞에 둔다 |
-| minutes  / minute  (뒤 공백) | (신규) | `[ wait, {5}m {7}s ] (43)` — "You must wait another 4 minutes 17 seconds …" |
-| must wait another | `[ - WAIT {5}s - ]` | `[ wait, {5}s ] (43)` |
+| Your attack cripples your target, lowering their defense | `[ - Target CRIPPLED! - ]` | `[ cripple, target ] (43)` |
+| You smash through | `[ - Target SMASHED! - ]` | `[ smash, target ] (43)` |
+| susceptible to special | `[ - Target BLEEDING! - ]` | `[ bleed, target ] (43)` |
+| armslore skillgain | `SWING!` | `[ swing ] (90)` |
+| attack causes your target to bleed | `[ - TARGET BLEEDING - ]` | `[ bleed, target ] (43)` |
+| minutes before / minute before | (신규) | `[ wait, {5}m ] (53)` — "…wait another 2 minutes before…" 처럼 초가 없는 형태. 초가 있는 형태보다 앞에 둔다 |
+| minutes  / minute  (뒤 공백) | (신규) | `[ wait, {5}m {7}s ] (53)` — "You must wait another 4 minutes 17 seconds …" |
+| must wait another | `[ - WAIT {5}s - ]` | `[ wait, {5}s ] (53)` |
 | 0 Trapped pouches remain | `[ - Out of TPs! - ]` | `[ pouch, out ] (33)` |
 | No trapped pouches found | `[ - Out of TPs! - ]` | `[ pouch, out ] (33)` |
 | restricted from performing aggressive | `[ - RESTRICTION {14} - ]` | `[ restrict, {14} ] (33)` |
-| world will save | `[ - World Save Comin.. - ]` | `[ world, coming ] (9)` |
-| world is saving | `[ - WORLD SAVE - ]` | `[ world, saving ] (9)` |
-| save complete | `[ - WS DONE! - ]` | `[ world, done ] (9)` |
+| world will save | `[ - World Save Comin.. - ]` | `[ world, coming ] (123)` |
+| world is saving | `[ - WORLD SAVE - ]` | `[ world, saving ] (123)` |
+| save complete | `[ - WS DONE! - ]` | `[ world, done ] (123)` |
 | aspect and other bonuses return | `[ - ASPECT RETURNS - ]` | `[ aspect, on ] (68)` |
-| free cure potion | `[ - FREE-CURE-POT - ]` | `[ cure pot, free ] (53)` |
-| too fatiqued | `[ - OVERWEIGHT - ]` | `[ weight, over ] (43)` |
-| too fatigued | `[ - OVERWEIGHT - ]` | `[ weight, over ] (43)` |
-| are overloaded | `[ - OVERLOADED - ]` | `[ weight, over ] (43)` |
-| contested boss has spawned | `[ - CONTESTED BOSS IN {7} - ]` | `[ boss, {7} ] (9)` |
-| control points earned for current beacon | `+{2} points {12}` | `[ beacon, +{2} {12} ] (53)` |
-| kill points earned | `[ - +{2} points {9} - ]` | `[ kill, +{2} {9} ] (53)` |
-| DF A Dungeon Flashpoint will begin in 15 minutes. | `[ - FP Comin - ]` | `[ flashpoint, coming ] (9)` |
+| free cure potion | `[ - FREE-CURE-POT - ]` | `[ cure pot, free ] (90)` |
+| too fatiqued | `[ - OVERWEIGHT - ]` | `[ weight, over ] (53)` |
+| too fatigued | `[ - OVERWEIGHT - ]` | `[ weight, over ] (53)` |
+| are overloaded | `[ - OVERLOADED - ]` | `[ weight, over ] (53)` |
+| contested boss has spawned | `[ - CONTESTED BOSS IN {7} - ]` | `[ boss, {7} ] (123)` |
+| control points earned for current beacon | `+{2} points {12}` | `[ beacon, +{2} {12} ] (90)` |
+| kill points earned | `[ - +{2} points {9} - ]` | `[ kill, +{2} {9} ] (90)` |
+| DF A Dungeon Flashpoint will begin in 15 minutes. | `[ - FP Comin - ]` | `[ flashpoint, coming ] (123)` |
 | cured the target of all poisons | `[ - Target CURED! - ]` | `[ cure, target ] (68)` |
 | cast a wizardry magic arrow spell again | `[ - Magic Arrow Ready! - ]` | `[ magic arrow, ready ] (68)` — 검색어를 준비 문장으로 좁힘, "activated" 는 아래 |
 | cast a wizardry harm spell again | `[ - Harm Ready! - ]` | `[ harm, ready ] (68)` |
@@ -327,98 +329,98 @@ hue 번호는 이 뜻으로 이미 쓰이고 있던 값을 골랐다. 실제 색
 | cast a wizardry lightning spell again | `[ - Lightning Ready! - ]` | `[ lightning, ready ] (68)` |
 | cast a wizardry chain lightning spell again | `[ - Chain Light Ready! - ]` | `[ chain, ready ] (68)` |
 | cast a wizardry meteor swarm spell again | `[ - Meteo Swo Ready! - ]` | `[ meteor, ready ] (68)` |
-| magic arrow / harm / fireball / chain lightning / meteor swarm activated | (신규) | `[ 주문, target ] (63)` — 프록이 터졌다, 15초 바 시작 |
-| upgraded to Deadly | `[ - DEADLY Poi - ]` | `[ poison, deadly ] (63)` |
-| upgraded to Lethal | `[ - LETHAL Poi - ]` | `[ poison, lethal ] (63)` |
+| magic arrow / harm / fireball / chain lightning / meteor swarm activated | (신규) | `[ 주문, target ] (43)` — 프록이 터졌다, 15초 바 시작 |
+| upgraded to Deadly | `[ - DEADLY Poi - ]` | `[ poison, deadly ] (43)` |
+| upgraded to Lethal | `[ - LETHAL Poi - ]` | `[ poison, lethal ] (43)` |
 | Triggered (Epic) | `[ - ASPECT ACTIVATED! - ]` | `[ aspect, on ] (68)` |
-| enough experience to upgrade | `[ - Aspect UPGRADE! - ]` | `[ aspect, upgrade ] (53)` |
-| Society Job Progress | `Soci: {4}` | `[ society, {4} ] (53)` |
+| enough experience to upgrade | `[ - Aspect UPGRADE! - ]` | `[ aspect, upgrade ] (90)` |
+| Society Job Progress | `Soci: {4}` | `[ society, {4} ] (90)` |
 | You have completed a society job | `[ - Society DONE! - ]` | `[ society, done ] (68)` |
-| aspect experience | `{4}: {7}` | `[ {4}, {7} ] (53)` |
+| aspect experience | `{4}: {7}` | `[ {4}, {7} ] (90)` |
 | resist a bleed | `[ - BLEED RESISTED! - ]` | `[ bleed, off ] (65)` |
 | resist a disease effect | `[ - Disease RESISTED! - ]` | `[ disease, off ] (65)` |
 | been struck by an ancient blight | `[ - HEAVY DISEASE! - ]` | `[ disease, on ] (33)` |
-| may now review results | `[ - Boss Results Available! - ]` | `[ boss, done ] (53)` |
-| struck by an evil omen | `[ - Omen Damage - ]` | `[ omen, target ] (63)` |
-| enough unholy | `[ - Insufficient Unholy - ]` | `[ unholy, out ] (43)` |
-| unholy symbols remaining | `[ - Unholy : {4} - ]` | `[ unholy, {4} ] (53)` |
+| may now review results | `[ - Boss Results Available! - ]` | `[ boss, done ] (90)` |
+| struck by an evil omen | `[ - Omen Damage - ]` | `[ omen, target ] (43)` |
+| enough unholy | `[ - Insufficient Unholy - ]` | `[ unholy, out ] (53)` |
+| unholy symbols remaining | `[ - Unholy : {4} - ]` | `[ unholy, {4} ] (90)` |
 | max unholy | `Unholy Maxed: {5}` | `[ unholy, max ] (68)` — "Max unholy symbols earned (10/10)", 괄호가 그대로 뜨는 `{5}` 대신 |
-| consume a magic mushroom | (신규) | `[ mush, on ] (53)` — "You consume a magic mushroom and restore some mana." 범용 `You consume` 보다 앞, 안 그러면 `[ essence, +a ]` 가 뜬다 |
-| mana from your mana well | (신규) | `[ eldritch, +{3} ] (53)` — "You draw 11 mana from your mana well." Eldritch 아스펙트 |
-| You consume | `+{3} Arcane Essence` | `[ essence, +{3} ] (53)` |
-| generates mana | `[ - Mana REFUNDED! - ]` | `[ mana, refund ] (53)` |
-| progress on the lock | `[ - Lock: {8} - ]` | `[ lock, {8} ] (53)` |
-| clearing it of traps | `[ - Trap: {10} - ]` | `[ trap, {10} ] (53)` |
-| thrown at that player within 30 | `[ - Telekinesis Ready! - ]` | `[ teleki, target ] (63)` |
-| free hand to drink | `[ - Hands full! - ]` | `[ hands, full ] (43)` |
-| You will now automatically | `[ - SCROLL USE  ON - ]` | `[ scroll mode, on ] (53)` |
-| You may only cast that spell on a player once every 30 seconds. | `[ - DONT - ]` | `[ limit, 30s ] (43)` |
+| consume a magic mushroom | (신규) | `[ mush, on ] (90)` — "You consume a magic mushroom and restore some mana." 범용 `You consume` 보다 앞, 안 그러면 `[ essence, +a ]` 가 뜬다 |
+| mana from your mana well | (신규) | `[ eldritch, +{3} ] (90)` — "You draw 11 mana from your mana well." Eldritch 아스펙트 |
+| You consume | `+{3} Arcane Essence` | `[ essence, +{3} ] (90)` |
+| generates mana | `[ - Mana REFUNDED! - ]` | `[ mana, refund ] (90)` |
+| progress on the lock | `[ - Lock: {8} - ]` | `[ lock, {8} ] (90)` |
+| clearing it of traps | `[ - Trap: {10} - ]` | `[ trap, {10} ] (90)` |
+| thrown at that player within 30 | `[ - Telekinesis Ready! - ]` | `[ teleki, target ] (43)` |
+| free hand to drink | `[ - Hands full! - ]` | `[ hands, full ] (53)` |
+| You will now automatically | `[ - SCROLL USE  ON - ]` | `[ scroll mode, on ] (90)` |
+| You may only cast that spell on a player once every 30 seconds. | `[ - DONT - ]` | `[ limit, 30s ] (53)` |
 | You may only cast that spell on a player once every 30 seconds. | `[ - DONT - ]` | — |
-| Your boarding party fails to board the ship | `[ - FAIL BOARD - ]` | `[ boarding, miss ] (43)` |
-| That ship is too far away to board. | `[ - FAR AWAY - ]` | `[ range, out ] (43)` |
-| Your shot hinders your target! | `[ - Hinder - ]` | `[ hinder, target ] (63)` |
-| You deactivate your stance. | `[ - CODEX OFF - ]` | `[ stance, off ] (43)` |
-| You smash the unprotected | `[ - Smash - ]` | `[ smash, target ] (63)` |
-| fallen to corruption | `[ - SHRINE EVENT - ]` | `[ shrine, on ] (9)` |
-| You begin to move quietly | `GO` | `[ stealth, on ] (53)` |
-| You have 4 stealth | `LAST STEPS` | `[ stealth, 4 ] (43)` |
-| You have 3 stealth | `3` | `[ stealth, 3 ] (43)` |
-| You have 2 stealth | `2` | `[ stealth, 2 ] (43)` |
+| Your boarding party fails to board the ship | `[ - FAIL BOARD - ]` | `[ boarding, miss ] (53)` |
+| That ship is too far away to board. | `[ - FAR AWAY - ]` | `[ range, out ] (53)` |
+| Your shot hinders your target! | `[ - Hinder - ]` | `[ hinder, target ] (43)` |
+| You deactivate your stance. | `[ - CODEX OFF - ]` | `[ stance, off ] (53)` |
+| You smash the unprotected | `[ - Smash - ]` | `[ smash, target ] (43)` |
+| fallen to corruption | `[ - SHRINE EVENT - ]` | `[ shrine, on ] (123)` |
+| You begin to move quietly | `GO` | `[ stealth, on ] (90)` |
+| You have 4 stealth | `LAST STEPS` | `[ stealth, 4 ] (53)` |
+| You have 3 stealth | `3` | `[ stealth, 3 ] (53)` |
+| You have 2 stealth | `2` | `[ stealth, 2 ] (53)` |
 | You have 1 stealth | `1` | `[ stealth, 1 ] (33)` |
 | You have 0 stealth | `STOP` | `[ stealth, 0 ] (33)` |
-| You must hide first | `NOT HIDDEN` | `[ hide, off ] (43)` |
+| You must hide first | `NOT HIDDEN` | `[ hide, off ] (53)` |
 | You charge your spell with additional energy! | `C^` | — |
-| Those cannons are out of ammunition | `[ - RELOAD CANNONS - ]` | `[ cannon, out ] (43)` |
-| You fail to steal | `[ - FAIL - ]` | `[ steal, miss ] (43)` |
-| You fail in your stealing attempt | `[ - FAIL - ]` | `[ steal, miss ] (43)` |
+| Those cannons are out of ammunition | `[ - RELOAD CANNONS - ]` | `[ cannon, out ] (53)` |
+| You fail to steal | `[ - FAIL - ]` | `[ steal, miss ] (53)` |
+| You fail in your stealing attempt | `[ - FAIL - ]` | `[ steal, miss ] (53)` |
 | You steal | `[ - WOOP - ]` | `[ steal, done ] (68)` |
 | You successfully steal | `[ - WOOP - ]` | `[ steal, done ] (68)` |
-| You have already stolen from this creature | `[ - Already Stolen - ]` | `[ steal, wrong ] (43)` |
+| You have already stolen from this creature | `[ - Already Stolen - ]` | `[ steal, wrong ] (53)` |
 | You may now taunt again. | `[ - Taunt Ready! - ]` | `[ taunt, ready ] (68)` |
 | Potion codex Panaccea upgrade is now ready. | `[ - Panaccea Ready - ]` | `[ panacea, ready ] (68)` |
 | Your ability to hide is no longer impeded | `[ - Invis Ready - ]` | `[ hide, ready ] (68)` |
 | Weapon ability ready | `[ - Weapon Abi Ready - ]` | `[ ability, ready ] (68)` |
-| your rapid | `[ - SLOW DOWN - ]` | `[ move, slow ] (43)` |
-| your movements attract | `[ - SLOW DOWN - ]` | `[ move, slow ] (43)` |
-| your quick movements draw the attention | `[ - SLOW DOWN - ]` | `[ move, slow ] (43)` |
-| iron flesh charges remaining | `[ - Iron Flesh : {1} - ]` | `[ iron flesh, {1} ] (53)` |
-| You detonate a ground trap | `[ - BOOOM - ]` | `[ detonate, done ] (63)` |
+| your rapid | `[ - SLOW DOWN - ]` | `[ move, slow ] (53)` |
+| your movements attract | `[ - SLOW DOWN - ]` | `[ move, slow ] (53)` |
+| your quick movements draw the attention | `[ - SLOW DOWN - ]` | `[ move, slow ] (53)` |
+| iron flesh charges remaining | `[ - Iron Flesh : {1} - ]` | `[ iron flesh, {1} ] (90)` |
+| You detonate a ground trap | `[ - BOOOM - ]` | `[ detonate, done ] (43)` |
 | You may now detonate another trap | `[ - DETONATE NOW - ]` | `[ detonate, ready ] (68)` |
-| You increase your [EventScore | `+ {6}` | `[ event, +{6} ] (53)` |
-| You are now under the effect of a Song | `++` | `[ song, on ] (53)` |
-| You fail to discord | `--` | `[ disco, miss ] (43)` |
-| fail to pacify your opponent | `--` | `[ peace, miss ] (43)` |
-| fail to pacify any nearby creatures | (신규) | `[ peace, area miss ] (43)` — 범용 `fail to pacify` 보다 앞 |
-| disrupting your opponent | (신규) | `[ disco, target ] (63)` |
-| briefly discording | (신규) | `[ disco, area ] (63)` — 자기 타겟 = 8타일 광역, 각 5초 |
-| pacifying your target | (신규) | `[ peace, target ] (63)` |
-| briefly pacifying | (신규) | `[ peace, area ] (63)` — 자기 타겟 = 8타일 광역, 각 2초 |
-| play successfully, provoking | (신규) | `[ provo, target ] (63)` — 프로보는 광역이 없다. 자기 타겟은 송 |
-| fail to incite anger | (신규) | `[ provo, miss ] (43)` |
-| Song of Discordance / Peacemaking / Provocation effect ends | (신규) | `[ disco song / peace song / provo song, off ] (43)` — 15분 송이 끝남. 범용 `You play successfully` 는 뺐다 |
-| additional energy | `+++` | `[ spell, charged ] (63)` |
+| You increase your [EventScore | `+ {6}` | `[ event, +{6} ] (90)` |
+| You are now under the effect of a Song | `++` | `[ song, on ] (90)` |
+| You fail to discord | `--` | `[ disco, miss ] (53)` |
+| fail to pacify your opponent | `--` | `[ peace, miss ] (53)` |
+| fail to pacify any nearby creatures | (신규) | `[ peace, area miss ] (53)` — 범용 `fail to pacify` 보다 앞 |
+| disrupting your opponent | (신규) | `[ disco, target ] (43)` |
+| briefly discording | (신규) | `[ disco, area ] (43)` — 자기 타겟 = 8타일 광역, 각 5초 |
+| pacifying your target | (신규) | `[ peace, target ] (43)` |
+| briefly pacifying | (신규) | `[ peace, area ] (43)` — 자기 타겟 = 8타일 광역, 각 2초 |
+| play successfully, provoking | (신규) | `[ provo, target ] (43)` — 프로보는 광역이 없다. 자기 타겟은 송 |
+| fail to incite anger | (신규) | `[ provo, miss ] (53)` |
+| Song of Discordance / Peacemaking / Provocation effect ends | (신규) | `[ disco song / peace song / provo song, off ] (53)` — 15분 송이 끝남. 범용 `You play successfully` 는 뺐다 |
+| additional energy | `+++` | `[ spell, charged ] (43)` |
 | What instrument shall you play | `[ - INSTRUMENT BROKE - ]` | `[ inst, out ] (33)` |
-| now planted | `You are now planted.` | `[ planted, on ] (53)` |
-| 5 moving throws | `5 moving throws left.` | `[ throws, 5 ] (53)` |
-| 4 moving throws | `4 moving throws left.` | `[ throws, 4 ] (53)` |
-| 3 moving throws | `3 moving throws left.` | `[ throws, 3 ] (53)` |
-| 2 moving throws | `2 moving throws left.` | `[ throws, 2 ] (53)` |
+| now planted | `You are now planted.` | `[ planted, on ] (90)` |
+| 5 moving throws | `5 moving throws left.` | `[ throws, 5 ] (90)` |
+| 4 moving throws | `4 moving throws left.` | `[ throws, 4 ] (90)` |
+| 3 moving throws | `3 moving throws left.` | `[ throws, 3 ] (90)` |
+| 2 moving throws | `2 moving throws left.` | `[ throws, 2 ] (90)` |
 | 1 moving throws | `1 moving throw left.` | `[ throws, 1 ] (33)` |
 | 0 moving throws | `No throws, plant now.` | `[ throws, 0 ] (33)` |
-| wing your target | `You wing your target.` | `[ wing, target ] (63)` |
-| Magic reflect removed. | (신규) | `[ reflect, off ] (43)` |
+| wing your target | `You wing your target.` | `[ wing, target ] (43)` |
+| Magic reflect removed. | (신규) | `[ reflect, off ] (53)` |
 | has applied telekinesis to you | (신규) | `[ teleki, me ] (33)` — "Qianshanmuxue has applied telekinesis to you." 건 사람 이름은 저널에 |
 | An explosion potion has stuck to you | (신규) | `[ bomb, me ] (33)` — 퓨즈 5초, 바 `bomb, me` 와 짝 |
-| Your explosion potion sticks to your target | (신규) | `[ bomb, target ] (63)` |
-| You drink a healing potion | (신규) | `[ heal pot, on ] (53)` — 스크립트의 같은 줄은 뺐다 |
-| You drink a cure potion | (신규) | `[ cure pot, on ] (53)`. 리프레시는 서버가 아무 문장도 안 보내서 없고, 힘·민은 "Your strength has changed by 20" 뿐이라 안 잡는다 — Weaken 을 맞아도 같은 문장이다 |
-| You mana drain your target. / You curse your target. | (신규) | `[ drain, target ]` / `[ curse, target ] (63)` — 스크립트의 `[ drain ]` `[ curse ]` 시전 알림은 뺐다 |
-| Your reactive armor spell has been nullified. | (신규) | `[ reactive, off ] (43)` — 25 흡수하고 빠짐, 다음 정지 구간에 다시 건다 |
-| You generate mana for your spell. | (신규) | `[ mana, refund ] (53)` — 기존 `generates mana` 는 이 문장을 못 잡았다 |
-| recovered from energy bolt kill | (신규) | `[ eb, refund ] (53)` — 티어마다 5/10/15 라 숫자는 안 보인다 |
-| That is too far away. | (신규) | `[ range, out ] (43)` |
+| Your explosion potion sticks to your target | (신규) | `[ bomb, target ] (43)` |
+| You drink a healing potion | (신규) | `[ heal pot, on ] (90)` — 스크립트의 같은 줄은 뺐다 |
+| You drink a cure potion | (신규) | `[ cure pot, on ] (90)`. 리프레시는 서버가 아무 문장도 안 보내서 없고, 힘·민은 "Your strength has changed by 20" 뿐이라 안 잡는다 — Weaken 을 맞아도 같은 문장이다 |
+| You mana drain your target. / You curse your target. | (신규) | `[ drain, target ]` / `[ curse, target ] (43)` — 스크립트의 `[ drain ]` `[ curse ]` 시전 알림은 뺐다 |
+| Your reactive armor spell has been nullified. | (신규) | `[ reactive, off ] (53)` — 25 흡수하고 빠짐, 다음 정지 구간에 다시 건다 |
+| You generate mana for your spell. | (신규) | `[ mana, refund ] (90)` — 기존 `generates mana` 는 이 문장을 못 잡았다 |
+| recovered from energy bolt kill | (신규) | `[ eb, refund ] (90)` — 티어마다 5/10/15 라 숫자는 안 보인다 |
+| That is too far away. | (신규) | `[ range, out ] (53)` |
 | Spell siphon active. | (신규) | `[ siphon, on ] (68)` — 5분마다 첫 주문 피격에 켜지는 60분 PvM 버프. 바 `siphon` 과 짝 |
-| Your spell siphon bonus has expired | (신규) | `[ siphon, off ] (43)` |
+| Your spell siphon bonus has expired | (신규) | `[ siphon, off ] (53)` |
 | You absorb their spell. | (신규) | `[ spell, absorbed ] (68)` — Resist 의 `25% x Resist/100` 확률, 피해 -75% |
 
 ## 스크립트 오버헤드

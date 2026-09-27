@@ -20,12 +20,12 @@ unsetvar! var_my_moongate
 
 while not varexist var_my_moongate
     if timer "gate_find_overhead" >= gate_find_overhead_frequency
-        overhead "[ moongate, out ]" 43
+        overhead "[ moongate, out ]" 53
         settimer "gate_find_overhead" 0
     endif
 
     if timer "gate_found_overhead" >= gate_found_overhead_frequency and findtype 3948 ground -1 -1 12 as found_moongate
-        overhead "[ moongate, set ]" 53 found_moongate
+        overhead "[ moongate, set ]" 90 found_moongate
         settimer "gate_found_overhead" 0
     endif
 
@@ -46,4 +46,4 @@ while find var_my_moongate ground
     wait 200
 endwhile
 
-overhead "[ moongate, done ]" 53
+overhead "[ moongate, done ]" 90

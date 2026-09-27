@@ -197,12 +197,12 @@ if not find var__my_instrument backpack
             wait wait__long
         else
             @setvar! var__my_instrument 0
-            overhead "[ inst, wrong ]" 43
+            overhead "[ inst, wrong ]" 53
             stop
         endif
     else
         @setvar! var__my_instrument 0
-        overhead "[ inst, out ]" 43
+        overhead "[ inst, out ]" 53
         stop
     endif
 endif
@@ -260,7 +260,7 @@ while not dead
             wait wait__long
         else
             if timer "timer__overhead_message" > cooldown__overhead_message
-                overhead "[ aspect weapon, out ]" 43
+                overhead "[ aspect weapon, out ]" 53
                 settimer "timer__overhead_message" 0
             endif
         endif
@@ -276,7 +276,7 @@ while not dead
 
     if insysmsg "That is not a musical instrument"
         @setvar! var__my_instrument 0
-        overhead "[ inst, wrong ]" 43
+        overhead "[ inst, wrong ]" 53
         replay
     endif
 
@@ -328,10 +328,10 @@ while not dead
             endif
 
             wait wait__long
-            overhead "[ gold, dropped ]" 53
+            overhead "[ gold, dropped ]" 90
         else
             if timer "timer__overhead_message" > cooldown__overhead_message
-                overhead "[ weight, over ]" 43
+                overhead "[ weight, over ]" 53
                 settimer "timer__overhead_message" 0
             endif
 
@@ -359,7 +359,7 @@ while not dead
                 wait wait__short
             else
                 if timer "timer__overhead_message" > cooldown__overhead_message
-                    overhead "[ bandage, out ]" 43
+                    overhead "[ bandage, out ]" 53
                     settimer "timer__overhead_message" 0
                 endif
             endif
@@ -375,7 +375,7 @@ while not dead
             wait wait__short
         else
             if timer "timer__overhead_message" > cooldown__overhead_message
-                overhead "[ pouch, out ]" 43
+                overhead "[ pouch, out ]" 53
                 settimer "timer__overhead_message" 0
             endif
         endif
@@ -390,7 +390,7 @@ while not dead
 
             if "next usable" in label__heal_potion
                 if timer "timer__overhead_message" > cooldown__overhead_message
-                    overhead "[ heal pot, {{label__heal_potion}} ]" 53
+                    overhead "[ heal pot, {{label__heal_potion}} ]" 90
                     settimer "timer__overhead_message" 0
                 endif
             else
@@ -400,7 +400,7 @@ while not dead
             endif
         else
             if timer "timer__overhead_message" > cooldown__overhead_message
-                overhead "[ heal pot, out ]" 43
+                overhead "[ heal pot, out ]" 53
                 settimer "timer__overhead_message" 0
             endif
         endif
@@ -412,12 +412,12 @@ while not dead
     // While hidden, skip only the potion. The old break terminated the whole main loop.
     if poisoned and config__use_potion = 1 and not targetexists and not hidden
         if findtype "Orange Potion" self as alias__cure_potion
-            overhead "[ cure pot, on ]" 53
+            overhead "[ cure pot, on ]" 90
             dclick alias__cure_potion
             wait wait__short
         else
             if timer "timer__overhead_message" > cooldown__overhead_message
-                overhead "[ cure pot, out ]" 43
+                overhead "[ cure pot, out ]" 53
                 settimer "timer__overhead_message" 0
             endif
         endif
@@ -433,7 +433,7 @@ while not dead
             wait wait__short
         else
             if timer "timer__overhead_message" > cooldown__overhead_message
-                overhead "[ refresh, out ]" 43
+                overhead "[ refresh, out ]" 53
                 settimer "timer__overhead_message" 0
             endif
         endif
@@ -448,7 +448,7 @@ while not dead
             wait wait__short
         else
             if timer "timer__overhead_message" > cooldown__overhead_message
-                overhead "[ str, out ]" 43
+                overhead "[ str, out ]" 53
                 settimer "timer__overhead_message" 0
             endif
         endif
@@ -463,7 +463,7 @@ while not dead
             wait wait__short
         else
             if timer "timer__overhead_message" > cooldown__overhead_message
-                overhead "[ agi, out ]" 43
+                overhead "[ agi, out ]" 53
                 settimer "timer__overhead_message" 0
             endif
         endif
@@ -478,7 +478,7 @@ while not dead
             wait wait__short
         else
             if timer "timer__overhead_message" > cooldown__overhead_message
-                overhead "[ resist, out ]" 43
+                overhead "[ resist, out ]" 53
                 settimer "timer__overhead_message" 0
             endif
         endif
@@ -665,7 +665,7 @@ while not dead
                     @setvar! var__stance_active config__stance_wildswing
                 else
                     @setvar! var__stance_disabled 1
-                    overhead "[ stance, out ]" 43
+                    overhead "[ stance, out ]" 53
                 endif
 
                 if var__stance_disabled = 0 and var__stance_want != var__stance_active
@@ -687,9 +687,9 @@ while not dead
                     settimer "timer__stance_resync" 0
 
                     if var__stance_want = config__stance_defensive
-                        overhead "[ stance, defensive ]" 53
+                        overhead "[ stance, defensive ]" 90
                     else
-                        overhead "[ stance, sunder ]" 53
+                        overhead "[ stance, sunder ]" 90
                     endif
                 endif
             endif
@@ -722,7 +722,7 @@ while not dead
             say "[WeaponAbility3"
         endif
 
-        overhead "[ pummel ]" 44
+        overhead "[ pummel ]" 118
         cooldown "ability" cooldown__ability
     endif
 endwhile

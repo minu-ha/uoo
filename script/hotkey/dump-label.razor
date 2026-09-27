@@ -25,11 +25,11 @@ overhead "[ label, pick ]" 55
 wait 1000
 
 if not varexist var__label_target
-    overhead "[ label, out ]" 43
+    overhead "[ label, out ]" 53
     stop
 endif
 
 getlabel var__label_target label__dump
 
-overhead "[ label, {{label__dump}} ]" 53
+overhead "[ label, {{label__dump}} ]" 90
 sysmsg "{{label__dump}}" 88

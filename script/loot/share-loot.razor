@@ -188,7 +188,7 @@ clearignore
 
 foreach distribute_item in distribute_item_list
     getlabel distribute_item distribute_item_description
-    overhead "[ share, {{distribute_item_description}} ]" 53
+    overhead "[ share, {{distribute_item_description}} ]" 90
     lift distribute_item 60000
     wait 500
     drop global__my_distribution_container -1 -1 1
@@ -201,4 +201,4 @@ clearsysmsg
 cleardragdrop
 clearignore
 
-overhead "[ share loot, done ]" 53
+overhead "[ share loot, done ]" 90

@@ -146,11 +146,12 @@ endif
 
 | 색 | 용도 | 예 |
 |---|---|---|
-| 53 | 상태, 정보. `config__chatty` 로 끈다 | `[ target, set ]` |
-| 43 | 경고, 재고 없음, 시전 끊김 | `[ heal pot, out ]` `[ heal, disturbed ]` |
+| 90 | 상태, 정보. `config__chatty` 로 끈다 | `[ target, set ]` |
+| 53 | 경고, 재고 없음, 시전 끊김 | `[ heal pot, out ]` `[ heal, disturbed ]` |
 | 33 | 에러, 그것 없이는 못 도는 것 | `[ inst, out ]` |
+| 43 | 내 공격이 먹힘 | `[ hams, target ]` |
 | 68 | 준비됨 | `[ hide, ready ]` |
-| 44 | 능력 · 네크로 시전 알림 | `[ blood oath ]` |
+| 118 | 능력 · 네크로 시전 알림 | `[ blood oath ]` |
 | 83 | 매저리 시전 알림 | `[ curse ]` |
 | 55 | 선택 프롬프트, 라벨 출력 | `[ inst, pick ]` |
 

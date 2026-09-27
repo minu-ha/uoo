@@ -49,11 +49,11 @@
 #
 # Overhead policy
 #   Every message is "[ subject, state ]" in lowercase, see library/overheads.md. Hues follow AGENTS.md.
-#     53  status and information, suppressed by config__chatty
-#     43  warning, a resource is running out but the run continues
+#     90  status and information, suppressed by config__chatty
+#     53  warning, a resource is running out but the run continues
 #     33  error, something is missing and the block cannot do its job
 #     55  a prompt waiting on the player
-#     44 / 83  a necro ability or a magery spell going out, subject only, the hue is the state
+#     118 / 83  a necro ability or a magery spell going out, subject only, the hue is the state
 #   A resource problem leads with the noun so it reads at a glance. No exclamation marks.
 #
 # System message buffer
@@ -152,7 +152,7 @@ clearignore
 # Potions are consumables. Turn this off when farming somewhere that does not need them.
 @setvar! config__use_potion 1
 
-# 1 narrates what the script is doing, 0 keeps it quiet. Covers every 53 hue line: target
+# 1 narrates what the script is doing, 0 keeps it quiet. Covers every 90 hue line: target
 # changes, potions drunk, gold dropped, and every cast cut short for a heal, named by spell.
 # A cast the server disturbs is not reported here: the profile's "[ cast, disturbed ]"
 # overhead already says so, the script only consumes the line. Warnings and errors ignore
@@ -450,11 +450,11 @@ if config__use_herding = 1
         dclick alias__crook
         wait wait__short
     else
-        overhead "[ crook, out ]" 43
+        overhead "[ crook, out ]" 53
     endif
 endif
 
-overhead "[ bard necro, on ]" 53
+overhead "[ bard necro, on ]" 90
 
 while not dead
     # Let anything already in flight finish before the pass reads state. Both reference
@@ -494,7 +494,7 @@ while not dead
                 @setvar! var__my_instrument alias__spare_instrument
 
                 if config__chatty = 1
-                    overhead "[ inst, set ]" 53
+                    overhead "[ inst, set ]" 90
                 endif
             elseif timer "timer__message" >= cooldown__message
                 overhead "[ inst, out ]" 33
@@ -516,7 +516,7 @@ while not dead
                 settimer "timer__target_grace" 0
 
                 if config__chatty = 1
-                    overhead "[ target, set ]" 53
+                    overhead "[ target, set ]" 90
                 endif
             endif
         endif
@@ -769,11 +769,11 @@ while not dead
                 wait wait__short
 
                 if config__chatty = 1
-                    overhead "[ cure pot, on ]" 53
+                    overhead "[ cure pot, on ]" 90
                 endif
             else
                 if timer "timer__message" >= cooldown__message
-                    overhead "[ cure pot, out ]" 43
+                    overhead "[ cure pot, out ]" 53
                     settimer "timer__message" 0
                 endif
 
@@ -854,7 +854,7 @@ while not dead
                 endif
             else
                 if timer "timer__message" >= cooldown__message
-                    overhead "[ heal pot, out ]" 43
+                    overhead "[ heal pot, out ]" 53
                     settimer "timer__message" 0
                 endif
 
@@ -903,11 +903,11 @@ while not dead
                 wait wait__long
 
                 if config__chatty = 1
-                    overhead "[ gold, dropped ]" 53
+                    overhead "[ gold, dropped ]" 90
                 endif
             else
                 if timer "timer__message" >= cooldown__message
-                    overhead "[ weight, over ]" 43
+                    overhead "[ weight, over ]" 53
                     settimer "timer__message" 0
                 endif
 
@@ -939,7 +939,7 @@ while not dead
                 hotkey 'Drink Refresh'
                 wait wait__short
             elseif timer "timer__message" >= cooldown__message
-                overhead "[ refresh, out ]" 43
+                overhead "[ refresh, out ]" 53
                 settimer "timer__message" 0
             endif
         endif
@@ -952,7 +952,7 @@ while not dead
                     hotkey 'Drink Strength'
                     wait wait__short
                 elseif timer "timer__message" >= cooldown__message
-                    overhead "[ str, out ]" 43
+                    overhead "[ str, out ]" 53
                     settimer "timer__message" 0
                 endif
             endif
@@ -962,7 +962,7 @@ while not dead
                     hotkey 'Drink Agility'
                     wait wait__short
                 elseif timer "timer__message" >= cooldown__message
-                    overhead "[ agi, out ]" 43
+                    overhead "[ agi, out ]" 53
                     settimer "timer__message" 0
                 endif
             endif
@@ -972,7 +972,7 @@ while not dead
                     hotkey 'Drink Magic Resist'
                     wait wait__short
                 elseif timer "timer__message" >= cooldown__message
-                    overhead "[ resist, out ]" 43
+                    overhead "[ resist, out ]" 53
                     settimer "timer__message" 0
                 endif
             endif
@@ -1296,7 +1296,7 @@ while not dead
                     @setvar! var__symbols_spent 1
 
                     if config__chatty = 1
-                        overhead "[ blood oath ]" 44
+                        overhead "[ blood oath ]" 118
                     endif
                 elseif insysmsg "seconds before you may use that ability again."
                     settimer "timer__blood_oath" 0
@@ -1310,7 +1310,7 @@ while not dead
                     @setvar! var__symbols_spent 1
 
                     if config__chatty = 1
-                        overhead "[ corpse skin ]" 44
+                        overhead "[ corpse skin ]" 118
                     endif
                 elseif insysmsg "seconds before you may use that ability again."
                     settimer "timer__corpse_skin" 0
@@ -1324,7 +1324,7 @@ while not dead
                     @setvar! var__symbols_spent 1
 
                     if config__chatty = 1
-                        overhead "[ evil omen ]" 44
+                        overhead "[ evil omen ]" 118
                     endif
                 elseif insysmsg "seconds before you may use that ability again."
                     settimer "timer__evil_omen" 0
@@ -1352,7 +1352,7 @@ while not dead
                             settimer "timer__vampiric_embrace" 0
 
                             if config__chatty = 1
-                                overhead "[ vampiric embrace ]" 44
+                                overhead "[ vampiric embrace ]" 118
                             endif
                         elseif insysmsg "seconds before you may use that ability again."
                             settimer "timer__vampiric_embrace" 0
@@ -1392,7 +1392,7 @@ while not dead
 
                         if config__interrupt_to_heal = 1 and diffhits >= config__emergency_hits
                             if config__chatty = 1
-                                overhead "[ drain, cut ]" 43
+                                overhead "[ drain, cut ]" 53
                             endif
 
                             hotkey "> Interrupt"
@@ -1432,7 +1432,7 @@ while not dead
 
                         if config__interrupt_to_heal = 1 and diffhits >= config__emergency_hits
                             if config__chatty = 1
-                                overhead "[ curse, cut ]" 43
+                                overhead "[ curse, cut ]" 53
                             endif
 
                             hotkey "> Interrupt"
@@ -1513,7 +1513,7 @@ while not dead
 
                         if config__interrupt_to_heal = 1 and diffhits >= config__emergency_hits
                             if config__chatty = 1
-                                overhead "[ magic arrow, cut ]" 43
+                                overhead "[ magic arrow, cut ]" 53
                             endif
 
                             hotkey "> Interrupt"
@@ -1546,7 +1546,7 @@ while not dead
 
                         if config__interrupt_to_heal = 1 and diffhits >= config__emergency_hits
                             if config__chatty = 1
-                                overhead "[ harm, cut ]" 43
+                                overhead "[ harm, cut ]" 53
                             endif
 
                             hotkey "> Interrupt"
@@ -1579,7 +1579,7 @@ while not dead
 
                         if config__interrupt_to_heal = 1 and diffhits >= config__emergency_hits
                             if config__chatty = 1
-                                overhead "[ fireball, cut ]" 43
+                                overhead "[ fireball, cut ]" 53
                             endif
 
                             hotkey "> Interrupt"
@@ -1612,7 +1612,7 @@ while not dead
 
                         if config__interrupt_to_heal = 1 and diffhits >= config__emergency_hits
                             if config__chatty = 1
-                                overhead "[ lightning, cut ]" 43
+                                overhead "[ lightning, cut ]" 53
                             endif
 
                             hotkey "> Interrupt"
@@ -1659,7 +1659,7 @@ while not dead
                             settimer "timer__poison_strike" 0
 
                             if config__chatty = 1
-                                overhead "[ poison strike ]" 44
+                                overhead "[ poison strike ]" 118
                             endif
                         elseif insysmsg "seconds before you may use that ability again."
                             settimer "timer__poison_strike" 0
@@ -1696,7 +1696,7 @@ while not dead
 
                     if config__interrupt_to_heal = 1 and diffhits >= config__emergency_hits
                         if config__chatty = 1
-                            overhead "[ eb, cut ]" 43
+                            overhead "[ eb, cut ]" 53
                         endif
 
                         hotkey "> Interrupt"
