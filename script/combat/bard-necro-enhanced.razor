@@ -39,6 +39,7 @@
 #   alias__*   : result of an as binding from find / findtype
 #   label__*   : result of getlabel
 #   timer__*   : createtimer / settimer target
+#   list__*    : createlist / pushlist target. A foreach loop variable carries no prefix
 #   words are snake_case, the prefix is split off with a double underscore
 #
 # Literal policy
@@ -191,14 +192,14 @@ clearignore
 @setvar! config__name_summons 1
 @setvar! config__summon_range 18
 
-if not listexists 'summon_names'
-    createlist 'summon_names'
+if not listexists 'list__summon_names'
+    createlist 'list__summon_names'
 endif
 
-clearlist 'summon_names'
-pushlist 'summon_names' 'nomeehei'
-pushlist 'summon_names' 'nomeehel'
-pushlist 'summon_names' 'nomeeheh'
+clearlist 'list__summon_names'
+pushlist 'list__summon_names' 'nomeehei'
+pushlist 'list__summon_names' 'nomeehel'
+pushlist 'list__summon_names' 'nomeeheh'
 
 # How far a mob may be and still count as engaged. Everything that asks "am I fighting"
 # goes through this one number, so the bard and spell stages inherit it unchanged.
@@ -358,16 +359,16 @@ endif
 
 # Targets that already carry each half of the opener. Two lists rather than a stage counter,
 # so retargeting answers correctly without any per target bookkeeping.
-if not listexists 'magic_drained_targets'
-    createlist 'magic_drained_targets'
+if not listexists 'list__magic_drained_targets'
+    createlist 'list__magic_drained_targets'
 endif
 
-if not listexists 'necro_symbols'
-    createlist 'necro_symbols'
+if not listexists 'list__necro_symbols'
+    createlist 'list__necro_symbols'
 endif
 
-if not listexists 'magic_cursed_targets'
-    createlist 'magic_cursed_targets'
+if not listexists 'list__magic_cursed_targets'
+    createlist 'list__magic_cursed_targets'
 endif
 
 if not timerexists "timer__blood_oath"
@@ -685,7 +686,7 @@ while not dead
     # Unholy Symbols, read off the necro hotbar gump, which prints them as "<have>/<max>",
     # into a list with one entry per symbol. Not a number: a script variable only supports
     # "=" in a condition, "var >= config" never fires, which is why the retired scripts kept
-    # the count as a list and compared list 'necro_symbols' >= n. Same trick here.
+    # the count as a list and compared list 'list__necro_symbols' >= n. Same trick here.
     #
     # The chain runs from the top down because ingump matches a substring: "1/" is inside
     # "11/20", "9/" is inside "19/20" and "0/" is inside "10/20". Checking the two digit
@@ -693,7 +694,7 @@ while not dead
     # is the ceiling because the bank is Effective Necromancy / 10 and no build here goes
     # past 200. A closed gump reads as zero, which parks every ability until the hotbar
     # block reopens it.
-    clearlist 'necro_symbols'
+    clearlist 'list__necro_symbols'
 
     # Set by the necro block when an ability lands. The list is filled once, up here, so a
     # block further down that also spends symbols would otherwise be looking at a bank that
@@ -702,83 +703,83 @@ while not dead
 
     if ingump "20/" 622436516
         for 20
-            pushlist 'necro_symbols' '1' 'back'
+            pushlist 'list__necro_symbols' '1' 'back'
         endfor
     elseif ingump "19/" 622436516
         for 19
-            pushlist 'necro_symbols' '1' 'back'
+            pushlist 'list__necro_symbols' '1' 'back'
         endfor
     elseif ingump "18/" 622436516
         for 18
-            pushlist 'necro_symbols' '1' 'back'
+            pushlist 'list__necro_symbols' '1' 'back'
         endfor
     elseif ingump "17/" 622436516
         for 17
-            pushlist 'necro_symbols' '1' 'back'
+            pushlist 'list__necro_symbols' '1' 'back'
         endfor
     elseif ingump "16/" 622436516
         for 16
-            pushlist 'necro_symbols' '1' 'back'
+            pushlist 'list__necro_symbols' '1' 'back'
         endfor
     elseif ingump "15/" 622436516
         for 15
-            pushlist 'necro_symbols' '1' 'back'
+            pushlist 'list__necro_symbols' '1' 'back'
         endfor
     elseif ingump "14/" 622436516
         for 14
-            pushlist 'necro_symbols' '1' 'back'
+            pushlist 'list__necro_symbols' '1' 'back'
         endfor
     elseif ingump "13/" 622436516
         for 13
-            pushlist 'necro_symbols' '1' 'back'
+            pushlist 'list__necro_symbols' '1' 'back'
         endfor
     elseif ingump "12/" 622436516
         for 12
-            pushlist 'necro_symbols' '1' 'back'
+            pushlist 'list__necro_symbols' '1' 'back'
         endfor
     elseif ingump "11/" 622436516
         for 11
-            pushlist 'necro_symbols' '1' 'back'
+            pushlist 'list__necro_symbols' '1' 'back'
         endfor
     elseif ingump "10/" 622436516
         for 10
-            pushlist 'necro_symbols' '1' 'back'
+            pushlist 'list__necro_symbols' '1' 'back'
         endfor
     elseif ingump "9/" 622436516
         for 9
-            pushlist 'necro_symbols' '1' 'back'
+            pushlist 'list__necro_symbols' '1' 'back'
         endfor
     elseif ingump "8/" 622436516
         for 8
-            pushlist 'necro_symbols' '1' 'back'
+            pushlist 'list__necro_symbols' '1' 'back'
         endfor
     elseif ingump "7/" 622436516
         for 7
-            pushlist 'necro_symbols' '1' 'back'
+            pushlist 'list__necro_symbols' '1' 'back'
         endfor
     elseif ingump "6/" 622436516
         for 6
-            pushlist 'necro_symbols' '1' 'back'
+            pushlist 'list__necro_symbols' '1' 'back'
         endfor
     elseif ingump "5/" 622436516
         for 5
-            pushlist 'necro_symbols' '1' 'back'
+            pushlist 'list__necro_symbols' '1' 'back'
         endfor
     elseif ingump "4/" 622436516
         for 4
-            pushlist 'necro_symbols' '1' 'back'
+            pushlist 'list__necro_symbols' '1' 'back'
         endfor
     elseif ingump "3/" 622436516
         for 3
-            pushlist 'necro_symbols' '1' 'back'
+            pushlist 'list__necro_symbols' '1' 'back'
         endfor
     elseif ingump "2/" 622436516
         for 2
-            pushlist 'necro_symbols' '1' 'back'
+            pushlist 'list__necro_symbols' '1' 'back'
         endfor
     elseif ingump "1/" 622436516
         for 1
-            pushlist 'necro_symbols' '1' 'back'
+            pushlist 'list__necro_symbols' '1' 'back'
         endfor
     endif
 
@@ -787,8 +788,8 @@ while not dead
     # both at once re-opens on a target that was done seconds ago, which costs 22 mana now
     # and then. Per target timestamps would need arithmetic, which Razor does not have.
     if timer "timer__magic_window" >= cooldown__magic_window
-        clearlist 'magic_drained_targets'
-        clearlist 'magic_cursed_targets'
+        clearlist 'list__magic_drained_targets'
+        clearlist 'list__magic_cursed_targets'
         settimer "timer__magic_window" 0
     endif
 
@@ -1106,7 +1107,7 @@ while not dead
     # in >info, a wild lich never passes, and rename would refuse it anyway. A renamed summon
     # still matches its body, so the three slot variables carry the serials, a match already
     # sitting in a slot is skipped, and a slot frees itself when find no longer sees its
-    # summon alive. The name comes out of the summon_names list by slot index: foreach
+    # summon alive. The name comes out of the list__summon_names list by slot index: foreach
     # carries a list entry as text, which a variable cannot.
     if config__name_summons = 1 and followers > 0 and timer "timer__summon_name" >= cooldown__summon_name
         settimer "timer__summon_name" 0
@@ -1169,7 +1170,7 @@ while not dead
         @clearignore
 
         if var__fresh_summon != 0
-            # The first free slot, as an index into summon_names. 3 is past the end, so with
+            # The first free slot, as an index into list__summon_names. 3 is past the end, so with
             # every name taken the loop below matches nothing.
             if var__summon_named_1 = 0
                 @setvar! var__free_slot 0
@@ -1184,7 +1185,7 @@ while not dead
                 @setvar! var__free_slot 3
             endif
 
-            foreach summon_name in summon_names
+            foreach summon_name in list__summon_names
                 if index = var__free_slot
                     @rename var__fresh_summon summon_name
 
@@ -1504,7 +1505,7 @@ while not dead
     # cast to break, and the embrace is walk only, so a walk guard would have parked it for good.
     if var__engaged = 1
         if not targetexists and not casting
-            if list 'necro_symbols' >= config__symbols_blood_oath and followers > 0 and timer "timer__blood_oath" >= cooldown__necro_action
+            if list 'list__necro_symbols' >= config__symbols_blood_oath and followers > 0 and timer "timer__blood_oath" >= cooldown__necro_action
                 yell '[BloodOath'
                 wait wait__message
 
@@ -1518,7 +1519,7 @@ while not dead
                 elseif insysmsg "seconds before you may use that ability again."
                     settimer "timer__blood_oath" 0
                 endif
-            elseif list 'necro_symbols' >= config__symbols_corpse_skin and timer "timer__corpse_skin" >= cooldown__necro_action
+            elseif list 'list__necro_symbols' >= config__symbols_corpse_skin and timer "timer__corpse_skin" >= cooldown__necro_action
                 yell '[CorpseSkin'
                 wait wait__message
 
@@ -1532,7 +1533,7 @@ while not dead
                 elseif insysmsg "seconds before you may use that ability again."
                     settimer "timer__corpse_skin" 0
                 endif
-            elseif list 'necro_symbols' >= config__symbols_evil_omen and timer "timer__evil_omen" >= cooldown__necro_action
+            elseif list 'list__necro_symbols' >= config__symbols_evil_omen and timer "timer__evil_omen" >= cooldown__necro_action
                 yell '[EvilOmen'
                 wait wait__message
 
@@ -1554,7 +1555,7 @@ while not dead
     # and it searches the surrounding area for one, so the cursor is answered with self. Walk
     # only, when a corpse is what is left of the last pull, and the corpse check keeps it from
     # burning a thirty second cooldown on air.
-    if list 'necro_symbols' >= config__symbols_vampiric_embrace and var__engaged = 0 and var__manual = 0 and followers > 0
+    if list 'list__necro_symbols' >= config__symbols_vampiric_embrace and var__engaged = 0 and var__manual = 0 and followers > 0
         if timer "timer__vampiric_embrace" >= cooldown__necro_action
             if not targetexists and not casting
                 if findtype 8198 ground -1 -1 8
@@ -1595,7 +1596,7 @@ while not dead
     if var__engaged = 1 and var__manual = 0
         if not targetexists and not casting and cooldown "walk" = 0
             if find var__combat_target ground -1 -1 config__target_range as alias__opener_target
-                if not inlist 'magic_drained_targets' var__combat_target and var__regs_mana_drain = 1 and mana >= config__mana_4th
+                if not inlist 'list__magic_drained_targets' var__combat_target and var__regs_mana_drain = 1 and mana >= config__mana_4th
                     cast 'Mana Drain'
 
                     for 25
@@ -1645,12 +1646,12 @@ while not dead
                             if insysmsg "cannot be seen"
                                 # not delivered, so the target stays off the list
                             else
-                                pushlist 'magic_drained_targets' var__combat_target
+                                pushlist 'list__magic_drained_targets' var__combat_target
 
                             endif
                         endif
                     endif
-                elseif not inlist 'magic_cursed_targets' var__combat_target and var__regs_curse = 1 and mana >= config__mana_4th
+                elseif not inlist 'list__magic_cursed_targets' var__combat_target and var__regs_curse = 1 and mana >= config__mana_4th
                     cast 'Curse'
 
                     for 25
@@ -1700,7 +1701,7 @@ while not dead
                             if insysmsg "cannot be seen"
                                 # not delivered, so the target stays off the list
                             else
-                                pushlist 'magic_cursed_targets' var__combat_target
+                                pushlist 'list__magic_cursed_targets' var__combat_target
                                 settimer "timer__magic_window" 0
 
                             endif
@@ -1721,7 +1722,7 @@ while not dead
     # opener does not have. Waiting for 22 mana and casting with the rider is the better trade.
     @setvar! var__opener_done 0
 
-    if inlist 'magic_cursed_targets' var__combat_target
+    if inlist 'list__magic_cursed_targets' var__combat_target
         @setvar! var__opener_done 1
     elseif var__regs_curse = 0
         @setvar! var__opener_done 1
@@ -1951,7 +1952,7 @@ while not dead
     # that is damage that would otherwise have gone with it. It sits at the bottom of the
     # symbol ladder, only fires while Corpse Skin is actually up, and takes a filler slot
     # rather than a proc one, since it costs no mana and the procs are worth more.
-    if var__engaged = 1 and var__opener_done = 1 and var__manual = 0 and var__symbols_spent = 0 and list 'necro_symbols' >= config__symbols_poison_strike
+    if var__engaged = 1 and var__opener_done = 1 and var__manual = 0 and var__symbols_spent = 0 and list 'list__necro_symbols' >= config__symbols_poison_strike
         if timer "timer__corpse_skin" < cooldown__necro_action and timer "timer__poison_strike" >= cooldown__necro_action
             if not targetexists and not casting
                 if find var__combat_target ground -1 -1 config__target_range as alias__strike_target

@@ -79,7 +79,7 @@ flowchart TD
 | 3 | 자기 버프 | `not findbuff` + `cooldown "reflect"` | **몹이 없을 때만.** 둘 다 시간이 아니라 소모로 끝난다. RA 는 25 흡수, Reflect 는 한 번 반사 뒤 30초 쿨 (반사 시점부터) |
 | 4 | Barding Song | `Music=0 and Song=0 and <슬롯>=0` | **몹이 없을 때만.** 라운드로빈 |
 | 5 | 바드 스킬 | `Music=0 and <슬롯>=0` | 디스코 1회 + **피스 12초마다** |
-| 6 | 네크로 | `list 'necro_symbols' >= config__symbols_*` | Blood Oath → Corpse Skin → Evil Omen 순. **유휴 예약** 아래 참조 |
+| 6 | 네크로 | `list 'list__necro_symbols' >= config__symbols_*` | Blood Oath → Corpse Skin → Evil Omen 순. **유휴 예약** 아래 참조 |
 | 7 | 오프닝 | 마나 + 대상별 리스트 | Mana Drain -> Curse |
 | 8 | 프록 코어 | `cooldown "magic arrow"` 등 | 네 개가 각자 쿨 |
 | 9 | 필러 | `mana > config__filler_floor` | Energy Bolt. **여기부터 잘린다** |
@@ -466,13 +466,13 @@ Wither(5)는 비공격 주문용 마나만 준다. Pain Spike(5)는 **다음 몹
 ### 리스트 두 개로 상태를 표현한다
 
 ```
-list 'magic_drained_targets'    Mana Drain 완료 serial
-list 'magic_cursed_targets'     Curse 완료 serial
+list 'list__magic_drained_targets'    Mana Drain 완료 serial
+list 'list__magic_cursed_targets'     Curse 완료 serial
 timer__magic_window             마지막 Curse 안착 이후 경과
 
 if timer "timer__magic_window" >= cooldown__magic_window        60000
-	clearlist 'magic_drained_targets'
-	clearlist 'magic_cursed_targets'
+	clearlist 'list__magic_drained_targets'
+	clearlist 'list__magic_cursed_targets'
 	settimer "timer__magic_window" 0
 endif
 
@@ -639,7 +639,7 @@ Bloodmoss 플래그 하나와 `Vengeful Spirit` 핫키(목록에 있음)만 추�
 | 2 | `nomeehel` | 두 번째 |
 | 3 | `nomeeheh` | 세 번째 (Summon Creature 같은 1슬롯짜리를 셋째로 뽑았을 때) |
 
-이름은 CONFIG 의 `summon_names` 리스트 (`pushlist` 세 줄). 변수는 단어를 못 담지만 리스트 항목은 글자를 유지하고 `foreach` 변수가 그대로 `rename` 에 넘어간다 (2026-09-28 프로브). 끄는 스위치는 `config__name_summons 0`.
+이름은 CONFIG 의 `list__summon_names` 리스트 (`pushlist` 세 줄). 변수는 단어를 못 담지만 리스트 항목은 글자를 유지하고 `foreach` 변수가 그대로 `rename` 에 넘어간다 (2026-09-28 프로브). 끄는 스위치는 `config__name_summons 0`.
 
 ### 왜 이 모양인가
 
@@ -662,7 +662,7 @@ Bloodmoss 플래그 하나와 `Vengeful Spirit` 핫키(목록에 있음)만 추�
   죽거나 해제된 소환수의 이름을 다음 소환이 이어받는다. 스크립트를 다시 켜면 슬롯이 비므로 이미 이름 붙은
   소환수도 한 번 더 이름을 받는다 (같은 세 이름 안에서 순서만 바뀔 수 있다).
 - **이름은 리스트에서 슬롯 번호로 꺼낸다.** 빈 슬롯을 `var__free_slot` (0 1 2, 3 은 없음) 로 고르고 그 자리에서 슬롯 변수에 serial 을
-  넣은 뒤, `foreach summon_name in summon_names` 안에서 `index = var__free_slot` 인 항목으로 `rename` 한다. 내장 `index` 가
+  넣은 뒤, `foreach summon_name in list__summon_names` 안에서 `index = var__free_slot` 인 항목으로 `rename` 한다. 내장 `index` 가
   왼쪽이라 변수와 비교해도 된다.
 - **매치를 전부 훑는다.** 이 포크의 `findtype` 은 부를 때마다 **같은 모빌**을 돌려준다 (Razor CE 의 무작위가 아니다).
   한 번만 부르면 이미 이름 붙은 리치만 계속 나와 둘째 소환수에 닿지 못했다 (2026-09-28 인게임). 그래서 구식
@@ -685,7 +685,7 @@ Bloodmoss 플래그 하나와 `Vengeful Spirit` 핫키(목록에 있음)만 추�
 | 구문 | 선례 |
 |---|---|
 | `not inlist '이름' alias` | `bard-necro-enhanced.razor` OPENER |
-| `magic_drained_targets` + `magic_cursed_targets` 2단 오프닝 | `bard-necro-enhanced.razor` OPENER |
+| `list__magic_drained_targets` + `list__magic_cursed_targets` 2단 오프닝 | `bard-necro-enhanced.razor` OPENER |
 | `createlist` / `removelist` / `clearlist` / `pushlist` | 여러 파일 |
 | `while findtype ... backpack as` + `@ignore` | `bard-necro-enhanced.razor` INSTRUMENT |
 | `not dead X and noto X != "hostile" ...` | `bard-necro-enhanced.razor` COMBAT TARGET CACHE |

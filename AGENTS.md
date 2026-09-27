@@ -94,6 +94,7 @@
 | `alias__` | `find` / `findtype` 의 `as` 바인딩 결과 | 실행 중 |
 | `label__` | `getlabel` 결과 | 실행 중 |
 | `timer__` | `createtimer` / `settimer` 대상 | 실행 중 |
+| `list__` | `createlist` / `pushlist` 대상. `foreach x in list__y` 의 루프 변수 `x` 는 접두 없이 | 실행 중 |
 | `global__` | **프로필에 저장되고 스크립트 사이에서 공유되는 값** | 영속 |
 
 - 실행 중만 쓰는 값은 전부 `@setvar!`. 영속은 `global__` 뿐이고 `setvar` 를 쓴다.
