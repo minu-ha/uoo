@@ -141,7 +141,7 @@ while not dead
                 settimer "timer__pets" cooldown__pets
 
                 if config__chatty = 1
-                    overhead "[ target, set ]" 90
+                    overhead "[ target, set ]" 705 var__target
                 endif
             endif
         endif
@@ -440,7 +440,7 @@ while not dead
                     settimer "timer__arm" 0
 
                     if config__chatty = 1
-                        overhead "[ explo, on ]" 90
+                        overhead "[ explo, on ]" 705 var__target
                     endif
 
                     break

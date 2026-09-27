@@ -213,22 +213,21 @@ clearignore
 # ability's own cost plus what the more valuable abilities above it need kept back:
 #
 #   blood oath        4       its cost, nothing held back, it is the priority
-#   corpse skin       6       2 + 4 for blood oath
-#   evil omen         8       2 + 4 + 2 for the two above
-#   poison strike     9       1 + the three above
-#   vampiric embrace  7       3 + 4, walk only, so it competes with nothing else
+#   corpse skin       5       2 + 3, enough that a Blood Oath is never more than a tick away
+#   evil omen         5       2 + 3, same footing as Corpse Skin
+#   poison strike     1       its cost. It only fires while Corpse Skin is up and after the
+#                             opener, a filler slot, so the bank has already been spent above
+#   vampiric embrace  9       3 + 6, walk only, so it competes with nothing else
 #
 # Symbols arrive one per five seconds and bank to Effective Necromancy / 10, ten here. A
 # thirty second cycle regenerates six, and Blood Oath plus Corpse Skin spend exactly six, so
-# at Necromancy 100 those two are the sustainable rotation. Evil Omen and Poison Strike only
-# ever fire from surplus a walk has banked or a fight in which Blood Oath had no followers to
-# buff. That is the intent, not a bug: lower their reserves and they starve the two above.
-# Raise everything if fights are short and walks long, lower if the bank sits full.
+# at Necromancy 100 those two are the sustainable rotation. Raise everything if fights are
+# short and walks long, lower if the bank sits full.
 @setvar! config__symbols_blood_oath 4
-@setvar! config__symbols_corpse_skin 6
-@setvar! config__symbols_evil_omen 8
-@setvar! config__symbols_poison_strike 9
-@setvar! config__symbols_vampiric_embrace 7
+@setvar! config__symbols_corpse_skin 5
+@setvar! config__symbols_evil_omen 5
+@setvar! config__symbols_poison_strike 1
+@setvar! config__symbols_vampiric_embrace 9
 
 # Energy Bolt only fills the gaps between procs, so it stands down before the mana that the
 # next opener and the next proc cycle need. 22 for Mana Drain plus Curse, 30 for the four
@@ -518,7 +517,7 @@ while not dead
                 settimer "timer__target_grace" 0
 
                 if config__chatty = 1
-                    overhead "[ target, set ]" 90
+                    overhead "[ target, set ]" 705 var__combat_target
                 endif
             endif
         endif
@@ -1238,7 +1237,7 @@ while not dead
 
                                     if find var__combat_target ground -1 -1 config__target_range as alias__disco_target
                                         if config__chatty = 1
-                                            overhead "[ target, set ]" 90
+                                            overhead "[ target, set ]" 705 var__combat_target
                                         endif
                                     endif
                                 endif
@@ -1307,7 +1306,7 @@ while not dead
 
                                     if find var__combat_target ground -1 -1 config__target_range as alias__peace_target
                                         if config__chatty = 1
-                                            overhead "[ target, set ]" 90
+                                            overhead "[ target, set ]" 705 var__combat_target
                                         endif
                                     endif
                                 endif
@@ -1476,7 +1475,7 @@ while not dead
 
                                     if find var__combat_target ground -1 -1 config__target_range as alias__opener_target
                                         if config__chatty = 1
-                                            overhead "[ target, set ]" 90
+                                            overhead "[ target, set ]" 705 var__combat_target
                                         endif
                                     endif
                                 endif
@@ -1531,7 +1530,7 @@ while not dead
 
                                     if find var__combat_target ground -1 -1 config__target_range as alias__opener_target
                                         if config__chatty = 1
-                                            overhead "[ target, set ]" 90
+                                            overhead "[ target, set ]" 705 var__combat_target
                                         endif
                                     endif
                                 endif
@@ -1627,7 +1626,7 @@ while not dead
 
                                     if find var__combat_target ground -1 -1 config__target_range as alias__proc_target
                                         if config__chatty = 1
-                                            overhead "[ target, set ]" 90
+                                            overhead "[ target, set ]" 705 var__combat_target
                                         endif
                                     endif
                                 endif
@@ -1675,7 +1674,7 @@ while not dead
 
                                     if find var__combat_target ground -1 -1 config__target_range as alias__proc_target
                                         if config__chatty = 1
-                                            overhead "[ target, set ]" 90
+                                            overhead "[ target, set ]" 705 var__combat_target
                                         endif
                                     endif
                                 endif
@@ -1723,7 +1722,7 @@ while not dead
 
                                     if find var__combat_target ground -1 -1 config__target_range as alias__proc_target
                                         if config__chatty = 1
-                                            overhead "[ target, set ]" 90
+                                            overhead "[ target, set ]" 705 var__combat_target
                                         endif
                                     endif
                                 endif
@@ -1771,7 +1770,7 @@ while not dead
 
                                     if find var__combat_target ground -1 -1 config__target_range as alias__proc_target
                                         if config__chatty = 1
-                                            overhead "[ target, set ]" 90
+                                            overhead "[ target, set ]" 705 var__combat_target
                                         endif
                                     endif
                                 endif
@@ -1815,7 +1814,7 @@ while not dead
 
                                     if find var__combat_target ground -1 -1 config__target_range as alias__strike_target
                                         if config__chatty = 1
-                                            overhead "[ target, set ]" 90
+                                            overhead "[ target, set ]" 705 var__combat_target
                                         endif
                                     endif
                                 endif
@@ -1885,7 +1884,7 @@ while not dead
 
                                 if find var__combat_target ground -1 -1 config__target_range as alias__filler_target
                                     if config__chatty = 1
-                                        overhead "[ target, set ]" 90
+                                        overhead "[ target, set ]" 705 var__combat_target
                                     endif
                                 endif
                             endif

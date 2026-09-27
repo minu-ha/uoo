@@ -154,6 +154,7 @@ endif
 | 118 | 능력 · 네크로 시전 알림 | `[ blood oath ]` |
 | 83 | 매저리 시전 알림 | `[ curse ]` |
 | 55 | 선택 프롬프트, 라벨 출력 | `[ inst, pick ]` |
+| 705 | 상대 머리 위 표시. `overhead "…" 705 <serial>` | `[ target, set ]` |
 
 ## Outlands 확장 문법
 
