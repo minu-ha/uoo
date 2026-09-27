@@ -125,11 +125,6 @@ endif
 `find` 는 클라이언트가 지금 인식하는 것만 찾으므로, 집에 있는 상자를 던전에서 검사하면 멀쩡한 값을 지운다.
 **대상 앞에 서 있는 것이 확실한 곳에만** 붙인다.
 
-**산술을 쓰지 않는다.** `@setvar! var__n var__n + 1` 같은 식은 저장소에 선례가 없고 Razor 가 받는지 확인되지 않았다.
-개수가 필요하면 `counttype` 으로 실제 상태를 다시 읽는다.
-**변수의 크기 비교도 안 된다.** `if var__a >= var__b` 는 조용히 거짓이다 (네크로 로테이션이 그래서 한 번도 안 나갔다). 변수는 `=` 만 쓰고,
-세어야 하면 리스트에 밀어 넣고 `list 'name' >= n` 으로 비교한다. `mana >= config__x` 처럼 **내장 식이 왼쪽**에 오는 비교는 된다.
-
 **타이머**
 - `if not timerexists "x_timer"` → `createtimer` → `settimer`. 이름은 `_timer` 접미.
 - 시간 제어는 타이머 기본. `cooldown` 명령은 기존 파일이 이미 그 스타일일 때만.
@@ -137,12 +132,26 @@ endif
 **그 외**
 - 시스템 메시지 띄우면 안 되는 명령은 `@` 접두.
 - 검색은 `if findtype "name" backpack as found_x` 로 alias에 담아 재사용. 반복 검색은 `ignore` / `clearignore`.
-- **스크립트 변수는 숫자와 serial 만 담는다.** 단어를 넣으면 (따옴표 유무와 무관하게) `4294967295` 가 된다. 단어는 리스트에 담는다: `pushlist` 항목은 글자를 유지하고 `foreach` 변수가 그대로 문자열 인자(`rename` 의 이름 등)로 넘어간다 (`bard-necro-enhanced` SUMMON NAMES). 그 밖의 문자열 변수는 `getlabel` 결과뿐이다.
-- **`as` alias 는 그것을 묶은 `if` / `while` 블록 안에서만 산다.** 밖에서 읽으면 `4294967295` (없는 serial) 가 된다. 블록 밖으로 가져가려면 안에서 `@setvar! var__x alias__x` 로 복사한다. 모빌도 `findtype` 으로 잡힌다 (바디 번호나 이름, 둘 다 `as` 가 묶인다). 바디 번호는 인게임 `>info` 로 읽는다.
 - 라벨 분기는 `getlabel` → `if "문자열" in label`.
 - 검프·핫바는 `gumpexists` / `ingump` 확인 후 `gumpresponse`.
 - 디버그 출력은 `{{var}}` 보간. 확인 끝나면 지운다.
-- **한 줄이 5~10ms, `findtype` 은 20~40ms 다** (2026-09-28 측정, `bard-necro-combat-design.md` "명령문 비용"). 엔진이 틱마다 한 줄씩 돌리므로 비용은 패스에서 밟는 줄 수다. 시약처럼 천천히 변하는 상태는 매 패스 찾지 말고 타이머로 몇 초에 한 번만 읽는다.
+
+**확인된 함정** — 전부 인게임에서 실제로 깨졌거나 프로브로 잰 것 (2026-09-28). 근거와 선례는 `library/bard-necro-handbook.md` 5.8절과 7절.
+
+| 함정 | 증상 | 대신 |
+|---|---|---|
+| 변수끼리, 변수와 숫자의 크기 비교 (`if var__a >= var__b`) | 조용히 거짓. 네크로가 한 번도 안 나갔다 | 변수는 `=` `!=` 만. 세려면 리스트에 넣고 `list 'x' >= n`. `mana >= config__x` 처럼 **내장 식이 왼쪽**이면 된다 |
+| 산술 (`@setvar! var__n var__n + 1`) | 선례 없음, 안 받는다고 본다 | `counttype` 으로 다시 읽거나 리스트 길이 |
+| `as` alias 를 묶은 `if` / `while` 블록 밖에서 읽기 | `4294967295`, `noto` 가 `Mobile … not found` | 블록 안에서 `@setvar! var__x alias__x` 로 복사해 나온다 |
+| 단어를 변수에 담기 | `4294967295` (따옴표 무관). `rename` 에 주면 `That name is unacceptable.` | `pushlist` 항목은 글자를 유지한다. `foreach x in list__y` 로 꺼내 문자열 인자에 준다. 그 밖의 문자열은 `getlabel` 결과뿐 |
+| `for <변수>` | `Invalid for loop syntax` | 값별 리터럴 `for N` 사슬 |
+| `not list 'x' >= var` | 파싱 에러 (`syntax error in line N`, 실행 자체가 안 됨) | `not` 뒤에 `list` 비교식을 두지 않는다. 갈래 안에서 `=` 로 비교 |
+| `sysmessage` | `Unknown command` | `sysmsg` |
+| `findtypelist` 를 명령으로 | `Unknown command` | 안 쓴다 (표현식일 것, 미확인) |
+| `findtype` 한 번으로 여러 모빌 중 하나 고르기 | 부를 때마다 **같은 모빌**이 온다 | `while findtype … as` → 검사 → 아니면 `@ignore` → `endwhile` → `@clearignore` |
+| 숫자(serial)를 펫 이름으로 | `That name is unacceptable.` | 글자 이름만 |
+| 매 패스 `findtype` 로 상태 세기 | 한 줄 5~10ms, 거짓 `if` 10~20ms, `findtype` 20~40ms. 32번이면 패스당 1초 | 천천히 변하는 상태는 타이머로 몇 초에 한 번. `if`/`elseif` 사슬은 통째로 한 틱이라 길어도 싸다 |
+| 모빌을 이름으로 찾기 | 되긴 하지만 이름을 바꾼 뒤 Razor 캐시가 갱신되는지 모른다 | 바디 번호. 인게임 `>info` 로 읽는다. 내 소환수의 noto 는 2 (friend) |
 
 **`overhead` 형식** — 전부 `[ 대상, 상태 ]` 소문자. 시전 알림만 `[ 대상 ]`. 단어와 hue 는 `library/overheads.md` 의
 글로서리와 팔레트를 따르고, 쿨다운 바 이름(`cooldown "heal pot"`)도 같은 단어를 쓴다. 새 단어를 만들기 전에 그 문서를 본다.
