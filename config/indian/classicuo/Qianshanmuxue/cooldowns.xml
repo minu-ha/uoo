@@ -301,6 +301,9 @@
 	<cooldownentry name="bomb, target" defaultcooldown="5" cooldownbartype="Regular" hue="118" hidewheninactive="True">
 		<trigger triggertype="SysMessage" duration="" triggertext="Your explosion potion sticks" />
 	</cooldownentry>
+	<cooldownentry name="bomb, me" defaultcooldown="5" cooldownbartype="Regular" hue="33" hidewheninactive="True">
+		<trigger triggertype="SysMessage" duration="" triggertext="An explosion potion has stuck to you" />
+	</cooldownentry>
 	<cooldownentry name="contested" defaultcooldown="1200" cooldownbartype="Regular" hue="488" hidewheninactive="True">
 		<trigger triggertype="SysMessage" duration="" triggertext="contested" />
 	</cooldownentry>

@@ -203,6 +203,7 @@ hue 번호는 이 뜻으로 이미 쓰이고 있던 값을 골랐다. 실제 색
 | `Omni Potion` | `omni pot` |
 | `Ability` | `ability` |
 | (신설) | `corpse skin` — backstab-mugging 이 `cooldown "corpse skin"` 으로 직접 세운다 |
+| (신설) | `bomb, me` 5s — "An explosion potion has stuck to you" |
 
 ## 오버헤드 표 (Razor 프로필 두 개, 같은 내용)
 
@@ -392,6 +393,10 @@ hue 번호는 이 뜻으로 이미 쓰이고 있던 값을 골랐다. 실제 색
 | 0 moving throws | `No throws, plant now.` | `[ throws, 0 ] (33)` |
 | wing your target | `You wing your target.` | `[ wing, target ] (63)` |
 | Magic reflect removed. | (신규) | `[ reflect, off ] (43)` |
+| has applied telekinesis to you | (신규) | `[ teleki, {1} ] (33)` — "Qianshanmuxue has applied telekinesis to you.", `{1}` 이 건 사람 |
+| An explosion potion has stuck to you | (신규) | `[ bomb, me ] (33)` — 퓨즈 5초, 바 `bomb, me` 와 짝 |
+| Your explosion potion sticks to your target | (신규) | `[ bomb, target ] (63)` |
+| You now have | (신규) | `[ pouch, {4} ] (53)` — "You now have 4 trapped pouches remaining." |
 
 ## 스크립트 오버헤드
 
@@ -632,17 +637,16 @@ hue 번호는 이 뜻으로 이미 쓰이고 있던 값을 골랐다. 실제 색
 
 | 상황 | 필요한 것 | 붙일 곳 |
 |---|---|---|
-| 폭탄이 나에게 붙음 | 대상이 보는 문장, 퓨즈 초 | 바 `bomb, me` + `[ bomb, me ]` |
-| TK 건 사람 이름 | 문장 형식 (이름이 몇 번째 단어인지 → `{n}`) | `[ teleki, me ]` 에 이름 |
 | Disarm On Me | 문장은 있음 "Their attack disarms you!" — **재장착까지 몇 초**인지 | 바 `disarm, me` |
 | Mana Drain / Vampire 맞음 | 문장 | `[ drain, me ]` (레지 -10 / -20, 2분) |
 | Curse / Weaken / Clumsy 맞음 | 문장 | `[ curse, me ]` 등 |
 | Cure · Refresh 포션 마심 | 문장 (힐은 "You drink a healing potion" 으로 잡음) | 바 `cure pot` `refresh` |
-| 트랩 파우치 남은 수 | "N Trapped pouches remain" 의 N 자리 → `{n}` | `[ pouch, {n} ]` |
 | `sp keg` | 무엇의 줄임인지 모름 (오버헤드 "spkeg" 트리거) | 이름 |
 
 ## 아직 확인 안 된 것
 
+- `[ pouch, {4} ]` 는 "You now have N trapped pouches remaining." 만 노린 것. "You now have" 로 시작하는 다른 문장이 있으면 엉뚱한 단어가 뜬다
+- `[ teleki, {1} ]` 는 이름이 한 단어일 때 온전하다. 두 단어 이름은 앞 단어만 뜬다
 - `para` 10s 바가 파우치로 깼을 때 "You can move!" 로 같이 꺼지는지
 - `hams, me` 두 문장 중 실제로 오는 쪽 ("You have been hamstrung" / "Their attack hamstrings you!")
 - `heal pot` 트리거 "You drink a healing potion" 이 실제 문장인지. 스크립트의 `cooldown "heal pot"` 과 겹쳐도 같은 시각에 다시 시작할 뿐이다
