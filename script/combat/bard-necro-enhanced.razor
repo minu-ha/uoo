@@ -373,6 +373,10 @@ if not listexists 'list__necro_symbols'
     createlist 'list__necro_symbols'
 endif
 
+# What the symbol list was last built from. 99 matches no reading, so the first pass
+# always rebuilds the list, whatever a previous run left in it.
+@setvar! var__symbols_listed 99
+
 if not listexists 'list__magic_cursed_targets'
     createlist 'list__magic_cursed_targets'
 endif
@@ -733,104 +737,56 @@ while not dead
         endif
     endif
 
-    # Unholy Symbols, read off the necro hotbar gump, which prints them as "<have>/<max>",
-    # into a list with one entry per symbol. Not a number: a script variable only supports
-    # "=" in a condition, "var >= config" never fires, which is why the retired scripts kept
-    # the count as a list and compared list 'list__necro_symbols' >= n. Same trick here.
+    # Unholy Symbols, read off the necro hotbar gump, which prints them as "<have>/<max>".
+    # ingump matches a substring, so the chain runs from the top down: "10/" is checked
+    # before the single digits, and none of "1/" to "9/" occurs inside "10/10", so each
+    # line only ever sees the count it names. Ten is the ceiling: the bank is Effective
+    # Necromancy / 10 and this character sits at 100. Should
+    # the hotbar ever show more than ten, add the higher readings above the 10/ line, or a
+    # two digit reading falls into "1/". A closed gump reads as zero, which parks every
+    # ability until the hotbar block reopens it. One statement per pass: an elseif chain
+    # is evaluated in a single tick.
     #
-    # The chain runs from the top down because ingump matches a substring: "1/" is inside
-    # "11/20", "9/" is inside "19/20" and "0/" is inside "10/20". Checking the two digit
-    # readings first means each single digit line only ever sees the count it names. Twenty
-    # is the ceiling because the bank is Effective Necromancy / 10 and no build here goes
-    # past 200. A closed gump reads as zero, which parks every ability until the hotbar
-    # block reopens it.
-    clearlist 'list__necro_symbols'
-
-    # Set by the necro block when an ability lands. The list is filled once, up here, so a
-    # block further down that also spends symbols would otherwise be looking at a bank that
-    # is already four short. Poison Strike checks this and sits out any pass that spent.
+    # Set by the necro block when an ability lands. Poison Strike checks this and sits out
+    # any pass that spent, since the list below is only rebuilt on the next pass.
     @setvar! var__symbols_spent 0
 
-    if ingump "20/" 622436516
-        for 20
-            pushlist 'list__necro_symbols' '1' 'back'
-        endfor
-    elseif ingump "19/" 622436516
-        for 19
-            pushlist 'list__necro_symbols' '1' 'back'
-        endfor
-    elseif ingump "18/" 622436516
-        for 18
-            pushlist 'list__necro_symbols' '1' 'back'
-        endfor
-    elseif ingump "17/" 622436516
-        for 17
-            pushlist 'list__necro_symbols' '1' 'back'
-        endfor
-    elseif ingump "16/" 622436516
-        for 16
-            pushlist 'list__necro_symbols' '1' 'back'
-        endfor
-    elseif ingump "15/" 622436516
-        for 15
-            pushlist 'list__necro_symbols' '1' 'back'
-        endfor
-    elseif ingump "14/" 622436516
-        for 14
-            pushlist 'list__necro_symbols' '1' 'back'
-        endfor
-    elseif ingump "13/" 622436516
-        for 13
-            pushlist 'list__necro_symbols' '1' 'back'
-        endfor
-    elseif ingump "12/" 622436516
-        for 12
-            pushlist 'list__necro_symbols' '1' 'back'
-        endfor
-    elseif ingump "11/" 622436516
-        for 11
-            pushlist 'list__necro_symbols' '1' 'back'
-        endfor
-    elseif ingump "10/" 622436516
-        for 10
-            pushlist 'list__necro_symbols' '1' 'back'
-        endfor
+    if ingump "10/" 622436516
+        @setvar! var__symbols 10
     elseif ingump "9/" 622436516
-        for 9
-            pushlist 'list__necro_symbols' '1' 'back'
-        endfor
+        @setvar! var__symbols 9
     elseif ingump "8/" 622436516
-        for 8
-            pushlist 'list__necro_symbols' '1' 'back'
-        endfor
+        @setvar! var__symbols 8
     elseif ingump "7/" 622436516
-        for 7
-            pushlist 'list__necro_symbols' '1' 'back'
-        endfor
+        @setvar! var__symbols 7
     elseif ingump "6/" 622436516
-        for 6
-            pushlist 'list__necro_symbols' '1' 'back'
-        endfor
+        @setvar! var__symbols 6
     elseif ingump "5/" 622436516
-        for 5
-            pushlist 'list__necro_symbols' '1' 'back'
-        endfor
+        @setvar! var__symbols 5
     elseif ingump "4/" 622436516
-        for 4
-            pushlist 'list__necro_symbols' '1' 'back'
-        endfor
+        @setvar! var__symbols 4
     elseif ingump "3/" 622436516
-        for 3
-            pushlist 'list__necro_symbols' '1' 'back'
-        endfor
+        @setvar! var__symbols 3
     elseif ingump "2/" 622436516
-        for 2
-            pushlist 'list__necro_symbols' '1' 'back'
-        endfor
+        @setvar! var__symbols 2
     elseif ingump "1/" 622436516
-        for 1
+        @setvar! var__symbols 1
+    else
+        @setvar! var__symbols 0
+    endif
+
+    # The gates compare against a list, list 'x' >= n being the one size comparison a
+    # script variable takes part in. Rebuilt only when the reading changed: at ten symbols
+    # the old rebuild on every pass was some twenty statements, and this is two. The list
+    # is filled with a while on its own length, because a for count cannot be a variable.
+    if var__symbols != var__symbols_listed
+        clearlist 'list__necro_symbols'
+
+        while not list 'list__necro_symbols' >= var__symbols
             pushlist 'list__necro_symbols' '1' 'back'
-        endfor
+        endwhile
+
+        @setvar! var__symbols_listed var__symbols
     endif
 
     # The Grimoire riders on Curse and Mana Drain run 60 seconds while the debuff icon runs

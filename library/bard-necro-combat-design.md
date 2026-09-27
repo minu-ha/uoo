@@ -703,8 +703,10 @@ Razor CE 원본은 스크립트 엔진이 **타이머 틱마다 명령문 하나
 - 소환수 이름 블록의 3초당 `findtype` 3번은 60 ~ 120ms 로, 시약 읽기에 비하면 작다.
 - 남은 매 패스 검색: `find lasttarget`, `find var__combat_target`, `find var__my_instrument`, 포션·버섯 `findtype`.
   각각 한 번이고 상태가 빨리 변하는 것들이라 둔다.
-- 심볼 수 읽기 (`for N` 안의 `pushlist`, 심볼 10개면 약 20줄) 는 값이 바뀔 때만 리스트를 다시 만드는 쪽으로 옮길 수 있다.
-  `for` 의 횟수를 변수로 줄 수 있는지 (`probe-for`) 에 달렸다.
+- 심볼 수 읽기: 사슬은 `ingump` 로 수를 `var__symbols` 에 읽고 (한 줄), 리스트는 **읽은 값이 `var__symbols_listed` 와
+  다를 때만** 다시 만든다. 채우기는 `while not list 'list__necro_symbols' >= var__symbols` + `pushlist`. `for` 횟수는
+  변수가 안 되기 때문이다 (`Invalid for loop syntax`, 2026-09-28 프로브). 사슬도 20갈래에서 10갈래로 줄였다.
+  Necromancy 100 이면 최대 10이고, 핫바가 그 이상을 보이면 위에 줄을 더한다.
 
 원칙: **자주 안 변하는 상태는 타이머로 게이트하고, 흔한 경로가 밟는 줄을 줄인다.**
 
@@ -744,6 +746,8 @@ Razor CE 원본은 스크립트 엔진이 **타이머 틱마다 명령문 하나
   숫자 `5000` 은 `5000`, `0x622396` 은 10진수 `6431638`). 변수는 숫자와 serial 전용이다. 그래서 `rename <serial> <변수>` 는
   서버에 쓰레기 이름이 가서 `That name is unacceptable.` 이 된다. 단어는 리스트에 담아 `foreach` 로 꺼낸다. serial 쪽은 변수여도 된다.
 - **숫자를 펫 이름으로.** serial 을 그대로 이름으로 주면 `That name is unacceptable.` (2026-09-28 프로브). 이름에 숫자는 안 된다.
+- **`for <변수>`.** `Invalid for loop syntax` (2026-09-28 프로브). 횟수는 리터럴만. 변수 횟수가 필요하면
+  `while not list 'x' >= var` 처럼 리스트 길이로 돈다.
 - 산술 `@setvar! var__n var__n + 1`
 - `while <스크립트 변수> <`
 - `menu <serial> <변수>` -- 인덱스는 반드시 리터럴
@@ -794,6 +798,9 @@ Razor CE 원본은 스크립트 엔진이 **타이머 틱마다 명령문 하나
 - **SELF BUFFS.** 몹이 없고 서 있을 때 (`var__engaged = 0`, `cooldown "walk" = 0`) Reactive Armor 와 Magic Reflection 을 건다.
   통과: 사냥 사이에 버프바에 둘이 붙고, 붙어 있는 동안은 다시 걸지 않는다. 실패: 매 패스 다시 건다 → `findbuff` 이름이 다른 것.
   리플렉트가 소모되면 `[ reflect, off ]` 와 `reflect` 바 30초, 바가 꺼진 뒤 다음 정지 구간에 다시 건다.
+- **심볼 리스트 재구성.** 네크로 능력이 예전과 같은 임계값(4/4/4/1/9)에서 나가야 한다. 한 번도 안 나가면
+  `while not list … >= var__symbols` 가 이 포크에서 안 도는 것: 그때는 10갈래 `for N` 사슬로 되돌린다.
+  시약을 새로 채운 뒤에는 최대 30초 안에 주문이 다시 나간다.
 - **SUMMON NAMES.** VS 를 켜고 소환하면 3초 안에 소환수 머리 위에 `[ name, nomeehei ]` (hue 9), 네임태그가 `nomeehei` 로 바뀐다.
   둘째는 `nomeehel`, 셋째는 `nomeeheh`. 통과: 네임태그가 바뀌고, 야생 언데드 옆에서도 야생 쪽은 그대로다.
   실패 표는 위 "소환수 이름" 절. 서버가 이름을 거부하면 그 문구를 받아 적는다 -- `overheads.md` 의 구멍 목록에 넣는다.
