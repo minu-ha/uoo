@@ -7,7 +7,8 @@
 # Full loop: sustain, bard control, necro burst, spell opener and damage rotation.
 #
 # Needs
-#   A shepherd's crook in the backpack, for the passive follower bonus Herding gives.
+#   A shepherd's crook in the backpack only while config__use_herding is 1. It is 0: the
+#   Herding slot went to Resisting Spells on 2026-09-27, so the crook does nothing.
 #   Discordance, Peacemaking and Provocation all trained: the song round robin only moves
 #   forward through a branch whose skill exists, so a missing one parks it.
 #   An instrument in the backpack, a necromancer book, reagents for the spell table below.
@@ -27,9 +28,9 @@
 #   Anything Razor exposes as a hotkey is driven through the hotkey, so one convention covers
 #   potions, abilities and agents alike. findtype still answers "is there one to drink", it
 #   just no longer does the drinking.
-#   cooldowns.xml carrying Music / Song / Discord / Peace-Provo and the four proc entries
-#   MagicArrow / Harm / Fireball / Lightning. Fireball's entry still lacks its "activated"
-#   trigger, so until that line is added its bar never fills and it casts every pass.
+#   cooldowns.xml carries every bar this loop reads: music / song / disco / peace/provo,
+#   the four proc entries magic arrow / harm / fireball / lightning, mush, heal pot, reflect
+#   and walk. The names are lowercase and the glossary is library/overheads.md.
 #
 # Naming convention
 #   config__*  : tunable settings, kept at the top of the file
