@@ -328,8 +328,19 @@ pushlist 'list__summon_names' 'nomeeheh'
 # Nothing was spent, so it is a short pause while the player walks on, not the window above.
 @setvar! cooldown__embrace_miss 5000
 
-# How long a lost necro hotbar waits before the next yell.
-@setvar! cooldown__hotbar_retry 3000
+# How often the necro hotbar is checked for, and so how long a lost one waits before it is
+# opened again. It only closes on a death, a relog or a stray click, and while it is closed
+# every ability parks, so up to thirty seconds of that is the price of not looking every pass.
+@setvar! cooldown__hotbar_check 30000
+
+# Slow state looked at on a clock rather than every pass (library/razor.md part 6): a plain
+# statement costs 5 to 10 ms here and a lookup 20 to 40, so each clock saves the pass one.
+#   weight          5 s, it only changes on a pickup, and being over it is not fatal
+#   food           60 s, the buff lasts far longer than that
+#   instrument     30 s, it only leaves the backpack on a break or a steal
+@setvar! cooldown__weight_check 5000
+@setvar! cooldown__food_check 60000
+@setvar! cooldown__instrument_check 30000
 
 # How often the reagent flags are re-read. On this Razor a plain statement costs 5 to 10
 # ms and a findtype 20 to 40 (probe, 2026-09-28), so the old read of up to 32 findtype
@@ -465,12 +476,28 @@ if not timerexists "timer__target_grace"
     settimer "timer__target_grace" cooldown__target_grace
 endif
 
-# Starts already expired so the recovery block in the loop opens the hotbar on the first
-# pass. That is why there is no separate hotbar setup section above the loop.
-if not timerexists "timer__hotbar_retry"
-    createtimer "timer__hotbar_retry"
-    settimer "timer__hotbar_retry" cooldown__hotbar_retry
+if not timerexists "timer__hotbar_check"
+    createtimer "timer__hotbar_check"
 endif
+
+if not timerexists "timer__weight_check"
+    createtimer "timer__weight_check"
+endif
+
+if not timerexists "timer__food_check"
+    createtimer "timer__food_check"
+endif
+
+if not timerexists "timer__instrument_check"
+    createtimer "timer__instrument_check"
+endif
+
+# Expired at every start, like the reagent refresh below, so the first pass looks at all of
+# them. The hotbar one is also why there is no separate hotbar setup section above the loop.
+settimer "timer__hotbar_check" cooldown__hotbar_check
+settimer "timer__weight_check" cooldown__weight_check
+settimer "timer__food_check" cooldown__food_check
+settimer "timer__instrument_check" cooldown__instrument_check
 
 if not timerexists "timer__regs_refresh"
     createtimer "timer__regs_refresh"
@@ -588,6 +615,7 @@ while not dead
         if not targetexists and not casting
             if findtype 3740|3742|3762|3763|10245|20006|20008|20010|20012|20014|20016 backpack as alias__spare_instrument
                 @setvar! var__my_instrument alias__spare_instrument
+                @setvar! var__instrument_ok 1
 
                 if config__chatty = 1
                     overhead "[ inst, set ]" 90
@@ -937,9 +965,22 @@ while not dead
     # mode the player toggles, and no block here consumes the instrument. not targetexists
     # and not casting are deliberately left out: our own blocks create both, so a snapshot
     # would be a lie by the time the third bard block read it.
+    #
+    # Whether the instrument is still in the backpack is looked at every thirty seconds, not
+    # every pass. A bard block that finds it gone clears var__my_instrument on the spot, and
+    # that stands this flag down at once, clock or no clock.
+    if timer "timer__instrument_check" >= cooldown__instrument_check
+        settimer "timer__instrument_check" 0
+        @setvar! var__instrument_ok 0
+
+        if find var__my_instrument backpack
+            @setvar! var__instrument_ok 1
+        endif
+    endif
+
     @setvar! var__bard_ready 0
 
-    if not warmode and find var__my_instrument backpack
+    if not warmode and var__instrument_ok = 1 and var__my_instrument != 0
         @setvar! var__bard_ready 1
     endif
 
@@ -1102,41 +1143,52 @@ while not dead
     # ####################################################################################
     # # OVERWEIGHT
     # ####################################################################################
-    if not targetexists and not casting
-        while weight > maxweight
-            if findtype "gold coin" backpack as alias__found_gold
-                lift alias__found_gold config__gold_drop_amount
-                droprelloc 0 0
-                wait wait__short
+    # Weight only changes on a pickup, so it is looked at every five seconds, not every pass.
+    if timer "timer__weight_check" >= cooldown__weight_check
+        settimer "timer__weight_check" 0
 
-                if insysmsg "cannot drop anything"
-                    drop backpack -1 -1 -1
+        if not targetexists and not casting
+            while weight > maxweight
+                if findtype "gold coin" backpack as alias__found_gold
+                    lift alias__found_gold config__gold_drop_amount
+                    droprelloc 0 0
+                    wait wait__short
+
+                    if insysmsg "cannot drop anything"
+                        drop backpack -1 -1 -1
+                    endif
+
+                    wait wait__long
+
+                    if config__chatty = 1
+                        overhead "[ gold, dropped ]" 90
+                    endif
+                else
+                    if timer "timer__message" >= cooldown__message
+                        overhead "[ weight, over ]" 53
+                        settimer "timer__message" 0
+                    endif
+
+                    break
                 endif
-
-                wait wait__long
-
-                if config__chatty = 1
-                    overhead "[ gold, dropped ]" 90
-                endif
-            else
-                if timer "timer__message" >= cooldown__message
-                    overhead "[ weight, over ]" 53
-                    settimer "timer__message" 0
-                endif
-
-                break
-            endif
-        endwhile
+            endwhile
+        endif
     endif
 
     # ####################################################################################
     # # FOOD
     # ####################################################################################
-    if not findbuff 'Food Satisfaction'
-        if not targetexists and not casting
-            if findtype tray backpack as alias__found_food
-                dclick alias__found_food
-                wait wait__short
+    # Looked at once a minute, the buff lasts far longer. The clock leads, ahead of the
+    # findbuff, because skipping that lookup is the point.
+    if timer "timer__food_check" >= cooldown__food_check
+        settimer "timer__food_check" 0
+
+        if not findbuff 'Food Satisfaction'
+            if not targetexists and not casting
+                if findtype tray backpack as alias__found_food
+                    dclick alias__found_food
+                    wait wait__short
+                endif
             endif
         endif
     endif
@@ -1197,11 +1249,13 @@ while not dead
     # ####################################################################################
     # The hotbar gump is the source of truth for the Unholy Symbol count the necro stage
     # reads. One block covers both the first open and any later loss, because the timer
-    # starts expired.
-    if skill "Necromancy" > 0 and not gumpexists 622436516
-        if timer "timer__hotbar_retry" >= cooldown__hotbar_retry
+    # starts expired. It is looked for every thirty seconds, the clock leading because
+    # skipping the gump lookup is the point. The clock only restarts once it has looked,
+    # so a missing hotbar behind an open cursor is tried again on the next pass.
+    if timer "timer__hotbar_check" >= cooldown__hotbar_check
+        if skill "Necromancy" > 0 and not gumpexists 622436516
             if not targetexists and not casting
-                settimer "timer__hotbar_retry" 0
+                settimer "timer__hotbar_check" 0
 
                 if findtype 'necromancer book' backpack
                     yell '[necromancyhotbar'
@@ -1211,6 +1265,8 @@ while not dead
                     settimer "timer__message" 0
                 endif
             endif
+        else
+            settimer "timer__hotbar_check" 0
         endif
     endif
 
