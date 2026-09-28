@@ -115,6 +115,10 @@
 #   tick, each with its own longer clock inside where it has one, so a pass pays one
 #   statement for all of them. Paralysis, poison and damage share one SURVIVAL test.
 #
+#   A label read only to learn that a state still holds is not read again on every pass:
+#   DISCO skips a discorded target for thirty seconds, PEACE waits two seconds on a
+#   pacified or broken one.
+#
 #   Blocks off the hot path, the setup, the reagent refresh and the like, keep one category
 #   per line, where the nesting depth shows at a glance how many kinds of condition there are.
 #
@@ -369,6 +373,11 @@ pushlist 'list__summon_names' 'nomeeheh'
 # about two minutes, so thirty seconds costs at most that long without it after it lapses.
 @setvar! cooldown__disco_seen 30000
 
+# How long PEACE waits before reading the label again once it has shown pacified or a
+# barding break. Two seconds is the gap between the 10 second slot and the 12 second
+# pacify, so a pacify seen as the slot opens is read again about when it ends.
+@setvar! cooldown__peace_seen 2000
+
 # How often the reagent flags are re-read. On this Razor a plain statement costs 5 to 10
 # ms and a findtype 20 to 40 (probe, 2026-09-28), so the old read of up to 32 findtype
 # on every pass was most of a second per pass. A flag that is stale for half a minute
@@ -514,6 +523,10 @@ if not timerexists "timer__disco_seen"
     createtimer "timer__disco_seen"
 endif
 
+if not timerexists "timer__peace_seen"
+    createtimer "timer__peace_seen"
+endif
+
 if not timerexists "timer__food_check"
     createtimer "timer__food_check"
 endif
@@ -533,6 +546,7 @@ settimer "timer__housekeeping" cooldown__housekeeping
 settimer "timer__food_check" cooldown__food_check
 settimer "timer__potion_check" cooldown__potion_check
 settimer "timer__instrument_check" cooldown__instrument_check
+settimer "timer__peace_seen" cooldown__peace_seen
 
 if not timerexists "timer__regs_refresh"
     createtimer "timer__regs_refresh"
@@ -1523,12 +1537,17 @@ while not dead
         # A pacified creature does not attack, and taking damage does NOT break that. Only a
         # barding break does, and while one is running neither Peace nor Provocation can land on
         # that creature, which is why a broken target is left alone until it clears.
-        if cooldown "peace/provo" = 0 and cooldown "music" = 0 and skill "Peacemaking" > 0 and not warmode and var__instrument_ok = 1 and var__my_instrument != 0 and not targetexists and not casting
+        #
+        # Either label is then waited out on timer__peace_seen instead of a find and a getlabel
+        # on every pass. A barding break runs 40 seconds, so it is read every two seconds
+        # rather than on every pass, and Peace lands at most two seconds after it clears.
+        if timer "timer__peace_seen" >= cooldown__peace_seen and cooldown "peace/provo" = 0 and cooldown "music" = 0 and skill "Peacemaking" > 0 and not warmode and var__instrument_ok = 1 and var__my_instrument != 0 and not targetexists and not casting
             if find var__combat_target ground -1 -1 config__target_range as alias__peace_target
                 getlabel alias__peace_target label__peace_target
 
                 if "pacified" in label__peace_target or "barding break" in label__peace_target
                     settimer "timer__target_grace" 0
+                    settimer "timer__peace_seen" 0
                 else
                     useskill 'Peacemaking'
                     waitfortarget wait__target

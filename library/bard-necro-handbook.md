@@ -1112,7 +1112,7 @@ flowchart TD
 | 2  | 타겟 캐시     | `lasttarget` + `noto`, 화면 거리                  | 18칸 (`config__acquire_range`) 안에서 받아 두고 10칸 안에서 교전. 노래·자기 대상 주문은 덮어쓰기 전에 lasttarget 을 다시 본다                                                      |
 | 3  | 자기 버프     | `not findbuff` + `cooldown "reflect"`             | **몹이 없을 때만.** 둘 다 시간이 아니라 소모로 끝난다. RA 는 25 흡수, Reflect 는 한 번 반사 뒤 30초 쿨 (반사 시점부터)                                                             |
 | 4  | Barding Song  | `Music=0 and Song=0 and <슬롯>=0`                 | **몹이 없을 때만.** 라운드로빈                                                                                                                                                     |
-| 5  | 바드 스킬     | `Music=0 and <슬롯>=0`                            | 디스코 1회 (걸린 대상은 30초 동안 다시 안 본다) + **피스 12초마다**                                                                                                                |
+| 5  | 바드 스킬     | `Music=0 and <슬롯>=0`                            | 디스코 1회 (걸린 대상은 30초 동안 다시 안 본다) + **피스 12초마다** (진정·브레이크는 2초에 한 번 확인)                                                                             |
 | 6  | 네크로        | `list 'list__necro_symbols' >= config__symbols_*` | Blood Oath → Corpse Skin → Evil Omen 순. Corpse Skin · Evil Omen 은 서 있고 warmode 가 아닐 때만. 심볼 몫은 3.4절                                                                  |
 | 7  | 오프닝        | 마나 + 대상별 리스트                              | Mana Drain -> Curse                                                                                                                                                                |
 | 8  | 프록 코어     | `cooldown "magic arrow"` 등                       | 네 개가 각자 쿨. 시전마다 대상을 `var__proc_target` 에 적는다                                                                                                                      |
@@ -1450,6 +1450,7 @@ endif
 | 음식 버프                               | 60초             | 버프가 훨씬 오래 간다                                                                     |
 | 스탯 포션 버프                          | 10초 (교전 중만) | 버프가 몇 분 간다                                                                         |
 | Disco 확인 (`var__disco_seen`)          | 30초             | Discordance 는 약 2분 간다. 한 번 확인한 대상은 30초 동안 `find` · `getlabel` 을 건너뛴다 |
+| Peace 확인 (`timer__peace_seen`)        | 2초 (게이트에서) | 진정 12초와 슬롯 10초의 차이. 브레이크 40초 동안은 매 패스 대신 2초에 한 번 읽는다        |
 
 - **생존 게이트** (2026-09-29). 마비·독·HP 세 블록을 `if paralyzed or poisoned or diffhits > config__light_hits` 한 줄 뒤에 둔다. 멀쩡한 패스는 세 줄 대신 한 줄.
 - **게이트 접기** (2026-09-29). 늘 참인 바깥 `if` (수동 모드, 행동 창, 스킬·악기 준비)를 안쪽 조건 한 줄에 합쳤다. 할 일이 없는 블록은 패스마다 한 줄만 밟는다.
@@ -1464,6 +1465,7 @@ endif
 | 걷는 중, 대상 없음              | 약 41줄, `find` 1 → 0.35 ~ 0.65초 | 약 19줄, `find` 1 → 0.2 ~ 0.35초 |
 
   5초마다 하우스키핑 틱이 0.4 ~ 0.8초 (소환수가 있을 때, 대부분 이름 검사)를, 30초마다 시약 리프레시가 0.5 ~ 1초를 더한다. 시전이 있는 패스는 여기에 시전 시간이 붙는다.
+  Peace 슬롯이 열렸는데 대상이 진정이나 브레이크 중이면, 전에는 `find` 와 `getlabel` 이 든 7줄이 매 패스 더 붙었다. 지금은 2초에 한 번이다.
 
 - 남은 매 패스 검색: 타겟 캐시의 `find lasttarget` 과 `find var__combat_target` (대상이 있을 때만) 둘뿐이다. 상태가 빨리 변하는 것들이라 둔다.
   버섯 `findtype` · `counttype` 은 이동 쪽에서 서 있을 때만 조건 끝에서 읽힌다. 대상이 없는 동안이라 급하지 않다.
