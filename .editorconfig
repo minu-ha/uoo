@@ -1,13 +1,53 @@
+# Each section describes what the files already look like, so saving one in any editor
+# changes only the lines you touched. Line endings match .gitattributes.
 root = true
 
 [*]
+charset = utf-8
 end_of_line = lf
+indent_style = space
+indent_size = 2
 insert_final_newline = true
 trim_trailing_whitespace = true
 
+# Razor writes scripts back with CRLF. The reference files (combat/bard-throwing,
+# restock/loadout) indent with 4 spaces. A few older or third-party scripts use tabs:
+# keep their style when editing them.
 [*.razor]
+end_of_line = crlf
+indent_size = 4
+# Razor's editor saves without a final newline, an external editor would add one back.
+# Leave whatever the file has.
+insert_final_newline = unset
+
+# Third-party (Jaseowns) scripts carry trailing spaces. Trimming them on save would bury
+# the one-line change in noise.
+[script/gather/*.razor]
+trim_trailing_whitespace = false
+
+[*.md]
+max_line_length = 200
+
+[*.sh]
 indent_style = tab
 
-[*.{md,xml,json,yml}]
-indent_style = space
-indent_size = 2
+# Graphic id list. Lines are long by design and scripts cite it by line number.
+[library/item-list.txt]
+indent_size = 4
+max_line_length = off
+
+# Written by Razor and ClassicUO on exit. Match their output exactly: CRLF, no final
+# newline, never trim. Edit these only while the game is closed.
+[config/*/**]
+end_of_line = crlf
+insert_final_newline = false
+trim_trailing_whitespace = false
+max_line_length = off
+
+[config/*/**.xml]
+charset = utf-8-bom
+indent_style = tab
+
+[config/*/razor/profiles/chars.lst]
+end_of_line = lf
+insert_final_newline = true
