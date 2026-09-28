@@ -1259,8 +1259,10 @@ while not dead
     # reads it: read outside, the alias came back as mobile 4294967295. The client asks the
     # server for every new mobile's status, and that reply is what gives Razor the "this is
     # your pet" flag rename checks, so a summon is known the moment it appears. The noto
-    # test is the old bard-necro follower filter: an own summon reads notoriety 2, friend,
-    # in >info, a wild lich never passes, and rename would refuse it anyway. A renamed summon
+    # test started as the old bard-necro follower filter: an own summon reads notoriety 2,
+    # friend, in >info, and a wild lich never passes. It also turns away innocent, which is
+    # how another player's summon reads unless that player is guild or allied: another
+    # player's earth elemental took the third name on 2026-09-29. A renamed summon
     # still matches its body, so the three slot variables carry the serials, a match already
     # sitting in a slot is skipped, and a slot frees itself when find no longer sees its
     # summon alive. The name comes out of the list__summon_names list by slot index: foreach
@@ -1301,20 +1303,22 @@ while not dead
         @setvar! var__fresh_summon 0
 
         # Bodies. Lich 24 and ancient mummy 158 read off >info, vampire thrall 722 and rag
-        # witch 740 from the old bard-necro follower cache, then the plain elementals a summon
-        # cast without Vengeful Spirit gives, daemon 9, air 13, earth 14, fire 15, water 16,
-        # and the Summon Creature undead pool as far as the stock client art goes, zombie 3,
-        # ghost 26, skeleton 50, 56, 57, skeletal knight 147, skeletal mage 148, ghoul 153,
-        # rotting corpse 155. Skeletal Fiend, skeletal marksman and rotting flesh are Outlands
-        # bodies: read theirs with >info when one is out and add the number here.
+        # witch 740 from the old bard-necro follower cache, and the Summon Creature undead pool
+        # as far as the stock client art goes, zombie 3, ghost 26, skeleton 50, 56, 57,
+        # skeletal knight 147, skeletal mage 148, ghoul 153, rotting corpse 155. Skeletal
+        # Fiend, skeletal marksman and rotting flesh are Outlands bodies: read theirs with
+        # >info when one is out and add the number here. The plain elementals and daemon a
+        # summon gives without Vengeful Spirit, 9 and 13 to 16, are left out: this character
+        # always summons through it, and other mages' elementals on screen were being taken
+        # for its own, a guildmate's among them, which the noto test cannot tell apart.
         # Walk every match, not just the first: this Razor hands back the same mobile on
         # every call, so a single findtype would return the summon already named and never
         # reach the second one. Each rejected match is ignored for the rest of the walk, the
         # first fresh own summon is copied out, and the ignore list is emptied again so the
         # slot checks above and the rest of the loop see everything.
-        while findtype 24|158|722|740|9|13|14|15|16|3|26|50|56|57|147|148|153|155 ground -1 -1 config__summon_range as alias__fresh_summon
+        while findtype 24|158|722|740|3|26|50|56|57|147|148|153|155 ground -1 -1 config__summon_range as alias__fresh_summon
             if alias__fresh_summon != var__summon_named_1 and alias__fresh_summon != var__summon_named_2 and alias__fresh_summon != var__summon_named_3
-                if not dead alias__fresh_summon and noto alias__fresh_summon != "hostile" and noto alias__fresh_summon != "criminal" and noto alias__fresh_summon != "enemy" and noto alias__fresh_summon != "murderer"
+                if not dead alias__fresh_summon and noto alias__fresh_summon != "hostile" and noto alias__fresh_summon != "criminal" and noto alias__fresh_summon != "enemy" and noto alias__fresh_summon != "murderer" and noto alias__fresh_summon != "innocent"
                     @setvar! var__fresh_summon alias__fresh_summon
                     break
                 endif

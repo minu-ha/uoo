@@ -962,13 +962,15 @@ Spirit Pact    T3   5
   복사하고 밖에서는 변수만 읽는다. 이름 대신 바디를 쓰는 이유는 이름을 바꾼 뒤 Razor 캐시가 갱신되는지 모르기
   때문이다. 바디 번호는 `>info` 로 읽는다: Lich 24,
   Ancient Mummy 158 (hue 2340). Vampire Thrall 722, Rag Witch 740 은 구식 `bard-necro` 의 팔로워 캐시 값이다.
-  VS 없이 나온 맨 엘리멘탈 (9 13 14 15 16)과 Summon Creature 풀의 표준 언데드 (3 26 50 56 57 147 148 153 155)도
-  같이 넣었다. **Skeletal Fiend, skeletal marksman, rotting flesh 는 Outlands 바디라 번호를 모른다.**
+  Summon Creature 풀의 표준 언데드 (3 26 50 56 57 147 148 153 155)도 같이 넣었다. VS 없이 나오는 맨 엘리멘탈 (9 13 14 15 16)은
+  2026-09-29 에 뺐다. 이 캐릭터는 늘 VS 로 뽑고, 다른 메이지의 엘리멘탈이 내 소환수로 잡혀 셋째 이름을 가져갔다.
+  **Skeletal Fiend, skeletal marksman, rotting flesh 는 Outlands 바디라 번호를 모른다.**
   나오면 `>info` 로 읽어 `findtype` 줄에 더한다.
 - **"내 펫" 플래그는 상태 패킷 (0x11)에서 온다.** ClassicUO 는 새 모빌이 보일 때마다 상태를 요청하므로 (`PacketHandlers.UpdateMobile`: "a way to get all Hp from all new mobiles") Razor 는 소환 직후 `CanRename` 을 안다. `rename` 은 이 플래그가 선
   모빌에만 패킷을 보낸다. 체력바를 열 필요가 없다.
-- **`noto` 필터는 구식 스크립트의 팔로워 필터 그대로.** 내 소환수는 `>info` 에 Notoriety 2 (friend, 초록) 로
-  읽힌다. 야생 리치는 통과 못 하고, 통과해도 `rename` 이 거부한다.
+- **`noto` 필터는 구식 스크립트의 팔로워 필터에 `innocent` 를 더한 것.** 내 소환수는 `>info` 에 Notoriety 2 (friend, 초록) 로
+  읽힌다. 야생 리치는 통과 못 하고, 통과해도 `rename` 이 거부한다. 다른 플레이어의 소환수는 길드·동맹이 아니면 `innocent` (파랑) 라 거른다.
+  길드원의 소환수는 friend 라 `noto` 로는 못 가르므로, 맨 엘리멘탈을 바디 목록에서 뺀 것이 그 몫을 한다.
 - **이름을 바꿔도 바디는 그대로 매치된다.** 그래서 "이미 바꿨는가"를 **슬롯 변수 셋 (`var__summon_named_1..3`)의
   serial** 로 묻는다. 슬롯에 있는 serial 은 건너뛰고, `find` 가 살아 있는 걸 못 보면 슬롯을 비운다.
   죽거나 해제된 소환수의 이름을 다음 소환이 이어받는다. 스크립트를 다시 켜면 슬롯이 비므로 이미 이름 붙은
@@ -990,6 +992,7 @@ Spirit Pact    T3   5
 | 오버헤드는 뜨는데 네임태그가 그대로                                              | 서버가 이름을 거부한 것 (`That name is unacceptable.`). 이름이 변수를 거쳤거나 숫자면 이렇게 된다. 슬롯은 찼다고 보므로 스크립트를 다시 켜야 재시도한다 |
 | 오버헤드가 아예 안 뜬다                                                          | 그 소환수의 바디 번호가 `findtype` 줄에 없는 것. `>info` 로 읽어서 더한다                                                                               |
 | 두 마리가 같은 이름                                                              | 슬롯 변수가 비워진 것. 소환수가 `config__summon_range` (18) 밖으로 나갔다가 돌아온 경우. 값을 키운다                                                    |
+| 남의 소환수 머리 위에 `[ name, … ]` 가 뜬다                                      | 길드원이 언데드를 뽑은 것. 이름은 안 바뀌지만 그 슬롯이 막혀 내 다음 소환수가 이름을 못 받을 수 있다                                                    |
 
 ### 4.9 재소환, 설계만 하고 구현 보류
 
@@ -1602,6 +1605,7 @@ Tracking 자체의 규칙은 [pvp.md](pvp.md) 10절.
 | Corpse Skin · Evil Omen 은 서 있고 warmode 가 아닐 때만 (2026-09-28)                                                    | 교전 중 걷는 동안과 warmode 에서는 둘이 안 나가고 `[ blood oath ]` 만 뜬다. 멈추면 프록 앞에 나간다                                                                   | 걷는 중이나 warmode 에서 `[ corpse skin ]` · `[ evil omen ]`                                               |
 | Poison Strike · Vampiric Embrace 거절 (2026-09-28)                                                                      | 질병 없는 몹에 Poison Strike 가 매 패스 되풀이되지 않고 다음 프록 뒤에 다시 시도한다. 시체가 멀면 Vampiric Embrace 는 5초에 한 번만 시도한다                          | 같은 거절 줄이 매 패스 뜬다                                                                                |
 | 타겟을 화면 거리에서 받아 둔다 (2026-09-29)                                                                             | 10칸 밖 몹을 All Kill 로 찍으면 `[ target, set ]` 이 뜨고, 다가오면 교전한다. 그 사이 노래가 나가도 타겟이 안 사라진다                                                | 찍었는데 `[ target, set ]` 이 안 뜬다. 몹이 붙었는데 노래·버프만 돈다                                      |
+| SUMMON NAMES 가 남의 소환수를 거른다 (2026-09-29)                                                                       | 파티원의 엘리멘탈이 나와도 `[ name, … ]` 가 안 뜬다                                                                                                                   | 뜬다                                                                                                       |
 
 ---
 
