@@ -308,6 +308,10 @@ pushlist 'list__summon_names' 'nomeeheh'
 # its own, so this only stops the script asking again every pass while that runs.
 @setvar! cooldown__necro_action 30500
 
+# How long Vampiric Embrace waits after "You do not see any corpses near that location."
+# Nothing was spent, so it is a short pause while the player walks on, not the window above.
+@setvar! cooldown__embrace_miss 5000
+
 # How long a lost necro hotbar waits before the next yell.
 @setvar! cooldown__hotbar_retry 3000
 
@@ -408,6 +412,11 @@ endif
 if not timerexists "timer__evil_omen"
     createtimer "timer__evil_omen"
     settimer "timer__evil_omen" cooldown__necro_action
+endif
+
+if not timerexists "timer__embrace_miss"
+    createtimer "timer__embrace_miss"
+    settimer "timer__embrace_miss" cooldown__embrace_miss
 endif
 
 if not timerexists "timer__poison_strike"
@@ -1661,11 +1670,16 @@ while not dead
     # Vampiric Embrace heals the undead followers off a corpse. Target an enemy or yourself
     # and it searches the surrounding area for one, so the cursor is answered with self. Walk
     # only, when a corpse is what is left of the last pull, and the corpse check keeps it from
-    # burning a thirty second cooldown on air. A refusal can come back instead of the cursor,
-    # so it is read on both sides of the cursor wait. Unread, the next pass would press again
-    # and sit out the same wait.
+    # pressing for nothing. The wiki gives no radius for that search, so a corpse inside the
+    # eight tiles looked at here can still be out of reach. That refusal spends nothing, so
+    # it only sits out cooldown__embrace_miss.
+    #
+    # A cooldown refusal restarts the window instead: the script cannot read the game's own
+    # cooldown, and the refusal nearly always answers a use whose success line came in late,
+    # so a full window from there is about right. It is read on both sides of the cursor
+    # wait, in case it comes back instead of the cursor.
     if list 'list__necro_symbols' >= config__symbols_vampiric_embrace and var__engaged = 0 and var__manual = 0 and followers > 0
-        if timer "timer__vampiric_embrace" >= cooldown__necro_action
+        if timer "timer__vampiric_embrace" >= cooldown__necro_action and timer "timer__embrace_miss" >= cooldown__embrace_miss
             if not targetexists and not casting
                 if findtype 8198 ground -1 -1 8
                     hotkey 'Vampiric Embrace'
@@ -1683,6 +1697,8 @@ while not dead
                             endif
                         elseif insysmsg "seconds before you may use that ability again."
                             settimer "timer__vampiric_embrace" 0
+                        elseif insysmsg "You do not see any corpses near that location."
+                            settimer "timer__embrace_miss" 0
                         endif
                     elseif insysmsg "seconds before you may use that ability again."
                         settimer "timer__vampiric_embrace" 0
@@ -2173,8 +2189,11 @@ while not dead
     # last one: no proc has reached that mob yet, so the strike waits until the next cycle
     # has gone out there.
     #
-    # A refusal can come back instead of the cursor, so it is read on both sides of the
-    # cursor wait. Unread, the next pass would press again and sit out the same wait.
+    # A target with nothing on it refuses the strike without spending it. Clearing
+    # var__proc_target then makes it wait for the next proc to reach that mob, rather than
+    # pressing again every pass or sitting out the full window. A cooldown refusal restarts
+    # the window, read on both sides of the cursor wait in case it comes back instead of the
+    # cursor.
     if var__engaged = 1 and var__opener_done = 1 and var__procs_done = 1 and var__proc_target = var__combat_target and var__manual = 0 and var__symbols_spent = 0 and list 'list__necro_symbols' >= config__symbols_poison_strike
         if timer "timer__corpse_skin" < cooldown__necro_action and timer "timer__poison_strike" >= cooldown__necro_action
             if not targetexists and not casting
@@ -2214,6 +2233,8 @@ while not dead
                             endif
                         elseif insysmsg "seconds before you may use that ability again."
                             settimer "timer__poison_strike" 0
+                        elseif insysmsg "You do not have a poison or disease effect on that target."
+                            @setvar! var__proc_target 0
                         endif
                     elseif insysmsg "seconds before you may use that ability again."
                         settimer "timer__poison_strike" 0

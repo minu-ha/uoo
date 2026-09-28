@@ -613,6 +613,15 @@ Lightning 프록은 `Wizardry lightning activated.` 와 `Your lightning spell hi
 Magic Arrow 하나 뒤에 쓰면 오고 있던 스택을 버린다. 그 순서를 어떻게 지키는지는 5.1절.
 질병 하나가 틱 몇 개로 도는지는 확인되지 않았다. 하나에 틱이 여러 개면 다섯 스택보다 적어도 8틱이 찬다.
 
+**능력이 돌려주는 문장.** 루프는 결과를 이 문장으로 읽는다. 쓰지 않은 거절에는 30초 창을 다시 세우지 않는다.
+
+| 문장                                                         | 뜻                                 | 루프가 하는 일                                                | 확인                        |
+|--------------------------------------------------------------|------------------------------------|---------------------------------------------------------------|-----------------------------|
+| `unholy symbols remaining`                                   | 썼다                               | 그 능력 타이머 0, 30초 뒤 다시                                | 성공 오버헤드가 여기서 뜬다 |
+| `seconds before you may use that ability again.`             | 아직 쿨                            | 타이머 0. 대개 성공 줄이 늦게 온 사용의 답이라 30초가 맞다    | 확인되지 않았다             |
+| `You do not have a poison or disease effect on that target.` | Poison Strike, 대상에 독·질병 없음 | `var__proc_target` 을 비워 다음 프록이 그 몹에 갈 때까지 대기 | 인게임 확인됨 2026-09-28    |
+| `You do not see any corpses near that location.`             | Vampiric Embrace, 닿는 시체 없음   | `cooldown__embrace_miss` (5초) 뒤 다시                        | 인게임 확인됨 2026-09-28    |
+
 **Necro 100 의 실제 순환은 Blood Oath + Corpse Skin 이다.** 30초에 6개가 차고 그 둘이 정확히 6개를 쓴다.
 셋이 전부 4 에서 나가므로 체인 순서 (Blood Oath → Corpse Skin → Evil Omen)가 곧 우선순위다. Blood Oath 뒤
 20초면 Corpse Skin 이 나가고 그때부터 Poison Strike 가 열린다. Evil Omen 은 이동 중 쌓인 잉여로만 돈다.
@@ -1522,6 +1531,7 @@ Tracking 자체의 규칙은 [pvp.md](pvp.md) 10절.
 | 소환수 이름 붙이기, 시약 30초 리프레시, 심볼 리스트 재구성 (2026-09-28)                                   | 4.8, 5.8절 |
 | Lightning 프록은 `Wizardry lightning activated.` 와 힌더 줄이 둘 다 뜬다 (2026-09-28)                     | 3.1절      |
 | 시약·마나는 대상을 찍을 때 검사하고 쓴다. 시약 부족 줄은 캐릭터 이름으로 뜬다 (2026-09-28)                | 3.2절      |
+| Poison Strike 질병 없음, Vampiric Embrace 시체 없음 문장 (2026-09-28)                                     | 3.4절      |
 
 **남은 측정**
 
@@ -1545,7 +1555,7 @@ Tracking 자체의 규칙은 [pvp.md](pvp.md) 10절.
 | Poison Strike · Energy Bolt 는 프록 코어 뒤 (2026-09-28)                                                                | Curse 뒤로 네 프록이 이어서 나가고, 바 넷이 다 뜬 뒤 Energy Bolt 한 방, 그다음 `[ poison strike ]`. 몹을 바꾸면 그 몹에 프록이 간 뒤에만                              | Curse 나 첫 프록 바로 뒤에 `[ poison strike ]` 나 Energy Bolt. 한 프록만 되풀이되면 그 바의 트리거 (3.1절) |
 | 네크로 능력을 Razor 핫키로 되돌림 (2026-09-28)                                                                          | `[ blood oath ]` `[ corpse skin ]` `[ evil omen ]` `[ poison strike ]` 가 전처럼 뜬다                                                                                 | 능력이 안 나가면 Razor 핫키 목록의 이름                                                                    |
 | Corpse Skin · Evil Omen 은 서 있고 warmode 가 아닐 때만 (2026-09-28)                                                    | 교전 중 걷는 동안과 warmode 에서는 둘이 안 나가고 `[ blood oath ]` 만 뜬다. 멈추면 프록 앞에 나간다                                                                   | 걷는 중이나 warmode 에서 `[ corpse skin ]` · `[ evil omen ]`                                               |
-| Poison Strike · Vampiric Embrace 가 커서 없이 거절될 때 (2026-09-28)                                                    | 손으로 Poison Strike 를 쓴 뒤 30초 동안 루프가 매 패스 1초씩 멈칫거리지 않는다                                                                                        | 매 패스 멈칫거리면 거절 문장이 다른 것. 저널 문장을 확인한다                                               |
+| Poison Strike · Vampiric Embrace 거절 (2026-09-28)                                                                      | 질병 없는 몹에 Poison Strike 가 매 패스 되풀이되지 않고 다음 프록 뒤에 다시 시도한다. 시체가 멀면 Vampiric Embrace 는 5초에 한 번만 시도한다                          | 같은 거절 줄이 매 패스 뜬다                                                                                |
 
 ---
 
