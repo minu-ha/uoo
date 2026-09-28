@@ -86,12 +86,12 @@ Wine 이 `Cmd → Ctrl`, `Option → Alt` 로 넘긴다 (`prefix/user.reg` 의 `
 
 ### 2.3 윗줄
 
-|        | Tab | Q              | W                | E             | R        | T                         | Y           | U |
-|--------|-----|----------------|------------------|---------------|----------|---------------------------|-------------|---|
-| 무수정 | —   | 셋 라타        | ↑                | **라타 발사** | 텔레포트 | Telekinesis               | Flamestrike | — |
-| Shift  | —   | Harm           | Magic Arrow      | Lightning     | Fireball | Mind Blast                | —           | — |
-| Ctrl   | —   | Reactive Armor | Magic Reflection | Protection    | Bless    | **Cure** (커서 → 펫·동료) | —           | — |
-| Alt    | —   | —              | —                | —             | —        | —                         | —           | — |
+|        | Tab | Q              | W                | E             | R        | T                         | Y                              | U |
+|--------|-----|----------------|------------------|---------------|----------|---------------------------|--------------------------------|---|
+| 무수정 | —   | 셋 라타        | ↑                | **라타 발사** | 텔레포트 | Telekinesis               | —                              | — |
+| Shift  | —   | Harm           | Magic Arrow      | Lightning     | Fireball | Mind Blast                | Poison                         | — |
+| Ctrl   | —   | Reactive Armor | Magic Reflection | Protection    | Bless    | **Cure** (커서 → 펫·동료) | **Resurrection** (커서 → 동료) | — |
+| Alt    | —   | —              | —                | —             | —        | —                         | —                              | — |
 
 ### 2.4 홈줄
 
@@ -180,18 +180,19 @@ basic (프로필 `default`):
 **매저리 주문**은 번호를 계산한다. Razor CE `Spells.cs` 의 규칙이 `3002011 + (서클 - 1) × 8 + (서클 안 번호 - 1)` 이고, 순서는 CE `spells.def` 와 같다.
 ClassicUO 매크로의 `subcode` 에서 바로 옮기려면 `L = subcode + 3001949` (Clumsy `subcode 62` = `L:3002011`).
 
-| 주문             | 번호    | 주문            | 번호    | 주문             | 번호    |
-|------------------|---------|-----------------|---------|------------------|---------|
-| Clumsy           | 3002011 | Reactive Armor  | 3002017 | Weaken           | 3002018 |
-| Magic Arrow      | 3002015 | Cure            | 3002021 | Harm             | 3002022 |
-| Protection       | 3002025 | Bless           | 3002027 | Fireball         | 3002028 |
-| Telekinesis      | 3002031 | Teleport        | 3002032 | Wall of Stone    | 3002034 |
-| Curse            | 3002037 | Greater Heal    | 3002039 | Lightning        | 3002040 |
-| Magic Reflection | 3002046 | Mind Blast      | 3002047 | Paralyze         | 3002048 |
-| Summon Creature  | 3002050 | Energy Bolt     | 3002052 | Explosion        | 3002053 |
-| Invisibility     | 3002054 | Reveal          | 3002058 | Chain Lightning  | 3002059 |
-| Flamestrike      | 3002061 | Mass Dispel     | 3002064 | Summon Daemon    | 3002071 |
-| Summon Earth El. | 3002072 | Summon Fire El. | 3002073 | Summon Water El. | 3002074 |
+| 주문             | 번호    | 주문             | 번호    | 주문            | 번호    |
+|------------------|---------|------------------|---------|-----------------|---------|
+| Clumsy           | 3002011 | Magic Arrow      | 3002015 | Reactive Armor  | 3002017 |
+| Weaken           | 3002018 | Cure             | 3002021 | Harm            | 3002022 |
+| Protection       | 3002025 | Bless            | 3002027 | Fireball        | 3002028 |
+| Poison           | 3002030 | Telekinesis      | 3002031 | Teleport        | 3002032 |
+| Wall of Stone    | 3002034 | Curse            | 3002037 | Greater Heal    | 3002039 |
+| Lightning        | 3002040 | Magic Reflection | 3002046 | Mind Blast      | 3002047 |
+| Paralyze         | 3002048 | Summon Creature  | 3002050 | Energy Bolt     | 3002052 |
+| Explosion        | 3002053 | Invisibility     | 3002054 | Reveal          | 3002058 |
+| Chain Lightning  | 3002059 | Mass Dispel      | 3002064 | Resurrection    | 3002069 |
+| Summon Daemon    | 3002071 | Summon Earth El. | 3002072 | Summon Fire El. | 3002073 |
+| Summon Water El. | 3002074 |                  |         |                 |         |
 
 ## 6. 주문 데미지 메모
 
