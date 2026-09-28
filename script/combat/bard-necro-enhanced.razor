@@ -16,10 +16,10 @@
 #     agents      "> Smart Heal/Cure Self", "> Greater Heal/Cure Self", "> Interrupt"
 #     potions     "Drink Heal", "Drink Cure", "Drink Refresh", "Drink Strength",
 #                 "Drink Agility", "Drink Magic Resist", "Eat Magic Mushroom"
-#     necromancy  none. The abilities go out as chat commands, [BloodOath [CorpseSkin
-#                 [EvilOmen [PoisonStrike [VampiricEmbrace (wiki Commands page). The Razor
-#                 hotkeys of the same names work too. They once looked broken, but the
-#                 real fault was a wrong ingump symbol count comparison.
+#     necromancy  "Blood Oath", "Corpse Skin", "Evil Omen", "Poison Strike",
+#                 "Vampiric Embrace". They once looked broken and were swapped for the
+#                 chat commands, [BloodOath and so on, but the real fault was a wrong
+#                 ingump symbol count comparison.
 #     targeting   "Target Self", "Cancel Current Target"
 #   The hotbar's own Auto-Renew must be OFF for every ability this loop drives. It spends the
 #   same symbols, and its priority is cheapest first, which is backwards for this build.
@@ -1576,10 +1576,10 @@ while not dead
     # ####################################################################################
     # # NECRO BURST
     # ####################################################################################
-    # Each ability is a chat command, resolves without a cursor, and answers with either
-    # "unholy symbols remaining" or the cooldown line, so success is read rather than
-    # assumed. The combat three run as one chain in value order, one per pass, so the bank
-    # is re-read between them and a lower one never spends what a higher one was saving.
+    # Each ability goes out through its Razor hotkey, resolves without a cursor, and answers
+    # with either "unholy symbols remaining" or the cooldown line, so success is read rather
+    # than assumed. The combat three run as one chain in value order, one per pass, so the
+    # bank is re-read between them and a lower one never spends what a higher one was saving.
     #
     #   blood oath     +30% follower damage, 5 self damage. The followers are 63% of the
     #                  damage, so this outweighs everything else in this block
@@ -1595,7 +1595,7 @@ while not dead
     if var__engaged = 1
         if not targetexists and not casting
             if list 'list__necro_symbols' >= config__symbols_blood_oath and followers > 0 and timer "timer__blood_oath" >= cooldown__necro_action
-                yell '[BloodOath'
+                hotkey 'Blood Oath'
                 wait wait__message
 
                 if insysmsg "unholy symbols remaining"
@@ -1609,7 +1609,7 @@ while not dead
                     settimer "timer__blood_oath" 0
                 endif
             elseif list 'list__necro_symbols' >= config__symbols_corpse_skin and timer "timer__corpse_skin" >= cooldown__necro_action
-                yell '[CorpseSkin'
+                hotkey 'Corpse Skin'
                 wait wait__message
 
                 if insysmsg "unholy symbols remaining"
@@ -1623,7 +1623,7 @@ while not dead
                     settimer "timer__corpse_skin" 0
                 endif
             elseif list 'list__necro_symbols' >= config__symbols_evil_omen and timer "timer__evil_omen" >= cooldown__necro_action
-                yell '[EvilOmen'
+                hotkey 'Evil Omen'
                 wait wait__message
 
                 if insysmsg "unholy symbols remaining"
@@ -1648,7 +1648,7 @@ while not dead
         if timer "timer__vampiric_embrace" >= cooldown__necro_action
             if not targetexists and not casting
                 if findtype 8198 ground -1 -1 8
-                    yell '[VampiricEmbrace'
+                    hotkey 'Vampiric Embrace'
                     waitfortarget wait__target
 
                     if targetexists
@@ -2082,7 +2082,7 @@ while not dead
         if timer "timer__corpse_skin" < cooldown__necro_action and timer "timer__poison_strike" >= cooldown__necro_action
             if not targetexists and not casting
                 if find var__combat_target ground -1 -1 config__target_range as alias__strike_target
-                    yell '[PoisonStrike'
+                    hotkey 'Poison Strike'
                     waitfortarget wait__target
 
                     if targetexists

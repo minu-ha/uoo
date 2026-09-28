@@ -1512,6 +1512,7 @@ Tracking 자체의 규칙은 [pvp.md](pvp.md) 10절.
 | SUMMON NAMES 셋째 이름. 1슬롯짜리를 셋째로 뽑았을 때                                                                    | `[ name, nomeeheh ]` 가 뜬다. 둘까지는 확인됐다                                                                                                                       | 4.8절 "실패하면 이렇게 보인다" 표                                                                          |
 | loadout 배치                                                                                                            | 우하단 한 자리에 새첼 → 루팅 파우치 → 트랩 파우치 5개 (x 120~140) 순으로 쌓인다                                                                                       | 새첼이나 루팅 파우치가 삐져나온다. `loadout.razor` 의 좌표만 조정 (`y 200`, `x 120~140` 은 감으로 잡은 값) |
 | Poison Strike · Energy Bolt 는 프록 코어 뒤 (2026-09-28)                                                                | Curse 뒤로 네 프록이 이어서 나가고, 바 넷이 다 뜬 뒤에 `[ poison strike ]` 와 Energy Bolt. 몹을 바꾸면 그 몹에 프록이 간 뒤에만 `[ poison strike ]`                   | Curse 나 첫 프록 바로 뒤에 `[ poison strike ]` 나 Energy Bolt. 한 프록만 되풀이되면 그 바의 트리거 (3.1절) |
+| 네크로 능력을 Razor 핫키로 되돌림 (2026-09-28)                                                                          | `[ blood oath ]` `[ corpse skin ]` `[ evil omen ]` `[ poison strike ]` 가 전처럼 뜬다                                                                                 | 능력이 안 나가면 Razor 핫키 목록의 이름                                                                    |
 
 ---
 
