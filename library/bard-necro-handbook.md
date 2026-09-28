@@ -735,16 +735,17 @@ Peace 를 가끔 쓰는 제어 수단으로만 다루면 `Ensemble` + `Virtuoso`
 
 ### 4.2 한 줄 결론
 
-| 상황                    | 조합                                                                           |
-|-------------------------|--------------------------------------------------------------------------------|
-| **테이머 듀오 (기본)**  | **Lich 2마리.** 테이머 펫이 전선을 잡으니 후열 딜에 전부 투자한다              |
-| 테이머 듀오 + 장기 교전 | `Vampire 2마리`. Fury 가 3분이면 캡이라 실전성이 있다                          |
-| 솔플                    | `Mummy + Lich`. 탱커 없이 후열만 세울 수 없다                                  |
-| 고 Magic Resist 맵      | `Mummy + Air`. **물리 딜이 필요한 유일한 경우다**                              |
-| PK 를 만났을 때         | 사냥하던 조합 그대로. 근거는 6.4절, 소환수별 PvP 비교는 [pvp.md](pvp.md) 6.2절 |
+| 상황                    | 조합                                                                             |
+|-------------------------|----------------------------------------------------------------------------------|
+| **테이머 듀오 (기본)**  | **Lich 2마리.** 테이머 펫이 전선을 잡으니 후열 딜에 전부 투자한다                |
+| 테이머 듀오 + 장기 교전 | `Vampire 2마리`. Fury 가 3분이면 캡이라 실전성이 있다                            |
+| 솔플                    | `Rag Witch + Lich`. 탱커 없이 후열만 세울 수 없다. 탱커 자리는 Rag Witch (4.5절) |
+| 솔플, 근접이 센 몹      | `Mummy + Lich`. 방어력이 Rag Witch 보다 25 높다                                  |
+| 고 Magic Resist 맵      | `Mummy + Air`. **물리 딜이 필요한 유일한 경우다**                                |
+| PK 를 만났을 때         | 사냥하던 조합 그대로. 근거는 6.4절, 소환수별 PvP 비교는 [pvp.md](pvp.md) 6.2절   |
 
-**Lich 와 Vampire 는 둘 다 주문 딜러다.** Vampire 위키에 `Spell Damage: 26 - 32` 로 명시돼 있다.
-따라서 본체의 `Mana Drain` (`-20 Magic Resist`) 과 Fire Tome 의 `Hex` 가 **두 조합 모두에 걸린다.**
+**Lich · Vampire · Rag Witch 는 주문 딜러다.** 위키에 Vampire `Spell Damage: 26 - 32`, Rag Witch `Spell Damage: 24 - 30` 으로 명시돼 있다.
+따라서 본체의 `Mana Drain` (`-20 Magic Resist`) 과 Fire Tome 의 `Hex` 가 **셋 모두에 걸린다.**
 물리 딜러는 `Mummy` 와 `Air` 뿐이다.
 
 **소환수 스탯은 반드시 SS 120 기준 스케일 표로 본다.** 위키의 기본 스탯은 낮은 SS 기준이라
@@ -752,7 +753,7 @@ Peace 를 가끔 쓰는 제어 수단으로만 다루면 `Ensemble` + `Virtuoso`
 
 ### 4.3 왜 Lich 2마리인가, 테이머 듀오 기준
 
-- 테이머 펫이 어그로를 잡아주므로 **탱커 소환수가 필요 없다.** Mummy 슬롯을 딜로 바꿀 수 있다.
+- 테이머 펫이 어그로를 잡아주므로 **탱커 소환수가 필요 없다.** 탱커 슬롯 (Rag Witch · Mummy)을 딜로 바꿀 수 있다.
 - Lich 는 `Epic Barrage` 로 거리를 유지하면서 딜을 넣는다. 후열 포지션과 맞는다.
 - Fire Tome 의 `Scorched Earth` 가 거는 **Hex 는 대상의 마법 저항을 깎는다.**
   Lich 딜도 내 주문딜도 같이 올라간다. 본체가 마법 스팸 빌드라 시너지가 직접적이다.
@@ -793,12 +794,40 @@ Fury 가 유지된다. 테이머가 전선을 잡아주면 실현 가능하다.
 
 ### 4.5 솔플
 
-솔플이면 **`Mummy + Lich`** 다. 테이머 펫이 없으면 전선을 잡아줄 것이 필요하고,
+솔플이면 **`Rag Witch + Lich`** 다. 테이머 펫이 없으면 전선을 잡아줄 것이 필요하고,
 소환수 둘이 동시에 맞으면 둘 다 녹는다. 소환수가 죽으면 3곡을 다시 불러야 해서 (`cooldown "music"` 글로벌 5초 + 곡당 10초) **전투 중에 회복이 안 되는 손실**이다.
+
+탱커 자리는 **Rag Witch** (Water Elemental) 가 Ancient Mummy (Earth Elemental) 보다 낫다. 2026-09-28 에 Mummy 에서 바꿨다.
+아래는 위키 스케일 표의 SS 120 열이다. 표의 열은 `Spirit Speak Skill Base / 80 / 100 / 120 / 150` 이고,
+두 소환수가 같은 비율로 커서 (SS 120 이면 HP x2.8, 딜 · Wrestling x1.6, Armor +30, Magic Resist +60) 차이는 어느 SS 에서도 같다.
+
+| SS 120         | Ancient Mummy (Earth) | Rag Witch (Water)                       |
+|----------------|-----------------------|-----------------------------------------|
+| HP             | 1540                  | 1540                                    |
+| 딜             | 근접 48 ~ 57.6        | 주문 38.4 ~ 48, 원거리 캐스터 (Mage AI) |
+| Armor          | **105**               | 80                                      |
+| Magic Resist   | 110                   | **210**                                 |
+| 독 / 특수 저항 | 0% / 0%               | **66% / 33%**                           |
+| Wrestling      | 152                   | 160                                     |
+| 능력           | Rooted                | Mirror, Flux                            |
+
+> "Mirror (Passive): Spells cast onto the creature have a 15% chance to be reflected back onto the caster" -- 위키 Rag Witch
+
+> "Flux (Innate): Creature has an innate 25 parry skill and increased aggro" -- 위키 Rag Witch
+
+> "Rooted (Innate): Creature is immune to Knockback effects and has increased Aggro" -- 위키 Ancient Mummy
+
+- **버티는 힘**: HP 가 같고 방어력은 25 낮지만 마법 저항이 100 높고, 독 · 특수 저항, 패리 25, 주문 반사가 붙는다.
+  난이도 300~500 몹은 주문 · 브레스 · 독이 많아서 Rag Witch 가 오래 버틴다.
+- **딜**: 주문 딜이라 내 `Mana Drain` 과 Lich 의 `Hex` 를 받는다 (4.2절). 숫자는 Mummy 보다 약 20% 낮지만 방어력에 깎이지 않는다.
+- **Mummy 가 나은 곳**: 마법 저항이 높은 맵 (물리 딜이 필요하다, `Mummy + Air`), 근접이 센 몹 (방어력 105 대 80), 넉백을 쓰는 몹 (Rooted).
+- **확인되지 않았다**: Rag Witch 는 원거리 캐스터라 어그로를 끌어도 Mummy 처럼 앞에 붙어 서지 않는다.
+  솔플에서 몹을 본체에서 떼어 놓을 만큼 버티는지는 인게임에서 본다.
 
 ### 4.6 Summoner's Tome 배분
 
-**소환 주문 하나당 20 포인트.** 티어 비용은 누적으로 `T1=1 / T2=3 / T3=5`.
+**소환 주문 하나당 20 포인트.** 그 주문으로 소환해 경험치를 쌓아 푼다 ("Players can earn experience and unlock up to 20 Upgrade Points per Summon Spell").
+주력 소환수를 바꾸면 새 Tome 은 처음부터 올린다. 티어 비용은 누적으로 `T1=1 / T2=3 / T3=5`.
 즉 20점은 **T3 네 개**가 정확히 맞아떨어진다.
 
 #### Fire Tome / Lich -- 최우선
@@ -817,9 +846,25 @@ Wildfire             T3   5    멀티타겟 구간 효율
 `Glass Cannon` 은 뺐다. 딜은 좋지만 어그로를 끌어서, Lich 를 후열에 두는 목적과 충돌한다.
 테이머 펫이 어그로를 확실히 잡아주는 것이 검증되면 `Wildfire` 와 바꿔볼 수 있다.
 
-#### Earth Tome / Ancient Mummy -- 솔플용, 두 번째
+#### Water Tome / Rag Witch -- 솔플용, 두 번째
 
-솔플 전선용. 테이머와만 다닌다면 우선순위가 내려간다.
+솔플 탱커용. 주문을 쓰는 몹 앞에 세우는 것을 기준으로 골랐다.
+
+```
+Reflecting Pool   T3   5    Mirror 15% -> 65%, 피해 저항 +10%
+Spirit Pact       T3   5    딜 +15%, 피해 저항 +10%
+Spell Siren       T3   5    때리는 몹 하나당 딜 · 피해 저항 +10% (최대 3). 어그로를 끄는 탱커와 맞는다
+Stagnant          T3   5    주문 40% 로 Greater Poison + 대상 독 저항 -40% 15초 (중첩)
+                     ---
+                      20
+```
+
+Rag Witch 가 자주 죽으면 `Stagnant` 대신 `Deep Water` (체력 66% 이상일 때 7.5% 회복, 30초 쿨). `Polluted` (주문 20% 로 질병)는 그다음이다.
+Rag Witch 가 건 독 · 질병이 내 Poison Strike 에 잡히는지는 확인되지 않았다. 위키 문구는 "you have applied" 다.
+
+#### Earth Tome / Ancient Mummy -- 고 MR 맵 · 근접 몹용, 세 번째
+
+솔플 탱커 자리는 Rag Witch 에 넘겼다. 물리 딜이 필요한 고 MR 맵 (`Mummy + Air`)과 근접이 센 몹에서 쓴다.
 
 ```
 Shatter        T3   5    Pierce 25. 물리 조합의 핵심
@@ -832,7 +877,7 @@ Slam           T3   5    밀리몹 상대 체감이 좋다
 
 `Earthpull` 은 위 넷이 다 찍힌 뒤에 고려한다.
 
-#### Air Tome / Skeletal Fiend -- 고 MR 맵용, 세 번째
+#### Air Tome / Skeletal Fiend -- 고 MR 맵용, 네 번째
 
 `Hex` 와 `Mana Drain` 으로도 저항이 안 깎이는 맵에서 물리 딜로 우회하는 카드다.
 
@@ -866,9 +911,9 @@ Spirit Pact    T3   5
 #### 투자 순서
 
 ```
-테이머 듀오 위주 (지금)    Fire -> Earth -> Air -> Daemon
-솔플 비중이 늘면           Earth -> Fire -> Air -> Daemon
-고 MR 맵을 자주 돌면       Fire -> Air -> Earth -> Daemon
+테이머 듀오 위주 (지금)    Fire -> Water -> Earth -> Air -> Daemon
+솔플 비중이 늘면           Water -> Fire -> Earth -> Air -> Daemon
+고 MR 맵을 자주 돌면       Fire -> Air -> Earth -> Water -> Daemon
 ```
 
 ### 4.7 스크립트 메모
@@ -952,7 +997,7 @@ Spirit Pact    T3   5
 
 #### 확정 사실 (3.3 절)
 
-- 언데드는 **Vengeful Spirit (심볼 1) 을 켠 뒤** 소환해야 나온다. Fire -> Lich, Earth -> Mummy, Daemon -> Vampire
+- 언데드는 **Vengeful Spirit (심볼 1) 을 켠 뒤** 소환해야 나온다. Fire -> Lich, Water -> Rag Witch, Earth -> Mummy, Daemon -> Vampire
 - 8서클: **마나 50, 시전 6초**, Bloodmoss 필요
 - 소환수는 **10초마다 최대 체력 1% 씩 썩어** 맞지 않아도 죽는다. 즉 재소환은 반응이 아니라 **주기 정비**다
 - `followers` 는 슬롯 수. Lich 2 = 4
@@ -962,7 +1007,7 @@ Spirit Pact    T3   5
 | 근거                                   | 내용                                                                                                                                                                                                         |
 |----------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | **한 세트가 VS + 6초 + 6초, 마나 101** | 교전 중엔 로테이션이 12초 서고 긴급 힐이 끊으면 50 씩 날아간다. 이동 중엔 서 있어야 하므로(`cooldown "walk"`) 다음 몹 앞에 멈춘 순간에만 나간다 -- 수동과 같은 타이밍이다                                    |
-| **뭘 뽑을지는 상황이 정한다**          | 듀오 Lich 2 / 솔플 Mummy + Lich / 고 MR Mummy + Air. 스크립트는 파티 구성을 모른다                                                                                                                           |
+| **뭘 뽑을지는 상황이 정한다**          | 듀오 Lich 2 / 솔플 Rag Witch + Lich / 고 MR Mummy + Air. 스크립트는 파티 구성을 모른다                                                                                                                       |
 | **썩는 속도가 결정을 사람에게 준다**   | 10초마다 남은 최대치의 1% (복리, 관찰: 30분 뒤에도 남는다) 라 반이 되는 데 약 11.5분, 30분이면 16%, 0 은 안 된다. "언제 갈아끼울지"는 남은 체력과 다음 몹을 보고 정하는 문제라 임계값 하나로 대신하기 어렵다 |
 | **없을 때의 뒷정리는 이미 자동이다**   | 송은 다음 이동에서 다시 걸리고, Blood Oath / Vampiric Embrace 는 `followers > 0` 으로 선다. 본체 로테이션은 그대로 돈다                                                                                      |
 
@@ -1617,6 +1662,7 @@ PvP 출처는 [pvp.md](pvp.md) 12절.
 - [Summoner's Tome](https://wiki.uooutlands.com/Summoner%27s_Tome)
 - [Status Effects](https://wiki.uooutlands.com/Status_Effects) -- Hex 등
 - [Ancient Mummy](https://wiki.uooutlands.com/Ancient_Mummy)
+- [Rag Witch](https://wiki.uooutlands.com/Rag_Witch)
 - [Skeletal Fiend](https://wiki.uooutlands.com/Skeletal_Fiend)
 - [Lich](https://wiki.uooutlands.com/Lich)
 - [Vampire Thrall](https://wiki.uooutlands.com/Vampire_Thrall)
