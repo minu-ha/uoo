@@ -299,6 +299,13 @@ while not dead
 
             wait wait__poll
         endfor
+
+        # Smart Heal answers its own cursor only while there is something to heal. One still
+        # open at full hit points would stand every block down, so it is cancelled.
+        if targetexists and diffhits = 0
+            hotkey "Cancel Current Target"
+            wait wait__short
+        endif
     endif
 
     if mana <= config__mushroom_eat_mana and not findbuff 'Magic Mushroom Cooldown' and findtype "mushroom" backpack

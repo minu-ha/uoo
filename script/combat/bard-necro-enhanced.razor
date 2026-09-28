@@ -142,6 +142,11 @@
 #   first round, and strand its cursor. So the line is read off just before the first cursor
 #   poll a pass can reach: ahead of the opener, and ahead of the Spell Siphon Magic Arrow.
 #
+#   The heal agents answer their own cursor only while there is something to heal. When the
+#   hit points top up during the cast, a tamer's heal say, the cursor is left open, and every
+#   block would stand down behind it. After each agent a cursor still open at full hit points
+#   is cancelled.
+#
 #   Abilities on the necro hotbar are not spells: they resolve without a cursor and answer
 #   with a message, so success is read from "unholy symbols remaining" rather than assumed.
 
@@ -965,6 +970,11 @@ while not dead
 
                         wait wait__poll
                     endfor
+
+                    if targetexists and diffhits = 0
+                        hotkey "Cancel Current Target"
+                        wait wait__short
+                    endif
                 endif
             endif
         endif
@@ -1002,6 +1012,11 @@ while not dead
 
                     wait wait__poll
                 endfor
+
+                if targetexists and diffhits = 0
+                    hotkey "Cancel Current Target"
+                    wait wait__short
+                endif
             endif
         endif
     elseif diffhits >= config__emergency_hits
@@ -1053,6 +1068,11 @@ while not dead
 
                         wait wait__poll
                     endfor
+
+                    if targetexists and diffhits = 0
+                        hotkey "Cancel Current Target"
+                        wait wait__short
+                    endif
                 endif
             endif
         endif
