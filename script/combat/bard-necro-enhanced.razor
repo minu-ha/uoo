@@ -640,6 +640,16 @@ while not dead
     # Read on timer__regs_refresh, not every pass. Each reagent is looked up once, the
     # spell flags are derived from those seven with plain comparisons, and between
     # refreshes the flags simply keep their last value.
+    #
+    # A cast refused for reagents means a flag is already stale, so that line expires the
+    # window and this pass re-reads them. Left alone, the proc core retries the spell every
+    # pass, each try waiting 2.5 seconds for a cursor that never comes, and while the stale
+    # flag says it is ready Poison Strike and the filler wait as well. The line is the stock
+    # UO one and has not been seen on Outlands yet.
+    if insysmsg "More reagents are needed"
+        settimer "timer__regs_refresh" cooldown__regs_refresh
+    endif
+
     if timer "timer__regs_refresh" >= cooldown__regs_refresh
         settimer "timer__regs_refresh" 0
 
