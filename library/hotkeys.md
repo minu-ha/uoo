@@ -41,8 +41,9 @@
 `Ctrl+`` ` ``` (Cmd+`) 는 macOS 기본 단축키 "다음 윈도우로 초점 이동" 이라 그대로는 씹힌다. 시스템 설정 → 키보드 → 키보드 단축키 → 키보드 에서 그 항목을 끈다.
 `Alt+`` ` ``` 도 안 된다 — Option+` 은 macOS 가 악센트 dead key 로 잡아서 게임에 안 들어온다. 예전에 Vengeful Spirit 핫키가 안 나가던 것도 이 키에 걸었기 때문이다. Alt 줄은 `1` 부터 쓴다.
 
-**어디에 거는가.** 주문 = ClassicUO `macros.xml` (Vengeful Spirit 도 여기, `[VengefulSpirit` Say 매크로). 나머지 (타겟 · 펫 · 포션 · Pouch · 힐 · VS · 스킬 · 스크립트) = Razor 프로필 `<hotkeys>`. **같은 키를 양쪽에 걸지 않는다.** 프로필이
-`HotKeyStop=True` 라 Razor 에 걸린 키는 CUO 로 넘어가지 않는다. 양쪽에 걸면 CUO 쪽 매크로는 조용히 죽는다.
+**어디에 거는가.** Razor 핫키로 되는 것은 전부 Razor 프로필 `<hotkeys>` 에 건다: 주문, 네크로 능력, 스킬, 타겟, 펫, 포션, Pouch, 힐, 스크립트. 프로필 하나가 유형 하나라 한 파일만 고치면 그 유형의 캐릭터 전부에 적용된다.
+ClassicUO `macros.xml` 에는 Razor 에 없는 것만 둔다: 말하기 (`bank guards`, `[recallcharge Houseboat`, `[vendor`, `all release`)와 클라이언트 UI (F5 이름 표시, F6 투명, Set Bag). `macros.xml` 은 캐릭터마다 따로라 되도록 적게, 캐릭터끼리 같게 둔다.
+프로필이 `HotKeyStop=True` 라 Razor 에 걸린 키는 CUO 로 넘어가지 않는다. 양쪽에 걸면 CUO 쪽 매크로는 조용히 죽는다.
 인게임 카운터·핫바에도 걸지 않는다. 파일에 없는 바인딩은 저장소가 못 지킨다.
 
 ## 2. 키 배치
@@ -145,16 +146,32 @@ basic (프로필 `default`):
 
 프로필의 `L:번호` 는 `Assistant/Language/Razor_lang.enu` 에서 찾는다. 지금 쓰는 것:
 
-| 번호        | 이름                                                                        | 번호               | 이름                                                                                  |
-|-------------|-----------------------------------------------------------------------------|--------------------|---------------------------------------------------------------------------------------|
-| 1058        | Last Target                                                                 | 2013               | Target Closest Non-Friendly Monster                                                   |
-| 1059        | Target Self                                                                 | 2022 / 2024 / 2026 | All Follow Me / All Guard Me / All Kill                                               |
-| 1060        | Set Last Target                                                             | 2054 / 2057        | Next / Previous Non-Friendly Player Target                                            |
-| 1332        | Cancel Current Target                                                       | 2052 / 2055        | Next / Previous Friendly Player Target                                                |
-| 1391        | > Smart Heal/Cure Self                                                      | 2101               | > Stop Current Script                                                                 |
-| 1395        | Attack Last Target                                                          | 2124               | Vengeful Spirit. 핫키로 동작한다. 지금은 CUO 매크로 `[VengefulSpirit` (Alt+1) 로 건다 |
-| 1028 ~ 1034 | Drink Heal / Cure / Refresh / Magic Resist / Explosion / Strength / Agility | 2527               | Pouch                                                                                 |
-| 1994        | > Interrupt                                                                 | 1044060 + 스킬번호 | 스킬 사용 (Disco 1044075, Peace 1044069, Provo 1044082)                               |
+| 번호        | 이름                                                                        | 번호               | 이름                                                                                        |
+|-------------|-----------------------------------------------------------------------------|--------------------|---------------------------------------------------------------------------------------------|
+| 1058        | Last Target                                                                 | 2013               | Target Closest Non-Friendly Monster                                                         |
+| 1059        | Target Self                                                                 | 2022 / 2024 / 2026 | All Follow Me / All Guard Me / All Kill                                                     |
+| 1060        | Set Last Target                                                             | 2054 / 2057        | Next / Previous Non-Friendly Player Target                                                  |
+| 1332        | Cancel Current Target                                                       | 2052 / 2055        | Next / Previous Friendly Player Target                                                      |
+| 1391        | > Smart Heal/Cure Self                                                      | 2101               | > Stop Current Script                                                                       |
+| 1395        | Attack Last Target                                                          | 2124               | Vengeful Spirit (Outlands 번호)                                                             |
+| 1028 ~ 1034 | Drink Heal / Cure / Refresh / Magic Resist / Explosion / Strength / Agility | 2527               | Pouch                                                                                       |
+| 1994        | > Interrupt                                                                 | 1044060 + 스킬번호 | 스킬 사용 (Disco 1044075, Peace 1044069, Hiding 1044081, Provo 1044082, Meditation 1044106) |
+
+**매저리 주문**은 번호를 계산한다. Razor CE `Spells.cs` 의 규칙이 `3002011 + (서클 - 1) × 8 + (서클 안 번호 - 1)` 이고, 순서는 CE `spells.def` 와 같다.
+ClassicUO 매크로의 `subcode` 에서 바로 옮기려면 `L = subcode + 3001949` (Clumsy `subcode 62` = `L:3002011`).
+
+| 주문             | 번호    | 주문            | 번호    | 주문             | 번호    |
+|------------------|---------|-----------------|---------|------------------|---------|
+| Clumsy           | 3002011 | Reactive Armor  | 3002017 | Weaken           | 3002018 |
+| Magic Arrow      | 3002015 | Cure            | 3002021 | Harm             | 3002022 |
+| Protection       | 3002025 | Bless           | 3002027 | Fireball         | 3002028 |
+| Telekinesis      | 3002031 | Teleport        | 3002032 | Wall of Stone    | 3002034 |
+| Curse            | 3002037 | Greater Heal    | 3002039 | Lightning        | 3002040 |
+| Magic Reflection | 3002046 | Mind Blast      | 3002047 | Paralyze         | 3002048 |
+| Summon Creature  | 3002050 | Energy Bolt     | 3002052 | Explosion        | 3002053 |
+| Invisibility     | 3002054 | Reveal          | 3002058 | Chain Lightning  | 3002059 |
+| Flamestrike      | 3002061 | Mass Dispel     | 3002064 | Summon Daemon    | 3002071 |
+| Summon Earth El. | 3002072 | Summon Fire El. | 3002073 | Summon Water El. | 3002074 |
 
 ## 6. 주문 데미지 메모
 
@@ -194,3 +211,4 @@ basic (프로필 `default`):
 - `Ctrl+T` Cure (nomeehej, xuezhonglian 의 `macros.xml`)와 아랫줄 새 배치 (`summoner.xml`, `default.xml`)가 게임에서 그대로 도는지.
 - 햄스트링·디스암 토글을 어떻게 거는지 (Razor 핫키, 채팅 명령, 버튼). 위키 Hamstring 문서에서 확인하고 basic 의 `Shift+Z` / `Shift+X` 에 건다.
 - `indian angus *` 네 캐릭터의 `macros.xml` 은 옛 배치다 (Cure 가 `Ctrl+2`). 그 캐릭이 `summoner` 프로필을 쓰면 Razor 의 `Ctrl+2` 큐어 포션과 겹쳐 두 번 나간다.
+- Razor 로 옮긴 주문 핫키 (`L:3002011` ~ `L:3002074`)가 Outlands 에서 그대로 도는지. CE 규칙으로 계산한 번호라 이 포크에서 게임으로 확인하지 않았다. 확인되면 nomeehej, xuezhonglian 의 `macros.xml` 에서 주문 매크로 (`sp …`)와 hide, medi, vegful 을 지운다. 그전까지는 남겨 둔다. Razor 가 번호를 모르면 그 줄을 버리고, 키가 CUO 로 넘어가 그 매크로가 대신 나갈 것으로 본다 (확인 안 됨).
