@@ -1650,7 +1650,9 @@ while not dead
     # Vampiric Embrace heals the undead followers off a corpse. Target an enemy or yourself
     # and it searches the surrounding area for one, so the cursor is answered with self. Walk
     # only, when a corpse is what is left of the last pull, and the corpse check keeps it from
-    # burning a thirty second cooldown on air.
+    # burning a thirty second cooldown on air. A refusal can come back instead of the cursor,
+    # so it is read on both sides of the cursor wait. Unread, the next pass would press again
+    # and sit out the same wait.
     if list 'list__necro_symbols' >= config__symbols_vampiric_embrace and var__engaged = 0 and var__manual = 0 and followers > 0
         if timer "timer__vampiric_embrace" >= cooldown__necro_action
             if not targetexists and not casting
@@ -1671,6 +1673,8 @@ while not dead
                         elseif insysmsg "seconds before you may use that ability again."
                             settimer "timer__vampiric_embrace" 0
                         endif
+                    elseif insysmsg "seconds before you may use that ability again."
+                        settimer "timer__vampiric_embrace" 0
                     endif
                 endif
             endif
@@ -2156,6 +2160,9 @@ while not dead
     # var__proc_target holds it off a mob picked up while the bars are still running from the
     # last one: no proc has reached that mob yet, so the strike waits until the next cycle
     # has gone out there.
+    #
+    # A refusal can come back instead of the cursor, so it is read on both sides of the
+    # cursor wait. Unread, the next pass would press again and sit out the same wait.
     if var__engaged = 1 and var__opener_done = 1 and var__procs_done = 1 and var__proc_target = var__combat_target and var__manual = 0 and var__symbols_spent = 0 and list 'list__necro_symbols' >= config__symbols_poison_strike
         if timer "timer__corpse_skin" < cooldown__necro_action and timer "timer__poison_strike" >= cooldown__necro_action
             if not targetexists and not casting
@@ -2196,6 +2203,8 @@ while not dead
                         elseif insysmsg "seconds before you may use that ability again."
                             settimer "timer__poison_strike" 0
                         endif
+                    elseif insysmsg "seconds before you may use that ability again."
+                        settimer "timer__poison_strike" 0
                     endif
                 endif
             endif

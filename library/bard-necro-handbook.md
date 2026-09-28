@@ -1532,6 +1532,7 @@ Tracking 자체의 규칙은 [pvp.md](pvp.md) 10절.
 | Poison Strike · Energy Bolt 는 프록 코어 뒤 (2026-09-28)                                                                | Curse 뒤로 네 프록이 이어서 나가고, 바 넷이 다 뜬 뒤 Energy Bolt 한 방, 그다음 `[ poison strike ]`. 몹을 바꾸면 그 몹에 프록이 간 뒤에만                              | Curse 나 첫 프록 바로 뒤에 `[ poison strike ]` 나 Energy Bolt. 한 프록만 되풀이되면 그 바의 트리거 (3.1절) |
 | 네크로 능력을 Razor 핫키로 되돌림 (2026-09-28)                                                                          | `[ blood oath ]` `[ corpse skin ]` `[ evil omen ]` `[ poison strike ]` 가 전처럼 뜬다                                                                                 | 능력이 안 나가면 Razor 핫키 목록의 이름                                                                    |
 | Corpse Skin · Evil Omen 은 서 있고 warmode 가 아닐 때만 (2026-09-28)                                                    | 교전 중 걷는 동안과 warmode 에서는 둘이 안 나가고 `[ blood oath ]` 만 뜬다. 멈추면 프록 앞에 나간다                                                                   | 걷는 중이나 warmode 에서 `[ corpse skin ]` · `[ evil omen ]`                                               |
+| Poison Strike · Vampiric Embrace 가 커서 없이 거절될 때 (2026-09-28)                                                    | 손으로 Poison Strike 를 쓴 뒤 30초 동안 루프가 매 패스 1초씩 멈칫거리지 않는다                                                                                        | 매 패스 멈칫거리면 거절 문장이 다른 것. 저널 문장을 확인한다                                               |
 
 ---
 
