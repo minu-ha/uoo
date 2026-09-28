@@ -955,7 +955,7 @@ RESUMMON   [MUSHROOM 뒤, BARD SONG 앞]
         else                                     -> cast config__summon_spell, for 70 폴링, target
 ```
 
-Bloodmoss 플래그 하나만 추가하면 된다. Vengeful Spirit 은 Razor 핫키가 아니라 채팅 명령 `[VengefulSpirit` 으로 켠다 (핫키는 Razor 가 종료할 때 지운다). 남은 미확인은 **소환 커서가 지점 지정인지 자동 배치인지** 하나뿐이다.
+Bloodmoss 플래그 하나만 추가하면 된다. Vengeful Spirit 은 채팅 명령 `[VengefulSpirit` 이나 Razor 핫키 (`L:2124`)로 켠다. 둘 다 동작한다. 남은 미확인은 **소환 커서가 지점 지정인지 자동 배치인지** 하나뿐이다.
 
 ---
 
@@ -1506,33 +1506,34 @@ Tracking 자체의 규칙은 [pvp.md](pvp.md) 10절.
 
 PvP 쪽 (명중률, TK 폭탄, 패링, 던전 리콜)은 [pvp.md](pvp.md) 11절.
 
-| 틀린 생각                                                  | 사실                                                                                    |
-|------------------------------------------------------------|-----------------------------------------------------------------------------------------|
-| 피스는 데미지를 받으면 풀린다                              | **아니다.** Barding Break 로만 풀린다                                                   |
-| Provocation 은 안 찍었다                                   | **찍었다.** Self Taught 가 Musicianship 을 대체해서 Disco/Peace/Provo 80/80/80 구성이다 |
-| Vampire Thrall 은 근접딜러다                               | **주문딜러다.** "Spell Damage: 26 - 32"                                                 |
-| Fury 는 분당 5%                                            | **30초당 5%, 최대 +30%** -- 3분이면 캡                                                  |
-| Music 쿨만 보면 된다                                       | **글로벌 5초 + 개별 쿨의 AND 조건이다**                                                 |
-| Discordance 는 Effective 로 스케일                         | **printed 스킬로 스케일한다** (`printed / 120 x 25%`)                                   |
-| 소환수도 Virtuoso / Ensemble 을 받는다                     | **팔로워 명시는 `Sing Your Own Praises` 뿐이다**                                        |
-| Discordance 도 barding break 로 끊긴다                     | **안 끊긴다.** 브레이크는 Peace / Provo 만 끊는다                                       |
-| Self Taught 는 요구조건만 대체한다                         | **Effective Barding 보너스 상한에도 적용된다.** 실측 170                                |
-| Song 은 별도 명령이다                                      | **스킬을 백팩에 타겟한 것이다.** 땅에 타겟하면 group effect                             |
-| Song 과 Skill 은 서로 막는다                               | **비대칭이다.** 송은 Music 과 슬롯을 읽기만 하고 쓰지 않는다                            |
-| Peace 와 Provo 는 슬롯이 따로다                            | **공유한다.** 로컬 엔트리가 서로를 반영하지 않아 한 번 착각했다                         |
-| 차단된 시도는 아무 쿨도 안 태운다                          | **Music 을 태운다.** 차단된 송 다음의 스킬 판정을 믿지 말 것                            |
-| Ensemble 은 디스코만 있으면 된다                           | **Discord AND (Peace OR Provo).** 두 개가 걸려야 한다                                   |
-| 바드 쿨은 예측 가능하다                                    | **"Your barding skill cooldowns reset." 프록이 있다** (Lyric 방어구). 측정할 땐 벗는다  |
-| Song 쿨은 `cooldown "music"` 이다                          | **아니다. 별도 계열이다.** `music` 이 둘을 섞어 덮어쓰던 버그는 고쳤다                  |
-| `cooldown "..."` 은 서버 값이다                            | **아니다. `cooldowns.xml` 의 내 메시지 트리거다.** 숫자가 이상하면 이 파일을 본다       |
-| 프록 15초는 타이머로 센다                                  | **게임이 메시지로 알려준다.** `cooldown "magic arrow"` 등을 읽는다                      |
-| Energy Bolt 는 시전마다 15 마나가 돌아온다                 | **5초 안에 대상이 죽을 때만.** 잡몹에서만 실질 5 다                                     |
-| 브레이크 중엔 Provo 로 Ensemble 을 살린다                  | **못 한다.** 브레이크 대상엔 Peace 도 Provo 도 안 걸린다                                |
-| Spirit Speak 만 있으면 언데드 소환이 나온다                | **Vengeful Spirit 을 먼저 켜야 한다.** 매핑은 위 표                                     |
-| `followers` 는 소환수 마릿수다                             | **컨트롤 슬롯 수다.** Lich 2마리 = 4                                                    |
-| 소환수는 안 맞으면 안 죽는다                               | **10초마다 최대 체력 1% 씩 썩는다.** 재소환은 주기적이다                                |
-| 바드에게 printed Resist 는 PvP 에서 쓸모없다               | **도주할 때만 맞다.** 반격하면 Heat of Battle 이 Defensive Barding 을 끈다              |
-| 바드 메이지는 Defensive Barding 이 있어 레슬링이 필요 없다 | **도주할 때만 맞다.** 첫 공격 주문에 Heat of Battle 이 켜지고 printed 0 이 된다         |
+| 틀린 생각                                                  | 사실                                                                                                                                                                    |
+|------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| 피스는 데미지를 받으면 풀린다                              | **아니다.** Barding Break 로만 풀린다                                                                                                                                   |
+| Provocation 은 안 찍었다                                   | **찍었다.** Self Taught 가 Musicianship 을 대체해서 Disco/Peace/Provo 80/80/80 구성이다                                                                                 |
+| Vampire Thrall 은 근접딜러다                               | **주문딜러다.** "Spell Damage: 26 - 32"                                                                                                                                 |
+| Fury 는 분당 5%                                            | **30초당 5%, 최대 +30%** -- 3분이면 캡                                                                                                                                  |
+| Music 쿨만 보면 된다                                       | **글로벌 5초 + 개별 쿨의 AND 조건이다**                                                                                                                                 |
+| Discordance 는 Effective 로 스케일                         | **printed 스킬로 스케일한다** (`printed / 120 x 25%`)                                                                                                                   |
+| 소환수도 Virtuoso / Ensemble 을 받는다                     | **팔로워 명시는 `Sing Your Own Praises` 뿐이다**                                                                                                                        |
+| Discordance 도 barding break 로 끊긴다                     | **안 끊긴다.** 브레이크는 Peace / Provo 만 끊는다                                                                                                                       |
+| Self Taught 는 요구조건만 대체한다                         | **Effective Barding 보너스 상한에도 적용된다.** 실측 170                                                                                                                |
+| Song 은 별도 명령이다                                      | **스킬을 백팩에 타겟한 것이다.** 땅에 타겟하면 group effect                                                                                                             |
+| Song 과 Skill 은 서로 막는다                               | **비대칭이다.** 송은 Music 과 슬롯을 읽기만 하고 쓰지 않는다                                                                                                            |
+| Peace 와 Provo 는 슬롯이 따로다                            | **공유한다.** 로컬 엔트리가 서로를 반영하지 않아 한 번 착각했다                                                                                                         |
+| 차단된 시도는 아무 쿨도 안 태운다                          | **Music 을 태운다.** 차단된 송 다음의 스킬 판정을 믿지 말 것                                                                                                            |
+| Ensemble 은 디스코만 있으면 된다                           | **Discord AND (Peace OR Provo).** 두 개가 걸려야 한다                                                                                                                   |
+| 바드 쿨은 예측 가능하다                                    | **"Your barding skill cooldowns reset." 프록이 있다** (Lyric 방어구). 측정할 땐 벗는다                                                                                  |
+| Song 쿨은 `cooldown "music"` 이다                          | **아니다. 별도 계열이다.** `music` 이 둘을 섞어 덮어쓰던 버그는 고쳤다                                                                                                  |
+| `cooldown "..."` 은 서버 값이다                            | **아니다. `cooldowns.xml` 의 내 메시지 트리거다.** 숫자가 이상하면 이 파일을 본다                                                                                       |
+| 프록 15초는 타이머로 센다                                  | **게임이 메시지로 알려준다.** `cooldown "magic arrow"` 등을 읽는다                                                                                                      |
+| Energy Bolt 는 시전마다 15 마나가 돌아온다                 | **5초 안에 대상이 죽을 때만.** 잡몹에서만 실질 5 다                                                                                                                     |
+| 브레이크 중엔 Provo 로 Ensemble 을 살린다                  | **못 한다.** 브레이크 대상엔 Peace 도 Provo 도 안 걸린다                                                                                                                |
+| Spirit Speak 만 있으면 언데드 소환이 나온다                | **Vengeful Spirit 을 먼저 켜야 한다.** 매핑은 위 표                                                                                                                     |
+| 네크로 능력 Razor 핫키는 이 빌드에서 안 먹는다             | **먹는다.** 능력이 안 나가던 원인은 심볼 수를 읽는 `ingump` 비교가 잘못돼 있던 것이다. Vengeful Spirit 핫키가 안 나간 건 macOS 가 먹는 `Alt+`` ` ``` 에 걸었기 때문이다 |
+| `followers` 는 소환수 마릿수다                             | **컨트롤 슬롯 수다.** Lich 2마리 = 4                                                                                                                                    |
+| 소환수는 안 맞으면 안 죽는다                               | **10초마다 최대 체력 1% 씩 썩는다.** 재소환은 주기적이다                                                                                                                |
+| 바드에게 printed Resist 는 PvP 에서 쓸모없다               | **도주할 때만 맞다.** 반격하면 Heat of Battle 이 Defensive Barding 을 끈다                                                                                              |
+| 바드 메이지는 Defensive Barding 이 있어 레슬링이 필요 없다 | **도주할 때만 맞다.** 첫 공격 주문에 Heat of Battle 이 켜지고 printed 0 이 된다                                                                                         |
 
 ---
 

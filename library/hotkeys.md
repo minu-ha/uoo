@@ -39,7 +39,7 @@
 
 **Mac 키 이름.** Wine 이 `Cmd → Ctrl`, `Option → Alt` 로 넘긴다 (`prefix/user.reg` 의 `LeftCommandIsCtrl`, `LeftOptionIsAlt`). 아래 표의 **Ctrl 은 엄지로 누르는 Cmd**, Alt 는 Option 이다. `Ctrl+Space` 는 macOS 가 먹으므로 쓰지 않는다.
 `Ctrl+`` ` ``` (Cmd+`) 는 macOS 기본 단축키 "다음 윈도우로 초점 이동" 이라 그대로는 씹힌다. 시스템 설정 → 키보드 → 키보드 단축키 → 키보드 에서 그 항목을 끈다.
-`Alt+`` ` ``` 도 안 된다 — Option+` 은 macOS 가 악센트 dead key 로 잡아서 Razor 에 안 들어오고, Razor 는 종료할 때 그 바인딩을 지워 버린다. Alt 줄은 `1` 부터 쓴다.
+`Alt+`` ` ``` 도 안 된다 — Option+` 은 macOS 가 악센트 dead key 로 잡아서 게임에 안 들어온다. 예전에 Vengeful Spirit 핫키가 안 나가던 것도 이 키에 걸었기 때문이다. Alt 줄은 `1` 부터 쓴다.
 
 **어디에 거는가.** 주문 = ClassicUO `macros.xml` (Vengeful Spirit 도 여기, `[VengefulSpirit` Say 매크로). 나머지 (타겟 · 펫 · 포션 · Pouch · 힐 · VS · 스킬 · 스크립트) = Razor 프로필 `<hotkeys>`. **같은 키를 양쪽에 걸지 않는다** — 프로필이
 `HotKeyStop=False` 라 Razor 키가 CUO 로도 넘어가서 두 번 나간다.
@@ -145,16 +145,16 @@ basic (프로필 `default`):
 
 프로필의 `L:번호` 는 `Assistant/Language/Razor_lang.enu` 에서 찾는다. 지금 쓰는 것:
 
-| 번호        | 이름                                                                        | 번호               | 이름                                                                                                                     |
-|-------------|-----------------------------------------------------------------------------|--------------------|--------------------------------------------------------------------------------------------------------------------------|
-| 1058        | Last Target                                                                 | 2013               | Target Closest Non-Friendly Monster                                                                                      |
-| 1059        | Target Self                                                                 | 2022 / 2024 / 2026 | All Follow Me / All Guard Me / All Kill                                                                                  |
-| 1060        | Set Last Target                                                             | 2054 / 2057        | Next / Previous Non-Friendly Player Target                                                                               |
-| 1332        | Cancel Current Target                                                       | 2052 / 2055        | Next / Previous Friendly Player Target                                                                                   |
-| 1391        | > Smart Heal/Cure Self                                                      | 2101               | > Stop Current Script                                                                                                    |
-| 1395        | Attack Last Target                                                          | 2124               | Vengeful Spirit — **쓰지 않는다.** 프로필에 넣어도 Razor 가 종료할 때 지운다. VS 는 CUO 매크로 `[VengefulSpirit` 로 건다 |
-| 1028 ~ 1034 | Drink Heal / Cure / Refresh / Magic Resist / Explosion / Strength / Agility | 2527               | Pouch                                                                                                                    |
-| 1994        | > Interrupt                                                                 | 1044060 + 스킬번호 | 스킬 사용 (Disco 1044075, Peace 1044069, Provo 1044082)                                                                  |
+| 번호        | 이름                                                                        | 번호               | 이름                                                                                  |
+|-------------|-----------------------------------------------------------------------------|--------------------|---------------------------------------------------------------------------------------|
+| 1058        | Last Target                                                                 | 2013               | Target Closest Non-Friendly Monster                                                   |
+| 1059        | Target Self                                                                 | 2022 / 2024 / 2026 | All Follow Me / All Guard Me / All Kill                                               |
+| 1060        | Set Last Target                                                             | 2054 / 2057        | Next / Previous Non-Friendly Player Target                                            |
+| 1332        | Cancel Current Target                                                       | 2052 / 2055        | Next / Previous Friendly Player Target                                                |
+| 1391        | > Smart Heal/Cure Self                                                      | 2101               | > Stop Current Script                                                                 |
+| 1395        | Attack Last Target                                                          | 2124               | Vengeful Spirit. 핫키로 동작한다. 지금은 CUO 매크로 `[VengefulSpirit` (Alt+1) 로 건다 |
+| 1028 ~ 1034 | Drink Heal / Cure / Refresh / Magic Resist / Explosion / Strength / Agility | 2527               | Pouch                                                                                 |
+| 1994        | > Interrupt                                                                 | 1044060 + 스킬번호 | 스킬 사용 (Disco 1044075, Peace 1044069, Provo 1044082)                               |
 
 ## 6. 주문 데미지 메모
 
