@@ -11,8 +11,7 @@ insert_final_newline = true
 trim_trailing_whitespace = true
 
 # Razor writes scripts back with CRLF. The reference files (combat/bard-throwing,
-# restock/loadout) indent with 4 spaces. A few older or third-party scripts use tabs:
-# keep their style when editing them.
+# restock/loadout) indent with 4 spaces. No tabs.
 [*.razor]
 end_of_line = crlf
 indent_size = 4
