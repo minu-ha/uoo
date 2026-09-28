@@ -134,11 +134,13 @@
 #   real. With a blocking waitfortarget the loop cannot look at hit points until the cursor
 #   turns up, which for Energy Bolt is 1.75 seconds after the hit that mattered.
 #
-#   Casts that take no target, the heal agents and Create Food, cannot be polled for a cursor.
-#   They poll casting instead, bounded the same way, then read the disturb line themselves
-#   and say so on screen. A disturb on one of them is consumed at the site and never reaches
-#   a later poll loop as a stale answer. Every cast in the file therefore handles its own
-#   disturb, and nothing at the top of the loop has to.
+#   Casts that take no target, the heal agents, Create Food and the two self buffs, cannot be
+#   polled for a cursor. They poll casting instead, bounded the same way. casting drops the
+#   moment such a cast is disturbed, so the poll leaves on that and the disturb line is left
+#   unread, as is the one an emergency interrupt brings in after its poll has already left.
+#   A cursor poll that found such a line would take it for its own disturb, leave on its
+#   first round, and strand its cursor. So the line is read off just before the first cursor
+#   poll a pass can reach: ahead of the opener, and ahead of the Spell Siphon Magic Arrow.
 #
 #   Abilities on the necro hotbar are not spells: they resolve without a cursor and answer
 #   with a message, so success is read from "unholy symbols remaining" rather than assumed.
@@ -1356,7 +1358,12 @@ while not dead
             elseif not findbuff 'Spell Siphon' and not findbuff 'Magic Reflection' and var__regs_magic_arrow = 1 and mana >= config__mana_1st
                 # Spell Siphon: the first spell to hit us starts a sixty minute buff that shows on the
                 # buff bar. A Magic Arrow on self is that hit. Never with Magic Reflection up, the
-                # arrow would only bounce off it and burn the reflection.
+                # arrow would only bounce off it and burn the reflection. Any disturb line
+                # an earlier cast left is read off first, so the poll only sees its own.
+                if insysmsg "Your concentration is disturbed, thus ruining thy spell."
+                    # consumed, nothing else to do
+                endif
+
                 cast 'Magic Arrow'
 
                 for 60
@@ -1723,6 +1730,13 @@ while not dead
     #
     # Two lists, so the branch itself is the state. A target that was retargeted mid fight
     # answers correctly with no extra bookkeeping.
+    #
+    # First, any disturb line nobody read is read off here, so the cursor polls from here to
+    # the filler only ever see their own. See Targeted casts at the top.
+    if insysmsg "Your concentration is disturbed, thus ruining thy spell."
+        # consumed, nothing else to do
+    endif
+
     if var__engaged = 1 and var__manual = 0
         if not targetexists and not casting and cooldown "walk" = 0
             if find var__combat_target ground -1 -1 config__target_range as alias__opener_target

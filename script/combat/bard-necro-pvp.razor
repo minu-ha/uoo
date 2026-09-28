@@ -346,7 +346,12 @@ while not dead
         elseif not findbuff 'Spell Siphon' and not findbuff 'Magic Reflection' and var__regs_magic_arrow = 1 and mana >= config__mana_1st
             # Spell Siphon: the first spell to hit us starts a sixty minute buff that shows on the
             # buff bar. A Magic Arrow on self is that hit. Never with Magic Reflection up, the
-            # arrow would only bounce off it and burn the reflection.
+            # arrow would only bounce off it and burn the reflection. Any disturb line an
+            # earlier cast left is read off first, so the poll only sees its own.
+            if insysmsg "Your concentration is disturbed, thus ruining thy spell."
+                # consumed, nothing else to do
+            endif
+
             cast 'Magic Arrow'
 
             for 60
@@ -406,6 +411,15 @@ while not dead
     # ####################################################################################
     # One cast per 30 seconds, whoever it goes on. Self first, unless the enemy already stuck
     # one on us, in which case ours would not land and the enemy gets it straight away.
+    #
+    # First, any disturb line nobody read is read off, so the cursor polls from here to the
+    # dump only ever see their own. The casts that poll casting instead, the heal and the
+    # buffs, leave on casting dropping and never read theirs (bard-necro-enhanced, Targeted
+    # casts).
+    if insysmsg "Your concentration is disturbed, thus ruining thy spell."
+        # consumed, nothing else to do
+    endif
+
     if var__engaged = 1 and timer "timer__tk" >= cooldown__tk and var__regs_tk = 1 and mana >= config__mana_3rd
         if not targetexists and not casting and cooldown "walk" = 0
             if cooldown "teleki, me" > 0
