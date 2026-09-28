@@ -1,5 +1,7 @@
 # config/
 
+**English** · [한국어](../language/config.ko.md)
+
 Razor and ClassicUO settings, one folder per player. `util/setup.sh` links the game to this folder
 so the client reads and writes the repo directly. Nothing is copied or synced.
 
