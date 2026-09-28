@@ -180,11 +180,14 @@ endif
 
 ## 5. 그 외 관용구
 
-- 시스템 메시지 띄우면 안 되는 명령은 `@` 접두.
-- 검색은 `if findtype "name" backpack as alias__x` 로 alias 에 담아 재사용. 반복 검색은 `ignore` / `clearignore`.
-- 라벨 분기는 `getlabel` → `if "문자열" in label`.
-- 검프·핫바는 `gumpexists` / `ingump` 확인 후 `gumpresponse`.
-- 디버그 출력은 `{{var}}` 보간. 확인 끝나면 지운다.
+| 하려는 것                           | 쓰는 모양                                                           |
+|-------------------------------------|---------------------------------------------------------------------|
+| 시스템 메시지를 안 띄우고 명령 실행 | `@` 접두                                                            |
+| 찾은 것을 다시 쓰기                 | `if findtype "name" backpack as alias__x` 로 alias 에 담는다        |
+| 같은 검색을 되풀이하며 하나씩 보기  | `@ignore` / `@clearignore` ([razor.md](razor.md) 3절 `findtype` 줄) |
+| 라벨로 분기                         | `getlabel` → `if "문자열" in label`                                 |
+| 검프·핫바 조작                      | `gumpexists` / `ingump` 로 확인한 뒤 `gumpresponse`                 |
+| 디버그 출력                         | `{{var}}` 보간. 확인이 끝나면 지운다                                |
 
 ## 6. overhead
 

@@ -131,6 +131,12 @@ Bard Necro 루프에 적용한 결과 (시약 플래그를 매 패스 `findtype`
 
 ## 7. PvP 제약
 
-- 구조화 PvP 또는 Faction 상태에서는 `settimer` `removetimer` `getlabel` `rename` `cooldown` `wait` 등이 제한된다.
-- 플레이어 serial 은 `0x0` 이 되고, `find` 계열은 자기 아이템만 잡는다. 그래서 상대 머리 위 `overhead … <serial>` 도 안 된다.
+구조화 PvP 또는 Faction 상태에서:
+
+| 막히는 것                                                         | 영향                                                                      |
+|-------------------------------------------------------------------|---------------------------------------------------------------------------|
+| `settimer` `removetimer` `getlabel` `rename` `cooldown` `wait` 등 | 타이머·라벨·쿨다운에 기대는 로직이 안 돈다                                |
+| 플레이어 serial 이 `0x0`                                          | 상대를 변수에 담을 수 없고, 상대 머리 위 `overhead … <serial>` 도 안 된다 |
+| `find` 계열이 자기 아이템만 잡는다                                | 상대나 바닥 물건을 찾는 로직이 안 돈다                                    |
+
 - PvP 겸용 스크립트를 쓰는 규칙은 [conventions.md](conventions.md) 7절. 게임 쪽 PvP 규칙과 숫자는 [pvp.md](pvp.md).
