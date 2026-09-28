@@ -642,10 +642,11 @@ while not dead
     # refreshes the flags simply keep their last value.
     #
     # A cast refused for reagents means a flag is already stale, so that line expires the
-    # window and this pass re-reads them. Left alone, the proc core retries the spell every
-    # pass, each try waiting 2.5 seconds for a cursor that never comes, and while the stale
-    # flag says it is ready Poison Strike and the filler wait as well. The line is the stock
-    # UO one and has not been seen on Outlands yet.
+    # window and this pass re-reads them. Outlands runs the whole cast and refuses only at
+    # the target, with no mana spent, so left alone the proc core would spend a full cast on
+    # the same spell every pass, and while the stale flag says it is ready Poison Strike and
+    # the filler wait as well. The line comes up under the character's own name, seen in
+    # game on 2026-09-28.
     if insysmsg "More reagents are needed"
         settimer "timer__regs_refresh" cooldown__regs_refresh
     endif
