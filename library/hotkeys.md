@@ -75,12 +75,12 @@ Wine 이 `Cmd → Ctrl`, `Option → Alt` 로 넘긴다 (`prefix/user.reg` 의 `
 
 ### 2.2 숫자줄
 
-|        | `` ` ``                           | 1                   | 2              | 3                | 4                | 5                    | 6               |
-|--------|-----------------------------------|---------------------|----------------|------------------|------------------|----------------------|-----------------|
-| 무수정 | **Smart Heal/Cure**               | 시그니처 ①          | 시그니처 ②     | 시그니처 ③       | Explosion        | Energy Bolt          | Paralyze        |
-| Shift  | —                                 | —                   | —              | —                | —                | —                    | —               |
-| Ctrl   | **Greater Heal** (커서 → 펫·동료) | 힐 포션             | 큐어 포션      | 리프 포션        | 힘 포션          | 민 포션              | 레지 포션       |
-| Alt    | —                                 | **Vengeful Spirit** | Fire El → Lich | Earth El → Mummy | Daemon → Vampire | Water El → Rag Witch | Summon Creature |
+|        | `` ` ``                           | 1                   | 2              | 3                    | 4                | 5                | 6               |
+|--------|-----------------------------------|---------------------|----------------|----------------------|------------------|------------------|-----------------|
+| 무수정 | **Smart Heal/Cure**               | 시그니처 ①          | 시그니처 ②     | 시그니처 ③           | Explosion        | Energy Bolt      | Paralyze        |
+| Shift  | —                                 | —                   | —              | —                    | —                | —                | —               |
+| Ctrl   | **Greater Heal** (커서 → 펫·동료) | 힐 포션             | 큐어 포션      | 리프 포션            | 힘 포션          | 민 포션          | 레지 포션       |
+| Alt    | —                                 | **Vengeful Spirit** | Fire El → Lich | Water El → Rag Witch | Earth El → Mummy | Daemon → Vampire | Summon Creature |
 
 `Alt+0` = dress. 소환 줄에 붙어 있지만 소환은 아니고, 자주 안 누르는 자리라 거기 둔 것. `F4` 는 PK 를 만났을 때: PvE 루프가 멈추고 `bard-necro-pvp` 가 돈다, `F1` 로 복귀.
 
@@ -146,21 +146,21 @@ basic (프로필 `default`):
 | 캐릭터 (유형)                   | 1 2 3                   | F1                  | F4             | Alt 줄                           |
 |---------------------------------|-------------------------|---------------------|----------------|----------------------------------|
 | nomeehej, Bard Necro (summoner) | Disco / Peace / Provo   | bard-necro-enhanced | bard-necro-pvp | 소환 5 + VS                      |
-| xuezhonglian, PK 메이지 (basic) | Curse / Weaken / Clumsy | hally-mage          | —              | Earth El · Water El 만 (Alt+3 5) |
+| xuezhonglian, PK 메이지 (basic) | Curse / Weaken / Clumsy | hally-mage          | —              | Water El · Earth El 만 (Alt+3 4) |
 
 ## 4. 손에 잡히는 흐름
 
-| 상황      | 키                                                                          | 메모                                                                                           |
-|-----------|-----------------------------------------------------------------------------|------------------------------------------------------------------------------------------------|
-| PvE 공격  | `Z` → `V`                                                                   | summoner 는 펫이, basic 은 내가 가장 가까운 몹을 친다 (2.5절)                                  |
-| PvE 주문  | `V` (summoner) 로 라타 → `1 E` `2 E` → `4 E` `5 E`                          |                                                                                                |
-| PvP 시작  | `F4`                                                                        | PvE 루프가 멈추고 PvP 루프가 돈다. 펫 공격은 루프가 15초마다 `all kill` 로 한다. `F1` 로 복귀  |
-| PvP 타겟  | `Q`, summoner 는 `Shift+X/C`, basic 은 `X/C`                                | 라타 하나만 친다                                                                               |
-| PvP 주문  | 라타를 잡고 → `6 E` → `4 E` `5 E`                                           |                                                                                                |
-| 폭탄      | `T` `E` → `G` `E`                                                           | Telekinesis 가 먼저다. 상대가 30초 끈끈이가 된다                                               |
-| 긴급      | `` ` `` 힐 (새끼), 사이드 아래 Pouch (엄지), `Ctrl+1` 힐 포션 (엄지 + 약지) | 손가락이 안 움직인다                                                                           |
-| 펫 돌보기 | `Ctrl+`` ` ``` → 펫 클릭 (Greater Heal), `Ctrl+T` → 펫 클릭 (Cure)          | `Ctrl+R` Bless 는 팔로워 데미지·공속 +5%                                                       |
-| 소환      | `Alt+1` → `Alt+2` → `Alt+2`                                                 | Vengeful Spirit 을 켜고 Lich 둘. 근접 플레이어 타겟은 서버가 막아 놨다. 플레이어는 순환만 된다 |
+| 상황      | 키                                                                          | 메모                                                                                                                                                                                    |
+|-----------|-----------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| PvE 공격  | `Z` → `V`                                                                   | summoner 는 펫이, basic 은 내가 가장 가까운 몹을 친다 (2.5절)                                                                                                                           |
+| PvE 주문  | `V` (summoner) 로 라타 → `1 E` `2 E` → `4 E` `5 E`                          |                                                                                                                                                                                         |
+| PvP 시작  | `F4`                                                                        | PvE 루프가 멈추고 PvP 루프가 돈다. 펫 공격은 루프가 15초마다 `all kill` 로 한다. `F1` 로 복귀                                                                                           |
+| PvP 타겟  | `Q`, summoner 는 `Shift+X/C`, basic 은 `X/C`                                | 라타 하나만 친다                                                                                                                                                                        |
+| PvP 주문  | 라타를 잡고 → `6 E` → `4 E` `5 E`                                           |                                                                                                                                                                                         |
+| 폭탄      | `T` `E` → `G` `E`                                                           | Telekinesis 가 먼저다. 상대가 30초 끈끈이가 된다                                                                                                                                        |
+| 긴급      | `` ` `` 힐 (새끼), 사이드 아래 Pouch (엄지), `Ctrl+1` 힐 포션 (엄지 + 약지) | 손가락이 안 움직인다                                                                                                                                                                    |
+| 펫 돌보기 | `Ctrl+`` ` ``` → 펫 클릭 (Greater Heal), `Ctrl+T` → 펫 클릭 (Cure)          | `Ctrl+R` Bless 는 팔로워 데미지·공속 +5%                                                                                                                                                |
+| 소환      | `Alt+1` → `Alt+2` → `Alt+2`, 솔플은 `Alt+1` → `Alt+3` → `Alt+2`             | Vengeful Spirit 을 켜고 듀오는 Lich 둘, 솔플은 Rag Witch + Lich ([bard-necro-handbook.md](bard-necro-handbook.md) 4.5절). 근접 플레이어 타겟은 서버가 막아 놨다. 플레이어는 순환만 된다 |
 
 ## 5. Razor 내장 이름, L 번호
 
