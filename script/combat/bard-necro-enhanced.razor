@@ -894,8 +894,9 @@ while not dead
 
     # Manual mode. warmode on means the player is casting by hand: every block that opens a
     # cursor stands down so its cursor cannot land on top of theirs, and the last target they
-    # set stays theirs. Cures, heals, potions, mushrooms and the necro commands keep running,
-    # none of them opens a cursor. Turning warmode off hands the same target back to the loop.
+    # set stays theirs. Cures, heals, potions, mushrooms and Blood Oath keep running, none of
+    # them opens a cursor. Corpse Skin and Evil Omen stand down as well: they only pay off
+    # through the loop's own spells. Turning warmode off hands the same target back to the loop.
     @setvar! var__manual 0
 
     if warmode
@@ -1590,8 +1591,14 @@ while not dead
     # Of the rest, Strangle (4) competes with Blood Oath for symbols and delays every hit by
     # five seconds, Wither (5) buys mana only for spells that do no damage, and Pain Spike
     # (5) wants a corpse next to the next mob. None earn a place here.
-    # No walk guard here or on Vampiric Embrace below: these are instant abilities with no
-    # cast to break, and the embrace is walk only, so a walk guard would have parked it for good.
+    #
+    # Corpse Skin and Evil Omen only pay off through the loop's own spells, and the loop casts
+    # no damage spell while the player is walking or has taken over in warmode. So both wait
+    # for a standing player in automatic mode: the first stop after a move opens them together
+    # with the procs instead of burning their duration on the walk. Blood Oath feeds the
+    # followers, who fight on either way, so it takes neither guard, and the two guards sit on
+    # the Corpse Skin and Evil Omen lines instead of on the block. Vampiric Embrace below has
+    # no walk guard either: it is walk only, so one would have parked it for good.
     if var__engaged = 1
         if not targetexists and not casting
             if list 'list__necro_symbols' >= config__symbols_blood_oath and followers > 0 and timer "timer__blood_oath" >= cooldown__necro_action
@@ -1608,7 +1615,7 @@ while not dead
                 elseif insysmsg "seconds before you may use that ability again."
                     settimer "timer__blood_oath" 0
                 endif
-            elseif list 'list__necro_symbols' >= config__symbols_corpse_skin and timer "timer__corpse_skin" >= cooldown__necro_action
+            elseif list 'list__necro_symbols' >= config__symbols_corpse_skin and var__manual = 0 and timer "timer__corpse_skin" >= cooldown__necro_action and cooldown "walk" = 0
                 hotkey 'Corpse Skin'
                 wait wait__message
 
@@ -1622,7 +1629,7 @@ while not dead
                 elseif insysmsg "seconds before you may use that ability again."
                     settimer "timer__corpse_skin" 0
                 endif
-            elseif list 'list__necro_symbols' >= config__symbols_evil_omen and timer "timer__evil_omen" >= cooldown__necro_action
+            elseif list 'list__necro_symbols' >= config__symbols_evil_omen and var__manual = 0 and timer "timer__evil_omen" >= cooldown__necro_action and cooldown "walk" = 0
                 hotkey 'Evil Omen'
                 wait wait__message
 

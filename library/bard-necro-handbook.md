@@ -570,8 +570,8 @@ Disco/Peace/Provo 가 전부 80이면 T3 (120점)를 찍어도 **80밖에 못 �
 | 능력             | 비용 | 발동 조건                                    | 남겨두는 것                                               |
 |------------------|------|----------------------------------------------|-----------------------------------------------------------|
 | **Blood Oath**   | 4    | `>= 4`                                       | 없음. 최우선                                              |
-| **Corpse Skin**  | 2    | `>= 4`                                       | 없음. Blood Oath 와 같은 4 라 체인 순서가 우선순위        |
-| Evil Omen        | 2    | `>= 4`                                       | 없음. 위 둘이 30초에 6개를 다 쓰니 사실상 이동 잉여에서만 |
+| **Corpse Skin**  | 2    | `>= 4`, 서 있고 warmode 가 아닐 때           | 없음. Blood Oath 와 같은 4 라 체인 순서가 우선순위        |
+| Evil Omen        | 2    | `>= 4`, 서 있고 warmode 가 아닐 때           | 없음. 위 둘이 30초에 6개를 다 쓰니 사실상 이동 잉여에서만 |
 | Poison Strike    | 1    | `>= 1`, Corpse Skin 켜진 동안 + 프록 코어 뒤 | 없음. 필러 자리라 위는 이미 썼다                          |
 | Vampiric Embrace | 3    | `>= 9`, 이동 중만                            | 6                                                         |
 
@@ -588,6 +588,10 @@ Disco/Peace/Provo 가 전부 80이면 T3 (120점)를 찍어도 **80밖에 못 �
 | Evil Omen   | 주문 +20%, 주문당 25% 확률로 마나/2 자해 | 37% × 20% = +7.4%, 자해 있음     |
 
 **Corpse Skin 이 Evil Omen 보다 위다.** 보너스가 크고 대가가 없다. **둘은 동시에 유지된다** (인게임 확인됨).
+
+**Corpse Skin 과 Evil Omen 은 걷는 중 (`cooldown "walk"`)과 warmode (수동 모드, `var__manual = 1`)에는 쓰지 않는다.**
+둘 다 루프가 쏘는 주문으로만 값을 하는데, 그때는 루프가 공격 주문을 쏘지 않아 지속시간만 흘러간다.
+걷다가 멈춰서 다시 칠 때 프록과 같이 열리게 하려는 것이다. Blood Oath 는 소환수 몫이라 둘 다 상관없이 나간다.
 
 **Poison Strike** 는 Corpse Skin 이 깔아둔 질병 틱을 최대 8개 한 번에 터뜨린다. 곧 죽을 몹에서는
 같이 사라졌을 딜을 회수하는 셈이라 값을 하고, 마나가 안 들어 **필러 자리**를 쓴다.
@@ -1034,7 +1038,7 @@ flowchart TD
 | 3  | 자기 버프     | `not findbuff` + `cooldown "reflect"`             | **몹이 없을 때만.** 둘 다 시간이 아니라 소모로 끝난다. RA 는 25 흡수, Reflect 는 한 번 반사 뒤 30초 쿨 (반사 시점부터)                                                             |
 | 4  | Barding Song  | `Music=0 and Song=0 and <슬롯>=0`                 | **몹이 없을 때만.** 라운드로빈                                                                                                                                                     |
 | 5  | 바드 스킬     | `Music=0 and <슬롯>=0`                            | 디스코 1회 + **피스 12초마다**                                                                                                                                                     |
-| 6  | 네크로        | `list 'list__necro_symbols' >= config__symbols_*` | Blood Oath → Corpse Skin → Evil Omen 순. **유휴 예약** 아래 참조                                                                                                                   |
+| 6  | 네크로        | `list 'list__necro_symbols' >= config__symbols_*` | Blood Oath → Corpse Skin → Evil Omen 순. Corpse Skin · Evil Omen 은 서 있고 warmode 가 아닐 때만. 심볼 몫은 3.4절                                                                  |
 | 7  | 오프닝        | 마나 + 대상별 리스트                              | Mana Drain -> Curse                                                                                                                                                                |
 | 8  | 프록 코어     | `cooldown "magic arrow"` 등                       | 네 개가 각자 쿨. 시전마다 대상을 `var__proc_target` 에 적는다                                                                                                                      |
 | 9  | Poison Strike | `var__procs_done` + `var__proc_target`            | 심볼 1. 프록이 전부 쿨이고 마지막 프록이 이 대상일 때. Corpse Skin 조건은 3.4절                                                                                                    |
@@ -1513,6 +1517,7 @@ Tracking 자체의 규칙은 [pvp.md](pvp.md) 10절.
 | loadout 배치                                                                                                            | 우하단 한 자리에 새첼 → 루팅 파우치 → 트랩 파우치 5개 (x 120~140) 순으로 쌓인다                                                                                       | 새첼이나 루팅 파우치가 삐져나온다. `loadout.razor` 의 좌표만 조정 (`y 200`, `x 120~140` 은 감으로 잡은 값) |
 | Poison Strike · Energy Bolt 는 프록 코어 뒤 (2026-09-28)                                                                | Curse 뒤로 네 프록이 이어서 나가고, 바 넷이 다 뜬 뒤에 `[ poison strike ]` 와 Energy Bolt. 몹을 바꾸면 그 몹에 프록이 간 뒤에만 `[ poison strike ]`                   | Curse 나 첫 프록 바로 뒤에 `[ poison strike ]` 나 Energy Bolt. 한 프록만 되풀이되면 그 바의 트리거 (3.1절) |
 | 네크로 능력을 Razor 핫키로 되돌림 (2026-09-28)                                                                          | `[ blood oath ]` `[ corpse skin ]` `[ evil omen ]` `[ poison strike ]` 가 전처럼 뜬다                                                                                 | 능력이 안 나가면 Razor 핫키 목록의 이름                                                                    |
+| Corpse Skin · Evil Omen 은 서 있고 warmode 가 아닐 때만 (2026-09-28)                                                    | 교전 중 걷는 동안과 warmode 에서는 둘이 안 나가고 `[ blood oath ]` 만 뜬다. 멈추면 프록 앞에 나간다                                                                   | 걷는 중이나 warmode 에서 `[ corpse skin ]` · `[ evil omen ]`                                               |
 
 ---
 
