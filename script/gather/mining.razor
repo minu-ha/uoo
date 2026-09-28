@@ -527,20 +527,20 @@ while not dead
 
 
 
-//    if findtype 6585 backpack as found_ore
-//        @getlabel found_ore ore_description
-//
-//        if findtype storage_container_id_number backpack as storage_container
-//            @drop backpack -1 -1 -1
-//            getlabel backpack ping
-//            wait 500
-//            lift found_ore 9999
-//            getlabel backpack ping
-//            drop storage_container -1 -1 -1
-//            wait 500
-//            @ignore found_ore
-//        endif
-//    endif
+#    if findtype 6585 backpack as found_ore
+#        @getlabel found_ore ore_description
+#
+#        if findtype storage_container_id_number backpack as storage_container
+#            @drop backpack -1 -1 -1
+#            getlabel backpack ping
+#            wait 500
+#            lift found_ore 9999
+#            getlabel backpack ping
+#            drop storage_container -1 -1 -1
+#            wait 500
+#            @ignore found_ore
+#        endif
+#    endif
 
     if findtype 4017|47190 ground any any 2 as found_forge
         if timer "forge_ping" >= forge_overhead_ping_frequency
@@ -566,20 +566,20 @@ while not dead
     endif
 
 
-//    if findtype 7154 backpack as found_ingots
-//        @getlabel found_ingots ingot_description
-//
-//        if findtype storage_container_id_number backpack as storage_container
-//            @drop backpack -1 -1 -1
-//            getlabel backpack ping
-//            wait 500
-//            lift found_ingots 9999
-//            getlabel backpack ping
-//            drop storage_container -1 -1 -1
-//            wait 600
-//            @ignore found_ingots
-//        endif
-//    endif
+#    if findtype 7154 backpack as found_ingots
+#        @getlabel found_ingots ingot_description
+#
+#        if findtype storage_container_id_number backpack as storage_container
+#            @drop backpack -1 -1 -1
+#            getlabel backpack ping
+#            wait 500
+#            lift found_ingots 9999
+#            getlabel backpack ping
+#            drop storage_container -1 -1 -1
+#            wait 600
+#            @ignore found_ingots
+#        endif
+#    endif
        
     
     if findtype 4017|47190 ground any any 6 as found_forge
@@ -740,18 +740,18 @@ while not dead
     endif
     
     if mana > 30
-//        if not findbuff 'Strength' or not findbuff 'Agility' or not findbuff 'Cunning'
-//            cast 'Bless'
-//            waitfortarget
-//            hotkey 'Target Self'
-//            wait 1000
-//        endif
-//        if not findbuff 'Protection'
-//            cast 'Arch Protection'
-//            waitfortarget
-//            hotkey 'Target Self'
-//            wait 1000
-//        endif
+#        if not findbuff 'Strength' or not findbuff 'Agility' or not findbuff 'Cunning'
+#            cast 'Bless'
+#            waitfortarget
+#            hotkey 'Target Self'
+#            wait 1000
+#        endif
+#        if not findbuff 'Protection'
+#            cast 'Arch Protection'
+#            waitfortarget
+#            hotkey 'Target Self'
+#            wait 1000
+#        endif
         if not findbuff 'Reactive Armor'
             cast 'Reactive Armor'
             wait 2000

@@ -1,56 +1,56 @@
-// ####################################################################################
-// # BARD MACE
-// ####################################################################################
-// Naming convention
-//   config__*  : tunable settings, kept at the top of the file
-//   wait__*    : how long the script sleeps or waits for a target cursor
-//   cooldown__*: thresholds compared against a timer__ or a named cooldown
-//   var__*     : state owned by this script
-//   alias__*   : result of an as binding from find / findtype
-//   label__*   : result of getlabel
-//   timer__*   : createtimer / settimer target
-//   words are snake_case, the prefix is split off with a double underscore
-//
-// Gear
-//   a two handed Grinding Medium staff in lefthand, offhand stays empty. A two handed
-//   weapon reads as lhandempty false and rhandempty true, so the equip test uses lhandempty.
-//
-// warmode policy
-//   warmode ON is the manual control window, so barding stands down there.
-//   disco / peace / virtuoso only run while warmode is OFF.
-//   codex stance and weapon ability ignore warmode: a stance is a passive mode, and the
-//   ability gauge fills whether or not the player drives the fight by hand.
-//
-// Literal policy
-//   wait / settimer / cooldown / lift amount / comparison right-hand sides and the findtype
-//   aspect hue are lifted to variables.
-//   find and findtype source / quantity / range, plus waitfortarget and overhead hue, stay
-//   as numeric literals.
+# ####################################################################################
+# # BARD MACE
+# ####################################################################################
+# Naming convention
+#   config__*  : tunable settings, kept at the top of the file
+#   wait__*    : how long the script sleeps or waits for a target cursor
+#   cooldown__*: thresholds compared against a timer__ or a named cooldown
+#   var__*     : state owned by this script
+#   alias__*   : result of an as binding from find / findtype
+#   label__*   : result of getlabel
+#   timer__*   : createtimer / settimer target
+#   words are snake_case, the prefix is split off with a double underscore
+#
+# Gear
+#   a two handed Grinding Medium staff in lefthand, offhand stays empty. A two handed
+#   weapon reads as lhandempty false and rhandempty true, so the equip test uses lhandempty.
+#
+# warmode policy
+#   warmode ON is the manual control window, so barding stands down there.
+#   disco / peace / virtuoso only run while warmode is OFF.
+#   codex stance and weapon ability ignore warmode: a stance is a passive mode, and the
+#   ability gauge fills whether or not the player drives the fight by hand.
+#
+# Literal policy
+#   wait / settimer / cooldown / lift amount / comparison right-hand sides and the findtype
+#   aspect hue are lifted to variables.
+#   find and findtype source / quantity / range, plus waitfortarget and overhead hue, stay
+#   as numeric literals.
 
 clearsysmsg
 clearall
 clearignore
 cleardragdrop
 
-// ####################################################################################
-// # CONFIG
-// ####################################################################################
+# ####################################################################################
+# # CONFIG
+# ####################################################################################
 @setvar! config__use_potion 1
 @setvar! config__use_bard_song 1
 @setvar! config__use_weapon_ability 1
 
-// Magic item mode. 1 looks for a magic suffix on the label, 0 takes the first match and
-// skips getlabel entirely, which is the cheaper path when training with plain gear.
+# Magic item mode. 1 looks for a magic suffix on the label, 0 takes the first match and
+# skips getlabel entirely, which is the cheaper path when training with plain gear.
 @setvar! config__use_magic_weapon 0
 @setvar! config__use_magic_instrument 1
 
-// Aspect hue the weapon search filters on. Change this one value when the aspect changes.
-// 2241 - lyric , 2767 - earth
+# Aspect hue the weapon search filters on. Change this one value when the aspect changes.
+# 2241 - lyric , 2767 - earth
 @setvar! config__aspect_hue 2767
 
-// Codex stance and weapon ability. The slot numbers follow the codex list order, so if the
-// in game order differs only these numbers change.
-// The stance commands are [MacingStance1..5, confirmed in game.
+# Codex stance and weapon ability. The slot numbers follow the codex list order, so if the
+# in game order differs only these numbers change.
+# The stance commands are [MacingStance1..5, confirmed in game.
 @setvar! config__use_codex_stance 1
 @setvar! config__stance_aggressive 1
 @setvar! config__stance_defensive 2
@@ -61,12 +61,12 @@ cleardragdrop
 @setvar! config__ability_stun 2
 @setvar! config__ability_smash 3
 
-// Defensive latches on above the enter line and only releases below the leave line, so the
-// stance cannot flap while bandages tick. Both are hit deficit, not percent.
+# Defensive latches on above the enter line and only releases below the leave line, so the
+# stance cannot flap while bandages tick. Both are hit deficit, not percent.
 @setvar! config__defensive_enter_diff 60
 @setvar! config__defensive_leave_diff 48
 
-// Survival thresholds
+# Survival thresholds
 @setvar! config__heal_potion_diff 40
 @setvar! config__heal_skill_min 10
 @setvar! config__stam_threshold 80
@@ -74,29 +74,29 @@ cleardragdrop
 @setvar! config__dex_threshold 100
 @setvar! config__gold_drop_amount 500
 
-// ####################################################################################
-// # WAIT AND COOLDOWN
-// ####################################################################################
-// Every value is milliseconds.
-// wait__short absorbed the old 100 poll and 200 settle, wait__target the old 500 and 1000
-// target waits, so a whole class of delay can be tuned from one line.
-// cooldown__ names mirror what they feed, so
-// settimer "timer__overhead_message" cooldown__overhead_message reads as one pair.
+# ####################################################################################
+# # WAIT AND COOLDOWN
+# ####################################################################################
+# Every value is milliseconds.
+# wait__short absorbed the old 100 poll and 200 settle, wait__target the old 500 and 1000
+# target waits, so a whole class of delay can be tuned from one line.
+# cooldown__ names mirror what they feed, so
+# settimer "timer__overhead_message" cooldown__overhead_message reads as one pair.
 @setvar! wait__short 200
 @setvar! wait__long 1000
 @setvar! wait__target 1000
 @setvar! cooldown__overhead_message 2700
 @setvar! cooldown__combat_target_grace 1200
 @setvar! cooldown__heal_potion 10000
-// Pummel, Stun and Smash share one gauge that refills in 24 to 60 seconds, so one minute is
-// the safe spacing. Shorter only wastes chat lines, it cannot fire the ability early.
+# Pummel, Stun and Smash share one gauge that refills in 24 to 60 seconds, so one minute is
+# the safe spacing. Shorter only wastes chat lines, it cannot fire the ability early.
 @setvar! cooldown__ability 60000
 @setvar! cooldown__stance_retry 3000
 @setvar! cooldown__stance_resync 30000
 
-// ####################################################################################
-// # TIMER
-// ####################################################################################
+# ####################################################################################
+# # TIMER
+# ####################################################################################
 if not timerexists "timer__overhead_message"
     createtimer "timer__overhead_message"
 endif
@@ -121,9 +121,9 @@ endif
 
 settimer "timer__stance_resync" 0
 
-// ####################################################################################
-// # STATE
-// ####################################################################################
+# ####################################################################################
+# # STATE
+# ####################################################################################
 if not varexist var__my_weapon
     @setvar! var__my_weapon 0
 endif
@@ -136,8 +136,8 @@ if not varexist var__combat_target
     @setvar! var__combat_target 0
 endif
 
-// Starts on Sunder so the dead band between the two Defensive lines has a defined answer on
-// the very first pass. var__stance_active 0 means unknown, which forces a label read.
+# Starts on Sunder so the dead band between the two Defensive lines has a defined answer on
+# the very first pass. var__stance_active 0 means unknown, which forces a label read.
 if not varexist var__stance_want
     @setvar! var__stance_want config__stance_sunder
 endif
@@ -154,10 +154,10 @@ if not varexist var__ability_want
     @setvar! var__ability_want 0
 endif
 
-// ####################################################################################
-// # INSTRUMENT
-// ####################################################################################
-// Only auto detect when the cached instrument is no longer in the backpack.
+# ####################################################################################
+# # INSTRUMENT
+# ####################################################################################
+# Only auto detect when the cached instrument is no longer in the backpack.
 if not find var__my_instrument backpack
     @setvar! var__my_instrument 0
 
@@ -181,7 +181,7 @@ if not find var__my_instrument backpack
     endif
 endif
 
-// If auto detect fails, ask for a manual pick exactly once.
+# If auto detect fails, ask for a manual pick exactly once.
 if not find var__my_instrument backpack
     clearsysmsg
     overhead "[ inst, pick ]" 55
@@ -207,9 +207,9 @@ if not find var__my_instrument backpack
     endif
 endif
 
-// ####################################################################################
-// # MAIN LOOP
-// ####################################################################################
+# ####################################################################################
+# # MAIN LOOP
+# ####################################################################################
 while not dead
     while queued
         wait wait__short
@@ -219,16 +219,16 @@ while not dead
         wait wait__short
     endwhile
 
-    // ################################################################################
-    // # WEAPON
-    // ################################################################################
-    // 3568 / 5112 / 3721 are black, gnarled and quarter staff, the two handed Grinding
-    // Medium group. Two handed is worth more here than a parrying gauche in the offhand:
-    // parry chance is 50% * (Parrying Skill / 100) and this template has no printed
-    // Parrying, so the gauche only buys what its own effective skill grants, while two
-    // handed is a flat +25% melee damage that is always on.
-    // rhandempty stays true while a two handed weapon is wielded, so test lhandempty.
-    // Re-scan when the cache is empty or the weapon is gone.
+    # ################################################################################
+    # # WEAPON
+    # ################################################################################
+    # 3568 / 5112 / 3721 are black, gnarled and quarter staff, the two handed Grinding
+    # Medium group. Two handed is worth more here than a parrying gauche in the offhand:
+    # parry chance is 50% * (Parrying Skill / 100) and this template has no printed
+    # Parrying, so the gauche only buys what its own effective skill grants, while two
+    # handed is a flat +25% melee damage that is always on.
+    # rhandempty stays true while a two handed weapon is wielded, so test lhandempty.
+    # Re-scan when the cache is empty or the weapon is gone.
     if lhandempty
         if not find var__my_weapon backpack
             @setvar! var__my_weapon 0
@@ -247,7 +247,7 @@ while not dead
 
                 @clearignore
             else
-                // Plain mode takes the first staff at the aspect hue without reading its label.
+                # Plain mode takes the first staff at the aspect hue without reading its label.
                 if findtype 3568|5112|3721 backpack config__aspect_hue as alias__found_craft_weapon
                     @setvar! var__my_weapon alias__found_craft_weapon
                 endif
@@ -266,10 +266,10 @@ while not dead
         endif
     endif
 
-    // ################################################################################
-    // # SYSTEM MESSAGE
-    // ################################################################################
-    // insysmsg consumes the matched message and everything before it, so check order matters.
+    # ################################################################################
+    # # SYSTEM MESSAGE
+    # ################################################################################
+    # insysmsg consumes the matched message and everything before it, so check order matters.
     if insysmsg "Your concentration is disturbed, thus ruining thy spell."
         replay
     endif
@@ -289,10 +289,10 @@ while not dead
         endif
     endif
 
-    // ################################################################################
-    // # COMBAT TARGET CACHE
-    // ################################################################################
-    // Cache the last hostile target so targeting the backpack or self does not break the combat logic.
+    # ################################################################################
+    # # COMBAT TARGET CACHE
+    # ################################################################################
+    # Cache the last hostile target so targeting the backpack or self does not break the combat logic.
     if find lasttarget ground -1 -1 12 as alias__fresh_target
         if not dead alias__fresh_target and var__combat_target != alias__fresh_target
             if noto alias__fresh_target = "hostile" or noto alias__fresh_target = "criminal" or noto alias__fresh_target = "enemy" or noto alias__fresh_target = "murderer"
@@ -314,9 +314,9 @@ while not dead
         @setvar! var__combat_target 0
     endif
 
-    // ################################################################################
-    // # OVERWEIGHT
-    // ################################################################################
+    # ################################################################################
+    # # OVERWEIGHT
+    # ################################################################################
     while weight > maxweight
         if findtype "gold coin" backpack as alias__found_gold
             lift alias__found_gold config__gold_drop_amount
@@ -339,9 +339,9 @@ while not dead
         endif
     endwhile
 
-    // ################################################################################
-    // # FOOD
-    // ################################################################################
+    # ################################################################################
+    # # FOOD
+    # ################################################################################
     if not findbuff 'Food Satisfaction'
         if findtype tray backpack as alias__found_food
             dclick alias__found_food
@@ -349,9 +349,9 @@ while not dead
         endif
     endif
 
-    // ################################################################################
-    // # BANDAGE
-    // ################################################################################
+    # ################################################################################
+    # # BANDAGE
+    # ################################################################################
     if diffhits > 0 or poisoned
         if not bandaging and skill "Healing" > config__heal_skill_min
             if findtype "clean bandage%s%" self
@@ -366,9 +366,9 @@ while not dead
         endif
     endif
 
-    // ################################################################################
-    // # PARALYZE POUCH
-    // ################################################################################
+    # ################################################################################
+    # # PARALYZE POUCH
+    # ################################################################################
     if paralyzed
         if findtype 3705 backpack 38
             yell "[Pouch"
@@ -381,9 +381,9 @@ while not dead
         endif
     endif
 
-    // ################################################################################
-    // # HEAL POT
-    // ################################################################################
+    # ################################################################################
+    # # HEAL POT
+    # ################################################################################
     if diffhits >= config__heal_potion_diff and config__use_potion = 1 and not targetexists
         if findtype "Yellow Potion" self as alias__heal_potion
             getlabel alias__heal_potion label__heal_potion
@@ -406,10 +406,10 @@ while not dead
         endif
     endif
 
-    // ################################################################################
-    // # CURE POT
-    // ################################################################################
-    // While hidden, skip only the potion. The old break terminated the whole main loop.
+    # ################################################################################
+    # # CURE POT
+    # ################################################################################
+    # While hidden, skip only the potion. The old break terminated the whole main loop.
     if poisoned and config__use_potion = 1 and not targetexists and not hidden
         if findtype "Orange Potion" self as alias__cure_potion
             overhead "[ cure pot, on ]" 90
@@ -423,10 +423,10 @@ while not dead
         endif
     endif
 
-    // ################################################################################
-    // # STAMINA POT
-    // ################################################################################
-    // Total Refresh has no cooldown, so keep drinking below the threshold.
+    # ################################################################################
+    # # STAMINA POT
+    # ################################################################################
+    # Total Refresh has no cooldown, so keep drinking below the threshold.
     if stam < config__stam_threshold and config__use_potion = 1 and not targetexists
         if findtype "Red Potion" backpack as alias__refresh_potion
             dclick alias__refresh_potion
@@ -439,9 +439,9 @@ while not dead
         endif
     endif
 
-    // ################################################################################
-    // # STRENGTH POT
-    // ################################################################################
+    # ################################################################################
+    # # STRENGTH POT
+    # ################################################################################
     if not findbuff 'Strength' and str <= config__str_threshold and config__use_potion = 1 and not targetexists and find var__combat_target ground -1 -1 12
         if findtype "White Potion" backpack as alias__strength_potion
             dclick alias__strength_potion
@@ -454,9 +454,9 @@ while not dead
         endif
     endif
 
-    // ################################################################################
-    // # AGILITY POT
-    // ################################################################################
+    # ################################################################################
+    # # AGILITY POT
+    # ################################################################################
     if not findbuff 'Agility' and dex <= config__dex_threshold and config__use_potion = 1 and not targetexists and find var__combat_target ground -1 -1 12
         if findtype "Blue Potion" backpack as alias__agility_potion
             dclick alias__agility_potion
@@ -469,9 +469,9 @@ while not dead
         endif
     endif
 
-    // ################################################################################
-    // # RESIST POT
-    // ################################################################################
+    # ################################################################################
+    # # RESIST POT
+    # ################################################################################
     if not findbuff 'Magic Resist Potion' and config__use_potion = 1 and not targetexists and find var__combat_target ground -1 -1 12
         if findtype "Black Potion" backpack as alias__resist_potion
             dclick alias__resist_potion
@@ -484,12 +484,12 @@ while not dead
         endif
     endif
 
-    // ################################################################################
-    // # BARD SONG BUFF
-    // ################################################################################
-    // The aspect resets the Music cooldown right after a song, so all three are tried in one pass.
-    // No clearsysmsg in front of the blocks. It wiped messages other blocks still needed, and a
-    // stale instrument prompt cannot hijack a cursor this useskill never opened.
+    # ################################################################################
+    # # BARD SONG BUFF
+    # ################################################################################
+    # The aspect resets the Music cooldown right after a song, so all three are tried in one pass.
+    # No clearsysmsg in front of the blocks. It wiped messages other blocks still needed, and a
+    # stale instrument prompt cannot hijack a cursor this useskill never opened.
     if config__use_bard_song = 1 and not targetexists and cooldown "disco" = 0 and cooldown "music" = 0 and not findbuff "song of discordance"
         useskill 'Discordance'
         waitfortarget wait__target
@@ -526,9 +526,9 @@ while not dead
         endif
     endif
 
-    // ################################################################################
-    // # PEACE
-    // ################################################################################
+    # ################################################################################
+    # # PEACE
+    # ################################################################################
     if not warmode and not targetexists and find var__combat_target ground -1 -1 10 as alias__peace_target
         if skill "Peacemaking" > 0 and cooldown "peace/provo" = 0 and cooldown "music" = 0
             getlabel alias__peace_target label__peace_target
@@ -559,9 +559,9 @@ while not dead
         endif
     endif
 
-    // ################################################################################
-    // # DISCO
-    // ################################################################################
+    # ################################################################################
+    # # DISCO
+    # ################################################################################
     if not warmode and not targetexists and find var__combat_target ground -1 -1 10 as alias__disco_target
         if skill "Discordance" > 0 and cooldown "disco" = 0 and cooldown "music" = 0
             getlabel alias__disco_target label__disco_target
@@ -592,9 +592,9 @@ while not dead
         endif
     endif
 
-    // ################################################################################
-    // # DISCO & VIRTUOSO
-    // ################################################################################
+    # ################################################################################
+    # # DISCO & VIRTUOSO
+    # ################################################################################
     if not warmode and not targetexists and find var__combat_target ground -1 -1 10 as alias__virtuoso_target
         if skill "Discordance" > 0 and cooldown "disco" = 0 and cooldown "music" = 0 and not findbuff "Virtuoso"
             useskill 'Discordance'
@@ -620,17 +620,17 @@ while not dead
 
     endif
 
-    // ################################################################################
-    // # CODEX STANCE
-    // ################################################################################
-    // Sunder is the default: it adds armor pierce on top of a flat damage bonus, and the
-    // pierce is what a flail is for. Defensive takes over while hurt, trading damage for a
-    // resistance buff that every swing refreshes.
-    //
-    // The codex label is the only source of truth. Outlands announces a stance change as an
-    // overhead message, not a system message, so insysmsg cannot read it. The cache is
-    // refreshed from the label on a timer, which also catches a stance changed by hand.
-    //
+    # ################################################################################
+    # # CODEX STANCE
+    # ################################################################################
+    # Sunder is the default: it adds armor pierce on top of a flat damage bonus, and the
+    # pierce is what a flail is for. Defensive takes over while hurt, trading damage for a
+    # resistance buff that every swing refreshes.
+    #
+    # The codex label is the only source of truth. Outlands announces a stance change as an
+    # overhead message, not a system message, so insysmsg cannot read it. The cache is
+    # refreshed from the label on a timer, which also catches a stance changed by hand.
+    #
     if config__use_codex_stance = 1 and var__stance_disabled = 0 and not pvp
         if timer "timer__stance_resync" > cooldown__stance_resync
             @setvar! var__stance_active 0
@@ -649,10 +649,10 @@ while not dead
             if findtype 11888 backpack as alias__macing_codex
                 getlabel alias__macing_codex label__macing_codex
 
-                // All five names are tested, not just the two this script drives. Finding
-                // one of the others means the label works and the player is parked on
-                // another stance. Finding none means the label does not carry the stance at
-                // all, and blind switching would risk toggling the active stance off.
+                # All five names are tested, not just the two this script drives. Finding
+                # one of the others means the label works and the player is parked on
+                # another stance. Finding none means the label does not carry the stance at
+                # all, and blind switching would risk toggling the active stance off.
                 if "Sunder" in label__macing_codex
                     @setvar! var__stance_active config__stance_sunder
                 elseif "Defensive" in label__macing_codex
@@ -681,8 +681,8 @@ while not dead
                         say "[MacingStance5"
                     endif
 
-                    // Assume it took. Saying it again before the label catches up would risk
-                    // toggling the stance straight back off.
+                    # Assume it took. Saying it again before the label catches up would risk
+                    # toggling the stance straight back off.
                     @setvar! var__stance_active var__stance_want
                     settimer "timer__stance_resync" 0
 
@@ -696,24 +696,24 @@ while not dead
         endif
     endif
 
-    // ################################################################################
-    // # WEAPON ABILITY
-    // ################################################################################
-    // Pummel, Stun and Smash share one gauge that refills in 24 to 60 seconds, so this
-    // speaks at most once per cooldown__ability window.
-    //
-    // Pummel ramps 10% per hit to a 50% cap over 15 seconds. Smash is one hit at 300% and
-    // roots the player for 1.5 seconds. Both are scaled by weapon speed and that formula is
-    // not documented, so which one wins on a Grinding Medium staff is not settled. Pummel is
-    // the pick for now. To switch, change the one line below to config__ability_smash.
-    //
-    // Lifted out of the DISCO and VIRTUOSO block, where it used to sit. It was only ever
-    // reached on passes that block ran, and it is not a bard action.
+    # ################################################################################
+    # # WEAPON ABILITY
+    # ################################################################################
+    # Pummel, Stun and Smash share one gauge that refills in 24 to 60 seconds, so this
+    # speaks at most once per cooldown__ability window.
+    #
+    # Pummel ramps 10% per hit to a 50% cap over 15 seconds. Smash is one hit at 300% and
+    # roots the player for 1.5 seconds. Both are scaled by weapon speed and that formula is
+    # not documented, so which one wins on a Grinding Medium staff is not settled. Pummel is
+    # the pick for now. To switch, change the one line below to config__ability_smash.
+    #
+    # Lifted out of the DISCO and VIRTUOSO block, where it used to sit. It was only ever
+    # reached on passes that block ran, and it is not a bard action.
     if config__use_weapon_ability = 1 and not pvp and cooldown "ability" = 0 and find var__combat_target ground -1 -1 2
         @setvar! var__ability_want config__ability_pummel
 
-        // The slot number is what the command carries, so this maps slot to command. It has
-        // a branch per slot because say takes a literal, not a variable.
+        # The slot number is what the command carries, so this maps slot to command. It has
+        # a branch per slot because say takes a literal, not a variable.
         if var__ability_want = 1
             say "[WeaponAbility1"
         elseif var__ability_want = 2

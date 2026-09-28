@@ -2,289 +2,289 @@ clearsysmsg
 clearall
 
 if not varexist is_stealth
-	setvar is_stealth 0
+    setvar is_stealth 0
 endif
 
 if not timerexists "target_timer"
-	setvar! target_timer_frequency 2500
-	createtimer "target_timer"
-	settimer "target_timer" target_timer_frequency
+    setvar! target_timer_frequency 2500
+    createtimer "target_timer"
+    settimer "target_timer" target_timer_frequency
 endif
 
 if not timerexists "overhead_message_timer"
-	setvar! overhead_message_timer_frequency 2700
-	createtimer "overhead_message_timer"
-	settimer "overhead_message_timer" overhead_message_timer_frequency
+    setvar! overhead_message_timer_frequency 2700
+    createtimer "overhead_message_timer"
+    settimer "overhead_message_timer" overhead_message_timer_frequency
 endif
 
 if not timerexists "corpse_carving_timer"
-	setvar! corpse_carving_timer_frequency 2000
-	createtimer "corpse_carving_timer"
-	settimer "corpse_carving_timer" corpse_carving_timer_frequency
+    setvar! corpse_carving_timer_frequency 2000
+    createtimer "corpse_carving_timer"
+    settimer "corpse_carving_timer" corpse_carving_timer_frequency
 endif
 
 if not timerexists "hide_reminder_timer"
-	setvar! hide_reminder_timer_frequency 7000
-	createtimer "hide_reminder_timer"
-	settimer "hide_reminder_timer" hide_reminder_timer_frequency
+    setvar! hide_reminder_timer_frequency 7000
+    createtimer "hide_reminder_timer"
+    settimer "hide_reminder_timer" hide_reminder_timer_frequency
 endif
 
 if not gumpexists 2016719803
-	say "[codexhotbar"
+    say "[codexhotbar"
 endif
 
 
 
 if skill "Tracking" > 0
-	if not findbuff "tracking"
-		while not gumpexists 4267467659
-			useskill 'tracking'
-			getlabel backpack ping
-		endwhile
+    if not findbuff "tracking"
+        while not gumpexists 4267467659
+            useskill 'tracking'
+            getlabel backpack ping
+        endwhile
 
-		if gumpexists 4267467659
-			while not insysmsg "You will now hunt all hostile players"
-				gumpresponse 8 4267467659
-				waitforgump 4267467659 5000
-			endwhile
+        if gumpexists 4267467659
+            while not insysmsg "You will now hunt all hostile players"
+                gumpresponse 8 4267467659
+                waitforgump 4267467659 5000
+            endwhile
 
-			gumpresponse 6 4267467659
-			getlabel backpack ping
-		endif
+            gumpresponse 6 4267467659
+            getlabel backpack ping
+        endif
 
-		wait 3000
-	endif
+        wait 3000
+    endif
 endif
 
 
 while not dead
-	while not hidden
-		if rhandempty
-			if findtype 'war hammer' backpack 1790 as found_hammer
-				dclick found_hammer
-			endif
-		endif
+    while not hidden
+        if rhandempty
+            if findtype 'war hammer' backpack 1790 as found_hammer
+                dclick found_hammer
+            endif
+        endif
 
-		if is_stealth = 1 or is_stealth = 2
-			if insysmsg "Vanish activated."
-				overhead "[ vanish, on ]" 90
-				setvar is_stealth 2
-				break
-			else
-				overhead "[ hide, off ]" 53
+        if is_stealth = 1 or is_stealth = 2
+            if insysmsg "Vanish activated."
+                overhead "[ vanish, on ]" 90
+                setvar is_stealth 2
+                break
+            else
+                overhead "[ hide, off ]" 53
                 setvar is_stealth 0
-			endif
+            endif
 
-			clearsysmsg
-			wait 200
-		endif
+            clearsysmsg
+            wait 200
+        endif
 
-		if paralyzed
-			if findtype 3705 backpack 38
-				yell "[Pouch"
-				getlabel backpack ping
-			else
-				overhead "[ pouch, out ]" 53
-			endif
-		endif
+        if paralyzed
+            if findtype 3705 backpack 38
+                yell "[Pouch"
+                getlabel backpack ping
+            else
+                overhead "[ pouch, out ]" 53
+            endif
+        endif
 
-		if hp <= 75
-			if findtype "Yellow Potion" self as found_potion
-					getlabel found_potion found_potion_description
+        if hp <= 75
+            if findtype "Yellow Potion" self as found_potion
+                    getlabel found_potion found_potion_description
 
-				if "next usable" in found_potion_description
-					if timer "overhead_message_timer" > overhead_message_timer_frequency
-						overhead "[ heal pot, {{found_potion_description}} ]" 90
-						settimer "overhead_message_timer" 0
-					endif
-				else
-					if hidden
-						break
-					endif
+                if "next usable" in found_potion_description
+                    if timer "overhead_message_timer" > overhead_message_timer_frequency
+                        overhead "[ heal pot, {{found_potion_description}} ]" 90
+                        settimer "overhead_message_timer" 0
+                    endif
+                else
+                    if hidden
+                        break
+                    endif
 
-					dclick found_potion
-					getlabel backpack ping
-					cooldown "heal pot" 10000
-				endif
-			else
-				if timer "overhead_message_timer" > overhead_message_timer_frequency
-					overhead "[ heal pot, out ]" 53
-					settimer "overhead_message_timer" 0
-				endif
-			endif
-		endif
+                    dclick found_potion
+                    getlabel backpack ping
+                    cooldown "heal pot" 10000
+                endif
+            else
+                if timer "overhead_message_timer" > overhead_message_timer_frequency
+                    overhead "[ heal pot, out ]" 53
+                    settimer "overhead_message_timer" 0
+                endif
+            endif
+        endif
 
-		if poisoned
-			if findtype "Orange Potion" self as found_potion
-				if hidden
-					break
-				endif
+        if poisoned
+            if findtype "Orange Potion" self as found_potion
+                if hidden
+                    break
+                endif
 
-				overhead "[ cure pot, on ]" 90
-				dclick found_potion
-				getlabel backpack ping
-			else
-				if timer "overhead_message_timer" > overhead_message_timer_frequency
-					overhead "[ cure pot, out ]" 53
-					settimer "overhead_message_timer" 0
-				endif
-			endif
-		endif
+                overhead "[ cure pot, on ]" 90
+                dclick found_potion
+                getlabel backpack ping
+            else
+                if timer "overhead_message_timer" > overhead_message_timer_frequency
+                    overhead "[ cure pot, out ]" 53
+                    settimer "overhead_message_timer" 0
+                endif
+            endif
+        endif
 
-		if findtype 8198 ground -1 -1 2 as found_corpse
-			if findtype "Elven Spellblade" backpack as found_spellblade
-				if cooldown "corpse skin" = 0
-					if hidden
-						break
-					endif
+        if findtype 8198 ground -1 -1 2 as found_corpse
+            if findtype "Elven Spellblade" backpack as found_spellblade
+                if cooldown "corpse skin" = 0
+                    if hidden
+                        break
+                    endif
 
-					dclick found_spellblade
-					waitfortarget
-					target 'self'
-					cooldown "corpse skin" 1000
+                    dclick found_spellblade
+                    waitfortarget
+                    target 'self'
+                    cooldown "corpse skin" 1000
 
-					if insysmsg "You carve materials from the corpse"
-						if timer "corpse_carving_timer" >= corpse_carving_timer_frequency
-							overhead "[ carve, done ]" 90
-							settimer "corpse_carving_timer" 0
-							ignore found_corpse
-						endif
-					elseif insysmsg "You dont see anything nearby worth carving or investigating."
-						if timer "corpse_carving_timer" >= corpse_carving_timer_frequency
-							overhead "[ corpse, out ]" 53
-							settimer "corpse_carving_timer" 0
-							ignore found_corpse
-						endif
-					endif
-				endif
-			else
-				if timer "overhead_message_timer" >= overhead_message_timer_frequency
-					overhead "[ blade, out ]" 53
-					settimer "overhead_message_timer" 0
-				endif
-			endif
-		endif
+                    if insysmsg "You carve materials from the corpse"
+                        if timer "corpse_carving_timer" >= corpse_carving_timer_frequency
+                            overhead "[ carve, done ]" 90
+                            settimer "corpse_carving_timer" 0
+                            ignore found_corpse
+                        endif
+                    elseif insysmsg "You dont see anything nearby worth carving or investigating."
+                        if timer "corpse_carving_timer" >= corpse_carving_timer_frequency
+                            overhead "[ corpse, out ]" 53
+                            settimer "corpse_carving_timer" 0
+                            ignore found_corpse
+                        endif
+                    endif
+                endif
+            else
+                if timer "overhead_message_timer" >= overhead_message_timer_frequency
+                    overhead "[ blade, out ]" 53
+                    settimer "overhead_message_timer" 0
+                endif
+            endif
+        endif
 
-		while weight > maxweight
-			if findtype "gold coin" backpack as found_gold
-				lift found_gold 500
-				droprelloc 0 0
-				getlabel backpack backpack_description
+        while weight > maxweight
+            if findtype "gold coin" backpack as found_gold
+                lift found_gold 500
+                droprelloc 0 0
+                getlabel backpack backpack_description
 
-				if insysmsg "cannot drop anything"
-					drop backpack -1 -1 -1
-				endif
+                if insysmsg "cannot drop anything"
+                    drop backpack -1 -1 -1
+                endif
 
-				wait 1000
-				overhead "[ gold, dropped ]" 90
-			endif
-		endwhile
-
-		if cooldown "skill" = 0 and timer "hide_reminder_timer" > hide_reminder_timer_frequency
-			overhead "[ hide, ready ]" 68
-			settimer "hide_reminder_timer" 0
-		endif
-
-		while queued
-		    wait 100
-		endwhile
-	endwhile
-
-	while hidden
-		while queued
-        	wait 100
+                wait 1000
+                overhead "[ gold, dropped ]" 90
+            endif
         endwhile
 
-		if mounted
-			if is_stealth = 1 or is_stealth = 2
-				hotkey "Dismount"
-			endif
-		endif
+        if cooldown "skill" = 0 and timer "hide_reminder_timer" > hide_reminder_timer_frequency
+            overhead "[ hide, ready ]" 68
+            settimer "hide_reminder_timer" 0
+        endif
 
-		if findbuff "Stationary Penalty" and timer "overhead_message_timer" >= overhead_message_timer_frequency
-			overhead "[ penalty, on ]" 53
-			settimer "overhead_message_timer" 0
-		endif
+        while queued
+            wait 100
+        endwhile
+    endwhile
 
-		if is_stealth = 0
-			if insysmsg "You feel comfortable enough to begin stealthing."
-				hotkey "Stealth"
-				setvar is_stealth 1
-				break
-			endif
+    while hidden
+        while queued
+            wait 100
+        endwhile
 
-			if insysmsg "stealth steps remaining"
-				setvar is_stealth 1
-				break
-			endif
+        if mounted
+            if is_stealth = 1 or is_stealth = 2
+                hotkey "Dismount"
+            endif
+        endif
 
-			if insysmsg "You begin to move quietly."
-				setvar is_stealth 1
-				break
-			endif
+        if findbuff "Stationary Penalty" and timer "overhead_message_timer" >= overhead_message_timer_frequency
+            overhead "[ penalty, on ]" 53
+            settimer "overhead_message_timer" 0
+        endif
 
-			if insysmsg "Vanish activated."
+        if is_stealth = 0
+            if insysmsg "You feel comfortable enough to begin stealthing."
+                hotkey "Stealth"
+                setvar is_stealth 1
+                break
+            endif
+
+            if insysmsg "stealth steps remaining"
+                setvar is_stealth 1
+                break
+            endif
+
+            if insysmsg "You begin to move quietly."
+                setvar is_stealth 1
+                break
+            endif
+
+            if insysmsg "Vanish activated."
                 setvar is_stealth 2
                 break
             endif
 
-			if timer "overhead_message_timer" > overhead_message_timer_frequency
-				overhead "[ stealth, off ]" 53
-				settimer "overhead_message_timer" 0
-			endif
-		endif
+            if timer "overhead_message_timer" > overhead_message_timer_frequency
+                overhead "[ stealth, off ]" 53
+                settimer "overhead_message_timer" 0
+            endif
+        endif
 
-		if insysmsg "You feel ready to continue stealthing."
-			setvar is_stealth 2
-		endif
+        if insysmsg "You feel ready to continue stealthing."
+            setvar is_stealth 2
+        endif
 
-		if is_stealth = 1 and timer "overhead_message_timer" > overhead_message_timer_frequency
-			overhead "[ position, ready ]" 68
-			settimer "overhead_message_timer" 0
-		endif
+        if is_stealth = 1 and timer "overhead_message_timer" > overhead_message_timer_frequency
+            overhead "[ position, ready ]" 68
+            settimer "overhead_message_timer" 0
+        endif
 
-		if is_stealth = 2 and timer "overhead_message_timer" > overhead_message_timer_frequency
-			overhead "[ stealth, ready ]" 68
-			settimer "overhead_message_timer" 0
-		endif
+        if is_stealth = 2 and timer "overhead_message_timer" > overhead_message_timer_frequency
+            overhead "[ stealth, ready ]" 68
+            settimer "overhead_message_timer" 0
+        endif
 
-		if insysmsg "You have 0 stealth steps remaining."
-			clearsysmsg
+        if insysmsg "You have 0 stealth steps remaining."
+            clearsysmsg
 
-			for 5
-				if cooldown "skill" = 0 or cooldown "stealth" = 0
-					hotkey "Stealth"
+            for 5
+                if cooldown "skill" = 0 or cooldown "stealth" = 0
+                    hotkey "Stealth"
                     setvar is_stealth 1
                     clearsysmsg
                     break
-				else
-					overhead "[ skill, off ]" 53
-				endif
+                else
+                    overhead "[ skill, off ]" 53
+                endif
 
-				wait 1000
-			endfor
-		endif
+                wait 1000
+            endfor
+        endif
 
 
-		if warmode
-			hotkey "Target Closest Grey Monster"
+        if warmode
+            hotkey "Target Closest Grey Monster"
 
-			while find lasttarget ground any
-				if not warmode
-					break
-				endif
+            while find lasttarget ground any
+                if not warmode
+                    break
+                endif
 
-				if find lasttarget ground -1 -1 1
-					hotkey "Attack Last Target"
-					cooldown "corpse skin" 1000
-					clearsysmsg
-					wait 300
-					break
-				elseif timer "target_timer" > target_timer_frequency
-					overhead "[ range, out ]" 53 lasttarget
-					settimer "target_timer" 0
-				endif
-			endwhile
-		endif
-	endwhile
+                if find lasttarget ground -1 -1 1
+                    hotkey "Attack Last Target"
+                    cooldown "corpse skin" 1000
+                    clearsysmsg
+                    wait 300
+                    break
+                elseif timer "target_timer" > target_timer_frequency
+                    overhead "[ range, out ]" 53 lasttarget
+                    settimer "target_timer" 0
+                endif
+            endwhile
+        endif
+    endwhile
 endwhile

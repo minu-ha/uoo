@@ -56,77 +56,77 @@ if not find var_my_instrument backpack
 endif
 
 while not dead
-	if insysmsg "That is not a musical instrument"
-		setvar var_my_instrument
-	endif
+    if insysmsg "That is not a musical instrument"
+        setvar var_my_instrument
+    endif
 
-	if insysmsg "What instrument shall you play"
-		waitfortarget 1000
+    if insysmsg "What instrument shall you play"
+        waitfortarget 1000
 
-		if targetexists
-			target var_my_instrument
-			replay
-		endif
-	endif
+        if targetexists
+            target var_my_instrument
+            replay
+        endif
+    endif
 
 
-	wait 1000
+    wait 1000
 
-	if var_bard_buff_stage = 0
-		if cooldown "disco" = 0 and cooldown "music" = 0 and cooldown "song" = 0
-			clearsysmsg
-			useskill 'Discordance'
-			waitfortarget 1000
+    if var_bard_buff_stage = 0
+        if cooldown "disco" = 0 and cooldown "music" = 0 and cooldown "song" = 0
+            clearsysmsg
+            useskill 'Discordance'
+            waitfortarget 1000
 
-			if insysmsg "What instrument"
-				target var_my_instrument
-				replay
-				waitfortarget 1000
-			endif
+            if insysmsg "What instrument"
+                target var_my_instrument
+                replay
+                waitfortarget 1000
+            endif
 
-			if targetexists
-				target backpack
-				wait 300
-				@setvar! var_bard_buff_stage 1
-			endif
-		endif
-	elseif var_bard_buff_stage = 1
-		if cooldown "peace/provo" = 0 and cooldown "music" = 0 and cooldown "song" = 0
-			clearsysmsg
-			useskill 'Provocation'
-			waitfortarget 1000
+            if targetexists
+                target backpack
+                wait 300
+                @setvar! var_bard_buff_stage 1
+            endif
+        endif
+    elseif var_bard_buff_stage = 1
+        if cooldown "peace/provo" = 0 and cooldown "music" = 0 and cooldown "song" = 0
+            clearsysmsg
+            useskill 'Provocation'
+            waitfortarget 1000
 
-			if insysmsg "What instrument"
-				target var_my_instrument
-				replay
-				waitfortarget 1000
-			endif
+            if insysmsg "What instrument"
+                target var_my_instrument
+                replay
+                waitfortarget 1000
+            endif
 
-			if targetexists
-				target backpack
-				wait 300
-				@setvar! var_bard_buff_stage 2
-			endif
-		endif
-	elseif var_bard_buff_stage = 2
-		if cooldown "peace/provo" = 0 and cooldown "music" = 0 and cooldown "song" = 0
-			clearsysmsg
-			useskill 'Peacemaking'
-			waitfortarget 1000
+            if targetexists
+                target backpack
+                wait 300
+                @setvar! var_bard_buff_stage 2
+            endif
+        endif
+    elseif var_bard_buff_stage = 2
+        if cooldown "peace/provo" = 0 and cooldown "music" = 0 and cooldown "song" = 0
+            clearsysmsg
+            useskill 'Peacemaking'
+            waitfortarget 1000
 
-			if insysmsg "What instrument"
-				target var_my_instrument
-				replay
-				waitfortarget 1000
-			endif
+            if insysmsg "What instrument"
+                target var_my_instrument
+                replay
+                waitfortarget 1000
+            endif
 
-			if targetexists
-				target backpack
-				wait 300
-				@setvar! var_bard_buff_stage 0
-			endif
-		endif
-	else
-		@setvar! var_bard_buff_stage 0
-	endif
+            if targetexists
+                target backpack
+                wait 300
+                @setvar! var_bard_buff_stage 0
+            endif
+        endif
+    else
+        @setvar! var_bard_buff_stage 0
+    endif
 endwhile

@@ -1,15 +1,15 @@
-// Dress Suite - Equip
-// Original credit for the concept to Demlar
-// Needs: script/restock/loadout.razor run once this session, it records what to put back on
+# Dress Suite - Equip
+# Original credit for the concept to Demlar
+# Needs: script/restock/loadout.razor run once this session, it records what to put back on
 
-// One block per layer findlayer accepts, the same list script/restock/loadout.razor records.
-// A layer that still holds something is recorded. A layer that is empty gets its remembered
-// item back. Nothing is addressed by item graphic: the old version equipped seven items that
-// way and forced three of them onto the pants layer, which holds one thing, so the quiver,
-// the short pipe and the wizard satchel overwrote each other. A layer sweep cannot get that
-// wrong, because the layer an item was recorded from is the layer it goes back to.
-//
-// hair and facialhair are left out, they are not equipment.
+# One block per layer findlayer accepts, the same list script/restock/loadout.razor records.
+# A layer that still holds something is recorded. A layer that is empty gets its remembered
+# item back. Nothing is addressed by item graphic: the old version equipped seven items that
+# way and forced three of them onto the pants layer, which holds one thing, so the quiver,
+# the short pipe and the wizard satchel overwrote each other. A layer sweep cannot get that
+# wrong, because the layer an item was recorded from is the layer it goes back to.
+#
+# hair and facialhair are left out, they are not equipment.
 @setvar! wait__short 300
 @setvar! config__chatty 1
 
