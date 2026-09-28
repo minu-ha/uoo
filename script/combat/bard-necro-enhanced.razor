@@ -111,7 +111,7 @@
 #   wait for the cursor IS the cast. Every targeted spell here takes the same shape:
 #
 #     cast 'X'
-#     for 25                                  poll for the cursor instead of blocking on it
+#     for 60                                  poll for the cursor instead of blocking on it
 #         if targetexists           break     the cast finished
 #         if disturbed              say, break the cast died and its cursor is never coming
 #         if diffhits >= emergency  say, hotkey "> Interrupt", break
@@ -288,10 +288,13 @@ pushlist 'list__summon_names' 'nomeeheh'
 @setvar! wait__message 400
 
 # Cast polling. A cursor for a spell arrives after the cast time, 0.5 seconds for a first
-# circle up to 1.75 for Energy Bolt, so each poll loop runs for 25 x wait__poll at most and
-# leaves the moment the cursor shows. The 25 is a literal on every for line because a for
-# count has never been a variable anywhere in this repo. wait__cast after the target covers
-# spell recovery, which is 0.2 seconds.
+# circle up to 1.75 for Energy Bolt, and each poll loop leaves the moment the cursor shows.
+# The cap is 60 rounds. 25 looked like 2.5 seconds on paper, yet in game on 2026-09-29 a
+# fourth circle cursor still came after the loop had ended, so one round here is evidently
+# well short of wait__poll. A cursor that turns up after the loop stays open, and every
+# block waits on not targetexists, so the whole loop stalls on it. 60 covers a sixth circle
+# cast with room. It is a literal on every for line because a for count cannot be a
+# variable. wait__cast after the target covers spell recovery, which is 0.2 seconds.
 @setvar! wait__poll 100
 @setvar! wait__cast 300
 
@@ -949,7 +952,7 @@ while not dead
                     settimer "timer__heal_action" 0
                     wait wait__short
 
-                    for 25
+                    for 60
                         if not casting
                             break
                         endif
@@ -986,7 +989,7 @@ while not dead
                 settimer "timer__heal_action" 0
                 wait wait__short
 
-                for 25
+                for 60
                     if not casting
                         break
                     endif
@@ -1037,7 +1040,7 @@ while not dead
                     settimer "timer__greater_heal_retry" 0
                     wait wait__short
 
-                    for 25
+                    for 60
                         if not casting
                             break
                         endif
@@ -1183,7 +1186,7 @@ while not dead
                 cast 'Create Food'
                 wait wait__short
 
-                for 25
+                for 60
                     if not casting
                         break
                     endif
@@ -1324,7 +1327,7 @@ while not dead
                 cast 'Reactive Armor'
                 wait wait__short
 
-                for 25
+                for 60
                     if not casting
                         break
                     endif
@@ -1339,7 +1342,7 @@ while not dead
                 cast 'Magic Reflection'
                 wait wait__short
 
-                for 25
+                for 60
                     if not casting
                         break
                     endif
@@ -1356,7 +1359,7 @@ while not dead
                 # arrow would only bounce off it and burn the reflection.
                 cast 'Magic Arrow'
 
-                for 25
+                for 60
                     if targetexists
                         break
                     endif
@@ -1726,7 +1729,7 @@ while not dead
                 if not inlist 'list__magic_drained_targets' var__combat_target and var__regs_mana_drain = 1 and mana >= config__mana_4th
                     cast 'Mana Drain'
 
-                    for 25
+                    for 60
                         if targetexists
                             break
                         endif
@@ -1781,7 +1784,7 @@ while not dead
                 elseif not inlist 'list__magic_cursed_targets' var__combat_target and var__regs_curse = 1 and mana >= config__mana_4th
                     cast 'Curse'
 
-                    for 25
+                    for 60
                         if targetexists
                             break
                         endif
@@ -1880,7 +1883,7 @@ while not dead
                 if cooldown "magic arrow" = 0 and var__regs_magic_arrow = 1 and mana >= config__mana_1st
                     cast 'Magic Arrow'
 
-                    for 25
+                    for 60
                         if targetexists
                             break
                         endif
@@ -1929,7 +1932,7 @@ while not dead
                 elseif cooldown "harm" = 0 and var__regs_harm = 1 and mana >= config__mana_2nd
                     cast 'Harm'
 
-                    for 25
+                    for 60
                         if targetexists
                             break
                         endif
@@ -1978,7 +1981,7 @@ while not dead
                 elseif cooldown "fireball" = 0 and var__regs_fireball = 1 and mana >= config__mana_3rd
                     cast 'Fireball'
 
-                    for 25
+                    for 60
                         if targetexists
                             break
                         endif
@@ -2027,7 +2030,7 @@ while not dead
                 elseif cooldown "lightning" = 0 and var__regs_lightning = 1 and mana >= config__mana_4th
                     cast 'Lightning'
 
-                    for 25
+                    for 60
                         if targetexists
                             break
                         endif
@@ -2124,7 +2127,7 @@ while not dead
             if find var__combat_target ground -1 -1 config__target_range as alias__filler_target
                 cast 'Energy Bolt'
 
-                for 25
+                for 60
                     if targetexists
                         break
                     endif

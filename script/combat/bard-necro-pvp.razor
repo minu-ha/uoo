@@ -288,7 +288,7 @@ while not dead
         hotkey "> Smart Heal/Cure Self"
         wait wait__short
 
-        for 25
+        for 60
             if not casting
                 break
             endif
@@ -317,7 +317,7 @@ while not dead
             cast 'Reactive Armor'
             wait wait__short
 
-            for 25
+            for 60
                 if not casting
                     break
                 endif
@@ -332,7 +332,7 @@ while not dead
             cast 'Magic Reflection'
             wait wait__short
 
-            for 25
+            for 60
                 if not casting
                     break
                 endif
@@ -349,7 +349,7 @@ while not dead
             # arrow would only bounce off it and burn the reflection.
             cast 'Magic Arrow'
 
-            for 25
+            for 60
                 if targetexists
                     break
                 endif
@@ -415,7 +415,7 @@ while not dead
             if config__use_self_tk = 1 and var__self_tk_done = 0
                 cast 'Telekinesis'
 
-                for 25
+                for 60
                     if targetexists
                         break
                     endif
@@ -436,7 +436,7 @@ while not dead
             elseif var__in_range = 1 and cooldown "teleki, target" = 0
                 cast 'Telekinesis'
 
-                for 25
+                for 60
                     if targetexists
                         break
                     endif
@@ -486,7 +486,7 @@ while not dead
         if not targetexists and not casting and cooldown "walk" = 0
             cast 'Explosion'
 
-            for 25
+            for 60
                 if targetexists
                     @setvar! var__armed 1
                     settimer "timer__arm" 0
@@ -519,7 +519,7 @@ while not dead
             if cooldown "walk" = 0 and mana >= config__mana_6th
                 cast 'Energy Bolt'
 
-                for 25
+                for 60
                     if targetexists
                         break
                     endif
