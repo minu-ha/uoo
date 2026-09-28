@@ -173,7 +173,7 @@ basic (프로필 `default`):
 | 1060        | Set Last Target                                                             | 2054 / 2057        | Next / Previous Non-Friendly Player Target                                                  |
 | 1332        | Cancel Current Target                                                       | 2052 / 2055        | Next / Previous Friendly Player Target                                                      |
 | 1391        | > Smart Heal/Cure Self                                                      | 2101               | > Stop Current Script                                                                       |
-| 1395        | Attack Last Target                                                          | 2124               | Vengeful Spirit (Outlands 번호)                                                             |
+| 1395        | Attack Last Target                                                          | 1060522            | Vengeful Spirit. Razor Hotkeys 탭에서 건 번호. 손으로 넣은 2124 는 종료 때 버려졌다         |
 | 1028 ~ 1034 | Drink Heal / Cure / Refresh / Magic Resist / Explosion / Strength / Agility | 2527               | Pouch                                                                                       |
 | 1994        | > Interrupt                                                                 | 1044060 + 스킬번호 | 스킬 사용 (Disco 1044075, Peace 1044069, Hiding 1044081, Provo 1044082, Meditation 1044106) |
 

@@ -1030,7 +1030,7 @@ RESUMMON   [MUSHROOM 뒤, BARD SONG 앞]
         else                                     -> cast config__summon_spell, for 70 폴링, target
 ```
 
-Bloodmoss 플래그 하나만 추가하면 된다. Vengeful Spirit 은 채팅 명령 `[VengefulSpirit` 이나 Razor 핫키 (`L:2124`)로 켠다. 둘 다 동작한다. 남은 미확인은 **소환 커서가 지점 지정인지 자동 배치인지** 하나뿐이다.
+Bloodmoss 플래그 하나만 추가하면 된다. Vengeful Spirit 은 채팅 명령 `[VengefulSpirit` 이나 Razor 핫키 (`L:1060522`)로 켠다. 둘 다 동작한다. 남은 미확인은 **소환 커서가 지점 지정인지 자동 배치인지** 하나뿐이다.
 
 ---
 
