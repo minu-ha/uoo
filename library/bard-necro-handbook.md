@@ -1,6 +1,6 @@
 # Bard Necro 핸드북
 
-- 캐릭터: `nomeehej` (Razor 프로필 `bard mace`)
+- 캐릭터: `nomeehej` (Razor 프로필 `summoner`)
 - 스크립트: `script/combat/bard-necro-enhanced.razor` (F1, 사냥), `script/combat/bard-necro-pvp.razor` (F4, PK)
 - 2026-09-28 에 `bard-mechanics.md` · `bard-necro-combat-design.md` · `bard-necro-summon-guide.md` 세 문서를 하나로 묶었다. 이력은 git.
 

@@ -189,7 +189,7 @@
 
 ## 7. 프로필 오버헤드 표
 
-서버 문장 (검색어) → 메시지 (hue). Razor 프로필 `bard mace.xml` 과 `default.xml` 이 같은 내용이고,
+서버 문장 (검색어) → 메시지 (hue). Razor 프로필 `summoner.xml` 과 `default.xml` 이 같은 내용이고,
 `default.xml` 에는 던지기 8줄 (`now planted`, `moving throws`, `wing your target`)이 없고 붕대 1줄이 더 있다.
 정본은 프로필 xml 이다. 항목을 바꾸면 이 표도 같이 고친다. 표의 순서는 파일 순서이고, 2절 "순서" 규칙 때문에 의미가 있다.
 
