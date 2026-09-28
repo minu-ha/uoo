@@ -94,9 +94,14 @@
 #
 #   The act window is third on purpose rather than first. It is the one thing our own blocks
 #   change inside a pass, so reading it late means reading it fresh, immediately before the
-#   action. Category 1 leads because it is the most selective: var__engaged alone splits
-#   every pass into travel or combat and throws half the blocks away. Category 4 trails
-#   because an alias binding is worthless unless everything above it already passed.
+#   action. Category 1 leads because it is the most selective. The most selective of all,
+#   var__engaged, is asked once, at COMBAT OR WALK, which splits every pass into travel or
+#   combat so neither half steps through the other's blocks. Category 4 trails because an
+#   alias binding is worthless unless everything above it already passed.
+#
+#   A block that only needs looking at now and then, weight, food, the hotbar, the stat
+#   potions, the instrument, puts its clock first instead: skipping the lookup behind it on
+#   most passes is the point.
 #
 #   cooldown "walk" = 0 joins line 3 only where the whole block casts. Where a block mixes a
 #   drink with a cast it stays on the casting line, because drinking while walking is fine
@@ -337,9 +342,11 @@ pushlist 'list__summon_names' 'nomeeheh'
 # statement costs 5 to 10 ms here and a lookup 20 to 40, so each clock saves the pass one.
 #   weight          5 s, it only changes on a pickup, and being over it is not fatal
 #   food           60 s, the buff lasts far longer than that
+#   stat potions   10 s, and in a fight only, the buffs last minutes
 #   instrument     30 s, it only leaves the backpack on a break or a steal
 @setvar! cooldown__weight_check 5000
 @setvar! cooldown__food_check 60000
+@setvar! cooldown__potion_check 10000
 @setvar! cooldown__instrument_check 30000
 
 # How often the reagent flags are re-read. On this Razor a plain statement costs 5 to 10
@@ -488,6 +495,10 @@ if not timerexists "timer__food_check"
     createtimer "timer__food_check"
 endif
 
+if not timerexists "timer__potion_check"
+    createtimer "timer__potion_check"
+endif
+
 if not timerexists "timer__instrument_check"
     createtimer "timer__instrument_check"
 endif
@@ -497,6 +508,7 @@ endif
 settimer "timer__hotbar_check" cooldown__hotbar_check
 settimer "timer__weight_check" cooldown__weight_check
 settimer "timer__food_check" cooldown__food_check
+settimer "timer__potion_check" cooldown__potion_check
 settimer "timer__instrument_check" cooldown__instrument_check
 
 if not timerexists "timer__regs_refresh"
@@ -1194,10 +1206,10 @@ while not dead
     endif
 
     # ####################################################################################
-    # # POTIONS
+    # # REFRESH POTION
     # ####################################################################################
-    # Refresh is the only one worth drinking out of combat. The three stat potions share a
-    # single engagement guard so an idle walk does not burn them.
+    # Worth drinking in a fight or out of one, so it stays ahead of the split. The stat
+    # potions live under the engaged branch, in STAT POTIONS.
     if stam < 5
         if not targetexists and not casting
             if findtype "Red Potion" backpack
@@ -1206,40 +1218,6 @@ while not dead
             elseif timer "timer__message" >= cooldown__message
                 overhead "[ refresh, out ]" 53
                 settimer "timer__message" 0
-            endif
-        endif
-    endif
-
-    if config__use_potion = 1 and var__engaged = 1
-        if not targetexists and not casting
-            if not findbuff 'Strength'
-                if findtype "White Potion" backpack
-                    hotkey 'Drink Strength'
-                    wait wait__short
-                elseif timer "timer__message" >= cooldown__message
-                    overhead "[ str, out ]" 53
-                    settimer "timer__message" 0
-                endif
-            endif
-
-            if not findbuff 'Agility'
-                if findtype "Blue Potion" backpack
-                    hotkey 'Drink Agility'
-                    wait wait__short
-                elseif timer "timer__message" >= cooldown__message
-                    overhead "[ agi, out ]" 53
-                    settimer "timer__message" 0
-                endif
-            endif
-
-            if not findbuff 'Magic Resist Potion'
-                if findtype "Black Potion" backpack
-                    hotkey 'Drink Magic Resist'
-                    wait wait__short
-                elseif timer "timer__message" >= cooldown__message
-                    overhead "[ resist, out ]" 53
-                    settimer "timer__message" 0
-                endif
             endif
         endif
     endif
@@ -1267,36 +1245,6 @@ while not dead
             endif
         else
             settimer "timer__hotbar_check" 0
-        endif
-    endif
-
-    # ####################################################################################
-    # # MUSHROOM
-    # ####################################################################################
-    # Out of combat only, so the 60 second cooldown burns during the walk rather than during
-    # a fight where the cast would compete with the spell rotation. The whole block either
-    # eats or casts, so the walk guard rides on the act window line.
-    if var__engaged = 0
-        if not targetexists and not casting and cooldown "walk" = 0
-            if mana <= config__mushroom_eat_mana and not findbuff 'Magic Mushroom Cooldown' and findtype "mushroom" backpack
-                hotkey 'Eat Magic Mushroom'
-                wait wait__short
-            elseif counttype "mushroom" backpack < config__mushroom_min_count and mana >= config__mushroom_create_mana and var__regs_create_food = 1 and var__manual = 0
-                cast 'Create Food'
-                wait wait__short
-
-                for 60
-                    if not casting
-                        break
-                    endif
-
-                    if insysmsg "Your concentration is disturbed, thus ruining thy spell."
-                        break
-                    endif
-
-                    wait wait__poll
-                endfor
-            endif
         endif
     endif
 
@@ -1414,337 +1362,231 @@ while not dead
     endif
 
     # ####################################################################################
-    # # SELF BUFFS
+    # # COMBAT OR WALK
     # ####################################################################################
-    # Reactive Armor and Magic Reflection stay up until they are used up, so each needs a
-    # cast only when findbuff no longer sees it. On the walk only: in a fight the cast would
-    # take a slot from the rotation, and what matters is that both are up when the next
-    # pull, or a red, arrives. Reactive Armor is 1st circle and goes first, Magic Reflection
-    # waits its turn on the next pass. Both are self-only, so no cursor: the same no-cursor
-    # shape as Create Food above.
-    # The reflect bar is the server's recast lock, 30 seconds after a creature's spell and 60
-    # after a player's. It starts on the "Magic reflect removed" line, so the bar is the clock.
-    if var__engaged = 0 and var__manual = 0
-        if not targetexists and not casting and cooldown "walk" = 0
-            if config__use_reactive_armor = 1 and not findbuff 'Reactive Armor' and var__regs_reactive_armor = 1 and mana >= config__mana_1st
-                cast 'Reactive Armor'
-                wait wait__short
-
-                for 60
-                    if not casting
-                        break
-                    endif
-
-                    if insysmsg "Your concentration is disturbed, thus ruining thy spell."
-                        break
-                    endif
-
-                    wait wait__poll
-                endfor
-            elseif config__use_magic_reflect = 1 and not findbuff 'Magic Reflection' and cooldown "reflect" = 0 and var__regs_magic_reflect = 1 and mana >= config__mana_5th
-                cast 'Magic Reflection'
-                wait wait__short
-
-                for 60
-                    if not casting
-                        break
-                    endif
-
-                    if insysmsg "Your concentration is disturbed, thus ruining thy spell."
-                        break
-                    endif
-
-                    wait wait__poll
-                endfor
-            elseif not findbuff 'Spell Siphon' and not findbuff 'Magic Reflection' and var__regs_magic_arrow = 1 and mana >= config__mana_1st
-                # Spell Siphon: the first spell to hit us starts a sixty minute buff that shows on the
-                # buff bar. A Magic Arrow on self is that hit. Never with Magic Reflection up, the
-                # arrow would only bounce off it and burn the reflection. Any disturb line
-                # an earlier cast left is read off first, so the poll only sees its own. Before
-                # self is targeted, lasttarget is read once more, the way BARD SONG does.
-                if insysmsg "Your concentration is disturbed, thus ruining thy spell."
-                    # consumed, nothing else to do
-                endif
-
-                cast 'Magic Arrow'
-
-                for 60
-                    if targetexists
-                        break
-                    endif
-
-                    if insysmsg "Your concentration is disturbed, thus ruining thy spell."
-                        break
-                    endif
-
-                    wait wait__poll
-                endfor
-
-                if targetexists
-                    @setvar! var__keep_lasttarget 0
-
-                    if find lasttarget ground -1 -1 config__acquire_range as alias__fresh_target
-                        if not dead alias__fresh_target and var__combat_target != alias__fresh_target
-                            if noto alias__fresh_target = "hostile" or noto alias__fresh_target = "criminal" or noto alias__fresh_target = "enemy" or noto alias__fresh_target = "murderer"
-                                @setvar! var__keep_lasttarget 1
-                            endif
-                        endif
-                    endif
-
-                    if var__keep_lasttarget = 1
-                        hotkey "Cancel Current Target"
-                        wait wait__short
-                    else
-                        hotkey 'Target Self'
-                        wait wait__cast
-                    endif
-                endif
-            endif
-        endif
-    endif
-
-    # ####################################################################################
-    # # BARD SONG
-    # ####################################################################################
-    # Three 15 minute AoE buffs, each worth 8.5% at this Effective Barding, landing on the
-    # player and every follower in range. Sung on the walk between pulls, never in a fight:
-    # while engaged, Discordance and Peacemaking keep Music busy so a song rarely gets a
-    # window, and playing an instrument interrupts a spell already in flight.
+    # Everything above runs on every pass: the drains, the target cache, the flags and what
+    # keeps the character alive, fed and under its weight. Here one test splits the pass. A
+    # pass in a fight never looks at the walk blocks and a pass on the walk never looks at the
+    # fight blocks, so each pays only for its own gates. Before the split every block asked
+    # var__engaged for itself, and a walk pass still stepped through Discordance and
+    # Peacemaking down to a failed find each (2026-09-29).
     #
-    # Singing on the walk is what removes follower tracking from this script. A resummoned
-    # creature picks the songs up on the next walk, so nothing has to notice that it died.
+    #   engaged   stat potions, disco, peace, necro burst, opener, proc core, filler,
+    #             poison strike
+    #   walk      mushroom, self buffs, bard song, vampiric embrace
     #
-    # findbuff is deliberately NOT the gate. The buffs run 15 minutes, so a findbuff test
-    # would be true almost always and the refresh would never fire. The gate is the song
-    # cooldown plus the slot each song borrows.
-    #
-    # A branch only advances var__song_next once the cursor was actually delivered, so a song
-    # that could not go out, for any reason, is retried next pass instead of being skipped.
-    #
-    # The chain only picks the skill and the song after it, the three share the rest. Right
-    # before the backpack is targeted, lasttarget is read once more: a hostile the player has
-    # just picked would be lost to the backpack, the way a green capper was on 2026-09-29.
-    # Then the song stands down, cancels its cursor and leaves lasttarget for the next pass.
-    if var__bard_ready = 1 and var__engaged = 0
-        if cooldown "music" = 0 and cooldown "song" = 0
-            if not targetexists and not casting
-                @setvar! var__song_after 0
-
-                if var__song_next = 1 and skill "Discordance" > 0 and cooldown "disco" = 0
-                    useskill 'Discordance'
-                    @setvar! var__song_after 2
-                elseif var__song_next = 2 and skill "Peacemaking" > 0 and cooldown "peace/provo" = 0
-                    useskill 'Peacemaking'
-                    @setvar! var__song_after 3
-                elseif var__song_next = 3 and skill "Provocation" > 0 and cooldown "peace/provo" = 0
-                    useskill 'Provocation'
-                    @setvar! var__song_after 1
-                endif
-
-                if var__song_after != 0
-                    waitfortarget wait__target
-
-                    if insysmsg "What instrument shall you play"
-                        target var__my_instrument
-                        waitfortarget wait__target
-
-                        if insysmsg "That is not a musical instrument"
-                            @setvar! var__my_instrument 0
-                        endif
-                    endif
-
-                    if targetexists
-                        @setvar! var__keep_lasttarget 0
-
-                        if find lasttarget ground -1 -1 config__acquire_range as alias__fresh_target
-                            if not dead alias__fresh_target and var__combat_target != alias__fresh_target
-                                if noto alias__fresh_target = "hostile" or noto alias__fresh_target = "criminal" or noto alias__fresh_target = "enemy" or noto alias__fresh_target = "murderer"
-                                    @setvar! var__keep_lasttarget 1
-                                endif
-                            endif
-                        endif
-
-                        if var__keep_lasttarget = 1
-                            hotkey "Cancel Current Target"
-                            wait wait__short
-                        else
-                            target backpack
-                            @setvar! var__song_next var__song_after
-                        endif
-                    endif
-                endif
-            endif
-        endif
-    endif
-
-    # ####################################################################################
-    # # DISCO
-    # ####################################################################################
-    # Discordance runs about two minutes and does not break, so it is applied once per
-    # target and then left alone. It goes before Peace because Ensemble wants Discord AND
-    # Peace on the same creature, and the one that does not break is worth landing first.
-    # bard-mace leads with Peace instead, and for a dexxer that is right: Peace is what stops
-    # the mob hitting the player in melee. Here the followers hold the mob and the player is
-    # ten tiles back, so the debuff outranks the pacify. Skill is 80 on both, so the odds are
-    # the same either way and the order is only about which effect is worth more.
-    #
-    # Music is shared, so whichever of these two blocks fires first stands the other down
-    # until the next pass. That is the arbitration, no extra state needed.
-    #
-    # warmode is the manual control window, folded into var__bard_ready.
-    if var__bard_ready = 1 and skill "Discordance" > 0
-        if cooldown "disco" = 0 and cooldown "music" = 0
-            if not targetexists and not casting
-                if find var__combat_target ground -1 -1 config__target_range as alias__disco_target
-                    getlabel alias__disco_target label__disco_target
-
-                    if "discord" in label__disco_target
-                        settimer "timer__target_grace" 0
-                    else
-                        useskill 'Discordance'
-                        waitfortarget wait__target
-
-                        # Answered once, before the delivery loop. Razor asks for an
-                        # instrument only when its cached one is gone, and answering it
-                        # makes the skill open the real target cursor, so the wait is
-                        # simply repeated. replay is documented as restarting the whole
-                        # script from the top, which would re-run the entire setup.
-                        if insysmsg "What instrument shall you play"
-                            target var__my_instrument
-                            waitfortarget wait__target
-
-                            if insysmsg "That is not a musical instrument"
-                                @setvar! var__my_instrument 0
-                            endif
-                        endif
-
-                        if find lasttarget ground -1 -1 config__acquire_range as alias__fresh_target
-                            if not dead alias__fresh_target and var__combat_target != alias__fresh_target
-                                if noto alias__fresh_target = "hostile" or noto alias__fresh_target = "criminal" or noto alias__fresh_target = "enemy" or noto alias__fresh_target = "murderer"
-                                    @setvar! var__combat_target alias__fresh_target
-                                    settimer "timer__target_grace" 0
-
-                                    if find var__combat_target ground -1 -1 config__target_range as alias__disco_target
-                                        if config__chatty = 1
-                                            overhead "[ target, set ]" 705 var__combat_target
-                                        endif
-                                    endif
-                                endif
-                            endif
-                        endif
-
-                        while targetexists
-                            if dead alias__disco_target or var__combat_target != alias__disco_target
-                                hotkey "Cancel Current Target"
-                                wait wait__short
-                            else
-                                target alias__disco_target
-                                wait wait__short
-                            endif
-                        endwhile
-
-                        wait wait__short
-                    endif
-                endif
-            endif
-        endif
-    endif
-
-    # ####################################################################################
-    # # PEACE
-    # ####################################################################################
-    # The other half of the Ensemble condition, and unlike Discordance it is short. At
-    # difficulty 300 and up the duration formula floors at 15 x Musicianship / 100, which is
-    # 12 seconds here, against a 10 second slot cooldown. So it is re-applied continuously
-    # rather than once per target: let it lapse and Ensemble and Virtuoso go dark with it.
-    #
-    # A pacified creature does not attack, and taking damage does NOT break that. Only a
-    # barding break does, and while one is running neither Peace nor Provocation can land on
-    # that creature, which is why a broken target is left alone until it clears.
-    if var__bard_ready = 1 and skill "Peacemaking" > 0
-        if cooldown "peace/provo" = 0 and cooldown "music" = 0
-            if not targetexists and not casting
-                if find var__combat_target ground -1 -1 config__target_range as alias__peace_target
-                    getlabel alias__peace_target label__peace_target
-
-                    if "pacified" in label__peace_target or "barding break" in label__peace_target
-                        settimer "timer__target_grace" 0
-                    else
-                        useskill 'Peacemaking'
-                        waitfortarget wait__target
-
-                        # Answered once, before the delivery loop. Razor asks for an
-                        # instrument only when its cached one is gone, and answering it
-                        # makes the skill open the real target cursor, so the wait is
-                        # simply repeated. replay is documented as restarting the whole
-                        # script from the top, which would re-run the entire setup.
-                        if insysmsg "What instrument shall you play"
-                            target var__my_instrument
-                            waitfortarget wait__target
-
-                            if insysmsg "That is not a musical instrument"
-                                @setvar! var__my_instrument 0
-                            endif
-                        endif
-
-                        if find lasttarget ground -1 -1 config__acquire_range as alias__fresh_target
-                            if not dead alias__fresh_target and var__combat_target != alias__fresh_target
-                                if noto alias__fresh_target = "hostile" or noto alias__fresh_target = "criminal" or noto alias__fresh_target = "enemy" or noto alias__fresh_target = "murderer"
-                                    @setvar! var__combat_target alias__fresh_target
-                                    settimer "timer__target_grace" 0
-
-                                    if find var__combat_target ground -1 -1 config__target_range as alias__peace_target
-                                        if config__chatty = 1
-                                            overhead "[ target, set ]" 705 var__combat_target
-                                        endif
-                                    endif
-                                endif
-                            endif
-                        endif
-
-                        while targetexists
-                            if dead alias__peace_target or var__combat_target != alias__peace_target
-                                hotkey "Cancel Current Target"
-                                wait wait__short
-                            else
-                                target alias__peace_target
-                                wait wait__short
-                            endif
-                        endwhile
-
-                        wait wait__short
-                    endif
-                endif
-            endif
-        endif
-    endif
-
-    # ####################################################################################
-    # # NECRO BURST
-    # ####################################################################################
-    # Each ability goes out through its Razor hotkey, resolves without a cursor, and answers
-    # with either "unholy symbols remaining" or the cooldown line, so success is read rather
-    # than assumed. The combat three run as one chain in value order, one per pass, so the
-    # bank is re-read between them and a lower one never spends what a higher one was saving.
-    #
-    #   blood oath     +30% follower damage, 5 self damage. The followers are 63% of the
-    #                  damage, so this outweighs everything else in this block
-    #   corpse skin    every damaging spell adds a disease worth 25% over 30 seconds
-    #   evil omen      +20% spell damage, and a 25% chance per spell of half its mana in
-    #                  self damage. Below Corpse Skin: smaller bonus with a cost attached
-    #
-    # Of the rest, Strangle (4) competes with Blood Oath for symbols and delays every hit by
-    # five seconds, Wither (5) buys mana only for spells that do no damage, and Pain Spike
-    # (5) wants a corpse next to the next mob. None earn a place here.
-    #
-    # Corpse Skin and Evil Omen only pay off through the loop's own spells, and the loop casts
-    # no damage spell while the player is walking or has taken over in warmode. So both wait
-    # for a standing player in automatic mode: the first stop after a move opens them together
-    # with the procs instead of burning their duration on the walk. Blood Oath feeds the
-    # followers, who fight on either way, so it takes neither guard, and the two guards sit on
-    # the Corpse Skin and Evil Omen lines instead of on the block. Vampiric Embrace below has
-    # no walk guard either: it is walk only, so one would have parked it for good.
+    # The blocks keep their other conditions. var__engaged is gone from them, the branch
+    # has already answered it.
     if var__engaged = 1
+        # ####################################################################################
+        # # STAT POTIONS
+        # ####################################################################################
+        # Strength, agility and magic resist, drunk in a fight only so an idle walk does not
+        # burn them. The buffs last minutes, so they are looked at every ten seconds rather
+        # than every pass, and the clock only restarts once the act window has let it look.
+        if config__use_potion = 1 and timer "timer__potion_check" >= cooldown__potion_check
+            if not targetexists and not casting
+                settimer "timer__potion_check" 0
+
+                if not findbuff 'Strength'
+                    if findtype "White Potion" backpack
+                        hotkey 'Drink Strength'
+                        wait wait__short
+                    elseif timer "timer__message" >= cooldown__message
+                        overhead "[ str, out ]" 53
+                        settimer "timer__message" 0
+                    endif
+                endif
+
+                if not findbuff 'Agility'
+                    if findtype "Blue Potion" backpack
+                        hotkey 'Drink Agility'
+                        wait wait__short
+                    elseif timer "timer__message" >= cooldown__message
+                        overhead "[ agi, out ]" 53
+                        settimer "timer__message" 0
+                    endif
+                endif
+
+                if not findbuff 'Magic Resist Potion'
+                    if findtype "Black Potion" backpack
+                        hotkey 'Drink Magic Resist'
+                        wait wait__short
+                    elseif timer "timer__message" >= cooldown__message
+                        overhead "[ resist, out ]" 53
+                        settimer "timer__message" 0
+                    endif
+                endif
+            endif
+        endif
+
+        # ####################################################################################
+        # # DISCO
+        # ####################################################################################
+        # Discordance runs about two minutes and does not break, so it is applied once per
+        # target and then left alone. It goes before Peace because Ensemble wants Discord AND
+        # Peace on the same creature, and the one that does not break is worth landing first.
+        # bard-mace leads with Peace instead, and for a dexxer that is right: Peace is what stops
+        # the mob hitting the player in melee. Here the followers hold the mob and the player is
+        # ten tiles back, so the debuff outranks the pacify. Skill is 80 on both, so the odds are
+        # the same either way and the order is only about which effect is worth more.
+        #
+        # Music is shared, so whichever of these two blocks fires first stands the other down
+        # until the next pass. That is the arbitration, no extra state needed.
+        #
+        # warmode is the manual control window, folded into var__bard_ready.
+        if var__bard_ready = 1 and skill "Discordance" > 0
+            if cooldown "disco" = 0 and cooldown "music" = 0
+                if not targetexists and not casting
+                    if find var__combat_target ground -1 -1 config__target_range as alias__disco_target
+                        getlabel alias__disco_target label__disco_target
+
+                        if "discord" in label__disco_target
+                            settimer "timer__target_grace" 0
+                        else
+                            useskill 'Discordance'
+                            waitfortarget wait__target
+
+                            # Answered once, before the delivery loop. Razor asks for an
+                            # instrument only when its cached one is gone, and answering it
+                            # makes the skill open the real target cursor, so the wait is
+                            # simply repeated. replay is documented as restarting the whole
+                            # script from the top, which would re-run the entire setup.
+                            if insysmsg "What instrument shall you play"
+                                target var__my_instrument
+                                waitfortarget wait__target
+
+                                if insysmsg "That is not a musical instrument"
+                                    @setvar! var__my_instrument 0
+                                endif
+                            endif
+
+                            if find lasttarget ground -1 -1 config__acquire_range as alias__fresh_target
+                                if not dead alias__fresh_target and var__combat_target != alias__fresh_target
+                                    if noto alias__fresh_target = "hostile" or noto alias__fresh_target = "criminal" or noto alias__fresh_target = "enemy" or noto alias__fresh_target = "murderer"
+                                        @setvar! var__combat_target alias__fresh_target
+                                        settimer "timer__target_grace" 0
+
+                                        if find var__combat_target ground -1 -1 config__target_range as alias__disco_target
+                                            if config__chatty = 1
+                                                overhead "[ target, set ]" 705 var__combat_target
+                                            endif
+                                        endif
+                                    endif
+                                endif
+                            endif
+
+                            while targetexists
+                                if dead alias__disco_target or var__combat_target != alias__disco_target
+                                    hotkey "Cancel Current Target"
+                                    wait wait__short
+                                else
+                                    target alias__disco_target
+                                    wait wait__short
+                                endif
+                            endwhile
+
+                            wait wait__short
+                        endif
+                    endif
+                endif
+            endif
+        endif
+
+        # ####################################################################################
+        # # PEACE
+        # ####################################################################################
+        # The other half of the Ensemble condition, and unlike Discordance it is short. At
+        # difficulty 300 and up the duration formula floors at 15 x Musicianship / 100, which is
+        # 12 seconds here, against a 10 second slot cooldown. So it is re-applied continuously
+        # rather than once per target: let it lapse and Ensemble and Virtuoso go dark with it.
+        #
+        # A pacified creature does not attack, and taking damage does NOT break that. Only a
+        # barding break does, and while one is running neither Peace nor Provocation can land on
+        # that creature, which is why a broken target is left alone until it clears.
+        if var__bard_ready = 1 and skill "Peacemaking" > 0
+            if cooldown "peace/provo" = 0 and cooldown "music" = 0
+                if not targetexists and not casting
+                    if find var__combat_target ground -1 -1 config__target_range as alias__peace_target
+                        getlabel alias__peace_target label__peace_target
+
+                        if "pacified" in label__peace_target or "barding break" in label__peace_target
+                            settimer "timer__target_grace" 0
+                        else
+                            useskill 'Peacemaking'
+                            waitfortarget wait__target
+
+                            # Answered once, before the delivery loop. Razor asks for an
+                            # instrument only when its cached one is gone, and answering it
+                            # makes the skill open the real target cursor, so the wait is
+                            # simply repeated. replay is documented as restarting the whole
+                            # script from the top, which would re-run the entire setup.
+                            if insysmsg "What instrument shall you play"
+                                target var__my_instrument
+                                waitfortarget wait__target
+
+                                if insysmsg "That is not a musical instrument"
+                                    @setvar! var__my_instrument 0
+                                endif
+                            endif
+
+                            if find lasttarget ground -1 -1 config__acquire_range as alias__fresh_target
+                                if not dead alias__fresh_target and var__combat_target != alias__fresh_target
+                                    if noto alias__fresh_target = "hostile" or noto alias__fresh_target = "criminal" or noto alias__fresh_target = "enemy" or noto alias__fresh_target = "murderer"
+                                        @setvar! var__combat_target alias__fresh_target
+                                        settimer "timer__target_grace" 0
+
+                                        if find var__combat_target ground -1 -1 config__target_range as alias__peace_target
+                                            if config__chatty = 1
+                                                overhead "[ target, set ]" 705 var__combat_target
+                                            endif
+                                        endif
+                                    endif
+                                endif
+                            endif
+
+                            while targetexists
+                                if dead alias__peace_target or var__combat_target != alias__peace_target
+                                    hotkey "Cancel Current Target"
+                                    wait wait__short
+                                else
+                                    target alias__peace_target
+                                    wait wait__short
+                                endif
+                            endwhile
+
+                            wait wait__short
+                        endif
+                    endif
+                endif
+            endif
+        endif
+
+        # ####################################################################################
+        # # NECRO BURST
+        # ####################################################################################
+        # Each ability goes out through its Razor hotkey, resolves without a cursor, and answers
+        # with either "unholy symbols remaining" or the cooldown line, so success is read rather
+        # than assumed. The combat three run as one chain in value order, one per pass, so the
+        # bank is re-read between them and a lower one never spends what a higher one was saving.
+        #
+        #   blood oath     +30% follower damage, 5 self damage. The followers are 63% of the
+        #                  damage, so this outweighs everything else in this block
+        #   corpse skin    every damaging spell adds a disease worth 25% over 30 seconds
+        #   evil omen      +20% spell damage, and a 25% chance per spell of half its mana in
+        #                  self damage. Below Corpse Skin: smaller bonus with a cost attached
+        #
+        # Of the rest, Strangle (4) competes with Blood Oath for symbols and delays every hit by
+        # five seconds, Wither (5) buys mana only for spells that do no damage, and Pain Spike
+        # (5) wants a corpse next to the next mob. None earn a place here.
+        #
+        # Corpse Skin and Evil Omen only pay off through the loop's own spells, and the loop casts
+        # no damage spell while the player is walking or has taken over in warmode. So both wait
+        # for a standing player in automatic mode: the first stop after a move opens them together
+        # with the procs instead of burning their duration on the walk. Blood Oath feeds the
+        # followers, who fight on either way, so it takes neither guard, and the two guards sit on
+        # the Corpse Skin and Evil Omen lines instead of on the block. Vampiric Embrace below has
+        # no walk guard either: it is walk only, so one would have parked it for good.
         if not targetexists and not casting
             if list 'list__necro_symbols' >= config__symbols_blood_oath and followers > 0 and timer "timer__blood_oath" >= cooldown__necro_action
                 hotkey 'Blood Oath'
@@ -1790,26 +1632,649 @@ while not dead
                 endif
             endif
         endif
-    endif
 
-    # Vampiric Embrace heals the undead followers off a corpse. Target an enemy or yourself
-    # and it searches the surrounding area for one, so the cursor is answered with self. Walk
-    # only, when a corpse is what is left of the last pull, and the corpse check keeps it from
-    # pressing for nothing. The wiki gives no radius for that search, so a corpse inside the
-    # eight tiles looked at here can still be out of reach. That refusal spends nothing, so
-    # it only sits out cooldown__embrace_miss.
-    #
-    # A cooldown refusal restarts the window instead: the script cannot read the game's own
-    # cooldown, and the refusal nearly always answers a use whose success line came in late,
-    # so a full window from there is about right. It is read on both sides of the cursor
-    # wait, in case it comes back instead of the cursor. Before self is targeted, lasttarget
-    # is read once more, the way BARD SONG does, so a hostile just picked is not lost.
-    if list 'list__necro_symbols' >= config__symbols_vampiric_embrace and var__engaged = 0 and var__manual = 0 and followers > 0
-        if timer "timer__vampiric_embrace" >= cooldown__necro_action and timer "timer__embrace_miss" >= cooldown__embrace_miss
-            if not targetexists and not casting
-                if findtype 8198 ground -1 -1 8
-                    hotkey 'Vampiric Embrace'
-                    waitfortarget wait__target
+        # ####################################################################################
+        # # OPENER
+        # ####################################################################################
+        # Mana Drain then Curse, once per target.
+        #
+        # Both spells carry a Grimoire rider that is scoped to the creature they were cast on:
+        # Curse gives every spell of ours +30% against that target for 60 seconds, Mana Drain
+        # gives a 30% refund chance on hostile spells against it. Neither follows to the next
+        # mob, which is why membership is tracked per target and not as a global stage.
+        #
+        # Two lists, so the branch itself is the state. A target that was retargeted mid fight
+        # answers correctly with no extra bookkeeping.
+        #
+        # First, any disturb line nobody read is read off here, so the cursor polls from here to
+        # the filler only ever see their own. See Targeted casts at the top.
+        if insysmsg "Your concentration is disturbed, thus ruining thy spell."
+            # consumed, nothing else to do
+        endif
+
+        if var__manual = 0
+            if not targetexists and not casting and cooldown "walk" = 0
+                if find var__combat_target ground -1 -1 config__target_range as alias__opener_target
+                    if not inlist 'list__magic_drained_targets' var__combat_target and var__regs_mana_drain = 1 and mana >= config__mana_4th
+                        cast 'Mana Drain'
+
+                        for 60
+                            if targetexists
+                                break
+                            endif
+
+                            if insysmsg "Your concentration is disturbed, thus ruining thy spell."
+                                break
+                            endif
+
+                            if config__interrupt_to_heal = 1 and diffhits >= config__emergency_hits
+                                if config__chatty = 1
+                                    overhead "[ drain, cut ]" 53
+                                endif
+
+                                hotkey "> Interrupt"
+                                break
+                            endif
+
+                            wait wait__poll
+                        endfor
+
+                        if targetexists
+                            if find lasttarget ground -1 -1 config__acquire_range as alias__fresh_target
+                                if not dead alias__fresh_target and var__combat_target != alias__fresh_target
+                                    if noto alias__fresh_target = "hostile" or noto alias__fresh_target = "criminal" or noto alias__fresh_target = "enemy" or noto alias__fresh_target = "murderer"
+                                        @setvar! var__combat_target alias__fresh_target
+                                        settimer "timer__target_grace" 0
+
+                                        if find var__combat_target ground -1 -1 config__target_range as alias__opener_target
+                                            if config__chatty = 1
+                                                overhead "[ target, set ]" 705 var__combat_target
+                                            endif
+                                        endif
+                                    endif
+                                endif
+                            endif
+
+                            if dead alias__opener_target or var__combat_target != alias__opener_target
+                                hotkey "Cancel Current Target"
+                                wait wait__short
+                            else
+                                target alias__opener_target
+                                wait wait__cast
+
+                                if insysmsg "cannot be seen"
+                                    # not delivered, so the target stays off the list
+                                else
+                                    pushlist 'list__magic_drained_targets' var__combat_target
+
+                                endif
+                            endif
+                        endif
+                    elseif not inlist 'list__magic_cursed_targets' var__combat_target and var__regs_curse = 1 and mana >= config__mana_4th
+                        cast 'Curse'
+
+                        for 60
+                            if targetexists
+                                break
+                            endif
+
+                            if insysmsg "Your concentration is disturbed, thus ruining thy spell."
+                                break
+                            endif
+
+                            if config__interrupt_to_heal = 1 and diffhits >= config__emergency_hits
+                                if config__chatty = 1
+                                    overhead "[ curse, cut ]" 53
+                                endif
+
+                                hotkey "> Interrupt"
+                                break
+                            endif
+
+                            wait wait__poll
+                        endfor
+
+                        if targetexists
+                            if find lasttarget ground -1 -1 config__acquire_range as alias__fresh_target
+                                if not dead alias__fresh_target and var__combat_target != alias__fresh_target
+                                    if noto alias__fresh_target = "hostile" or noto alias__fresh_target = "criminal" or noto alias__fresh_target = "enemy" or noto alias__fresh_target = "murderer"
+                                        @setvar! var__combat_target alias__fresh_target
+                                        settimer "timer__target_grace" 0
+
+                                        if find var__combat_target ground -1 -1 config__target_range as alias__opener_target
+                                            if config__chatty = 1
+                                                overhead "[ target, set ]" 705 var__combat_target
+                                            endif
+                                        endif
+                                    endif
+                                endif
+                            endif
+
+                            if dead alias__opener_target or var__combat_target != alias__opener_target
+                                hotkey "Cancel Current Target"
+                                wait wait__short
+                            else
+                                target alias__opener_target
+                                wait wait__cast
+
+                                if insysmsg "cannot be seen"
+                                    # not delivered, so the target stays off the list
+                                else
+                                    pushlist 'list__magic_cursed_targets' var__combat_target
+                                    settimer "timer__magic_window" 0
+
+                                endif
+                            endif
+                        endif
+                    endif
+                endif
+            endif
+        endif
+
+        # The rotation waits for Curse, because everything after it is worth 30% more once it
+        # has landed. The one thing it does not wait for is a reagent that is not coming back
+        # until the next restock: with no Curse reagents the damage goes out without the rider
+        # rather than the script standing still in front of a live target.
+        #
+        # Low mana is deliberately NOT an escape. It regenerates, the followers carry the fight
+        # meanwhile, and every point dribbled into an uncursed Magic Arrow is a point the next
+        # opener does not have. Waiting for 22 mana and casting with the rider is the better trade.
+        @setvar! var__opener_done 0
+
+        if inlist 'list__magic_cursed_targets' var__combat_target
+            @setvar! var__opener_done 1
+        elseif var__regs_curse = 0
+            @setvar! var__opener_done 1
+        endif
+
+        # ####################################################################################
+        # # PROC CORE
+        # ####################################################################################
+        # The four Grimoire proc spells. Each carries a large first cast bonus on its own timer,
+        # and the game announces when that timer is back, so cooldowns.xml already tracks them
+        # and this block simply reads the bars. No timer of our own, which also means the script
+        # inherits any cooldown reset the game hands out.
+        #
+        #   magic arrow  +250% on the first cast in the window
+        #   harm         +250%
+        #   fireball     +250% as a burn over 15 seconds
+        #   lightning    +200% and a hinder
+        #
+        # Ordered cheapest first. They rarely compete, because a spell whose bar is up is the
+        # only one asking, but when two are ready together the cheap one going first keeps more
+        # mana available for the opener on the next mob.
+        #
+        # Each delivery records its mob in var__proc_target, and the flag after this block tells
+        # Poison Strike and the filler whether the core is spent. Both wait for it.
+        if var__opener_done = 1 and var__manual = 0
+            if not targetexists and not casting and cooldown "walk" = 0
+                if find var__combat_target ground -1 -1 config__target_range as alias__proc_target
+                    if cooldown "magic arrow" = 0 and var__regs_magic_arrow = 1 and mana >= config__mana_1st
+                        cast 'Magic Arrow'
+
+                        for 60
+                            if targetexists
+                                break
+                            endif
+
+                            if insysmsg "Your concentration is disturbed, thus ruining thy spell."
+                                break
+                            endif
+
+                            if config__interrupt_to_heal = 1 and diffhits >= config__emergency_hits
+                                if config__chatty = 1
+                                    overhead "[ magic arrow, cut ]" 53
+                                endif
+
+                                hotkey "> Interrupt"
+                                break
+                            endif
+
+                            wait wait__poll
+                        endfor
+
+                        if targetexists
+                            if find lasttarget ground -1 -1 config__acquire_range as alias__fresh_target
+                                if not dead alias__fresh_target and var__combat_target != alias__fresh_target
+                                    if noto alias__fresh_target = "hostile" or noto alias__fresh_target = "criminal" or noto alias__fresh_target = "enemy" or noto alias__fresh_target = "murderer"
+                                        @setvar! var__combat_target alias__fresh_target
+                                        settimer "timer__target_grace" 0
+
+                                        if find var__combat_target ground -1 -1 config__target_range as alias__proc_target
+                                            if config__chatty = 1
+                                                overhead "[ target, set ]" 705 var__combat_target
+                                            endif
+                                        endif
+                                    endif
+                                endif
+                            endif
+
+                            if dead alias__proc_target or var__combat_target != alias__proc_target
+                                hotkey "Cancel Current Target"
+                                wait wait__short
+                            else
+                                target alias__proc_target
+                                wait wait__cast
+                                @setvar! var__proc_target var__combat_target
+                            endif
+                        endif
+                    elseif cooldown "harm" = 0 and var__regs_harm = 1 and mana >= config__mana_2nd
+                        cast 'Harm'
+
+                        for 60
+                            if targetexists
+                                break
+                            endif
+
+                            if insysmsg "Your concentration is disturbed, thus ruining thy spell."
+                                break
+                            endif
+
+                            if config__interrupt_to_heal = 1 and diffhits >= config__emergency_hits
+                                if config__chatty = 1
+                                    overhead "[ harm, cut ]" 53
+                                endif
+
+                                hotkey "> Interrupt"
+                                break
+                            endif
+
+                            wait wait__poll
+                        endfor
+
+                        if targetexists
+                            if find lasttarget ground -1 -1 config__acquire_range as alias__fresh_target
+                                if not dead alias__fresh_target and var__combat_target != alias__fresh_target
+                                    if noto alias__fresh_target = "hostile" or noto alias__fresh_target = "criminal" or noto alias__fresh_target = "enemy" or noto alias__fresh_target = "murderer"
+                                        @setvar! var__combat_target alias__fresh_target
+                                        settimer "timer__target_grace" 0
+
+                                        if find var__combat_target ground -1 -1 config__target_range as alias__proc_target
+                                            if config__chatty = 1
+                                                overhead "[ target, set ]" 705 var__combat_target
+                                            endif
+                                        endif
+                                    endif
+                                endif
+                            endif
+
+                            if dead alias__proc_target or var__combat_target != alias__proc_target
+                                hotkey "Cancel Current Target"
+                                wait wait__short
+                            else
+                                target alias__proc_target
+                                wait wait__cast
+                                @setvar! var__proc_target var__combat_target
+                            endif
+                        endif
+                    elseif cooldown "fireball" = 0 and var__regs_fireball = 1 and mana >= config__mana_3rd
+                        cast 'Fireball'
+
+                        for 60
+                            if targetexists
+                                break
+                            endif
+
+                            if insysmsg "Your concentration is disturbed, thus ruining thy spell."
+                                break
+                            endif
+
+                            if config__interrupt_to_heal = 1 and diffhits >= config__emergency_hits
+                                if config__chatty = 1
+                                    overhead "[ fireball, cut ]" 53
+                                endif
+
+                                hotkey "> Interrupt"
+                                break
+                            endif
+
+                            wait wait__poll
+                        endfor
+
+                        if targetexists
+                            if find lasttarget ground -1 -1 config__acquire_range as alias__fresh_target
+                                if not dead alias__fresh_target and var__combat_target != alias__fresh_target
+                                    if noto alias__fresh_target = "hostile" or noto alias__fresh_target = "criminal" or noto alias__fresh_target = "enemy" or noto alias__fresh_target = "murderer"
+                                        @setvar! var__combat_target alias__fresh_target
+                                        settimer "timer__target_grace" 0
+
+                                        if find var__combat_target ground -1 -1 config__target_range as alias__proc_target
+                                            if config__chatty = 1
+                                                overhead "[ target, set ]" 705 var__combat_target
+                                            endif
+                                        endif
+                                    endif
+                                endif
+                            endif
+
+                            if dead alias__proc_target or var__combat_target != alias__proc_target
+                                hotkey "Cancel Current Target"
+                                wait wait__short
+                            else
+                                target alias__proc_target
+                                wait wait__cast
+                                @setvar! var__proc_target var__combat_target
+                            endif
+                        endif
+                    elseif cooldown "lightning" = 0 and var__regs_lightning = 1 and mana >= config__mana_4th
+                        cast 'Lightning'
+
+                        for 60
+                            if targetexists
+                                break
+                            endif
+
+                            if insysmsg "Your concentration is disturbed, thus ruining thy spell."
+                                break
+                            endif
+
+                            if config__interrupt_to_heal = 1 and diffhits >= config__emergency_hits
+                                if config__chatty = 1
+                                    overhead "[ lightning, cut ]" 53
+                                endif
+
+                                hotkey "> Interrupt"
+                                break
+                            endif
+
+                            wait wait__poll
+                        endfor
+
+                        if targetexists
+                            if find lasttarget ground -1 -1 config__acquire_range as alias__fresh_target
+                                if not dead alias__fresh_target and var__combat_target != alias__fresh_target
+                                    if noto alias__fresh_target = "hostile" or noto alias__fresh_target = "criminal" or noto alias__fresh_target = "enemy" or noto alias__fresh_target = "murderer"
+                                        @setvar! var__combat_target alias__fresh_target
+                                        settimer "timer__target_grace" 0
+
+                                        if find var__combat_target ground -1 -1 config__target_range as alias__proc_target
+                                            if config__chatty = 1
+                                                overhead "[ target, set ]" 705 var__combat_target
+                                            endif
+                                        endif
+                                    endif
+                                endif
+                            endif
+
+                            if dead alias__proc_target or var__combat_target != alias__proc_target
+                                hotkey "Cancel Current Target"
+                                wait wait__short
+                            else
+                                target alias__proc_target
+                                wait wait__cast
+                                @setvar! var__proc_target var__combat_target
+                            endif
+                        endif
+                    endif
+                endif
+            endif
+        endif
+
+        # Poison Strike and the filler wait for the whole proc core. Every proc that lands while
+        # Corpse Skin is up leaves its disease on the target, so a strike after Magic Arrow alone
+        # pops one stack where four were on the way, and a bolt cast while a proc is ready pushes
+        # that proc and its next window back by a whole cast.
+        #
+        # This has to be a flag. A cast does not end the pass, so every block below still gets
+        # its turn, which is how both used to go out straight behind Curse and the first proc.
+        #
+        # 1 once no proc is ready, each one either on its bar or out of reagents. A missing
+        # reagent is the same escape the opener takes, it is not coming back until the next
+        # restock. Low mana is not, for the reason given at the opener. Read after the proc core
+        # has had its turn, so a proc cast this pass already counts. A bar whose message has not
+        # arrived yet reads as ready, which only holds both back one pass.
+        @setvar! var__procs_done 1
+
+        if cooldown "magic arrow" = 0 and var__regs_magic_arrow = 1
+            @setvar! var__procs_done 0
+        elseif cooldown "harm" = 0 and var__regs_harm = 1
+            @setvar! var__procs_done 0
+        elseif cooldown "fireball" = 0 and var__regs_fireball = 1
+            @setvar! var__procs_done 0
+        elseif cooldown "lightning" = 0 and var__regs_lightning = 1
+            @setvar! var__procs_done 0
+        endif
+
+        # ####################################################################################
+        # # FILLER
+        # ####################################################################################
+        # The four proc spells spend about 4.3 seconds of a 15 second window and then wait, so
+        # roughly two thirds of the window used to go unused. Energy Bolt has no proc timer of
+        # its own, and its Grimoire upgrade adds 30% damage and hands back 15 of its 20 mana when
+        # the target dies within five seconds, so it is the one spell worth firing purely to fill
+        # that gap.
+        #
+        # Only that gap: var__procs_done keeps it out while any proc is ready, so a bar coming
+        # back hands the next cast to the proc core. A bar that returns mid bolt waits out the
+        # rest of the cast, 1.95 seconds at most. Poison Strike comes after this block, so a bolt
+        # in the same pass adds its disease before the strike pops them.
+        #
+        # It is also the first thing to stand down when mana runs short, which is what
+        # config__filler_floor is for: the opener and one full proc cycle come first.
+        if var__opener_done = 1 and var__procs_done = 1 and var__manual = 0 and mana > config__filler_floor and var__regs_energy_bolt = 1
+            if not targetexists and not casting and cooldown "walk" = 0
+                if find var__combat_target ground -1 -1 config__target_range as alias__filler_target
+                    cast 'Energy Bolt'
+
+                    for 60
+                        if targetexists
+                            break
+                        endif
+
+                        if insysmsg "Your concentration is disturbed, thus ruining thy spell."
+                            break
+                        endif
+
+                        if config__interrupt_to_heal = 1 and diffhits >= config__emergency_hits
+                            if config__chatty = 1
+                                overhead "[ eb, cut ]" 53
+                            endif
+
+                            hotkey "> Interrupt"
+                            break
+                        endif
+
+                        wait wait__poll
+                    endfor
+
+                    if targetexists
+                        if find lasttarget ground -1 -1 config__acquire_range as alias__fresh_target
+                            if not dead alias__fresh_target and var__combat_target != alias__fresh_target
+                                if noto alias__fresh_target = "hostile" or noto alias__fresh_target = "criminal" or noto alias__fresh_target = "enemy" or noto alias__fresh_target = "murderer"
+                                    @setvar! var__combat_target alias__fresh_target
+                                    settimer "timer__target_grace" 0
+
+                                    if find var__combat_target ground -1 -1 config__target_range as alias__filler_target
+                                        if config__chatty = 1
+                                            overhead "[ target, set ]" 705 var__combat_target
+                                        endif
+                                    endif
+                                endif
+                            endif
+                        endif
+
+                        if dead alias__filler_target or var__combat_target != alias__filler_target
+                            hotkey "Cancel Current Target"
+                            wait wait__short
+                        else
+                            target alias__filler_target
+                            wait wait__cast
+                        endif
+                    endif
+                endif
+            endif
+        endif
+
+        # ####################################################################################
+        # # POISON STRIKE
+        # ####################################################################################
+        # One symbol to resolve the disease Corpse Skin has been layering on the target: up to
+        # eight ticks land at once instead of over the next thirty seconds. On a mob about to die
+        # that is damage that would otherwise have gone with it. It sits at the bottom of the
+        # symbol ladder and only fires while Corpse Skin is actually up.
+        #
+        # It goes once the proc core is spent, var__procs_done, and last in the pass, behind the
+        # filler. Every damaging spell leaves one disease, so when the pass that spends the core
+        # also has the mana for a bolt, the strike pops four procs and a bolt instead of four.
+        # Below the filler floor there is no bolt coming, and it pops the four rather than wait.
+        # var__proc_target holds it off a mob picked up while the bars are still running from the
+        # last one: no proc has reached that mob yet, so the strike waits until the next cycle
+        # has gone out there.
+        #
+        # A target with nothing on it refuses the strike without spending it. Clearing
+        # var__proc_target then makes it wait for the next proc to reach that mob, rather than
+        # pressing again every pass or sitting out the full window. A cooldown refusal restarts
+        # the window, read on both sides of the cursor wait in case it comes back instead of the
+        # cursor.
+        if var__opener_done = 1 and var__procs_done = 1 and var__proc_target = var__combat_target and var__manual = 0 and var__symbols_spent = 0 and list 'list__necro_symbols' >= config__symbols_poison_strike
+            if timer "timer__corpse_skin" < cooldown__necro_action and timer "timer__poison_strike" >= cooldown__necro_action
+                if not targetexists and not casting
+                    if find var__combat_target ground -1 -1 config__target_range as alias__strike_target
+                        # A bolt from the filler hits 0.5 seconds after its target and brings
+                        # its disease then (library/pvp.md part 5). wait__cast covered 0.3 of
+                        # that and this covers the rest, so on a quick connection the strike
+                        # does not land ahead of the bolt.
+                        wait wait__short
+                        hotkey 'Poison Strike'
+                        waitfortarget wait__target
+
+                        if targetexists
+                            if find lasttarget ground -1 -1 config__acquire_range as alias__fresh_target
+                                if not dead alias__fresh_target and var__combat_target != alias__fresh_target
+                                    if noto alias__fresh_target = "hostile" or noto alias__fresh_target = "criminal" or noto alias__fresh_target = "enemy" or noto alias__fresh_target = "murderer"
+                                        @setvar! var__combat_target alias__fresh_target
+                                        settimer "timer__target_grace" 0
+
+                                        if find var__combat_target ground -1 -1 config__target_range as alias__strike_target
+                                            if config__chatty = 1
+                                                overhead "[ target, set ]" 705 var__combat_target
+                                            endif
+                                        endif
+                                    endif
+                                endif
+                            endif
+
+                            if var__combat_target != alias__strike_target
+                                hotkey "Cancel Current Target"
+                                wait wait__short
+                            else
+                                target alias__strike_target
+                                wait wait__message
+
+                                if insysmsg "unholy symbols remaining"
+                                    settimer "timer__poison_strike" 0
+
+                                    if config__chatty = 1
+                                        overhead "[ poison strike ]" 118
+                                    endif
+                                elseif insysmsg "seconds before you may use that ability again."
+                                    settimer "timer__poison_strike" 0
+                                elseif insysmsg "You do not have a poison or disease effect on that target."
+                                    @setvar! var__proc_target 0
+                                endif
+                            endif
+                        elseif insysmsg "seconds before you may use that ability again."
+                            settimer "timer__poison_strike" 0
+                        endif
+                    endif
+                endif
+            endif
+        endif
+    else
+        # ####################################################################################
+        # # MUSHROOM
+        # ####################################################################################
+        # Out of combat only, so the 60 second cooldown burns during the walk rather than during
+        # a fight where the cast would compete with the spell rotation. The whole block either
+        # eats or casts, so the walk guard rides on the act window line.
+        if not targetexists and not casting and cooldown "walk" = 0
+            if mana <= config__mushroom_eat_mana and not findbuff 'Magic Mushroom Cooldown' and findtype "mushroom" backpack
+                hotkey 'Eat Magic Mushroom'
+                wait wait__short
+            elseif counttype "mushroom" backpack < config__mushroom_min_count and mana >= config__mushroom_create_mana and var__regs_create_food = 1 and var__manual = 0
+                cast 'Create Food'
+                wait wait__short
+
+                for 60
+                    if not casting
+                        break
+                    endif
+
+                    if insysmsg "Your concentration is disturbed, thus ruining thy spell."
+                        break
+                    endif
+
+                    wait wait__poll
+                endfor
+            endif
+        endif
+
+        # ####################################################################################
+        # # SELF BUFFS
+        # ####################################################################################
+        # Reactive Armor and Magic Reflection stay up until they are used up, so each needs a
+        # cast only when findbuff no longer sees it. On the walk only: in a fight the cast would
+        # take a slot from the rotation, and what matters is that both are up when the next
+        # pull, or a red, arrives. Reactive Armor is 1st circle and goes first, Magic Reflection
+        # waits its turn on the next pass. Both are self-only, so no cursor: the same no-cursor
+        # shape as Create Food above.
+        # The reflect bar is the server's recast lock, 30 seconds after a creature's spell and 60
+        # after a player's. It starts on the "Magic reflect removed" line, so the bar is the clock.
+        if var__manual = 0
+            if not targetexists and not casting and cooldown "walk" = 0
+                if config__use_reactive_armor = 1 and not findbuff 'Reactive Armor' and var__regs_reactive_armor = 1 and mana >= config__mana_1st
+                    cast 'Reactive Armor'
+                    wait wait__short
+
+                    for 60
+                        if not casting
+                            break
+                        endif
+
+                        if insysmsg "Your concentration is disturbed, thus ruining thy spell."
+                            break
+                        endif
+
+                        wait wait__poll
+                    endfor
+                elseif config__use_magic_reflect = 1 and not findbuff 'Magic Reflection' and cooldown "reflect" = 0 and var__regs_magic_reflect = 1 and mana >= config__mana_5th
+                    cast 'Magic Reflection'
+                    wait wait__short
+
+                    for 60
+                        if not casting
+                            break
+                        endif
+
+                        if insysmsg "Your concentration is disturbed, thus ruining thy spell."
+                            break
+                        endif
+
+                        wait wait__poll
+                    endfor
+                elseif not findbuff 'Spell Siphon' and not findbuff 'Magic Reflection' and var__regs_magic_arrow = 1 and mana >= config__mana_1st
+                    # Spell Siphon: the first spell to hit us starts a sixty minute buff that shows on the
+                    # buff bar. A Magic Arrow on self is that hit. Never with Magic Reflection up, the
+                    # arrow would only bounce off it and burn the reflection. Any disturb line
+                    # an earlier cast left is read off first, so the poll only sees its own. Before
+                    # self is targeted, lasttarget is read once more, the way BARD SONG does.
+                    if insysmsg "Your concentration is disturbed, thus ruining thy spell."
+                        # consumed, nothing else to do
+                    endif
+
+                    cast 'Magic Arrow'
+
+                    for 60
+                        if targetexists
+                            break
+                        endif
+
+                        if insysmsg "Your concentration is disturbed, thus ruining thy spell."
+                            break
+                        endif
+
+                        wait wait__poll
+                    endfor
 
                     if targetexists
                         @setvar! var__keep_lasttarget 0
@@ -1827,570 +2292,142 @@ while not dead
                             wait wait__short
                         else
                             hotkey 'Target Self'
-                            wait wait__message
-
-                            if insysmsg "unholy symbols remaining"
-                                settimer "timer__vampiric_embrace" 0
-
-                                if config__chatty = 1
-                                    overhead "[ vampiric embrace ]" 118
-                                endif
-                            elseif insysmsg "seconds before you may use that ability again."
-                                settimer "timer__vampiric_embrace" 0
-                            elseif insysmsg "You do not see any corpses near that location."
-                                settimer "timer__embrace_miss" 0
-                            endif
+                            wait wait__cast
                         endif
-                    elseif insysmsg "seconds before you may use that ability again."
-                        settimer "timer__vampiric_embrace" 0
                     endif
                 endif
             endif
         endif
-    endif
 
-    # ####################################################################################
-    # # OPENER
-    # ####################################################################################
-    # Mana Drain then Curse, once per target.
-    #
-    # Both spells carry a Grimoire rider that is scoped to the creature they were cast on:
-    # Curse gives every spell of ours +30% against that target for 60 seconds, Mana Drain
-    # gives a 30% refund chance on hostile spells against it. Neither follows to the next
-    # mob, which is why membership is tracked per target and not as a global stage.
-    #
-    # Two lists, so the branch itself is the state. A target that was retargeted mid fight
-    # answers correctly with no extra bookkeeping.
-    #
-    # First, any disturb line nobody read is read off here, so the cursor polls from here to
-    # the filler only ever see their own. See Targeted casts at the top.
-    if insysmsg "Your concentration is disturbed, thus ruining thy spell."
-        # consumed, nothing else to do
-    endif
+        # ####################################################################################
+        # # BARD SONG
+        # ####################################################################################
+        # Three 15 minute AoE buffs, each worth 8.5% at this Effective Barding, landing on the
+        # player and every follower in range. Sung on the walk between pulls, never in a fight:
+        # while engaged, Discordance and Peacemaking keep Music busy so a song rarely gets a
+        # window, and playing an instrument interrupts a spell already in flight.
+        #
+        # Singing on the walk is what removes follower tracking from this script. A resummoned
+        # creature picks the songs up on the next walk, so nothing has to notice that it died.
+        #
+        # findbuff is deliberately NOT the gate. The buffs run 15 minutes, so a findbuff test
+        # would be true almost always and the refresh would never fire. The gate is the song
+        # cooldown plus the slot each song borrows.
+        #
+        # A branch only advances var__song_next once the cursor was actually delivered, so a song
+        # that could not go out, for any reason, is retried next pass instead of being skipped.
+        #
+        # The chain only picks the skill and the song after it, the three share the rest. Right
+        # before the backpack is targeted, lasttarget is read once more: a hostile the player has
+        # just picked would be lost to the backpack, the way a green capper was on 2026-09-29.
+        # Then the song stands down, cancels its cursor and leaves lasttarget for the next pass.
+        if var__bard_ready = 1
+            if cooldown "music" = 0 and cooldown "song" = 0
+                if not targetexists and not casting
+                    @setvar! var__song_after 0
 
-    if var__engaged = 1 and var__manual = 0
-        if not targetexists and not casting and cooldown "walk" = 0
-            if find var__combat_target ground -1 -1 config__target_range as alias__opener_target
-                if not inlist 'list__magic_drained_targets' var__combat_target and var__regs_mana_drain = 1 and mana >= config__mana_4th
-                    cast 'Mana Drain'
+                    if var__song_next = 1 and skill "Discordance" > 0 and cooldown "disco" = 0
+                        useskill 'Discordance'
+                        @setvar! var__song_after 2
+                    elseif var__song_next = 2 and skill "Peacemaking" > 0 and cooldown "peace/provo" = 0
+                        useskill 'Peacemaking'
+                        @setvar! var__song_after 3
+                    elseif var__song_next = 3 and skill "Provocation" > 0 and cooldown "peace/provo" = 0
+                        useskill 'Provocation'
+                        @setvar! var__song_after 1
+                    endif
 
-                    for 60
-                        if targetexists
-                            break
-                        endif
+                    if var__song_after != 0
+                        waitfortarget wait__target
 
-                        if insysmsg "Your concentration is disturbed, thus ruining thy spell."
-                            break
-                        endif
+                        if insysmsg "What instrument shall you play"
+                            target var__my_instrument
+                            waitfortarget wait__target
 
-                        if config__interrupt_to_heal = 1 and diffhits >= config__emergency_hits
-                            if config__chatty = 1
-                                overhead "[ drain, cut ]" 53
+                            if insysmsg "That is not a musical instrument"
+                                @setvar! var__my_instrument 0
                             endif
-
-                            hotkey "> Interrupt"
-                            break
                         endif
 
-                        wait wait__poll
-                    endfor
+                        if targetexists
+                            @setvar! var__keep_lasttarget 0
 
-                    if targetexists
-                        if find lasttarget ground -1 -1 config__acquire_range as alias__fresh_target
-                            if not dead alias__fresh_target and var__combat_target != alias__fresh_target
-                                if noto alias__fresh_target = "hostile" or noto alias__fresh_target = "criminal" or noto alias__fresh_target = "enemy" or noto alias__fresh_target = "murderer"
-                                    @setvar! var__combat_target alias__fresh_target
-                                    settimer "timer__target_grace" 0
-
-                                    if find var__combat_target ground -1 -1 config__target_range as alias__opener_target
-                                        if config__chatty = 1
-                                            overhead "[ target, set ]" 705 var__combat_target
-                                        endif
+                            if find lasttarget ground -1 -1 config__acquire_range as alias__fresh_target
+                                if not dead alias__fresh_target and var__combat_target != alias__fresh_target
+                                    if noto alias__fresh_target = "hostile" or noto alias__fresh_target = "criminal" or noto alias__fresh_target = "enemy" or noto alias__fresh_target = "murderer"
+                                        @setvar! var__keep_lasttarget 1
                                     endif
                                 endif
                             endif
-                        endif
 
-                        if dead alias__opener_target or var__combat_target != alias__opener_target
-                            hotkey "Cancel Current Target"
-                            wait wait__short
-                        else
-                            target alias__opener_target
-                            wait wait__cast
-
-                            if insysmsg "cannot be seen"
-                                # not delivered, so the target stays off the list
+                            if var__keep_lasttarget = 1
+                                hotkey "Cancel Current Target"
+                                wait wait__short
                             else
-                                pushlist 'list__magic_drained_targets' var__combat_target
-
+                                target backpack
+                                @setvar! var__song_next var__song_after
                             endif
                         endif
                     endif
-                elseif not inlist 'list__magic_cursed_targets' var__combat_target and var__regs_curse = 1 and mana >= config__mana_4th
-                    cast 'Curse'
+                endif
+            endif
+        endif
 
-                    for 60
+        # ####################################################################################
+        # # VAMPIRIC EMBRACE
+        # ####################################################################################
+        # Vampiric Embrace heals the undead followers off a corpse. Target an enemy or yourself
+        # and it searches the surrounding area for one, so the cursor is answered with self. Walk
+        # only, when a corpse is what is left of the last pull, and the corpse check keeps it from
+        # pressing for nothing. The wiki gives no radius for that search, so a corpse inside the
+        # eight tiles looked at here can still be out of reach. That refusal spends nothing, so
+        # it only sits out cooldown__embrace_miss.
+        #
+        # A cooldown refusal restarts the window instead: the script cannot read the game's own
+        # cooldown, and the refusal nearly always answers a use whose success line came in late,
+        # so a full window from there is about right. It is read on both sides of the cursor
+        # wait, in case it comes back instead of the cursor. Before self is targeted, lasttarget
+        # is read once more, the way BARD SONG does, so a hostile just picked is not lost.
+        if list 'list__necro_symbols' >= config__symbols_vampiric_embrace and var__manual = 0 and followers > 0
+            if timer "timer__vampiric_embrace" >= cooldown__necro_action and timer "timer__embrace_miss" >= cooldown__embrace_miss
+                if not targetexists and not casting
+                    if findtype 8198 ground -1 -1 8
+                        hotkey 'Vampiric Embrace'
+                        waitfortarget wait__target
+
                         if targetexists
-                            break
-                        endif
+                            @setvar! var__keep_lasttarget 0
 
-                        if insysmsg "Your concentration is disturbed, thus ruining thy spell."
-                            break
-                        endif
-
-                        if config__interrupt_to_heal = 1 and diffhits >= config__emergency_hits
-                            if config__chatty = 1
-                                overhead "[ curse, cut ]" 53
-                            endif
-
-                            hotkey "> Interrupt"
-                            break
-                        endif
-
-                        wait wait__poll
-                    endfor
-
-                    if targetexists
-                        if find lasttarget ground -1 -1 config__acquire_range as alias__fresh_target
-                            if not dead alias__fresh_target and var__combat_target != alias__fresh_target
-                                if noto alias__fresh_target = "hostile" or noto alias__fresh_target = "criminal" or noto alias__fresh_target = "enemy" or noto alias__fresh_target = "murderer"
-                                    @setvar! var__combat_target alias__fresh_target
-                                    settimer "timer__target_grace" 0
-
-                                    if find var__combat_target ground -1 -1 config__target_range as alias__opener_target
-                                        if config__chatty = 1
-                                            overhead "[ target, set ]" 705 var__combat_target
-                                        endif
+                            if find lasttarget ground -1 -1 config__acquire_range as alias__fresh_target
+                                if not dead alias__fresh_target and var__combat_target != alias__fresh_target
+                                    if noto alias__fresh_target = "hostile" or noto alias__fresh_target = "criminal" or noto alias__fresh_target = "enemy" or noto alias__fresh_target = "murderer"
+                                        @setvar! var__keep_lasttarget 1
                                     endif
                                 endif
                             endif
-                        endif
 
-                        if dead alias__opener_target or var__combat_target != alias__opener_target
-                            hotkey "Cancel Current Target"
-                            wait wait__short
-                        else
-                            target alias__opener_target
-                            wait wait__cast
-
-                            if insysmsg "cannot be seen"
-                                # not delivered, so the target stays off the list
+                            if var__keep_lasttarget = 1
+                                hotkey "Cancel Current Target"
+                                wait wait__short
                             else
-                                pushlist 'list__magic_cursed_targets' var__combat_target
-                                settimer "timer__magic_window" 0
+                                hotkey 'Target Self'
+                                wait wait__message
 
-                            endif
-                        endif
-                    endif
-                endif
-            endif
-        endif
-    endif
+                                if insysmsg "unholy symbols remaining"
+                                    settimer "timer__vampiric_embrace" 0
 
-    # The rotation waits for Curse, because everything after it is worth 30% more once it
-    # has landed. The one thing it does not wait for is a reagent that is not coming back
-    # until the next restock: with no Curse reagents the damage goes out without the rider
-    # rather than the script standing still in front of a live target.
-    #
-    # Low mana is deliberately NOT an escape. It regenerates, the followers carry the fight
-    # meanwhile, and every point dribbled into an uncursed Magic Arrow is a point the next
-    # opener does not have. Waiting for 22 mana and casting with the rider is the better trade.
-    @setvar! var__opener_done 0
-
-    if inlist 'list__magic_cursed_targets' var__combat_target
-        @setvar! var__opener_done 1
-    elseif var__regs_curse = 0
-        @setvar! var__opener_done 1
-    endif
-
-    # ####################################################################################
-    # # PROC CORE
-    # ####################################################################################
-    # The four Grimoire proc spells. Each carries a large first cast bonus on its own timer,
-    # and the game announces when that timer is back, so cooldowns.xml already tracks them
-    # and this block simply reads the bars. No timer of our own, which also means the script
-    # inherits any cooldown reset the game hands out.
-    #
-    #   magic arrow  +250% on the first cast in the window
-    #   harm         +250%
-    #   fireball     +250% as a burn over 15 seconds
-    #   lightning    +200% and a hinder
-    #
-    # Ordered cheapest first. They rarely compete, because a spell whose bar is up is the
-    # only one asking, but when two are ready together the cheap one going first keeps more
-    # mana available for the opener on the next mob.
-    #
-    # Each delivery records its mob in var__proc_target, and the flag after this block tells
-    # Poison Strike and the filler whether the core is spent. Both wait for it.
-    if var__engaged = 1 and var__opener_done = 1 and var__manual = 0
-        if not targetexists and not casting and cooldown "walk" = 0
-            if find var__combat_target ground -1 -1 config__target_range as alias__proc_target
-                if cooldown "magic arrow" = 0 and var__regs_magic_arrow = 1 and mana >= config__mana_1st
-                    cast 'Magic Arrow'
-
-                    for 60
-                        if targetexists
-                            break
-                        endif
-
-                        if insysmsg "Your concentration is disturbed, thus ruining thy spell."
-                            break
-                        endif
-
-                        if config__interrupt_to_heal = 1 and diffhits >= config__emergency_hits
-                            if config__chatty = 1
-                                overhead "[ magic arrow, cut ]" 53
-                            endif
-
-                            hotkey "> Interrupt"
-                            break
-                        endif
-
-                        wait wait__poll
-                    endfor
-
-                    if targetexists
-                        if find lasttarget ground -1 -1 config__acquire_range as alias__fresh_target
-                            if not dead alias__fresh_target and var__combat_target != alias__fresh_target
-                                if noto alias__fresh_target = "hostile" or noto alias__fresh_target = "criminal" or noto alias__fresh_target = "enemy" or noto alias__fresh_target = "murderer"
-                                    @setvar! var__combat_target alias__fresh_target
-                                    settimer "timer__target_grace" 0
-
-                                    if find var__combat_target ground -1 -1 config__target_range as alias__proc_target
-                                        if config__chatty = 1
-                                            overhead "[ target, set ]" 705 var__combat_target
-                                        endif
-                                    endif
-                                endif
-                            endif
-                        endif
-
-                        if dead alias__proc_target or var__combat_target != alias__proc_target
-                            hotkey "Cancel Current Target"
-                            wait wait__short
-                        else
-                            target alias__proc_target
-                            wait wait__cast
-                            @setvar! var__proc_target var__combat_target
-                        endif
-                    endif
-                elseif cooldown "harm" = 0 and var__regs_harm = 1 and mana >= config__mana_2nd
-                    cast 'Harm'
-
-                    for 60
-                        if targetexists
-                            break
-                        endif
-
-                        if insysmsg "Your concentration is disturbed, thus ruining thy spell."
-                            break
-                        endif
-
-                        if config__interrupt_to_heal = 1 and diffhits >= config__emergency_hits
-                            if config__chatty = 1
-                                overhead "[ harm, cut ]" 53
-                            endif
-
-                            hotkey "> Interrupt"
-                            break
-                        endif
-
-                        wait wait__poll
-                    endfor
-
-                    if targetexists
-                        if find lasttarget ground -1 -1 config__acquire_range as alias__fresh_target
-                            if not dead alias__fresh_target and var__combat_target != alias__fresh_target
-                                if noto alias__fresh_target = "hostile" or noto alias__fresh_target = "criminal" or noto alias__fresh_target = "enemy" or noto alias__fresh_target = "murderer"
-                                    @setvar! var__combat_target alias__fresh_target
-                                    settimer "timer__target_grace" 0
-
-                                    if find var__combat_target ground -1 -1 config__target_range as alias__proc_target
-                                        if config__chatty = 1
-                                            overhead "[ target, set ]" 705 var__combat_target
-                                        endif
-                                    endif
-                                endif
-                            endif
-                        endif
-
-                        if dead alias__proc_target or var__combat_target != alias__proc_target
-                            hotkey "Cancel Current Target"
-                            wait wait__short
-                        else
-                            target alias__proc_target
-                            wait wait__cast
-                            @setvar! var__proc_target var__combat_target
-                        endif
-                    endif
-                elseif cooldown "fireball" = 0 and var__regs_fireball = 1 and mana >= config__mana_3rd
-                    cast 'Fireball'
-
-                    for 60
-                        if targetexists
-                            break
-                        endif
-
-                        if insysmsg "Your concentration is disturbed, thus ruining thy spell."
-                            break
-                        endif
-
-                        if config__interrupt_to_heal = 1 and diffhits >= config__emergency_hits
-                            if config__chatty = 1
-                                overhead "[ fireball, cut ]" 53
-                            endif
-
-                            hotkey "> Interrupt"
-                            break
-                        endif
-
-                        wait wait__poll
-                    endfor
-
-                    if targetexists
-                        if find lasttarget ground -1 -1 config__acquire_range as alias__fresh_target
-                            if not dead alias__fresh_target and var__combat_target != alias__fresh_target
-                                if noto alias__fresh_target = "hostile" or noto alias__fresh_target = "criminal" or noto alias__fresh_target = "enemy" or noto alias__fresh_target = "murderer"
-                                    @setvar! var__combat_target alias__fresh_target
-                                    settimer "timer__target_grace" 0
-
-                                    if find var__combat_target ground -1 -1 config__target_range as alias__proc_target
-                                        if config__chatty = 1
-                                            overhead "[ target, set ]" 705 var__combat_target
-                                        endif
-                                    endif
-                                endif
-                            endif
-                        endif
-
-                        if dead alias__proc_target or var__combat_target != alias__proc_target
-                            hotkey "Cancel Current Target"
-                            wait wait__short
-                        else
-                            target alias__proc_target
-                            wait wait__cast
-                            @setvar! var__proc_target var__combat_target
-                        endif
-                    endif
-                elseif cooldown "lightning" = 0 and var__regs_lightning = 1 and mana >= config__mana_4th
-                    cast 'Lightning'
-
-                    for 60
-                        if targetexists
-                            break
-                        endif
-
-                        if insysmsg "Your concentration is disturbed, thus ruining thy spell."
-                            break
-                        endif
-
-                        if config__interrupt_to_heal = 1 and diffhits >= config__emergency_hits
-                            if config__chatty = 1
-                                overhead "[ lightning, cut ]" 53
-                            endif
-
-                            hotkey "> Interrupt"
-                            break
-                        endif
-
-                        wait wait__poll
-                    endfor
-
-                    if targetexists
-                        if find lasttarget ground -1 -1 config__acquire_range as alias__fresh_target
-                            if not dead alias__fresh_target and var__combat_target != alias__fresh_target
-                                if noto alias__fresh_target = "hostile" or noto alias__fresh_target = "criminal" or noto alias__fresh_target = "enemy" or noto alias__fresh_target = "murderer"
-                                    @setvar! var__combat_target alias__fresh_target
-                                    settimer "timer__target_grace" 0
-
-                                    if find var__combat_target ground -1 -1 config__target_range as alias__proc_target
-                                        if config__chatty = 1
-                                            overhead "[ target, set ]" 705 var__combat_target
-                                        endif
-                                    endif
-                                endif
-                            endif
-                        endif
-
-                        if dead alias__proc_target or var__combat_target != alias__proc_target
-                            hotkey "Cancel Current Target"
-                            wait wait__short
-                        else
-                            target alias__proc_target
-                            wait wait__cast
-                            @setvar! var__proc_target var__combat_target
-                        endif
-                    endif
-                endif
-            endif
-        endif
-    endif
-
-    # Poison Strike and the filler wait for the whole proc core. Every proc that lands while
-    # Corpse Skin is up leaves its disease on the target, so a strike after Magic Arrow alone
-    # pops one stack where four were on the way, and a bolt cast while a proc is ready pushes
-    # that proc and its next window back by a whole cast.
-    #
-    # This has to be a flag. A cast does not end the pass, so every block below still gets
-    # its turn, which is how both used to go out straight behind Curse and the first proc.
-    #
-    # 1 once no proc is ready, each one either on its bar or out of reagents. A missing
-    # reagent is the same escape the opener takes, it is not coming back until the next
-    # restock. Low mana is not, for the reason given at the opener. Read after the proc core
-    # has had its turn, so a proc cast this pass already counts. A bar whose message has not
-    # arrived yet reads as ready, which only holds both back one pass.
-    @setvar! var__procs_done 1
-
-    if cooldown "magic arrow" = 0 and var__regs_magic_arrow = 1
-        @setvar! var__procs_done 0
-    elseif cooldown "harm" = 0 and var__regs_harm = 1
-        @setvar! var__procs_done 0
-    elseif cooldown "fireball" = 0 and var__regs_fireball = 1
-        @setvar! var__procs_done 0
-    elseif cooldown "lightning" = 0 and var__regs_lightning = 1
-        @setvar! var__procs_done 0
-    endif
-
-    # ####################################################################################
-    # # FILLER
-    # ####################################################################################
-    # The four proc spells spend about 4.3 seconds of a 15 second window and then wait, so
-    # roughly two thirds of the window used to go unused. Energy Bolt has no proc timer of
-    # its own, and its Grimoire upgrade adds 30% damage and hands back 15 of its 20 mana when
-    # the target dies within five seconds, so it is the one spell worth firing purely to fill
-    # that gap.
-    #
-    # Only that gap: var__procs_done keeps it out while any proc is ready, so a bar coming
-    # back hands the next cast to the proc core. A bar that returns mid bolt waits out the
-    # rest of the cast, 1.95 seconds at most. Poison Strike comes after this block, so a bolt
-    # in the same pass adds its disease before the strike pops them.
-    #
-    # It is also the first thing to stand down when mana runs short, which is what
-    # config__filler_floor is for: the opener and one full proc cycle come first.
-    if var__engaged = 1 and var__opener_done = 1 and var__procs_done = 1 and var__manual = 0 and mana > config__filler_floor and var__regs_energy_bolt = 1
-        if not targetexists and not casting and cooldown "walk" = 0
-            if find var__combat_target ground -1 -1 config__target_range as alias__filler_target
-                cast 'Energy Bolt'
-
-                for 60
-                    if targetexists
-                        break
-                    endif
-
-                    if insysmsg "Your concentration is disturbed, thus ruining thy spell."
-                        break
-                    endif
-
-                    if config__interrupt_to_heal = 1 and diffhits >= config__emergency_hits
-                        if config__chatty = 1
-                            overhead "[ eb, cut ]" 53
-                        endif
-
-                        hotkey "> Interrupt"
-                        break
-                    endif
-
-                    wait wait__poll
-                endfor
-
-                if targetexists
-                    if find lasttarget ground -1 -1 config__acquire_range as alias__fresh_target
-                        if not dead alias__fresh_target and var__combat_target != alias__fresh_target
-                            if noto alias__fresh_target = "hostile" or noto alias__fresh_target = "criminal" or noto alias__fresh_target = "enemy" or noto alias__fresh_target = "murderer"
-                                @setvar! var__combat_target alias__fresh_target
-                                settimer "timer__target_grace" 0
-
-                                if find var__combat_target ground -1 -1 config__target_range as alias__filler_target
                                     if config__chatty = 1
-                                        overhead "[ target, set ]" 705 var__combat_target
+                                        overhead "[ vampiric embrace ]" 118
                                     endif
+                                elseif insysmsg "seconds before you may use that ability again."
+                                    settimer "timer__vampiric_embrace" 0
+                                elseif insysmsg "You do not see any corpses near that location."
+                                    settimer "timer__embrace_miss" 0
                                 endif
                             endif
+                        elseif insysmsg "seconds before you may use that ability again."
+                            settimer "timer__vampiric_embrace" 0
                         endif
-                    endif
-
-                    if dead alias__filler_target or var__combat_target != alias__filler_target
-                        hotkey "Cancel Current Target"
-                        wait wait__short
-                    else
-                        target alias__filler_target
-                        wait wait__cast
-                    endif
-                endif
-            endif
-        endif
-    endif
-
-    # ####################################################################################
-    # # POISON STRIKE
-    # ####################################################################################
-    # One symbol to resolve the disease Corpse Skin has been layering on the target: up to
-    # eight ticks land at once instead of over the next thirty seconds. On a mob about to die
-    # that is damage that would otherwise have gone with it. It sits at the bottom of the
-    # symbol ladder and only fires while Corpse Skin is actually up.
-    #
-    # It goes once the proc core is spent, var__procs_done, and last in the pass, behind the
-    # filler. Every damaging spell leaves one disease, so when the pass that spends the core
-    # also has the mana for a bolt, the strike pops four procs and a bolt instead of four.
-    # Below the filler floor there is no bolt coming, and it pops the four rather than wait.
-    # var__proc_target holds it off a mob picked up while the bars are still running from the
-    # last one: no proc has reached that mob yet, so the strike waits until the next cycle
-    # has gone out there.
-    #
-    # A target with nothing on it refuses the strike without spending it. Clearing
-    # var__proc_target then makes it wait for the next proc to reach that mob, rather than
-    # pressing again every pass or sitting out the full window. A cooldown refusal restarts
-    # the window, read on both sides of the cursor wait in case it comes back instead of the
-    # cursor.
-    if var__engaged = 1 and var__opener_done = 1 and var__procs_done = 1 and var__proc_target = var__combat_target and var__manual = 0 and var__symbols_spent = 0 and list 'list__necro_symbols' >= config__symbols_poison_strike
-        if timer "timer__corpse_skin" < cooldown__necro_action and timer "timer__poison_strike" >= cooldown__necro_action
-            if not targetexists and not casting
-                if find var__combat_target ground -1 -1 config__target_range as alias__strike_target
-                    # A bolt from the filler hits 0.5 seconds after its target and brings
-                    # its disease then (library/pvp.md part 5). wait__cast covered 0.3 of
-                    # that and this covers the rest, so on a quick connection the strike
-                    # does not land ahead of the bolt.
-                    wait wait__short
-                    hotkey 'Poison Strike'
-                    waitfortarget wait__target
-
-                    if targetexists
-                        if find lasttarget ground -1 -1 config__acquire_range as alias__fresh_target
-                            if not dead alias__fresh_target and var__combat_target != alias__fresh_target
-                                if noto alias__fresh_target = "hostile" or noto alias__fresh_target = "criminal" or noto alias__fresh_target = "enemy" or noto alias__fresh_target = "murderer"
-                                    @setvar! var__combat_target alias__fresh_target
-                                    settimer "timer__target_grace" 0
-
-                                    if find var__combat_target ground -1 -1 config__target_range as alias__strike_target
-                                        if config__chatty = 1
-                                            overhead "[ target, set ]" 705 var__combat_target
-                                        endif
-                                    endif
-                                endif
-                            endif
-                        endif
-
-                        if var__combat_target != alias__strike_target
-                            hotkey "Cancel Current Target"
-                            wait wait__short
-                        else
-                            target alias__strike_target
-                            wait wait__message
-
-                            if insysmsg "unholy symbols remaining"
-                                settimer "timer__poison_strike" 0
-
-                                if config__chatty = 1
-                                    overhead "[ poison strike ]" 118
-                                endif
-                            elseif insysmsg "seconds before you may use that ability again."
-                                settimer "timer__poison_strike" 0
-                            elseif insysmsg "You do not have a poison or disease effect on that target."
-                                @setvar! var__proc_target 0
-                            endif
-                        endif
-                    elseif insysmsg "seconds before you may use that ability again."
-                        settimer "timer__poison_strike" 0
                     endif
                 endif
             endif
