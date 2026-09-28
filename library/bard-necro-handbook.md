@@ -1065,7 +1065,7 @@ flowchart TD
 1.7   Fireball      3서클  1.00 + 0.2
 2.9   Lightning     4서클  1.25 + 0.2
 4.3   ────── 프록 네 개 소진, 쿨 대기 ──────
-4.3   Energy Bolt   6서클  1.75 + 0.2   실질 5마나
+4.3   Energy Bolt   6서클  1.75 + 0.2   20마나, 5초 안에 죽이면 실질 5
 6.3   Poison Strike 심볼 1, 시전 없음. 질병 5개 (프록 4 + 볼트 1). Corpse Skin 켜짐 + 자기 쿨 30초가 돌았을 때
 6.3   Energy Bolt
 8.2   Energy Bolt
@@ -1103,14 +1103,14 @@ Poison Strike 는 `var__proc_target` 도 본다. 프록이 시전될 때마다 �
 
 ### 5.3 자원
 
-| 자원                     | 쓰는 곳                                                          | 성격                                                      |
-|--------------------------|------------------------------------------------------------------|-----------------------------------------------------------|
-| `cooldown "music"`       | 바드 **스킬** 사용                                               | 글로벌 5초. **Song 은 이것을 세우지 않는다**              |
-| `cooldown "disco"`       | Disco                                                            | 단독 슬롯 5초                                             |
-| `cooldown "peace/provo"` | Peace 와 Provo                                                   | **공유 슬롯 10초.** 합친 항목 하나                        |
-| **Barding Song 쿨**      | 3곡 전체                                                         | **별도 계열. `cooldown "music"` 이 아니다.** 세 곡이 공유 |
-| Unholy Symbol            | Blood Oath(4), Corpse Skin(2), Evil Omen(2), Vampiric Embrace(3) | 5초당 1개, 최대 Effective Necro/10 = **10**               |
-| 마나                     | 버프 + 오프닝 + 스팸 + 필러                                      | 메디가 없어 가장 빡빡하다                                 |
+| 자원                     | 쓰는 곳                                                                            | 성격                                                      |
+|--------------------------|------------------------------------------------------------------------------------|-----------------------------------------------------------|
+| `cooldown "music"`       | 바드 **스킬** 사용                                                                 | 글로벌 5초. **Song 은 이것을 세우지 않는다**              |
+| `cooldown "disco"`       | Disco                                                                              | 단독 슬롯 5초                                             |
+| `cooldown "peace/provo"` | Peace 와 Provo                                                                     | **공유 슬롯 10초.** 합친 항목 하나                        |
+| **Barding Song 쿨**      | 3곡 전체                                                                           | **별도 계열. `cooldown "music"` 이 아니다.** 세 곡이 공유 |
+| Unholy Symbol            | Blood Oath(4), Corpse Skin(2), Evil Omen(2), Poison Strike(1), Vampiric Embrace(3) | 5초당 1개, 최대 Effective Necro/10 = **10**               |
+| 마나                     | 버프 + 오프닝 + 스팸 + 필러                                                        | 메디가 없어 가장 빡빡하다                                 |
 
 **자원이 독립이어도 행동 슬롯은 하나다.** 교전 중 블록의 전체 가드는 이렇다.
 
@@ -1264,14 +1264,16 @@ inlist cursed                       -> 프록 코어
 
 **트레이드오프**: sweep 이 전역이라 방금 건 대상까지 지운다. 동시 교전 1~2마리면 가끔 22마나 손해다. **대상별 타임스탬프는 산술이 필요해서 못 쓴다.**
 
-**막힘 방지**: 타이머가 아니라 **조건**으로 푼다. Curse 시약이 없거나 4서클 마나가 안 되면
-`var__opener_done` 이 그냥 1이 되어 프록과 필러가 라이더 없이 나간다.
+**막힘 방지**: 타이머가 아니라 **조건**으로 푼다. Curse 시약이 없으면
+`var__opener_done` 이 그냥 1이 되어 프록과 필러가 라이더 없이 나간다. 시약은 다음 보급까지 돌아오지 않고,
 살아있는 몹 앞에서 스크립트가 서 있는 것보다 30% 덜 아프게 때리는 쪽이 낫다.
+
+**마나 부족은 여기에 넣지 않는다.** 마나는 돌아오고 그동안 소환수가 싸운다. 라이더 없는 주문에 흘린 마나만큼
+다음 오프닝이 늦어지므로, 22 가 찰 때까지 기다렸다가 라이더를 달고 친다.
 
 ```
 var__opener_done = 1  <-  inlist cursed
                      or  var__regs_curse = 0
-                     or  mana < config__mana_4th
 ```
 
 #### 구식 스크립트의 버그 (반복하지 말 것)
@@ -1522,6 +1524,7 @@ Tracking 자체의 규칙은 [pvp.md](pvp.md) 10절.
 | 4 | Ensemble / Reverb / Virtuoso 가 정말 본체 전용인가                       | 포인트 변경 전후로 데미지 트래커의 **소환수 딜 절대값**을 비교한다                                                                                                | 코덱스 배분 (3.6절)                     |
 | 5 | Skeletal Fiend, skeletal marksman, rotting flesh 의 바디 번호            | 나오면 `>info` 로 읽는다                                                                                                                                          | `SUMMON NAMES` 의 `findtype` 줄 (4.8절) |
 | 6 | Corpse Skin 질병 하나가 틱 몇 개로 도는가                                | 방법 미정. 후보: 프록 한 방 뒤와 프록 네 방 + 볼트 뒤 Poison Strike 피해를 데미지 트래커로 비교한다                                                               | Poison Strike 시점 (3.4절)              |
+| 7 | Lightning 프록의 저널 문장. `lightning activated` 가 따로 뜨는가         | Lightning 프록을 한 번 쏘고 저널을 본다. 다른 셋처럼 `activated` 줄이 있으면 그걸로 바꾸는 게 힌더에 안 묶인다                                                    | `lightning` 바 트리거 (3.1절)           |
 
 **확인 대기 (2026-09-27)**
 

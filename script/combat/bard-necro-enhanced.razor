@@ -2091,8 +2091,9 @@ while not dead
     # ####################################################################################
     # The four proc spells spend about 4.3 seconds of a 15 second window and then wait, so
     # roughly two thirds of the window used to go unused. Energy Bolt has no proc timer of
-    # its own, and its Grimoire upgrade returns 15 of its 20 mana, so it is the one spell
-    # worth firing purely to fill that gap.
+    # its own, and its Grimoire upgrade adds 30% damage and hands back 15 of its 20 mana when
+    # the target dies within five seconds, so it is the one spell worth firing purely to fill
+    # that gap.
     #
     # Only that gap: var__procs_done keeps it out while any proc is ready, so a bar coming
     # back hands the next cast to the proc core. A bar that returns mid bolt waits out the
