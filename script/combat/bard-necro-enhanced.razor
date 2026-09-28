@@ -213,6 +213,12 @@ pushlist 'list__summon_names' 'nomeeheh'
 # goes through this one number, so the bard and spell stages inherit it unchanged.
 @setvar! config__target_range 10
 
+# How far the target the player picks is taken up from, the whole screen. The pets often
+# open on a mob well past config__target_range, and a walk time song or self cast then
+# overwrites lasttarget before that mob comes within reach. The loop keeps the target while
+# it is on screen and only engages once it is inside config__target_range.
+@setvar! config__acquire_range 18
+
 # Damage taken, as hit points below maximum, that separates the cheap heal from the
 # emergency path. The emergency figure is also what lets a cast in flight be cut short.
 @setvar! config__light_hits 15
@@ -335,7 +341,7 @@ pushlist 'list__summon_names' 'nomeeheh'
 # pair summoned back to back gets its names in the order they appeared.
 @setvar! cooldown__summon_name 3000
 
-# How long the cache keeps a target that has stepped out of range before dropping it.
+# How long the cache keeps a target that has gone off screen before dropping it.
 @setvar! cooldown__target_grace 500
 
 # ####################################################################################
@@ -601,7 +607,14 @@ while not dead
     # for afterwards. Every targeted cast reads it once more just before delivering, because
     # the script's own target calls overwrite it: a Q pressed between this read and that
     # delivery would otherwise be lost, and the loop would stay on the old mob.
-    if find lasttarget ground -1 -1 config__target_range as alias__fresh_target
+    #
+    # The player's pick is taken up anywhere on screen, config__acquire_range, and kept while
+    # it stays there, but the loop only engages inside config__target_range. Taking it up only
+    # inside that range lost every target the pets opened on from further out: the next song
+    # put lasttarget on the backpack and the mob was never seen again (2026-09-29). The range
+    # check runs first, so a pass in combat pays the one find it always did, and a pass with
+    # no target at all pays none.
+    if find lasttarget ground -1 -1 config__acquire_range as alias__fresh_target
         if not dead alias__fresh_target and var__combat_target != alias__fresh_target
             if noto alias__fresh_target = "hostile" or noto alias__fresh_target = "criminal" or noto alias__fresh_target = "enemy" or noto alias__fresh_target = "murderer"
                 @setvar! var__combat_target alias__fresh_target
@@ -616,18 +629,26 @@ while not dead
 
     @setvar! var__engaged 0
 
-    if find var__combat_target ground -1 -1 config__target_range as alias__stored_target
-        settimer "timer__target_grace" 0
+    if var__combat_target != 0
+        if find var__combat_target ground -1 -1 config__target_range as alias__stored_target
+            settimer "timer__target_grace" 0
 
-        if dead alias__stored_target
+            if dead alias__stored_target
+                @setvar! var__combat_target 0
+            elseif noto alias__stored_target != "hostile" and noto alias__stored_target != "criminal" and noto alias__stored_target != "enemy" and noto alias__stored_target != "murderer"
+                @setvar! var__combat_target 0
+            else
+                @setvar! var__engaged 1
+            endif
+        elseif find var__combat_target ground -1 -1 config__acquire_range as alias__stored_target
+            settimer "timer__target_grace" 0
+
+            if dead alias__stored_target
+                @setvar! var__combat_target 0
+            endif
+        elseif timer "timer__target_grace" >= cooldown__target_grace
             @setvar! var__combat_target 0
-        elseif noto alias__stored_target != "hostile" and noto alias__stored_target != "criminal" and noto alias__stored_target != "enemy" and noto alias__stored_target != "murderer"
-            @setvar! var__combat_target 0
-        else
-            @setvar! var__engaged 1
         endif
-    elseif var__combat_target != 0 and timer "timer__target_grace" >= cooldown__target_grace
-        @setvar! var__combat_target 0
     endif
 
     # ####################################################################################
@@ -1379,7 +1400,8 @@ while not dead
                 # Spell Siphon: the first spell to hit us starts a sixty minute buff that shows on the
                 # buff bar. A Magic Arrow on self is that hit. Never with Magic Reflection up, the
                 # arrow would only bounce off it and burn the reflection. Any disturb line
-                # an earlier cast left is read off first, so the poll only sees its own.
+                # an earlier cast left is read off first, so the poll only sees its own. Before
+                # self is targeted, lasttarget is read once more, the way BARD SONG does.
                 if insysmsg "Your concentration is disturbed, thus ruining thy spell."
                     # consumed, nothing else to do
                 endif
@@ -1399,8 +1421,23 @@ while not dead
                 endfor
 
                 if targetexists
-                    hotkey 'Target Self'
-                    wait wait__cast
+                    @setvar! var__keep_lasttarget 0
+
+                    if find lasttarget ground -1 -1 config__acquire_range as alias__fresh_target
+                        if not dead alias__fresh_target and var__combat_target != alias__fresh_target
+                            if noto alias__fresh_target = "hostile" or noto alias__fresh_target = "criminal" or noto alias__fresh_target = "enemy" or noto alias__fresh_target = "murderer"
+                                @setvar! var__keep_lasttarget 1
+                            endif
+                        endif
+                    endif
+
+                    if var__keep_lasttarget = 1
+                        hotkey "Cancel Current Target"
+                        wait wait__short
+                    else
+                        hotkey 'Target Self'
+                        wait wait__cast
+                    endif
                 endif
             endif
         endif
@@ -1423,45 +1460,28 @@ while not dead
     #
     # A branch only advances var__song_next once the cursor was actually delivered, so a song
     # that could not go out, for any reason, is retried next pass instead of being skipped.
+    #
+    # The chain only picks the skill and the song after it, the three share the rest. Right
+    # before the backpack is targeted, lasttarget is read once more: a hostile the player has
+    # just picked would be lost to the backpack, the way a green capper was on 2026-09-29.
+    # Then the song stands down, cancels its cursor and leaves lasttarget for the next pass.
     if var__bard_ready = 1 and var__engaged = 0
         if cooldown "music" = 0 and cooldown "song" = 0
             if not targetexists and not casting
+                @setvar! var__song_after 0
+
                 if var__song_next = 1 and skill "Discordance" > 0 and cooldown "disco" = 0
                     useskill 'Discordance'
-                    waitfortarget wait__target
-
-                    if insysmsg "What instrument shall you play"
-                        target var__my_instrument
-                        waitfortarget wait__target
-
-                        if insysmsg "That is not a musical instrument"
-                            @setvar! var__my_instrument 0
-                        endif
-                    endif
-
-                    if targetexists
-                        target backpack
-                        @setvar! var__song_next 2
-                    endif
+                    @setvar! var__song_after 2
                 elseif var__song_next = 2 and skill "Peacemaking" > 0 and cooldown "peace/provo" = 0
                     useskill 'Peacemaking'
-                    waitfortarget wait__target
-
-                    if insysmsg "What instrument shall you play"
-                        target var__my_instrument
-                        waitfortarget wait__target
-
-                        if insysmsg "That is not a musical instrument"
-                            @setvar! var__my_instrument 0
-                        endif
-                    endif
-
-                    if targetexists
-                        target backpack
-                        @setvar! var__song_next 3
-                    endif
+                    @setvar! var__song_after 3
                 elseif var__song_next = 3 and skill "Provocation" > 0 and cooldown "peace/provo" = 0
                     useskill 'Provocation'
+                    @setvar! var__song_after 1
+                endif
+
+                if var__song_after != 0
                     waitfortarget wait__target
 
                     if insysmsg "What instrument shall you play"
@@ -1474,8 +1494,23 @@ while not dead
                     endif
 
                     if targetexists
-                        target backpack
-                        @setvar! var__song_next 1
+                        @setvar! var__keep_lasttarget 0
+
+                        if find lasttarget ground -1 -1 config__acquire_range as alias__fresh_target
+                            if not dead alias__fresh_target and var__combat_target != alias__fresh_target
+                                if noto alias__fresh_target = "hostile" or noto alias__fresh_target = "criminal" or noto alias__fresh_target = "enemy" or noto alias__fresh_target = "murderer"
+                                    @setvar! var__keep_lasttarget 1
+                                endif
+                            endif
+                        endif
+
+                        if var__keep_lasttarget = 1
+                            hotkey "Cancel Current Target"
+                            wait wait__short
+                        else
+                            target backpack
+                            @setvar! var__song_next var__song_after
+                        endif
                     endif
                 endif
             endif
@@ -1523,7 +1558,7 @@ while not dead
                             endif
                         endif
 
-                        if find lasttarget ground -1 -1 config__target_range as alias__fresh_target
+                        if find lasttarget ground -1 -1 config__acquire_range as alias__fresh_target
                             if not dead alias__fresh_target and var__combat_target != alias__fresh_target
                                 if noto alias__fresh_target = "hostile" or noto alias__fresh_target = "criminal" or noto alias__fresh_target = "enemy" or noto alias__fresh_target = "murderer"
                                     @setvar! var__combat_target alias__fresh_target
@@ -1592,7 +1627,7 @@ while not dead
                             endif
                         endif
 
-                        if find lasttarget ground -1 -1 config__target_range as alias__fresh_target
+                        if find lasttarget ground -1 -1 config__acquire_range as alias__fresh_target
                             if not dead alias__fresh_target and var__combat_target != alias__fresh_target
                                 if noto alias__fresh_target = "hostile" or noto alias__fresh_target = "criminal" or noto alias__fresh_target = "enemy" or noto alias__fresh_target = "murderer"
                                     @setvar! var__combat_target alias__fresh_target
@@ -1707,7 +1742,8 @@ while not dead
     # A cooldown refusal restarts the window instead: the script cannot read the game's own
     # cooldown, and the refusal nearly always answers a use whose success line came in late,
     # so a full window from there is about right. It is read on both sides of the cursor
-    # wait, in case it comes back instead of the cursor.
+    # wait, in case it comes back instead of the cursor. Before self is targeted, lasttarget
+    # is read once more, the way BARD SONG does, so a hostile just picked is not lost.
     if list 'list__necro_symbols' >= config__symbols_vampiric_embrace and var__engaged = 0 and var__manual = 0 and followers > 0
         if timer "timer__vampiric_embrace" >= cooldown__necro_action and timer "timer__embrace_miss" >= cooldown__embrace_miss
             if not targetexists and not casting
@@ -1716,19 +1752,34 @@ while not dead
                     waitfortarget wait__target
 
                     if targetexists
-                        hotkey 'Target Self'
-                        wait wait__message
+                        @setvar! var__keep_lasttarget 0
 
-                        if insysmsg "unholy symbols remaining"
-                            settimer "timer__vampiric_embrace" 0
-
-                            if config__chatty = 1
-                                overhead "[ vampiric embrace ]" 118
+                        if find lasttarget ground -1 -1 config__acquire_range as alias__fresh_target
+                            if not dead alias__fresh_target and var__combat_target != alias__fresh_target
+                                if noto alias__fresh_target = "hostile" or noto alias__fresh_target = "criminal" or noto alias__fresh_target = "enemy" or noto alias__fresh_target = "murderer"
+                                    @setvar! var__keep_lasttarget 1
+                                endif
                             endif
-                        elseif insysmsg "seconds before you may use that ability again."
-                            settimer "timer__vampiric_embrace" 0
-                        elseif insysmsg "You do not see any corpses near that location."
-                            settimer "timer__embrace_miss" 0
+                        endif
+
+                        if var__keep_lasttarget = 1
+                            hotkey "Cancel Current Target"
+                            wait wait__short
+                        else
+                            hotkey 'Target Self'
+                            wait wait__message
+
+                            if insysmsg "unholy symbols remaining"
+                                settimer "timer__vampiric_embrace" 0
+
+                                if config__chatty = 1
+                                    overhead "[ vampiric embrace ]" 118
+                                endif
+                            elseif insysmsg "seconds before you may use that ability again."
+                                settimer "timer__vampiric_embrace" 0
+                            elseif insysmsg "You do not see any corpses near that location."
+                                settimer "timer__embrace_miss" 0
+                            endif
                         endif
                     elseif insysmsg "seconds before you may use that ability again."
                         settimer "timer__vampiric_embrace" 0
@@ -1785,7 +1836,7 @@ while not dead
                     endfor
 
                     if targetexists
-                        if find lasttarget ground -1 -1 config__target_range as alias__fresh_target
+                        if find lasttarget ground -1 -1 config__acquire_range as alias__fresh_target
                             if not dead alias__fresh_target and var__combat_target != alias__fresh_target
                                 if noto alias__fresh_target = "hostile" or noto alias__fresh_target = "criminal" or noto alias__fresh_target = "enemy" or noto alias__fresh_target = "murderer"
                                     @setvar! var__combat_target alias__fresh_target
@@ -1800,7 +1851,7 @@ while not dead
                             endif
                         endif
 
-                        if dead alias__opener_target
+                        if dead alias__opener_target or var__combat_target != alias__opener_target
                             hotkey "Cancel Current Target"
                             wait wait__short
                         else
@@ -1840,7 +1891,7 @@ while not dead
                     endfor
 
                     if targetexists
-                        if find lasttarget ground -1 -1 config__target_range as alias__fresh_target
+                        if find lasttarget ground -1 -1 config__acquire_range as alias__fresh_target
                             if not dead alias__fresh_target and var__combat_target != alias__fresh_target
                                 if noto alias__fresh_target = "hostile" or noto alias__fresh_target = "criminal" or noto alias__fresh_target = "enemy" or noto alias__fresh_target = "murderer"
                                     @setvar! var__combat_target alias__fresh_target
@@ -1855,7 +1906,7 @@ while not dead
                             endif
                         endif
 
-                        if dead alias__opener_target
+                        if dead alias__opener_target or var__combat_target != alias__opener_target
                             hotkey "Cancel Current Target"
                             wait wait__short
                         else
@@ -1939,7 +1990,7 @@ while not dead
                     endfor
 
                     if targetexists
-                        if find lasttarget ground -1 -1 config__target_range as alias__fresh_target
+                        if find lasttarget ground -1 -1 config__acquire_range as alias__fresh_target
                             if not dead alias__fresh_target and var__combat_target != alias__fresh_target
                                 if noto alias__fresh_target = "hostile" or noto alias__fresh_target = "criminal" or noto alias__fresh_target = "enemy" or noto alias__fresh_target = "murderer"
                                     @setvar! var__combat_target alias__fresh_target
@@ -1954,7 +2005,7 @@ while not dead
                             endif
                         endif
 
-                        if dead alias__proc_target
+                        if dead alias__proc_target or var__combat_target != alias__proc_target
                             hotkey "Cancel Current Target"
                             wait wait__short
                         else
@@ -1988,7 +2039,7 @@ while not dead
                     endfor
 
                     if targetexists
-                        if find lasttarget ground -1 -1 config__target_range as alias__fresh_target
+                        if find lasttarget ground -1 -1 config__acquire_range as alias__fresh_target
                             if not dead alias__fresh_target and var__combat_target != alias__fresh_target
                                 if noto alias__fresh_target = "hostile" or noto alias__fresh_target = "criminal" or noto alias__fresh_target = "enemy" or noto alias__fresh_target = "murderer"
                                     @setvar! var__combat_target alias__fresh_target
@@ -2003,7 +2054,7 @@ while not dead
                             endif
                         endif
 
-                        if dead alias__proc_target
+                        if dead alias__proc_target or var__combat_target != alias__proc_target
                             hotkey "Cancel Current Target"
                             wait wait__short
                         else
@@ -2037,7 +2088,7 @@ while not dead
                     endfor
 
                     if targetexists
-                        if find lasttarget ground -1 -1 config__target_range as alias__fresh_target
+                        if find lasttarget ground -1 -1 config__acquire_range as alias__fresh_target
                             if not dead alias__fresh_target and var__combat_target != alias__fresh_target
                                 if noto alias__fresh_target = "hostile" or noto alias__fresh_target = "criminal" or noto alias__fresh_target = "enemy" or noto alias__fresh_target = "murderer"
                                     @setvar! var__combat_target alias__fresh_target
@@ -2052,7 +2103,7 @@ while not dead
                             endif
                         endif
 
-                        if dead alias__proc_target
+                        if dead alias__proc_target or var__combat_target != alias__proc_target
                             hotkey "Cancel Current Target"
                             wait wait__short
                         else
@@ -2086,7 +2137,7 @@ while not dead
                     endfor
 
                     if targetexists
-                        if find lasttarget ground -1 -1 config__target_range as alias__fresh_target
+                        if find lasttarget ground -1 -1 config__acquire_range as alias__fresh_target
                             if not dead alias__fresh_target and var__combat_target != alias__fresh_target
                                 if noto alias__fresh_target = "hostile" or noto alias__fresh_target = "criminal" or noto alias__fresh_target = "enemy" or noto alias__fresh_target = "murderer"
                                     @setvar! var__combat_target alias__fresh_target
@@ -2101,7 +2152,7 @@ while not dead
                             endif
                         endif
 
-                        if dead alias__proc_target
+                        if dead alias__proc_target or var__combat_target != alias__proc_target
                             hotkey "Cancel Current Target"
                             wait wait__short
                         else
@@ -2183,7 +2234,7 @@ while not dead
                 endfor
 
                 if targetexists
-                    if find lasttarget ground -1 -1 config__target_range as alias__fresh_target
+                    if find lasttarget ground -1 -1 config__acquire_range as alias__fresh_target
                         if not dead alias__fresh_target and var__combat_target != alias__fresh_target
                             if noto alias__fresh_target = "hostile" or noto alias__fresh_target = "criminal" or noto alias__fresh_target = "enemy" or noto alias__fresh_target = "murderer"
                                 @setvar! var__combat_target alias__fresh_target
@@ -2198,7 +2249,7 @@ while not dead
                         endif
                     endif
 
-                    if dead alias__filler_target
+                    if dead alias__filler_target or var__combat_target != alias__filler_target
                         hotkey "Cancel Current Target"
                         wait wait__short
                     else
@@ -2244,7 +2295,7 @@ while not dead
                     waitfortarget wait__target
 
                     if targetexists
-                        if find lasttarget ground -1 -1 config__target_range as alias__fresh_target
+                        if find lasttarget ground -1 -1 config__acquire_range as alias__fresh_target
                             if not dead alias__fresh_target and var__combat_target != alias__fresh_target
                                 if noto alias__fresh_target = "hostile" or noto alias__fresh_target = "criminal" or noto alias__fresh_target = "enemy" or noto alias__fresh_target = "murderer"
                                     @setvar! var__combat_target alias__fresh_target
@@ -2259,19 +2310,24 @@ while not dead
                             endif
                         endif
 
-                        target alias__strike_target
-                        wait wait__message
+                        if var__combat_target != alias__strike_target
+                            hotkey "Cancel Current Target"
+                            wait wait__short
+                        else
+                            target alias__strike_target
+                            wait wait__message
 
-                        if insysmsg "unholy symbols remaining"
-                            settimer "timer__poison_strike" 0
+                            if insysmsg "unholy symbols remaining"
+                                settimer "timer__poison_strike" 0
 
-                            if config__chatty = 1
-                                overhead "[ poison strike ]" 118
+                                if config__chatty = 1
+                                    overhead "[ poison strike ]" 118
+                                endif
+                            elseif insysmsg "seconds before you may use that ability again."
+                                settimer "timer__poison_strike" 0
+                            elseif insysmsg "You do not have a poison or disease effect on that target."
+                                @setvar! var__proc_target 0
                             endif
-                        elseif insysmsg "seconds before you may use that ability again."
-                            settimer "timer__poison_strike" 0
-                        elseif insysmsg "You do not have a poison or disease effect on that target."
-                            @setvar! var__proc_target 0
                         endif
                     elseif insysmsg "seconds before you may use that ability again."
                         settimer "timer__poison_strike" 0
