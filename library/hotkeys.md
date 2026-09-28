@@ -41,8 +41,8 @@
 `Ctrl+`` ` ``` (Cmd+`) 는 macOS 기본 단축키 "다음 윈도우로 초점 이동" 이라 그대로는 씹힌다. 시스템 설정 → 키보드 → 키보드 단축키 → 키보드 에서 그 항목을 끈다.
 `Alt+`` ` ``` 도 안 된다 — Option+` 은 macOS 가 악센트 dead key 로 잡아서 게임에 안 들어온다. 예전에 Vengeful Spirit 핫키가 안 나가던 것도 이 키에 걸었기 때문이다. Alt 줄은 `1` 부터 쓴다.
 
-**어디에 거는가.** 주문 = ClassicUO `macros.xml` (Vengeful Spirit 도 여기, `[VengefulSpirit` Say 매크로). 나머지 (타겟 · 펫 · 포션 · Pouch · 힐 · VS · 스킬 · 스크립트) = Razor 프로필 `<hotkeys>`. **같은 키를 양쪽에 걸지 않는다** — 프로필이
-`HotKeyStop=False` 라 Razor 키가 CUO 로도 넘어가서 두 번 나간다.
+**어디에 거는가.** 주문 = ClassicUO `macros.xml` (Vengeful Spirit 도 여기, `[VengefulSpirit` Say 매크로). 나머지 (타겟 · 펫 · 포션 · Pouch · 힐 · VS · 스킬 · 스크립트) = Razor 프로필 `<hotkeys>`. **같은 키를 양쪽에 걸지 않는다.** 프로필이
+`HotKeyStop=True` 라 Razor 에 걸린 키는 CUO 로 넘어가지 않는다. 양쪽에 걸면 CUO 쪽 매크로는 조용히 죽는다.
 인게임 카운터·핫바에도 걸지 않는다. 파일에 없는 바인딩은 저장소가 못 지킨다.
 
 ## 2. 키 배치
