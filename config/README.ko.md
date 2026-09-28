@@ -28,10 +28,10 @@ util/setup.sh [<이름>] /path/to/ClassicUO/Data/Plugins/Assistant/Razor.exe   #
 util/setup.sh --undo             # 실제 폴더로 되돌리기
 ```
 
-macOS(Sikarugir) 에서는 래퍼 안의 `Razor.exe` 를 찾아, Razor 프로필과 캐릭터 폴더를 `config/<이름>/`
+macOS (Sikarugir) 에서는 래퍼 안의 `Razor.exe` 를 찾아, Razor 프로필과 캐릭터 폴더를 `config/<이름>/`
 으로 옮기고 그 자리에 링크를 남깁니다.
 
-- **묻는 건 하나.** `config/<이름>/` 에 이미 파일이 있으면(두 번째 PC, 이름 바꾼 폴더, 또는 남의 이름)
+- **묻는 건 하나.** `config/<이름>/` 에 이미 파일이 있으면 (두 번째 PC, 이름 바꾼 폴더, 또는 남의 이름)
   게임을 그쪽으로 연결하기 전에 물어봅니다.
 - **지우지 않습니다.** 빈 폴더와, 저장소가 이미 가진 파일만 든 `Scripts` 폴더는 치웁니다. 그 외는
   원래 자리 옆에 `Scripts-bak`, `Profiles-bak`, `<캐릭>-bak` 으로 남습니다. 확인 후 지우세요.
@@ -54,7 +54,7 @@ cmd /c mklink /J "$ASSIST\Scripts" "C:\src\uoo\script"
 - **게임 → 저장소.** Razor 는 종료할 때 프로필 xml 을 쓰고, ClassicUO 는 로그아웃할 때 캐릭터 파일을
   쓰고, Razor 편집기에서 저장한 스크립트는 즉시 바뀝니다. `git status` 로 보고 남길 것만 커밋하세요.
 - **저장소 → 게임.** Razor 는 스크립트 본문을 캐시합니다. 스크립트를 고쳤거나 pull 했으면 Scripts 탭을
-  클릭하거나(우클릭 → *Reload all scripts*) 다음에 실행하세요. 프로필 xml 은 시작할 때 읽고 종료할 때
+  클릭하거나 (우클릭 → *Reload all scripts*) 다음에 실행하세요. 프로필 xml 은 시작할 때 읽고 종료할 때
   덮어쓰니 **게임을 끈 상태에서** 고치거나 pull 하세요.
 - **캐릭터.** Razor 프로필은 캐릭터 단위가 아닙니다. Profile 탭에서 캐릭터마다 골라 두면 `chars.lst`
   에 기억됩니다. ClassicUO 설정은 원래 캐릭터별입니다.
@@ -69,11 +69,11 @@ push 는 collaborator 만 할 수 있습니다. 나머지는 clone 이나 fork �
 `script/` 는 공유, `config/<이름>/` 은 사람별이라 겹치지 않고, 남이 핫키나 organizer 를 어떻게 짰는지
 읽어볼 수는 있습니다. 프로필 안의 serial 은 주인 계정에서만 의미가 있습니다.
 
-| 파일 | 내용 | 추적 |
-|---|---|---|
-| `razor/profiles/<프로필>.xml` | 핫키, 에이전트(organizer / restock / dress 목록, 컨테이너 serial), 필터, 쿨다운 바, script variable, 창 배치 | 함 |
-| `razor/profiles/chars.lst` | 캐릭터마다 마지막에 쓴 프로필 | 함 |
-| `classicuo/<캐릭>/macros.xml`, `skillsgroups.xml`, `infobar.xml` | 클라 매크로, 스킬 그룹, 인포바 | 함 |
-| `classicuo/<캐릭>/profile.json` | 클라 옵션과 창 위치, 세션마다 바뀜 | 함, 노이즈 있음 |
-| `classicuo/<캐릭>/gumps.xml`, `*.bak1..3`, `*.backup1..3` | 열린 창 상태, 자동 백업 | ignore |
-| `ClassicUO/settings.json` | 해상도, fps, **username / password** | ignore, 링크 안 함 |
+| 파일                                                             | 내용                                                                                                         | 추적               |
+|------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------|--------------------|
+| `razor/profiles/<프로필>.xml`                                    | 핫키, 에이전트(organizer / restock / dress 목록, 컨테이너 serial), 필터, 쿨다운 바, script variable, 창 배치 | 함                 |
+| `razor/profiles/chars.lst`                                       | 캐릭터마다 마지막에 쓴 프로필                                                                                | 함                 |
+| `classicuo/<캐릭>/macros.xml`, `skillsgroups.xml`, `infobar.xml` | 클라 매크로, 스킬 그룹, 인포바                                                                               | 함                 |
+| `classicuo/<캐릭>/profile.json`                                  | 클라 옵션과 창 위치, 세션마다 바뀜                                                                           | 함, 노이즈 있음    |
+| `classicuo/<캐릭>/gumps.xml`, `*.bak1..3`, `*.backup1..3`        | 열린 창 상태, 자동 백업                                                                                      | ignore             |
+| `ClassicUO/settings.json`                                        | 해상도, fps, **username / password**                                                                         | ignore, 링크 안 함 |

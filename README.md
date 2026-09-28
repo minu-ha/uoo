@@ -18,12 +18,12 @@ unmodified. Syntax reference: [Razor Scripting on the Outlands wiki](https://wik
 
 ## Where things are
 
-| | |
-|---|---|
-| [`script/`](script/README.md) | the scripts, grouped by what they do |
-| [`config/`](config/README.md) | Razor and ClassicUO settings, one folder per player, and how the game gets linked to this repo |
-| `library/` | reference: the Bard Necro handbook, item graphic IDs, hotkey layout, overhead glossary, template ↔ script map |
-| `util/` | `setup.sh` links the game to the repo, `check.sh` finds unbalanced blocks in scripts |
+|                               |                                                                                                               |
+|-------------------------------|---------------------------------------------------------------------------------------------------------------|
+| [`script/`](script/README.md) | the scripts, grouped by what they do                                                                          |
+| [`config/`](config/README.md) | Razor and ClassicUO settings, one folder per player, and how the game gets linked to this repo                |
+| `library/`                    | reference: the Bard Necro handbook, item graphic IDs, hotkey layout, overhead glossary, template ↔ script map |
+| `util/`                       | `setup.sh` links the game to the repo, `check.sh` finds unbalanced blocks in scripts                          |
 
 ## Credits
 
