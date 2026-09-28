@@ -567,13 +567,13 @@ Disco/Peace/Provo 가 전부 80이면 T3 (120점)를 찍어도 **80밖에 못 �
 전투용 세 개 (4 + 2 + 2 = 8)를 다 쓰면 **사이클당 2개씩 마이너스**다.
 그래서 개수만 되면 바로 쓰지 않고, **위에 있는 능력 몫을 남기고** 쓴다.
 
-| 능력             | 비용 | 발동 조건                                 | 남겨두는 것                                               |
-|------------------|------|-------------------------------------------|-----------------------------------------------------------|
-| **Blood Oath**   | 4    | `>= 4`                                    | 없음. 최우선                                              |
-| **Corpse Skin**  | 2    | `>= 4`                                    | 없음. Blood Oath 와 같은 4 라 체인 순서가 우선순위        |
-| Evil Omen        | 2    | `>= 4`                                    | 없음. 위 둘이 30초에 6개를 다 쓰니 사실상 이동 잉여에서만 |
-| Poison Strike    | 1    | `>= 1`, Corpse Skin 켜진 동안 + 오프너 뒤 | 없음. 필러 자리라 위는 이미 썼다                          |
-| Vampiric Embrace | 3    | `>= 9`, 이동 중만                         | 6                                                         |
+| 능력             | 비용 | 발동 조건                                    | 남겨두는 것                                               |
+|------------------|------|----------------------------------------------|-----------------------------------------------------------|
+| **Blood Oath**   | 4    | `>= 4`                                       | 없음. 최우선                                              |
+| **Corpse Skin**  | 2    | `>= 4`                                       | 없음. Blood Oath 와 같은 4 라 체인 순서가 우선순위        |
+| Evil Omen        | 2    | `>= 4`                                       | 없음. 위 둘이 30초에 6개를 다 쓰니 사실상 이동 잉여에서만 |
+| Poison Strike    | 1    | `>= 1`, Corpse Skin 켜진 동안 + 프록 코어 뒤 | 없음. 필러 자리라 위는 이미 썼다                          |
+| Vampiric Embrace | 3    | `>= 9`, 이동 중만                            | 6                                                         |
 
 2026-09-27 에 6/8/9/7 → 4/4/1/9. 은행이 늘 차 있어서 Evil Omen 과 Poison Strike 가 거의 안 나가던 것, 그리고 Poison Strike 가 Corpse Skin 을 기다리는 시간을 줄이려고.
 
@@ -591,6 +591,8 @@ Disco/Peace/Provo 가 전부 80이면 T3 (120점)를 찍어도 **80밖에 못 �
 
 **Poison Strike** 는 Corpse Skin 이 깔아둔 질병 틱을 최대 8개 한 번에 터뜨린다. 곧 죽을 몹에서는
 같이 사라졌을 딜을 회수하는 셈이라 값을 하고, 마나가 안 들어 **필러 자리**를 쓴다.
+질병은 프록 주문마다 쌓이므로 **프록 코어 네 개가 다 나간 뒤에** 터뜨린다. Magic Arrow 하나 뒤에 쓰면 오고 있던 세 스택을 버린다.
+그 순서를 어떻게 지키는지는 5.1절.
 
 **Necro 100 의 실제 순환은 Blood Oath + Corpse Skin 이다.** 30초에 6개가 차고 그 둘이 정확히 6개를 쓴다.
 셋이 전부 4 에서 나가므로 체인 순서 (Blood Oath → Corpse Skin → Evil Omen)가 곧 우선순위다. Blood Oath 뒤
@@ -973,7 +975,9 @@ Bloodmoss 플래그 하나만 추가하면 된다. Vengeful Spirit 은 채팅 �
 
 ### 5.1 루프 한 장
 
-한 패스에 **한 동작만** 한다. 위에서부터 조건이 맞는 첫 블록이 실행되고 나머지는 다음 패스로 넘어간다.
+블록 하나는 한 패스에 **한 동작만** 한다 (`elseif` 사슬). 하지만 동작한 블록이 **패스를 끝내지는 않는다.**
+시전이 끝나면 `casting` 이 풀려서 아래 블록도 같은 패스에 차례를 받는다. 그래서 아래 그림은 우선순위일 뿐이고,
+블록 사이의 순서가 필요한 곳은 플래그로 막는다. 오프닝 → 프록은 `var__opener_done`, 프록 → Poison Strike · 필러는 `var__procs_done` 이다.
 모든 블록이 같은 가드를 단다 -- **가드를 빠뜨린 블록은 항상 이긴다.**
 
 ```
@@ -1010,7 +1014,10 @@ flowchart TD
   OPEN -->|yes| PROC
   PROC{"프록 중<br/>쿨 끝난 것"}
   PROC -->|yes| APROC["Magic Arrow · Harm<br/>Fireball · Lightning"] --> E
-  PROC -->|no| FILL
+  PROC -->|no| STRIKE
+  STRIKE{"Corpse Skin 켜짐<br/>마지막 프록이 이 대상"}
+  STRIKE -->|yes| ASTRIKE["Poison Strike"] --> FILL
+  STRIKE -->|no| FILL
   FILL{"mana ><br/>filler_floor"}
   FILL -->|yes| AFILL["Energy Bolt"] --> E
   FILL -->|no| E
@@ -1019,18 +1026,19 @@ flowchart TD
 
 #### 단계별 게이트
 
-| # | 블록          | 게이트                                            | 비고                                                                                                                                                                               |
-|---|---------------|---------------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| 0 | 시스템 메시지 | `insysmsg`                                        | 방해 -> `replay`, 악기 분실 -> 재선택                                                                                                                                              |
-| 1 | 생존          | 마비 → 독 → HP → 무게 → 음식 → 포션 → 마나        | **아래 전부를 막는다.** 마비가 맨 앞: 그 상태에선 아래가 아무것도 못 한다. 큐어가 힐보다 앞: 큐어는 즉시고 힐은 독 틱에 일부가 샌다. 무게는 그 뒤: 과체중은 다음 1초에 죽지 않는다 |
-| 2 | 타겟 캐시     | `lasttarget` + `noto`                             | `var__combat_target` 갱신                                                                                                                                                          |
-| 3 | 자기 버프     | `not findbuff` + `cooldown "reflect"`             | **몹이 없을 때만.** 둘 다 시간이 아니라 소모로 끝난다. RA 는 25 흡수, Reflect 는 한 번 반사 뒤 30초 쿨 (반사 시점부터)                                                             |
-| 4 | Barding Song  | `Music=0 and Song=0 and <슬롯>=0`                 | **몹이 없을 때만.** 라운드로빈                                                                                                                                                     |
-| 5 | 바드 스킬     | `Music=0 and <슬롯>=0`                            | 디스코 1회 + **피스 12초마다**                                                                                                                                                     |
-| 6 | 네크로        | `list 'list__necro_symbols' >= config__symbols_*` | Blood Oath → Corpse Skin → Evil Omen 순. **유휴 예약** 아래 참조                                                                                                                   |
-| 7 | 오프닝        | 마나 + 대상별 리스트                              | Mana Drain -> Curse                                                                                                                                                                |
-| 8 | 프록 코어     | `cooldown "magic arrow"` 등                       | 네 개가 각자 쿨                                                                                                                                                                    |
-| 9 | 필러          | `mana > config__filler_floor`                     | Energy Bolt. **여기부터 잘린다**                                                                                                                                                   |
+| #  | 블록          | 게이트                                            | 비고                                                                                                                                                                               |
+|----|---------------|---------------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| 0  | 시스템 메시지 | `insysmsg`                                        | 방해 -> `replay`, 악기 분실 -> 재선택                                                                                                                                              |
+| 1  | 생존          | 마비 → 독 → HP → 무게 → 음식 → 포션 → 마나        | **아래 전부를 막는다.** 마비가 맨 앞: 그 상태에선 아래가 아무것도 못 한다. 큐어가 힐보다 앞: 큐어는 즉시고 힐은 독 틱에 일부가 샌다. 무게는 그 뒤: 과체중은 다음 1초에 죽지 않는다 |
+| 2  | 타겟 캐시     | `lasttarget` + `noto`                             | `var__combat_target` 갱신                                                                                                                                                          |
+| 3  | 자기 버프     | `not findbuff` + `cooldown "reflect"`             | **몹이 없을 때만.** 둘 다 시간이 아니라 소모로 끝난다. RA 는 25 흡수, Reflect 는 한 번 반사 뒤 30초 쿨 (반사 시점부터)                                                             |
+| 4  | Barding Song  | `Music=0 and Song=0 and <슬롯>=0`                 | **몹이 없을 때만.** 라운드로빈                                                                                                                                                     |
+| 5  | 바드 스킬     | `Music=0 and <슬롯>=0`                            | 디스코 1회 + **피스 12초마다**                                                                                                                                                     |
+| 6  | 네크로        | `list 'list__necro_symbols' >= config__symbols_*` | Blood Oath → Corpse Skin → Evil Omen 순. **유휴 예약** 아래 참조                                                                                                                   |
+| 7  | 오프닝        | 마나 + 대상별 리스트                              | Mana Drain -> Curse                                                                                                                                                                |
+| 8  | 프록 코어     | `cooldown "magic arrow"` 등                       | 네 개가 각자 쿨. 시전마다 대상을 `var__proc_target` 에 적는다                                                                                                                      |
+| 9  | Poison Strike | `var__procs_done` + `var__proc_target`            | 심볼 1. 프록이 전부 쿨이고 마지막 프록이 이 대상일 때. Corpse Skin 조건은 3.4절                                                                                                    |
+| 10 | 필러          | `var__procs_done` + `mana > config__filler_floor` | Energy Bolt. 프록이 전부 쿨인 동안만. **마나는 여기부터 잘린다**                                                                                                                   |
 
 **`PASS FLAGS` 의 시약 플래그는 30초에 한 번만 읽는다** (`timer__regs_refresh`). 시약 일곱 종을 `findtype` 로 한 번씩 찾아
 `var__has_*` 에 두고 주문 플래그 13개는 그 일곱을 비교해서 만든다. 매 패스 `findtype` 19~32번이던 것이 이렇게 됐다 (5.8 절).
@@ -1045,6 +1053,7 @@ flowchart TD
 1.7   Fireball      3서클  1.00 + 0.2
 2.9   Lightning     4서클  1.25 + 0.2
 4.3   ────── 프록 네 개 소진, 쿨 대기 ──────
+4.3   Poison Strike 심볼 1, 시전 없음. Corpse Skin 이 켜져 있고 자기 쿨이 돌았을 때
 4.3   Energy Bolt   6서클  1.75 + 0.2   실질 5마나
 6.3   Energy Bolt
 8.2   Energy Bolt
@@ -1053,10 +1062,18 @@ flowchart TD
 14.1  ────── 프록이 돌아오면 다시 위로 ──────
 ```
 
-**15초당 시전 4회 -> 9회.** 프록이 쿨에서 돌아오는 순간 사다리 7번이 8번을 앞지르므로,
-별도 상태값 없이 자연스럽게 사이클이 돈다.
+**15초당 시전 4회 -> 9회.** 이 순서는 저절로 지켜지지 않는다. 시전이 패스를 끝내지 않으므로
+Poison Strike 와 필러는 `PROC CORE` 바로 뒤에서 계산하는 `var__procs_done` 을 본다.
+네 프록이 저마다 바에 올라 있거나 시약이 없을 때만 1 이다. 마나 부족은 해당하지 않는다.
+마나는 돌아오고 그동안 소환수가 싸우므로 Poison Strike 도 프록을 기다린다. 필러는 바닥 (52)이 어차피 모든 프록 비용보다 높다.
+바 하나가 돌아오면 다음 시전은 프록 코어 차지고, 볼트 도중에 돌아온 바는 남은 시전 (최대 1.95초)만큼 기다린다.
+이 플래그가 없을 때는 Curse 와 첫 프록 바로 뒤에 Poison Strike 와 Energy Bolt 가 같은 패스에 따라 나갔다 (2026-09-28 에 고쳤다).
 
-**마나가 모자라면 8번부터 잘린다.** `config__filler_floor` 를 52 이상 (오프닝 22 + 코어 30)으로
+Poison Strike 는 `var__proc_target` 도 본다. 프록이 시전될 때마다 그 대상을 적어 두고, 마지막 프록이 간 대상이 지금 대상일 때만 나간다.
+이전 몹에서 돌던 프록 쿨이 남은 채로 새 몹의 오프닝이 끝나면 `var__procs_done` 은 이미 1 이지만 그 몹에는 프록 질병이 없기 때문이다.
+그 사이 Energy Bolt 는 그대로 나간다. 필러는 대상을 가리지 않는다.
+
+**마나가 모자라면 필러부터 잘린다.** `config__filler_floor` 를 52 이상 (오프닝 22 + 코어 30)으로
 두어 필러가 다음 몹의 오프닝 마나를 먹지 않게 한다.
 
 ### 5.2 셋업에서 한 번만 하는 것
@@ -1108,7 +1125,7 @@ Peace 송    cooldown "music" = 0 and cooldown "song" = 0 and cooldown "peace/pr
 Disco 스킬  cooldown "music" = 0 and cooldown "disco" = 0
 Peace 스킬  cooldown "music" = 0 and cooldown "peace/provo" = 0
 프록 스펠   cooldown "magic arrow" / "harm" / "fireball" / "lightning" = 0
-필러        mana > config__filler_floor
+필러        프록 넷이 전부 쿨 (var__procs_done = 1) and mana > config__filler_floor
 ```
 
 **바드 외 스킬을 루프에 넣게 되면 `music` 대신 `skill` 을 봐야 한다.**
@@ -1494,6 +1511,7 @@ Tracking 자체의 규칙은 [pvp.md](pvp.md) 10절.
 | 시약 30초 리프레시                                                                                                      | 시약을 새로 채운 뒤 최대 30초 안에 주문이 다시 나간다                                                                                                                 | `insufficient reagents` 류가 반복된다                                                                      |
 | SUMMON NAMES 셋째 이름. 1슬롯짜리를 셋째로 뽑았을 때                                                                    | `[ name, nomeeheh ]` 가 뜬다. 둘까지는 확인됐다                                                                                                                       | 4.8절 "실패하면 이렇게 보인다" 표                                                                          |
 | loadout 배치                                                                                                            | 우하단 한 자리에 새첼 → 루팅 파우치 → 트랩 파우치 5개 (x 120~140) 순으로 쌓인다                                                                                       | 새첼이나 루팅 파우치가 삐져나온다. `loadout.razor` 의 좌표만 조정 (`y 200`, `x 120~140` 은 감으로 잡은 값) |
+| Poison Strike · Energy Bolt 는 프록 코어 뒤 (2026-09-28)                                                                | Curse 뒤로 네 프록이 이어서 나가고, 바 넷이 다 뜬 뒤에 `[ poison strike ]` 와 Energy Bolt. 몹을 바꾸면 그 몹에 프록이 간 뒤에만 `[ poison strike ]`                   | Curse 나 첫 프록 바로 뒤에 `[ poison strike ]` 나 Energy Bolt. 한 프록만 되풀이되면 그 바의 트리거 (3.1절) |
 
 ---
 

@@ -238,8 +238,9 @@ pushlist 'list__summon_names' 'nomeeheh'
 #   blood oath        4       its cost, nothing held back, it is the priority
 #   corpse skin       4       same bar as Blood Oath, the chain order settles who goes first
 #   evil omen         4       same again, so it only ever fires from a walk's surplus
-#   poison strike     1       its cost. It only fires while Corpse Skin is up and after the
-#                             opener, a filler slot, so the bank has already been spent above
+#   poison strike     1       its cost. It only fires while Corpse Skin is up and once the
+#                             proc core is spent, a filler slot, so the bank has already
+#                             been spent above
 #   vampiric embrace  9       3 + 6, walk only, so it competes with nothing else
 #
 # Symbols arrive one per five seconds and bank to Effective Necromancy / 10, ten here. A
@@ -380,6 +381,13 @@ endif
 
 if not listexists 'list__magic_cursed_targets'
     createlist 'list__magic_cursed_targets'
+endif
+
+# Serial the last proc spell went at. Poison Strike waits until it is the current target,
+# so a mob picked up while the proc bars are still running from the last one is not struck
+# before any proc has reached it.
+if not varexist var__proc_target
+    @setvar! var__proc_target 0
 endif
 
 if not timerexists "timer__blood_oath"
@@ -1825,6 +1833,9 @@ while not dead
     # Ordered cheapest first. They rarely compete, because a spell whose bar is up is the
     # only one asking, but when two are ready together the cheap one going first keeps more
     # mana available for the opener on the next mob.
+    #
+    # Each delivery records its mob in var__proc_target, and the flag after this block tells
+    # Poison Strike and the filler whether the core is spent. Both wait for it.
     if var__engaged = 1 and var__opener_done = 1 and var__manual = 0
         if not targetexists and not casting and cooldown "walk" = 0
             if find var__combat_target ground -1 -1 config__target_range as alias__proc_target
@@ -1874,6 +1885,7 @@ while not dead
                         else
                             target alias__proc_target
                             wait wait__cast
+                            @setvar! var__proc_target var__combat_target
                         endif
                     endif
                 elseif cooldown "harm" = 0 and var__regs_harm = 1 and mana >= config__mana_2nd
@@ -1922,6 +1934,7 @@ while not dead
                         else
                             target alias__proc_target
                             wait wait__cast
+                            @setvar! var__proc_target var__combat_target
                         endif
                     endif
                 elseif cooldown "fireball" = 0 and var__regs_fireball = 1 and mana >= config__mana_3rd
@@ -1970,6 +1983,7 @@ while not dead
                         else
                             target alias__proc_target
                             wait wait__cast
+                            @setvar! var__proc_target var__combat_target
                         endif
                     endif
                 elseif cooldown "lightning" = 0 and var__regs_lightning = 1 and mana >= config__mana_4th
@@ -2018,11 +2032,37 @@ while not dead
                         else
                             target alias__proc_target
                             wait wait__cast
+                            @setvar! var__proc_target var__combat_target
                         endif
                     endif
                 endif
             endif
         endif
+    endif
+
+    # Poison Strike and the filler wait for the whole proc core. Every proc that lands while
+    # Corpse Skin is up leaves its disease on the target, so a strike after Magic Arrow alone
+    # pops one stack where four were on the way, and a bolt cast while a proc is ready pushes
+    # that proc and its next window back by a whole cast.
+    #
+    # This has to be a flag. A cast does not end the pass, so every block below still gets
+    # its turn, which is how both used to go out straight behind Curse and the first proc.
+    #
+    # 1 once no proc is ready, each one either on its bar or out of reagents. A missing
+    # reagent is the same escape the opener takes, it is not coming back until the next
+    # restock. Low mana is not, for the reason given at the opener. Read after the proc core
+    # has had its turn, so a proc cast this pass already counts. A bar whose message has not
+    # arrived yet reads as ready, which only holds both back one pass.
+    @setvar! var__procs_done 1
+
+    if cooldown "magic arrow" = 0 and var__regs_magic_arrow = 1
+        @setvar! var__procs_done 0
+    elseif cooldown "harm" = 0 and var__regs_harm = 1
+        @setvar! var__procs_done 0
+    elseif cooldown "fireball" = 0 and var__regs_fireball = 1
+        @setvar! var__procs_done 0
+    elseif cooldown "lightning" = 0 and var__regs_lightning = 1
+        @setvar! var__procs_done 0
     endif
 
     # ####################################################################################
@@ -2033,7 +2073,12 @@ while not dead
     # that is damage that would otherwise have gone with it. It sits at the bottom of the
     # symbol ladder, only fires while Corpse Skin is actually up, and takes a filler slot
     # rather than a proc one, since it costs no mana and the procs are worth more.
-    if var__engaged = 1 and var__opener_done = 1 and var__manual = 0 and var__symbols_spent = 0 and list 'list__necro_symbols' >= config__symbols_poison_strike
+    #
+    # It goes once the proc core is spent, var__procs_done, so all four stacks are on the
+    # target when it pops them. var__proc_target holds it off a mob picked up while the bars
+    # are still running from the last one: no proc has reached that mob yet, so the strike
+    # waits until the next cycle has gone out there.
+    if var__engaged = 1 and var__opener_done = 1 and var__procs_done = 1 and var__proc_target = var__combat_target and var__manual = 0 and var__symbols_spent = 0 and list 'list__necro_symbols' >= config__symbols_poison_strike
         if timer "timer__corpse_skin" < cooldown__necro_action and timer "timer__poison_strike" >= cooldown__necro_action
             if not targetexists and not casting
                 if find var__combat_target ground -1 -1 config__target_range as alias__strike_target
@@ -2082,9 +2127,13 @@ while not dead
     # its own, and its Grimoire upgrade returns 15 of its 20 mana, so it is the one spell
     # worth firing purely to fill that gap.
     #
+    # Only that gap: var__procs_done keeps it out while any proc is ready, so a bar coming
+    # back hands the next cast to the proc core. A bar that returns mid bolt waits out the
+    # rest of the cast, 1.95 seconds at most.
+    #
     # It is also the first thing to stand down when mana runs short, which is what
     # config__filler_floor is for: the opener and one full proc cycle come first.
-    if var__engaged = 1 and var__opener_done = 1 and var__manual = 0 and mana > config__filler_floor and var__regs_energy_bolt = 1
+    if var__engaged = 1 and var__opener_done = 1 and var__procs_done = 1 and var__manual = 0 and mana > config__filler_floor and var__regs_energy_bolt = 1
         if not targetexists and not casting and cooldown "walk" = 0
             if find var__combat_target ground -1 -1 config__target_range as alias__filler_target
                 cast 'Energy Bolt'
