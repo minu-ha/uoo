@@ -567,13 +567,13 @@ Disco/Peace/Provo 가 전부 80이면 T3 (120점)를 찍어도 **80밖에 못 �
 전투용 세 개 (4 + 2 + 2 = 8)를 다 쓰면 **사이클당 2개씩 마이너스**다.
 그래서 개수만 되면 바로 쓰지 않고, **위에 있는 능력 몫을 남기고** 쓴다.
 
-| 능력             | 비용 | 발동 조건                                    | 남겨두는 것                                               |
-|------------------|------|----------------------------------------------|-----------------------------------------------------------|
-| **Blood Oath**   | 4    | `>= 4`                                       | 없음. 최우선                                              |
-| **Corpse Skin**  | 2    | `>= 4`, 서 있고 warmode 가 아닐 때           | 없음. Blood Oath 와 같은 4 라 체인 순서가 우선순위        |
-| Evil Omen        | 2    | `>= 4`, 서 있고 warmode 가 아닐 때           | 없음. 위 둘이 30초에 6개를 다 쓰니 사실상 이동 잉여에서만 |
-| Poison Strike    | 1    | `>= 1`, Corpse Skin 켜진 동안 + 프록 코어 뒤 | 없음. 필러 자리라 위는 이미 썼다                          |
-| Vampiric Embrace | 3    | `>= 9`, 이동 중만                            | 6                                                         |
+| 능력             | 비용 | 발동 조건                                         | 남겨두는 것                                               |
+|------------------|------|---------------------------------------------------|-----------------------------------------------------------|
+| **Blood Oath**   | 4    | `>= 4`                                            | 없음. 최우선                                              |
+| **Corpse Skin**  | 2    | `>= 4`, 서 있고 warmode 가 아닐 때                | 없음. Blood Oath 와 같은 4 라 체인 순서가 우선순위        |
+| Evil Omen        | 2    | `>= 4`, 서 있고 warmode 가 아닐 때                | 없음. 위 둘이 30초에 6개를 다 쓰니 사실상 이동 잉여에서만 |
+| Poison Strike    | 1    | `>= 1`, Corpse Skin 켜진 동안 + 프록 코어·필러 뒤 | 없음. 필러 자리라 위는 이미 썼다                          |
+| Vampiric Embrace | 3    | `>= 9`, 이동 중만                                 | 6                                                         |
 
 2026-09-27 에 6/8/9/7 → 4/4/1/9. 은행이 늘 차 있어서 Evil Omen 과 Poison Strike 가 거의 안 나가던 것, 그리고 Poison Strike 가 Corpse Skin 을 기다리는 시간을 줄이려고.
 
@@ -593,10 +593,18 @@ Disco/Peace/Provo 가 전부 80이면 T3 (120점)를 찍어도 **80밖에 못 �
 둘 다 루프가 쏘는 주문으로만 값을 하는데, 그때는 루프가 공격 주문을 쏘지 않아 지속시간만 흘러간다.
 걷다가 멈춰서 다시 칠 때 프록과 같이 열리게 하려는 것이다. Blood Oath 는 소환수 몫이라 둘 다 상관없이 나간다.
 
-**Poison Strike** 는 Corpse Skin 이 깔아둔 질병 틱을 최대 8개 한 번에 터뜨린다. 곧 죽을 몹에서는
+> "Target a creature that you have applied Poison or Disease onto to resolve up to 3 Poison ticks and up to 8 Disease ticks remaining at (100% * (Necromancy / 100)) normal damage."
+> -- 위키 Necromancy, Poison Strike
+
+> "For next 30 seconds any damaging spell will apply a Disease effect dealing damage of (25% * (Necromancy / 100)) over 30 seconds" -- 위키 Necromancy, Corpse Skin
+
+> "30 second cooldown in between uses of the same Necromancy ability" -- 위키 Necromancy
+
+**Poison Strike** 는 Corpse Skin 이 깔아둔 질병 틱을 최대 8개 (독은 3개) 한 번에 터뜨린다. 곧 죽을 몹에서는
 같이 사라졌을 딜을 회수하는 셈이라 값을 하고, 마나가 안 들어 **필러 자리**를 쓴다.
-질병은 프록 주문마다 쌓이므로 **프록 코어 네 개가 다 나간 뒤에** 터뜨린다. Magic Arrow 하나 뒤에 쓰면 오고 있던 세 스택을 버린다.
-그 순서를 어떻게 지키는지는 5.1절.
+질병은 공격 주문마다 하나씩 붙으므로 **프록 코어 네 개와 필러 Energy Bolt 한 방이 나간 뒤에** 터뜨린다 (4 + 1 = 5개).
+Magic Arrow 하나 뒤에 쓰면 오고 있던 스택을 버린다. 그 순서를 어떻게 지키는지는 5.1절.
+질병 하나가 틱 몇 개로 도는지는 확인되지 않았다. 하나에 틱이 여러 개면 다섯 스택보다 적어도 8틱이 찬다.
 
 **Necro 100 의 실제 순환은 Blood Oath + Corpse Skin 이다.** 30초에 6개가 차고 그 둘이 정확히 6개를 쓴다.
 셋이 전부 4 에서 나가므로 체인 순서 (Blood Oath → Corpse Skin → Evil Omen)가 곧 우선순위다. Blood Oath 뒤
@@ -1018,13 +1026,13 @@ flowchart TD
   OPEN -->|yes| PROC
   PROC{"프록 중<br/>쿨 끝난 것"}
   PROC -->|yes| APROC["Magic Arrow · Harm<br/>Fireball · Lightning"] --> E
-  PROC -->|no| STRIKE
-  STRIKE{"Corpse Skin 켜짐<br/>마지막 프록이 이 대상"}
-  STRIKE -->|yes| ASTRIKE["Poison Strike"] --> FILL
-  STRIKE -->|no| FILL
+  PROC -->|no| FILL
   FILL{"mana ><br/>filler_floor"}
-  FILL -->|yes| AFILL["Energy Bolt"] --> E
-  FILL -->|no| E
+  FILL -->|yes| AFILL["Energy Bolt"] --> STRIKE
+  FILL -->|no| STRIKE
+  STRIKE{"Corpse Skin 켜짐<br/>마지막 프록이 이 대상"}
+  STRIKE -->|yes| ASTRIKE["Poison Strike"] --> E
+  STRIKE -->|no| E
   E([패스 끝])
 ```
 
@@ -1041,8 +1049,8 @@ flowchart TD
 | 6  | 네크로        | `list 'list__necro_symbols' >= config__symbols_*` | Blood Oath → Corpse Skin → Evil Omen 순. Corpse Skin · Evil Omen 은 서 있고 warmode 가 아닐 때만. 심볼 몫은 3.4절                                                                  |
 | 7  | 오프닝        | 마나 + 대상별 리스트                              | Mana Drain -> Curse                                                                                                                                                                |
 | 8  | 프록 코어     | `cooldown "magic arrow"` 등                       | 네 개가 각자 쿨. 시전마다 대상을 `var__proc_target` 에 적는다                                                                                                                      |
-| 9  | Poison Strike | `var__procs_done` + `var__proc_target`            | 심볼 1. 프록이 전부 쿨이고 마지막 프록이 이 대상일 때. Corpse Skin 조건은 3.4절                                                                                                    |
-| 10 | 필러          | `var__procs_done` + `mana > config__filler_floor` | Energy Bolt. 프록이 전부 쿨인 동안만. **마나는 여기부터 잘린다**                                                                                                                   |
+| 9  | 필러          | `var__procs_done` + `mana > config__filler_floor` | Energy Bolt. 프록이 전부 쿨인 동안만. **마나는 여기부터 잘린다**                                                                                                                   |
+| 10 | Poison Strike | `var__procs_done` + `var__proc_target`            | 심볼 1. 맨 끝이라 같은 패스의 Energy Bolt 질병까지 터뜨린다. 마지막 프록이 이 대상일 때. Corpse Skin 조건은 3.4절                                                                  |
 
 **`PASS FLAGS` 의 시약 플래그는 30초에 한 번만 읽는다** (`timer__regs_refresh`). 시약 일곱 종을 `findtype` 로 한 번씩 찾아
 `var__has_*` 에 두고 주문 플래그 13개는 그 일곱을 비교해서 만든다. 매 패스 `findtype` 19~32번이던 것이 이렇게 됐다 (5.8 절).
@@ -1057,8 +1065,8 @@ flowchart TD
 1.7   Fireball      3서클  1.00 + 0.2
 2.9   Lightning     4서클  1.25 + 0.2
 4.3   ────── 프록 네 개 소진, 쿨 대기 ──────
-4.3   Poison Strike 심볼 1, 시전 없음. Corpse Skin 이 켜져 있고 자기 쿨이 돌았을 때
 4.3   Energy Bolt   6서클  1.75 + 0.2   실질 5마나
+6.3   Poison Strike 심볼 1, 시전 없음. 질병 5개 (프록 4 + 볼트 1). Corpse Skin 켜짐 + 자기 쿨 30초가 돌았을 때
 6.3   Energy Bolt
 8.2   Energy Bolt
 10.2  Energy Bolt
@@ -1072,6 +1080,11 @@ Poison Strike 와 필러는 `PROC CORE` 바로 뒤에서 계산하는 `var__proc
 마나는 돌아오고 그동안 소환수가 싸우므로 Poison Strike 도 프록을 기다린다. 필러는 바닥 (52)이 어차피 모든 프록 비용보다 높다.
 바 하나가 돌아오면 다음 시전은 프록 코어 차지고, 볼트 도중에 돌아온 바는 남은 시전 (최대 1.95초)만큼 기다린다.
 이 플래그가 없을 때는 Curse 와 첫 프록 바로 뒤에 Poison Strike 와 Energy Bolt 가 같은 패스에 따라 나갔다 (2026-09-28 에 고쳤다).
+
+Poison Strike 는 패스 맨 끝, 필러 다음이다. 프록을 다 쓴 패스에 마나가 있으면 볼트가 먼저 나가 질병이 하나 더 붙은 뒤에 터뜨린다.
+마나가 필러 바닥 아래면 볼트가 안 나가므로 기다리지 않고 프록 네 개분을 터뜨린다. 자기 쿨이 30초라 프록 사이클 (15초) 두 번에 한 번 나간다.
+볼트는 대상 뒤 0.5초에 맞으므로 ([pvp.md](pvp.md) 5절) 누르기 전에 `wait__short` (0.2초)를 더 기다린다. 볼트 뒤 `wait__cast` 0.3초와 합쳐 0.5초다.
+빠른 연결에서 Poison Strike 가 볼트 질병보다 먼저 들어가지 않게 하려는 것이고, 30초에 한 번이라 비용은 없다시피 하다.
 
 Poison Strike 는 `var__proc_target` 도 본다. 프록이 시전될 때마다 그 대상을 적어 두고, 마지막 프록이 간 대상이 지금 대상일 때만 나간다.
 이전 몹에서 돌던 프록 쿨이 남은 채로 새 몹의 오프닝이 끝나면 `var__procs_done` 은 이미 1 이지만 그 몹에는 프록 질병이 없기 때문이다.
@@ -1506,6 +1519,7 @@ Tracking 자체의 규칙은 [pvp.md](pvp.md) 10절.
 | 3 | Energy Bolt 의 15마나 회수 (5초 안 마무리 때만)가 환급 확률과 중첩되는지 | 방법 미정. 후보: 한 시전에 `[ mana, refund ]` 와 `[ eb, refund ]` 가 둘 다 뜨는지 본다 (overheads.md 7절)                                                         | 마나 예산이 2.7/초냐 훨씬 낮냐 (5.4절)  |
 | 4 | Ensemble / Reverb / Virtuoso 가 정말 본체 전용인가                       | 포인트 변경 전후로 데미지 트래커의 **소환수 딜 절대값**을 비교한다                                                                                                | 코덱스 배분 (3.6절)                     |
 | 5 | Skeletal Fiend, skeletal marksman, rotting flesh 의 바디 번호            | 나오면 `>info` 로 읽는다                                                                                                                                          | `SUMMON NAMES` 의 `findtype` 줄 (4.8절) |
+| 6 | Corpse Skin 질병 하나가 틱 몇 개로 도는가                                | 방법 미정. 후보: 프록 한 방 뒤와 프록 네 방 + 볼트 뒤 Poison Strike 피해를 데미지 트래커로 비교한다                                                               | Poison Strike 시점 (3.4절)              |
 
 **확인 대기 (2026-09-27)**
 
@@ -1515,7 +1529,7 @@ Tracking 자체의 규칙은 [pvp.md](pvp.md) 10절.
 | 시약 30초 리프레시                                                                                                      | 시약을 새로 채운 뒤 최대 30초 안에 주문이 다시 나간다                                                                                                                 | `insufficient reagents` 류가 반복된다                                                                      |
 | SUMMON NAMES 셋째 이름. 1슬롯짜리를 셋째로 뽑았을 때                                                                    | `[ name, nomeeheh ]` 가 뜬다. 둘까지는 확인됐다                                                                                                                       | 4.8절 "실패하면 이렇게 보인다" 표                                                                          |
 | loadout 배치                                                                                                            | 우하단 한 자리에 새첼 → 루팅 파우치 → 트랩 파우치 5개 (x 120~140) 순으로 쌓인다                                                                                       | 새첼이나 루팅 파우치가 삐져나온다. `loadout.razor` 의 좌표만 조정 (`y 200`, `x 120~140` 은 감으로 잡은 값) |
-| Poison Strike · Energy Bolt 는 프록 코어 뒤 (2026-09-28)                                                                | Curse 뒤로 네 프록이 이어서 나가고, 바 넷이 다 뜬 뒤에 `[ poison strike ]` 와 Energy Bolt. 몹을 바꾸면 그 몹에 프록이 간 뒤에만 `[ poison strike ]`                   | Curse 나 첫 프록 바로 뒤에 `[ poison strike ]` 나 Energy Bolt. 한 프록만 되풀이되면 그 바의 트리거 (3.1절) |
+| Poison Strike · Energy Bolt 는 프록 코어 뒤 (2026-09-28)                                                                | Curse 뒤로 네 프록이 이어서 나가고, 바 넷이 다 뜬 뒤 Energy Bolt 한 방, 그다음 `[ poison strike ]`. 몹을 바꾸면 그 몹에 프록이 간 뒤에만                              | Curse 나 첫 프록 바로 뒤에 `[ poison strike ]` 나 Energy Bolt. 한 프록만 되풀이되면 그 바의 트리거 (3.1절) |
 | 네크로 능력을 Razor 핫키로 되돌림 (2026-09-28)                                                                          | `[ blood oath ]` `[ corpse skin ]` `[ evil omen ]` `[ poison strike ]` 가 전처럼 뜬다                                                                                 | 능력이 안 나가면 Razor 핫키 목록의 이름                                                                    |
 | Corpse Skin · Evil Omen 은 서 있고 warmode 가 아닐 때만 (2026-09-28)                                                    | 교전 중 걷는 동안과 warmode 에서는 둘이 안 나가고 `[ blood oath ]` 만 뜬다. 멈추면 프록 앞에 나간다                                                                   | 걷는 중이나 warmode 에서 `[ corpse skin ]` · `[ evil omen ]`                                               |
 
