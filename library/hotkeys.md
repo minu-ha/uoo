@@ -191,6 +191,6 @@ basic (프로필 `default`):
 - 메이지의 `1 2 3` = Curse / Weaken / Clumsy 와 `F1` = hally-mage 는 임시 배정. 실제 템플릿에 맞춰 바꾼다.
 - 사이드 위/아래는 코드 `-5` / `-4` 로 배정했다. 눌러 보고 반대면 두 줄을 맞바꾼다.
 - macOS 의 "다음 윈도우로 초점 이동" 을 끈 뒤 `Ctrl+`` ` ``` 가 게임에 들어오는지.
-- `Ctrl+T` Cure 는 문서에만 있다. 게임을 끈 상태에서 `macros.xml` 에 건다.
+- `Ctrl+T` Cure (nomeehej, xuezhonglian 의 `macros.xml`)와 아랫줄 새 배치 (`summoner.xml`, `default.xml`)가 게임에서 그대로 도는지.
 - 햄스트링·디스암 토글을 어떻게 거는지 (Razor 핫키, 채팅 명령, 버튼). 위키 Hamstring 문서에서 확인하고 basic 의 `Shift+Z` / `Shift+X` 에 건다.
-- 아랫줄 새 배치는 문서에만 있다. 게임을 끈 상태에서 프로필 `<hotkeys>` 에 건다.
+- `indian angus *` 네 캐릭터의 `macros.xml` 은 옛 배치다 (Cure 가 `Ctrl+2`). 그 캐릭이 `summoner` 프로필을 쓰면 Razor 의 `Ctrl+2` 큐어 포션과 겹쳐 두 번 나간다.
