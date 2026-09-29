@@ -27,6 +27,7 @@ const blueprint_docs = [
   { file: 'overheads.html', label: '머리 위 메시지와 쿨다운 바', group: '사양' },
   { file: 'hotkeys.html', label: '핫키 배치', group: '사양' },
   { file: 'bard-necro-handbook.html', label: 'Bard Necro 핸드북', group: '템플릿' },
+  { file: 'lumberjack-pvp-handbook.html', label: '벌목 · PvP 핸드북', group: '템플릿' },
   { file: 'item-list.txt', label: '아이템 목록', group: '자료' },
   { file: 'open-items.html', label: '확인할 것', group: '기록' },
 ]

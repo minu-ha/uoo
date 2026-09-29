@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="ko">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BLUEPRINT - UOO</title>
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="_index.css">
+<script src="_index.js"></script>
+
+<body class="bp_index__root">
+<main class="bp_index__doc">
+<h1>벌목 · PvP 핸드북</h1>
+<p>Lumberjacking을 유지하면서 도끼·붕대·마법으로 필드에서 반격하는 캐릭터의 선택과 교전 설계.
+서버 규칙의 정본은 <a href="pvp.html">pvp.html</a>, 미확인 메커니즘과 실험 절차는 <a href="open-items.html#08">open-items.html</a> 08절이다.</p>
+
+<h2 id="00">00 한눈에</h2>
+<p><strong>벌목 120을 유지하는 근접 중심 하이브리드</strong>다. 순수 결투 캐릭터의 최적해라고 단정하지 않는다.
+2026-09-30 대화에서 고른 출발안이며, 아래 수치는 공식 기반 계산이고 전투 시나리오는 아직 실전 검증 전이다.</p>
+<ul>
+<li>기본안은 720 스킬, STR / DEX / INT = <strong>100 / 50 / 75</strong>. 공격용 마나와 붕대 시간을 함께 확보한다.</li>
+<li>Great Axe로 한 방, Norse Axe로 붙어서 압박, Hatchet은 벌목과 중간 속도용이다.</li>
+<li>상대도 자동 파우치·붕대·포션을 쓴다. Paralyze 동안 멈춰 기다려 주는 상대를 가정하지 않는다.</li>
+<li>TK는 자기 방어와 공격 부착 중 선택한다. <strong>반사 TK를 공짜 자기 방어로 계산하지 않는다.</strong></li>
+<li>새 전투 스크립트는 아직 만들지 않았다. 이 문서는 구현 전에 합의할 동작과 포기할 조건을 남긴다.</li>
+</ul>
+
+<h2 id="01" data-part="캐릭터">01 스킬 720</h2>
+<table>
+<thead><tr><th>스킬</th><th>값</th><th>이 템플릿에서 맡는 일</th></tr></thead>
+<tbody>
+<tr><td>Lumberjacking</td><td>120</td><td>채집 목적을 유지하고 도끼의 PvP 보조 피해를 얻는다</td></tr>
+<tr><td>Swordsmanship</td><td>100</td><td>도끼의 명중·무장 중 근접 방어. Lumberjacking으로 대체할 수 없다</td></tr>
+<tr><td>Tactics</td><td>100</td><td>근접 기본 피해의 페널티를 없앤다</td></tr>
+<tr><td>Magery</td><td>80</td><td>회복·해독·이동·견제·조건부 Explosion / EB</td></tr>
+<tr><td>Tracking</td><td>80</td><td>적 탐지, 보조 피해, Hamstring 자격의 한 자리</td></tr>
+<tr><td>Resisting Spells</td><td>80</td><td>주문 피해 방어. PvP 시전 인터럽트 면역은 아니다</td></tr>
+<tr><td>Anatomy</td><td>80</td><td>Hamstring 자격의 다른 자리, 근접 기본 피해·붕대 보조</td></tr>
+<tr><td>Healing</td><td>80</td><td>공격 마나를 남겨 주는 붕대 회복</td></tr>
+<tr><td>합계</td><td>720</td><td>Eval / Meditation / Wrestling 없음</td></tr>
+</tbody>
+</table>
+<p>Hamstring은 Swordsmanship으로 공격하고 Anatomy + Tracking으로 보조 조건을 채운다.
+<strong>Swordsmanship + Tracking만 있는 것으로는 부족하다.</strong> 조건 원문은 <a href="pvp.html#03">pvp.html</a> 03절.</p>
+<p>Lumberjacking 120의 +12%와 Tracking 80의 +8%로 도끼의 근접 보조 상한을 채운다.
+Tracking의 주문 보조는 +8%지만 Eval을 대신하지 않는다. Tactics와 Anatomy도 그 상한 밖이다
+(<a href="pvp.html#09.A">pvp.html</a> 09.A절).</p>
+<p>무기를 들면 Swordsmanship으로 싸우지만, 시전으로 손을 비우면 Wrestling 없는 약점이 드러난다.
+상대 무기 스킬 100 대 내 맨손 Wrestling 0의 기본 명중은 100%다. 가까이서 긴 시전을 버티는 운영은 피한다
+(<a href="pvp.html#02.E">pvp.html</a> 02.E절).</p>
+
+<h3 id="01.A">01.A 마지막 20점의 선택</h3>
+<p>Lumberjacking 120, Swordsmanship 100, 나머지 여섯 스킬 80이면 700이다. 다음은 남은 20점을 어디에 넣을지의 비교다.</p>
+<table>
+<thead><tr><th>100으로 올릴 스킬</th><th>얻는 것</th><th>선택 기준</th></tr></thead>
+<tbody>
+<tr><td>Tactics — 기본안</td><td>기본 무기 피해의 -10% 보정 제거</td><td>도끼로 붙어서 마무리할 계획에 우선</td></tr>
+<tr><td>Healing</td><td>슬립 전 붕대 평균 46.4 → 58</td><td>마나를 힐에 너무 많이 쓰거나 지속 교환에서 밀리면 비교</td></tr>
+<tr><td>Resisting Spells</td><td>주문 피해 방어 강화</td><td>메이지 폭딜에 회복하기도 전에 무너지면 비교</td></tr>
+<tr><td>Tracking</td><td>탐지 거리·성공률, 주문 보조 +8% → +10%</td><td>조기 발견이 최우선일 때. 도끼 보조 피해는 이미 상한이다</td></tr>
+<tr><td>Anatomy</td><td>근접 기본 피해 +16% → +20%, 붕대 평균 46.4 → 48</td><td>회복량만 보면 Healing 증량보다 작다</td></tr>
+</tbody>
+</table>
+<p>계산 근거는 <a href="pvp.html#09.A">pvp.html</a> 09.A·09.C절, 방어는 <a href="pvp.html#08">08절</a>, 탐지는 <a href="pvp.html#10">10절</a>이다.</p>
+
+<h3 id="01.B">01.B Magery 80과 Eval·Meditation을 뺀 비용</h3>
+<p>6서클 콤보와 유틸리티가 목적이면 Magery 80을 출발점으로 삼을 수 있다. Earth Elemental은 스크롤을 챙기는 선택이 있다.
+다만 소환 성공과 몸빵 유지·PvP 생존은 별개이며, 소환 마나를 쓴 직후는 교전 준비가 안 된 상태다
+(<a href="pvp.html#05.B">pvp.html</a> 05.B절, <a href="pvp.html#06">06절</a>).</p>
+<p>Magery 100은 단지 7·8서클 때문에 찍는 것이 아니다. 피해와 Greater Heal도 강해진다.
+반대로 60으로 줄이면 지금 설계의 6서클 공격 신뢰도를 잃으므로 같은 운영의 저렴한 대체안으로 보지 않는다.</p>
+<p>Eval 없는 주문은 주력 메이지의 공격과 같지 않고, Meditation 없는 마나는 긴 주문 교환을 버티기 어렵다.
+현재안은 둘 중 무엇을 80 넣을지 고르는 안이 아니라 <strong>Anatomy + Healing을 함께 유지하는 안</strong>이다.</p>
+<p>예전의 Wrestling 80 + Eval 80 또는 Meditation 80 안으로 돌아가려면 Anatomy + Healing을 빼는 식의 재설계가 필요하다.
+그 경우 Hamstring은 Tracking + Wrestling로 충족하지만 붕대를 잃는다. 주문전 위주로 바꾸고 싶을 때 별도로 비교한다.</p>
+
+<h2 id="02">02 스탯 225와 회복</h2>
+<p>STR 100을 고정하고 DEX와 INT를 나눈다. 아래는 Greater Agility +20만 반영한 값이다.
+Greater Strength 사용 시 최대 HP는 120으로 계산한다. Bless의 정수·중첩 처리는 제외한다
+(<a href="pvp.html#09.D">pvp.html</a> 09.D절).</p>
+<table>
+<thead><tr><th>STR / DEX / INT</th><th>포션 후 DEX</th><th>자기 붕대</th><th>판단</th></tr></thead>
+<tbody>
+<tr><td>100 / 25 / 100</td><td>45</td><td>약 13.67초</td><td>마나는 넉넉하지만 원하는 붕대 11~12초보다 느리다</td></tr>
+<tr><td><strong>100 / 50 / 75</strong></td><td>70</td><td><strong>12초</strong></td><td>첫 실전 비교안</td></tr>
+<tr><td>100 / 60 / 65</td><td>80</td><td>약 11.33초</td><td>근접과 회복을 조금 더 중시</td></tr>
+<tr><td>100 / 65 / 60</td><td>85</td><td>11초</td><td>붕대 목표를 확실히 당기되 마나 여유 감소</td></tr>
+<tr><td>100 / 80 / 45</td><td>100</td><td>10초</td><td>근접 중심. 긴 선공 주문 콤보와 후속 회복을 함께 쓰기 어렵다</td></tr>
+</tbody>
+</table>
+<p><a href="pvp.html#09.C">pvp.html</a> 09.C절 공식에 대입한 이론값이다. 자동 붕대는 재사용 실수를 줄이지 완료 시간을 줄이지는 않는다.
+DEX를 더 올려도 서버의 계산 상한을 넘는 부분은 붕대·PvP 공속에 추가 이득을 주지 않는다.</p>
+<p>출발안에서 실제로 부족한 것을 기록한다. 마나가 먼저 고갈되면 공격 주문 소비를 줄이고,
+붕대 완료 전 압박에 밀리면 DEX를 올리는 안과 Healing 100 안을 비교한다. 포션 만료·Curse·독·슬립이 섞인 결과도 분리한다.</p>
+
+<h2 id="03">03 도끼와 스윙</h2>
+<p><a href="https://wiki.uooutlands.com/Swordsmanship">Swordsmanship 무기표</a>에서 목적별 도끼를 고른다.
+Katana·Halberd가 같은 스킬을 쓴다는 이유로 Lumberjacking 보너스를 받는 것은 아니다
+(<a href="pvp.html#09.A">pvp.html</a> 09.A절).</p>
+<table>
+<thead><tr><th>무기</th><th>역할</th><th>Speed</th><th>기본 피해</th></tr></thead>
+<tbody>
+<tr><td>Great Axe — 2H Burst</td><td>접촉 순간 한 방과 Hamstring 시도</td><td>25</td><td>21~46</td></tr>
+<tr><td>Hatchet — 2H Medium</td><td>벌목 도구 겸 중간 속도의 지속전</td><td>38</td><td>17~32</td></tr>
+<tr><td>Norse Axe — 1H Light</td><td>붙어 있는 동안 더 자주 명중·인터럽트를 시도</td><td>48</td><td>13~23</td></tr>
+</tbody>
+</table>
+<p>위 값은 무기표의 Speed·MinDmg·MaxDmg이다. 상대에게 실제 뜨는 피해에는 스킬·방어구 등 다른 계산이 들어간다.</p>
+<table>
+<thead><tr><th>현재 스태미나</th><th>Great Axe</th><th>Hatchet</th><th>Norse Axe</th></tr></thead>
+<tbody>
+<tr><td>45</td><td>4.14초</td><td>2.72초</td><td>2.16초</td></tr>
+<tr><td>70 — 출발안의 만스태미나</td><td>3.53초</td><td>2.32초</td><td>1.84초</td></tr>
+<tr><td>80</td><td>3.33초</td><td>2.19초</td><td>1.74초</td></tr>
+<tr><td>100</td><td>3초</td><td>1.97초</td><td>1.56초</td></tr>
+</tbody>
+</table>
+<p><a href="pvp.html#09.B">pvp.html</a> 09.B절 공식으로 계산했다. 피해로 스태미나가 내려가면 포션 후 최대 DEX만으로 공속을 예상할 수 없다.</p>
+<p>예를 들어 스태미나 80에서 Great Axe를 t=0에 휘두르고 Norse Axe를 약 t=1.74에 휘두르면,
+다음 Great Axe는 약 t=5.07부터다. 원래 Great Axe 간격인 t=3.33에 공짜로 다시 치는 것은 아니다.</p>
+<p>따라서 "큰 무기 쿨이면 무조건 작은 무기"가 아니다. 곧 상대가 붙어서 큰 한 방을 줄 기회가 생길지,
+지금 빠른 스윙으로 상대 회복 시전을 견제하는 게 나을지 고른다. 명중 자체는 보장되지 않는다.</p>
+
+<h2 id="04" data-part="교전">04 마나 예산과 시작 조건</h2>
+<p><a href="pvp.html#05.B">pvp.html</a> 05.B절의 기본 마나를 합산한 값이다. 자연 회복·실패·추가 시전은 제외했다.
+INT 75여도 전투 시작 시 실제 마나가 75라는 보장은 없다.</p>
+<table>
+<thead><tr><th>행동 묶음</th><th>마나</th><th>판단</th></tr></thead>
+<tbody>
+<tr><td>공격 TK + 폭발 포션 + Explosion + EB</td><td>49</td><td>가능하지만 회복·도주 마나를 따로 남겨야 한다</td></tr>
+<tr><td>위 묶음 + MA 한 번 + GH 한 번 + Teleport 한 번</td><td>73</td><td>마나 75에서도 2만 남는다. 반복할 기본 루프로 부적합</td></tr>
+<tr><td>Paralyze + 공격 TK + 폭발 포션 + Explosion + EB</td><td>63</td><td>상대 자동 파우치를 감안하면 비싼 고정 오프너</td></tr>
+<tr><td>자기 TK + MA 한 번 또는 두 번 + EB</td><td>33 / 37</td><td>근접 진입을 보조하는 짧은 시작안. 공격 TK는 함께 넣지 않는다</td></tr>
+</tbody>
+</table>
+<p>설계상 최소 여유로 GH + Teleport 몫을 별도로 확보한다. 이것은 생존 보장치가 아니라 한 번의 회복·이동 예산이다.
+추가 해독·견제·실패 비용이 필요하면 긴 콤보를 포기한다. 자기 TK를 미리 걸었어도 회복하지 않은 마나는 이미 소비한 것이다.</p>
+<p>Rope는 기본 추격 수단으로 자동 사용하지 않는다. 마나 부족 등 정말 필요한 상황의 수동 선택으로 남기되,
+이후 Teleport까지 공유 쿨에 묶이는 비용을 보여 줘야 한다 (<a href="pvp.html#05.C">pvp.html</a> 05.C절).</p>
+
+<h2 id="05">05 상대도 스크립트를 쓰는 전투</h2>
+<p>상대는 TK·폭발 포션을 쓰는 Alchemy + Inscription 메이지라고 가정한다. 수치상 승률을 예언하는 시뮬레이션이 아니라,
+상대의 이동·회복·반사와 내 실패에 대응하는 의사결정이다. 이벤트별 명령 제한은 별도로 확인한다.</p>
+
+<h3 id="05.A">05.A 기본안 — 자기 TK와 짧은 주문, 도끼 압박</h3>
+<ol>
+<li><strong>발견:</strong> Tracking으로 발견하면 무게·퇴로·마나·포션 상태를 본다. 과적 채집 상태에서 쫓기 시작하지 않는다.
+먼저 반격 주문을 쓰면 도주 제한도 생긴다 (<a href="pvp.html#01">pvp.html</a> 01절).</li>
+<li><strong>TK 선택:</strong> 상대의 포션 부착을 방어하는 시작을 선택했다면 자기 TK를 먼저 건다.
+이미 적 TK가 걸렸다면 자기 TK를 반복하지 말고 포션 폭발과 퇴로에 대응한다.</li>
+<li><strong>Reflect 확인:</strong> MA 같은 저비용 주문의 실제 처리와 반사 반응을 본다.
+제거를 확인하지 못했으면 큰 주문을 자동 방출하지 않는다 (<a href="pvp.html#05.A">pvp.html</a> 05.A절).</li>
+<li><strong>접근:</strong> 여유 거리가 있을 때 EB 시전을 끝내고 도끼를 든다. 상대가 뒤로 빠지면 이미 가진 EB를 버리지 않되,
+커서를 붙잡은 채 자동 회복과 충돌하지 않도록 한다. 위험하면 공격 보유보다 회복을 우선한다.</li>
+<li><strong>접촉:</strong> 상대가 유효 타겟이고 Reflect 위험이 해소됐으면 EB를 먼저 방출하고, 이어 준비된 근접 스윙과 Hamstring을 시도할 수 있다.
+반드시 Hamstring 성공을 기다린 뒤 EB를 던져야 하는 규칙은 없다.</li>
+<li><strong>반응:</strong> 명중·Hamstring 성공이면 상대 이동이 제한된 동안 도끼로 압박한다.
+실패하면 다음 시도를 즉시 할 수 없으므로 주문을 추가로 낭비하며 추격하지 않는다.</li>
+<li><strong>회복 경쟁:</strong> 상대가 GH를 시전하면 무기 스윙이나 가능한 주문으로 끊기를 시도한다.
+내 HP·독 상태가 위험하면 공격 주문을 중단하고 해독·붕대·포션·거리 확보를 우선한다.</li>
+</ol>
+<p>먼저 Hamstring을 맞히고 EB를 놓는 선택도 가능하다. 이미 접촉했고 이동 제한 성공 여부에 따라 주문을 아끼려는 경우다.
+단, EB를 들고 있으면서도 스윙이 빗나가거나 상대가 회복하는 대기 비용이 있으므로 고정 순서로 강제하지 않는다.</p>
+
+<h3 id="05.B">05.B 조건부 공격안 — Explosion과 포션</h3>
+<p>공격 TK를 선택하고 적에게 실제 적용한 경우에만 포션 부착을 기대한다. 자기 TK 방어와 동시에 확보했다고 가정하지 않는다.
+포션 부착 안내는 자기 TK에도 뜨므로 대상 문맥 없이 성공으로 읽지 않는다. TK는 Reflect 제거 수단으로 쓰지 않는다
+(<a href="pvp.html#04.C">pvp.html</a> 04.C절).</p>
+<ol>
+<li>Reflect 위험을 정리하고, 회복용 마나를 빼고도 공격할 여유가 있는지 본다.</li>
+<li>폭발 포션은 부착 대상·퓨즈·투척 상태를 따로 관리한다. TK → 포션 버튼 입력만으로 부착 성공을 선언하지 않는다.</li>
+<li>Explosion을 프리캐스트했다면 유효한 순간에 방출하고 도끼 접촉을 노린다. 근접 기회가 없으면 Hamstring을 억지로 순서에 끼우지 않는다.</li>
+<li>그 다음 EB는 안전하게 시전할 공간이 있을 때만 추가한다. 무기를 내리고 장시간 시전할 상황이 아니면 이미 들어간 주문과 도끼로 압박한다.</li>
+</ol>
+<p>Hamstring은 침묵이나 기절이 아니다. 상대는 그동안에도 회복·공격 주문과 포션을 사용할 수 있다.
+Paralyze도 자동 파우치 상대를 긴 콤보 동안 고정하는 도구로 계산하지 않는다.</p>
+<p>상대가 내게 포션을 붙였을 때 투척자와 폭발 범위 안에 함께 들어가 Splashback을 노릴 수는 있지만,
+진입하면 더 큰 근접·주문 피해를 받는 상황인지 먼저 본다 (<a href="pvp.html#04.A">pvp.html</a> 04.A절).</p>
+
+<h3 id="05.C">05.C 길어진 교전과 철수</h3>
+<p>붙지 못한 채 주문만 교환하면 이 구성은 Eval·Meditation을 갖춘 메이지보다 불리한 자원 구조다.
+상대가 회복을 마쳤는데 내 마나·스태미나만 줄어들면 같은 오프너를 반복하지 않는다.</p>
+<ul>
+<li>원거리 견제는 MA·Harm·Fireball·Lightning을 고정 회전시키지 않고 상대 시전, 거리, 서클별 인터럽트 창을 보고 선택한다.</li>
+<li>붕대는 미리 돌아가게 하되, 완료 전 버틸 수 없으면 포션·GH·시야 차단을 쓴다. 자동 사용은 판단 비용을 줄일 뿐 피해를 없애지 않는다.</li>
+<li>추격용 Teleport를 쓴 직후에는 탈출용으로 바로 다시 쓸 수 없다. 포션이나 가방의 자원도 출발 시점에 검사한다.</li>
+<li>철수는 이동·시야 차단을 기본으로 생각하고, 공격 후 즉시 Recall할 수 있다고 가정하지 않는다.</li>
+</ul>
+
+<h2 id="06" data-part="구현 · 확인">06 스크립트로 옮기기 전</h2>
+<p>기존 <code>script/combat/bard-necro-pvp.razor</code>의 동작은 참고 자료이지, 이 빌드가 이미 구현됐다는 뜻은 아니다.
+아래는 자동화 요구사항이며 새 변수·타이머나 핫키를 실제로 추가한 것은 아니다.</p>
+<table>
+<thead><tr><th>상태</th><th>요구사항</th></tr></thead>
+<tbody>
+<tr><td>TK</td><td>자기·공격이 하나의 시전자 쿨을 공유. 공통 성공 문구만 보지 말고 시전 대상과 현재 공격 대상의 일치를 확인</td></tr>
+<tr><td>Reflect</td><td>상태 미확인은 미확인으로 유지. 공격자에게 없는 메시지를 조건으로 만들지 않음</td></tr>
+<tr><td>시전과 타겟</td><td>시전 중 / 완료 후 보유 / 방출 / 취소 구분. 포션·붕대·무기 교체가 공격 타겟을 빼앗는지 확인</td></tr>
+<tr><td>무기</td><td>실제 마지막 스윙 기준. 장착 완료나 공격 명령만으로 명중·Hamstring 성공 처리하지 않음</td></tr>
+<tr><td>우선순위</td><td>위험한 HP·해독·탈출 판단이 공격 예약보다 우선. 마나 부족·LOS 상실 시 콤보 중단</td></tr>
+<tr><td>Teleport / Rope</td><td>공유 쿨 표시. Rope 자동 추격 금지, 긴 이동 잠금은 의식적으로 선택</td></tr>
+</tbody>
+</table>
+<p>서버에서 허용하는 정보·명령만 사용한다 (<a href="razor.html#07">razor.html</a> 07절).
+TK 대상 판정·상대 Reflect 메시지·버프 중첩·프리캐스트 충돌의 실험 목록은 <a href="open-items.html#08">open-items.html</a> 08절에 모았다.</p>
+</main>

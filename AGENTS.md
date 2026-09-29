@@ -35,6 +35,7 @@ Ultima Online Outlands용 Razor 스크립트 (`script/`), 클라이언트 설정
 | 오버헤드나 쿨다운 바를 더하거나 바꿀 때 | [overheads.html](blueprint/overheads.html)                                                                                                   |
 | 바드·네크로·소환수 숫자가 필요할 때     | [bard-necro-handbook.html](blueprint/bard-necro-handbook.html)                                                                               |
 | PvP 규칙이 필요할 때                    | [pvp.html](blueprint/pvp.html)                                                                                                               |
+| 벌목·PvP 템플릿과 교전을 볼 때          | [lumberjack-pvp-handbook.html](blueprint/lumberjack-pvp-handbook.html)                                                                         |
 | 키 배치를 볼 때                         | [hotkeys.html](blueprint/hotkeys.html)                                                                                                       |
 | `findtype` 인자 (graphic id, hue)       | [item-list.txt](blueprint/item-list.txt)                                                                                                     |
 | 문서를 고치거나 새로 만들 때            | [workflow.html](blueprint/workflow.html#05) 05절                                                                                             |
@@ -52,6 +53,7 @@ Ultima Online Outlands용 Razor 스크립트 (`script/`), 클라이언트 설정
 | [blueprint/overheads.html](blueprint/overheads.html)                     | 알림 세 경로, `[ 대상, 상태 ]` 형식, 어휘, hue, 쿨다운 바, 프로필 오버헤드 표                        |
 | [blueprint/pvp.html](blueprint/pvp.html)                                 | 템플릿과 무관한 PvP 규칙과 숫자                                                                      |
 | [blueprint/bard-necro-handbook.html](blueprint/bard-necro-handbook.html) | Bard Necro의 메커니즘, 소환수, 전투 루프 설계, PvP 판단, 인게임 확인                                 |
+| [blueprint/lumberjack-pvp-handbook.html](blueprint/lumberjack-pvp-handbook.html) | 벌목·PvP 템플릿의 스킬·스탯·도끼 선택, 마나 예산, 교전 분기와 구현 요구사항                    |
 | [blueprint/hotkeys.html](blueprint/hotkeys.html)                         | 키 배치와 주문 데미지 메모                                                                           |
 | [blueprint/open-items.html](blueprint/open-items.html)                   | 사용자에게 물을 것으로 남긴 것: 뜨지 않는 바, 규칙과 어긋난 줄, 출처 없는 숫자, 규칙 해석            |
 | [blueprint/item-list.txt](blueprint/item-list.txt)                       | 아이템 이름·graphic id·hue                                                                           |

@@ -16,11 +16,11 @@
 <h2 id="00">00 한눈에</h2>
 <p>표마다 마지막 열이 물을 것이다. 답은 "01 drain: 지운다"처럼 절 번호와 항목 이름으로 알려 주면 된다.
 새로 물을 것이 생기면 여기에 더한다 (<a href="workflow.html#03">workflow.html</a> 03절).</p>
-<p>먼저 답이 필요한 것은 셋이다.</p>
+<p>먼저 답이 필요한 것은 다음과 같다.</p>
 <ol>
 <li><strong>다섯 캐릭터의 옛 <code>cooldowns.xml</code></strong> (01절). 그 캐릭터로 스크립트를 돌리면 바를 하나도 못 읽는다.</li>
-<li><strong>Energy Bolt 0.5초</strong> (04절). bard-necro-enhanced의 Poison Strike 대기가 이 숫자에 기댄다.</li>
 <li><strong>뜨지 않는 바 14개</strong> (01절). 지우든 트리거를 달든 정해야 바 목록이 실제와 같아진다.</li>
+<li><strong>자기 TK에도 켜지는 target 바</strong> (08.B절). 포션 부착 대상을 잘못 판단할 수 있다.</li>
 </ol>
 
 <h2 id="01" data-part="스크립트 · 설정">01 쿨다운 바</h2>
@@ -147,11 +147,6 @@
 </thead>
 <tbody>
 <tr>
-<td>Energy Bolt 피해 딜레이 0.5초</td>
-<td>pvp 05절, handbook 05.A · 05.I, bard-necro-enhanced POISON STRIKE</td>
-<td>인용이 없다. hotkeys 06절은 0.5초를 Fireball에 적었다. 어느 쪽이 맞나</td>
-</tr>
-<tr>
 <td>Lyric 방어구 무시 42.5%</td>
 <td>handbook 03.F</td>
 <td>출처가 어디인가. Peace 가동률 62%가 이 숫자에서 나왔다</td>
@@ -210,7 +205,7 @@ siphon 5분마다 · 60분, reactive 25, drain 레지 -10 / -20 · 2분, Paralyz
 <tr>
 <td>pvp의 주장</td>
 <td>pvp 02절, 03절, 05절</td>
-<td>"2·3서클도 같은 규칙, 창은 서클마다 따로", "Swordsmanship도 같은 형태다", Greater Explosion 쿨 15초, 크리처 주문 패링 25%,
+<td>"Swordsmanship도 같은 형태다", Greater Explosion 쿨 15초, 크리처 주문 패링 25%,
 Hamstring이 PvM 목록에는 있다</td>
 </tr>
 </tbody>
@@ -317,6 +312,41 @@ bard-throwing · bard-mace는 <code>clearsysmsg</code> → <code>clearall</code>
 <td><a href="hotkeys.html#03">hotkeys.html</a> 03절에 summoner 캐릭터가 nomeehej 하나뿐이다. gumps 파일의 serial로 보면 이 셋도 summoner다 (추정).
 그렇다면 Bard Necro 칸 (1 2 3 Disco / Peace / Provo, F1 bard-necro-enhanced)을 받는다</td>
 </tr>
+</tbody>
+</table>
+<h2 id="08" data-part="필드 PvP">08 벌목 · PvP 실험과 구현 전 확인</h2>
+<p>2026-09-30 문서 정리 중 남긴 항목이다. 확인된 자기 TK 공용 쿨과 두 클라이언트 관찰은
+<a href="pvp.html#04">pvp.html</a> 04절에 반영했다. 아래는 그 결과로도 아직 확정할 수 없거나 수정이 필요한 부분이다.</p>
+
+<h3 id="08.A">08.A TK와 Reflect의 추가 확인 범위</h3>
+<p>이번 실험에서 TK로 Reflect가 사라지지 않았다는 결과는 다시 미확인으로 돌리지 않는다.
+다만 "모든 조건에서 반사 판정 자체를 완전히 우회한다"는 서버 내부 결론이나 포션 부착 소유권까지 화면만으로 확장하지 않는다.</p>
+<ol>
+<li>A가 공격자, B가 대상인 통제 테스트에서 B의 Inscription 값과 Reflect 상태를 기록한다. 처음에는 A의 Reflect를 끄고 양측 TK 제한이 끝난 상태로 시작한다.</li>
+<li>A → B TK 직후 양측 Journal과 B의 Reflect를 함께 기록한다. A에게 TK 수신 안내가 오는지, B에게 누가 걸었다고 뜨는지 확인한다.</li>
+<li>별도 시행에서 A가 B에게 포션을 던지고 B가 이동해 실제 부착을 확인한다. 반대 방향 시험은 새 시행으로 분리하고 모든 TK·포션 제한이 끝난 뒤 한다.</li>
+<li>비교군으로 Reflect 없는 B, A의 자기 TK를 각각 시험한다. 포션 부착 때 대상 제한이 갱신되므로 마지막 적용·부착부터 시간을 센다.</li>
+<li>Inscription 0과 높은 경우를 구분한다. "첫 반사 후 유지"를 "전혀 반사되지 않음"과 혼동하지 않도록 양쪽 화면으로 확인한다.</li>
+</ol>
+<p>이 실험을 완료하기 전에도 운영 결론은 같다. TK를 Reflect 제거나 공짜 자기 TK 획득 수단으로 삼지 않는다.</p>
+
+<h3 id="08.B">08.B 자동화 전에 남은 것</h3>
+<table>
+<thead><tr><th>항목</th><th>현재 근거</th><th>다음 확인 또는 수정 범위</th></tr></thead>
+<tbody>
+<tr><td>자기 TK로 target 바가 켜짐</td><td>자기 TK에도 적 대상과 같은 포션 부착 안내가 뜸. nomeehej의 target 바는 그 안내로 동작</td>
+<td>바 하나를 적 부착 성공으로 쓰는 bard-necro-pvp BOMB 조건을 재설계해야 한다. 직전 시전 대상·대상 변경·실패를 구분.
+스크립트·설정 수정은 이번 문서 작업에 포함하지 않았다</td></tr>
+<tr><td>나에게 걸린 TK의 소유자</td><td>me 바는 <code>applied telekinesis to you</code>만 읽음</td>
+<td>자기·적 시전자 이름을 구별해야 방어 TK와 적 Sticky를 혼동하지 않는다. 두 상태 모두 me 바가 켜질 수 있다</td></tr>
+<tr><td>상대 Reflect 최종 소진</td><td>Harm 반사 피해와 Spell Siphon 표시는 소진 전용 신호가 아님</td>
+<td>첫 반사로 소진 / 첫 반사 후 유지 / 두 번째로 소진을 나눠 공격자 Journal을 수집. 전용 문구가 없으면 스크립트에서 확정 상태로 만들지 않음</td></tr>
+<tr><td>Bless와 스탯 포션</td><td>공식 계산과 실제 정수·중첩 처리는 구분해야 함</td>
+<td>Magery 80에서 포션만 / Bless만 / 둘 다 순서를 바꿔 STR·DEX·INT·최댓값 기록</td></tr>
+<tr><td>프리캐스트와 자동 회복</td><td>공식은 완료한 프리캐스트 보유 중 포션 음용이 주문을 취소한다고 설명</td>
+<td>현재 자동 포션·붕대 타겟과 EB 보유가 충돌하는지 확인. 공격 타겟 유지보다 긴급 회복이 우선</td></tr>
+<tr><td>출발 스탯과 무기 교체</td><td>핸드북 표는 공식 대입 계산</td>
+<td>동일 장비로 붕대 완료·슬립·마나 고갈 시점·현재 스태미나·실제 스윙을 기록. 100/50/75와 DEX 증량안을 비교</td></tr>
 </tbody>
 </table>
 </main>
