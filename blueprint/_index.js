@@ -2,13 +2,14 @@
  * blueprint 문서가 함께 쓰는 스크립트. 문서에는 글만 두고 목차와 부품은 이 파일이 붙인다.
  * <head> 에서 바로 돌아 그리기 전에 테마를 정하고, 나머지는 문서를 다 읽은 뒤에 한다.
  * 1. 테마를 밝게 · 어둡게 고정한다(기본은 시스템 설정)
- * 2. 목차를 만든다 — 문서 목록, 이 문서의 절(h2)과 소제목(h3)
+ * 2. 목차를 만든다 — 문서 목록, 이 문서의 절(h2)과 소제목(h3). h2 의 data-part 는 가름 머리와 목차 묶음 이름이 된다
  * 3. 목차가 지금 읽는 절과 소제목을 표시하고, 그 절의 소제목만 펼친다
  * 4. 제목부터 첫 절 앞까지를 머리로 묶고, 제목 앞 절 번호를 번호 글자로 가른다
  * 5. 표를 가로로 밀리는 상자로 감싼다
  * 6. "인게임 확인됨" · "확인되지 않았다" 를 상태 알약으로 바꾸고, <code>#rrggbb</code> 앞에 색 칩을 붙이고, Razor 코드 블록에 색을 입힌다
  * 7. _index.html 의 문서 카드를 그린다
- * 8. mermaid 원문(pre.mermaid)을 격자 렌더러(beautiful-mermaid)로 흐름도 SVG 로 바꾼다 — 파일 끝, 쓰는 법은 workflow.html 5.2절
+ * 8. mermaid 원문(pre.mermaid)을 격자 렌더러(beautiful-mermaid)로 흐름도 SVG 로 바꾼다 — 파일 끝, 쓰는 법은 workflow.html 05.B절
+ * 9. 주소의 #절로 들어오면, 위의 것들이 높이를 바꾼 뒤 그 절로 다시 맞춘다
  * 모양과 동작은 sk-ax-gas-pp 의 .ignore/blueprint/blueprint.js 에서 가져왔다.
  */
 
@@ -73,11 +74,11 @@ const makeElement = (tag, className, text) => {
 const currentFile = () => decodeURIComponent(window.location.pathname.split('/').at(-1)) || '_index.html'
 
 /**
- * 제목 첫머리의 절 번호(1. / 1.1)를 떼어 번호 글자로 감싼다. 번호와 번호를 뺀 제목을 돌려준다
+ * 제목 첫머리의 절 번호(01 / 01.A)를 떼어 번호 글자로 감싼다. 번호와 번호를 뺀 제목을 돌려준다
  */
 const splitNumber = (heading) => {
   const first = heading.firstChild
-  const match = first?.nodeType === Node.TEXT_NODE ? first.textContent.match(/^\s*(\d+(?:\.\d+)*)\.?\s+/) : null
+  const match = first?.nodeType === Node.TEXT_NODE ? first.textContent.match(/^\s*(\d{2}(?:\.[A-Z])?)\s+/) : null
 
   if (!match) {
     return { number: '', title: heading.textContent.trim() }
@@ -163,6 +164,15 @@ const buildNav = (doc) => {
     row.append(link)
 
     if (heading.tagName === 'H2') {
+      // 가름은 그 첫 절의 data-part 가 연다. 본문에는 가름 머리를, 목차에는 묶음 이름을 단다
+      if (heading.dataset.part) {
+        const part = makeElement('div', 'bp_index__part')
+
+        part.append(makeElement('span', 'bp_index__partLabel', heading.dataset.part))
+        heading.before(part)
+        toc.append(makeElement('li', 'bp_index__tocGroup', heading.dataset.part))
+      }
+
       sections.push({ heading, link, list: null, subs: [] })
       toc.append(row)
       continue
@@ -390,6 +400,30 @@ let current_theme = readStoredTheme()
 
 applyTheme(current_theme)
 
+/**
+ * 주소의 #절로 들어오면 브라우저는 가름 머리를 끼우기 전에 그 자리로 옮긴다. 끼운 뒤 한 번, 흐름도와 글꼴이 높이를 바꾼 뒤 한 번 다시 맞춘다.
+ * 그새 사용자가 스크롤을 시작했으면 두 번째는 건너뛴다
+ */
+const settleHash = (drawn) => {
+  const target = document.getElementById(decodeURIComponent(window.location.hash.slice(1)))
+
+  if (!target) {
+    return
+  }
+
+  let moved = false
+  const stop = () => {
+    moved = true
+  }
+
+  for (const type of ['wheel', 'touchmove', 'keydown', 'mousedown']) {
+    window.addEventListener(type, stop, { once: true, passive: true })
+  }
+
+  target.scrollIntoView({ behavior: 'instant' })
+  Promise.all([drawn, document.fonts.ready]).then(() => moved || target.scrollIntoView({ behavior: 'instant' }))
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   const doc = document.querySelector('.bp_index__doc')
 
@@ -408,7 +442,7 @@ document.addEventListener('DOMContentLoaded', () => {
   highlightRazor(doc)
   buildCards()
   startSectionSpy(sections)
-  drawFlows()
+  settleHash(drawFlows())
 })
 
 /*
@@ -421,7 +455,7 @@ document.addEventListener('DOMContentLoaded', () => {
  * 원본과 다른 곳은 색 · 글꼴 변수(_index.css 토큰), 원문 선택자, 그림 상자 이름, 문서를 다 읽은 뒤에 도는 것뿐이다. 원본을 고치면 여기로 옮긴다.
  * 색은 CSS 변수로 그리므로 테마가 바뀌어도 다시 그리지 않는다.
  *
- * 원문 쓰는 규칙(괄호 금지 · 선 라벨 한 낱말 · 엉키는 모양)은 workflow.html 5.2절에 있다.
+ * 원문 쓰는 규칙(괄호 금지 · 선 라벨 한 낱말 · 엉키는 모양)은 workflow.html 05.B절에 있다.
  * 렌더러 모듈은 CDN 에서 늦게 온다. 오프라인이면 원문이 그대로 보인다.
  */
 const drawFlows = () => {
@@ -754,7 +788,7 @@ const drawFlows = () => {
 
 	if (!document.querySelector("pre.mermaid")) return;
 
-	import("https://cdn.jsdelivr.net/npm/beautiful-mermaid@1.1.3/+esm").then((module) => {
+	return import("https://cdn.jsdelivr.net/npm/beautiful-mermaid@1.1.3/+esm").then((module) => {
 		window.renderMermaidASCII = module.renderMermaidASCII;
 		drawDiagrams();
 	});

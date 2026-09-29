@@ -14,14 +14,14 @@
 문법이 애매하면 추측하지 말고 <a href="https://wiki.uooutlands.com/Razor_Scripting">위키 Razor Scripting</a>을 읽고, 알게 된 것을 여기에 더한다.</p>
 <ul>
 <li>스크립트를 <strong>어떻게 쓰는가</strong> (헤더, 변수 접두, 타이머 관용구)는 <a href="conventions.html">conventions.html</a>.</li>
-<li>고친 스크립트를 <strong>게임에 반영하고 확인하는 법</strong> (캐시, 리로드)은 <a href="workflow.html#4">workflow.html</a> 4절.</li>
+<li>고친 스크립트를 <strong>게임에 반영하고 확인하는 법</strong> (캐시, 리로드)은 <a href="workflow.html#04">workflow.html</a> 04절.</li>
 </ul>
 
-<h2 id="1">1. 이 포크</h2>
+<h2 id="01" data-part="문법">01 이 포크</h2>
 <p>Outlands 클라이언트에 딸린 Razor는 <a href="https://www.razorce.com/guide/">Razor CE</a>의 포크이고 CE에 없는 명령이 많다.
 근거는 위키 Razor Scripting이 1순위, CE 가이드는 기본 문법 확인용이다. 공개 스크립트는 <a href="https://outlands.uorazorscripts.com/">outlands.uorazorscripts.com</a>에 있다.</p>
 
-<h2 id="2">2. 확장 문법</h2>
+<h2 id="02">02 확장 문법</h2>
 <p>Razor CE에 없거나 확장된 것. 존재 여부만 적어 두니 인자 형식은 위키에서 확인한다.</p>
 <table>
 <thead>
@@ -71,9 +71,9 @@
 </tbody>
 </table>
 
-<h2 id="3">3. 확인된 함정</h2>
+<h2 id="03" data-part="함정 · 선례">03 확인된 함정</h2>
 <p><code>.razor</code>를 고치기 전에 이 절의 표를 읽는다. 대부분 인게임에서 깨졌거나 프로브로 잰 것이다. 선례가 없거나 확인되지 않은 것은 증상 칸에 그렇게 적었다.
-근거는 5절, 비용 숫자는 6절.</p>
+근거는 05절, 비용 숫자는 06절.</p>
 
 <h4>에러가 나는 구문</h4>
 <table>
@@ -93,12 +93,12 @@
 <tr>
 <td><code>for &lt;변수&gt;</code></td>
 <td><code>Invalid for loop syntax</code></td>
-<td>값별 리터럴 <code>for N</code> 사슬 (4절 <code>ingump</code> 사슬)</td>
+<td>값별 리터럴 <code>for N</code> 사슬 (04절 <code>ingump</code> 사슬)</td>
 </tr>
 <tr>
 <td><code>not list 'x' &gt;= var</code></td>
 <td>파싱 에러 (<code>syntax error in line N</code>, 실행 자체가 안 됨)</td>
-<td><code>not</code> 뒤에 <code>list</code> 비교식을 두지 않는다. 값마다 갈래를 나누고 갈래 안에서 리터럴과 비교한다 (4절 <code>ingump</code> 사슬)</td>
+<td><code>not</code> 뒤에 <code>list</code> 비교식을 두지 않는다. 값마다 갈래를 나누고 갈래 안에서 리터럴과 비교한다 (04절 <code>ingump</code> 사슬)</td>
 </tr>
 <tr>
 <td><code>sysmessage</code></td>
@@ -157,7 +157,7 @@
 <tr>
 <td><code>varexist</code>로 값의 유효성 확인</td>
 <td>선언 여부만 본다. 잘못 타겟한 값도 참이라 영영 안 고쳐진다</td>
-<td>대상 앞에 서 있는 게 확실한 곳에서만 <code>find</code>로 확인 (<a href="conventions.html#3.4">conventions.html</a> 3.4절)</td>
+<td>대상 앞에 서 있는 게 확실한 곳에서만 <code>find</code>로 확인 (<a href="conventions.html#03.D">conventions.html</a> 03.D절)</td>
 </tr>
 </tbody>
 </table>
@@ -184,14 +184,14 @@
 </tr>
 <tr>
 <td>매 패스 <code>findtype</code>으로 상태 세기</td>
-<td><code>findtype</code>이 가장 비싸다 (한 번에 20 ~ 40ms, 6절). 32번이면 패스당 1초 안팎</td>
+<td><code>findtype</code>이 가장 비싸다 (한 번에 20 ~ 40ms, 06절). 32번이면 패스당 1초 안팎</td>
 <td>천천히 변하는 상태는 타이머로 몇 초에 한 번. <code>elseif</code> 사슬은 통째로 한 틱이라 길어도 싸다</td>
 </tr>
 </tbody>
 </table>
 
 <h4>커서와 타겟</h4>
-<p>타겟 주문 한 번의 모양은 4절 끝에 있다.</p>
+<p>타겟 주문 한 번의 모양은 04절 끝에 있다.</p>
 <table>
 <thead>
 <tr>
@@ -224,7 +224,7 @@
 </tbody>
 </table>
 
-<h2 id="4">4. 되는 구문과 선례</h2>
+<h2 id="04">04 되는 구문과 선례</h2>
 <p>전부 저장소에 선례가 있다. 새 패턴을 쓰기 전에 여기서 먼저 찾는다.</p>
 <table>
 <thead>
@@ -325,8 +325,8 @@ HP 때문이면 <code>hotkey "&gt; Interrupt"</code>로 제 시전을 먼저 끊
   same -- 예 --> hit("target 대상&lt;br&gt;wait wait__cast")
   same -- 아니요 --> cancel("Cancel Current Target")</pre>
 
-<h2 id="5">5. 안 되는 구문의 근거</h2>
-<p>3절 표에서 근거가 긴 줄을 표와 같은 순서로 푼다. 선례가 없어서 쓰지 않는 것은 맨 끝에 모았다.</p>
+<h2 id="05">05 안 되는 구문의 근거</h2>
+<p>03절 표에서 근거가 긴 줄을 표와 같은 순서로 푼다. 선례가 없어서 쓰지 않는 것은 맨 끝에 모았다.</p>
 <ul>
 <li><strong><code>for &lt;변수&gt;</code>.</strong> <code>Invalid for loop syntax</code> (2026-09-28 프로브). 횟수는 리터럴만 된다. 변수 횟수가 필요하면 값별 <code>for N</code> 사슬을 쓴다.</li>
 <li><strong><code>while not list 'x' &gt;= var</code>.</strong> <code>syntax error</code>로 파싱 자체가 안 된다 (2026-09-28). <code>not</code> 뒤에 <code>list</code> 비교식을 두지 않는다.</li>
@@ -352,7 +352,7 @@ Bard Necro의 네크로가 한 번도 안 나가던 원인이다. 수를 세려�
 </ul></li>
 </ul>
 
-<h2 id="6">6. 명령문 비용</h2>
+<h2 id="06" data-part="비용 · 제약">06 명령문 비용</h2>
 <p><strong>비용은 검색 종류가 아니라 "이 패스에서 밟는 줄 수"이고, 그중 <code>findtype</code>이 가장 비싸다.</strong>
 그래서 <strong>자주 안 변하는 상태는 타이머로 게이트하고, 흔한 경로가 밟는 줄을 줄인다.</strong></p>
 <p>Razor CE 원본은 스크립트 엔진이 <strong>타이머 틱마다 명령문 하나</strong>를 실행한다 (<code>ScriptManager.ScriptTimer</code> → <code>Interpreter.ExecuteScript</code> → <code>ExecuteNext</code> 1회, 기본 25ms).
@@ -389,9 +389,9 @@ Bard Necro의 네크로가 한 번도 안 나가던 원인이다. 수를 세려�
 </tr>
 </tbody>
 </table>
-<p>Bard Necro 루프에 적용한 결과 (시약 플래그를 매 패스 <code>findtype</code> 최대 32번 → 30초에 7번)는 <a href="bard-necro-handbook.html#5.8">bard-necro-handbook.html</a> 5.8절.</p>
+<p>Bard Necro 루프에 적용한 결과 (시약 플래그를 매 패스 <code>findtype</code> 최대 32번 → 30초에 7번)는 <a href="bard-necro-handbook.html#05.H">bard-necro-handbook.html</a> 05.H절.</p>
 
-<h2 id="7">7. PvP 제약</h2>
+<h2 id="07">07 PvP 제약</h2>
 <p>구조화 PvP나 팩션 상태에서는 스크립트에 아래 제약이 걸린다.</p>
 <table>
 <thead>
@@ -415,5 +415,5 @@ Bard Necro의 네크로가 한 번도 안 나가던 원인이다. 수를 세려�
 </tr>
 </tbody>
 </table>
-<p>PvP 겸용 스크립트를 쓰는 규칙은 <a href="conventions.html#7">conventions.html</a> 7절. 게임 쪽 PvP 규칙과 숫자는 <a href="pvp.html">pvp.html</a>.</p>
+<p>PvP 겸용 스크립트를 쓰는 규칙은 <a href="conventions.html#07">conventions.html</a> 07절. 게임 쪽 PvP 규칙과 숫자는 <a href="pvp.html">pvp.html</a>.</p>
 </main>

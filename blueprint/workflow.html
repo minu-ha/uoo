@@ -13,12 +13,12 @@
 <p>무엇을 근거로 삼고, 스크립트와 문서를 어떤 순서로 고치고, 게임에 어떻게 반영해 확인하고, 어떻게 커밋하는가.
 파일 이름과 스크립트 모양은 <a href="conventions.html">conventions.html</a>, 문법과 함정은 <a href="razor.html">razor.html</a>에 있다.</p>
 
-<h2 id="1">1. 근거</h2>
+<h2 id="01" data-part="근거">01 근거</h2>
 
-<h3 id="1.1">1.1 우선순위</h3>
+<h3 id="01.A">01.A 우선순위</h3>
 <p>사용자 요청 &gt; <a href="../AGENTS.md">AGENTS.md</a>와 <code>blueprint/</code>의 규칙 문서 &gt; 같은 폴더의 기존 스크립트 &gt; 공식 위키.</p>
 
-<h3 id="1.2">1.2 참고 사이트</h3>
+<h3 id="01.B">01.B 참고 사이트</h3>
 <table>
 <thead>
 <tr>
@@ -55,7 +55,7 @@
 </table>
 <p>문법이 애매하면 추측하지 말고 위키를 읽는다. Outlands Razor는 Razor CE에 없는 명령이 많다 (<a href="razor.html">razor.html</a>).</p>
 
-<h3 id="1.3">1.3 숫자는 인용한다</h3>
+<h3 id="01.C">01.C 숫자는 인용한다</h3>
 <p>게임 숫자 (공식, 쿨다운, 확률)는 추측하지 않는다.</p>
 <table>
 <thead>
@@ -79,7 +79,7 @@
 </tr>
 <tr>
 <td>주문 데미지 메모</td>
-<td><a href="hotkeys.html#6">hotkeys.html</a> 6절</td>
+<td><a href="hotkeys.html#06">hotkeys.html</a> 06절</td>
 </tr>
 </tbody>
 </table>
@@ -89,26 +89,26 @@
 <li>인게임에서 확인한 것은 "인게임 확인됨 2026-09-28"처럼 날짜를 붙여 적고, 확인하지 못한 것은 "확인되지 않았다"로 남긴다.</li>
 </ul>
 
-<h2 id="2">2. 스크립트 고치기</h2>
+<h2 id="02" data-part="스크립트">02 스크립트 고치기</h2>
 <ol>
 <li><strong>대상 스크립트를 끝까지 읽는다.</strong> 메인 루프 하나에 타이머, 타겟 캐시, 후속 캐스팅이 얽혀 있어 한 분기만 고치면 다른 분기가 깨진다.</li>
-<li><a href="razor.html#3">razor.html</a> 3절의 확인된 함정 표를 본다. 새 패턴은 그 문서 4절의 선례에서 먼저 찾는다.</li>
+<li><a href="razor.html#03">razor.html</a> 03절의 확인된 함정 표를 본다. 새 패턴은 그 문서 04절의 선례에서 먼저 찾는다.</li>
 <li>요청 범위만 구현한다. 저장소에 근거 없는 패턴은 추가하지 않는다.</li>
 <li>고친 뒤 <code>util/check.sh &lt;파일&gt;</code>로 <code>if/endif</code>, <code>while/endwhile</code>, <code>for/endfor</code> 짝과 선언 없이 쓴 접두 변수를 확인한다.</li>
 <li>새 전투 루프를 만들면 <a href="../script/README.md">script/README.md</a>의 전투 루프 표에 한 줄 더한다.</li>
 </ol>
 
-<h2 id="3">3. 변경 보고</h2>
+<h2 id="03">03 변경 보고</h2>
 <p>변경을 보고할 때 반드시 넣는다.</p>
 <ul>
 <li>추가·변경된 변수와 타이머.</li>
 <li>인게임 확인 절차: 어떤 상황에서 어떤 <code>overhead</code>가 떠야 하고, 어떤 상황이면 실패인지.</li>
-<li>4절의 반영 방법 (리로드로 되는지, 재시작이 필요한지)과 종료 후 <code>git status</code> 확인.</li>
+<li>04절의 반영 방법 (리로드로 되는지, 재시작이 필요한지)과 종료 후 <code>git status</code> 확인.</li>
 </ul>
 
-<h2 id="4">4. 게임에 반영하고 확인하기</h2>
+<h2 id="04">04 게임에 반영하고 확인하기</h2>
 
-<h3 id="4.1">4.1 스크립트 캐시와 리로드</h3>
+<h3 id="04.A">04.A 스크립트 캐시와 리로드</h3>
 <p>Razor는 스크립트 본문을 메모리에 캐시한다. 고친 본문을 반영하는 방법은 어디서 고쳤는지와 어떻게 돌리는지로 갈린다.</p>
 <pre class="mermaid">flowchart LR
   file{"외부 편집기로&lt;br&gt;파일을 고쳤나"} -- 예 --> hotkey{"핫키로 돌리나"} -- 예 --> restart("클라이언트를 껐다 켠다&lt;br&gt;리로드로는 안 된다")
@@ -119,13 +119,13 @@
 프로필에는 바인딩이 객체가 아니라 이름 (<code>Play Script: hotkey\dress</code>)으로 저장돼 있어서, 키를 누르면 같은 이름 중 <strong>맨 앞의 옛 객체</strong>가 잡힌다.</li>
 <li><strong>Scripts 탭의 Play 버튼으로 돌리면 리로드로 충분하다.</strong> Scripts 탭을 다시 열거나 우클릭 → Reload all scripts를 한다. 반복 테스트는 이쪽으로 한다.</li>
 <li><strong>Razor 편집기에 직접 붙여넣으면</strong> 기존 객체의 본문이 바뀌므로 핫키도 새 본문을 쓴다. 다만 그 순간부터 <strong>Razor가 그 파일의 주인</strong>이 되니,
-외부 편집기로 고치는 것과 섞지 않는다 (4.2절).</li>
+외부 편집기로 고치는 것과 섞지 않는다 (04.B절).</li>
 </ul>
 <p>리로드할 때마다 Hotkeys 목록에 <code>Play Script: ... (not assigned)</code>가 한 줄씩 쌓인다 (메모리에만, 파일엔 안 남는다).</p>
 <p><strong>파일을 고쳤는데도 스크립트 에러가 같은 줄 번호를 계속 가리키면 캐시를 의심한다.</strong> 줄을 지웠다면 그 아래 줄 번호도 같이 당겨져야 한다.
 Reload all scripts로 안 풀리면 클라이언트를 완전히 껐다 켠다.</p>
 
-<h3 id="4.2">4.2 캐시가 파일을 되돌린다</h3>
+<h3 id="04.B">04.B 캐시가 파일을 되돌린다</h3>
 <ul>
 <li>캐시가 옛 본문을 들고 있는 상태로 클라이언트를 끄면 Razor가 그 본문을 파일에 다시 쓴다. 외부 편집기로 고친 내용이 되돌아갈 수 있으니
 <strong>종료 후 <code>git status</code>로 확인한다.</strong></li>
@@ -133,52 +133,56 @@ Reload all scripts로 안 풀리면 클라이언트를 완전히 껐다 켠다.<
 <li>외부 편집기로 스크립트를 고치는 프로필은 Razor 설정 <code>AutoSaveScript</code>를 꺼 둔다.</li>
 </ul>
 
-<h3 id="4.3">4.3 config는 종료할 때 덮어쓴다</h3>
+<h3 id="04.C">04.C config는 종료할 때 덮어쓴다</h3>
 <p><strong><code>config/</code> 아래 파일은 게임을 끈 상태에서만 고친다.</strong> 종료 시 클라이언트가 통째로 덮어쓰기 때문이다.
 Razor 프로필 xml뿐 아니라 ClassicUO의 <code>cooldowns.xml</code>, <code>macros.xml</code> 등 전부 해당된다.
 켜둔 채로 고치면 종료할 때 조용히 사라진다. 실제로 한 번 날아갔다.</p>
 
-<h2 id="5">5. 문서 고치기</h2>
+<h2 id="05" data-part="문서 · 커밋">05 문서 고치기</h2>
 
-<h3 id="5.1">5.1 한 사실은 한 곳에</h3>
+<h3 id="05.A">05.A 한 사실은 한 곳에</h3>
 <p>같은 내용을 두 문서에 쓰지 않는다. 한 곳을 정본으로 두고 다른 곳은 절 번호로 링크한다.
 두 곳에 쓰면 한쪽만 고쳐지고, 어느 쪽이 맞는지 모르게 된다 (overheads.html의 옛 hue 표가 그렇게 틀렸다).</p>
-<p>무엇이 무엇의 정본인지는 <a href="../AGENTS.md">AGENTS.md</a> 3절 문서 지도 한 곳에 둔다.
+<p>무엇이 무엇의 정본인지는 <a href="../AGENTS.md">AGENTS.md</a> 03절 문서 지도 한 곳에 둔다.
 문서를 새로 만들거나 정본을 옮기면 그 표를 고친다.</p>
 <p>템플릿 문서 (bard-necro-handbook 같은)에는 <strong>그 템플릿이 내린 판단</strong>만 둔다. 서버 규칙이나 문법처럼
 다른 템플릿에서도 쓰는 내용이 생기면 공통 문서로 옮기고 링크를 남긴다.</p>
 
-<h3 id="5.2">5.2 문서 모양</h3>
+<h3 id="05.B">05.B 문서 모양</h3>
 <p>문서는 <code>blueprint/</code>의 HTML 한 장이다. 모양과 글꼴은 <code>_index.css</code>가 맡는다.
 목차, 절 번호 글자, 표 상자, 확인 알약, 색 칩, 코드 색, 흐름도는 <code>_index.js</code>가 모든 문서에 붙인다.
 문서에는 <strong>글만</strong> 쓴다. 브라우저로 <code>_index.html</code>을 열면 문서 사이를 오간다.</p>
 <h4>틀</h4>
 <ul>
-<li><code>&lt;head&gt;</code>는 모든 문서가 같다 (5.3절의 빈 틀). 글꼴은 <code>_index.css</code>가 불러오므로 글꼴 링크를 따로 두지 않는다.
+<li><code>&lt;head&gt;</code>는 모든 문서가 같다 (05.C절의 빈 틀). 글꼴은 <code>_index.css</code>가 불러오므로 글꼴 링크를 따로 두지 않는다.
 <code>&lt;body&gt;</code>와 <code>&lt;main&gt;</code>의 class도 모든 문서가 같다.</li>
 <li>doctype이 빠지면 quirks 모드로 그려져 표 줄 높이가 달라진다.</li>
 <li><code>&lt;title&gt;</code>은 모든 문서가 <code>BLUEPRINT - UOO</code> 하나다. 문서 이름은 목차의 문서 목록이 보여 준다.</li>
 <li>맨 위에는 <code>&lt;h1&gt;</code> 제목, 이 문서가 답하는 것 한두 줄, 여기 없는 것은 어디 있는지 링크를 둔다.</li>
 </ul>
-<h4>절 번호</h4>
+<h4>절 번호와 가름</h4>
 <ul>
 <li>목차는 쓰지 않는다. <code>_index.js</code>가 <code>id</code>가 있는 <code>&lt;h2&gt;</code>와 <code>&lt;h3&gt;</code>로 만든다.</li>
-<li>절은 <code>&lt;h2 id="1"&gt;1. 이름&lt;/h2&gt;</code>, 소제목은 <code>&lt;h3 id="1.1"&gt;1.1 이름&lt;/h3&gt;</code>처럼 번호를 제목과 <code>id</code>에 같이 적는다.
-<code>&lt;h4&gt;</code>와 <code>&lt;h5&gt;</code>에는 번호도 <code>id</code>도 달지 않는다. 목차에 들지 않는 작은 제목이다.</li>
+<li>절은 두 자리로 <code>&lt;h2 id="01"&gt;01 이름&lt;/h2&gt;</code>, 소제목은 절 번호에 대문자를 붙여 <code>&lt;h3 id="01.A"&gt;01.A 이름&lt;/h3&gt;</code>처럼
+번호를 제목과 <code>id</code>에 같이 적는다 (sk-ax-gas-pp와 같다). <code>&lt;h4&gt;</code>와 <code>&lt;h5&gt;</code>에는 번호도 <code>id</code>도 달지 않는다. 목차에 들지 않는 작은 제목이다.</li>
+<li><code>00</code>은 한눈에 자리다. 문서를 처음 여는 사람이 먼저 알 것과 남은 것을 둔다.</li>
+<li>절이 많으면 몇 절씩 가름으로 묶는다. 가름을 여는 첫 절의 <code>&lt;h2&gt;</code>에 <code>data-part="이름"</code>을 단다 (<code>&lt;h2 id="05" data-part="문서 · 커밋"&gt;</code>).
+<code>_index.js</code>가 그 앞에 가름 머리를, 목차에 같은 이름의 묶음을 단다. 00 한눈에는 가름 밖에 두고, 끝의 확인 안 된 것 · 자주 틀렸던 것 · 참고 링크는 <code>기록</code> 가름으로 묶는다.</li>
+<li>글 안에서는 제목에 보이는 번호 그대로 "03절", "05.D절"로 가리킨다.</li>
 <li>절을 넣거나 빼면 번호와 <code>id</code>를 같이 고치고, 그 번호를 가리킨 곳도 저장소 전체에서 찾아 고친다.
-AGENTS.md와 스크립트 주석 (<code>part 5</code>)도 절 번호를 쓴다: <code>git grep -n -e '5.8절' -e '#5.8' -e 'part 5'</code>.</li>
+AGENTS.md와 스크립트 주석 (<code>part 5</code>)도 절 번호를 쓴다: <code>git grep -n -e '05.H' -e 'part 5'</code>.</li>
 </ul>
 <h4>본문</h4>
 <ul>
 <li>본문은 태그만 쓴다: <code>h1</code>–<code>h5</code> <code>p</code> <code>ul</code> <code>ol</code> <code>li</code> <code>table</code> <code>thead</code> <code>tbody</code> <code>tr</code> <code>th</code>
 <code>td</code> <code>pre</code> <code>code</code> <code>blockquote</code> <code>a</code> <code>strong</code> <code>em</code> <code>hr</code>.
-<code>class</code>와 <code>style</code>은 쓰지 않는다. 예외는 흐름도 원문 <code>&lt;pre class="mermaid"&gt;</code> 하나다.</li>
+<code>class</code>와 <code>style</code>은 쓰지 않는다. 예외는 흐름도 원문 <code>&lt;pre class="mermaid"&gt;</code>와 가름을 여는 <code>&lt;h2&gt;</code>의 <code>data-part</code>다.</li>
 <li>글 속의 <code>&lt;</code> <code>&gt;</code> <code>&amp;</code>는 <code>&amp;lt;</code> <code>&amp;gt;</code> <code>&amp;amp;</code>로 쓴다. 그대로 쓰면 브라우저가 태그로 읽어 글이 조용히 사라진다.</li>
 <li><code>&lt;pre&gt;</code>에는 코드, 의사 코드, 파일 트리만 쓴다. 파일 트리의 한글은 줄 끝 주석에만 둔다. 칸을 맞춰야 하는 것은 <code>&lt;table&gt;</code>로 쓴다.
 코드 글꼴 JetBrains Mono에는 한글이 없어서 한글이 섞인 열은 어긋난다.</li>
 <li>Razor로 보이는 <code>&lt;pre&gt;&lt;code&gt;</code>에는 <code>_index.js</code>가 색을 입힌다 (주석, 문자열, 키워드, 명령, 접두 변수). 그러니 예시는 실제로 도는 Razor 줄로 쓴다.</li>
-<li>다른 문서는 상대 경로 링크로, 절은 "파일 N절"로 가리키고 링크에 절을 붙인다 (<code>&lt;a href="razor.html#3"&gt;razor.html&lt;/a&gt; 3절</code>).</li>
-<li>인용과 확인 표시는 1.3절에 적은 대로 쓴다. "인게임 확인됨"과 "확인되지 않았다"는 그 글자 그대로 쓰면 알약으로 보인다. 코드, 링크, 제목 안에서는 바뀌지 않는다.</li>
+<li>다른 문서는 상대 경로 링크로, 절은 "파일 N절"로 가리키고 링크에 절을 붙인다 (<code>&lt;a href="razor.html#03"&gt;razor.html&lt;/a&gt; 03절</code>).</li>
+<li>인용과 확인 표시는 01.C절에 적은 대로 쓴다. "인게임 확인됨"과 "확인되지 않았다"는 그 글자 그대로 쓰면 알약으로 보인다. 코드, 링크, 제목 안에서는 바뀌지 않는다.</li>
 <li><code>&lt;code&gt;#e80030&lt;/code&gt;</code>처럼 색 값만 든 코드에는 색 칩이 붙는다.</li>
 </ul>
 <h4>흐름도</h4>
@@ -188,22 +192,22 @@ AGENTS.md와 스크립트 주석 (<code>part 5</code>)도 절 번호를 쓴다: 
 <li>잘 되는 것: <code>flowchart TD</code> 사슬과 나무, <code>flowchart LR</code> 판단 사슬 (<code>예</code> 사슬을 윗줄로), <code>sequenceDiagram</code>.</li>
 <li>라벨에 괄호를 넣지 않는다. 렌더러가 괄호에서 글을 잘라 낸다. 긴 라벨은 <code>&amp;lt;br&amp;gt;</code>로 줄을 나눈다.</li>
 <li>선 라벨은 한 낱말로 쓴다 (<code>-- 예 --&gt;</code>). 띄어 쓰면 격자가 빈칸을 선으로 채워 라벨이 둘로 갈린다.</li>
-<li>되돌아가는 선과 라벨 달린 합류선은 엉킨다. 그림이 크거나 엉키면 여러 장으로 쪼갠다 (<a href="bard-necro-handbook.html#5.1">bard-necro-handbook.html</a> 5.1절).</li>
+<li>되돌아가는 선과 라벨 달린 합류선은 엉킨다. 그림이 크거나 엉키면 여러 장으로 쪼갠다 (<a href="bard-necro-handbook.html#05.A">bard-necro-handbook.html</a> 05.A절).</li>
 <li>폭은 140칸 안쪽으로 둔다. 넘치면 <code>LR</code>을 <code>TD</code>로 바꾸거나 둘로 나눈다.</li>
 </ul>
 <h4>줄과 확인</h4>
 <ul>
 <li>한 줄은 200자까지다 (<code>.editorconfig</code>의 <code>max_line_length</code>). 넘으면 태그와 <code>&lt;code&gt;</code> 밖의 빈칸에서 줄을 바꾸고, 되도록 문장 끝에서 바꾼다.
 <code>&lt;pre&gt;</code> 안은 바꾸지 않는다. 그 밖에서는 줄바꿈이 빈칸 하나로 보이므로 화면이 달라지지 않는다.</li>
-<li>고친 뒤 <code>util/check-blueprint.sh</code>로 첫 줄 doctype, 끊긴 링크, 목록에 없는 문서, 이스케이프를 빠뜨린 꺾쇠를 확인하고, 브라우저로 열어 본다.</li>
+<li>고친 뒤 <code>util/check-blueprint.sh</code>로 첫 줄 doctype, 끊긴 링크, 목록에 없는 문서, 이스케이프를 빠뜨린 꺾쇠, 제목 번호와 <code>id</code>가 어긋난 곳을 확인하고, 브라우저로 열어 본다.</li>
 </ul>
 
-<h3 id="5.3">5.3 새 문서</h3>
+<h3 id="05.C">05.C 새 문서</h3>
 <ul>
 <li><code>blueprint/</code>에 kebab-case <code>.html</code>로 만든다. 템플릿 전용이면 <code>&lt;템플릿&gt;-handbook.html</code>.</li>
 <li>아래 빈 틀에서 시작한다.</li>
 <li>만들면 <code>_index.js</code>의 <code>blueprint_docs</code>와 <a href="../AGENTS.md">AGENTS.md</a>의 문서 지도에 한 줄씩 더하고,
-루트 <a href="../README.md">README.md</a>의 <code>blueprint/</code> 칸에 주제를 더한다. 번역본도 같이 고친다 (5.4절).</li>
+루트 <a href="../README.md">README.md</a>의 <code>blueprint/</code> 칸에 주제를 더한다. 번역본도 같이 고친다 (05.D절).</li>
 </ul>
 <pre><code>&lt;!doctype html&gt;
 &lt;html lang=&quot;ko&quot;&gt;
@@ -219,14 +223,17 @@ AGENTS.md와 스크립트 주석 (<code>part 5</code>)도 절 번호를 쓴다: 
 &lt;h1&gt;{제목}&lt;/h1&gt;
 &lt;p&gt;{이 문서가 답하는 것 한두 줄. 여기 없는 것은 어디 있는지 링크}&lt;/p&gt;
 
-&lt;h2 id=&quot;1&quot;&gt;1. {절}&lt;/h2&gt;
+&lt;h2 id=&quot;00&quot;&gt;00 한눈에&lt;/h2&gt;
+&lt;p&gt;{먼저 알 것과 남은 것}&lt;/p&gt;
+
+&lt;h2 id=&quot;01&quot; data-part=&quot;{가름}&quot;&gt;01 {절}&lt;/h2&gt;
 &lt;p&gt;{본문}&lt;/p&gt;
 
-&lt;h3 id=&quot;1.1&quot;&gt;1.1 {소제목}&lt;/h3&gt;
+&lt;h3 id=&quot;01.A&quot;&gt;01.A {소제목}&lt;/h3&gt;
 &lt;p&gt;{본문}&lt;/p&gt;
 &lt;/main&gt;</code></pre>
 
-<h3 id="5.4">5.4 언어와 번역본</h3>
+<h3 id="05.D">05.D 언어와 번역본</h3>
 <ul>
 <li>문서와 답변은 한국어, 스크립트 안 주석은 영어.</li>
 <li>사람이 처음 보는 README는 영어가 원본이다. 번역본은 <code>language/</code>에 <code>&lt;무엇&gt;.&lt;언어&gt;.md</code>로 둔다
@@ -234,7 +241,7 @@ AGENTS.md와 스크립트 주석 (<code>part 5</code>)도 절 번호를 쓴다: 
 <li>원본 맨 위에 번역본 링크, 번역본 맨 위에 원본 링크를 둔다. 원본을 고치면 번역본도 같은 커밋에서 고친다.</li>
 </ul>
 
-<h2 id="6">6. 커밋</h2>
+<h2 id="06">06 커밋</h2>
 <ul>
 <li>사용자가 커밋하라고 할 때만 커밋한다. push는 별도 요청이 있을 때만.</li>
 <li>한 커밋에 한 가지 변경. 스크립트 수정과 문서 수정이 독립적이면 나눈다.</li>

@@ -1,12 +1,13 @@
 #!/usr/bin/env bash
-# Check blueprint/*.html for three things the browser will not tell you about:
+# Check blueprint/*.html for four things the browser will not tell you about:
 #   1. a link to a file that does not exist, or to an id the target page does not have
 #   2. a page that is missing from blueprint_docs in blueprint/_index.js (it would not show in the nav)
 #   3. a tag outside the short list the pages use, which is almost always a < in the text that
 #      was not written as &lt; -- the browser swallows it as a tag and the words silently vanish
+#   4. a numbered heading whose text does not start with its id, or a data-part off an h2
 #
-# Section ids are section numbers (<h3 id="4.3">), so renumbering a section breaks every link
-# that points at it. Run this after moving or renumbering sections.
+# Section ids are section numbers (<h3 id="04.C">04.C ...), so renumbering a section breaks every
+# link that points at it. Run this after moving or renumbering sections.
 #
 #   util/check-blueprint.sh
 #
@@ -33,6 +34,15 @@ for page in "$DIR"/*.html; do
 		echo "$name: unexpected <$tag> -- write a literal < as &lt;"
 		status=1
 	done < <(grep -o '<[a-zA-Z][a-zA-Z0-9]*' "$page" | sed 's/^<//' | tr 'A-Z' 'a-z' | sort -u | grep -vxE "$TAGS")
+
+	while IFS= read -r heading; do
+		id="${heading#*id=\"}"
+		id="${id%%\"*}"
+		text="${heading#*>}"
+		[ "${text%% *}" = "$id" ] || { echo "$name: heading id=\"$id\" but its text starts \"${text%% *}\""; status=1; }
+	done < <(grep -oE '<h[23] id="[^"]*"[^>]*>[^<]*' "$page")
+
+	grep -oE '<[a-z0-9]+ [^>]*data-part=' "$page" | grep -v '^<h2 ' | sed "s/^/$name: data-part only goes on an h2: /" | grep . && status=1
 
 	while IFS= read -r href; do
 		case "$href" in http://* | https://* | mailto:*) continue ;; esac

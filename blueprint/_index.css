@@ -2,7 +2,7 @@
  * blueprint 문서가 함께 쓰는 스타일. 문서에는 글만 두고 모양은 전부 이 파일이 맡는다.
  *
  * 클래스는 범위_식별자__요소--수정자 문법이다. 파일이 하나라 식별자도 bp_index 하나다.
- * 문서 본문은 태그만 쓰므로 (workflow.html 5.2절) 태그는 .bp_index__doc 블록 안에서만 잡는다.
+ * 문서 본문은 태그만 쓰므로 (workflow.html 05.B절) 태그는 .bp_index__doc 블록 안에서만 잡는다.
  * 테마는 토큰 값만 바꾸고, 브레이크포인트는 파일 맨 아래에 모은다.
  * 모양은 sk-ax-gas-pp 의 .ignore/blueprint/blueprint.css 에서 가져왔다.
  */
@@ -290,6 +290,15 @@
   font-weight: 400;
 }
 
+/* 목차 묶음 이름 — 본문의 가름 머리 (.bp_index__part) 와 같은 이름으로 절을 가른다 */
+.bp_index__tocGroup {
+  margin: 18px 0 4px;
+  padding-left: 14px;
+  color: var(--app-color-text-muted);
+  font-size: 10.5px;
+  letter-spacing: 0.02em;
+}
+
 /* 절 안의 소제목 — 지금 읽는 절의 것만 펼친다 */
 .bp_index__tocSub {
   display: none;
@@ -362,7 +371,7 @@
   /* 끝 여백은 마지막 절도 읽는 선(--app-space-anchor)까지 올라올 만큼 둔다 */
   padding-block: 44px calc(100vh - var(--app-space-anchor));
 
-  /* stylelint-disable selector-disallowed-list -- 문서 본문은 태그만 쓴다 (workflow.html 5.2절) */
+  /* stylelint-disable selector-disallowed-list -- 문서 본문은 태그만 쓴다 (workflow.html 05.B절) */
   & h1 {
     margin: 14px 0 12px;
     color: var(--app-color-text-strong);
@@ -389,6 +398,13 @@
     letter-spacing: -0.01em;
     text-wrap: balance;
     scroll-margin-top: var(--app-space-anchor);
+  }
+
+  /* 가름 머리 바로 밑의 절은 가름 선이 제 선을 대신한다 */
+  & .bp_index__part + h2 {
+    margin-top: 20px;
+    padding-top: 0;
+    border-top: 0;
   }
 
   & h3 {
@@ -487,7 +503,7 @@
     font-size: inherit;
   }
 
-  /* 위키 · 패치노트 원문 인용 (workflow.html 1.3절)과 문서 첫머리의 당부 */
+  /* 위키 · 패치노트 원문 인용 (workflow.html 01.C절)과 문서 첫머리의 당부 */
   & blockquote {
     margin: 16px 0;
     padding: 12px 18px;
@@ -575,7 +591,20 @@
   text-transform: uppercase;
 }
 
-/* 제목 앞 절 번호 (1.1). 목차도 같은 글자를 쓴다 */
+/* 가름 머리 — 여러 절을 한 묶음으로 가른다. data-part 가 달린 h2 앞에 _index.js 가 단다 */
+.bp_index__part {
+  margin-top: 88px;
+  padding-top: 14px;
+  border-top: 2px solid var(--app-color-text-strong);
+}
+
+.bp_index__partLabel {
+  color: var(--app-color-text-strong);
+  font-size: 19px;
+  font-weight: 600;
+}
+
+/* 제목 앞 절 번호 (01.A). 목차도 같은 글자를 쓴다 */
 .bp_index__num {
   margin-right: 12px;
   color: var(--app-color-accent);

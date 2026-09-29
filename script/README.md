@@ -28,7 +28,7 @@ Combat loops are named after the template (`bard-mace`, `hally-mage`), variants 
 | `backstab-mugging`    | Stealth backstab thief                                                                       |
 
 A new combat loop gets a row here. Every loop has the same shape, set out in
-[blueprint/conventions.html](../blueprint/conventions.html#2.2) 2.2: config and state first, then one `while not dead` loop.
+[blueprint/conventions.html](../blueprint/conventions.html#02.B) 02.B: config and state first, then one `while not dead` loop.
 
 ## Personal values never go into a script
 

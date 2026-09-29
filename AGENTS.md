@@ -16,12 +16,12 @@ Ultima Online Outlands용 Razor 스크립트 (`script/`), 클라이언트 설정
 
 한 줄씩만 적는다. 이유와 자세한 규칙은 링크한 곳에 있다.
 
-- 문서와 답변은 한국어, 스크립트 안 주석은 영어 → [workflow.html](blueprint/workflow.html#5.4) 5.4절
-- `.razor`를 고치기 전에 대상 파일을 끝까지 읽고 확인된 함정 표를 본다 → [razor.html](blueprint/razor.html#3) 3절
-- `config/` 아래는 게임을 끈 상태에서만 고친다 → [workflow.html](blueprint/workflow.html#4.3) 4.3절
-- 다른 사람의 `config/`는 건드리지 않고, `settings.json`은 절대 커밋하지 않는다 → [conventions.html](blueprint/conventions.html#1.4) 1.4절
-- 스크립트에 serial 리터럴을 쓰지 않는다 → [conventions.html](blueprint/conventions.html#3.3) 3.3절
-- 커밋은 사용자가 하라고 할 때만, push는 따로 요청이 있을 때만 → [workflow.html](blueprint/workflow.html#6) 6절
+- 문서와 답변은 한국어, 스크립트 안 주석은 영어 → [workflow.html](blueprint/workflow.html#05.D) 05.D절
+- `.razor`를 고치기 전에 대상 파일을 끝까지 읽고 확인된 함정 표를 본다 → [razor.html](blueprint/razor.html#03) 03절
+- `config/` 아래는 게임을 끈 상태에서만 고친다 → [workflow.html](blueprint/workflow.html#04.C) 04.C절
+- 다른 사람의 `config/`는 건드리지 않고, `settings.json`은 절대 커밋하지 않는다 → [conventions.html](blueprint/conventions.html#01.D) 01.D절
+- 스크립트에 serial 리터럴을 쓰지 않는다 → [conventions.html](blueprint/conventions.html#03.C) 03.C절
+- 커밋은 사용자가 하라고 할 때만, push는 따로 요청이 있을 때만 → [workflow.html](blueprint/workflow.html#06) 06절
 
 ## 2. 언제 무엇을 읽나
 
@@ -29,16 +29,16 @@ Ultima Online Outlands용 Razor 스크립트 (`script/`), 클라이언트 설정
 |-----------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------|
 | 무엇이든 시작할 때                      | [workflow.html](blueprint/workflow.html)                                                                                                     |
 | `.razor`를 고치거나 새로 쓸 때          | [conventions.html](blueprint/conventions.html), [razor.html](blueprint/razor.html), 알림을 띄우면 [overheads.html](blueprint/overheads.html) |
-| 파일을 새로 만들거나 이름을 지을 때     | [conventions.html](blueprint/conventions.html#1) 1절                                                                                         |
-| 고친 것을 게임에서 확인할 때            | [workflow.html](blueprint/workflow.html#4) 4절                                                                                               |
-| `config/`를 고칠 때                     | [workflow.html](blueprint/workflow.html#4.3) 4.3절, [config/README.md](config/README.md)                                                     |
+| 파일을 새로 만들거나 이름을 지을 때     | [conventions.html](blueprint/conventions.html#01) 01절                                                                                       |
+| 고친 것을 게임에서 확인할 때            | [workflow.html](blueprint/workflow.html#04) 04절                                                                                             |
+| `config/`를 고칠 때                     | [workflow.html](blueprint/workflow.html#04.C) 04.C절, [config/README.md](config/README.md)                                                   |
 | 오버헤드나 쿨다운 바를 더하거나 바꿀 때 | [overheads.html](blueprint/overheads.html)                                                                                                   |
 | 바드·네크로·소환수 숫자가 필요할 때     | [bard-necro-handbook.html](blueprint/bard-necro-handbook.html)                                                                               |
 | PvP 규칙이 필요할 때                    | [pvp.html](blueprint/pvp.html)                                                                                                               |
 | 키 배치를 볼 때                         | [hotkeys.html](blueprint/hotkeys.html)                                                                                                       |
 | `findtype` 인자 (graphic id, hue)       | [item-list.txt](blueprint/item-list.txt)                                                                                                     |
-| 문서를 고치거나 새로 만들 때            | [workflow.html](blueprint/workflow.html#5) 5절                                                                                               |
-| 커밋할 때                               | [workflow.html](blueprint/workflow.html#6) 6절                                                                                               |
+| 문서를 고치거나 새로 만들 때            | [workflow.html](blueprint/workflow.html#05) 05절                                                                                             |
+| 커밋할 때                               | [workflow.html](blueprint/workflow.html#06) 06절                                                                                             |
 
 ## 3. 문서 지도
 
