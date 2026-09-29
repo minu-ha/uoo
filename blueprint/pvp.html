@@ -20,27 +20,19 @@
 </ul>
 
 <h2 id="1">1. 공격적 행동과 Heat of Battle</h2>
-<p><strong>다른 플레이어에게 공격적 행동을 하면 Heat of Battle이 켜지고, 그동안 리콜·문게이트를 못 쓴다.</strong>
-바드는 여기에 Defensive Barding까지 같이 잃는다 (<a href="bard-necro-handbook.html#6.1">bard-necro-handbook.html</a> 6.1절). 아래 숫자는 전부 이 조건에서 갈린다.</p>
+<p><strong>다른 플레이어에게 공격적 행동을 하면 Heat of Battle이 켜지고, 그동안 리콜·게이트·문게이트를 못 쓴다.</strong> 여관 방에도 못 들어간다.
+바드는 여기에 Defensive Barding까지 잃는다 (<a href="bard-necro-handbook.html#6.1">bard-necro-handbook.html</a> 6.1절). 그래서 바드의 방어 숫자 (2.3절, 8절)는 이 조건에서 갈린다.</p>
 
 <h3 id="1.1">1.1 무엇이 켜는가</h3>
+<p><strong>PK를 향한 공격 가운데 Heat of Battle을 켜지 않는다고 적힌 것은 자동 반격 스윙 하나다.</strong> 누가 나를 칠 때 캐릭터가 저절로 되받아치는 스윙이다.
+타겟을 바꿔 치거나 훔치거나 해로운 주문을 쓰면 상대가 먼저 쳤어도 켜진다.</p>
 <blockquote>
 <p>"Heat of Battle will be triggered by performing an aggressive action against another player regardless of notoriety, or when interacting with various faction content events or wayposts."
 "Aggressive actions include attacking or stealing from a player"
 "Aggressive actions do not include retaliatory empty-handed wrestling attacks or weapon swings your character makes when someone attacks you"
-"However, it is an aggressive action to re-target your attacker (for example, to avoid attacking monsters instead of the attacking player)
-"
+"However, it is an aggressive action to re-target your attacker (for example, to avoid attacking monsters instead of the attacking player)"
 "Note also that using harmful spells (such as Weaken, Telekinesis, or Energy Bolt) will trigger Heat of Battle, even when used against an attacker"
 "Heat of battle will prevent the player from utilizing any moongates, recalling, or entering an inn room while it is active"</p>
-</blockquote>
-
-<h3 id="1.2">1.2 지속시간</h3>
-<p>지속시간은 위키 문서에 없고 2020-09-28 패치 원문에 있다.</p>
-<blockquote>
-<p>"When any player commits a hostile action (including stealing) to another player, but the action is not considered a criminal action (such as attacking or stealing from a Red, Grey, or Orange
-player) they will have a 30 second Heat of Battle timer started"
-"When any player commits any Criminal action, they have will have a 2 minute Heat of Battle timer started that matches their Criminal Timer duration"
-"Heat of Battle now has a maximum duration of 5 minutes, regardless of circumstance"</p>
 </blockquote>
 <table>
 <thead>
@@ -63,34 +55,81 @@ player) they will have a 30 second Heat of Battle timer started"
 <td><strong>켜짐.</strong> 상대가 먼저 쳤어도</td>
 </tr>
 <tr>
-<td>빨강 / 회색 / 주황 플레이어에게 공격적 행동</td>
-<td>켜짐, 할 때마다 <strong>30초</strong> 타이머</td>
+<td>플레이어에게서 훔치기</td>
+<td><strong>켜짐</strong></td>
 </tr>
 <tr>
-<td>파랑 공격 (Criminal)</td>
-<td>켜짐, <strong>2분</strong></td>
+<td>팩션 콘텐츠 이벤트나 waypost와 상호작용</td>
+<td><strong>켜짐</strong></td>
 </tr>
 <tr>
 <td>햄스트링을 켜 둔 자동 반격 스윙</td>
 <td>확인되지 않았다</td>
+</tr>
+<tr>
+<td>자기에게 거는 Telekinesis</td>
+<td>확인되지 않았다 (4.1절)</td>
+</tr>
+<tr>
+<td>내 소환수가 PK를 침</td>
+<td>확인되지 않았다 (6.1절)</td>
 </tr>
 </tbody>
 </table>
 <p><strong>"반격은 안 켜진다"는 자동 스윙에만 맞다.</strong> 사냥 중에는 몹을 치고 있으므로 PK를 치려면 타겟을 바꿔야 하고,
 그 순간 켜진다. 거리를 두고 주문을 쓰는 메이지 PK에게는 자동 스윙이 나갈 일 자체가 없다.</p>
 
-<h3 id="1.3">1.3 던전에서는 리콜로 도주할 수 없다</h3>
+<h3 id="1.2">1.2 지속시간</h3>
+<p><strong>빨강·회색·주황을 치면 30초, 파랑을 쳐서 Criminal이 되면 2분이다.</strong> 지속시간은 위키 문서에 없고 2020-09-28 패치 원문에 있다.</p>
+<blockquote>
+<p>"When any player commits a hostile action (including stealing) to another player, but the action is not considered a criminal action (such as attacking or stealing from a Red, Grey, or Orange
+player) they will have a 30 second Heat of Battle timer started"
+"When any player commits any Criminal action, they have will have a 2 minute Heat of Battle timer started that matches their Criminal Timer duration"
+"Heat of Battle now has a maximum duration of 5 minutes, regardless of circumstance"</p>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th>내 행동</th>
+<th>Heat of Battle</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>빨강 / 회색 / 주황 플레이어에게 공격적 행동</td>
+<td>할 때마다 <strong>30초</strong> 타이머</td>
+</tr>
+<tr>
+<td>파랑 공격 (Criminal)</td>
+<td><strong>2분.</strong> Criminal 타이머와 같다</td>
+</tr>
+<tr>
+<td>무엇을 했든</td>
+<td>최대 <strong>5분</strong></td>
+</tr>
+</tbody>
+</table>
+
+<h3 id="1.3">1.3 던전에서는 Golden Moongate 곁에서만 리콜된다</h3>
+<p><strong>던전 안에서는 Golden Moongate 8타일 안에서만 리콜된다.</strong> Heat of Battle 중이면 그곳에서도 리콜·게이트·문게이트가 막힌다.</p>
 <blockquote>
 <p>"Within dungeons, players may only cast Recall within 8 tiles of a Golden Moongate" -- Magery (Recall)
 "Any character can cast this spell from a scroll in a rune book or rune tome, or from a scroll onto a loose marked rune, even with 0 Magery skill" -- Magery (Recall)
 "When a player is in the Heat of Battle they are unable to cast Recall, Gate, or use any Moongates" -- Magery</p>
 </blockquote>
+<pre class="mermaid">flowchart LR
+  off{"Heat of Battle이&lt;br&gt;꺼져 있나"} -- 예 --> where{"던전 밖이거나&lt;br&gt;Golden Moongate&lt;br&gt;8타일 안인가"} -- 예 --> recall("리콜한다")
+  off -- 아니요 --> blocked("리콜 · 게이트 · 문게이트&lt;br&gt;전부 못 쓴다")
+  where -- 아니요 --> run("Golden Moongate까지 뛴다")</pre>
 <ul>
-<li>룬북 리콜은 Magery 0 이어도 된다. 하지만 <strong>던전 안에서는 Golden Moongate 8타일 안에서만 된다.</strong></li>
-<li>던전에서 PK를 만나면 도주 플랜은 "문게이트까지 뛰기"다. 그 사이에 맞으면 <strong>printed 방어로 버텨야 한다.</strong></li>
+<li>룬북 리콜은 Magery 0이어도 된다.</li>
+<li>던전에서 PK를 만나면 도주는 Golden Moongate까지 뛰는 것이다. 가는 길에 PK에게 공격적 행동을 하면 Heat of Battle이 켜져 그 문게이트도 못 쓴다.
+먼저 공격하지 않은 바드는 그동안 Defensive Barding으로 막는다 (2.3절).</li>
+<li>리콜도 시전이다. 시전하는 동안 근접 한 대나 해로운 주문에 맞으면 끊긴다 (2.5절, 5절).</li>
 </ul>
 
 <h2 id="2">2. 명중률</h2>
+<p><strong>명중률은 양쪽이 지금 손에 든 것의 스킬끼리 겨룬다.</strong> 가진 다른 스킬은 판정에 안 들어간다.</p>
 <blockquote>
 <p>"The chance to hit with a mace class weapon is equal to (attacker's mace fighting skill + 50) / ((defender's weapon or wrestling skill + 50) * 2)
 plus any relevant accuracy bonuses" -- Mace Fighting
@@ -100,7 +139,6 @@ accuracy bonuses." -- Wrestling
 </blockquote>
 <p>Swordsmanship도 같은 형태다.</p>
 <pre><code>명중률 = (공격자 스킬 + 50) / ((방어자 스킬 + 50) x 2)</code></pre>
-<p><strong>양쪽 다 지금 손에 든 것의 스킬 하나만 쓴다.</strong> 가진 다른 스킬은 판정에 안 들어간다.</p>
 <table>
 <thead>
 <tr>
@@ -111,11 +149,11 @@ accuracy bonuses." -- Wrestling
 <tbody>
 <tr>
 <td>공격자</td>
-<td>든 무기의 스킬. 맨손·레슬링 무기일 때만 Wrestling</td>
+<td>든 무기의 스킬. 맨손이나 레슬링 무기면 Wrestling</td>
 </tr>
 <tr>
 <td>방어자</td>
-<td>든 무기의 스킬. 맨손·스펠북이면 Wrestling</td>
+<td>든 무기의 스킬. 맨손이나 스펠북이면 Wrestling</td>
 </tr>
 </tbody>
 </table>
@@ -163,11 +201,12 @@ accuracy bonuses." -- Wrestling
 </tbody>
 </table>
 <ul>
-<li><strong>같은 숫자끼리는 항상 50%.</strong></li>
-<li>방어 0에 공격 50 이상은 공식값이 1을 넘는다 (130%, 150%). 100%로 적었다.</li>
+<li><strong>같은 숫자끼리는 항상 50%다.</strong></li>
+<li>방어가 0이면 공격 50은 딱 100%이고, 80과 100은 공식값이 1을 넘는다 (130%, 150%). 100%로 적었다.</li>
 </ul>
 
 <h3 id="2.2">2.2 내가 칠 때</h3>
+<p><strong>메이지 PK를 칠 때 내 쪽에서 들어가는 것은 든 무기의 스킬뿐이다.</strong> 내 레슬링은 내가 레슬링으로 칠 때만 들어간다.</p>
 <table>
 <thead>
 <tr>
@@ -247,12 +286,13 @@ accuracy bonuses." -- Wrestling
 </tbody>
 </table>
 <ul>
-<li><strong>메이지 PK 상대 명중률은 내 무기 스킬만 정한다.</strong> 내 레슬링은 내가 레슬링으로 칠 때만 들어간다.</li>
 <li>80으로 치면 메이스든 레슬링 무기든 똑같이 43.3%다.</li>
 <li>무기와 레슬링을 둘 다 가진 상대는 <strong>지금 든 쪽</strong>으로 방어한다.</li>
 </ul>
 
-<h3 id="2.3">2.3 PK 가 나를 칠 때, PK 무기 100</h3>
+<h3 id="2.3">2.3 PK가 나를 칠 때, PK 무기 100</h3>
+<p><strong>Defensive Barding의 Effective Wrestling은 맨손일 때 끼어든다.</strong> 무기를 들면 방어는 그 무기의 스킬이다.
+Heat of Battle이 켜지면 printed 값만 남는다.</p>
 <table>
 <thead>
 <tr>
@@ -289,7 +329,6 @@ accuracy bonuses." -- Wrestling
 </tr>
 </tbody>
 </table>
-<p>무기를 들면 방어는 그 무기의 스킬이다. <strong>Effective Wrestling이 끼어드는 것은 맨손일 때다.</strong></p>
 
 <h3 id="2.4">2.4 명중 보너스</h3>
 <blockquote>
@@ -298,46 +337,78 @@ are now capped by a player's base melee skill for that weapon." -- Armor &amp; W
 "Players will receive bonuses against creatures based on what "setup" they have for weapons/shields occupying their hands" -- Wrestling</p>
 </blockquote>
 <ul>
-<li>위 표는 보너스 0 기준이다. <strong>보너스가 곱해지는지 더해지는지는 위키에 없다.</strong></li>
+<li>위 표는 보너스 0 기준이다. <strong>공식은 보너스를 "plus"로만 적는다.</strong> 보너스 10%가 명중률에 10%p를 더하는지 1.1배를 하는지는 위키에 없다.</li>
 <li>Weapon Setup 보너스 (한손 무방패 Accuracy 등)는 크리처 상대 보너스라서 PvP에는 안 붙는다.</li>
 </ul>
 
-<h3 id="2.5">2.5 메이지가 레슬링을 드는 이유</h3>
+<h3 id="2.5">2.5 메이지가 레슬링을 올리는 이유</h3>
 <blockquote>
 <p>"Wrestling is very important to mage-types, as taking a melee hit will interrupt a spellcast in progress." -- Wrestling</p>
 </blockquote>
-<p><strong>메이지 PK는 한 대 맞으면 시전이 끊긴다.</strong> 메이지가 레슬링 100을 드는 이유이고, 이쪽이 무기 스킬을 올려야 하는 이유다.</p>
+<p><strong>메이지 PK는 한 대 맞으면 시전이 끊긴다.</strong> 메이지가 레슬링 100을 올리는 이유이고, 이쪽이 무기 스킬을 올려야 하는 이유다.</p>
 <p>Arcane Staff를 든 메이지는 방어 스킬이 다르다.</p>
 <blockquote>
 <p>"A players chance to hit/defend with an Arcane Staff is based on their Arcane skill, but is also capped by the lower printed value of Magery or Wrestling" -- Arcane Staff
 "PvP-based interrupts while casting with an Arcane Staff equipped will be resolved as normal using the player's Wrestling skill" -- Arcane Staff</p>
 </blockquote>
+<p>근접 명중과 방어는 Arcane 스킬로 판정하고, printed Magery와 Wrestling 중 낮은 값을 넘지 못한다. 시전 중 PvP 인터럽트는 평소처럼 Wrestling으로 판정한다.</p>
 
 <h2 id="3">3. Hamstring</h2>
-<p>PvP 요구조건. 첫 줄을 채우고 나머지 둘 중 하나를 채운다.</p>
-<blockquote>
-<p>"80.0 or higher attacking weapon skill in Dual Wielding, Fencing, Mace Fighting, Swordsmanship, or Wrestling"
-"two of the following skills at 80.0 or higher; Anatomy, Arms Lore, Chivalry, Forensic Evaluation, Tracking, Wrestling"
-"two of the following weapon skills at 80.0 or higher (including attacking weapon skill); Archery, Dual Wielding, Fencing, Mace Fighting, Swordsmanship"</p>
-</blockquote>
+<p><strong>걸린 쪽은 3초 동안 걷는다. 거는 쪽은 빗나가면 15초, 맞히면 30~53초 동안 다시 못 건다.</strong> 한 교전에 한 번이라고 보는 게 맞다.</p>
 <blockquote>
 <p>"if Hamstring is toggled for a player, on a missed attack they will not be able to make another Hamstring attempt for 15 seconds"
 "On a successful hit when Hamstring is toggled, a player will have a cooldown of 30-53 seconds (100-25 dex) before they may make another Hamstring attempt to any target"
 "When a player is hit by a Hamstring effect, they will be reduced to 0 Stamina for 3 seconds (forcing them to walk), after which their stamina will return to its previous amount"
 "Once hamstrung, a player or creature cannot be affected by another hamstring effect for another 30 seconds"</p>
 </blockquote>
+<table>
+<thead>
+<tr>
+<th>무엇</th>
+<th>얼마나</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>햄스트링을 켠 공격이 빗나감</td>
+<td><strong>15초</strong> 동안 다시 못 건다</td>
+</tr>
+<tr>
+<td>햄스트링을 켠 공격이 맞음</td>
+<td><strong>30~53초</strong> (Dex 100~25) 동안 누구에게도 못 건다</td>
+</tr>
+<tr>
+<td>걸린 쪽</td>
+<td><strong>3초</strong> 동안 스태미나 0이라 걷는다. 그 뒤 원래 스태미나로 돌아온다</td>
+</tr>
+<tr>
+<td>한 번 걸린 쪽</td>
+<td><strong>30초</strong> 동안 다시 안 걸린다</td>
+</tr>
+</tbody>
+</table>
 <ul>
-<li><strong>빗나가면 15초 잠긴다.</strong> 햄스트링을 켠 첫 스윙의 명중률이 곧 성공률이다. 레슬링 100 메이지 상대로 무기 80이면 43.3%, 100이면 50%.</li>
-<li>걸려도 3초이고 다음 시도는 30~53초 뒤다. <strong>한 교전에 한 번</strong>이라고 보는 게 맞다.</li>
+<li>햄스트링을 켠 첫 스윙의 명중률이 곧 성공률이다. 레슬링 100 메이지 상대로 무기 80이면 43.3%, 100이면 50%다 (2.2절).</li>
+</ul>
+<h4>PvP 요구조건</h4>
+<p>첫 줄을 채우고, 나머지 두 줄 중 하나를 채운다.</p>
+<blockquote>
+<p>"80.0 or higher attacking weapon skill in Dual Wielding, Fencing, Mace Fighting, Swordsmanship, or Wrestling"
+"two of the following skills at 80.0 or higher; Anatomy, Arms Lore, Chivalry, Forensic Evaluation, Tracking, Wrestling"
+"two of the following weapon skills at 80.0 or higher (including attacking weapon skill); Archery, Dual Wielding, Fencing, Mace Fighting, Swordsmanship"</p>
+</blockquote>
+<ul>
 <li>Wrestling 80 + Anatomy 80은 두 번째 줄 (목록에서 두 개)을 채운다. 공격 스킬인 Wrestling을 목록에서 다시 세지 말라는 문구는 없다.</li>
-<li>메이스로 하려면 Mace 80 + 목록에서 두 개. Anatomy + Tracking도 된다.</li>
+<li>메이스로 하려면 Mace 80에 목록에서 두 개를 더한다. Anatomy + Tracking도 된다.</li>
 <li>세 번째 줄 (무기 두 개)의 PvP 목록에는 Wrestling이 없다. PvM 목록에는 있다.</li>
 </ul>
 
-<h2 id="4">4. Telekinesis 와 폭발 포션</h2>
+<h2 id="4">4. Telekinesis와 폭발 포션</h2>
+<p>메이지 PK가 흔히 여는 수다. <strong>TK로 붙인 폭발 포션은 리콜해도 따라온다. 막는 길은 상대 TK보다 먼저 거는 자기 TK다.</strong></p>
+<p>이 절에서 자기 TK는 내가 나에게, 공격 TK는 내가 상대에게, 상대 TK는 상대가 나에게 거는 TK다.</p>
 
 <h3 id="4.1">4.1 규칙</h3>
-<p>메이지 PK의 흔한 진입이다. 규칙은 2020-09-28 패치 원문에 있고, 위키 Alchemy 문서에는
+<p>규칙은 2020-09-28 패치 원문에 있고, 위키 Alchemy 문서에는
 "Telekinesis is always required for sticking explosion potions to players regardless of skill level"만 남아 있다.</p>
 <blockquote>
 <p>"If a player casts Telekinesis and successfully targets another player, it will apply a "Sticky" effect to the target player lasting 30 seconds"
@@ -351,22 +422,22 @@ but to also damage the thrower and potentially interrupt a spellcast if the thro
 the caster of the spell is allowed to stick potions onto a target that has Telekinesis active on them"
 "Telekinesis is a 3rd circle spell, requiring a minimum of 30 Magery to cast and 50 Magery to cast with 100% success"</p>
 </blockquote>
-<p>위키 Explosion Potion 문서 (삭제 표시가 붙어 있다):</p>
+<p>삭제 표시가 붙은 위키 Explosion Potion 문서에는 이렇게 적혀 있다.</p>
 <blockquote>
 <p>"Explosion Potions stuck to another player with Telekinesis will now follow their target even if they change regions, such as crossing dungeon levels, exiting dungeons, recalling/gating/hiking, or
 using moongates"</p>
 </blockquote>
 <ul>
 <li><strong>붙은 포션은 리콜해도 따라온다.</strong> 리콜로 이 콤보를 피할 수 없다.</li>
-<li><strong>던진 사람 곁에서 터지면 데미지가 반으로 나뉘고, 상대 시전이 끊길 수 있다.</strong> 붙어서 싸우는 플랜과 방향이 같다.</li>
-<li>자기 자신에게 TK를 거는 방어는 Magery 30 이 있어야 한다.</li>
+<li><strong>던진 사람 곁에서 터지면 데미지가 둘에게 반씩 나뉘고, 던진 사람의 시전이 끊길 수 있다.</strong> 그래서 포션이 붙으면 던진 사람에게 달려가는 것 (Splashback)도 방법이다.</li>
+<li>자기 TK는 Magery 30이 있어야 건다.</li>
 </ul>
 <p>지금 위키 Magery 주문표도 자기 TK 방어를 적고 있다.</p>
 <blockquote>
 <p>"Players can cast the Telekinesis spell onto another player (PvP) to make the player "Sticky" for explosion potions for the next 30 seconds" -- Magery (Telekinesis)
 "or on themselves to block it from being cast on them." -- Magery (Telekinesis)</p>
 </blockquote>
-<p>TK 쿨다운 제약 (2020-09-28 패치 원문. 지금 위키에는 없다):</p>
+<p>TK 쿨다운 제약은 2020-09-28 패치 원문에만 있고, 지금 위키에는 없다.</p>
 <blockquote>
 <p>"Each player has a global cooldown for casting Telekinesis in PvP, and can only successfuly apply it at most once every 30 seconds to any player (similar to Wall of Stone casting cooldowns)"
 "A player can only be hit by the Telekinesis spell (from all players) at most once every 30 seconds"
@@ -374,16 +445,17 @@ using moongates"</p>
 another 30 seconds after that point)"</p>
 </blockquote>
 <ul>
-<li><strong>자기 TK는 상대 TK보다 먼저 걸려야 한다.</strong> 상대 TK가 먼저 맞으면 30초 동안 Sticky이고, 그동안은 내 TK도 나에게 안 걸린다.</li>
+<li><strong>자기 TK는 상대 TK보다 먼저 걸려야 한다.</strong> 상대 TK가 먼저 맞으면 30초 동안 Sticky이고, 그동안은 자기 TK도 안 걸린다.</li>
 <li>자기 TK가 막는 것은 <strong>붙는 것</strong>이다. 던지는 것 자체는 막지 않는다. 안 붙은 포션은 나를 따라오지 않는다.</li>
-<li><strong>자기 TK와 역콤보 TK는 30초 안에 둘 다 못 쓸 수 있다.</strong> "to any player"에 자기 자신이 들어가는지는 확인되지 않았다.</li>
-<li><strong>상대가 자기 TK를 걸어 두었으면 내 TK는 안 걸린다.</strong> 걸려 있는 동안 포션을 붙일 수 있는 것은 건 사람뿐이다.</li>
-<li>자기에게 거는 TK는 "against another player"가 아니므로 위키 정의상 Heat of Battle 조건이 아니다. 인게임 확인은 안 됐다.</li>
+<li><strong>자기 TK와 공격 TK는 30초 안에 둘 다 못 쓸 수 있다.</strong> "to any player"에 자기 자신이 들어가는지는 확인되지 않았다.</li>
+<li><strong>상대가 자기 TK를 걸어 두었으면 내 공격 TK는 안 걸린다.</strong> 걸려 있는 동안 포션을 붙일 수 있는 것은 건 사람뿐이다.</li>
+<li>포션이 붙으면 그 순간부터 30초 동안 다른 플레이어가 그 사람에게 TK를 못 건다.</li>
+<li>자기 TK는 "against another player"가 아니므로 위키 정의로는 Heat of Battle을 켜지 않는다. 하지만 1.1절 인용은 Telekinesis를 해로운 주문으로 꼽는다. 확인되지 않았다.</li>
 </ul>
 
 <h3 id="4.2">4.2 TK 순서</h3>
 <p>시전자 글로벌 쿨 "at most once every 30 seconds to any player"에 자기 자신이 들어가면
-자기 TK와 공격 TK는 30초 안에 하나만 된다 (미확인, 길드원에게 시험하면 바로 안다).</p>
+자기 TK와 공격 TK는 30초 안에 하나만 된다. 확인되지 않았다. 길드원에게 시험하면 바로 안다.</p>
 <table>
 <thead>
 <tr>
@@ -396,11 +468,11 @@ another 30 seconds after that point)"</p>
 <tr>
 <td>내가 먼저 움직일 수 있다</td>
 <td><strong>자기 TK</strong></td>
-<td>30초 동안 상대 폭탄이 안 붙는다. 붙지 않은 포션은 걸어서 피한다</td>
+<td>30초 동안 상대의 폭발 포션이 안 붙는다. 붙지 않은 포션은 걸어서 피한다</td>
 </tr>
 <tr>
 <td>이미 상대 TK에 맞았다</td>
-<td><strong>상대에게 TK</strong></td>
+<td><strong>공격 TK</strong></td>
 <td>자기 TK는 어차피 안 걸린다 (한 사람은 30초에 한 번만 맞는다). 내 글로벌 쿨은 아직 안 썼다</td>
 </tr>
 <tr>
@@ -410,16 +482,40 @@ another 30 seconds after that point)"</p>
 </tr>
 </tbody>
 </table>
-<p>막는 범위는 4.1 끝의 목록.</p>
+<p>무엇이 막히는지는 4.1절 끝의 목록에 있다.</p>
 
 <h2 id="5">5. 주문으로 싸울 때</h2>
-<p>메이지 계열 템플릿을 PvP 기준으로 볼 때 필요한 숫자다.</p>
+<p>메이지 계열 템플릿을 PvP 기준으로 볼 때 필요한 숫자다. <strong>4서클 이상 해로운 주문은 상대 시전을 항상 끊는다.
+1서클은 첫 발만 끊고, 그 뒤 5초 동안은 못 끊는다.</strong></p>
+<h4>인터럽트</h4>
 <blockquote>
 <p>"All hostile spells from 4th, 5th, 6th, 7th, and 8th circles will interrupt other players 100% of the time" -- Magery
 "Casting a hostile 1st circle spell against another player will at first have an interrupt chance of 100%" -- Magery
 "Afterwards, a 5 second window starts where all subsequent 1st circle hostile spells against the target have a 0% interrupt chance" -- Magery</p>
 </blockquote>
-<p>2서클과 3서클도 같은 규칙이고, 창은 서클마다 따로 돈다.</p>
+<table>
+<thead>
+<tr>
+<th>해로운 주문</th>
+<th>상대 시전을 끊는 확률</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1서클</td>
+<td>첫 발 100%. 그 뒤 5초 동안 같은 대상에게 쏘는 1서클은 0%</td>
+</tr>
+<tr>
+<td>2서클, 3서클</td>
+<td>1서클과 같은 규칙이고, 5초 창은 서클마다 따로 돈다</td>
+</tr>
+<tr>
+<td>4~8서클</td>
+<td><strong>항상 100%</strong></td>
+</tr>
+</tbody>
+</table>
+<h4>데미지</h4>
 <blockquote>
 <p>"PvP - Deals ((28 to 36) * (Magery / 100) * (.75 + (.375 * (Eval Int / 100)))) damage to target player" -- Energy Bolt, Explosion 공통
 "Modifies base spell damage against players by (0.75 + (0.375 * (Eval/100)))" -- Evaluating Intelligence
@@ -437,71 +533,19 @@ another 30 seconds after that point)"</p>
 <tr>
 <td>80</td>
 <td>x1.05</td>
-<td>29.4 ~ 37.8</td>
+<td>29.4~37.8</td>
 </tr>
 <tr>
 <td>100</td>
 <td>x1.125</td>
-<td>31.5 ~ 40.5</td>
+<td>31.5~40.5</td>
 </tr>
 </tbody>
 </table>
 <ul>
 <li>Explosion은 "damage delay of 2.5 seconds", Energy Bolt는 0.5초다.</li>
 </ul>
-<p><strong>레슬링:</strong></p>
-<ul>
-<li>메이지는 근접 한 대에 시전이 끊긴다 (2.5절).</li>
-<li>바드는 도주할 때만 Defensive Barding이 레슬링을 채운다 (<a href="bard-necro-handbook.html#6.5">bard-necro-handbook.html</a> 6.5절).</li>
-<li>printed 0이면 무기 100 PK의 근접은 <strong>100%</strong> 맞고, 한 대마다 시전이 끊긴다.</li>
-</ul>
-<blockquote>
-<p>"Wrestling will provide a (15% * (Wrestling Skill / 100)) Mana Refund chance when casting spells" -- Wrestling (PvM)</p>
-</blockquote>
-<p><strong>Magic Reflection과 Inscription:</strong></p>
-<blockquote>
-<p>"PvP - Has a (35% * (Inscription / 100)) chance to stay active and reflect a single additional spell before being nullified" -- Magery (Magic Reflection)
-"Will at most ever reflect 2 spells during PvP" -- Magery (Magic Reflection)
-"Players using a scroll to cast a spell will receive a (10% * (Inscription Skill / 100)) damage bonus against other players (PvP Spell Supplemental Damage Cap 10%)" -- Inscription
-"Increases certain spell's buff durations. Normal duration is 2 minutes and are increased by (400% * (Inscription Skill / 100)), including:" -- Inscription (Protection, Arch Protection, Bless,
-Invisibility)</p>
-</blockquote>
-<ul>
-<li>Inscription 120의 PvP 몫은 <strong>리플렉트가 한 번 더 남을 확률 42%</strong>와 스크롤 시전 딜 +10% (상한) 정도다.</li>
-<li>나머지는 PvM이다. 버프 지속 2분 -&gt; 11.6분, 스크롤 환급, Reactive Armor.</li>
-</ul>
-<p><strong>Alchemy (PvP):</strong></p>
-<blockquote>
-<p>"Increases Explosion Potion damage by (50% * (Alchemy Skill / 100))" -- Alchemy
-"Increases Healing Potion effectiveness by (25% * (Alchemy Skill / 100))" -- Alchemy
-"Increases Cure Potion chances by (12.5% * (Alchemy Skill / 100))" -- Alchemy
-"In PvP the base damage range is 15-25, scaled with a player's alchemy skill" -- Alchemy (Greater Explosion)</p>
-</blockquote>
-<ul>
-<li>80이면 폭발 포션 +40%, 힐 포션 +20%, 큐어 포션 +10%. Greater Explosion 쿨다운은 15초 (위키 포션표).</li>
-</ul>
-<p><strong>마나:</strong></p>
-<blockquote>
-<p>"The baseline Mana Regen rate is 1 mana restored every 2 seconds (i.e., 0.5 mana per second)." -- Meditation
-"The Mana Regen rate is increased by (100% * (Meditation skill / 100))" -- Meditation</p>
-</blockquote>
-<ul>
-<li>Meditation 0이면 초당 0.5다. PvP에서 오래 싸우는 구성이 아니다.</li>
-</ul>
-<p><strong>PvM에서 인터럽트:</strong></p>
-<blockquote>
-<p>"Provides players with a (Effective Magic Resist Skill / 100%)) chance to avoid Spell Interruption from Creature/Environment Damage" -- Resisting Spells
-"Players will have an (Effective Inscription Skill / 100%)) chance to avoid Spell Interruption from Creature/Environment Damage" -- Inscription</p>
-</blockquote>
-<ul>
-<li>크리처 인터럽트 회피가 Resist와 Inscription에 같은 형태로 있다. 둘이 합산되는지는 확인되지 않았다. <strong>Resist 100이면 이것만으로 100%다.</strong></li>
-<li>바드의 Defensive Barding은 PvM 보너스를 주지 않으므로 이 효과는 printed Resist로만 받는다.</li>
-</ul>
-<p>Wizard's Grimoire:</p>
-<blockquote>
-<p>"Players must have at least 80 Magery skill and at least 80 Meditation or 80 Eval Int skill to benefit from the Wizard's Grimoire" -- Wizard's Grimoire</p>
-</blockquote>
-<p><strong>주문 데미지 보너스 합산:</strong></p>
+<h4>주문 데미지 보너스 합산</h4>
 <blockquote>
 <p>"Instead, having the Necromancy skill during PvP will provide the player with a (10% * (Necromancy Skill / 100)) Supplemental PvP Spell Damage bonus" -- Necromancy
 "However, you could have 100 Evaluating Intelligence and 100 Tracking and gain 22.5% spell damage increase" -- Evaluating Intelligence</p>
@@ -539,10 +583,67 @@ Invisibility)</p>
 </tr>
 </tbody>
 </table>
+<h4>레슬링</h4>
+<ul>
+<li>메이지는 근접 한 대에 시전이 끊긴다 (2.5절).</li>
+<li>바드는 도주할 때만 Defensive Barding이 레슬링을 채운다 (<a href="bard-necro-handbook.html#6.5">bard-necro-handbook.html</a> 6.5절).</li>
+<li>printed 0이면 무기 100 PK의 근접은 <strong>100%</strong> 맞고, 한 대마다 시전이 끊긴다.</li>
+</ul>
+<blockquote>
+<p>"Wrestling will provide a (15% * (Wrestling Skill / 100)) Mana Refund chance when casting spells" -- Wrestling (PvM)</p>
+</blockquote>
+<ul>
+<li>PvM 몫이다. Defensive Barding이 채운 레슬링에는 붙지 않는다 (<a href="bard-necro-handbook.html#6.1">bard-necro-handbook.html</a> 6.1절).</li>
+</ul>
+<h4>Magic Reflection과 Inscription</h4>
+<blockquote>
+<p>"PvP - Has a (35% * (Inscription / 100)) chance to stay active and reflect a single additional spell before being nullified" -- Magery (Magic Reflection)
+"Will at most ever reflect 2 spells during PvP" -- Magery (Magic Reflection)
+"Players using a scroll to cast a spell will receive a (10% * (Inscription Skill / 100)) damage bonus against other players (PvP Spell Supplemental Damage Cap 10%)" -- Inscription
+"Increases certain spell's buff durations. Normal duration is 2 minutes and are increased by (400% * (Inscription Skill / 100)), including:" -- Inscription (Protection, Arch Protection, Bless,
+Invisibility)</p>
+</blockquote>
+<ul>
+<li>Inscription 120의 PvP 몫은 <strong>리플렉트가 한 번 더 남을 확률 42%</strong>와 스크롤 시전 딜 +10% (상한) 정도다.</li>
+<li>나머지는 PvM이다. 버프 지속 2분 -&gt; 11.6분, 스크롤 환급, Reactive Armor.</li>
+</ul>
+<h4>Alchemy</h4>
+<blockquote>
+<p>"Increases Explosion Potion damage by (50% * (Alchemy Skill / 100))" -- Alchemy
+"Increases Healing Potion effectiveness by (25% * (Alchemy Skill / 100))" -- Alchemy
+"Increases Cure Potion chances by (12.5% * (Alchemy Skill / 100))" -- Alchemy
+"In PvP the base damage range is 15-25, scaled with a player's alchemy skill" -- Alchemy (Greater Explosion)</p>
+</blockquote>
+<ul>
+<li>80이면 폭발 포션 +40%, 힐 포션 +20%, 큐어 포션 +10%. Greater Explosion 쿨다운은 15초 (위키 포션표).</li>
+<li>위 +40%를 기본 15~25에 그대로 곱하면 Greater Explosion의 PvP 데미지는 Alchemy 80에서 21~35, 100에서 22.5~37.5다.</li>
+</ul>
+<h4>마나</h4>
+<blockquote>
+<p>"The baseline Mana Regen rate is 1 mana restored every 2 seconds (i.e., 0.5 mana per second)." -- Meditation
+"The Mana Regen rate is increased by (100% * (Meditation skill / 100))" -- Meditation</p>
+</blockquote>
+<ul>
+<li>Meditation 0이면 초당 0.5다. PvP에서 오래 싸우는 구성이 아니다.</li>
+</ul>
+<h4>PvM 인터럽트</h4>
+<blockquote>
+<p>"Provides players with a (Effective Magic Resist Skill / 100%)) chance to avoid Spell Interruption from Creature/Environment Damage" -- Resisting Spells
+"Players will have an (Effective Inscription Skill / 100%)) chance to avoid Spell Interruption from Creature/Environment Damage" -- Inscription</p>
+</blockquote>
+<ul>
+<li>크리처 인터럽트 회피가 Resist와 Inscription에 같은 형태로 있다. 둘이 합산되는지는 확인되지 않았다. <strong>Resist 100이면 이것만으로 100%다.</strong></li>
+<li>바드의 Defensive Barding은 PvM 보너스를 주지 않으므로 이 효과는 printed Resist로만 받는다.</li>
+<li>소환수의 공격이 이 "Creature/Environment Damage"에 드는지는 6.1절.</li>
+</ul>
+<h4>Wizard's Grimoire</h4>
+<blockquote>
+<p>"Players must have at least 80 Magery skill and at least 80 Meditation or 80 Eval Int skill to benefit from the Wizard's Grimoire" -- Wizard's Grimoire</p>
+</blockquote>
 
 <h2 id="6">6. 소환수로 싸울 때</h2>
 
-<h3 id="6.1">6.1 PvM 에서 받던 강화가 빠진다</h3>
+<h3 id="6.1">6.1 PvM에서 받던 강화가 빠진다</h3>
 <p><strong>"소환수는 PvP에서 약하다"에는 근거가 있다.</strong> PvM에서 받던 강화가 PvP에서 빠진다.</p>
 <blockquote>
 <p>"If a player gets PvP flagged their summons' stats and skills will be automatically adjusted to their printed spirit speak skill" -- Spirit Speak
@@ -593,27 +694,30 @@ Follower will ignore the dispel attempt (this applies to normal and Undead summo
 <tr>
 <td>다시 부르기</td>
 <td>--</td>
-<td>5초 시전 (<code>item-list.txt</code>는 6.00초), 마나 환급 없음, 상대 4서클+ 주문에 끊긴다</td>
+<td>5초 시전 (<code>item-list.txt</code>는 6.00초), 마나 환급 없음, 상대의 4서클 이상 주문에 끊긴다</td>
 </tr>
 </tbody>
 </table>
-<p>Herding이 PvP에서 대신 주는 것 (Necromancy의 주문 보너스는 5절):</p>
+<p>Herding은 PvP에서도 소환수에 붙는다 (Necromancy의 주문 보너스는 5절).</p>
 <blockquote>
 <p>"Tamed and summoned creatures deal (11% * (Effective Herding Skill / 100)) additional damage against players while their controller has an active shepherd's crook." -- Herding
 "Tamed and summoned receive (5.5% * (Effective Herding Skill)) Damage Resistance against all players" -- Herding</p>
 </blockquote>
 <ul>
-<li>Herding 80이면 소환수 딜 +8.8%. 저항 공식은 원문에 <code>/ 100</code>이 빠져 있어 값을 그대로 읽을 수 없다.</li>
+<li>Herding 80이면 소환수 딜 +8.8%다. 조종하는 쪽에 active shepherd's crook이 있어야 한다. 저항 공식은 원문에 <code>/ 100</code>이 빠져 있어 값을 그대로 읽을 수 없다.</li>
 </ul>
-<p><strong>확인되지 않은 것:</strong></p>
+<h4>확인되지 않은 것</h4>
 <ul>
 <li><strong>소환수가 PK를 치면 내 Heat of Battle이 켜지는지.</strong> 위키 정의는 "performing an aggressive action against another player"뿐이다.
 켜지지 않는다면 "소환수가 싸우고 나는 자기 대상 주문 (자기 TK, 힐, 큐어)만 쓴다"는 플랜이 Defensive Barding과 리콜을 지킨다.
+자기 TK가 켜는지도 확인되지 않았다 (4.1절).
 Heat of Battle은 버프바에 뜨므로 ("The Heat of Battle flag is now a visible buff on players in the Buff Bar") 실전에서 소환수가 공격을 시작한 직후 버프바를 보면 확인된다.</li>
-<li><strong>소환수 데미지가 Resisting Spells의 "Creature/Environment Damage"에 들어가는지.</strong> 들어간다면 Resist 100 PK는 소환수에게 맞아도 시전이 끊기지 않는다. 그러면 PK의 콤보를 끊는 것은 <strong>내 주문뿐</strong>이다.</li>
+<li><strong>소환수 데미지가 Resisting Spells의 "Creature/Environment Damage"에 들어가는지.</strong> 들어간다면 Resist 100 PK는 소환수에게 맞아도 시전이 끊기지 않는다 (5절).
+그러면 PK의 콤보를 끊는 것은 <strong>내 주문뿐</strong>이다.</li>
 </ul>
 
 <h3 id="6.2">6.2 소환수별 비교</h3>
+<p><strong>PvP에서는 소환수 딜이 슬롯당 상한에 묶여 소환수끼리 차이가 줄어든다. 남는 차이는 버티는 힘이다.</strong></p>
 <blockquote>
 <p>"Any summon that is cast while the Necromancy "Vengeful Spirit" ability is active will be summoned as an undead summon with the same stats, skills and abilities as their normal counterparts." --
 Spirit Speak
@@ -621,7 +725,7 @@ Spirit Speak
 "Like Blade Spirits, Skeletal Husks are now "non-hostile" to players and tamed creatures and will never attack them" -- Skeletal Husk
 "Mana Drain - Casting on a monster will reduce its magic resistance by 20 * Magery/100 (halved in PvP)" -- Magery</p>
 </blockquote>
-<p>팔로워 PvP 규칙 (Animal Taming. "Tamed/Summoned"로 적힌 것만 옮겼다):</p>
+<p>팔로워 PvP 규칙은 Animal Taming 문서에 있다. "Tamed/Summoned"로 적힌 것만 옮겼다.</p>
 <blockquote>
 <p>"Tamed/Summoned follower PvP damage scalar has been increased to 30% (previously was 25%)"
 "Tamed/Summoned follower maximum melee hit chance in PvP is now 66%. (previously was 50%)"
@@ -631,7 +735,7 @@ Spirit Speak
 "Capped at inflicting at most 7 Damage Per Control Slot over a 3 second window to individual players in PvP. Capped at 8 tiles distance." -- 원거리 / 주문
 "Player pets move at 80% speed while attacking a player target" -- 소환수에도 해당하는지는 적혀 있지 않다</p>
 </blockquote>
-<p>위키 소환수 데이터 (<code>Module:SummonableCreatureData</code>. 기본 스탯이라 SS 120 스케일 전 값이다):</p>
+<p>아래는 위키 소환수 데이터 (<code>Module:SummonableCreatureData</code>)다. 기본 스탯이라 Spirit Speak 120으로 스케일하기 전 값이다.</p>
 <table>
 <thead>
 <tr>
@@ -653,7 +757,7 @@ Spirit Speak
 <td>2</td>
 <td>주문</td>
 <td>400</td>
-<td>28-34</td>
+<td>28~34</td>
 <td>85</td>
 <td>25</td>
 <td>100</td>
@@ -665,7 +769,7 @@ Spirit Speak
 <td>2</td>
 <td>주문</td>
 <td><strong>600</strong></td>
-<td>26-32</td>
+<td>26~32</td>
 <td>95</td>
 <td>50</td>
 <td>100</td>
@@ -677,7 +781,7 @@ Spirit Speak
 <td>2</td>
 <td>주문</td>
 <td>550</td>
-<td>24-30</td>
+<td>24~30</td>
 <td>100</td>
 <td>50</td>
 <td><strong>150</strong></td>
@@ -689,7 +793,7 @@ Spirit Speak
 <td>2</td>
 <td>근접</td>
 <td>550</td>
-<td>30-36</td>
+<td>30~36</td>
 <td>95</td>
 <td>75</td>
 <td>50</td>
@@ -701,7 +805,7 @@ Spirit Speak
 <td>2</td>
 <td>근접</td>
 <td>500</td>
-<td>34-40</td>
+<td>34~40</td>
 <td>100</td>
 <td>50</td>
 <td>100</td>
@@ -713,7 +817,7 @@ Spirit Speak
 <td>2</td>
 <td>근접</td>
 <td>500</td>
-<td>38-46</td>
+<td>38~46</td>
 <td>105</td>
 <td>50</td>
 <td>100</td>
@@ -725,7 +829,7 @@ Spirit Speak
 <td>1</td>
 <td>근접</td>
 <td>250</td>
-<td>20-24</td>
+<td>20~24</td>
 <td>90</td>
 <td>50</td>
 <td>100</td>
@@ -735,15 +839,18 @@ Spirit Speak
 </tbody>
 </table>
 <ul>
-<li><strong>PvP에서는 소환수끼리 딜 차이가 줄어든다.</strong> 2슬롯 소환수 하나가 플레이어에게 넣는 양은 3초에 주문 14 · 근접 20 이 상한이다.</li>
+<li>2슬롯 소환수 하나가 플레이어에게 넣는 양은 3초에 주문 14, 근접 20이 상한이다.</li>
 <li><strong>Lich를 PvM 기본으로 쓰는 이유가 PvP에서는 사라진다.</strong> Hex는 Fire Tome 업그레이드이고 Tome은 플레이어 상대로 적용되지 않는다. Mana Drain도 절반이다.</li>
-<li>그러면 남는 차이는 <strong>버티는 힘</strong>이다. Vampire (HP 600)와 Rag Witch (MR 150)가 Lich (HP 400, AR 25)보다 낫다.</li>
+<li>버티는 힘은 Vampire (HP 600)와 Rag Witch (MR 150)가 Lich (HP 400, AR 25)보다 낫다.</li>
 <li>주문형 소환수는 PK의 Magic Resist 포션 (-10 / 20 / 30%)에 깎인다. 근접형은 안 깎이지만, 거리를 두는 메이지 PK에게 붙어야 딜이 들어간다.</li>
 <li>Dispel은 어느 소환수든 같은 확률로 막는다 (Spirit Speak 120이면 60%).</li>
-<li><strong>PK 앞에서 다시 부를 수는 없다고 본다.</strong> 5초 시전에 상대 4서클 이상 주문은 100% 끊고, Vengeful Spirit도 다시 켜야 한다. 그러므로 PK 전에 쓰는 소환수는 <strong>사냥하던 소환수</strong>다.</li>
+<li><strong>PK 앞에서 다시 부를 수는 없다고 본다.</strong> 6.1절 표의 "다시 부르기" 제약에 더해 언데드는 Vengeful Spirit도 다시 켜야 한다.
+그래서 PK와 싸우는 소환수는 <strong>사냥하던 소환수</strong>다.</li>
 </ul>
 
 <h2 id="7">7. Parrying</h2>
+<p><strong>패링은 근접만 막는다.</strong> PvP 주문은 못 막으므로 메이지 PK 상대로는 피격 스태미나 손실 감소만 남는다.
+근접 PK나 무기를 든 하이브리드 상대로는 Parrying 80 방패가 근접 데미지를 기대값으로 30% 줄인다.</p>
 <blockquote>
 <p>"Players may parry melee attacks with shields, two-handed weapons, paired weapons (wrestling/dual wielding) and parry daggers."
 "Chance to parry a melee attack is (50% * (Parrying Skill / 100))"
@@ -777,7 +884,6 @@ Spirit Speak
 </tbody>
 </table>
 <ul>
-<li><strong>PvP 주문은 못 막는다.</strong> 메이지 PK 상대로 남는 것은 스태미나 손실 감소뿐이다.</li>
 <li>레슬링 무기는 무기표에 <strong>2H</strong>로 적혀 있다. PvP 패링 감소가 -50%로 줄어드는지는 확인되지 않았다.</li>
 </ul>
 <p>PvP 근접 데미지 기대 감소 = 막을 확률 x 감소율.</p>
@@ -813,7 +919,7 @@ Spirit Speak
 Weapons</p>
 </blockquote>
 <ul>
-<li>메이지는 <strong>Magery 80 + Parrying 80 이 있어야 방패를 든 채 시전한다.</strong> 방패 AR도 Parrying에 비례한다.</li>
+<li>메이지는 <strong>Magery 80 + Parrying 80이 있어야 방패를 든 채 시전한다.</strong> 방패 AR은 Parrying 0이면 Base AR의 절반이고, 100이면 전부다.</li>
 <li>PvP에서 하는 일은 덱서의 근접을 막고, 맞을 때 잃는 스태미나를 줄이는 것이다.
 스태미나가 0이면 걷게 된다 (Hamstring 원문 "reduced to 0 Stamina ... forcing them to walk").</li>
 <li>PvM에서 하는 일이 더 많다. 크리처 주문 패링 (<code>25% x (Parrying / 100)</code>, -75%), Taunt, Parry Codex.</li>
@@ -821,9 +927,9 @@ Weapons</p>
 하지만 Codex 문서 분류는 PvM이고 XP도 크리처를 잡아야 오른다. <strong>PvP에 적용되는지는 적혀 있지 않다.</strong></li>
 <li>위키 메이지 템플릿 페이지에 패리 메이지는 없다. Parry Codex를 요구하는 메이지는 New Player 페이지의 Arcane Mage 하나다.</li>
 </ul>
-<p><strong>메이지 PK 상대로 패링이 막는 것은 없다.</strong> 근접 PK나 무기를 든 하이브리드 상대로는 위 30%가 그대로 산다.</p>
 
 <h2 id="8">8. Resisting Spells</h2>
+<p><strong>Resist는 PvP에서도 주문 데미지를 줄이고 (80이면 10~30%), Curse나 Poison 같은 비데미지 주문을 가끔 막는다.</strong> 막는 확률은 서클이 높을수록 낮다.</p>
 <blockquote>
 <p>"Spell damage taken is reduced by a minimum of (12.5% * (Magic Resist Skill / 100)) (PvM/PvP)"
 "Spell damage taken is reduced by a maximum of (37.5% * (Magic Resist Skill / 100)) (PvM/PvP)"
@@ -848,7 +954,7 @@ Weapons</p>
 <tbody>
 <tr>
 <td>80</td>
-<td>10 ~ 30%</td>
+<td>10~30%</td>
 <td>28%</td>
 <td>24%</td>
 <td>N/A</td>
@@ -860,7 +966,7 @@ Weapons</p>
 </tr>
 <tr>
 <td>100</td>
-<td>12.5 ~ 37.5%</td>
+<td>12.5~37.5%</td>
 <td>35%</td>
 <td>30%</td>
 <td>N/A</td>
@@ -875,10 +981,12 @@ Weapons</p>
 <ul>
 <li>서클 (위키 Magery 주문표): Weaken 1, <strong>Poison · Telekinesis 3</strong>, Curse 4, Paralyze 5, <strong>Energy Bolt · Explosion 6</strong>, Mana Vampire 7.</li>
 <li>위키 표는 3서클을 N/A로 적는데 본문은 3서클인 Poison을 예로 든다. 서로 맞지 않는다. 확인되지 않았다.</li>
-<li>바드는 <strong>Defensive Barding이 켜져 있으면 100 행, Heat of Battle 중이면 printed 행이다</strong> (<a href="bard-necro-handbook.html#6.1">bard-necro-handbook.html</a> 6.1절).</li>
+<li>Disco/Peace/Provo 80/80/80인 바드는 <strong>Defensive Barding이 켜져 있으면 100 행, Heat of Battle 중이면 printed 행이다</strong>.
+2020 패치의 <code>/ 3</code> 공식이면 켜져 있어도 80 행이다 (<a href="bard-necro-handbook.html#6.1">bard-necro-handbook.html</a> 6.1절).</li>
 </ul>
 
 <h2 id="9">9. 근접 반격력</h2>
+<p><strong>맨손은 PvP에서 1~4라 되받아칠 힘이 없다.</strong> 레슬링으로 싸우려면 레슬링 무기가 있어야 한다.</p>
 <blockquote>
 <p>"Unarmed Wrestling base damage against players is 1-4" -- Wrestling
 "Damage from Wrestling Weapons in PvP will scale based on the player's Raw Dex stat as a % (without any adjustments for Dex bonuses or penalties from Potions, Bless, Weaken, other effects)" --
@@ -886,7 +994,7 @@ Wrestling
 "Wrestling Weapons can be disarmed, which will result in the player dealing standard "Unarmed" 1-2 damage during that time" -- Wrestling
 "Wrestling Weapons receive a +20% Melee Damage bonus towards creatures that is applied to Two-Handed Weapons (since players cannot equip shields while using Wrestling Weapons)" -- Wrestling</p>
 </blockquote>
-<p>위키 무기표의 Grinding (Light) 행:</p>
+<p>위키 무기표의 Grinding (Light) 행이다.</p>
 <table>
 <thead>
 <tr>
@@ -902,7 +1010,7 @@ Wrestling
 <tr>
 <td>Wrestling</td>
 <td>1.67</td>
-<td>13 ~ 31</td>
+<td>13~31</td>
 <td>22</td>
 <td><strong>13.17</strong></td>
 <td>Martial Manual, Cestus, Fistblade</td>
@@ -910,7 +1018,7 @@ Wrestling
 <tr>
 <td>Swordsmanship</td>
 <td>1.56</td>
-<td>13 ~ 23</td>
+<td>13~23</td>
 <td>18</td>
 <td>11.54</td>
 <td>Longswords, Broadsword, Viking Sword, Norse Axe</td>
@@ -918,7 +1026,7 @@ Wrestling
 <tr>
 <td>Mace Fighting</td>
 <td>1.63</td>
-<td>12 ~ 24</td>
+<td>12~24</td>
 <td>18</td>
 <td>11.04</td>
 <td>Mace, Maul, War Mace, Flanged Mace, Flail</td>
@@ -926,7 +1034,7 @@ Wrestling
 <tr>
 <td>Throwing</td>
 <td>1.88</td>
-<td>14 ~ 24</td>
+<td>14~24</td>
 <td>19</td>
 <td>10.11</td>
 <td>Throwing Dagger, Throwing Star</td>
@@ -934,7 +1042,7 @@ Wrestling
 <tr>
 <td>Archery</td>
 <td>2.21</td>
-<td>13 ~ 25</td>
+<td>13~25</td>
 <td>19</td>
 <td>8.6</td>
 <td>Bow, Hunting Bow, Recurve Bow</td>
@@ -942,12 +1050,13 @@ Wrestling
 </tbody>
 </table>
 <ul>
-<li><strong>맨손은 PvP에서 1~4다.</strong> 레슬링으로 싸우려면 레슬링 무기가 전제다.</li>
-<li>레슬링 무기의 PvP 데미지는 <strong>raw Dex 비율</strong>이다. raw Dex 100이면 100%, 50이면 50%. 포션·Bless는 안 친다.</li>
+<li>레슬링 무기의 PvP 데미지는 <strong>raw Dex 비율</strong>이다. raw Dex 100이면 100%, 50이면 50%다. 포션이나 Bless로 올린 Dex는 들어가지 않는다.</li>
 <li>레슬링 무기는 방패를 못 든다. 패링은 무기 자체로 한다 (7절).</li>
+<li>무장 해제된 동안의 데미지는 원문에 "Unarmed" 1-2로 적혀 있다. 플레이어 상대 맨손 1~4와 어느 쪽이 맞는지는 확인되지 않았다.</li>
 </ul>
 
 <h2 id="10">10. Tracking</h2>
+<p><strong>Tracking은 PK를 먼저 보고 피하게 해 준다.</strong> 80이면 판정에 성공했을 때 야외 84타일, 던전 42타일 안의 숨지 않은 대상이 보인다.</p>
 <blockquote>
 <p>"A downside of Bard Templates is clear lack to fight back Pks / Griefers. Through Defensive Barding they are tough to kill but lack the offensive to fight back." -- TemplatesBard
 "Consider squeezing 80-100 Tracking into a template to passively track hostile players (PK's) so you can avoid them." -- TemplatesBard
@@ -969,13 +1078,13 @@ Wrestling
 <tbody>
 <tr>
 <td>80</td>
-<td>84 / 42 타일</td>
+<td>84 / 42타일</td>
 <td>+8</td>
 <td>+20% / +8%</td>
 </tr>
 <tr>
 <td>100</td>
-<td>100 / 50 타일</td>
+<td>100 / 50타일</td>
 <td>+10</td>
 <td>+25% / +10%</td>
 </tr>
@@ -983,11 +1092,14 @@ Wrestling
 </table>
 <ul>
 <li>바드에게 주는 Effective Barding 보너스와 Hunting이 바드 스킬 쿨에 끼치는 영향은 <a href="bard-necro-handbook.html#6.6">bard-necro-handbook.html</a> 6.6절.</li>
-<li>Hunting 모드를 "Murderer Players"로 켜는 코드가 이미 있다: <code>script/gather/mining.razor:195</code>.</li>
+<li>Tracking은 주문 데미지 보조 스킬이기도 하다. 위키 예시는 Tracking 100을 +10%로 센다 (5절).</li>
 <li>Hamstring 두 번째 줄 목록에 들어 있다 (3절).</li>
+<li>Hunting 모드를 켜는 코드가 이미 있다. <code>script/gather/mining.razor:195</code>와 <code>script/gather/lumberjack.razor:183</code>의 Tracking 블록이다.
+<code>track_only_red_players</code>가 1이면 murderer players를, 기본값 0이면 all hostile players를 쫓는다.</li>
 </ul>
 
 <h3 id="10.1">10.1 Hunting 모드</h3>
+<p><strong>딜과 바딩 보너스는 Hunting을 안 켜도 붙는다.</strong> PK 조기 발견에만 Hunting이 필요하다.</p>
 <blockquote>
 <p>"Players can activate and deactivate a "Hunting" mode from the Tracking window to automatically make Tracking skill checks at various intervals (still requiring the normal 5 second skill cooldown)
 against a specific type of player/creature"
@@ -995,9 +1107,8 @@ against a specific type of player/creature"
 "Tracking success chance is (100% * (Tracking Skill / 100))"</p>
 </blockquote>
 <ul>
-<li><strong>딜·바딩 보너스는 Hunting을 안 켜도 붙는다.</strong> PK 조기 발견에만 Hunting이 필요하다.</li>
 <li>판정 한 번의 성공률은 Tracking 80이면 80%다.</li>
-<li><strong>Hunting의 자동 판정도 5초 스킬 쿨을 쓴다.</strong> 서버 스킬 게이트가 하나라 다른 스킬과 부딪칠 수 있다.</li>
+<li><strong>Hunting의 자동 판정도 5초 스킬 쿨을 쓴다.</strong> 서버 스킬 게이트가 하나라 (<a href="bard-necro-handbook.html#2.10">bard-necro-handbook.html</a> 2.10절) 다른 스킬과 부딪칠 수 있다.</li>
 <li>판정 빈도는 Hunt Frequency로 고른다. "New When No Arrow"와 "New When No Target"은 화살표가 없을 때만 판정한다.
 주변에 Murderer가 없으면 화살표가 없으므로 계속 판정한다.</li>
 </ul>
@@ -1012,44 +1123,44 @@ against a specific type of player/creature"
 </thead>
 <tbody>
 <tr>
-<td>레슬링이 0이면 PvP에서 못 때린다</td>
-<td><strong>아니다.</strong> 공격은 든 무기의 스킬로 판정한다. 레슬링은 맨손·레슬링 무기로 칠 때만 쓴다</td>
-</tr>
-<tr>
-<td>레슬링 100이면 명중 50%</td>
-<td><strong>스킬이 같으면 50%다.</strong> 100 대 100이라서 50%다</td>
-</tr>
-<tr>
-<td>메이지 PK를 맞히려면 내 레슬링이 필요하다</td>
-<td><strong>내 무기 스킬 대 상대 레슬링이다.</strong> 메이스 100이면 50%, 80이면 43.3%</td>
-</tr>
-<tr>
 <td>PK가 먼저 쳤으면 반격해도 Heat of Battle이 안 켜진다</td>
-<td><strong>자동 반격 스윙만 예외다.</strong> 타겟을 바꾸거나 해로운 주문을 쓰면 켜진다</td>
-</tr>
-<tr>
-<td>레슬링 무기 데미지는 4~13이다</td>
-<td><strong>13~31, 평균 22.</strong> 무기표의 DiceMax(4)와 MinDmg(13) 칸을 데미지로 잘못 읽은 값이었다</td>
-</tr>
-<tr>
-<td>붙은 폭발 포션은 리콜로 피한다</td>
-<td><strong>따라온다.</strong> 던진 사람 곁으로 가면 데미지가 반으로 나뉜다</td>
-</tr>
-<tr>
-<td>패링으로 PK의 주문을 막는다</td>
-<td><strong>못 막는다.</strong> "You cannot parry spells in PVP". 패리 메이지의 이유는 근접 방어와 방패 시전이다</td>
+<td><strong>자동 반격 스윙만 예외다.</strong> 타겟을 바꾸거나 해로운 주문을 쓰면 켜진다 (1.1절)</td>
 </tr>
 <tr>
 <td>던전에서도 룬북으로 도망친다</td>
-<td><strong>Golden Moongate 8타일 안에서만 리콜된다</strong></td>
+<td><strong>Golden Moongate 8타일 안에서만 리콜된다</strong> (1.3절)</td>
 </tr>
 <tr>
-<td>Summoner's Tome 투자는 PvP에서도 소환수를 세게 한다</td>
-<td><strong>안 한다.</strong> "Summoner Tome upgrades will not apply against players". 스탯도 printed Spirit Speak로 돌아간다</td>
+<td>레슬링이 0이면 PvP에서 못 때린다</td>
+<td><strong>아니다.</strong> 공격은 든 무기의 스킬로 판정한다. 레슬링은 맨손이나 레슬링 무기로 칠 때만 쓴다 (2절)</td>
+</tr>
+<tr>
+<td>레슬링 100이면 명중 50%</td>
+<td><strong>스킬이 같으면 50%다.</strong> 100 대 100이라서 50%다 (2.1절)</td>
+</tr>
+<tr>
+<td>메이지 PK를 맞히려면 내 레슬링이 필요하다</td>
+<td><strong>내 무기 스킬 대 상대 레슬링이다.</strong> 메이스 100이면 50%, 80이면 43.3% (2.2절)</td>
+</tr>
+<tr>
+<td>붙은 폭발 포션은 리콜로 피한다</td>
+<td><strong>따라온다.</strong> 던진 사람 곁으로 가면 데미지가 반으로 나뉜다 (4.1절)</td>
 </tr>
 <tr>
 <td>자기 TK는 PK가 나타난 뒤 아무 때나 걸면 된다</td>
-<td><strong>상대 TK보다 먼저여야 한다.</strong> 한 사람은 30초에 한 번만 TK에 맞는다</td>
+<td><strong>상대 TK보다 먼저여야 한다.</strong> 한 사람은 30초에 한 번만 TK에 맞는다 (4.1절)</td>
+</tr>
+<tr>
+<td>Summoner's Tome 투자는 PvP에서도 소환수를 세게 한다</td>
+<td><strong>안 한다.</strong> "Summoner Tome upgrades will not apply against players". 스탯도 printed Spirit Speak로 돌아간다 (6.1절)</td>
+</tr>
+<tr>
+<td>패링으로 PK의 주문을 막는다</td>
+<td><strong>못 막는다.</strong> "You cannot parry spells in PVP". 패리 메이지의 이유는 근접 방어와 방패 시전이다 (7절)</td>
+</tr>
+<tr>
+<td>레슬링 무기 데미지는 4~13이다</td>
+<td><strong>13~31, 평균 22.</strong> 무기표의 DiceMax(4)와 MinDmg(13) 칸을 데미지로 잘못 읽은 값이었다 (9절)</td>
 </tr>
 </tbody>
 </table>
