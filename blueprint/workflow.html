@@ -222,7 +222,16 @@ doctype 이 빠지면 quirks 모드로 그려져 표 줄 높이가 달라진다.
 <li>다른 문서는 상대 경로 링크로, 절은 "파일 N절" 로 가리키고 링크에 절을 붙인다 (<code>&lt;a href="razor.html#3"&gt;razor.html&lt;/a&gt; 3절</code>).</li>
 <li>인용은 <code>&lt;blockquote&gt;</code> 로 쓴다 (1.3절). "인게임 확인됨 2026-09-28" 과 "확인되지 않았다" 는 그 글자 그대로 쓰면 알약으로 보이고,
 <code>&lt;code&gt;#e80030&lt;/code&gt;</code> 처럼 색 값만 든 코드에는 색 칩이 붙는다.</li>
-<li>흐름도는 <code>&lt;pre class="mermaid"&gt;</code> 안에 mermaid 원문을 쓴다. 렌더러를 CDN 에서 받아 오므로 오프라인이면 원문이 그대로 보인다.</li>
+<li>흐름도는 <code>&lt;pre class="mermaid"&gt;</code> 안에 mermaid 원문을 쓴다. <code>_index.js</code>가 beautiful-mermaid 격자 렌더러로 SVG를 그린다.
+sk-ax-gas-pp와 agent-conventions가 쓰는 렌더러와 같다. 렌더러를 CDN에서 받아 오므로 오프라인이면 원문이 그대로 보인다.
+격자 렌더러라 mermaid 문법이 전부 되지는 않는다.
+<ul>
+<li>잘 되는 것: <code>flowchart TD</code> 사슬과 나무, <code>flowchart LR</code> 판단 사슬 (<code>예</code> 사슬을 윗줄로), <code>sequenceDiagram</code>.</li>
+<li>라벨에 괄호를 넣지 않는다. 렌더러가 괄호에서 글을 잘라 낸다. 긴 라벨은 <code>&amp;lt;br&amp;gt;</code>로 줄을 나눈다.</li>
+<li>선 라벨은 한 낱말로 쓴다 (<code>-- 예 --&gt;</code>). 띄어 쓰면 격자가 빈칸을 선으로 채워 라벨이 둘로 갈린다.</li>
+<li>되돌아가는 선과 라벨 달린 합류선은 엉킨다. 그림이 크거나 엉키면 여러 장으로 쪼갠다 (<a href="bard-necro-handbook.html#5.1">bard-necro-handbook.html</a> 5.1절).</li>
+<li>폭은 140칸 안쪽으로 둔다. 넘치면 <code>LR</code>을 <code>TD</code>로 바꾸거나 둘로 나눈다.</li>
+</ul></li>
 <li>한 줄은 200자까지 (<code>.editorconfig</code> 의 <code>max_line_length</code>). 문장 중간에서 끊지 말고, 넘으면 문장 경계에서 줄을 바꾼다.</li>
 <li>고친 뒤 <code>util/check-blueprint.sh</code> 로 끊긴 링크, 목록에 없는 문서, 이스케이프를 빠뜨린 꺾쇠를 확인하고, 브라우저로 열어 본다.</li>
 </ul>

@@ -1579,55 +1579,22 @@ RESUMMON   [MUSHROOM 뒤, BARD SONG 앞]
 다른 템플릿은 계속 쓰므로 파일 자체는 남긴다.</p>
 
 <h3 id="5.1">5.1 루프 한 장</h3>
-<p>교전인지는 <code>COMBAT OR WALK</code> 에서 한 번만 묻고, 그 아래를 교전 블록과 이동 블록으로 나눈다 (5.8절). 아래 그림의 "몹이 근처에 있나" 가 그 자리다.
+<p>교전인지는 <code>COMBAT OR WALK</code> 에서 한 번만 묻고, 그 아래를 교전 블록과 이동 블록으로 나눈다 (5.8절). 아래 첫 그림의 "교전 중인가"가 그 자리다.
 블록 하나는 한 패스에 <strong>한 동작만</strong> 한다 (<code>elseif</code> 사슬). 하지만 동작한 블록이 <strong>패스를 끝내지는 않는다.</strong>
 시전이 끝나면 <code>casting</code> 이 풀려서 아래 블록도 같은 패스에 차례를 받는다. 그래서 아래 그림은 우선순위일 뿐이고,
 블록 사이의 순서가 필요한 곳은 플래그로 막는다. 오프닝 → 프록은 <code>var__opener_done</code>, 프록 → Poison Strike · 필러는 <code>var__procs_done</code> 이다.
 모든 블록이 같은 가드를 단다 -- <strong>가드를 빠뜨린 블록은 항상 이긴다.</strong></p>
 <pre><code>if not targetexists and not casting and not warmode</code></pre>
 <p>게이트 접기 (5.8절) 뒤로 이 가드는 따로 한 줄을 쓰지 않고 각 블록의 조건 줄 끝에 붙는다.</p>
+<h4>한 패스</h4>
 <pre class="mermaid">flowchart TD
-  S([패스 시작]) --&gt; M0
-  M0{&quot;시스템 메시지&lt;br/&gt;방해 · 악기 분실&quot;}
-  M0 --&gt;|yes| A0[&quot;replay / 악기 재선택&quot;] --&gt; E
-  M0 --&gt;|no| M1
-  M1{&quot;생존 위험&lt;br/&gt;마비 · 무게 · 독 · HP · 마나&quot;}
-  M1 --&gt;|yes| A1[&quot;파우치 · 큐어 · 힐 · 포션 · 버섯&quot;] --&gt; E
-  M1 --&gt;|no| M2
-  M2[&quot;타겟 캐시&lt;br/&gt;lasttarget → noto 검사&quot;] --&gt; M3
-  M3{&quot;몹이 근처에&lt;br/&gt;있나&quot;}
-  M3 --&gt;|&quot; 없음 · 이동 중 &quot;| BUFF
-  M3 --&gt;|&quot; 있음 · 교전 중 &quot;| SKILL
-  BUFF{&quot;Reactive Armor 나&lt;br/&gt;Magic Reflection 이&lt;br/&gt;빠졌나&quot;}
-  BUFF --&gt;|yes| ABUFF[&quot;다시 건다&lt;br/&gt;Reflect 는 반사 후 30초 쿨&quot;] --&gt; E
-  BUFF --&gt;|no| SONG
-  SONG{&quot;Music = 0 and&lt;br/&gt;Song = 0 and&lt;br/&gt;그 곡의 슬롯 = 0&quot;}
-  SONG --&gt;|yes| ASONG[&quot;라운드로빈 한 곡&lt;br/&gt;Disco → Peace → Provo&quot;] --&gt; E
-  SONG --&gt;|no| E
-  SKILL{&quot;디스코 미적용&lt;br/&gt;또는 피스 만료&quot;}
-  SKILL --&gt;|yes| ASKILL[&quot;Discordance / Peacemaking&lt;br/&gt;Ensemble 조건 유지&quot;] --&gt; E
-  SKILL --&gt;|no| NECRO
-  NECRO{&quot;Unholy Symbol&lt;br/&gt;충분한가&quot;}
-  NECRO --&gt;|yes| ANECRO[&quot;Blood Oath → Corpse Skin → Evil Omen&lt;br/&gt;Vampiric Embrace (이동 중)&quot;] --&gt; E
-  NECRO --&gt;|no| OPEN
-  OPEN{&quot;이 대상에&lt;br/&gt;오프닝 완료&quot;}
-  OPEN --&gt;|no| AOPEN[&quot;Mana Drain → Curse&quot;] --&gt; E
-  OPEN --&gt;|yes| PROC
-  PROC{&quot;프록 중&lt;br/&gt;쿨 끝난 것&quot;}
-  PROC --&gt;|yes| APROC[&quot;Magic Arrow · Harm&lt;br/&gt;Fireball · Lightning&quot;] --&gt; E
-  PROC --&gt;|no| FILL
-  FILL{&quot;mana &gt;&lt;br/&gt;filler_floor&quot;}
-  FILL --&gt;|yes| AFILL[&quot;Energy Bolt&quot;] --&gt; STRIKE
-  FILL --&gt;|no| STRIKE
-  STRIKE{&quot;Corpse Skin 켜짐&lt;br/&gt;마지막 프록이 이 대상&quot;}
-  STRIKE --&gt;|yes| ASTRIKE[&quot;Poison Strike&quot;] --&gt; E
-  STRIKE --&gt;|no| E
-  E([패스 끝])</pre>
-<h4>단계별 게이트</h4>
+  drain("드레인&lt;br&gt;큐와 시전이 빌 때까지") --> survive("생존&lt;br&gt;마비 · 독 · HP") --> cache("타겟 캐시") --> flags("패스 플래그") --> house("하우스키핑&lt;br&gt;5초마다") --> engaged{"교전 중인가"}
+  engaged -- 예 --> combat("교전 블록 일곱")
+  engaged -- 아니요 --> walk("이동 블록 넷")</pre>
+<p>위의 다섯 블록은 모든 패스가 지나고, 교전인지는 그 뒤에 한 번만 묻는다. 교전 패스는 이동 블록을, 이동 패스는 교전 블록을 보지 않는다.</p>
 <table>
 <thead>
 <tr>
-<th>#</th>
 <th>블록</th>
 <th>게이트</th>
 <th>비고</th>
@@ -1635,75 +1602,131 @@ RESUMMON   [MUSHROOM 뒤, BARD SONG 앞]
 </thead>
 <tbody>
 <tr>
-<td>0</td>
-<td>시스템 메시지</td>
-<td><code>insysmsg</code></td>
-<td>방해 -&gt; <code>replay</code>, 악기 분실 -&gt; 재선택</td>
+<td>드레인</td>
+<td><code>while queued or casting</code></td>
+<td>이미 나간 동작이 끝난 뒤에 상태를 읽는다. 참조 스크립트 둘도 루프를 이렇게 연다</td>
 </tr>
 <tr>
-<td>1</td>
 <td>생존</td>
-<td>마비 → 독 → HP (한 줄 게이트)</td>
-<td><strong>아래 전부를 막는다.</strong> 마비가 맨 앞: 그 상태에선 아래가 아무것도 못 한다. 큐어가 힐보다 앞: 큐어는 즉시고 힐은 독 틱에 일부가 샌다. 무게와 음식, 포션은 5초 하우스키핑 틱 (5.8절)</td>
+<td><code>paralyzed or poisoned or diffhits &gt; config__light_hits</code></td>
+<td>세 상태를 한 줄로 묻고, 안에서 마비 → 큐어 → 힐 순으로 본다. 마비가 맨 앞: 그 상태에선 아래가 아무것도 못 한다.
+큐어가 힐보다 앞: 큐어는 즉시고 힐은 독 틱에 일부가 샌다</td>
 </tr>
 <tr>
-<td>2</td>
 <td>타겟 캐시</td>
 <td><code>lasttarget</code> + <code>noto</code>, 화면 거리</td>
-<td>18칸 (<code>config__acquire_range</code>) 안에서 받아 두고 10칸 안에서 교전. 노래·자기 대상 주문은 덮어쓰기 전에 lasttarget 을 다시 본다</td>
+<td>18칸 (<code>config__acquire_range</code>) 안에서 받아 두고 10칸 안에서 교전. 노래·자기 대상 주문은 덮어쓰기 전에 lasttarget을 다시 본다</td>
 </tr>
 <tr>
-<td>3</td>
-<td>자기 버프</td>
-<td><code>not findbuff</code> + <code>cooldown "reflect"</code></td>
-<td><strong>몹이 없을 때만.</strong> 둘 다 시간이 아니라 소모로 끝난다. RA 는 25 흡수, Reflect 는 한 번 반사 뒤 30초 쿨 (반사 시점부터)</td>
+<td>패스 플래그</td>
+<td><code>timer "timer__regs_refresh"</code> 30초, 또는 시약 부족 메시지</td>
+<td>시약과 주문 플래그를 만든다. 아래 문단</td>
 </tr>
 <tr>
-<td>4</td>
-<td>Barding Song</td>
-<td><code>Music=0 and Song=0 and &lt;슬롯&gt;=0</code></td>
-<td><strong>몹이 없을 때만.</strong> 라운드로빈</td>
+<td>하우스키핑</td>
+<td><code>timer "timer__housekeeping"</code> 5초</td>
+<td>악기 회수 · 무게 · 리프레시 포션 · 소환수 이름은 틱마다, 악기 확인 30초 · 핫바 30초 · 음식 60초 · 스탯 포션 10초 (교전 중만).
+디스코를 건 대상도 여기서 30초 뒤에 잊는다 (5.8절)</td>
 </tr>
 <tr>
-<td>5</td>
-<td>바드 스킬</td>
-<td><code>Music=0 and &lt;슬롯&gt;=0</code></td>
-<td>디스코 1회 (걸린 대상은 30초 동안 다시 안 본다) + <strong>피스 12초마다</strong> (진정·브레이크는 2초에 한 번 확인)</td>
+<td>교전 중인가</td>
+<td><code>var__engaged = 1</code></td>
+<td>한 번만 묻는다. 그 아래 블록은 이 질문을 다시 하지 않는다</td>
+</tr>
+</tbody>
+</table>
+<p><strong><code>PASS FLAGS</code> 의 시약 플래그는 30초에 한 번만 읽는다</strong> (<code>timer__regs_refresh</code>). 시약 일곱 종을 <code>findtype</code> 로 한 번씩 찾아
+<code>var__has_*</code> 에 두고 주문 플래그 13개는 그 일곱을 비교해서 만든다. 매 패스 <code>findtype</code> 19~32번이던 것이 이렇게 됐다 (5.8 절).</p>
+
+<h4>교전 블록</h4>
+<pre class="mermaid">flowchart TD
+  disco("디스코&lt;br&gt;대상마다 한 번") --> peace("피스&lt;br&gt;끊기지 않게 다시") --> necro("네크로 버스트&lt;br&gt;Blood Oath → Corpse Skin → Evil Omen") --> opener("오프닝&lt;br&gt;Mana Drain → Curse")
+  opener -- 끝나면 --> proc("프록 코어&lt;br&gt;Magic Arrow · Harm · Fireball · Lightning")
+  proc -- 소진되면 --> filler("필러&lt;br&gt;Energy Bolt") --> strike("Poison Strike")</pre>
+<p>화살표는 같은 패스 안의 다음 차례다. 라벨이 붙은 화살표는 플래그라서, 앞 블록이 끝나야 뒤 블록이 나선다
+(<code>var__opener_done</code>, <code>var__procs_done</code>).</p>
+<table>
+<thead>
+<tr>
+<th>블록</th>
+<th>게이트</th>
+<th>비고</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>디스코</td>
+<td><code>cooldown "disco" = 0 and cooldown "music" = 0</code></td>
+<td>대상마다 한 번 건다. 걸린 대상은 30초 동안 다시 안 본다 (<code>cooldown__disco_seen</code>)</td>
 </tr>
 <tr>
-<td>6</td>
-<td>네크로</td>
+<td>피스</td>
+<td><code>cooldown "peace/provo" = 0 and cooldown "music" = 0</code></td>
+<td><strong>계속 다시 건다.</strong> 이 Musicianship에서 12초 가고 슬롯 쿨은 10초다. 진정·브레이크 라벨은 2초에 한 번 본다 (<code>cooldown__peace_seen</code>)</td>
+</tr>
+<tr>
+<td>네크로 버스트</td>
 <td><code>list 'list__necro_symbols' &gt;= config__symbols_*</code></td>
-<td>Blood Oath → Corpse Skin → Evil Omen 순. Corpse Skin · Evil Omen 은 서 있고 warmode 가 아닐 때만. 심볼 몫은 3.4절</td>
+<td>Blood Oath → Corpse Skin → Evil Omen 순. Corpse Skin · Evil Omen은 서 있고 warmode가 아닐 때만. 심볼 몫은 3.4절</td>
 </tr>
 <tr>
-<td>7</td>
 <td>오프닝</td>
 <td>마나 + 대상별 리스트</td>
-<td>Mana Drain -&gt; Curse</td>
+<td>Mana Drain → Curse</td>
 </tr>
 <tr>
-<td>8</td>
 <td>프록 코어</td>
-<td><code>cooldown "magic arrow"</code> 등</td>
-<td>네 개가 각자 쿨. 시전마다 대상을 <code>var__proc_target</code> 에 적는다</td>
+<td><code>cooldown "magic arrow"</code> 등 + <code>var__opener_done</code></td>
+<td>네 개가 각자 쿨. 시전마다 대상을 <code>var__proc_target</code>에 적는다</td>
 </tr>
 <tr>
-<td>9</td>
 <td>필러</td>
 <td><code>var__procs_done</code> + <code>mana &gt; config__filler_floor</code></td>
 <td>Energy Bolt. 프록이 전부 쿨인 동안만. <strong>마나는 여기부터 잘린다</strong></td>
 </tr>
 <tr>
-<td>10</td>
 <td>Poison Strike</td>
 <td><code>var__procs_done</code> + <code>var__proc_target</code></td>
 <td>심볼 1. 맨 끝이라 같은 패스의 Energy Bolt 질병까지 터뜨린다. 마지막 프록이 이 대상일 때. Corpse Skin 조건은 3.4절</td>
 </tr>
 </tbody>
 </table>
-<p><strong><code>PASS FLAGS</code> 의 시약 플래그는 30초에 한 번만 읽는다</strong> (<code>timer__regs_refresh</code>). 시약 일곱 종을 <code>findtype</code> 로 한 번씩 찾아
-<code>var__has_*</code> 에 두고 주문 플래그 13개는 그 일곱을 비교해서 만든다. 매 패스 <code>findtype</code> 19~32번이던 것이 이렇게 됐다 (5.8 절).</p>
+
+<h4>이동 블록</h4>
+<pre class="mermaid">flowchart TD
+  mushroom("버섯&lt;br&gt;마나가 낮으면 먹고 모자라면 만든다") --> buffs("자기 버프&lt;br&gt;Reactive Armor · Magic Reflection") --> song("Barding Song&lt;br&gt;세 곡을 돌아가며") --> embrace("Vampiric Embrace&lt;br&gt;펫이 있고 시체가 가까울 때")</pre>
+<p>몹이 없는 동안만 돈다. 쿨과 버프를 걷는 사이에 채워 두어, 다음 교전에서 로테이션과 겨루지 않게 한다.</p>
+<table>
+<thead>
+<tr>
+<th>블록</th>
+<th>게이트</th>
+<th>비고</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>버섯</td>
+<td><code>mana &lt;= config__mushroom_eat_mana</code> 먹기, <code>mana &gt;= config__mushroom_create_mana</code> 만들기</td>
+<td>마나 55 이하면 먹고, 70 이상인데 두 개보다 적으면 Create Food. 60초 쿨이 걷는 동안 돈다</td>
+</tr>
+<tr>
+<td>자기 버프</td>
+<td><code>not findbuff</code> + <code>cooldown "reflect"</code></td>
+<td>둘 다 시간이 아니라 소모로 끝난다. RA는 25 흡수, Reflect는 한 번 반사 뒤 30초 쿨 (반사 시점부터)</td>
+</tr>
+<tr>
+<td>Barding Song</td>
+<td><code>Music=0 and Song=0 and &lt;슬롯&gt;=0</code></td>
+<td>라운드로빈</td>
+</tr>
+<tr>
+<td>Vampiric Embrace</td>
+<td><code>followers &gt; 0</code> + 심볼 9 + 8칸 안의 시체</td>
+<td>시체가 없다는 메시지가 뜨면 5초 쉰다 (<code>cooldown__embrace_miss</code>)</td>
+</tr>
+</tbody>
+</table>
 <h4>데미지 사이클이 도는 모양</h4>
 <p>프록 네 개는 각자 쿨을 돌고, <strong>비는 시간은 전부 Energy Bolt 가 채운다.</strong></p>
 <pre><code>0.0   Magic Arrow   1서클  0.50 + 0.2
