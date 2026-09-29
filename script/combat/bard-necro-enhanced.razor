@@ -2,7 +2,7 @@
 # # BARD NECRO ENHANCED
 # ####################################################################################
 # Replaces bard-necro and bard-necro-eval. Design, cooldown model and every barding
-# number: library/bard-necro-handbook.md (design in part 5, mechanics in part 2).
+# number: blueprint/bard-necro-handbook.html (design in part 5, mechanics in part 2).
 #
 # Full loop: sustain, bard control, necro burst, spell opener and damage rotation.
 #
@@ -30,7 +30,7 @@
 #   just no longer does the drinking.
 #   cooldowns.xml carries every bar this loop reads: music / song / disco / peace/provo,
 #   the four proc entries magic arrow / harm / fireball / lightning, mush, heal pot, reflect
-#   and walk. The names are lowercase and the glossary is library/overheads.md.
+#   and walk. The names are lowercase and the glossary is blueprint/overheads.html.
 #
 # Naming convention
 #   config__*  : tunable settings, kept at the top of the file
@@ -50,7 +50,7 @@
 #   in config__target_range, the same way loadout.razor carries config__reach.
 #
 # Overhead policy
-#   Every message is "[ subject, state ]" in lowercase, see library/overheads.md for the words and the hue palette.
+#   Every message is "[ subject, state ]" in lowercase, see blueprint/overheads.html for the words and the hue palette.
 #     90  status and information, suppressed by config__chatty
 #     53  warning, a resource is running out but the run continues
 #     33  error, something is missing and the block cannot do its job
@@ -94,7 +94,7 @@
 #   warmode where it is needed is five statements a pass less.
 #
 # Condition order
-#   Every statement a pass steps on costs a tick, 5 to 20 ms here (library/razor.md part 6),
+#   Every statement a pass steps on costs a tick, 5 to 20 ms here (blueprint/razor.html part 6),
 #   and a gate that is nearly always true costs its tick for nothing. So in the hot path the
 #   categories below share one line, the ones most often false first, and a block with
 #   nothing to do costs a pass one statement:
@@ -357,7 +357,7 @@ pushlist 'list__summon_names' 'nomeeheh'
 # every ability parks, so up to thirty seconds of that is the price of not looking every pass.
 @setvar! cooldown__hotbar_check 30000
 
-# Slow state looked at on a clock rather than every pass (library/razor.md part 6): a plain
+# Slow state looked at on a clock rather than every pass (blueprint/razor.html part 6): a plain
 # statement costs 5 to 10 ms here and a lookup 20 to 40, so each clock saves the pass one.
 #   housekeeping    5 s, one clock for every check that does not need every pass, weight,
 #                   instrument recovery, refresh potion and summon names on each tick
@@ -2159,7 +2159,7 @@ while not dead
         if timer "timer__poison_strike" >= cooldown__necro_action and var__procs_done = 1 and var__opener_done = 1 and var__proc_target = var__combat_target and var__symbols_spent = 0 and timer "timer__corpse_skin" < cooldown__necro_action and not warmode and list 'list__necro_symbols' >= config__symbols_poison_strike and not targetexists and not casting
             if find var__combat_target ground -1 -1 config__target_range as alias__strike_target
                 # A bolt from the filler hits 0.5 seconds after its target and brings
-                # its disease then (library/pvp.md part 5). wait__cast covered 0.3 of
+                # its disease then (blueprint/pvp.html part 5). wait__cast covered 0.3 of
                 # that and this covers the rest, so on a quick connection the strike
                 # does not land ahead of the bolt.
                 wait wait__short

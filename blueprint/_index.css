@@ -1,0 +1,774 @@
+/*
+ * blueprint 문서가 함께 쓰는 스타일. 문서에는 글만 두고 모양은 전부 이 파일이 맡는다.
+ *
+ * 클래스는 범위_식별자__요소--수정자 문법이다. 파일이 하나라 식별자도 bp_index 하나다.
+ * 문서 본문은 태그만 쓰므로 (workflow.html 5.2절) 태그는 .bp_index__doc 블록 안에서만 잡는다.
+ * 테마는 토큰 값만 바꾸고, 브레이크포인트는 파일 맨 아래에 모은다.
+ * 모양은 sk-ax-gas-pp 의 .ignore/blueprint/blueprint.css 에서 가져왔다.
+ */
+
+:root {
+  color-scheme: light;
+
+  --app-color-ground: #f7f8fa;
+  --app-color-surface: #ffffff;
+  --app-color-text: #414a56;
+  --app-color-text-strong: #1b2027;
+  --app-color-text-muted: #7b8593;
+  --app-color-border: #dfe3e9;
+  --app-color-border-soft: #eceff3;
+  --app-color-accent: #2e3f5e;
+  --app-color-accent-soft: #eef1f7;
+  --app-color-code: #f2f4f7;
+  --app-color-verified: #157f45;
+  --app-color-verified-soft: #e9f4ed;
+  --app-color-unverified: #9a6400;
+  --app-color-unverified-soft: #fdf4e3;
+
+  --app-font-sans: 'IBM Plex Sans KR', 'Apple SD Gothic Neo', system-ui, sans-serif;
+  --app-font-mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: dark;
+
+    --app-color-ground: #13171d;
+    --app-color-surface: #191e25;
+    --app-color-text: #c2cad6;
+    --app-color-text-strong: #eef1f6;
+    --app-color-text-muted: #8892a1;
+    --app-color-border: #2b323d;
+    --app-color-border-soft: #232932;
+    --app-color-accent: #93a9d4;
+    --app-color-accent-soft: #1d2634;
+    --app-color-code: #10141a;
+    --app-color-verified: #5cc183;
+    --app-color-verified-soft: #17281e;
+    --app-color-unverified: #d8a54a;
+    --app-color-unverified-soft: #2a2317;
+  }
+}
+
+/* 목차에서 고른 테마. 뒤에 오고 명시도도 높아 위 @media 블록을 이긴다 */
+:root[data-theme='light'] {
+  color-scheme: light;
+
+  --app-color-ground: #f7f8fa;
+  --app-color-surface: #ffffff;
+  --app-color-text: #414a56;
+  --app-color-text-strong: #1b2027;
+  --app-color-text-muted: #7b8593;
+  --app-color-border: #dfe3e9;
+  --app-color-border-soft: #eceff3;
+  --app-color-accent: #2e3f5e;
+  --app-color-accent-soft: #eef1f7;
+  --app-color-code: #f2f4f7;
+  --app-color-verified: #157f45;
+  --app-color-verified-soft: #e9f4ed;
+  --app-color-unverified: #9a6400;
+  --app-color-unverified-soft: #fdf4e3;
+}
+
+:root[data-theme='dark'] {
+  color-scheme: dark;
+
+  --app-color-ground: #13171d;
+  --app-color-surface: #191e25;
+  --app-color-text: #c2cad6;
+  --app-color-text-strong: #eef1f6;
+  --app-color-text-muted: #8892a1;
+  --app-color-border: #2b323d;
+  --app-color-border-soft: #232932;
+  --app-color-accent: #93a9d4;
+  --app-color-accent-soft: #1d2634;
+  --app-color-code: #10141a;
+  --app-color-verified: #5cc183;
+  --app-color-verified-soft: #17281e;
+  --app-color-unverified: #d8a54a;
+  --app-color-unverified-soft: #2a2317;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+/* ── 껍데기 ─────────────────────────────── */
+
+/* <body>. 목차와 문서를 두 칸으로 놓는다. 목차는 _index.js 가 붙이므로 칸을 먼저 정해 둔다 */
+.bp_index__root {
+  display: grid;
+  max-width: 1920px;
+  margin: 0 auto;
+  padding: 0 32px;
+  gap: 56px;
+  grid-template-columns: 264px minmax(0, 1fr);
+  background: var(--app-color-ground);
+  color: var(--app-color-text);
+  font-family: var(--app-font-sans);
+  font-size: 15px;
+  line-height: 1.75;
+  /* 한국어는 낱말 안에서 줄을 끊지 않는다. 긴 식별자만 예외로 끊는다 */
+  word-break: keep-all;
+  overflow-wrap: break-word;
+  text-wrap: pretty;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── 목차 ───────────────────────────────── */
+
+.bp_index__nav {
+  /* 뷰포트에 붙는다. 조상인 <body> 와 <html> 에는 overflow 가 없다 */
+  position: sticky;
+  top: 0;
+  grid-row: 1;
+  grid-column: 1;
+  align-self: start;
+  max-height: 100vh;
+  overflow-y: auto;
+  padding-block: 44px;
+}
+
+.bp_index__brand {
+  display: block;
+  color: var(--app-color-text-muted);
+  font-family: var(--app-font-mono);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-decoration: none;
+  text-transform: uppercase;
+
+  &:hover {
+    color: var(--app-color-text-strong);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--app-color-accent);
+    outline-offset: 2px;
+  }
+}
+
+.bp_index__docsLabel {
+  margin: 16px 0 6px;
+  color: var(--app-color-text-muted);
+  font-family: var(--app-font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.08em;
+}
+
+.bp_index__docs {
+  display: flex;
+  flex-direction: column;
+  margin: 0 0 18px;
+  padding: 0 0 16px;
+  gap: 1px;
+  border-bottom: 1px solid var(--app-color-border);
+  list-style: none;
+}
+
+.bp_index__docsLink {
+  display: block;
+  margin-left: -1px;
+  padding: 3px 0 3px 12px;
+  border-left: 2px solid transparent;
+  color: var(--app-color-text);
+  font-size: 13px;
+  line-height: 1.5;
+  text-decoration: none;
+
+  &:hover {
+    border-left-color: var(--app-color-border);
+    color: var(--app-color-text-strong);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--app-color-accent);
+    outline-offset: 2px;
+  }
+}
+
+.bp_index__docsLink--current {
+  border-left-color: var(--app-color-accent);
+  color: var(--app-color-text-strong);
+  font-weight: 600;
+}
+
+.bp_index__navTitle {
+  margin: 6px 0 18px;
+  color: var(--app-color-text-strong);
+  font-size: 17px;
+  font-weight: 600;
+  line-height: 1.35;
+  text-wrap: balance;
+}
+
+.bp_index__toc {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  gap: 1px;
+  border-left: 1px solid var(--app-color-border);
+  list-style: none;
+}
+
+.bp_index__tocLink {
+  display: flex;
+  align-items: baseline;
+  margin-left: -1px;
+  padding: 5px 0 5px 14px;
+  gap: 8px;
+  border-left: 2px solid transparent;
+  color: var(--app-color-text);
+  font-size: 13.5px;
+  line-height: 1.45;
+  text-decoration: none;
+
+  &:hover {
+    border-left-color: var(--app-color-border);
+    color: var(--app-color-text-strong);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--app-color-accent);
+    outline-offset: 2px;
+  }
+}
+
+/* 지금 읽고 있는 절 */
+.bp_index__tocLink--active {
+  border-left-color: var(--app-color-accent);
+  color: var(--app-color-text-strong);
+  font-weight: 600;
+}
+
+.bp_index__tocNum {
+  flex: none;
+  color: var(--app-color-text-muted);
+  font-family: var(--app-font-mono);
+  font-size: 11px;
+  font-weight: 400;
+}
+
+/* 절 안의 소제목 — 지금 읽는 절의 것만 펼친다 */
+.bp_index__tocSub {
+  display: none;
+  margin: 1px 0 6px;
+  padding: 0;
+  list-style: none;
+}
+
+.bp_index__tocSub--open {
+  display: block;
+}
+
+.bp_index__tocSubLink {
+  display: flex;
+  align-items: baseline;
+  margin-left: -1px;
+  padding: 3px 0 3px 26px;
+  gap: 8px;
+  border-left: 2px solid transparent;
+  color: var(--app-color-text-muted);
+  font-size: 12.5px;
+  line-height: 1.5;
+  text-decoration: none;
+
+  &:hover {
+    color: var(--app-color-text-strong);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--app-color-accent);
+    outline-offset: 2px;
+  }
+}
+
+.bp_index__tocSubLink--active {
+  border-left-color: var(--app-color-border);
+  color: var(--app-color-text-strong);
+}
+
+.bp_index__theme {
+  margin-top: 20px;
+  padding: 5px 11px;
+  border: 1px solid var(--app-color-border);
+  border-radius: 999px;
+  background: var(--app-color-surface);
+  color: var(--app-color-text);
+  font-family: var(--app-font-mono);
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+
+  &:hover {
+    border-color: var(--app-color-accent);
+    color: var(--app-color-text-strong);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--app-color-accent);
+    outline-offset: 2px;
+  }
+}
+
+/* ── 문서 ───────────────────────────────── */
+
+/* <main>. 문서 본문은 태그만 쓰므로 여기서 태그로 잡는다 */
+.bp_index__doc {
+  grid-row: 1;
+  grid-column: 2;
+  min-width: 0;
+  max-width: 1080px;
+  padding-block: 44px 96px;
+
+  /* stylelint-disable selector-disallowed-list -- 문서 본문은 태그만 쓴다 (workflow.html 5.2절) */
+  & h1 {
+    margin: 14px 0 12px;
+    color: var(--app-color-text-strong);
+    font-size: clamp(30px, 3.4vw, 42px);
+    font-weight: 700;
+    line-height: 1.14;
+    letter-spacing: -0.02em;
+    text-wrap: balance;
+  }
+
+  /* 제목 밑 첫 문단이 이 문서가 답하는 것이다 */
+  & h1 + p {
+    font-size: 16.5px;
+  }
+
+  & h2 {
+    margin: 56px 0 14px;
+    padding-top: 22px;
+    border-top: 1px solid var(--app-color-border);
+    color: var(--app-color-text-strong);
+    font-size: 23px;
+    font-weight: 600;
+    line-height: 1.35;
+    letter-spacing: -0.01em;
+    text-wrap: balance;
+    scroll-margin-top: 16px;
+  }
+
+  & h3 {
+    margin: 34px 0 8px;
+    color: var(--app-color-text-strong);
+    font-size: 16.5px;
+    font-weight: 600;
+    line-height: 1.45;
+    scroll-margin-top: 24px;
+  }
+
+  & h4 {
+    margin: 24px 0 6px;
+    color: var(--app-color-text-strong);
+    font-size: 14.5px;
+    font-weight: 600;
+    scroll-margin-top: 24px;
+  }
+
+  & h5 {
+    margin: 18px 0 6px;
+    color: var(--app-color-text-muted);
+    font-size: 13.5px;
+    font-weight: 600;
+    scroll-margin-top: 24px;
+  }
+
+  & p {
+    margin: 0 0 12px;
+  }
+
+  & a {
+    color: var(--app-color-accent);
+    text-underline-offset: 2px;
+  }
+
+  & a:hover {
+    color: var(--app-color-text-strong);
+  }
+
+  & a:focus-visible {
+    border-radius: 2px;
+    outline: 2px solid var(--app-color-accent);
+    outline-offset: 2px;
+  }
+
+  & strong {
+    color: var(--app-color-text-strong);
+    font-weight: 600;
+  }
+
+  & ul {
+    margin: 0 0 14px;
+    padding-left: 20px;
+  }
+
+  & ol {
+    margin: 0 0 14px;
+    padding-left: 22px;
+  }
+
+  & li {
+    margin-bottom: 5px;
+  }
+
+  & li > ul {
+    margin: 5px 0 0;
+  }
+
+  & li > ol {
+    margin: 5px 0 0;
+  }
+
+  & code {
+    padding: 1px 5px;
+    border-radius: 3px;
+    background: var(--app-color-code);
+    color: var(--app-color-text-strong);
+    font-family: var(--app-font-mono);
+    font-size: 0.87em;
+  }
+
+  & pre {
+    overflow-x: auto;
+    margin: 14px 0;
+    padding: 14px 18px;
+    border: 1px solid var(--app-color-border);
+    border-radius: 6px;
+    background: var(--app-color-code);
+    font-family: var(--app-font-mono);
+    font-size: 12.5px;
+    line-height: 1.7;
+  }
+
+  & pre code {
+    padding: 0;
+    background: none;
+    font-size: inherit;
+  }
+
+  /* 위키 · 패치노트 원문 인용 (workflow.html 1.3절)과 문서 첫머리의 당부 */
+  & blockquote {
+    margin: 16px 0;
+    padding: 12px 18px;
+    border-left: 3px solid var(--app-color-accent);
+    border-radius: 0 5px 5px 0;
+    background: var(--app-color-accent-soft);
+  }
+
+  & blockquote > :last-child {
+    margin-bottom: 0;
+  }
+
+  & table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13.5px;
+    font-variant-numeric: tabular-nums;
+  }
+
+  & th {
+    padding: 9px 16px;
+    border-bottom: 1px solid var(--app-color-border);
+    color: var(--app-color-text-muted);
+    font-family: var(--app-font-mono);
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-align: left;
+    vertical-align: bottom;
+    white-space: nowrap;
+  }
+
+  & td {
+    padding: 9px 16px;
+    border-bottom: 1px solid var(--app-color-border-soft);
+    text-align: left;
+    vertical-align: top;
+  }
+
+  & tbody tr:last-child td {
+    border-bottom: 0;
+  }
+
+  & hr {
+    margin: 32px 0;
+    border: 0;
+    border-top: 1px solid var(--app-color-border);
+  }
+  /* stylelint-enable selector-disallowed-list */
+}
+
+/* 문서 머리 — 제목부터 첫 절 앞까지를 _index.js 가 묶는다 */
+.bp_index__head {
+  margin-bottom: 8px;
+  padding-bottom: 28px;
+  border-bottom: 2px solid var(--app-color-text-strong);
+
+  /* stylelint-disable selector-disallowed-list -- 머리 안과 바로 뒤는 문서 본문 태그다 */
+  & > :last-child {
+    margin-bottom: 0;
+  }
+
+  /* 머리의 굵은 선 바로 밑이라 첫 절은 선을 또 긋지 않는다 */
+  & + h2 {
+    margin-top: 40px;
+    padding-top: 0;
+    border-top: 0;
+  }
+  /* stylelint-enable selector-disallowed-list */
+}
+
+.bp_index__eyebrow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  color: var(--app-color-text-muted);
+  font-family: var(--app-font-mono);
+  font-size: 11.5px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* 제목 앞 절 번호 (1.1). 목차도 같은 글자를 쓴다 */
+.bp_index__num {
+  margin-right: 12px;
+  color: var(--app-color-accent);
+  font-family: var(--app-font-mono);
+  font-size: 0.62em;
+  font-weight: 500;
+  letter-spacing: 0;
+}
+
+/* 표 — 넓으면 상자 안에서 가로로 민다 */
+.bp_index__table {
+  overflow-x: auto;
+  margin: 16px 0;
+  border: 1px solid var(--app-color-border);
+  border-radius: 6px;
+  background: var(--app-color-surface);
+}
+
+/* 상태 알약 — "인게임 확인됨" 은 초록, "확인되지 않았다" 는 amber */
+.bp_index__pill {
+  display: inline-block;
+  padding: 0 7px;
+  border-radius: 3px;
+  font-size: 12.5px;
+  font-weight: 600;
+  line-height: 1.6;
+  white-space: nowrap;
+}
+
+.bp_index__pill--verified {
+  background: var(--app-color-verified-soft);
+  color: var(--app-color-verified);
+}
+
+.bp_index__pill--unverified {
+  background: var(--app-color-unverified-soft);
+  color: var(--app-color-unverified);
+}
+
+/* 색 칩 — #rrggbb 한 덩어리인 <code> 앞. 색은 _index.js 가 --app-color-chip 으로 넘긴다 */
+.bp_index__color {
+  /* 좁은 표 칸에서 칩과 값 사이로 줄이 갈리지 않게 한다 */
+  white-space: nowrap;
+
+  &::before {
+    display: inline-block;
+    width: 0.8em;
+    height: 0.8em;
+    margin-right: 5px;
+    border: 1px solid var(--app-color-border);
+    border-radius: 2px;
+    background: var(--app-color-chip, transparent);
+    content: '';
+    vertical-align: -0.05em;
+  }
+}
+
+/* 흐름도 — pre.mermaid 원문을 _index.js 가 SVG 로 바꾼 상자. 처음엔 폭에 맞춰 줄이고, 크게 보기를 누르면 제 크기로 민다 */
+.bp_index__flow {
+  display: flex;
+  flex-direction: column;
+  margin: 16px 0;
+  padding: 12px 16px 20px;
+  gap: 8px;
+  border: 1px solid var(--app-color-border);
+  border-radius: 6px;
+  background: var(--app-color-surface);
+}
+
+.bp_index__flowZoom {
+  align-self: flex-end;
+  padding: 3px 10px;
+  border: 1px solid var(--app-color-border);
+  border-radius: 999px;
+  background: var(--app-color-surface);
+  color: var(--app-color-text);
+  font-family: var(--app-font-mono);
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+
+  &:hover {
+    border-color: var(--app-color-accent);
+    color: var(--app-color-text-strong);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--app-color-accent);
+    outline-offset: 2px;
+  }
+}
+
+.bp_index__flowCanvas {
+  overflow-x: auto;
+
+  /* stylelint-disable-next-line selector-disallowed-list -- mermaid 가 그린 마크업이다 */
+  & svg {
+    display: block;
+    max-width: 100%;
+    height: auto;
+    margin: 0 auto;
+  }
+}
+
+.bp_index__flowCanvas--zoomed {
+  /* stylelint-disable-next-line selector-disallowed-list -- mermaid 가 그린 마크업이다 */
+  & svg {
+    max-width: none;
+  }
+}
+
+/* ── 한눈에 (_index.html) ───────────────── */
+
+.bp_index__cards {
+  display: grid;
+  margin-top: 28px;
+  gap: 14px;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr));
+}
+
+.bp_index__card {
+  display: flex;
+  flex-direction: column;
+  padding: 16px 18px;
+  gap: 4px;
+  border: 1px solid var(--app-color-border);
+  border-radius: 8px;
+  background: var(--app-color-surface);
+  text-decoration: none;
+
+  &:hover {
+    border-color: var(--app-color-accent);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--app-color-accent);
+    outline-offset: 2px;
+  }
+}
+
+.bp_index__cardGroup {
+  color: var(--app-color-text-muted);
+  font-family: var(--app-font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.08em;
+}
+
+.bp_index__cardTitle {
+  color: var(--app-color-text-strong);
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.bp_index__cardFile {
+  color: var(--app-color-text-muted);
+  font-family: var(--app-font-mono);
+  font-size: 12px;
+}
+
+/* ── 좁은 화면 ──────────────────────────── */
+
+@media (width < 1024px) {
+  .bp_index__root {
+    gap: 0;
+    padding: 0 20px;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .bp_index__nav {
+    position: static;
+    grid-row: 1;
+    grid-column: 1;
+    max-height: none;
+    padding-block: 28px 0;
+  }
+
+  .bp_index__doc {
+    grid-row: 2;
+    grid-column: 1;
+    padding-block: 28px 72px;
+  }
+
+  /* 문서 목록과 목차를 알약 줄로 */
+  .bp_index__docs {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .bp_index__docsLink {
+    margin-left: 0;
+    padding: 3px 10px;
+    border: 1px solid var(--app-color-border);
+    border-radius: 999px;
+    font-size: 12.5px;
+  }
+
+  .bp_index__docsLink--current {
+    border-color: var(--app-color-accent);
+  }
+
+  .bp_index__toc {
+    flex-direction: row;
+    flex-wrap: wrap;
+    padding-top: 12px;
+    gap: 6px;
+    border-top: 1px solid var(--app-color-border);
+    border-left: 0;
+  }
+
+  .bp_index__tocLink {
+    margin-left: 0;
+    padding: 3px 10px;
+    border: 1px solid var(--app-color-border);
+    border-radius: 999px;
+    font-size: 12.5px;
+  }
+
+  .bp_index__tocLink--active {
+    border-color: var(--app-color-accent);
+  }
+
+  /* 목차가 알약 줄이면 소제목은 두지 않는다 */
+  .bp_index__tocSub--open {
+    display: none;
+  }
+}
+
+@media (width < 640px) {
+  .bp_index__root {
+    padding: 0 16px;
+  }
+
+  .bp_index__doc {
+    padding-block: 20px 56px;
+  }
+}

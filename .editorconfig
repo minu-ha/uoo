@@ -24,14 +24,14 @@ insert_final_newline = unset
 [script/gather/*.razor]
 trim_trailing_whitespace = false
 
-[*.md]
+[*.{md,html}]
 max_line_length = 200
 
 [*.sh]
 indent_style = tab
 
 # Graphic id list. Lines are long by design and scripts cite it by line number.
-[library/item-list.txt]
+[blueprint/item-list.txt]
 indent_size = 4
 max_line_length = off
 

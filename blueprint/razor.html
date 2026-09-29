@@ -1,0 +1,364 @@
+<!doctype html>
+<html lang="ko">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BLUEPRINT - UOO</title>
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="_index.css">
+<script src="_index.js"></script>
+
+<body class="bp_index__root">
+<main class="bp_index__doc">
+<h1>Outlands Razor 문법</h1>
+<p>이 저장소 스크립트가 쓰는 언어의 정본. 되는 구문, 안 되는 구문, 명령문 비용, PvP 에서 막히는 것.
+문법이 애매하면 추측하지 말고 <a href="https://wiki.uooutlands.com/Razor_Scripting">위키 Razor Scripting</a> 을 읽고, 알게 된 것을 여기에 더한다.</p>
+<ul>
+<li>스크립트를 <strong>어떻게 쓰는가</strong> (헤더, 변수 접두, 타이머 관용구)는 <a href="conventions.html">conventions.html</a>.</li>
+<li>고친 스크립트를 <strong>게임에 반영하고 확인하는 법</strong> (캐시, 리로드)은 <a href="workflow.html#4">workflow.html</a> 4절.</li>
+</ul>
+
+<h2 id="1">1. 이 포크</h2>
+<p>Outlands 클라이언트에 딸린 Razor 는 <a href="https://www.razorce.com/guide/">Razor CE</a> 의 포크이고 CE 에 없는 명령이 많다.
+근거는 위키 Razor Scripting 이 1순위, CE 가이드는 기본 문법 확인용이다. 공개 스크립트는
+<a href="https://outlands.uorazorscripts.com/">outlands.uorazorscripts.com</a> 에 있다.</p>
+
+<h2 id="2">2. 확장 문법</h2>
+<p>Razor CE 에 없거나 확장된 것. 존재 여부만 적어 두니 인자 형식은 위키에서 확인한다.</p>
+<table>
+<thead>
+<tr>
+<th>분류</th>
+<th>무엇</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>검색</td>
+<td><code>findtype</code> <code>dclicktype</code> <code>findtypelist</code> <code>targettype</code> <code>lifttype</code> 에 <code>source</code> <code>hue</code> <code>quantity</code>
+<code>range</code> 인자</td>
+</tr>
+<tr>
+<td>alias</td>
+<td><code>ground</code></td>
+</tr>
+<tr>
+<td>표현식</td>
+<td><code>find</code> <code>findlayer</code> <code>targetexists</code> <code>followers</code> <code>hue</code> <code>name</code> <code>paralyzed</code> <code>invul</code> <code>warmode</code>
+<code>noto</code> <code>dead</code> <code>maxweight</code> <code>diffweight</code> <code>diffhits</code> <code>diffmana</code> <code>diffstam</code> <code>counttype</code> <code>gumpexists</code>
+<code>ingump</code> <code>varexist</code> <code>bandaging</code> <code>cooldown</code> <code>pvp</code></td>
+</tr>
+<tr>
+<td>명령</td>
+<td><code>setvar</code> <code>unsetvar</code> <code>ignore</code> <code>unignore</code> <code>clearignore</code> <code>warmode</code> <code>getlabel</code> <code>rename</code> <code>skill</code>
+<code>setskill</code> <code>waitforgump</code> <code>gumpresponse</code> <code>gumpclose</code> <code>cooldown</code></td>
+</tr>
+<tr>
+<td>연산자</td>
+<td><code>as</code> <code>in</code></td>
+</tr>
+<tr>
+<td>리스트</td>
+<td><code>createlist</code> <code>clearlist</code> <code>removelist</code> <code>pushlist</code> <code>poplist</code> <code>listexists</code> <code>list</code> <code>inlist</code> <code>atlist</code>
+<code>foreach</code></td>
+</tr>
+<tr>
+<td>타이머</td>
+<td><code>createtimer</code> <code>removetimer</code> <code>settimer</code> <code>timer</code> <code>timerexists</code></td>
+</tr>
+<tr>
+<td>기타</td>
+<td>모든 루프에 <code>index</code> 내장. <code>overhead</code> / <code>sysmsg</code> 에 <code>{{var}}</code> 보간</td>
+</tr>
+</tbody>
+</table>
+
+<h2 id="3">3. 확인된 함정</h2>
+<p>전부 인게임에서 실제로 깨졌거나 프로브로 잰 것 (2026-09-28). <code>.razor</code> 를 고치기 전에 이 표를 읽는다. 근거는 5절, 비용 숫자는 6절.</p>
+<table>
+<thead>
+<tr>
+<th>함정</th>
+<th>증상</th>
+<th>대신</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>주석 안의 <code>;</code></td>
+<td>그 뒤를 명령으로 파싱해서 그 줄에서 에러</td>
+<td>마침표로 문장을 끊는다</td>
+</tr>
+<tr>
+<td>변수끼리, 변수와 숫자의 크기 비교 (<code>if var__a &gt;= var__b</code>)</td>
+<td>조용히 거짓. 네크로가 한 번도 안 나갔다</td>
+<td>변수는 <code>=</code> <code>!=</code> 만. 세려면 리스트에 넣고 <code>list 'x' &gt;= n</code>. <code>mana &gt;= config__x</code> 처럼 <strong>내장 식이 왼쪽</strong>이면 된다</td>
+</tr>
+<tr>
+<td>산술 (<code>@setvar! var__n var__n + 1</code>)</td>
+<td>선례 없음, 안 받는다고 본다</td>
+<td><code>counttype</code> 으로 다시 읽거나 리스트 길이</td>
+</tr>
+<tr>
+<td><code>as</code> alias 를 묶은 <code>if</code> / <code>while</code> 블록 밖에서 읽기</td>
+<td><code>4294967295</code>, <code>noto</code> 가 <code>Mobile … not found</code></td>
+<td>블록 안에서 <code>@setvar! var__x alias__x</code> 로 복사해 나온다</td>
+</tr>
+<tr>
+<td>단어를 변수에 담기</td>
+<td><code>4294967295</code> (따옴표 무관). <code>rename</code> 에 주면 <code>That name is unacceptable.</code></td>
+<td><code>pushlist</code> 항목은 글자를 유지한다. <code>foreach x in list__y</code> 로 꺼내 문자열 인자에 준다. 그 밖의 문자열은 <code>getlabel</code> 결과뿐</td>
+</tr>
+<tr>
+<td><code>for &lt;변수&gt;</code></td>
+<td><code>Invalid for loop syntax</code></td>
+<td>값별 리터럴 <code>for N</code> 사슬</td>
+</tr>
+<tr>
+<td><code>not list 'x' &gt;= var</code></td>
+<td>파싱 에러 (<code>syntax error in line N</code>, 실행 자체가 안 됨)</td>
+<td><code>not</code> 뒤에 <code>list</code> 비교식을 두지 않는다. 갈래 안에서 <code>=</code> 로 비교</td>
+</tr>
+<tr>
+<td><code>sysmessage</code></td>
+<td><code>Unknown command</code></td>
+<td><code>sysmsg</code></td>
+</tr>
+<tr>
+<td><code>findtypelist</code> 를 명령으로</td>
+<td><code>Unknown command</code></td>
+<td>안 쓴다 (표현식일 것, 미확인)</td>
+</tr>
+<tr>
+<td><code>findtype</code> 한 번으로 여러 모빌 중 하나 고르기</td>
+<td>부를 때마다 <strong>같은 모빌</strong>이 온다</td>
+<td><code>while findtype … as</code> → 검사 → 아니면 <code>@ignore</code> → <code>endwhile</code> → <code>@clearignore</code></td>
+</tr>
+<tr>
+<td>숫자(serial)를 펫 이름으로</td>
+<td><code>That name is unacceptable.</code></td>
+<td>글자 이름만</td>
+</tr>
+<tr>
+<td>매 패스 <code>findtype</code> 로 상태 세기</td>
+<td>한 줄 5~10ms, 거짓 <code>if</code> 10~20ms, <code>findtype</code> 20~40ms. 32번이면 패스당 1초</td>
+<td>천천히 변하는 상태는 타이머로 몇 초에 한 번. <code>if</code>/<code>elseif</code> 사슬은 통째로 한 틱이라 길어도 싸다</td>
+</tr>
+<tr>
+<td>모빌을 이름으로 찾기</td>
+<td>되긴 하지만 이름을 바꾼 뒤 Razor 캐시가 갱신되는지 모른다</td>
+<td>바디 번호. 인게임 <code>&gt;info</code> 로 읽는다. 내 소환수의 noto 는 2 (friend)</td>
+</tr>
+<tr>
+<td><code>varexist</code> 로 값의 유효성 확인</td>
+<td>선언 여부만 본다. 잘못 타겟한 값도 참이라 영영 안 고쳐진다</td>
+<td>대상 앞에 서 있는 게 확실한 곳에서만 <code>find</code> 로 확인 (<a href="conventions.html#3.4">conventions.html</a> 3.4절)</td>
+</tr>
+<tr>
+<td>미선언 변수</td>
+<td>빈 값으로 읽혀 조건이 조용히 안 맞는다</td>
+<td><code>util/check.sh</code> 가 접두 붙은 변수는 잡는다. 접두 없는 이름은 못 잡는다</td>
+</tr>
+<tr>
+<td><code>for 25</code> + <code>wait 100</code> 로 커서 폴링</td>
+<td>4서클 커서가 루프가 끝난 뒤에 떴다 (2026-09-29). 남은 커서가 <code>not targetexists</code> 를 단 블록을 전부 막는다</td>
+<td><code>for 60</code>. 한 바퀴가 <code>wait</code> 값보다 한참 짧게 도는 것으로 보인다. 원인은 확인되지 않았다</td>
+</tr>
+<tr>
+<td>커서 없는 시전 (힐 에이전트, 버프)을 <code>not casting</code> 먼저 보며 폴링</td>
+<td>끊기는 순간 <code>casting</code> 이 풀려 끊김 줄을 안 읽고 나간다 (2026-09-29). 다음 커서 폴링이 그 줄을 제 것으로 읽고 첫 바퀴에 나가 커서가 남는다</td>
+<td>커서 폴링이 시작되기 전에 끊김 줄을 한 번 읽어 비운다 (<code>bard-necro-enhanced</code> OPENER 앞)</td>
+</tr>
+<tr>
+<td>Smart Heal · Greater Heal 에이전트를 치유할 게 없을 때</td>
+<td>풀피면 커서를 찍지 않고 남긴다 (2026-09-29). 모든 블록이 선다</td>
+<td>에이전트 폴링 뒤 <code>targetexists and diffhits = 0</code> 이면 <code>Cancel Current Target</code></td>
+</tr>
+<tr>
+<td>스크립트의 <code>target</code> · <code>Target Self</code></td>
+<td>lasttarget 이 백팩·나로 바뀐다. 10칸 밖에서 고른 타겟을 노래가 덮어써 교전을 못 했다 (2026-09-29)</td>
+<td>타겟은 화면 거리에서 받아 두고, 백팩·나를 찍기 전에 lasttarget 을 한 번 더 본다</td>
+</tr>
+</tbody>
+</table>
+
+<h2 id="4">4. 되는 구문과 선례</h2>
+<p>전부 저장소에 선례가 있다. 새 패턴을 쓰기 전에 여기서 먼저 찾는다.</p>
+<table>
+<thead>
+<tr>
+<th>구문</th>
+<th>선례</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>not inlist '이름' alias</code></td>
+<td><code>bard-necro-enhanced.razor</code> OPENER</td>
+</tr>
+<tr>
+<td><code>list__magic_drained_targets</code> + <code>list__magic_cursed_targets</code> 2단 오프닝</td>
+<td><code>bard-necro-enhanced.razor</code> OPENER</td>
+</tr>
+<tr>
+<td><code>createlist</code> / <code>removelist</code> / <code>clearlist</code> / <code>pushlist</code></td>
+<td>여러 파일</td>
+</tr>
+<tr>
+<td><code>while findtype ... backpack as</code> + <code>@ignore</code></td>
+<td><code>bard-necro-enhanced.razor</code> INSTRUMENT</td>
+</tr>
+<tr>
+<td><code>not dead X and noto X != "hostile" ...</code></td>
+<td><code>bard-necro-enhanced.razor</code> COMBAT TARGET CACHE</td>
+</tr>
+<tr>
+<td><code>findbuff "song of discordance"</code></td>
+<td><code>bard-mace.razor:494</code></td>
+</tr>
+<tr>
+<td><code>useskill</code> -&gt; <code>waitfortarget</code> -&gt; <code>target backpack</code></td>
+<td><code>bard-mace.razor:518</code></td>
+</tr>
+<tr>
+<td><code>stop</code></td>
+<td><code>bard-necro-enhanced.razor</code> INSTRUMENT</td>
+</tr>
+<tr>
+<td><code>cooldown "magic arrow" = 0</code></td>
+<td><code>cooldowns.xml</code> 에 항목 존재</td>
+</tr>
+<tr>
+<td><code>for 60</code> + <code>break</code> 로 커서 폴링</td>
+<td><code>bard-necro-enhanced.razor</code> PROC CORE, 레퍼런스 <code>auto-mage.razor:1160</code></td>
+</tr>
+<tr>
+<td><code>hotkey 'Vampiric Embrace'</code> + <code>hotkey 'Target Self'</code></td>
+<td>위키: 자신을 타겟하면 주변 시체를 자동 탐색. <strong>인게임 확인됨</strong></td>
+</tr>
+<tr>
+<td><code>hotkey 'Drink Heal'</code> 등 포션 핫키</td>
+<td>Razor 핫키 목록 Potions 항목. 이름 그대로</td>
+</tr>
+<tr>
+<td><code>hotkey "&gt; Interrupt"</code></td>
+<td>휠다운에 물려 쓰던 것. 시전 폴링 안에서 긴급 힐용</td>
+</tr>
+<tr>
+<td><code>findtype 24|158|… ground -1 -1 &lt;range&gt; as</code> -- 바디 번호로 모빌 찾기</td>
+<td><code>bard-necro-enhanced.razor</code> SUMMON NAMES, 구식 <code>bard-necro</code> PROVO FOLLOWER CACHE</td>
+</tr>
+<tr>
+<td><code>@rename &lt;alias&gt; &lt;var&gt;</code></td>
+<td><code>bard-necro-enhanced.razor</code> SUMMON NAMES. 위키 <code>rename</code>, CE 는 <code>CanRename</code> 인 펫에만 보낸다</td>
+</tr>
+<tr>
+<td><code>find &lt;var&gt; ground -1 -1 &lt;range&gt; as</code> + <code>dead</code> 로 슬롯 비우기</td>
+<td><code>bard-necro-enhanced.razor</code> SUMMON NAMES, 구식 <code>bard-necro</code> PROVO FOLLOWER CACHE</td>
+</tr>
+<tr>
+<td><code>pushlist '리스트' '단어'</code> + <code>foreach x in 리스트</code> + <code>index = &lt;변수&gt;</code> -- 단어를 문자열 인자로 넘기기</td>
+<td><code>bard-necro-enhanced.razor</code> SUMMON NAMES. 2026-09-28 프로브: 항목이 글자 그대로 읽히고 <code>rename</code> 이 받는다</td>
+</tr>
+<tr>
+<td><code>ingump "10/"</code> … <code>"1/"</code> 큰 수부터 내려오는 사슬로 숫자 읽기</td>
+<td><code>bard-necro-enhanced.razor</code> 심볼 수. <code>ingump</code> 는 부분 문자열 매칭이라 큰 수부터 본다</td>
+</tr>
+</tbody>
+</table>
+
+<h2 id="5">5. 안 되는 구문의 근거</h2>
+<p>3절 표의 줄마다 무엇이 어떻게 깨졌는지. 선례가 없는 것도 같이 적는다.</p>
+<ul>
+<li><strong>변수끼리, 또는 변수와 숫자의 크기 비교</strong> (<code>var__symbols &gt;= config__symbols_blood_oath</code>). 조건에서 변수는 <code>=</code> 만 된다.
+Bard Necro 의 네크로가 한 번도 안 나가던 원인. 수를 세려면 옛 스크립트처럼 <strong>리스트에 항목을 밀어 넣고 <code>list 'name' &gt;= n</code></strong> 으로 비교한다.
+<code>mana &gt;= config__x</code> 처럼 <strong>내장 식이 왼쪽</strong>이면 된다. 내장 <code>index</code> 도 왼쪽이면 변수와 비교된다.</li>
+<li><strong><code>as</code> alias 를 묶은 블록 밖에서 읽기.</strong> <code>if findtype … as alias__x</code> / <code>endif</code> 뒤에서 <code>alias__x</code> 를 읽으면
+<code>4294967295</code> 가 되어 <code>noto</code> 가 <code>Mobile … not found</code> 를 낸다. 안에서 <code>@setvar! var__x alias__x</code> 로 복사해 나온다.
+<code>bard-necro-enhanced.razor</code> 의 alias 가 전부 블록 안에서만 쓰이는 이유다.</li>
+<li><strong><code>findtypelist</code> 를 명령으로 쓰기.</strong> <code>Unknown command</code>. 쓴다면 <code>findtype</code> 처럼 <code>if</code> 안의 표현식일 것이다 (미확인).</li>
+<li><strong>단어를 변수에 담기.</strong> <code>@setvar! var__x nomeeheh</code> 는 따옴표가 있든 없든 <code>4294967295</code> 로 읽힌다 (2026-09-28 프로브.
+숫자 <code>5000</code> 은 <code>5000</code>, <code>0x622396</code> 은 10진수 <code>6431638</code>). 변수는 숫자와 serial 전용이다. 그래서 <code>rename &lt;serial&gt; &lt;변수&gt;</code> 는
+서버에 쓰레기 이름이 가서 <code>That name is unacceptable.</code> 이 된다. 단어는 리스트에 담아 <code>foreach</code> 로 꺼낸다. serial 쪽은 변수여도 된다.</li>
+<li><strong>숫자를 펫 이름으로.</strong> serial 을 그대로 이름으로 주면 <code>That name is unacceptable.</code> (2026-09-28 프로브). 이름에 숫자는 안 된다.</li>
+<li><strong><code>for &lt;변수&gt;</code>.</strong> <code>Invalid for loop syntax</code> (2026-09-28 프로브). 횟수는 리터럴만. 변수 횟수가 필요하면 값별 <code>for N</code> 사슬.</li>
+<li><strong><code>while not list 'x' &gt;= var</code>.</strong> <code>syntax error</code> 로 파싱 자체가 안 된다 (2026-09-28). <code>not</code> 뒤에 <code>list</code> 비교식을 두지 않는다.</li>
+<li><strong><code>findtype</code> 은 매번 같은 모빌을 돌려준다.</strong> Razor CE 의 무작위가 아니다. 한 번만 부르면 이미 처리한 모빌만 계속 나온다
+(2026-09-28, 둘째 소환수에 이름이 안 붙었다). <code>while findtype … as</code> → 검사 → <code>@ignore</code> → <code>endwhile</code> → <code>@clearignore</code> 로 한 번에 다 본다.</li>
+<li>선례가 없어서 쓰지 않는 것:
+<ul>
+<li>산술 <code>@setvar! var__n var__n + 1</code></li>
+<li><code>while &lt;스크립트 변수&gt; &lt;</code></li>
+<li><code>menu &lt;serial&gt; &lt;변수&gt;</code> -- 인덱스는 반드시 리터럴</li>
+<li>조건 안의 괄호</li>
+</ul></li>
+</ul>
+
+<h2 id="6">6. 명령문 비용</h2>
+<p>2026-09-28 측정. Razor CE 원본은 스크립트 엔진이 <strong>타이머 틱마다 명령문 하나</strong>를 실행한다 (<code>ScriptManager.ScriptTimer</code> → <code>Interpreter.ExecuteScript</code> → <code>ExecuteNext</code> 1회, 기본 25ms).
+거짓인 <code>if</code> 는 본문을 건너뛰는 것까지 한 틱, <code>elseif</code> 사슬은 한 틱 안에서
+평가된다.
+이 포크는 그보다 빠르지만 같은 모양이다. 프로브 (<code>probe-tick</code>, 지움)로 잰 값:</p>
+<table>
+<thead>
+<tr>
+<th>잰 것</th>
+<th>걸린 시간</th>
+<th>한 개당</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>대입 100줄</td>
+<td>0.5 ~ 1초</td>
+<td>5 ~ 10ms</td>
+</tr>
+<tr>
+<td>거짓 <code>if</code> 100개 (3줄 본문 건너뜀)</td>
+<td>1 ~ 2초</td>
+<td>10 ~ 20ms</td>
+</tr>
+<tr>
+<td><code>findtype … self</code> 50번</td>
+<td>1 ~ 2초</td>
+<td><strong>20 ~ 40ms</strong></td>
+</tr>
+<tr>
+<td>20갈래 <code>elseif</code> 사슬 10번</td>
+<td>0.25 ~ 0.5초</td>
+<td>사슬 하나 25 ~ 50ms</td>
+</tr>
+</tbody>
+</table>
+<p><strong>비용은 검색 종류가 아니라 "이 패스에서 밟는 줄 수"이고, 그중 <code>findtype</code> 이 가장 비싸다.</strong></p>
+<p>원칙: <strong>자주 안 변하는 상태는 타이머로 게이트하고, 흔한 경로가 밟는 줄을 줄인다.</strong>
+Bard Necro 루프에 적용한 결과 (시약 플래그를 매 패스 <code>findtype</code> 32번 → 30초에 7번)는 <a href="bard-necro-handbook.html#5.8">bard-necro-handbook.html</a> 5.8절.</p>
+
+<h2 id="7">7. PvP 제약</h2>
+<p>구조화 PvP 또는 Faction 상태에서:</p>
+<table>
+<thead>
+<tr>
+<th>막히는 것</th>
+<th>영향</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>settimer</code> <code>removetimer</code> <code>getlabel</code> <code>rename</code> <code>cooldown</code> <code>wait</code> 등</td>
+<td>타이머·라벨·쿨다운에 기대는 로직이 안 돈다</td>
+</tr>
+<tr>
+<td>플레이어 serial 이 <code>0x0</code></td>
+<td>상대를 변수에 담을 수 없고, 상대 머리 위 <code>overhead … &lt;serial&gt;</code> 도 안 된다</td>
+</tr>
+<tr>
+<td><code>find</code> 계열이 자기 아이템만 잡는다</td>
+<td>상대나 바닥 물건을 찾는 로직이 안 돈다</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>PvP 겸용 스크립트를 쓰는 규칙은 <a href="conventions.html#7">conventions.html</a> 7절. 게임 쪽 PvP 규칙과 숫자는 <a href="pvp.html">pvp.html</a>.</li>
+</ul>
+</main>
