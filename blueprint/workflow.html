@@ -13,6 +13,49 @@
 <p>무엇을 근거로 삼고, 스크립트와 문서를 어떤 순서로 고치고, 게임에 어떻게 반영해 확인하고, 어떻게 커밋하는가.
 파일 이름과 스크립트 모양은 <a href="conventions.html">conventions.html</a>, 문법과 함정은 <a href="razor.html">razor.html</a>에 있다.</p>
 
+<h2 id="00">00 한눈에</h2>
+<pre class="mermaid">flowchart LR
+  a("01&lt;br&gt;근거") --> b("02&lt;br&gt;고치기")
+  b --> c("03&lt;br&gt;보고")
+  c --> d("04&lt;br&gt;반영 · 확인")
+  d --> e("05&lt;br&gt;문서")
+  e --> f("06&lt;br&gt;커밋")</pre>
+<table>
+<thead>
+<tr>
+<th>절</th>
+<th>무엇을 답하나</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="#01">01</a></td>
+<td>무엇을 근거로 삼나. 어느 사이트를 믿고, 숫자는 어떻게 인용하나</td>
+</tr>
+<tr>
+<td><a href="#02">02</a></td>
+<td>스크립트를 어떤 순서로 고치나</td>
+</tr>
+<tr>
+<td><a href="#03">03</a></td>
+<td>변경을 보고할 때 무엇을 넣나</td>
+</tr>
+<tr>
+<td><a href="#04">04</a></td>
+<td>고친 것을 게임에 어떻게 반영하나. 리로드냐 재시작이냐, 캐시와 종료가 무엇을 덮어쓰나</td>
+</tr>
+<tr>
+<td><a href="#05">05</a></td>
+<td>문서를 어떻게 쓰고 새로 만드나. 틀, 절 번호와 가름, 흐름도, 언어</td>
+</tr>
+<tr>
+<td><a href="#06">06</a></td>
+<td>언제, 어떤 메시지로 커밋하나</td>
+</tr>
+</tbody>
+</table>
+<p>이 문서에 걸린 질문은 <a href="open-items.html">open-items.html</a>에 모았다.</p>
+
 <h2 id="01" data-part="근거">01 근거</h2>
 
 <h3 id="01.A">01.A 우선순위</h3>
