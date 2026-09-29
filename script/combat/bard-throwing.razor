@@ -26,14 +26,11 @@
 #   A resource or gear problem leads with the noun, so it reads at a glance.
 #   A line that echoes a game event keeps the game's own sentence.
 #   No exclamation marks.
-#   Hue carries the category. The values sit one step apart on the UO message hue ladder,
-#   so no two categories share a colour family:
-#     33  red     act on this right now
-#     43  orange  a resource or a piece of gear is missing
-#     53  yellow  moving throw count      (profile agent, see below)
-#     63  green   a potion was just consumed, kept to two lines so green stays rare
-#     73  aqua    neutral information, prompts and planted
-#     88  blue    a special effect fired  (profile agent, see below)
+#   Hue carries the category, see blueprint/overheads.html for the words and the palette:
+#     90  status and information
+#     53  warning, something is missing, wrong or running out
+#     55  a prompt waiting on the player
+#     118 a weapon ability going out, subject only
 #
 # Throw status readout
 #   The moving throw count, the planted reload and the wing proc are printed by Razor's
@@ -41,7 +38,7 @@
 #   no logic attached, and reading them here meant competing for the system message buffer.
 #   The agent watches the journal instead, so the readout does not depend on what this
 #   script does with the buffer at all.
-#   Entries live under <overheadmessages> in the Razor profile, hues as listed above.
+#   Entries live under <overheadmessages> in the Razor profile, on the same palette.
 #
 # System message buffer
 #   Nothing clears the buffer once the loop is running. The two clearsysmsg left are both in

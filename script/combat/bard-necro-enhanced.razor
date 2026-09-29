@@ -52,8 +52,7 @@
 # Overhead policy
 #   Every message is "[ subject, state ]" in lowercase, see blueprint/overheads.html for the words and the hue palette.
 #     90  status and information, suppressed by config__chatty
-#     53  warning, a resource is running out but the run continues
-#     33  error, something is missing and the block cannot do its job
+#     53  warning, something is missing, wrong or running out
 #     55  a prompt waiting on the player
 #     118 / 83  a necro ability or a magery spell going out, subject only, the hue is the state
 #   A resource problem leads with the noun so it reads at a glance. No exclamation marks.
@@ -596,12 +595,12 @@ if not find var__my_instrument backpack
             overhead "[ inst, {{label__picked_instrument}} ]" 55
         else
             @setvar! var__my_instrument 0
-            overhead "[ inst, wrong ]" 33
+            overhead "[ inst, wrong ]" 53
             stop
         endif
     else
         @setvar! var__my_instrument 0
-        overhead "[ inst, out ]" 33
+        overhead "[ inst, out ]" 53
         stop
     endif
 endif
@@ -647,7 +646,7 @@ while not dead
                 yell "[Pouch"
                 wait wait__short
             elseif timer "timer__message" >= cooldown__message
-                overhead "[ pouch, out ]" 33
+                overhead "[ pouch, out ]" 53
                 settimer "timer__message" 0
             endif
         endif
@@ -1139,7 +1138,7 @@ while not dead
                         overhead "[ inst, set ]" 90
                     endif
                 elseif timer "timer__message" >= cooldown__message
-                    overhead "[ inst, out ]" 33
+                    overhead "[ inst, out ]" 53
                     settimer "timer__message" 0
                 endif
             endif
@@ -1244,7 +1243,7 @@ while not dead
                         yell '[necromancyhotbar'
                         waitforgump 622436516 wait__target
                     elseif timer "timer__message" >= cooldown__message
-                        overhead "[ necro book, out ]" 33
+                        overhead "[ necro book, out ]" 53
                         settimer "timer__message" 0
                     endif
                 endif

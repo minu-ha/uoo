@@ -390,9 +390,9 @@
 <tr>
 <td>33</td>
 <td>진홍 <code>#e80030</code></td>
-<td><strong>나에게 걸린 것</strong>, 그것 없이는 못 싸우는 것 (스크립트라면 그 블록이 제 일을 못 한다)</td>
-<td><code>me</code>, 치명적 <code>out</code></td>
-<td><code>[ hams, me ]</code> <code>[ teleki, me ]</code> <code>[ pouch, out ]</code> <code>[ inst, out ]</code></td>
+<td><strong>나에게 걸린 것</strong>, 지금 손써야 하는 것</td>
+<td><code>me</code>, 나쁜 효과의 <code>on</code>, 바닥이 보이는 카운터</td>
+<td><code>[ hams, me ]</code> <code>[ teleki, me ]</code> <code>[ poison, on ]</code> <code>[ throws, 0 ]</code></td>
 </tr>
 <tr>
 <td>43</td>
@@ -404,23 +404,23 @@
 <tr>
 <td>53</td>
 <td>노랑 <code>#e8e800</code></td>
-<td>경고. 실패, 막힘, 재고 없음, 버프 빠짐 (스크립트는 계속 돈다)</td>
+<td>경고. 실패, 막힘, 재고 없음, 버프 빠짐. 스크립트를 멈추게 하는 <code>out</code>도 여기에 든다</td>
 <td><code>miss</code> <code>wrong</code> <code>out</code> <code>disturbed</code> <code>cut</code> <code>over</code> <code>blocked</code>, 버프의 <code>off</code></td>
 <td><code>[ hams, miss ]</code> <code>[ heal pot, out ]</code> <code>[ reflect, off ]</code> <code>[ wait, 4m ]</code></td>
 </tr>
 <tr>
 <td>90</td>
 <td>하늘 <code>#60e0f0</code></td>
-<td>정보, 카운터, 진행. 스크립트에서는 <code>config__chatty</code>로 끈다</td>
-<td><code>on</code> 숫자 <code>refund</code> <code>set</code></td>
-<td><code>[ unholy, 6/10 ]</code> <code>[ mana, refund ]</code> <code>[ mush, on ]</code> <code>[ var, set ]</code></td>
+<td>정보, 카운터, 진행, 끝남. 스크립트에서는 <code>config__chatty</code>로 끈다</td>
+<td><code>on</code> 숫자 <code>refund</code> <code>set</code> <code>done</code></td>
+<td><code>[ unholy, 6/10 ]</code> <code>[ mana, refund ]</code> <code>[ lock, done ]</code> <code>[ var, set ]</code></td>
 </tr>
 <tr>
 <td>68</td>
 <td>초록 <code>#18e800</code></td>
-<td>준비됨, 끝남, 내 것 성공</td>
-<td><code>ready</code> <code>done</code></td>
-<td><code>[ str, ready ]</code> <code>[ lock, done ]</code> <code>[ siphon, on ]</code></td>
+<td>준비됨, 내 것 성공</td>
+<td><code>ready</code></td>
+<td><code>[ str, ready ]</code> <code>[ house, clear ]</code> <code>[ siphon, on ]</code></td>
 </tr>
 <tr>
 <td>65</td>
@@ -665,7 +665,7 @@ Heat of Battle은 <code>pvp</code> 바가 그 자리다.</li>
 </tr>
 <tr>
 <td>You finish applying the bandages.</td>
-<td><code>[ bandage, done ] (68)</code></td>
+<td><code>[ bandage, done ] (90)</code></td>
 <td><code>default.xml</code>에만 있다</td>
 </tr>
 <tr>
@@ -720,7 +720,7 @@ Heat of Battle은 <code>pvp</code> 바가 그 자리다.</li>
 </tr>
 <tr>
 <td>You are not poisoned.</td>
-<td><code>[ poison, off ] (90)</code></td>
+<td><code>[ poison, off ] (65)</code></td>
 <td></td>
 </tr>
 <tr>
@@ -920,12 +920,12 @@ Heat of Battle은 <code>pvp</code> 바가 그 자리다.</li>
 </tr>
 <tr>
 <td>You have successfully cleared it of traps</td>
-<td><code>[ trap, done ] (68)</code></td>
+<td><code>[ trap, done ] (90)</code></td>
 <td></td>
 </tr>
 <tr>
 <td>You successfully pick the lock</td>
-<td><code>[ lock, done ] (68)</code></td>
+<td><code>[ lock, done ] (90)</code></td>
 <td></td>
 </tr>
 <tr>
@@ -940,7 +940,7 @@ Heat of Battle은 <code>pvp</code> 바가 그 자리다.</li>
 </tr>
 <tr>
 <td>You finish using veterinary supplies</td>
-<td><code>[ vet, done ] (68)</code></td>
+<td><code>[ vet, done ] (90)</code></td>
 <td></td>
 </tr>
 <tr>
@@ -1060,12 +1060,12 @@ Heat of Battle은 <code>pvp</code> 바가 그 자리다.</li>
 </tr>
 <tr>
 <td>0 Trapped pouches remain</td>
-<td><code>[ pouch, out ] (33)</code></td>
+<td><code>[ pouch, out ] (53)</code></td>
 <td></td>
 </tr>
 <tr>
 <td>No trapped pouches found</td>
-<td><code>[ pouch, out ] (33)</code></td>
+<td><code>[ pouch, out ] (53)</code></td>
 <td></td>
 </tr>
 <tr>
@@ -1200,7 +1200,7 @@ Heat of Battle은 <code>pvp</code> 바가 그 자리다.</li>
 </tr>
 <tr>
 <td>You have completed a society job</td>
-<td><code>[ society, done ] (68)</code></td>
+<td><code>[ society, done ] (90)</code></td>
 <td></td>
 </tr>
 <tr>
@@ -1311,7 +1311,7 @@ Heat of Battle은 <code>pvp</code> 바가 그 자리다.</li>
 <tr>
 <td>You drink a cure potion</td>
 <td><code>[ cure pot, on ] (90)</code></td>
-<td>리프레시는 서버가 문장을 보내지 않아 없다. 힘·민 포션은 "Your strength has changed by 20"뿐인데 Weaken을 맞아도 같은 문장이라 잡지 않는다</td>
+<td>스크립트의 같은 줄은 뺐다. 리프레시는 서버가 문장을 보내지 않아 없다. 힘·민 포션은 "Your strength has changed by 20"뿐인데 Weaken을 맞아도 같은 문장이라 잡지 않는다</td>
 </tr>
 <tr>
 <td>You will now automatically</td>
@@ -1405,12 +1405,12 @@ Heat of Battle은 <code>pvp</code> 바가 그 자리다.</li>
 </tr>
 <tr>
 <td>You steal</td>
-<td><code>[ steal, done ] (68)</code></td>
+<td><code>[ steal, done ] (90)</code></td>
 <td></td>
 </tr>
 <tr>
 <td>You successfully steal</td>
-<td><code>[ steal, done ] (68)</code></td>
+<td><code>[ steal, done ] (90)</code></td>
 <td></td>
 </tr>
 <tr>
@@ -1460,7 +1460,7 @@ Heat of Battle은 <code>pvp</code> 바가 그 자리다.</li>
 </tr>
 <tr>
 <td>You detonate a ground trap</td>
-<td><code>[ detonate, done ] (43)</code></td>
+<td><code>[ detonate, done ] (90)</code></td>
 <td></td>
 </tr>
 <tr>
@@ -1535,7 +1535,7 @@ Heat of Battle은 <code>pvp</code> 바가 그 자리다.</li>
 </tr>
 <tr>
 <td>What instrument shall you play</td>
-<td><code>[ inst, out ] (33)</code></td>
+<td><code>[ inst, out ] (53)</code></td>
 <td></td>
 </tr>
 <tr>

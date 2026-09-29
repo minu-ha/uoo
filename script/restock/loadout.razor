@@ -979,7 +979,7 @@ if findtype 8012 global__my_recall_scroll_container as alias__found_recall_scrol
 endif
 
 if global__my_recall_scroll = 0
-    overhead "[ recall scroll, out ]" 33
+    overhead "[ recall scroll, out ]" 53
     stop
 endif
 
@@ -990,7 +990,7 @@ while findtype "runetome|runebook" backpack as alias__found_runetome
 
     lift global__my_recall_scroll 6000
     if insysmsg 'not found or out of range'
-        overhead "[ recall scroll, out ]" 33
+        overhead "[ recall scroll, out ]" 53
         stop
     endif
 
@@ -1005,7 +1005,7 @@ while findtype "runetome|runebook" ground -1 -1 2 as alias__found_runetome
 
     lift global__my_recall_scroll 6000
     if insysmsg 'not found or out of range'
-        overhead "[ recall scroll, out ]" 33
+        overhead "[ recall scroll, out ]" 53
         stop
     endif
 
@@ -1021,7 +1021,7 @@ while findtype 47202|62764|2473|3710|41451|41452|3646|3647|3644|3645|41449|41450
 
         lift global__my_recall_scroll 60000
         if insysmsg 'not found or out of range'
-            overhead "[ recall scroll, out ]" 33
+            overhead "[ recall scroll, out ]" 53
             stop
         endif
 

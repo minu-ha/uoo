@@ -26,7 +26,7 @@ if recallScrolls = 0
 endif
 
 if recallScrolls = 0
-    overhead "[ scroll, out ]" 33
+    overhead "[ scroll, out ]" 53
     stop
 endif
 
@@ -37,7 +37,7 @@ while findtype "runetome|runebook" backpack as tome
 
     lift recallScrolls 60000
     if insysmsg 'not found or out of range'
-        overhead "[ scroll, out ]" 33
+        overhead "[ scroll, out ]" 53
         stop
     endif
 
@@ -52,7 +52,7 @@ while findtype "runetome|runebook" ground -1 -1 2 as tome
 
     lift recallScrolls 60000
     if insysmsg 'not found or out of range'
-        overhead "[ scroll, out ]" 33
+        overhead "[ scroll, out ]" 53
         stop
     endif
 
@@ -68,7 +68,7 @@ while findtype 62764|2473|3710|41451|41452|3646|3647|3644|3645|41449|41450|29832
 
         lift recallScrolls 60000
         if insysmsg 'not found or out of range'
-            overhead "[ scroll, out ]" 33
+            overhead "[ scroll, out ]" 53
             stop
         endif
 
