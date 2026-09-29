@@ -1,0 +1,322 @@
+<!doctype html>
+<html lang="ko">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BLUEPRINT - UOO</title>
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="_index.css">
+<script src="_index.js"></script>
+
+<body class="bp_index__root">
+<main class="bp_index__doc">
+<h1>확인할 것</h1>
+<p>작업하면서 사용자에게 물을 것으로 남긴 것을 한곳에 모았다. 스크립트나 설정을 바꿔야 하는 것, 출처가 없는 숫자, 해석이 갈리는 규칙이다.
+답이 정해지면 그대로 반영하고 이 문서에서 지운다.</p>
+
+<h2 id="00">00 한눈에</h2>
+<p>표마다 마지막 열이 물을 것이다. 답은 "01 drain: 지운다"처럼 절 번호와 항목 이름으로 알려 주면 된다.
+새로 물을 것이 생기면 여기에 더한다 (<a href="workflow.html#03">workflow.html</a> 03절).</p>
+<p>먼저 답이 필요한 것은 셋이다.</p>
+<ol>
+<li><strong>다섯 캐릭터의 옛 <code>cooldowns.xml</code></strong> (01절). 그 캐릭터로 스크립트를 돌리면 바를 하나도 못 읽는다.</li>
+<li><strong>Energy Bolt 0.5초</strong> (04절). bard-necro-enhanced의 Poison Strike 대기가 이 숫자에 기댄다.</li>
+<li><strong>뜨지 않는 바 14개</strong> (01절). 지우든 트리거를 달든 정해야 바 목록이 실제와 같아진다.</li>
+</ol>
+
+<h2 id="01" data-part="스크립트 · 설정">01 쿨다운 바</h2>
+<table>
+<thead>
+<tr>
+<th>바</th>
+<th>지금</th>
+<th>정할 것</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>nomeehej 말고 다섯 캐릭터의 <code>cooldowns.xml</code></td>
+<td>옛 22항목 형식이다 (<code>mushroom</code>, <code>CorpseSkin</code> 같은 이름). 지금 이름을 읽는 스크립트는 그 캐릭터에서 바를 찾지 못한다</td>
+<td>nomeehej 파일로 맞출까</td>
+</tr>
+<tr>
+<td><code>pain spike</code> <code>necrosis</code> <code>noble sacrifice</code> <code>holy light</code> <code>poison strike</code> <code>curse</code> <code>mass curse</code>
+<code>spyglass</code> <code>divine fury</code> <code>consecrate weapon</code> <code>spam</code> <code>crew heal</code> <code>quest</code></td>
+<td>트리거도 없고 세우는 스크립트도 없어서 뜨지 않는다 (<a href="overheads.html#06.C">overheads.html</a> 06.C절)</td>
+<td>지울까, 트리거 문장을 달까</td>
+</tr>
+<tr>
+<td><code>drain</code></td>
+<td>트리거가 머리 위 메시지 "MV ON" 하나인데 이 메시지를 띄우는 곳이 없다</td>
+<td>지울까, 다른 트리거를 달까</td>
+</tr>
+</tbody>
+</table>
+
+<h2 id="02">02 머리 위 메시지</h2>
+<p>규칙은 <a href="overheads.html">overheads.html</a>에 있다. 아래는 그 규칙과 어긋난 채 남은 줄이다.</p>
+<table>
+<thead>
+<tr>
+<th>규칙</th>
+<th>지금</th>
+<th>정할 것</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>22자 상한 (<a href="overheads.html#02">overheads.html</a> 02절)</td>
+<td><code>[ magic arrow, target ]</code> 23자 (프로필), <code>[ trapped pouch, moved ]</code> 24자와 <code>[ alch satchel, moved ]</code> 23자 (loadout)</td>
+<td>줄일까. <code>magic arrow</code>는 줄이지 않는다는 규칙과 부딪힌다</td>
+</tr>
+<tr>
+<td>대상 위에 띄우는 줄은 705 (<a href="overheads.html#01.C">overheads.html</a> 01.C절)</td>
+<td>moongate의 <code>[ moongate, set ]</code> 90은 게이트 위에, backstab-mugging의 <code>[ range, out ]</code> 53은 lasttarget 위에 뜬다</td>
+<td>705로 바꿀까, 예외로 적을까</td>
+</tr>
+<tr>
+<td>한 대상에 한 낱말 (<a href="overheads.html#04">overheads.html</a> 04절)</td>
+<td>loadout의 <code>[ pouch, moved ]</code>는 looting pouch 줄인데 글로서리는 <code>pouch</code>를 트랩 파우치에 쓴다 (<code>loot pouch</code>가 맞다).
+<code>[ omen, target ]</code> (프로필)과 <code>[ evil omen ]</code> (스크립트), <code>[ herding, done ]</code>과 글로서리의 <code>herd</code>, 바 <code>cannons</code>와 <code>[ cannon, out ]</code>도 갈린다</td>
+<td>어느 쪽으로 맞출까</td>
+</tr>
+<tr>
+<td>대상만 쓰는 줄은 시전 (<a href="overheads.html#05">overheads.html</a> 05절)</td>
+<td>프로필의 <code>[ swing ]</code> 90은 대상만 쓰는데 시전이 아니다</td>
+<td><code>[ swing, on ]</code>처럼 상태를 붙일까</td>
+</tr>
+<tr>
+<td>고르라는 줄은 <code>pick</code> 55</td>
+<td>refill-runebook의 <code>[ chest, set ]</code>과 loadout의 <code>[ loot pouch, set ]</code>은 대상을 고르게 하는 줄인데 <code>set</code> 90이다</td>
+<td><code>pick</code> 55로 바꿀까</td>
+</tr>
+<tr>
+<td>글로서리 낱말</td>
+<td><code>gheal</code> <code>invis</code> <code>tp</code>를 쓰는 줄이 없다</td>
+<td>예약어로 둘까, 지울까</td>
+</tr>
+</tbody>
+</table>
+
+<h2 id="03">03 캐릭터와 핫키</h2>
+<table>
+<thead>
+<tr>
+<th>무엇</th>
+<th>지금</th>
+<th>정할 것</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>indian angus bot</td>
+<td>배치를 따르지 않는다. 이동이 화살표 키이고 매크로는 ClassicUO 기본 세트다 (F1 Guards, F2 bank, 4 all stay, 6 Circle Trans). <code>chars.lst</code>에도 없다</td>
+<td>예외로 두는 캐릭터인가</td>
+</tr>
+<tr>
+<td><code>Shift</code>+휠</td>
+<td>아군 순환이 Shift 층의 정의 ("밖으로 던지는 것", <a href="hotkeys.html#02.A">hotkeys.html</a> 02.A절)와 어긋난다</td>
+<td>일부러 둔 예외인가</td>
+</tr>
+<tr>
+<td>가장 가까운 플레이어 타겟</td>
+<td>"서버가 막아 놨다" (<a href="hotkeys.html#04">hotkeys.html</a> 04절)에 출처가 없다</td>
+<td>맞다면 PvP 제약이니 <a href="razor.html#07">razor.html</a> 07절로 옮길까</td>
+</tr>
+<tr>
+<td>"C and a click"</td>
+<td>bard-necro-pvp 주석에 있던 말이다. 어느 바인딩과도 맞지 않아 (summoner의 <code>C</code>는 All Guard Me) "Q or Shift+X/C"로 고쳤다</td>
+<td>원래 뜻이 있었나</td>
+</tr>
+<tr>
+<td>저장소 밖 파일</td>
+<td>L 이름과 <code>Razor_lang.enu</code> (hotkeys 05절), Wine <code>user.reg</code> 키 이름 (01절), Clumsy subcode 62 (05절)는 대조하지 못했다</td>
+<td>게임이 깔린 곳에서 확인</td>
+</tr>
+</tbody>
+</table>
+
+<h2 id="04" data-part="근거">04 출처 없는 숫자와 사실</h2>
+<p>숫자는 인용한다는 규칙 (<a href="workflow.html#01.C">workflow.html</a> 01.C절)에 비춰 근거가 없는 것이다. 문서에는 그대로 두었거나 "확인되지 않았다"로 표시했다.</p>
+<table>
+<thead>
+<tr>
+<th>무엇</th>
+<th>어디</th>
+<th>물을 것</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Energy Bolt 피해 딜레이 0.5초</td>
+<td>pvp 05절, handbook 05.A · 05.I, bard-necro-enhanced POISON STRIKE</td>
+<td>인용이 없다. hotkeys 06절은 0.5초를 Fireball에 적었다. 어느 쪽이 맞나</td>
+</tr>
+<tr>
+<td>Lyric 방어구 무시 42.5%</td>
+<td>handbook 03.F</td>
+<td>출처가 어디인가. Peace 가동률 62%가 이 숫자에서 나왔다</td>
+</tr>
+<tr>
+<td>Barding Break 동안 Virtuoso</td>
+<td>handbook 03.F, bard-necro-enhanced PEACE</td>
+<td>정말 꺼지나. "Barded Creatures"에 디스코만 걸린 몹도 드는지 모른다</td>
+</tr>
+<tr>
+<td>PK의 Alchemy</td>
+<td>handbook 06.C</td>
+<td>80인가 100인가. 지금 숫자는 80 기준이다</td>
+</tr>
+<tr>
+<td>song, peace/provo 성공 쿨</td>
+<td><code>cooldowns.xml</code>은 11초, 위키는 10초 (handbook 02.C)</td>
+<td>1초를 일부러 더했나</td>
+</tr>
+<tr>
+<td>Vengeful Spirit의 마나</td>
+<td>handbook 04.A, 04.I</td>
+<td>"마나 101"을 심볼 1 + 마나 100으로 고쳤다. 마나가 따로 들지 않나</td>
+</tr>
+<tr>
+<td><code>cooldown "…"</code>의 반환값</td>
+<td>razor.html</td>
+<td>1인가, 남은 초인가</td>
+</tr>
+<tr>
+<td><code>and</code>의 단락 평가</td>
+<td>handbook 05.H</td>
+<td>버섯 <code>findtype</code>과 <code>counttype</code>을 서 있을 때만 읽는다는 설명이 이것에 기댄다. razor.html에 없다</td>
+</tr>
+<tr>
+<td><code>in</code>의 대소문자 구분</td>
+<td>conventions 05절</td>
+<td>근거가 <code>dump-label.razor:11</code> 주석뿐이다. 인게임에서 봤다면 razor.html 03절 함정 표에 넣는다</td>
+</tr>
+<tr>
+<td>Vampiric Embrace 확인 날짜</td>
+<td>razor 04절</td>
+<td>2026-09-25는 커밋 날짜에서 가져왔다. 실제로 본 날짜인가</td>
+</tr>
+<tr>
+<td><code>auto-mage.razor:1160</code> 인용</td>
+<td>razor 04절</td>
+<td>저장소와 이력 어디에도 없는 파일이다. 어디 있나</td>
+</tr>
+<tr>
+<td>overheads의 숫자</td>
+<td>overheads 07절, 09절</td>
+<td>광역 바딩 8타일 · 5초 · 2초, Resist 흡수 <code>25% x Resist/100</code> · -75% (pvp의 Parrying 공식과 섞이지 않았나),
+siphon 5분마다 · 60분, reactive 25, drain 레지 -10 / -20 · 2분, Paralyze PvP 10초, Teleport 15초</td>
+</tr>
+<tr>
+<td>pvp의 주장</td>
+<td>pvp 02절, 03절, 05절</td>
+<td>"2·3서클도 같은 규칙, 창은 서클마다 따로", "Swordsmanship도 같은 형태다", Greater Explosion 쿨 15초, 크리처 주문 패링 25%,
+Hamstring이 PvM 목록에는 있다</td>
+</tr>
+</tbody>
+</table>
+
+<h2 id="05" data-part="규칙">05 규칙과 파일이 다른 곳</h2>
+<table>
+<thead>
+<tr>
+<th>규칙</th>
+<th>파일은</th>
+<th>정할 것</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>헤더는 설명 한 줄 + <code>Needs:</code> (<a href="conventions.html#02.C">conventions.html</a> 02.C절)</td>
+<td>bard-throwing과 bard-mace는 배너 뒤에 "Naming convention" 블록이, bard-necro-enhanced는 배너 · 설명 · Needs 순으로 온다. loadout은 헤더 없이 <code>clearall</code>로 시작한다</td>
+<td>긴 루프의 헤더는 어떤 모양인가</td>
+</tr>
+<tr>
+<td><code>cooldown</code> 명령은 기존 파일이 그 스타일일 때만 (<a href="conventions.html#04">conventions.html</a> 04절)</td>
+<td>bard-throwing이 <code>cooldown "ability"</code>로 게이트를 세운다</td>
+<td>규칙이 낡았나, 바가 보여야 해서 일부러 쓴 것인가</td>
+</tr>
+<tr>
+<td>같은 성격이 3개 이상이면 폴더 (<a href="conventions.html#01.C">conventions.html</a> 01.C절)</td>
+<td><code>gather/</code>와 <code>restock/</code>은 2개씩이다</td>
+<td>규칙을 고칠까, 폴더를 합칠까</td>
+</tr>
+<tr>
+<td>시작 4줄 (<a href="conventions.html#02.D">conventions.html</a> 02.D절)</td>
+<td>loadout · claim-loot · share-loot는 <code>clearall</code> → <code>clearsysmsg</code> → <code>cleardragdrop</code> → <code>clearignore</code>,
+bard-throwing · bard-mace는 <code>clearsysmsg</code> → <code>clearall</code> → <code>clearignore</code> → <code>cleardragdrop</code></td>
+<td>순서가 중요한가</td>
+</tr>
+<tr>
+<td><code>AutoSaveScript</code>를 끈다 (<a href="workflow.html#04.B">workflow.html</a> 04.B절)</td>
+<td>프로필에는 <code>AutoSaveScriptPlay</code>도 있다. <code>summoner.xml</code>은 둘 다 False, <code>default.xml</code>은 둘 다 True다</td>
+<td>둘 다 끌까. default 프로필 캐릭터는 외부 편집기를 쓰지 않나</td>
+</tr>
+<tr>
+<td>세션 값과 영속 값 (<a href="conventions.html#03.B">conventions.html</a> 03.B절)</td>
+<td>stock-vendor의 <code>setvar var__…</code> (영속 <code>var__</code>), loadout의 <code>setvar! global__my_recall_scroll</code> (세션 <code>global__</code>), loadout의 <code>as item</code> (<code>alias__</code> 없음)</td>
+<td>스크립트를 규칙에 맞출까</td>
+</tr>
+</tbody>
+</table>
+
+<h2 id="06">06 문서 정리</h2>
+<p>옮길 곳을 정해야 하는 중복과 제자리가 아닌 내용이다. 한 사실은 한 곳에 둔다 (<a href="workflow.html#05.A">workflow.html</a> 05.A절).</p>
+<table>
+<thead>
+<tr>
+<th>무엇</th>
+<th>제안</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>handbook 04.H가 되풀이하는 문법 사실</td>
+<td>razor.html 03절 링크로 바꾼다</td>
+</tr>
+<tr>
+<td>"바드 쿨을 자기 타이머로 복사하지 않는다"</td>
+<td>세 문서에 있다. 한 곳을 정본으로 두고 나머지는 링크로 바꾼다</td>
+</tr>
+<tr>
+<td>Defensive Barding과 서버 스킬 게이트 (handbook 06.A)</td>
+<td>모든 바드 템플릿에 해당하니 pvp.html로 옮긴다</td>
+</tr>
+<tr>
+<td>overheads 11절 링크 메모의 Hamstring (3초 / 30초 / 30~53초)과 TK (30초) 숫자</td>
+<td>pvp.html 03절, 04절이 정본이다. 숫자를 빼고 링크만 남긴다</td>
+</tr>
+<tr>
+<td>handbook 07절의 "loadout 배치" 행</td>
+<td>이 템플릿 이야기가 아니다. conventions나 hotkeys로 옮길까</td>
+</tr>
+<tr>
+<td>2026-09-29에 바꾼 루프 (교전과 이동 분기, 하우스키핑 시계, peace 대기, 한 줄로 접은 게이트)</td>
+<td>handbook 07절에 "확인 대기" 행이 없다. 더할까</td>
+</tr>
+</tbody>
+</table>
+
+<h2 id="07" data-part="보류">07 미뤄 둔 것</h2>
+<p>사용자가 그대로 두라고 한 것이다 (2026-09-29). 답이 아니라 순서를 기다린다.</p>
+<table>
+<thead>
+<tr>
+<th>무엇</th>
+<th>남은 일</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>hally-mage</td>
+<td><code>[ cure pot, on ]</code> 90을 아직 띄워 프로필 줄과 겹친다. <code>[ pvp, on ]</code>이 33이다 (bard-necro-pvp는 90).
+읽는 무기 바 <code>Halberd</code> <code>Battle Axe</code> <code>Viking Sword</code> <code>Katana</code>가 어느 <code>cooldowns.xml</code>에도 없다</td>
+</tr>
+<tr>
+<td>indian angus nom, kit, pay</td>
+<td><a href="hotkeys.html#03">hotkeys.html</a> 03절에 summoner 캐릭터가 nomeehej 하나뿐이다. gumps 파일의 serial로 보면 이 셋도 summoner다 (추정).
+그렇다면 Bard Necro 칸 (1 2 3 Disco / Peace / Provo, F1 bard-necro-enhanced)을 받는다</td>
+</tr>
+</tbody>
+</table>
+</main>
