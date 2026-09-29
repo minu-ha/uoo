@@ -712,7 +712,8 @@ while not dead
         # reads the disturb line itself. That is what keeps a disturbed heal from leaving a stale
         # line for a later cast poll to trip on. The wait is a bounded poll, not a bare while:
         # a disturb drops casting and the poll leaves at once, and if Razor ever left casting
-        # stuck the poll still leaves after 2.5 seconds instead of hanging the loop.
+        # stuck the poll still leaves after its 60 rounds (Cast polling, above) instead of
+        # hanging the loop.
         if diffhits > config__light_hits and diffhits < config__emergency_hits and var__regs_heal = 1
             if timer "timer__heal_action" >= cooldown__heal_action
                 if not targetexists and not casting and cooldown "walk" = 0
