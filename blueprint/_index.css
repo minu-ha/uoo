@@ -44,6 +44,9 @@
   --app-color-verified-soft: #e9f4ed;
   --app-color-unverified: #9a6400;
   --app-color-unverified-soft: #fdf4e3;
+  --app-color-code-command: #5b3ea8;
+  --app-color-code-variable: #0b7a75;
+  --app-color-code-string: #9a6400;
 
   --app-font-sans: 'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont, system-ui, 'Apple SD Gothic Neo', sans-serif;
   --app-font-mono: 'D2Coding', ui-monospace, SFMono-Regular, Menlo, monospace;
@@ -73,6 +76,12 @@
     --app-color-verified-soft: #17281e;
     --app-color-unverified: #d8a54a;
     --app-color-unverified-soft: #2a2317;
+  --app-color-code-command: #b8a3ef;
+  --app-color-code-variable: #5cc7c0;
+  --app-color-code-string: #d8a54a;
+    --app-color-code-command: #b8a3ef;
+    --app-color-code-variable: #5cc7c0;
+    --app-color-code-string: #d8a54a;
   }
 }
 
@@ -94,6 +103,9 @@
   --app-color-verified-soft: #e9f4ed;
   --app-color-unverified: #9a6400;
   --app-color-unverified-soft: #fdf4e3;
+  --app-color-code-command: #5b3ea8;
+  --app-color-code-variable: #0b7a75;
+  --app-color-code-string: #9a6400;
 }
 
 :root[data-theme='dark'] {
@@ -119,18 +131,6 @@
   box-sizing: border-box;
 }
 
-/* ── 껍데기 ─────────────────────────────── */
-
-/* <body>. 목차와 문서를 두 칸으로 놓는다. 목차는 _index.js 가 붙이므로 칸을 먼저 정해 둔다 */
-.bp_index__root {
-  display: grid;
-  max-width: 1920px;
-  margin: 0 auto;
-  padding: 0 32px;
-  gap: 56px;
-  grid-template-columns: 264px minmax(0, 1fr);
-  background: var(--app-color-ground);
-  color: var(--app-color-text);
 /* 움직임 줄이기 — 전역에서 한 번. 목차로 옮길 때도 바로 간다 */
 @media (prefers-reduced-motion: reduce) {
   *,
@@ -145,6 +145,18 @@
   }
 }
 
+/* ── 껍데기 ─────────────────────────────── */
+
+/* <body>. 목차와 문서를 두 칸으로 놓는다. 목차는 _index.js 가 붙이므로 칸을 먼저 정해 둔다 */
+.bp_index__root {
+  display: grid;
+  max-width: 1920px;
+  margin: 0 auto;
+  padding: 0 32px;
+  gap: 56px;
+  grid-template-columns: 264px minmax(0, 1fr);
+  background: var(--app-color-ground);
+  color: var(--app-color-text);
   font-family: var(--app-font-sans);
   font-size: 15px;
   line-height: 1.75;
@@ -398,6 +410,7 @@
     font-size: 16.5px;
     font-weight: 600;
     line-height: 1.45;
+    scroll-margin-top: var(--app-space-anchor);
   }
 
   & h4 {
@@ -412,7 +425,6 @@
     color: var(--app-color-text-muted);
     font-size: 13.5px;
     font-weight: 600;
-    scroll-margin-top: var(--app-space-anchor);
   }
 
   & p {
@@ -532,6 +544,11 @@
     border-bottom: 0;
   }
 
+  /* 넓은 표에서 읽는 줄을 짚는다 */
+  & tbody tr:hover td {
+    background: var(--app-color-accent-soft);
+  }
+
   & hr {
     margin: 32px 0;
     border: 0;
@@ -627,6 +644,28 @@
     content: '';
     vertical-align: -0.05em;
   }
+}
+
+/* Razor 코드 색 — Razor 로 보이는 <pre><code> 에 _index.js 가 붙인다 */
+.bp_index__codeComment {
+  color: var(--app-color-text-muted);
+}
+
+.bp_index__codeString {
+  color: var(--app-color-code-string);
+}
+
+.bp_index__codeKeyword {
+  color: var(--app-color-accent);
+  font-weight: 700;
+}
+
+.bp_index__codeCommand {
+  color: var(--app-color-code-command);
+}
+
+.bp_index__codeVariable {
+  color: var(--app-color-code-variable);
 }
 
 /* 흐름도 — pre.mermaid 원문을 _index.js 가 격자 렌더러로 그린 SVG 상자. 렌더러가 못 오면(오프라인) 원문이 남는다 */

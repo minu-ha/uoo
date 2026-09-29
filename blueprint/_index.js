@@ -6,7 +6,7 @@
  * 3. 목차가 지금 읽는 절과 소제목을 표시하고, 그 절의 소제목만 펼친다
  * 4. 제목부터 첫 절 앞까지를 머리로 묶고, 제목 앞 절 번호를 번호 글자로 가른다
  * 5. 표를 가로로 밀리는 상자로 감싼다
- * 6. "인게임 확인됨" · "확인되지 않았다" 를 상태 알약으로 바꾸고, <code>#rrggbb</code> 앞에 색 칩을 붙인다
+ * 6. "인게임 확인됨" · "확인되지 않았다" 를 상태 알약으로 바꾸고, <code>#rrggbb</code> 앞에 색 칩을 붙이고, Razor 코드 블록에 색을 입힌다
  * 7. _index.html 의 문서 카드를 그린다
  * 8. mermaid 원문(pre.mermaid)을 격자 렌더러(beautiful-mermaid)로 흐름도 SVG 로 바꾼다 — 파일 끝, 쓰는 법은 workflow.html 5.2절
  * 모양과 동작은 sk-ax-gas-pp 의 .ignore/blueprint/blueprint.js 에서 가져왔다.
@@ -306,6 +306,65 @@ const markColors = (doc) => {
   }
 }
 
+const razor_keywords = new Set(['if', 'elseif', 'else', 'endif', 'while', 'endwhile', 'for', 'foreach', 'endfor', 'break', 'continue',
+  'stop', 'replay', 'and', 'or', 'not', 'as', 'in'])
+const razor_prefixed = /^(config|var|wait|cooldown|alias|label|timer|list|global)__\w+$/
+
+const escapeHtml = (text) => text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+
+/**
+ * Razor 한 줄에 색을 입힌다. 주석 줄 · 따옴표 문자열 · 키워드 · 줄 첫 명령 · 접두 변수만 가르고 나머지는 그대로 둔다
+ */
+const highlightRazorLine = (line) => {
+  const comment = line.match(/^(\s*)(#.*)$/)
+
+  if (comment) {
+    return `${comment[1]}<span class="bp_index__codeComment">${escapeHtml(comment[2])}</span>`
+  }
+
+  let first = true
+
+  return line.replace(/("[^"]*"|'[^']*')|([@A-Za-z_][\w!]*)|([^"'@A-Za-z_]+)/g, (token, string, word, other) => {
+    if (string) {
+      return `<span class="bp_index__codeString">${escapeHtml(string)}</span>`
+    }
+
+    if (other) {
+      return escapeHtml(other)
+    }
+
+    const isFirst = first
+
+    first = false
+
+    if (razor_keywords.has(word)) {
+      return `<span class="bp_index__codeKeyword">${word}</span>`
+    }
+
+    if (razor_prefixed.test(word)) {
+      return `<span class="bp_index__codeVariable">${word}</span>`
+    }
+
+    return isFirst && /^[@a-z]/.test(word) ? `<span class="bp_index__codeCommand">${word}</span>` : escapeHtml(word)
+  })
+}
+
+/**
+ * Razor 로 보이는 코드 블록에만 색을 입힌다. 주석을 뺀 줄의 6할 넘게가 소문자 명령으로 시작해야 Razor 로 본다.
+ * 칸을 맞춘 글자 표나 의사 코드는 대개 대문자 · 한글 · 숫자로 시작해서 그대로 남는다
+ */
+const highlightRazor = (doc) => {
+  for (const code of doc.querySelectorAll('pre > code')) {
+    const lines = code.textContent.split('\n')
+    const statements = lines.map((line) => line.trim()).filter((line) => line && !line.startsWith('#'))
+    const commands = statements.filter((line) => /^[@a-z]/.test(line))
+
+    if (statements.length > 0 && commands.length / statements.length > 0.6) {
+      code.innerHTML = lines.map(highlightRazorLine).join('\n')
+    }
+  }
+}
+
 const buildCards = () => {
   const box = document.querySelector('.bp_index__cards')
 
@@ -346,6 +405,7 @@ document.addEventListener('DOMContentLoaded', () => {
   wrapTables(doc)
   markVerification(doc)
   markColors(doc)
+  highlightRazor(doc)
   buildCards()
   startSectionSpy(sections)
   drawFlows()
