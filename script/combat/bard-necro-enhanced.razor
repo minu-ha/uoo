@@ -186,7 +186,7 @@ clearignore
 @setvar! config__use_potion 1
 
 # 1 narrates what the script is doing, 0 keeps it quiet. Covers every 90 hue line: target
-# changes, potions drunk, gold dropped, and every cast cut short for a heal, named by spell.
+# changes, gold dropped, and every cast cut short for a heal, named by spell.
 # A cast the server disturbs is not reported here: the profile's "[ cast, disturbed ]"
 # overhead already says so, the script only consumes the line. Warnings and errors ignore
 # this switch.
@@ -663,10 +663,6 @@ while not dead
                 if findtype "Orange Potion" self
                     hotkey 'Drink Cure'
                     wait wait__short
-
-                    if config__chatty = 1
-                        overhead "[ cure pot, on ]" 90
-                    endif
                 else
                     if timer "timer__message" >= cooldown__message
                         overhead "[ cure pot, out ]" 53

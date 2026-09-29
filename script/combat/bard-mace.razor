@@ -412,7 +412,6 @@ while not dead
     # While hidden, skip only the potion. The old break terminated the whole main loop.
     if poisoned and config__use_potion = 1 and not targetexists and not hidden
         if findtype "Orange Potion" self as alias__cure_potion
-            overhead "[ cure pot, on ]" 90
             dclick alias__cure_potion
             wait wait__short
         else
