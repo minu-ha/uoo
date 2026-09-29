@@ -27,7 +27,8 @@ Combat loops are named after the template (`bard-mace`, `hally-mage`), variants 
 | `dexxer-basic`        | Minimal dexxer sustain: bandages, potions, healing                                           |
 | `backstab-mugging`    | Stealth backstab thief                                                                       |
 
-A new combat loop gets a row here. Every loop has the same shape: setup (variables, timers) → instrument / hotbar checks → one `while not dead` loop for sustain, control and damage.
+A new combat loop gets a row here. Every loop has the same shape, set out in
+[blueprint/conventions.html](../blueprint/conventions.html#2.2) 2.2: config and state first, then one `while not dead` loop.
 
 ## Personal values never go into a script
 
@@ -35,15 +36,15 @@ These files are shared. A container serial typed into one is *someone else's* co
 everyone who pulls it. Keep such values in your Razor profile instead:
 
 ```
-if not varexist global__my_loot_chest
-	overhead "[ loot chest, pick ]" 55
-	setvar global__my_loot_chest
+if not varexist global__my_loot_container
+    overhead "[ loot chest, pick ]" 55
+    setvar global__my_loot_container
 endif
 ```
 
 `setvar` asks for a target once and stores the serial in your profile; the script carries only the
-name. A few older scripts in `restock/`, `loot/` and `gather/` still hardcode serials and are being
-converted.
+name (this is `loot/claim-loot`). `gather/mining`, `gather/lumberjack` and `loot/bank-pouch` still
+hardcode serials and are being converted. `shelf/` scripts are generated with their owner's shelf serial.
 
 ## Checking a script
 
@@ -53,4 +54,5 @@ util/check.sh script/combat/bard-necro-enhanced.razor
 ```
 
 Razor has no linter and a missing `endif` is the usual way a script silently misbehaves. `check.sh`
-reports unbalanced or mismatched `if / while / for` blocks with line numbers. Bash and awk only.
+reports unbalanced or mismatched `if / while / for` blocks, and prefixed variables used before anything
+assigns them, with line numbers. Bash and awk only.
