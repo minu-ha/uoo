@@ -36,7 +36,7 @@
 </tr>
 <tr>
 <td><code>blueprint/</code></td>
-<td>설계 문서. 브라우저로 <a href="_index.html">_index.html</a> 을 연다. 무엇이 있는지는 <a href="../AGENTS.md">AGENTS.md</a> 의 문서 지도, 쓰는 법은 <a href="workflow.html#5.2">workflow.html</a> 5.2절</td>
+<td>설계 문서. 브라우저로 <a href="_index.html">_index.html</a>을 연다. 무엇이 있는지는 <a href="../AGENTS.md">AGENTS.md</a>의 문서 지도, 쓰는 법은 <a href="workflow.html#5.2">workflow.html</a> 5.2절</td>
 </tr>
 <tr>
 <td><code>language/</code></td>
@@ -51,7 +51,7 @@
 <p>웹/서버 프로젝트가 아니다. 빌드·린트·테스트 러너가 없고, 동작 검증은 인게임에서만 된다.</p>
 
 <h3 id="1.2">1.2 script 분류와 파일명</h3>
-<p><code>script/</code> 는 <strong>언제 돌리는 스크립트인지</strong>로 나눈다. 파일명만 봐도 뭔지 알 수 있어야 한다.</p>
+<p><code>script/</code>는 <strong>언제 돌리는 스크립트인지</strong>로 나눈다. 파일명만 봐도 뭔지 알 수 있어야 한다.</p>
 <table>
 <thead>
 <tr>
@@ -106,30 +106,30 @@
 </tr>
 </tbody>
 </table>
-<p>전투 루프와 템플릿의 대응은 <a href="../script/README.md">script/README.md</a> 의 전투 루프 표가 정본이다.</p>
+<p>전투 루프와 템플릿의 대응은 <a href="../script/README.md">script/README.md</a>의 전투 루프 표가 정본이다.</p>
 
 <h3 id="1.3">1.3 파일 규칙</h3>
 <ul>
 <li>kebab-case, 소문자, 공백 없음. 폴더가 분류를 말하므로 파일명에 <code>combat-</code> 같은 접두는 붙이지 않는다.</li>
-<li><code>blueprint/</code> 의 <code>_index.html</code> · <code>_index.css</code> · <code>_index.js</code> 는 모든 문서가 같이 쓰는 입구 · 모양 · 스크립트라 밑줄을 붙여 맨 앞에 세운다.</li>
+<li><code>blueprint/</code>의 <code>_index.html</code> · <code>_index.css</code> · <code>_index.js</code>는 모든 문서가 같이 쓰는 입구 · 모양 · 스크립트라 밑줄을 붙여 맨 앞에 세운다.</li>
 <li>같은 성격이 3개 이상 모이면 폴더를 나누고, 2개 이하면 기존 폴더에 둔다.</li>
-<li><code>-temp</code>, <code>-old</code>, <code>-new</code>, <code>-backup</code> 파일을 만들지 않는다. 이력은 git 이 가진다.</li>
-<li><code>shelf/</code> 는 outlandsbutler.com 생성물. 손으로 고치지 않고 사이트에서 다시 만든다. 내 셸프 serial 이 들어 있어 사실상 개인 파일이다.</li>
+<li><code>-temp</code>, <code>-old</code>, <code>-new</code>, <code>-backup</code> 파일을 만들지 않는다. 이력은 git이 가진다.</li>
+<li><code>shelf/</code>는 outlandsbutler.com 생성물. 손으로 고치지 않고 사이트에서 다시 만든다. 내 셸프 serial이 들어 있어 사실상 개인 파일이다.</li>
 <li>외부 출처 스크립트 (Jaseowns, Demlar 등)는 헤더 크레딧을 유지하고, 상단 설정 변수 위주로만 고친다.
-이 문서의 규칙과 <a href="overheads.html">overheads.html</a> 의 형식도 외부 출처 파일에는 적용하지 않는다.</li>
+이 문서의 규칙과 <a href="overheads.html">overheads.html</a>의 형식도 외부 출처 파일에는 적용하지 않는다.</li>
 </ul>
 
 <h3 id="1.4">1.4 config 는 사람별</h3>
 <ul>
-<li>스크립트는 모두가 공유하고 설정은 사람마다 분리된다. <strong>다른 사람의 <code>config/</code> 는 건드리지 않는다.</strong></li>
-<li><code>settings.json</code> 은 계정 비밀번호가 들어 있으므로 <strong>절대 커밋하지 않는다.</strong></li>
+<li>스크립트는 모두가 공유하고 설정은 사람마다 분리된다. <strong>다른 사람의 <code>config/</code>는 건드리지 않는다.</strong></li>
+<li><code>settings.json</code>은 계정 비밀번호가 들어 있으므로 <strong>절대 커밋하지 않는다.</strong></li>
 <li><code>config/</code> 아래 파일은 게임을 끈 상태에서만 고친다. 이유는 <a href="workflow.html#4.3">workflow.html</a> 4.3절.</li>
 </ul>
 
 <h2 id="2">2. 스크립트 모양</h2>
 
 <h3 id="2.1">2.1 기준 파일</h3>
-<p><code>script/combat/bard-throwing.razor</code> 와 <code>script/restock/loadout.razor</code>. 새 코드는 이 규칙을 따르고,
+<p><code>script/combat/bard-throwing.razor</code>와 <code>script/restock/loadout.razor</code>. 새 코드는 이 규칙을 따르고,
 아직 옮기지 못한 파일을 고칠 때는 그 파일 스타일을 유지한다.</p>
 
 <h3 id="2.2">2.2 헤더</h3>
@@ -139,8 +139,8 @@
 
 <h3 id="2.3">2.3 주석</h3>
 <ul>
-<li>스크립트 안 주석은 영어이고, 줄 맨 앞의 <code>#</code> 로 쓴다. <code>//</code> 는 쓰지 않는다.</li>
-<li><strong>주석에 <code>;</code> 를 쓰지 않는다.</strong> Razor 는 주석을 걷어내기 전에 <code>;</code> 를 구문 구분자로 보기 때문에,
+<li>스크립트 안 주석은 영어이고, 줄 맨 앞의 <code>#</code>로 쓴다. <code>//</code>는 쓰지 않는다.</li>
+<li><strong>주석에 <code>;</code>를 쓰지 않는다.</strong> Razor는 주석을 걷어내기 전에 <code>;</code>를 구문 구분자로 보기 때문에,
 주석 안의 세미콜론도 그 뒤를 명령으로 파싱해서 그 줄에서 에러가 난다. 마침표로 문장을 끊는다.</li>
 </ul>
 
@@ -149,8 +149,8 @@
 clearsysmsg
 cleardragdrop
 clearignore</code></pre>
-<p>들여쓰기는 스페이스 4칸, 줄끝은 CRLF (Razor 가 그렇게 다시 쓴다). 탭은 쓰지 않는다.
-편집기 설정은 <code>.editorconfig</code> 가 정본이다.</p>
+<p>들여쓰기는 스페이스 4칸, 줄끝은 CRLF (Razor가 그렇게 다시 쓴다). 탭은 쓰지 않는다.
+편집기 설정은 <code>.editorconfig</code>가 정본이다.</p>
 
 <h3 id="2.5">2.5 구조와 섹션 배너</h3>
 <p><code>SETUP</code>(변수, 타이머) → 준비 (악기 선택, 핫바 확인) → <code>while not dead</code> 메인 루프 하나 → <code>endwhile</code>.</p>
@@ -183,7 +183,7 @@ clearignore</code></pre>
 </tr>
 <tr>
 <td><code>cooldown__</code></td>
-<td><code>timer__</code> 나 <code>cooldown</code> 과 비교하는 임계값</td>
+<td><code>timer__</code>나 <code>cooldown</code>과 비교하는 임계값</td>
 <td>실행 중</td>
 </tr>
 <tr>
@@ -193,7 +193,7 @@ clearignore</code></pre>
 </tr>
 <tr>
 <td><code>alias__</code></td>
-<td><code>find</code> / <code>findtype</code> 의 <code>as</code> 바인딩 결과</td>
+<td><code>find</code> / <code>findtype</code>의 <code>as</code> 바인딩 결과</td>
 <td>실행 중</td>
 </tr>
 <tr>
@@ -208,7 +208,7 @@ clearignore</code></pre>
 </tr>
 <tr>
 <td><code>list__</code></td>
-<td><code>createlist</code> / <code>pushlist</code> 대상. <code>foreach x in list__y</code> 의 루프 변수 <code>x</code> 는 접두 없이</td>
+<td><code>createlist</code> / <code>pushlist</code> 대상. <code>foreach x in list__y</code>의 루프 변수 <code>x</code>는 접두 없이</td>
 <td>실행 중</td>
 </tr>
 <tr>
@@ -218,39 +218,39 @@ clearignore</code></pre>
 </tr>
 </tbody>
 </table>
-<p><code>alias__</code> 는 묶은 블록 밖에서 읽지 못한다 (<a href="razor.html#3">razor.html</a> 3절).</p>
+<p><code>alias__</code>는 묶은 블록 밖에서 읽지 못한다 (<a href="razor.html#3">razor.html</a> 3절).</p>
 
 <h3 id="3.2">3.2 실행 중 값과 영속 값</h3>
 <ul>
-<li>실행 중만 쓰는 값은 전부 <code>@setvar!</code>. 영속은 <code>global__</code> 뿐이고 <code>setvar</code> 를 쓴다.</li>
+<li>실행 중만 쓰는 값은 전부 <code>@setvar!</code>. 영속은 <code>global__</code> 뿐이고 <code>setvar</code>를 쓴다.</li>
 <li><strong><code>global__</code> 이름을 바꾸면 프로필의 기존 항목과 연결이 끊긴다.</strong> 이름이 곧 키라서, 바꾸면 전부 다시 타겟해야 하고 프로필에 옛 항목이 고아로 남는다.
 같은 이름을 쓰는 파일이 여러 개면 한 커밋에서 같이 바꾼다.</li>
 </ul>
 
 <h3 id="3.3">3.3 serial 리터럴 금지</h3>
-<p><strong>serial 리터럴 (<code>0x45147618</code> 같은 값)을 스크립트에 쓰지 않는다.</strong> <code>script/</code> 는 공유 파일이라 남의 컨테이너 번호가
+<p><strong>serial 리터럴 (<code>0x45147618</code> 같은 값)을 스크립트에 쓰지 않는다.</strong> <code>script/</code>는 공유 파일이라 남의 컨테이너 번호가
 pull 한 사람 모두의 게임에 들어간다. 개인 값은 프로필에 저장하고 스크립트에는 이름만 남긴다.</p>
 <pre><code>if not varexist global__my_loot_chest
     overhead &quot;[ loot chest, pick ]&quot; 55
     setvar global__my_loot_chest
 endif</code></pre>
-<p><code>setvar 이름</code> 은 타겟을 요구하고 그 serial 을 프로필 script variable 로 저장한다.</p>
+<p><code>setvar 이름</code>은 타겟을 요구하고 그 serial을 프로필 script variable로 저장한다.</p>
 
 <h3 id="3.4">3.4 varexist 는 선언 여부만 본다</h3>
 <p>잘못 타겟한 값이 들어 있어도 참이라 영영 안 고쳐진다. 그 물건 앞에 서 있는 것이
-보장되는 스크립트에서는 <code>find</code> 로 실제 유효성까지 확인하고, 아니면 다시 요구한다.</p>
+보장되는 스크립트에서는 <code>find</code>로 실제 유효성까지 확인하고, 아니면 다시 요구한다.</p>
 <pre><code>if not varexist global__my_loot_chest or not find global__my_loot_chest ground -1 -1 3
     unsetvar global__my_loot_chest
     overhead &quot;[ loot chest, pick ]&quot; 55
     setvar global__my_loot_chest
 endif</code></pre>
-<p><code>find</code> 는 클라이언트가 지금 인식하는 것만 찾으므로, 집에 있는 상자를 던전에서 검사하면 멀쩡한 값을 지운다. <strong>대상 앞에 서 있는 것이 확실한 곳에만</strong> 붙인다.</p>
+<p><code>find</code>는 클라이언트가 지금 인식하는 것만 찾으므로, 집에 있는 상자를 던전에서 검사하면 멀쩡한 값을 지운다. <strong>대상 앞에 서 있는 것이 확실한 곳에만</strong> 붙인다.</p>
 
 <h2 id="4">4. 타이머</h2>
 <ul>
 <li><code>if not timerexists "x_timer"</code> → <code>createtimer</code> → <code>settimer</code>. 이름은 <code>_timer</code> 접미.</li>
 <li>시간 제어는 타이머 기본. <code>cooldown</code> 명령은 기존 파일이 이미 그 스타일일 때만.</li>
-<li>서버가 알려주는 쿨 (바드 스킬, 매저리 프록)은 자체 타이머로 흉내 내지 않고 <code>cooldown "이름"</code> 을 읽는다. 이유는 <a href="overheads.html#6.2">overheads.html</a> 6.2절.</li>
+<li>서버가 알려주는 쿨 (바드 스킬, 매저리 프록)은 자체 타이머로 흉내 내지 않고 <code>cooldown "이름"</code>을 읽는다. 이유는 <a href="overheads.html#6.2">overheads.html</a> 6.2절.</li>
 </ul>
 
 <h2 id="5">5. 그 외 관용구</h2>
@@ -268,7 +268,7 @@ endif</code></pre>
 </tr>
 <tr>
 <td>찾은 것을 다시 쓰기</td>
-<td><code>if findtype "name" backpack as alias__x</code> 로 alias 에 담는다</td>
+<td><code>if findtype "name" backpack as alias__x</code>로 alias에 담는다</td>
 </tr>
 <tr>
 <td>같은 검색을 되풀이하며 하나씩 보기</td>
@@ -280,7 +280,7 @@ endif</code></pre>
 </tr>
 <tr>
 <td>검프·핫바 조작</td>
-<td><code>gumpexists</code> / <code>ingump</code> 로 확인한 뒤 <code>gumpresponse</code></td>
+<td><code>gumpexists</code> / <code>ingump</code>로 확인한 뒤 <code>gumpresponse</code></td>
 </tr>
 <tr>
 <td>디버그 출력</td>
@@ -290,7 +290,7 @@ endif</code></pre>
 </table>
 
 <h2 id="6">6. overhead</h2>
-<p>전부 <code>[ 대상, 상태 ]</code> 소문자. 시전 알림만 <code>[ 대상 ]</code>. 단어, hue, 어느 경로로 띄울지는 <a href="overheads.html">overheads.html</a> 가 정본이다.
+<p>전부 <code>[ 대상, 상태 ]</code> 소문자. 시전 알림만 <code>[ 대상 ]</code>. 단어, hue, 어느 경로로 띄울지는 <a href="overheads.html">overheads.html</a>가 정본이다.
 새 단어를 만들기 전에 그 문서의 어휘와 글로서리를 본다.</p>
 
 <h2 id="7">7. PvP 겸용 스크립트</h2>
