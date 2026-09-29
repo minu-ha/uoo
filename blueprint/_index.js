@@ -207,7 +207,8 @@ const buildNav = (doc) => {
 }
 
 /**
- * 화면 위쪽을 지난 마지막 절과 그 안의 소제목을 켠다. 소제목은 절 경계를 넘지 않아도 바뀌므로 스크롤마다(한 프레임에 한 번) 다시 잰다
+ * 읽는 선에 걸린 절과 그 안의 소제목을 켠다. 읽는 선은 목차 · 링크로 옮긴 제목이 서는 높이(_index.css --app-space-anchor)라
+ * 옮긴 곳이 곧 켜진다. 소제목은 절 경계를 넘지 않아도 바뀌므로 스크롤마다(한 프레임에 한 번) 다시 잰다
  */
 const startSectionSpy = (sections) => {
   if (sections.length === 0) {
@@ -219,8 +220,10 @@ const startSectionSpy = (sections) => {
   const markActive = () => {
     frame = 0
 
-    const current = sections.filter((section) => section.heading.getBoundingClientRect().top < 120).at(-1) ?? sections[0]
-    const sub = current.subs.filter((item) => item.heading.getBoundingClientRect().top < 100).at(-1)
+    // scroll-margin-top 은 vh 를 px 로 푼 값으로 읽힌다. 반올림 오차만큼 1px 여유를 둔다
+    const line = parseFloat(getComputedStyle(sections[0].heading).scrollMarginTop) + 1
+    const current = sections.findLast((section) => section.heading.getBoundingClientRect().top <= line) ?? sections[0]
+    const sub = current.subs.findLast((item) => item.heading.getBoundingClientRect().top <= line)
 
     for (const section of sections) {
       const isCurrent = section === current
@@ -234,13 +237,13 @@ const startSectionSpy = (sections) => {
     }
   }
 
-  window.addEventListener(
-    'scroll',
-    () => {
-      frame ||= window.requestAnimationFrame(markActive)
-    },
-    { passive: true },
-  )
+  const scheduleMark = () => {
+    frame ||= window.requestAnimationFrame(markActive)
+  }
+
+  // 읽는 선이 창 높이를 따르므로 창 크기가 바뀌어도 다시 잰다
+  window.addEventListener('scroll', scheduleMark, { passive: true })
+  window.addEventListener('resize', scheduleMark)
 
   markActive()
 }

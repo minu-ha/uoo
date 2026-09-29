@@ -7,6 +7,26 @@
  * 모양은 sk-ax-gas-pp 의 .ignore/blueprint/blueprint.css 에서 가져왔다.
  */
 
+/*
+ * 글꼴 — 본문은 Pretendard, 코드 · 표지 · 흐름도는 D2Coding (한글이 영문 두 칸과 정확히 같다). sk-ax-gas-pp 와 같다.
+ * 둘 다 CDN 이다. file:// 문서는 로컬 글꼴 파일을 CORS 로 막아서 폴더에 두지 않는다
+ */
+@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css');
+
+@font-face {
+  font-family: 'D2Coding';
+  font-weight: 400;
+  font-display: swap;
+  src: url('https://cdn.jsdelivr.net/gh/joungkyun/font-d2coding@1.3.2/D2Coding.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'D2Coding';
+  font-weight: 700;
+  font-display: swap;
+  src: url('https://cdn.jsdelivr.net/gh/joungkyun/font-d2coding@1.3.2/D2CodingBold.woff2') format('woff2');
+}
+
 :root {
   color-scheme: light;
 
@@ -26,8 +46,13 @@
   --app-color-unverified-soft: #fdf4e3;
 
   --app-font-sans: 'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont, system-ui, 'Apple SD Gothic Neo', sans-serif;
-  /* 고정폭 자리에 한글이 오면 (표 머리, 흐름도 라벨) 본문 글꼴로 받는다 */
-  --app-font-mono: 'JetBrains Mono', 'Pretendard Variable', ui-monospace, SFMono-Regular, Menlo, monospace;
+  --app-font-mono: 'D2Coding', ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  /* 목차 · 링크로 옮기면 제목이 화면 이 높이에 선다. _index.js 의 읽는 선도 이 값을 읽는다 (sk-ax-gas-pp 의 --anchor-offset) */
+  --app-space-anchor: 40vh;
+
+  /* 목차 · 본문 링크로 절을 옮길 때 부드럽게 간다. 움직임 줄이기를 켜면 아래 전역 블록이 끈다 */
+  scroll-behavior: smooth;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -106,6 +131,20 @@
   grid-template-columns: 264px minmax(0, 1fr);
   background: var(--app-color-ground);
   color: var(--app-color-text);
+/* 움직임 줄이기 — 전역에서 한 번. 목차로 옮길 때도 바로 간다 */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-delay: 0s !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    transition-delay: 0s !important;
+    scroll-behavior: auto !important;
+  }
+}
+
   font-family: var(--app-font-sans);
   font-size: 15px;
   line-height: 1.75;
@@ -321,7 +360,8 @@
   grid-row: 1;
   grid-column: 2;
   min-width: 0;
-  padding-block: 44px 96px;
+  /* 끝 여백은 마지막 절도 읽는 선(--app-space-anchor)까지 올라올 만큼 둔다 */
+  padding-block: 44px calc(100vh - var(--app-space-anchor));
 
   /* stylelint-disable selector-disallowed-list -- 문서 본문은 태그만 쓴다 (workflow.html 5.2절) */
   & h1 {
@@ -349,7 +389,7 @@
     line-height: 1.35;
     letter-spacing: -0.01em;
     text-wrap: balance;
-    scroll-margin-top: 16px;
+    scroll-margin-top: var(--app-space-anchor);
   }
 
   & h3 {
@@ -358,7 +398,6 @@
     font-size: 16.5px;
     font-weight: 600;
     line-height: 1.45;
-    scroll-margin-top: 24px;
   }
 
   & h4 {
@@ -366,7 +405,6 @@
     color: var(--app-color-text-strong);
     font-size: 14.5px;
     font-weight: 600;
-    scroll-margin-top: 24px;
   }
 
   & h5 {
@@ -374,7 +412,7 @@
     color: var(--app-color-text-muted);
     font-size: 13.5px;
     font-weight: 600;
-    scroll-margin-top: 24px;
+    scroll-margin-top: var(--app-space-anchor);
   }
 
   & p {
@@ -678,7 +716,7 @@
   .bp_index__doc {
     grid-row: 2;
     grid-column: 1;
-    padding-block: 28px 72px;
+    padding-block: 28px calc(100vh - var(--app-space-anchor));
   }
 
   /* 문서 목록과 목차를 알약 줄로 */
@@ -733,6 +771,6 @@
   }
 
   .bp_index__doc {
-    padding-block: 20px 56px;
+    padding-block: 20px calc(100vh - var(--app-space-anchor));
   }
 }
