@@ -18,13 +18,13 @@ unmodified. Syntax reference: [Razor Scripting on the Outlands wiki](https://wik
 
 ## Where things are
 
-|                               |                                                                                                                                                                  |
-|-------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| [`script/`](script/README.md) | the scripts, grouped by what they do                                                                                                                             |
-| [`config/`](config/README.md) | Razor and ClassicUO settings, one folder per player, and how the game gets linked to this repo                                                                   |
-| `blueprint/`                  | design docs as HTML, open `_index.html` in a browser: conventions, Razor syntax, overheads, PvP, Bard Necro, hotkeys, item IDs. [AGENTS.md](AGENTS.md) maps them |
-| `language/`                   | translations of these READMEs                                                                                                                                    |
-| `util/`                       | `setup.sh` links the game to the repo, `check.sh` finds unbalanced blocks in scripts, `check-blueprint.sh` finds broken links in the docs                        |
+|                               |                                                                                                                                                                     |
+|-------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| [`script/`](script/README.md) | the scripts, grouped by what they do                                                                                                                                |
+| [`config/`](config/README.md) | Razor and ClassicUO settings, one folder per player, and how the game gets linked to this repo                                                                      |
+| `blueprint/`                  | design docs as HTML, open `_index.html` in a browser: workflow, conventions, Razor, overheads, PvP, Bard Necro, hotkeys, item IDs. [AGENTS.md](AGENTS.md) maps them |
+| `language/`                   | translations of these READMEs                                                                                                                                       |
+| `util/`                       | `setup.sh` links the game to the repo, `check.sh` finds unbalanced blocks in scripts, `check-blueprint.sh` finds broken links in the docs                           |
 
 ## Credits
 
