@@ -476,6 +476,7 @@
     margin: 5px 0 0;
   }
 
+  /* 합자를 끈다. JetBrains Mono 는 >= 와 != 를 한 글자 (≥ ≠) 로 그려 Razor 비교식을 옮겨 적을 때 헷갈린다 */
   & code {
     padding: 1px 5px;
     border-radius: 3px;
@@ -483,6 +484,7 @@
     color: var(--app-color-text-strong);
     font-family: var(--app-font-mono);
     font-size: 0.87em;
+    font-variant-ligatures: none;
   }
 
   & pre {
@@ -494,6 +496,7 @@
     background: var(--app-color-code);
     font-family: var(--app-font-mono);
     font-size: 12.5px;
+    font-variant-ligatures: none;
     line-height: 1.7;
   }
 
