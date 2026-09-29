@@ -25,8 +25,9 @@
   --app-color-unverified: #9a6400;
   --app-color-unverified-soft: #fdf4e3;
 
-  --app-font-sans: 'IBM Plex Sans KR', 'Apple SD Gothic Neo', system-ui, sans-serif;
-  --app-font-mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+  --app-font-sans: 'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont, system-ui, 'Apple SD Gothic Neo', sans-serif;
+  /* 고정폭 자리에 한글이 오면 (표 머리, 흐름도 라벨) 본문 글꼴로 받는다 */
+  --app-font-mono: 'JetBrains Mono', 'Pretendard Variable', ui-monospace, SFMono-Regular, Menlo, monospace;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -320,7 +321,6 @@
   grid-row: 1;
   grid-column: 2;
   min-width: 0;
-  max-width: 1080px;
   padding-block: 44px 96px;
 
   /* stylelint-disable selector-disallowed-list -- 문서 본문은 태그만 쓴다 (workflow.html 5.2절) */
