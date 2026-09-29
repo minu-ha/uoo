@@ -12,15 +12,14 @@
 <body class="bp_index__root">
 <main class="bp_index__doc">
 <h1>Bard Necro 핸드북</h1>
+<p>Bard Necro 템플릿의 메커니즘과 판단. 무엇을 소환하는지, 전투 루프가 왜 이 모양인지, PK를 만나면 어떻게 하는지 답한다.
+<strong>숫자는 추측하지 않는다.</strong> 바드·네크로·소환수 숫자는 여기서 인용하고, 여기 없으면 위키를 읽어 여기에 더한다.
+인용과 확인 표시 규칙은 <a href="workflow.html#1.3">workflow.html</a> 1.3절.</p>
 <ul>
 <li>캐릭터: <code>nomeehej</code> (Razor 프로필 <code>summoner</code>)</li>
 <li>스크립트: <code>script/combat/bard-necro-enhanced.razor</code> (F1, 사냥), <code>script/combat/bard-necro-pvp.razor</code> (F4, PK)</li>
-<li>2026-09-28에 <code>bard-mechanics.md</code> · <code>bard-necro-combat-design.md</code> · <code>bard-necro-summon-guide.md</code> 세 문서를 하나로 묶었다. 이력은 git.</li>
+<li>2026-09-28에 <code>bard-mechanics.md</code>, <code>bard-necro-combat-design.md</code>, <code>bard-necro-summon-guide.md</code> 세 문서를 하나로 묶었다. 이력은 git.</li>
 </ul>
-<blockquote>
-<p><strong>추측 금지 문서.</strong> 바드·네크로·소환수 숫자가 필요하면 여기서 인용한다. 여기 없으면 위키를 읽고 여기에 추가한다.
-인용과 확인 표시 규칙은 <a href="workflow.html#1.3">workflow.html</a> 1.3절.</p>
-</blockquote>
 <p>여기 없는 것:</p>
 <ul>
 <li>템플릿과 무관한 PvP 규칙과 숫자는 <a href="pvp.html">pvp.html</a>. 6절은 그 규칙으로 이 캐릭터가 내린 판단만 둔다.</li>
@@ -43,7 +42,7 @@
 </tr>
 <tr>
 <td>2</td>
-<td>바드 스킬·송·쿨다운·코덱스가 어떻게 도는가. 루프 게이트의 근거</td>
+<td>바드 스킬, 송, 쿨, 코덱스가 어떻게 도는가. 루프 게이트의 근거</td>
 </tr>
 <tr>
 <td>3</td>
@@ -51,7 +50,7 @@
 </tr>
 <tr>
 <td>4</td>
-<td>무엇을 소환하고 Tome을 어디에 넣는가. 소환수 이름 붙이기</td>
+<td>무엇을 소환하고 Tome을 어디에 넣는가. 소환수 이름 붙이기, 재소환</td>
 </tr>
 <tr>
 <td>5</td>
@@ -75,6 +74,7 @@
 </tr>
 </tbody>
 </table>
+<p>자주 찾는 곳: 무엇을 소환할지는 <a href="#4.2">4.2절</a>, 루프를 고치려면 <a href="#5.1">5.1절</a>부터, PK를 만나면 <a href="#6">6절</a>.</p>
 
 <h2 id="1">1. 캐릭터</h2>
 
@@ -119,11 +119,12 @@
 </table>
 <ul>
 <li><strong>바딩 3종을 전부 찍었다.</strong> <code>Self Taught</code>가 "lowest printed skill amongst Discordance,
-Peacemaking, Provocation" 80 점을 Musicianship 대체로 쓰게 해준다. Musicianship 슬롯이
+Peacemaking, Provocation" 80점을 Musicianship 대체로 쓰게 해 준다. Musicianship 슬롯이
 통째로 비므로 Provocation을 넣을 수 있다.</li>
 <li><strong>Effective Barding = 170</strong> (송 메시지 <code>8.5%</code>로 실측. 2.13절).</li>
-<li><strong>Meditation 없음.</strong> 마나 회복은 환급 스택 + 이동 중 자연회복 + 버섯이다.</li>
-<li><strong>Inscription 없음.</strong> <code>Bless</code> / <code>Protection</code> 지속 연장이 0이고 <code>Reactive Armor</code>는 무효.</li>
+<li><strong>Meditation 없음.</strong> 마나 회복은 환급 스택 + 이동 중 자연 회복 + 버섯이다.</li>
+<li><strong>Inscription 없음.</strong> Inscription이 늘려 주는 <code>Bless</code> / <code>Protection</code> 지속과 <code>Reactive Armor</code> 강화를 받지 못한다.
+Reactive Armor 자체는 Magery로 걸고, 루프가 이동 중에 유지한다 (5.1절 자기 버프).</li>
 <li>장비: Avarhide 스펠북 (double mana regen 60%), Eldritch Aspect 8단계 (mana refund 26%, special chance 7.2%), Lyric Aspect 방어구.</li>
 <li>소환수 딜 비중 <strong>63.4%</strong> (실측, 1.2절). 본체는 37%.</li>
 <li>테이머 듀오와 함께 다니는 경우가 많다. <strong>본체는 후열이다.</strong></li>
@@ -155,17 +156,19 @@ Peacemaking, Provocation" 80 점을 Musicianship 대체로 쓰게 해준다. Mus
 <p><strong>소환수가 딜의 3분의 2다.</strong> 바딩을 120으로 올려 얻는 것보다 SS를 120으로 올려
 소환수 계수를 키우는 쪽이 훨씬 크다. 바딩 3개를 80으로 통일한 근거가 이것이다.</p>
 <ul>
-<li>바딩 최소 성공률은 <code>33% x (유효/100)</code>이라 80에서도 실용 구간이 나온다.</li>
-<li>바딩 지속시간은 난이도 300~500 구간에서 바닥값 <code>15초 x (Musicianship/100)</code>이 지배한다.
+<li>바딩 최소 성공률은 <code>33% x (Effective Barding / 100)</code>이라 80에서도 실용 구간이 나온다 (2.18절).</li>
+<li>바딩 지속시간은 난이도 300~500 구간에서 최소값 <code>15초 x (Musicianship / 100)</code>이 지배한다 (2.14절).
 Musicianship을 120으로 올려도 이 구간에서는 체감이 작다.</li>
-<li>Herding은 뺐다 (2026-09-27, Resisting Spells 80). 있을 때는 팔로워 데미지 <code>22% x (유효 Herding/100)</code>과 저항 <code>11%</code>를 얹었다.
+<li>Herding은 뺐다 (2026-09-27, Resisting Spells 80). 있을 때는 팔로워 데미지 <code>22% x (Effective Herding / 100)</code>과
+저항 <code>11% x (Effective Herding / 100)</code>을 얹었다. 80이면 17.6%와 8.8%다 (스크립트 <code>config__use_herding</code> 주석).
 PK와 싸우는 것이 기본이라 Heat of Battle 중의 printed Resist가 더 급했다. 근거는 6.3절.</li>
 </ul>
 
 <h3 id="1.3">1.3 전투 사이클</h3>
-<pre><code>한 마리 교전  -&gt;  10~20초 이동  -&gt;  다음 한 마리</code></pre>
-<p><strong>이동 구간이 전체의 약 4분의 1이다.</strong> 마나가 회복되고 버섯 60초 쿨이 도는 시간이다.
-반대로 2분짜리 버프는 이 구간에서 낭비된다. 그래서 <strong>2분 버프는 몹이 근처에 있을 때만 건다.</strong></p>
+<p>한 마리와 교전하고, 10~20초 걸어서 다음 한 마리로 간다.
+<strong>이동 구간이 전체의 약 4분의 1이다.</strong> 마나가 회복되고 버섯 60초 쿨이 도는 시간이다.
+반대로 2분짜리 버프는 이 구간에서 낭비된다. 그래서 <strong>2분 버프는 몹이 근처에 있을 때만 건다.</strong>
+루프가 스탯 포션을 교전 중에만 마시는 것도 이 때문이다 (5.1절 하우스키핑).</p>
 
 <h3 id="1.4">1.4 확정 수치, Effective Barding 170</h3>
 <table>
@@ -180,44 +183,47 @@ PK와 싸우는 것이 기본이라 Heat of Battle 중의 printed Resist가 더 
 <tr>
 <td>Barding Song 세 곡 각각</td>
 <td><strong>8.5%</strong> (나 + 팔로워)</td>
-<td>송 메시지 실측</td>
+<td>송 메시지 실측 (2.13절)</td>
 </tr>
 <tr>
 <td>Discordance 디버프</td>
-<td>printed 80 -&gt; <code>80/120 x 25 = </code> <strong>16.7%</strong></td>
-<td>printed 기준</td>
+<td>printed 80 → <code>80/120 x 25 = </code> <strong>16.7%</strong></td>
+<td>printed 기준 (2.12절)</td>
 </tr>
 <tr>
 <td>Discordance 지속</td>
 <td><strong>1분 21초 ~ 1분 57초</strong></td>
-<td>실측. 장비/대상에 따라 변동</td>
+<td>실측. 장비와 대상에 따라 다르다</td>
 </tr>
 <tr>
 <td>Peace / Provo 최소 지속</td>
 <td><code>15 x 0.8 = </code> <strong>12초</strong></td>
-<td>난이도 300+ 에서 이 값이 지배</td>
+<td>난이도 300 이상에서 이 값이 지배 (2.14절)</td>
 </tr>
 <tr>
 <td>바딩 최소 성공률</td>
 <td><strong>56.1%</strong>, Perfect Pitch T3 포함 <strong>72.9%</strong></td>
-<td></td>
+<td>공식 (2.18절)</td>
 </tr>
 <tr>
 <td>Barding Break (난이도 400)</td>
 <td>초당 <strong>4%</strong>, 걸리면 <strong>40초</strong></td>
-<td><strong>Peace / Provo만</strong> 끊는다</td>
+<td><strong>Peace / Provo만</strong> 끊는다 (2.15절)</td>
 </tr>
 </tbody>
 </table>
 
 <h2 id="2">2. 바드 메커니즘</h2>
+<p>루프가 쓰는 결론은 2.5절의 쿨 모델 하나다. 바딩 행동은 전부 <code>music</code>과 자기 슬롯이 0일 때만 나가고, 송은 <code>song</code>까지 본다.
+스킬은 <code>music</code> 5초와 슬롯을 세우고, 송은 <code>song</code>만 세운다. 2.1 ~ 2.4절은 그 근거, 2.6 ~ 2.10절은 그것을 <code>cooldowns.xml</code>과 스크립트에 옮긴 방법,
+2.11절부터는 송, 디버프, 코덱스의 효과다.</p>
 
-<h3 id="2.1">2.1 스킬 사용 쿨다운</h3>
+<h3 id="2.1">2.1 스킬 사용 쿨</h3>
 <table>
 <thead>
 <tr>
 <th></th>
-<th>쿨다운</th>
+<th>쿨</th>
 <th>출처</th>
 </tr>
 </thead>
@@ -249,27 +255,54 @@ PK와 싸우는 것이 기본이라 Heat of Battle 중의 printed Resist가 더 
 </tr>
 </tbody>
 </table>
-<p><strong>Peace와 Provo는 슬롯을 공유한다.</strong> <code>cooldowns.xml</code>에서 <code>peace/provo</code> 한 항목으로 합쳤다.</p>
+<p><strong>Peace와 Provo는 슬롯을 공유한다</strong> (2.6절).</p>
 <p><strong>글로벌과 개별은 AND 조건이다.</strong> Music 5초가 지나도 Peace 자기 쿨 10초가 안 지났으면 못 쓴다.</p>
 <pre><code>if cooldown &quot;music&quot; = 0 and cooldown &quot;peace/provo&quot; = 0</code></pre>
-<p>가능한 사이클:</p>
-<pre><code>t=0   Discordance      Music 0-&gt;5,  Disco 0-&gt;5
-t=5   Peacemaking      Music 0-&gt;5,  Peace/Provo 0-&gt;10
-t=10  Discordance      Music 0-&gt;5,  Disco 0-&gt;5
-t=15  Provocation      Peace/Provo 쿨이 그때 풀린다</code></pre>
+<p>두 쿨을 다 지키면 이렇게 돈다.</p>
+<table>
+<thead>
+<tr>
+<th>시각</th>
+<th>스킬</th>
+<th>쿨</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>t=0</td>
+<td>Discordance</td>
+<td>Music 0 → 5, Disco 0 → 5</td>
+</tr>
+<tr>
+<td>t=5</td>
+<td>Peacemaking</td>
+<td>Music 0 → 5, Peace/Provo 0 → 10</td>
+</tr>
+<tr>
+<td>t=10</td>
+<td>Discordance</td>
+<td>Music 0 → 5, Disco 0 → 5</td>
+</tr>
+<tr>
+<td>t=15</td>
+<td>Provocation</td>
+<td>Peace/Provo 쿨이 그때 풀린다</td>
+</tr>
+</tbody>
+</table>
 
-<h3 id="2.2">2.2 Song 은 스킬을 백팩에 쓴 것이다</h3>
-<p>별도 명령이 아니다. <strong>바드 스킬을 자기 자신 (백팩)에 타겟하면 Song이다.</strong></p>
+<h3 id="2.2">2.2 송은 스킬을 백팩에 쓴 것이다</h3>
+<p>별도 명령이 아니다. <strong>바드 스킬을 자기 자신 (백팩)에 타겟하면 송이다.</strong></p>
 <blockquote>
 <p>"What do you wish to pacify? (you may target <strong>yourself for an area effect</strong> or the <strong>ground for a group effect</strong>)"</p>
 </blockquote>
 <pre><code>useskill &#39;Peacemaking&#39;
 waitfortarget wait__target
-target backpack          &lt;- Song (AoE)
-target lasttarget        &lt;- Skill (단일 대상 디버프)</code></pre>
-<p>저장소의 기존 구현이 이미 이 형태다 (<code>bard-mace.razor:518</code>, <code>bard-necro-enhanced.razor</code> BARD SONG).</p>
+target backpack</code></pre>
+<p>마지막 줄이 <code>target backpack</code>이면 송 (AoE)이고, <code>target lasttarget</code>이면 스킬 (단일 대상 디버프)이다.</p>
+<p>저장소의 기존 구현이 이미 이 형태다 (<code>bard-mace.razor</code> BARD SONG BUFF, <code>bard-necro-enhanced.razor</code> BARD SONG).</p>
 
-<h3 id="2.3">2.3 세 가지 쿨다운 계열</h3>
+<h3 id="2.3">2.3 세 가지 쿨 계열</h3>
 <p>차단 메시지가 어느 계열인지 알려준다. <strong>이 구분이 모델의 열쇠다.</strong></p>
 <table>
 <thead>
@@ -288,49 +321,80 @@ target lasttarget        &lt;- Skill (단일 대상 디버프)</code></pre>
 <tr>
 <td><strong>Barding Song</strong></td>
 <td>"You must wait a few moments before performing <strong>another barding song</strong>."</td>
-<td><strong>세 곡 전체가 공유.</strong> 11초</td>
+<td><strong>세 곡 전체가 공유.</strong> 바는 11초 (2.9절)</td>
 </tr>
 <tr>
 <td><strong>Peace / Provo 슬롯</strong></td>
 <td>"You must wait a few moments before you may <strong>provoke or pacify another creature</strong>."</td>
-<td><strong>공유.</strong> 10초. <code>cooldowns.xml</code>에서 <code>peace/provo</code> 한 항목으로 합쳤다</td>
+<td><strong>공유.</strong> 10초 (2.6절)</td>
 </tr>
 </tbody>
 </table>
 <p>Discordance는 자기 슬롯 5초를 따로 쓴다 (전용 차단 메시지는 확인되지 않았다).</p>
-<p><code>Peace Song -&gt; Disco Skill -&gt; Disco Song</code>에서 마지막이 "another barding song"으로 막혔다. <strong>다른 곡이 다른 곡을 막는다 = 곡끼리 하나의 쿨을 공유한다.</strong></p>
+<p><code>Peace Song -&gt; Disco Skill -&gt; Disco Song</code>에서 마지막이 "another barding song"으로 막혔다. <strong>다른 곡이 다른 곡을 막는다. 곡끼리 쿨 하나를 공유한다는 뜻이다.</strong></p>
 
-<h3 id="2.4">2.4 cooldown 은 서버 값이 아니다</h3>
+<h3 id="2.4">2.4 cooldown은 서버 값이 아니다</h3>
 <p><code>cooldown "..."</code>이 서버 값이 아니라 <code>cooldowns.xml</code>의 내 트리거라는 일반 규칙은 <a href="overheads.html#6.2">overheads.html</a> 6.2절.
-바드에서 이게 문제였던 것:</p>
-<p>예전에는 <code>music</code> 항목에 송 트리거 (10초)까지 섞여 있어서 뒤따르는 5초 스킬 트리거가 서로 덮어썼다.
+바드에서는 이것이 이렇게 문제가 됐다.</p>
+<p>예전에는 <code>music</code> 항목에 송 트리거 (10초)까지 섞여 있어서 뒤따르는 5초 스킬 트리거와 서로 덮어썼다.
 "Music이 0인데 송이 안 나간다"와 "서버가 허용하는 스킬을 10초 참는다"가 둘 다 여기서 나왔다.
-2.9 절의 최종 형태로 고쳤고, 고친 내역과 이유도 거기 있다.</p>
+2.9절의 최종 형태로 고쳤고, 고친 내역과 이유도 거기 있다.</p>
 
-<h3 id="2.5">2.5 쿨다운 모델, 확정</h3>
-<pre><code>Song    요구:  Music = 0   AND   Song = 0   AND   &lt;그 곡의 슬롯&gt; = 0
-        설정:  Song 11초만.   Music 도 슬롯도 세우지 않는다
-
-Skill   요구:  Music = 0   AND   &lt;그 스킬의 슬롯&gt; = 0
-        설정:  Music 5초   +   &lt;그 스킬의 슬롯&gt;
-
-슬롯:   Discord         5초   단독
-        Peace / Provo   10초  **공유**</code></pre>
-<h4>한 문장으로</h4>
+<h3 id="2.5">2.5 쿨 모델, 확정</h3>
 <p><strong>모든 바딩 행동이 같은 관문 하나를 통과한다.</strong></p>
 <pre><code>Music = 0   AND   &lt;그 스킬의 슬롯&gt; = 0</code></pre>
 <p><strong>송만 여기에 <code>Song = 0</code>을 하나 더 본다.</strong>
 읽는 조건은 거의 같고, <strong>다른 것은 무엇을 세우느냐뿐이다.</strong></p>
-<pre><code>Skill  -&gt;  Music 5초  +  슬롯을 세운다
-Song   -&gt;  Song 11초만 세운다        &lt;- Music 도 슬롯도 건드리지 않는다</code></pre>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>요구</th>
+<th>설정</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Song</td>
+<td><code>Music = 0 AND Song = 0 AND &lt;그 곡의 슬롯&gt; = 0</code></td>
+<td>Song 11초만. Music도 슬롯도 세우지 않는다</td>
+</tr>
+<tr>
+<td>Skill</td>
+<td><code>Music = 0 AND &lt;그 스킬의 슬롯&gt; = 0</code></td>
+<td>Music 5초 + &lt;그 스킬의 슬롯&gt;</td>
+</tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr>
+<th>슬롯</th>
+<th>길이</th>
+<th>공유</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Discord</td>
+<td>5초</td>
+<td>단독</td>
+</tr>
+<tr>
+<td>Peace / Provo</td>
+<td>10초</td>
+<td><strong>공유</strong></td>
+</tr>
+</tbody>
+</table>
 <p><strong>"송은 스킬을 빌려 쓰되 소모하지 않는다."</strong></p>
 <ul>
-<li>스킬이 Music을 세우므로 <strong>스킬 -&gt; 송이 막힌다</strong></li>
-<li>송은 Music을 안 세우므로 <strong>송 -&gt; 스킬은 통과한다</strong></li>
-<li>스킬이 슬롯을 세우므로 <strong>Peace 스킬 -&gt; Peace 송이 막힌다</strong></li>
-<li>송은 슬롯을 안 세우므로 <strong>Peace 송 -&gt; Peace 스킬은 통과한다</strong></li>
+<li>스킬이 Music을 세우므로 <strong>스킬 → 송이 막힌다</strong></li>
+<li>송은 Music을 안 세우므로 <strong>송 → 스킬은 통과한다</strong></li>
+<li>스킬이 슬롯을 세우므로 <strong>Peace 스킬 → Peace 송이 막힌다</strong></li>
+<li>송은 슬롯을 안 세우므로 <strong>Peace 송 → Peace 스킬은 통과한다</strong></li>
 </ul>
-<h5>근거 (전부 인게임 실측)</h5>
+<h4>근거 (전부 인게임 실측)</h4>
 <table>
 <thead>
 <tr>
@@ -341,112 +405,158 @@ Song   -&gt;  Song 11초만 세운다        &lt;- Music 도 슬롯도 건드리
 </thead>
 <tbody>
 <tr>
-<td>Song -&gt; Disco Skill (1.5초 후)</td>
+<td>Song → Disco Skill (1.5초 후)</td>
 <td><strong>성공</strong></td>
 <td>송이 Music도 슬롯도 안 세운다. same/other 둘 다 통과</td>
 </tr>
 <tr>
-<td>Song -&gt; Peace Skill</td>
+<td>Song → Peace Skill</td>
 <td><strong>성공</strong></td>
 <td>같음</td>
 </tr>
 <tr>
-<td>Song -&gt; Song (즉시)</td>
+<td>Song → Song (즉시)</td>
 <td>"another barding song"</td>
-<td>Song 쿨 공유</td>
+<td>송 쿨 공유</td>
 </tr>
 <tr>
-<td>Disco Skill -&gt; Song (즉시)</td>
+<td>Disco Skill → Song (즉시)</td>
 <td>"use another skill"</td>
 <td><strong>송이 Music을 본다</strong></td>
 </tr>
 <tr>
-<td>Song(t=0) -&gt; Disco Skill(t=9) -&gt; Song(t=11)</td>
+<td>Song (t=0) → Disco Skill (t=9) → Song (t=11)</td>
 <td>차단</td>
-<td>Song은 풀렸지만 Disco가 세운 Music이 t=14까지</td>
+<td>송 쿨은 풀렸지만 Disco가 세운 Music이 t=14까지</td>
 </tr>
 <tr>
-<td><strong>Peace Skill -&gt; Peace Song</strong> (Music 풀린 뒤)</td>
+<td><strong>Peace Skill → Peace Song</strong> (Music 풀린 뒤)</td>
 <td><strong>"provoke or pacify another creature"</strong></td>
 <td><strong>송이 자기 슬롯을 읽는다</strong></td>
 </tr>
 <tr>
-<td><strong>Peace Skill -&gt; Disco Song</strong></td>
+<td><strong>Peace Skill → Disco Song</strong></td>
 <td><strong>성공</strong></td>
 <td>슬롯이 다르면 통과</td>
 </tr>
 <tr>
-<td><strong>Peace Song -&gt; Peace Skill</strong></td>
+<td><strong>Peace Song → Peace Skill</strong></td>
 <td><strong>성공</strong></td>
 <td><strong>송은 슬롯을 세우지 않는다</strong></td>
 </tr>
 <tr>
-<td>Song -&gt; 차단된 Song -&gt; Peace Skill</td>
+<td>Song → 차단된 Song → Peace Skill</td>
 <td>차단</td>
 <td><strong>차단된 시도도 Music을 태운다</strong></td>
 </tr>
 </tbody>
 </table>
-<p><strong>마지막 줄이 함정이다.</strong> 송 쿨에 막힌 시도가 스킬 쿨을 소비하기 때문에,
+<p><strong>마지막 줄이 함정이다.</strong> 송 쿨에 막힌 시도도 Music을 태우기 때문에,
 "차단된 송 바로 다음의 스킬 판정"을 보고 "송이 스킬을 잠근다"고 오독하기 쉽다. 실제로 한 번 틀렸다.</p>
-<h5>루프에 주는 규칙</h5>
+<h4>루프에 주는 규칙</h4>
 <p><strong>전투 중에는 송이 거의 안 나간다.</strong> 디스코와 피스가 <code>music</code>을 5초씩 계속 세우기 때문이다.
 게다가 악기 연주는 시전을 끊어 주문을 날려먹는다.</p>
 <p>그래서 <code>bard-necro-enhanced</code>는 <strong>송을 이동 구간에서만 부른다.</strong>
 이동 10~20초 동안 <code>music</code>이 비어 있고 어차피 아무것도 안 하고 있다.</p>
 
-<h3 id="2.6">2.6 Peace 와 Provo 는 슬롯을 공유한다</h3>
+<h3 id="2.6">2.6 Peace와 Provo는 슬롯을 공유한다</h3>
 <p>전용 차단 메시지가 있다.</p>
 <blockquote>
 <p>"You must wait a few moments before you may <strong>provoke or pacify another creature</strong>."</p>
 </blockquote>
+<p><strong><code>cooldowns.xml</code>에서 <code>peace/provo</code> 한 항목으로 합쳤다.</strong> 서버가 타이머 하나를 쓰는데
+칸을 둘로 두면 화면만 차지하고 값도 틀린다.</p>
 <p>한때 이 문서가 "공유하지 않는다"고 적었던 것은 <strong>로컬 Razor 엔트리만 보고 내린 결론</strong>이었다.
 <code>Provo</code> 엔트리가 Peace 메시지에 반응하지 않으니 <code>provo READY</code>로 보였을 뿐, <strong>서버는 막는다.</strong>
 위키의 원래 서술이 맞았다.</p>
-<p><strong><code>cooldowns.xml</code>에서 <code>peace/provo</code> 한 항목으로 합쳤다.</strong> 서버가 타이머 하나를 쓰는데
-칸을 둘로 두면 화면만 차지하고 값도 틀린다.</p>
-<p>합치기 전에는 기존 스크립트가 <strong>틀린 값을 읽고 있었다</strong> -- 직전에 Peace를 썼는데
+<p>합치기 전에는 기존 스크립트가 <strong>틀린 값을 읽고 있었다.</strong> 직전에 Peace를 썼는데
 <code>Provo</code>가 READY로 나와서 헛시전하고 <code>music</code>만 태웠다.
 <code>script/</code> 전체의 <code>cooldown "Peace"</code> / <code>cooldown "Provo"</code> 30곳을 <code>cooldown "peace/provo"</code>로 바꿨다.</p>
 
 <h3 id="2.7">2.7 쿨 리셋 프록</h3>
-<p><strong>출처는 Lyric Aspect 방어구다.</strong> 모든 바드 쿨다운을 즉시 초기화한다.</p>
-<p><strong>Song 쿨도 같이 초기화된다</strong> (인게임 확인됨). <code>song song disco</code>가 가능하다.</p>
-<p><strong>쿨다운을 측정할 때는 Lyric 방어구를 벗는다.</strong> 착용 중이면 리셋이 끼어들어 실제 길이가 안 보인다.
-송 메시지가 그대로 알려준다 -- <strong><code>8.5%</code>면 착용 중, <code>6.8%</code>면 벗은 상태.</strong></p>
-<p><strong>스크립트에 주는 영향</strong>: 쿨다운이 예고 없이 0이 될 수 있다.
-따라서 <strong>자체 <code>timer__</code>로 바드 쿨을 흉내내지 않는다.</strong> 게임이 주는 <code>cooldown "..."</code>을 직접 읽어야
+<p><strong>출처는 Lyric Aspect 방어구다.</strong> 모든 바드 쿨을 즉시 초기화한다.
+문장은 "Your barding skill cooldowns reset."이고, <code>cooldowns.xml</code>의 바드 항목이 전부 이 문장에 0으로 돌아간다 (2.9절).</p>
+<p><strong>송 쿨도 같이 초기화된다</strong> (인게임 확인됨). <code>song song disco</code>가 가능하다.</p>
+<p><strong>쿨을 잴 때는 Lyric 방어구를 벗는다.</strong> 착용 중이면 리셋이 끼어들어 실제 길이가 안 보인다.
+입었는지는 송 메시지로 알 수 있다. <strong><code>8.5%</code>면 착용 중, <code>6.8%</code>면 벗은 상태다.</strong></p>
+<p><strong>스크립트에 주는 영향</strong>: 쿨이 예고 없이 0이 될 수 있다.
+따라서 <strong>자체 <code>timer__</code>로 바드 쿨을 흉내 내지 않는다.</strong> 게임이 주는 <code>cooldown "..."</code>을 직접 읽어야
 리셋 프록의 이득을 가져간다.</p>
 
-<h3 id="2.8">2.8 Song 버프 감지</h3>
+<h3 id="2.8">2.8 송 버프 감지</h3>
 <pre><code>findbuff &quot;song of discordance&quot;
 findbuff &quot;song of provocation&quot;
 findbuff &quot;song of peacemaking&quot;</code></pre>
-<p>15분 만료를 직접 세지 않는다. 저장소 기존 구현 (<code>bard-mace.razor:494</code>)이 이 방식이다.</p>
+<p>15분 만료를 직접 세지 않는다. 저장소 기존 구현 (<code>bard-mace.razor</code> BARD SONG BUFF)이 이 방식이다.
+<code>bard-necro-enhanced</code>는 이것으로 게이트하지 않는다 (5.7절).</p>
 
 <h3 id="2.9">2.9 이 저장소의 cooldowns.xml 최종 형태</h3>
-<pre><code>skill        일반 스킬 전부 + 바드 5초 트리거 4개 + 리셋
-music     5s play successfully / fail to incite anger / fail to discord / fail to pacify
-          0s Your barding skill cooldowns
-disco     5s successfully, disrupting your opponent / fail to discord / briefly discording
-          0s Your barding skill cooldowns
-peace/provo
-         11s pacifying your target / successfully, briefly pacifying / play successfully, provoking
-          5s fail to pacify any nearby creatures / fail to pacify your opponent / fail to incite anger
-          0s Your barding skill cooldowns
-song     11s under the effect of a song
-          0s Your barding skill cooldowns</code></pre>
+<table>
+<thead>
+<tr>
+<th>항목</th>
+<th>길이</th>
+<th>트리거</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>skill</code></td>
+<td></td>
+<td>일반 스킬 전부 + 바드 5초 트리거 4개 + 리셋</td>
+</tr>
+<tr>
+<td><code>music</code></td>
+<td>5s</td>
+<td>play successfully / fail to incite anger / fail to discord / fail to pacify</td>
+</tr>
+<tr>
+<td></td>
+<td>0s</td>
+<td>Your barding skill cooldowns</td>
+</tr>
+<tr>
+<td><code>disco</code></td>
+<td>5s</td>
+<td>successfully, disrupting your opponent / fail to discord / briefly discording</td>
+</tr>
+<tr>
+<td></td>
+<td>0s</td>
+<td>Your barding skill cooldowns</td>
+</tr>
+<tr>
+<td><code>peace/provo</code></td>
+<td>11s</td>
+<td>pacifying your target / successfully, briefly pacifying / play successfully, provoking</td>
+</tr>
+<tr>
+<td></td>
+<td>5s</td>
+<td>fail to pacify any nearby creatures / fail to pacify your opponent / fail to incite anger</td>
+</tr>
+<tr>
+<td></td>
+<td>0s</td>
+<td>Your barding skill cooldowns</td>
+</tr>
+<tr>
+<td><code>song</code></td>
+<td>11s</td>
+<td>under the effect of a song</td>
+</tr>
+<tr>
+<td></td>
+<td>0s</td>
+<td>Your barding skill cooldowns</td>
+</tr>
+</tbody>
+</table>
+<p>바 길이는 위키 값 (2.1절)과 조금 다르다. 송과 Peace / Provo 성공은 10초가 아니라 11초로 잡혀 있다.
+송 쿨의 정확한 길이는 아직 재지 않았다 (7절 남은 측정 2).</p>
 <p>항목 순서는 <strong>바가 자주 뜨는 순서</strong>로 정렬했다.
-<code>skill</code> -&gt; <code>music</code> -&gt; <code>disco</code> -&gt; <code>peace/provo</code> -&gt; <code>song</code>, 그 뒤에 이 루프가 읽는 바 순서로 <code>magic arrow</code> -&gt; <code>harm</code> -&gt;
-<code>fireball</code> -&gt; <code>lightning</code> -&gt; <code>mush</code> -&gt; <code>heal pot</code>.</p>
-
-<h3 id="2.10">2.10 skill 과 music 의 관계</h3>
-<p><strong>서버는 스킬 게이트가 하나다.</strong> <code>music</code>은 그중 바드 부분만 따로 보는 이름일 뿐이다.
-실제로 <strong>Music이 도는 동안 Animal Lore 같은 다른 스킬도 안 먹는다.</strong></p>
-<p>그래서 <code>skill</code> 항목에도 바드 5초 트리거 네 개와 리셋을 넣었다.</p>
-<pre><code>cooldown &quot;skill&quot;   아무 스킬이라도 쿨이면 1
-cooldown &quot;music&quot;   바드 때문에 쿨이면 1      &lt;- 전투 루프가 쓰는 것</code></pre>
-<p>전투 루프는 바드 외 스킬을 안 쓰므로 <code>music</code>으로 충분하다. <strong>루프에 Animal Lore나 Herding 크룩 같은 비바드 스킬을 넣게 되면 <code>skill</code>로 바꿔야 한다.</strong></p>
+<code>skill</code> → <code>music</code> → <code>disco</code> → <code>peace/provo</code> → <code>song</code>, 그 뒤에 이 루프가 읽는 바 순서로 <code>magic arrow</code> → <code>harm</code> →
+<code>fireball</code> → <code>lightning</code> → <code>mush</code> → <code>heal pot</code>.</p>
 <p>고친 내역과 이유:</p>
 <table>
 <thead>
@@ -474,11 +584,11 @@ cooldown &quot;music&quot;   바드 때문에 쿨이면 1      &lt;- 전투 루�
 </tr>
 <tr>
 <td>Peace와 Provo를 <strong><code>peace/provo</code> 한 항목으로 합쳤다</strong></td>
-<td>서버가 슬롯을 공유한다. <code>script/</code>의 참조 30곳도 같이 바꿨다</td>
+<td>서버가 슬롯을 공유한다 (2.6절)</td>
 </tr>
 <tr>
 <td><code>skill</code>에 바드 5초 트리거를 <strong>넣었다</strong></td>
-<td>서버 스킬 게이트가 하나라 바드가 도는 동안 다른 스킬도 막힌다</td>
+<td>서버 스킬 게이트가 하나라 바드가 도는 동안 다른 스킬도 막힌다 (2.10절)</td>
 </tr>
 <tr>
 <td>항목 이름을 <strong>통일했다</strong>. 그때는 PascalCase, 2026-09-26에 전부 소문자로 다시 바꿨다</td>
@@ -486,16 +596,42 @@ cooldown &quot;music&quot;   바드 때문에 쿨이면 1      &lt;- 전투 루�
 </tr>
 <tr>
 <td><code>fireball</code>에 발동 트리거 <code>"fireball activated"</code>를 <strong>넣었다</strong></td>
-<td>실측 메시지는 "Wizardry fireball activated." 이게 없어 바가 안 채워지고 프록 게이트가 매 패스 통과했다</td>
+<td>실측 메시지는 "Wizardry fireball activated."다. 이게 없어 바가 안 채워지고 프록 게이트가 매 패스 통과했다</td>
 </tr>
 <tr>
 <td>바가 자주 뜨는 순서로 <strong>재정렬했다</strong></td>
-<td><code>skill</code> → <code>music</code> → <code>disco</code> → <code>peace/provo</code> → <code>song</code>, 그 뒤 이 루프가 읽는 순서로 <code>magic arrow</code> → <code>harm</code> → <code>fireball</code> →
-<code>lightning</code> → <code>mush</code> → <code>heal pot</code></td>
+<td>위 문단의 순서</td>
 </tr>
 </tbody>
 </table>
 <p><strong>이 파일은 게임을 끈 상태에서만 고친다</strong> (<a href="workflow.html#4.3">workflow.html</a> 4.3절).</p>
+
+<h3 id="2.10">2.10 skill과 music의 관계</h3>
+<p><strong>서버는 스킬 게이트가 하나다.</strong> <code>music</code>은 그중 바드 부분만 따로 보는 이름일 뿐이다.
+실제로 <strong>Music이 도는 동안 Animal Lore 같은 다른 스킬도 안 먹는다.</strong></p>
+<p>그래서 <code>skill</code> 항목에도 바드 5초 트리거 네 개와 리셋을 넣었다.</p>
+<table>
+<thead>
+<tr>
+<th>식</th>
+<th>0보다 클 때</th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>cooldown "skill"</code></td>
+<td>아무 스킬이라도 쿨일 때</td>
+<td></td>
+</tr>
+<tr>
+<td><code>cooldown "music"</code></td>
+<td>바드 때문에 쿨일 때</td>
+<td>전투 루프가 쓰는 것</td>
+</tr>
+</tbody>
+</table>
+<p>전투 루프는 바드 외 스킬을 안 쓰므로 <code>music</code>으로 충분하다. <strong>루프에 Animal Lore나 Herding 크룩 같은 비바드 스킬을 넣게 되면 <code>skill</code>로 바꿔야 한다.</strong></p>
 
 <h3 id="2.11">2.11 Barding Song, AoE 버프</h3>
 <p>세 곡 전부 <strong>"Players and their Followers"</strong>에 걸린다. 소환수가 받는다.</p>
@@ -526,9 +662,9 @@ cooldown &quot;music&quot;   바드 때문에 쿨이면 1      &lt;- 전투 루�
 </tbody>
 </table>
 <ul>
-<li>지속: <strong>15분</strong> -- "All AoE Barding Song Buffs durations are 15 minutes"</li>
+<li>지속은 <strong>15분</strong>이다. "All AoE Barding Song Buffs durations are 15 minutes"</li>
 <li><strong>재소환한 소환수에는 안 걸려 있다.</strong> 다시 불러야 한다 (인게임 확인됨).</li>
-<li>스킬 사용 (디스코/피스/프로보)과는 다른 것이다. 혼동하지 말 것.</li>
+<li>스킬 사용 (디스코, 피스, 프로보)과는 다른 것이다. 둘을 섞지 않는다.</li>
 </ul>
 
 <h3 id="2.12">2.12 Discordance 디버프</h3>
@@ -546,7 +682,7 @@ cooldown &quot;music&quot;   바드 때문에 쿨이면 1      &lt;- 전투 루�
 <p><strong>보너스 합계의 상한이 Musicianship이다.</strong> 이것이 Musicianship을 버릴 수 없는 이유다.</p>
 <p><strong><code>Self Taught</code>의 대체값이 이 상한에도 적용된다</strong> (인게임 확인됨).</p>
 <h4>실측값: Effective Barding = 170</h4>
-<p>Song 시전 메시지가 값을 그대로 알려준다. 송 공식이 <code>5% x (Effective Barding / 100)</code>이므로
+<p>송 시전 메시지가 값을 그대로 알려준다. 송 공식이 <code>5% x (Effective Barding / 100)</code>이므로
 표시된 퍼센트에 20을 곱하면 Effective Barding이다.</p>
 <table>
 <thead>
@@ -611,11 +747,11 @@ time."</li>
 </ul>
 <p><strong><code>Ensemble</code>은 그래도 브레이크에 걸린다.</strong> 조건이 <code>Discord AND (Peace OR Provo)</code>라서,
 디스코가 살아 있어도 <strong>Peace / Provo가 끊기면 Ensemble이 꺼진다.</strong>
-따라서 <code>Refrain</code>(브레이크 무시)은 Peace / Provo를 지키는 동시에 <strong>Ensemble 가동률을 지킨다.</strong></p>
+따라서 <code>Refrain</code> (브레이크 무시)은 Peace / Provo를 지키는 동시에 <strong>Ensemble 가동률을 지킨다.</strong></p>
 <p><strong>브레이크가 걸린 대상에게는 Peace도 Provo도 걸 수 없다</strong> (인게임 확인됨).
 한쪽으로 다른 쪽을 대신할 수 없다. 난이도 400 기준 <strong>40초 동안 Ensemble이 완전히 꺼진다.</strong></p>
 
-<h3 id="2.16">2.16 Peacemaking 이 하는 일</h3>
+<h3 id="2.16">2.16 Peacemaking이 하는 일</h3>
 <blockquote>
 <p>"Pacified creatures will not move, perform melee attacks, cast spells, or use most abilities"</p>
 </blockquote>
@@ -627,7 +763,7 @@ time."</li>
 <blockquote>
 <p>요구조건: "Players must have 2 or more skills of at least 80 Musicianship, Peacemaking, Provocation, Discordance skill or above"</p>
 </blockquote>
-<p><strong>총 20 포인트.</strong> 티어 비용은 증분 <code>1/2/2</code> = 누적 <strong><code>T1=1 / T2=3 / T3=5</code></strong>.</p>
+<p><strong>총 20포인트.</strong> 티어 비용은 증분 <code>1/2/2</code> = 누적 <strong><code>T1=1 / T2=3 / T3=5</code></strong>.</p>
 <table>
 <thead>
 <tr>
@@ -644,7 +780,7 @@ time."</li>
 </tr>
 <tr>
 <td>Ensemble</td>
-<td>"Gain Damage Bonus of (8% / 24% / 40%) towards creatures that you have Discorded" -- <strong>실제 조건은 Discord <strong>AND</strong> (Peace <strong>OR</strong> Provo).
+<td>"Gain Damage Bonus of (8% / 24% / 40%) towards creatures that you have Discorded" -- <strong>실제 조건은 Discord AND (Peace OR Provo)다.
 두 개가 걸려 있어야 한다</strong> (인게임 확인됨)</td>
 <td>언급 없음</td>
 </tr>
@@ -732,17 +868,18 @@ Disco/Peace/Provo가 전부 80이면 T3 (120점)를 찍어도 <strong>80밖에 �
 </tbody>
 </table>
 <p>바 길이는 15초 (인게임 관찰). 준비 문장에 리셋되므로 길이가 조금 틀려도 문장이 바로잡는다.</p>
-<p>Lightning 프록은 <code>Wizardry lightning activated.</code>와 <code>Your lightning spell hinders your target.</code>가 둘 다 뜬다 (인게임 확인됨 2026-09-28).
+<p>Lightning 프록은 <code>Wizardry lightning activated.</code>와 <code>Your lightning spell hinders your target.</code>이 둘 다 뜬다 (인게임 확인됨 2026-09-28).
 지금 트리거 (힌더 줄)로 충분하다. 발동 줄로 바꾼다면 <code>lightning activated</code>가 아니라 <code>Wizardry lightning activated</code>로 쓴다.
 짧은 쪽은 <code>chain lightning activated</code>에도 걸린다.</p>
 <p>스크립트는 <code>cooldown "magic arrow" = 0</code>처럼 바로 읽으면 된다.</p>
-<p><strong><code>Energy Bolt</code>는 쿨다운 항목이 필요 없다.</strong> 15초 창 같은 것이 없어서 순수 필러로 쓸 수 있다. 다만 환급은 조건부다.</p>
+<p><strong><code>Energy Bolt</code>는 쿨다운 항목이 필요 없다.</strong> 15초 창 같은 것이 없어서 순수 필러로 쓸 수 있다. 다만 마나 회수는 조건부다.</p>
 <blockquote>
 <p>"Damage increased by (6% / 18% / 30%). Player recovers (3 / 9 / 15) mana <strong>if target is killed within next 5 seconds</strong>" -- Wizard's Grimoire, Energy Bolt
 "Inflicts an additional (7%, 21%, 35%) of final spell damage to target over 15 seconds" -- Wizard's Grimoire, Flamestrike</p>
 </blockquote>
 <ul>
-<li>15 마나는 <strong>볼트 뒤 5초 안에 대상이 죽을 때만</strong> 돌아온다. 잡몹 마무리에는 거의 공짜, 체력 큰 몹에는 20 그대로다.</li>
+<li>돌려받는 마나는 Grimoire 티어별로 T1 / T2 / T3 = <strong>3 / 9 / 15</strong>다. 이 캐릭터는 Energy Bolt에 5점 (T3)을 넣어 15다 (3.5절).</li>
+<li>15마나는 <strong>볼트 뒤 5초 안에 대상이 죽을 때만</strong> 돌아온다. 잡몹 마무리에는 실질 5, 체력 큰 몹에는 20 그대로다.</li>
 <li>이전 판의 "조건 없는 상시 효과"는 틀렸다. 5.4절 마나 예산도 이 조건으로 고쳤다.</li>
 </ul>
 
@@ -786,11 +923,12 @@ Disco/Peace/Provo가 전부 80이면 T3 (120점)를 찍어도 <strong>80밖에 �
 <blockquote>
 <p>"Casting recovery time is <strong>0.2 seconds</strong>" -- 시전 사이 고정 딜레이</p>
 </blockquote>
+<p>소환 주문은 이 표를 따르지 않는다. <code>item-list.txt</code>에서 소환 주문은 서클과 무관하게 전부 6.00초다 (3.3절).</p>
 <p><strong>시약과 마나는 대상을 찍을 때 검사하고 쓴다</strong> (인게임 확인됨 2026-09-28). 시약이 없어도 시전은 끝까지 되고 커서도 뜬다.
 대상을 찍는 순간 캐릭터 이름으로 <code>More reagents are needed for this spell.</code>이 뜨며 실패하고, 마나는 그때까지 줄지 않는다.</p>
 
 <h3 id="3.3">3.3 네크로 소환, Vengeful Spirit</h3>
-<p><strong>언데드 소환수는 <code>Vengeful Spirit</code>을 켠 뒤에 소환 주문을 시전해야 나온다.</strong> Spirit Speak 만으로는 안 된다.</p>
+<p><strong>언데드 소환수는 <code>Vengeful Spirit</code>을 켠 뒤에 소환 주문을 시전해야 나온다.</strong> Spirit Speak만으로는 안 된다.</p>
 <blockquote>
 <p>"For next 30 seconds all summon spells cast will instead create an Undead follower that loses 1% health &amp;
 max health every 10 seconds but has damage increased by (20% * (Necromancy / 100))"</p>
@@ -839,9 +977,10 @@ max health every 10 seconds but has damage increased by (20% * (Necromancy / 100
 </table>
 <ul>
 <li>8서클 소환 전부 <strong>마나 50, 시전 6.00초</strong>, 시약에 <strong>Bloodmoss</strong> 포함 (<code>item-list.txt</code>)</li>
-<li><strong>타이머는 없지만 최대 체력이 10초마다 1% 깎여 결국 죽는다.</strong> 재소환은 "죽었을 때"가 아니라 주기적 정비다</li>
-<li><strong><code>followers</code>는 컨트롤 슬롯 수다.</strong> 위 소환수는 각 <strong>2</strong>, Summon Creature는 1 (인게임 확인됨)</li>
-<li>Vengeful Spirit은 심볼 1, 30초. 소환 둘을 뽑으려면 VS -&gt; 소환 -&gt; 소환 을 30초 안에</li>
+<li><strong>타이머는 없지만 최대 체력이 10초마다 1%씩 깎여 결국 쓸모가 없어진다.</strong> 0이 되지는 않는다 (4.1절). 재소환은 "죽었을 때"가 아니라 주기적 정비다</li>
+<li><strong><code>followers</code>는 컨트롤 슬롯 수다.</strong> 위 소환수는 각 <strong>2</strong>, Summon Creature는 1 (인게임 확인됨).
+Skeletal Husk는 위키 데이터에서 1이다 (<a href="pvp.html#6.2">pvp.html</a> 6.2절)</li>
+<li>Vengeful Spirit은 심볼 1, 30초. 소환 둘을 뽑으려면 VS → 소환 → 소환을 30초 안에 한다</li>
 </ul>
 
 <h3 id="3.4">3.4 Unholy Symbol 경제</h3>
@@ -890,8 +1029,12 @@ max health every 10 seconds but has damage increased by (20% * (Necromancy / 100
 </tr>
 </tbody>
 </table>
-<p>2026-09-27에 6/8/9/7 → 4/4/1/9. 은행이 늘 차 있어서 Evil Omen과 Poison Strike가 거의 안 나가던 것, 그리고 Poison Strike가 Corpse Skin을 기다리는 시간을 줄이려고.</p>
-<p>전부 <code>config__symbols_*</code>라 사냥터에 맞춰 조정한다. 전투가 짧고 이동이 길면 올리고, 은행이 늘 차 있으면 내린다.</p>
+<p><strong>Necro 100의 실제 순환은 Blood Oath + Corpse Skin이다.</strong> 30초에 6개가 차고 그 둘이 정확히 6개를 쓴다.
+셋이 전부 4에서 나가므로 체인 순서 (Blood Oath → Corpse Skin → Evil Omen)가 곧 우선순위다. Blood Oath 뒤
+20초면 Corpse Skin이 나가고 그때부터 Poison Strike가 열린다. Evil Omen은 이동 중 쌓인 잉여로만 돈다.</p>
+<p>전부 <code>config__symbols_*</code>라 사냥터에 맞춰 조정한다. 전투가 짧고 이동이 길면 올리고, 은행이 늘 차 있으면 내린다.
+2026-09-27에 Corpse Skin / Evil Omen / Poison Strike / Vampiric Embrace를 6/8/9/7에서 4/4/1/9로 바꿨다.
+그 전에는 은행이 늘 찬 채로 Evil Omen과 Poison Strike가 거의 안 나갔고, Poison Strike는 Corpse Skin을 오래 기다렸다.</p>
 <p><strong>우선순위 근거</strong> (Necro 100):</p>
 <table>
 <thead>
@@ -905,17 +1048,17 @@ max health every 10 seconds but has damage increased by (20% * (Necromancy / 100
 <tr>
 <td>Blood Oath</td>
 <td>팔로워 딜 <strong>+30%</strong></td>
-<td>63% × 30% = <strong>+18.9%</strong></td>
+<td>63% x 30% = <strong>+18.9%</strong></td>
 </tr>
 <tr>
 <td>Corpse Skin</td>
-<td>모든 주문에 25% 질병 DoT</td>
-<td>37% × 25% = +9.3%, <strong>자해 없음</strong></td>
+<td>공격 주문마다 25% 질병 DoT</td>
+<td>37% x 25% = +9.3%, <strong>자해 없음</strong></td>
 </tr>
 <tr>
 <td>Evil Omen</td>
 <td>주문 +20%, 주문당 25% 확률로 마나/2 자해</td>
-<td>37% × 20% = +7.4%, 자해 있음</td>
+<td>37% x 20% = +7.4%, 자해 있음</td>
 </tr>
 </tbody>
 </table>
@@ -975,28 +1118,70 @@ Magic Arrow 하나 뒤에 쓰면 오고 있던 스택을 버린다. 그 순서�
 </tr>
 </tbody>
 </table>
-<p><strong>Necro 100의 실제 순환은 Blood Oath + Corpse Skin이다.</strong> 30초에 6개가 차고 그 둘이 정확히 6개를 쓴다.
-셋이 전부 4에서 나가므로 체인 순서 (Blood Oath → Corpse Skin → Evil Omen)가 곧 우선순위다. Blood Oath 뒤
-20초면 Corpse Skin이 나가고 그때부터 Poison Strike가 열린다. Evil Omen은 이동 중 쌓인 잉여로만 돈다.</p>
 <p><strong>안 넣은 것</strong>: Strangle (4)은 Blood Oath와 심볼을 다투고 모든 딜을 5초 지연시킨다.
 Wither (5)는 비공격 주문용 마나만 준다. Pain Spike (5)는 <strong>다음 몹 옆에</strong> 시체가 있어야 한다.</p>
 <p><strong>핫바 Auto-Renew는 전부 끈다.</strong> 게임이 같은 심볼을 쓰고, 우선순위가 <strong>"least expensive first"</strong>라
-이 빌드엔 정반대다 — Blood Oath가 맨 마지막에 돈다.</p>
-<p><strong>심볼 개수는 <code>ingump</code>로 읽는다.</strong> <code>"&lt;have&gt;/&lt;max&gt;"</code> 형식이고 <code>ingump</code>가 부분문자열 매칭이라 큰 수부터 내려오는
-체인으로 읽는다. Necromancy 100이면 최대 10이라 사슬은 <code>10/</code>부터 <code>1/</code> 까지다. 핫바가 11 이상을 보이면 위에 줄을 더한다 (<code>"11/11"</code>이 <code>"1/"</code>로 읽히기 때문). 리스트는 읽은 값이 바뀔 때만 다시 채운다 (5.8절).</p>
+이 빌드에는 정반대다. Blood Oath가 맨 마지막에 돈다.</p>
+<p>루프가 핫바에서 심볼 수를 읽는 방법은 5.8절.</p>
 
 <h3 id="3.5">3.5 Wizard's Grimoire 40점</h3>
-<pre><code>Magic Arrow    5    15초마다 첫 시전 +250%
-Harm           5    15초마다 첫 시전 +250%
-Fireball       5    15초마다 첫 시전 +250% DoT
-Lightning      5    15초마다 첫 시전 +200% + 힌더 2.5초
-Curse          5    대상에게 60초간 내 모든 주문 +30%
-Mana Drain     5    대상에게 60초간 적대주문 환급 +30%
-Create Food    5    버섯 25마나 / 60초
-Energy Bolt    5    +30% 데미지, 5초 안에 죽으면 15마나 회수
-              ----
-               40</code></pre>
-<h4>Bless 를 빼고 Energy Bolt 를 넣은 것이 맞다</h4>
+<table>
+<thead>
+<tr>
+<th>주문</th>
+<th>점수</th>
+<th>효과</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Magic Arrow</td>
+<td>5</td>
+<td>15초마다 첫 시전 +250%</td>
+</tr>
+<tr>
+<td>Harm</td>
+<td>5</td>
+<td>15초마다 첫 시전 +250%</td>
+</tr>
+<tr>
+<td>Fireball</td>
+<td>5</td>
+<td>15초마다 첫 시전 +250% DoT</td>
+</tr>
+<tr>
+<td>Lightning</td>
+<td>5</td>
+<td>15초마다 첫 시전 +200% + 힌더 2.5초</td>
+</tr>
+<tr>
+<td>Curse</td>
+<td>5</td>
+<td>대상에게 60초간 내 모든 주문 +30%</td>
+</tr>
+<tr>
+<td>Mana Drain</td>
+<td>5</td>
+<td>대상에게 60초간 적대 주문 환급 +30%</td>
+</tr>
+<tr>
+<td>Create Food</td>
+<td>5</td>
+<td>버섯 25마나 / 60초</td>
+</tr>
+<tr>
+<td>Energy Bolt</td>
+<td>5</td>
+<td>+30% 데미지, 5초 안에 죽으면 15마나 회수</td>
+</tr>
+<tr>
+<td>합</td>
+<td>40</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h4>Bless를 빼고 Energy Bolt를 넣은 것이 맞다</h4>
 <table>
 <thead>
 <tr>
@@ -1014,7 +1199,7 @@ Energy Bolt    5    +30% 데미지, 5초 안에 죽으면 15마나 회수
 <tr>
 <td>전체 딜 기여</td>
 <td>주문뎀 5% x 소환수 63% = <strong>약 +3.2%</strong></td>
-<td>15초 창마다 시전 횟수가 <strong>약 2배</strong></td>
+<td>15초 창마다 시전 횟수가 <strong>약 2배</strong> (4회 → 9회, 5.4절)</td>
 </tr>
 <tr>
 <td>비용</td>
@@ -1023,10 +1208,10 @@ Energy Bolt    5    +30% 데미지, 5초 안에 죽으면 15마나 회수
 </tr>
 </tbody>
 </table>
-<p><strong>프록 4종은 15초 창에 약 6초만 쓴다.</strong> 남는 9초가 그냥 버려지고 있었다.
-<code>Energy Bolt</code>가 그 9초를 6서클 주문 +30%로 채운다는 것이 <code>Bless</code>의 <code>+3.2%</code>와 비교가 안 된다.
-실질 5 마나는 마무리 때만이지만, 20을 다 내도 결론은 같다.</p>
-<h4>필러는 Energy Bolt 지 Flamestrike 가 아니다</h4>
+<p><strong>프록 4종은 15초 창에 약 4.3초만 쓴다.</strong> 남는 10.7초가 그냥 버려지고 있었다 (5.4절).
+<code>Energy Bolt</code>가 그 10.7초를 6서클 주문 +30%로 채운다는 것이 <code>Bless</code>의 <code>+3.2%</code>와 비교가 안 된다.
+실질 5마나는 마무리 때만이지만, 20을 다 내도 결론은 같다.</p>
+<h4>필러는 Energy Bolt지 Flamestrike가 아니다</h4>
 <p>Magery 100, Eval 80 (<code>0.75 + 0.75 x 0.8 = 1.35</code>), 위키 PvM 공식.</p>
 <table>
 <thead>
@@ -1044,8 +1229,8 @@ Energy Bolt    5    +30% 데미지, 5초 안에 죽으면 15마나 회수
 </tr>
 <tr>
 <td>피해</td>
-<td>32~44 x 1.35 x 1.30 = **56~77**, 평균 67</td>
-<td>72~96 x 1.35 = **97~130**, 평균 113</td>
+<td>32~44 x 1.35 x 1.30 = <strong>56~77</strong>, 평균 67</td>
+<td>72~96 x 1.35 = <strong>97~130</strong>, 평균 113</td>
 </tr>
 <tr>
 <td>시전</td>
@@ -1072,19 +1257,55 @@ Flamestrike를 쓰고 싶으면 "마나가 높을 때만 (예: 80 이상) 체력
 기본 주문은 포인트 없이도 시전되고, 큐어는 쿨 없는 포션이 우선이다.</p>
 
 <h3 id="3.6">3.6 Bard Codex 20점, 지금 배분이 맞다</h3>
-<pre><code>Self Taught     3    Musicianship 80 대체.  T3(120점)는 낭비 -- printed 가 80뿐
-Perfect Pitch   5    성공률 56.1% -&gt; 72.9%
-Refrain         5    Barding Break 20% 무시
-Ensemble        3    +24%
-Reverb          3    +12%
-Virtuoso        1    +4%
-               ----
-                20</code></pre>
-<p><strong>이전 판의 <code>Refrain 5 -&gt; 1</code> 권고는 철회한다.</strong> 근거가 틀렸다.</p>
-<p><code>Ensemble</code>의 실제 조건은 <strong><code>Discord AND (Peace OR Provo)</code></strong>다. 디스코 하나로는 안 켜진다.
-Discordance 자체는 브레이크에 안 끊기지만 <strong>Peace / Provo는 끊긴다.</strong>
-따라서 <code>Refrain</code>은 Peace를 지키는 동시에 <strong><code>Ensemble</code> 가동률을 지킨다.</strong></p>
-<h4>Ensemble 3 -&gt; 5 로 올릴 가치는 거의 없다</h4>
+<table>
+<thead>
+<tr>
+<th>업그레이드</th>
+<th>점수</th>
+<th>효과</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Self Taught</td>
+<td>3</td>
+<td>Musicianship 80 대체. T3 (120점)는 낭비다. printed가 80뿐이다</td>
+</tr>
+<tr>
+<td>Perfect Pitch</td>
+<td>5</td>
+<td>성공률 56.1% → 72.9%</td>
+</tr>
+<tr>
+<td>Refrain</td>
+<td>5</td>
+<td>Barding Break 20% 무시</td>
+</tr>
+<tr>
+<td>Ensemble</td>
+<td>3</td>
+<td>+24%</td>
+</tr>
+<tr>
+<td>Reverb</td>
+<td>3</td>
+<td>+12%</td>
+</tr>
+<tr>
+<td>Virtuoso</td>
+<td>1</td>
+<td>+4%</td>
+</tr>
+<tr>
+<td>합</td>
+<td>20</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p><strong>이전 판의 <code>Refrain 5 -&gt; 1</code> 권고는 철회한다.</strong> 근거가 틀렸다.
+<code>Ensemble</code>은 Peace (또는 Provo)까지 걸려야 켜지고 그쪽은 브레이크에 끊기므로 (2.15절), <code>Refrain</code>이 <strong><code>Ensemble</code> 가동률을 지킨다.</strong></p>
+<h4>Ensemble 3 → 5로 올릴 가치는 거의 없다</h4>
 <p>난이도 400, Lyric 방어구 무시 42.5% + <code>Refrain</code> T3 20%로 계산하면 Peace 가동률은 약 <strong>62%</strong>다.</p>
 <table>
 <thead>
@@ -1096,11 +1317,11 @@ Discordance 자체는 브레이크에 안 끊기지만 <strong>Peace / Provo는 
 <tbody>
 <tr>
 <td><code>Ensemble 3 -&gt; 5</code></td>
-<td><code>+24% -&gt; +40%</code>, 가동률 62% -&gt; 실효 <strong>+9.9</strong></td>
+<td><code>+24% -&gt; +40%</code>, 가동률 62% → 실효 <strong>+9.9</strong></td>
 </tr>
 <tr>
 <td><code>Reverb 3 -&gt; 1</code></td>
-<td><code>+12% -&gt; +4%</code>, 가동률 거의 100% -&gt; 실효 <strong>-8.0</strong></td>
+<td><code>+12% -&gt; +4%</code>, 가동률 거의 100% → 실효 <strong>-8.0</strong></td>
 </tr>
 <tr>
 <td>합</td>
@@ -1111,20 +1332,29 @@ Discordance 자체는 브레이크에 안 끊기지만 <strong>Peace / Provo는 
 <p><strong>움직일 값이 아니다.</strong> 지금 배분을 유지한다.</p>
 <h4>진짜 문제는 배분이 아니라 Peace 가동률이다</h4>
 <p><code>Ensemble</code> 3점이 값을 하려면 <strong>Peace가 계속 걸려 있어야 한다.</strong>
-난이도 300+ 에서 Peace 지속은 최소값 <code>15 x 0.8 = 12초</code>이고 자기 쿨은 10초다. <strong>즉 12초마다 다시 걸면 끊김 없이 유지된다.</strong> 이것이 루프에 반드시 들어가야 한다.</p>
+난이도 300 이상에서 Peace 지속은 최소값 <code>15 x 0.8 = 12초</code>이고 자기 쿨은 10초다. <strong>즉 12초마다 다시 걸면 끊김 없이 유지된다.</strong>
+그래서 루프의 피스 블록은 대상마다 한 번이 아니라 계속 다시 건다 (5.1절).</p>
 <p>Peace를 가끔 쓰는 제어 수단으로만 다루면 <code>Ensemble</code> + <code>Virtuoso</code> 4점이 대부분 놀게 된다.</p>
-<p><strong>브레이크가 걸린 대상에게는 Peace도 Provo도 못 건다</strong> (인게임 확인됨).
-한쪽으로 다른 쪽을 대신할 수 없으므로, 브레이크가 뜨면 난이도 400 기준 <strong>40초 동안 <code>Ensemble</code>과 <code>Virtuoso</code>가 통째로 꺼진다.</strong> <code>Refrain</code>이 막아주는 것이 바로 이 40초다.</p>
+<p>브레이크가 뜨면 그 대상에게는 Peace도 Provo도 못 걸어서 (2.15절) 난이도 400 기준 <strong>40초 동안 <code>Ensemble</code>과 <code>Virtuoso</code>가 통째로 꺼진다.</strong>
+<code>Refrain</code>이 막아 주는 것이 바로 이 40초다.</p>
 
 <h2 id="4">4. 소환수</h2>
 
 <h3 id="4.1">4.1 소환 절차</h3>
-<p><strong><code>Vengeful Spirit</code>(심볼 1)을 켠 뒤 30초 안에 소환 주문을 시전한다.</strong> 안 켜면 맨 엘리멘탈이 나온다.
-소환은 8서클이라 <strong>마나 50, 시전 6초</strong>, 둘 뽑으면 마나 100에 12초다.
-나온 언데드는 <strong>10초마다 남은 최대 체력의 1% 씩 썩어</strong> (복리 — 30분 뒤 약 16%, 0은 안 된다. 인게임 관찰) 결국 쓸모가 없어지므로, 재소환은 사망 대응이 아니라 <strong>주기 정비</strong>로 본다.
+<p><strong><code>Vengeful Spirit</code> (심볼 1)을 켠 뒤 30초 안에 소환 주문을 시전한다.</strong> 안 켜면 맨 엘리멘탈이 나온다.
+소환은 8서클이라 <strong>마나 50, 시전 6초</strong>, 둘 뽑으면 마나 100에 12초다. 키는 Alt 숫자줄에 있다 (<a href="hotkeys.html#1.2">hotkeys.html</a> 1.2절).
+나온 언데드는 <strong>10초마다 남은 최대 체력의 1%씩 썩는다.</strong> 복리라 30분 뒤에도 약 16%가 남고 0이 되지는 않는다 (인게임 관찰).
+그래도 결국 쓸모가 없어지므로, 재소환은 사망 대응이 아니라 <strong>주기 정비</strong>로 본다.
 Lich 하나가 슬롯 2라 <code>followers</code>는 Lich 2마리에 4다.</p>
 
-<h3 id="4.2">4.2 한 줄 결론</h3>
+<h3 id="4.2">4.2 무엇을 소환하나</h3>
+<p><strong>Magic Resist가 높은 맵이면 누구와 다니든 <code>Mummy + Air</code>다.</strong> 그 밖에는 이렇게 고른다.</p>
+<pre class="mermaid">flowchart LR
+  duo{"테이머와&lt;br&gt;같이 다니나"} -- 예 --> long{"한 마리를&lt;br&gt;3분 넘게 붙잡나"} -- 예 --> vamp("Vampire 2마리")
+  long -- 아니요 --> lich("Lich 2마리&lt;br&gt;기본")
+  duo -- 아니요 --> melee{"근접이 세거나&lt;br&gt;넉백을 쓰는 몹인가"} -- 예 --> mummy("Mummy + Lich")
+  melee -- 아니요 --> witch("Rag Witch + Lich")</pre>
+<p>PK를 만나도 바꾸지 않는다. 사냥하던 조합 그대로 싸운다 (6.4절). 각 조합의 이유는 아래 표다.</p>
 <table>
 <thead>
 <tr>
@@ -1146,8 +1376,8 @@ Lich 하나가 슬롯 2라 <code>followers</code>는 Lich 2마리에 4다.</p>
 <td><code>Rag Witch + Lich</code>. 탱커 없이 후열만 세울 수 없다. 탱커 자리는 Rag Witch (4.5절)</td>
 </tr>
 <tr>
-<td>솔플, 근접이 센 몹</td>
-<td><code>Mummy + Lich</code>. 방어력이 Rag Witch보다 25 높다</td>
+<td>솔플, 근접이 세거나 넉백을 쓰는 몹</td>
+<td><code>Mummy + Lich</code>. 방어력이 Rag Witch보다 25 높고 넉백에 안 밀린다 (Rooted, 4.5절)</td>
 </tr>
 <tr>
 <td>고 Magic Resist 맵</td>
@@ -1159,18 +1389,18 @@ Lich 하나가 슬롯 2라 <code>followers</code>는 Lich 2마리에 4다.</p>
 </tr>
 </tbody>
 </table>
-<p><strong>Lich · Vampire · Rag Witch는 주문 딜러다.</strong> 위키에 Vampire <code>Spell Damage: 26 - 32</code>, Rag Witch <code>Spell Damage: 24 - 30</code>으로 명시돼 있다.
-따라서 본체의 <code>Mana Drain</code> (<code>-20 Magic Resist</code>)과 Fire Tome의 <code>Hex</code>가 <strong>셋 모두에 걸린다.</strong>
+<p><strong>Lich, Vampire, Rag Witch는 주문 딜러다.</strong> 위키에 Vampire <code>Spell Damage: 26 - 32</code>, Rag Witch <code>Spell Damage: 24 - 30</code>으로 명시돼 있다.
+본체의 <code>Mana Drain</code> (<code>-20 Magic Resist</code>)과 Fire Tome의 <code>Hex</code>는 대상의 마법 저항을 깎으므로 <strong>셋 모두 그 덕을 본다.</strong>
 물리 딜러는 <code>Mummy</code>와 <code>Air</code>뿐이다.</p>
 <p><strong>소환수 스탯은 반드시 SS 120 기준 스케일 표로 본다.</strong> 위키의 기본 스탯은 낮은 SS 기준이라
 실제 수치와 다르다.</p>
 
 <h3 id="4.3">4.3 왜 Lich 2마리인가, 테이머 듀오 기준</h3>
 <ul>
-<li>테이머 펫이 어그로를 잡아주므로 <strong>탱커 소환수가 필요 없다.</strong> 탱커 슬롯 (Rag Witch · Mummy)을 딜로 바꿀 수 있다.</li>
+<li>테이머 펫이 어그로를 잡아주므로 <strong>탱커 소환수가 필요 없다.</strong> 탱커 슬롯 (Rag Witch, Mummy)을 딜로 바꿀 수 있다.</li>
 <li>Lich는 <code>Epic Barrage</code>로 거리를 유지하면서 딜을 넣는다. 후열 포지션과 맞는다.</li>
 <li>Fire Tome의 <code>Scorched Earth</code>가 거는 <strong>Hex는 대상의 마법 저항을 깎는다.</strong>
-Lich 딜도 내 주문딜도 같이 올라간다. 본체가 마법 스팸 빌드라 시너지가 직접적이다.</li>
+Lich 딜도 내 주문 딜도 같이 올라간다. 본체가 마법 스팸 빌드라 시너지가 직접적이다.</li>
 <li>내 <code>Mana Drain</code>이 거는 <code>-20 Magic Resist</code>도 같은 방향이다.
 Lich는 주문 딜러라 이 감소를 그대로 받는다.</li>
 </ul>
@@ -1210,7 +1440,7 @@ Lich를 고르는 이유는 어디까지나 <strong>후열 딜 + Hex 시너지</
 </tr>
 <tr>
 <td>Tome 시너지</td>
-<td><code>Scorched Earth</code>의 Hex가 <strong>파티 전체 주문딜</strong>을 올린다</td>
+<td><code>Scorched Earth</code>의 Hex가 <strong>파티 전체 주문 딜</strong>을 올린다</td>
 <td><code>Bloodfuel</code> / <code>Battlecaster</code> / <code>Vengeance</code>는 자기 딜만</td>
 </tr>
 <tr>
@@ -1221,23 +1451,21 @@ Lich를 고르는 이유는 어디까지나 <strong>후열 딜 + Hex 시너지</
 </tbody>
 </table>
 <p><strong>기본값은 여전히 <code>Lich 2마리</code>다.</strong> 이유는 Fury가 아니라 <strong>Hex다.</strong>
-Fire Tome의 <code>Scorched Earth</code>가 거는 마법저항 감소는 Lich 자신, 내 주문, 그리고
+Fire Tome의 <code>Scorched Earth</code>가 거는 마법 저항 감소는 Lich 자신, 내 주문, 그리고
 테이머가 주문 딜을 넣는다면 그쪽까지 올린다. Vampire의 Tome 업그레이드는 전부 자기 딜에만 붙는다.</p>
 <p><code>Vampire 2마리</code>는 <strong>한 마리를 3분 이상 붙잡고 싸우는 장기 교전</strong>에서 값을 한다.
 지금 전투 사이클 (한 마리 잡고 10~20초 이동)에서는 뱀파이어가 몹 사이를 살아서 넘어가야
 Fury가 유지된다. 테이머가 전선을 잡아주면 실현 가능하다.</p>
-<blockquote>
-<p><strong>미확인</strong>: 몹을 바꿀 때 Fury가 유지되는지, 전투가 끝나고 이동하는 동안에도
-"alive" 카운터가 계속 도는지 확인하지 않았다. 이동 중에도 돈다면 <code>Vampire 2마리</code>의
-평가가 올라간다.</p>
-</blockquote>
+<p>몹을 바꿀 때 Fury가 유지되는지, 전투가 끝나고 이동하는 동안에도 "alive" 카운터가 계속 도는지는 확인되지 않았다.
+이동 중에도 돈다면 <code>Vampire 2마리</code>의 평가가 올라간다.</p>
 
 <h3 id="4.5">4.5 솔플</h3>
 <p>솔플이면 <strong><code>Rag Witch + Lich</code></strong>다. 테이머 펫이 없으면 전선을 잡아줄 것이 필요하고,
-소환수 둘이 동시에 맞으면 둘 다 녹는다. 소환수가 죽으면 3곡을 다시 불러야 해서 (<code>cooldown "music"</code> 글로벌 5초 + 곡당 10초) <strong>전투 중에 회복이 안 되는 손실</strong>이다.</p>
+소환수 둘이 동시에 맞으면 둘 다 녹는다. 소환수가 죽으면 다시 뽑아도 송 세 곡은 다음 이동에서야 다시 걸린다 (5.7절).
+<strong>전투 중에 회복이 안 되는 손실</strong>이다.</p>
 <p>탱커 자리는 <strong>Rag Witch</strong> (Water Elemental)가 Ancient Mummy (Earth Elemental)보다 낫다. 2026-09-28에 Mummy에서 바꿨다.
 아래는 위키 스케일 표의 SS 120 열이다. 표의 열은 <code>Spirit Speak Skill Base / 80 / 100 / 120 / 150</code>이고,
-두 소환수가 같은 비율로 커서 (SS 120이면 HP x2.8, 딜 · Wrestling x1.6, Armor +30, Magic Resist +60) 차이는 어느 SS에서도 같다.</p>
+두 소환수가 같은 비율로 커서 (SS 120이면 HP x2.8, 딜과 Wrestling x1.6, Armor +30, Magic Resist +60) 차이는 어느 SS에서도 같다.</p>
 <table>
 <thead>
 <tr>
@@ -1294,70 +1522,269 @@ Fury가 유지된다. 테이머가 전선을 잡아주면 실현 가능하다.</
 <p>"Rooted (Innate): Creature is immune to Knockback effects and has increased Aggro" -- 위키 Ancient Mummy</p>
 </blockquote>
 <ul>
-<li><strong>버티는 힘</strong>: HP가 같고 방어력은 25 낮지만 마법 저항이 100 높고, 독 · 특수 저항, 패리 25, 주문 반사가 붙는다.
-난이도 300~500 몹은 주문 · 브레스 · 독이 많아서 Rag Witch가 오래 버틴다.</li>
+<li><strong>버티는 힘</strong>: HP가 같고 방어력은 25 낮지만 마법 저항이 100 높고, 독·특수 저항, 패리 25, 주문 반사가 붙는다.
+난이도 300~500 몹은 주문, 브레스, 독이 많아서 Rag Witch가 오래 버틴다.</li>
 <li><strong>딜</strong>: 주문 딜이라 내 <code>Mana Drain</code>과 Lich의 <code>Hex</code>를 받는다 (4.2절). 숫자는 Mummy보다 약 20% 낮지만 방어력에 깎이지 않는다.</li>
 <li><strong>Mummy가 나은 곳</strong>: 마법 저항이 높은 맵 (물리 딜이 필요하다, <code>Mummy + Air</code>), 근접이 센 몹 (방어력 105 대 80), 넉백을 쓰는 몹 (Rooted).</li>
-<li><strong>확인되지 않았다</strong>: Rag Witch는 원거리 캐스터라 어그로를 끌어도 Mummy처럼 앞에 붙어 서지 않는다.
-솔플에서 몹을 본체에서 떼어 놓을 만큼 버티는지는 인게임에서 본다.</li>
+<li><strong>남은 질문</strong>: Rag Witch는 원거리 캐스터라 어그로를 끌어도 Mummy처럼 앞에 붙어 서지 않는다.
+솔플에서 몹을 본체에서 떼어 놓을 만큼 버티는지는 확인되지 않았다.</li>
 </ul>
 
 <h3 id="4.6">4.6 Summoner's Tome 배분</h3>
-<p><strong>소환 주문 하나당 20 포인트.</strong> 그 주문으로 소환해 경험치를 쌓아 푼다 ("Players can earn experience and unlock up to 20 Upgrade Points per Summon Spell").
+<p><strong>소환 주문 하나당 20포인트.</strong> 그 주문으로 소환해 경험치를 쌓아 푼다 ("Players can earn experience and unlock up to 20 Upgrade Points per Summon Spell").
 주력 소환수를 바꾸면 새 Tome은 처음부터 올린다. 티어 비용은 누적으로 <code>T1=1 / T2=3 / T3=5</code>.
 즉 20점은 <strong>T3 네 개</strong>가 정확히 맞아떨어진다.</p>
 <h4>Fire Tome / Lich -- 최우선</h4>
 <p>주력 조합의 핵심이다.</p>
-<pre><code>Fanning The Flames   T3   5    Epic Barrage 를 직접 강화. 체감이 가장 크다
-Scorched Earth       T3   5    Hex. 대상 마법저항 감소 -&gt; Lich 딜 + 내 주문딜 동시 상승
-Spirit Pact          T3   5    전투 성능 전반. 무난한 기본값
-Wildfire             T3   5    멀티타겟 구간 효율
-                        ---
-                         20</code></pre>
+<table>
+<thead>
+<tr>
+<th>업그레이드</th>
+<th>티어</th>
+<th>점수</th>
+<th>이유</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Fanning The Flames</td>
+<td>T3</td>
+<td>5</td>
+<td>Epic Barrage를 직접 강화. 체감이 가장 크다</td>
+</tr>
+<tr>
+<td>Scorched Earth</td>
+<td>T3</td>
+<td>5</td>
+<td>Hex. 대상 마법 저항 감소 → Lich 딜 + 내 주문 딜 동시 상승</td>
+</tr>
+<tr>
+<td>Spirit Pact</td>
+<td>T3</td>
+<td>5</td>
+<td>전투 성능 전반. 무난한 기본값</td>
+</tr>
+<tr>
+<td>Wildfire</td>
+<td>T3</td>
+<td>5</td>
+<td>멀티타겟 구간 효율</td>
+</tr>
+<tr>
+<td>합</td>
+<td></td>
+<td>20</td>
+<td></td>
+</tr>
+</tbody>
+</table>
 <p><code>Glass Cannon</code>은 뺐다. 딜은 좋지만 어그로를 끌어서, Lich를 후열에 두는 목적과 충돌한다.
 테이머 펫이 어그로를 확실히 잡아주는 것이 검증되면 <code>Wildfire</code>와 바꿔볼 수 있다.</p>
 <h4>Water Tome / Rag Witch -- 솔플용, 두 번째</h4>
 <p>솔플 탱커용. 주문을 쓰는 몹 앞에 세우는 것을 기준으로 골랐다.</p>
-<pre><code>Reflecting Pool   T3   5    Mirror 15% -&gt; 65%, 피해 저항 +10%
-Spirit Pact       T3   5    딜 +15%, 피해 저항 +10%
-Spell Siren       T3   5    때리는 몹 하나당 딜 · 피해 저항 +10% (최대 3). 어그로를 끄는 탱커와 맞는다
-Stagnant          T3   5    주문 40% 로 Greater Poison + 대상 독 저항 -40% 15초 (중첩)
-                     ---
-                      20</code></pre>
+<table>
+<thead>
+<tr>
+<th>업그레이드</th>
+<th>티어</th>
+<th>점수</th>
+<th>효과</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Reflecting Pool</td>
+<td>T3</td>
+<td>5</td>
+<td>Mirror 15% → 65%, 피해 저항 +10%</td>
+</tr>
+<tr>
+<td>Spirit Pact</td>
+<td>T3</td>
+<td>5</td>
+<td>딜 +15%, 피해 저항 +10%</td>
+</tr>
+<tr>
+<td>Spell Siren</td>
+<td>T3</td>
+<td>5</td>
+<td>때리는 몹 하나당 딜·피해 저항 +10% (최대 3). 어그로를 끄는 탱커와 맞는다</td>
+</tr>
+<tr>
+<td>Stagnant</td>
+<td>T3</td>
+<td>5</td>
+<td>주문 40%로 Greater Poison + 대상 독 저항 -40% 15초 (중첩)</td>
+</tr>
+<tr>
+<td>합</td>
+<td></td>
+<td>20</td>
+<td></td>
+</tr>
+</tbody>
+</table>
 <p>Rag Witch가 자주 죽으면 <code>Stagnant</code> 대신 <code>Deep Water</code> (체력 66% 이상일 때 7.5% 회복, 30초 쿨). <code>Polluted</code> (주문 20%로 질병)는 그다음이다.
-Rag Witch가 건 독 · 질병이 내 Poison Strike에 잡히는지는 확인되지 않았다. 위키 문구는 "you have applied"다.</p>
-<h4>Earth Tome / Ancient Mummy -- 고 MR 맵 · 근접 몹용, 세 번째</h4>
+Rag Witch가 건 독이나 질병이 내 Poison Strike에 잡히는지는 확인되지 않았다. 위키 문구는 "you have applied"다.</p>
+<h4>Earth Tome / Ancient Mummy -- 고 MR 맵과 근접 몹용, 세 번째</h4>
 <p>솔플 탱커 자리는 Rag Witch에 넘겼다. 물리 딜이 필요한 고 MR 맵 (<code>Mummy + Air</code>)과 근접이 센 몹에서 쓴다.</p>
-<pre><code>Shatter        T3   5    Pierce 25. 물리 조합의 핵심
-Spirit Pact    T3   5
-Bedrock        T3   5    탱커 성격과 맞는다
-Slam           T3   5    밀리몹 상대 체감이 좋다
-                   ---
-                    20</code></pre>
+<table>
+<thead>
+<tr>
+<th>업그레이드</th>
+<th>티어</th>
+<th>점수</th>
+<th>이유</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Shatter</td>
+<td>T3</td>
+<td>5</td>
+<td>Pierce 25. 물리 조합의 핵심</td>
+</tr>
+<tr>
+<td>Spirit Pact</td>
+<td>T3</td>
+<td>5</td>
+<td></td>
+</tr>
+<tr>
+<td>Bedrock</td>
+<td>T3</td>
+<td>5</td>
+<td>탱커 성격과 맞는다</td>
+</tr>
+<tr>
+<td>Slam</td>
+<td>T3</td>
+<td>5</td>
+<td>근접 몹 상대 체감이 좋다</td>
+</tr>
+<tr>
+<td>합</td>
+<td></td>
+<td>20</td>
+<td></td>
+</tr>
+</tbody>
+</table>
 <p><code>Earthpull</code>은 위 넷이 다 찍힌 뒤에 고려한다.</p>
 <h4>Air Tome / Skeletal Fiend -- 고 MR 맵용, 네 번째</h4>
 <p><code>Hex</code>와 <code>Mana Drain</code>으로도 저항이 안 깎이는 맵에서 물리 딜로 우회하는 카드다.</p>
-<pre><code>Tempest        T3   5    가장 중요하다
-Spirit Pact    T3   5
-Gale           T3   5
-Microburst     T3   5
-                   ---
-                    20</code></pre>
+<table>
+<thead>
+<tr>
+<th>업그레이드</th>
+<th>티어</th>
+<th>점수</th>
+<th>이유</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Tempest</td>
+<td>T3</td>
+<td>5</td>
+<td>가장 중요하다</td>
+</tr>
+<tr>
+<td>Spirit Pact</td>
+<td>T3</td>
+<td>5</td>
+<td></td>
+</tr>
+<tr>
+<td>Gale</td>
+<td>T3</td>
+<td>5</td>
+<td></td>
+</tr>
+<tr>
+<td>Microburst</td>
+<td>T3</td>
+<td>5</td>
+<td></td>
+</tr>
+<tr>
+<td>합</td>
+<td></td>
+<td>20</td>
+<td></td>
+</tr>
+</tbody>
+</table>
 <p><code>Whirlwind</code>, <code>Windshear</code>, <code>Cyclone</code>은 상황형이라 후순위다.</p>
 <h4>Daemon Tome / Vampire Thrall -- 마지막</h4>
 <p><code>Vampire 2마리</code>를 실제로 주력으로 굴리기로 확정한 뒤에만 투자한다.</p>
-<pre><code>Bloodfuel      T3   5
-Battlecaster   T3   5
-Vengeance      T3   5
-Spirit Pact    T3   5
-                   ---
-                    20</code></pre>
+<table>
+<thead>
+<tr>
+<th>업그레이드</th>
+<th>티어</th>
+<th>점수</th>
+<th>이유</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Bloodfuel</td>
+<td>T3</td>
+<td>5</td>
+<td></td>
+</tr>
+<tr>
+<td>Battlecaster</td>
+<td>T3</td>
+<td>5</td>
+<td></td>
+</tr>
+<tr>
+<td>Vengeance</td>
+<td>T3</td>
+<td>5</td>
+<td></td>
+</tr>
+<tr>
+<td>Spirit Pact</td>
+<td>T3</td>
+<td>5</td>
+<td></td>
+</tr>
+<tr>
+<td>합</td>
+<td></td>
+<td>20</td>
+<td></td>
+</tr>
+</tbody>
+</table>
 <p><code>Growing Fury</code>는 오래 살 때만 값을 하는데, 난이도 300~500에서 뱀파이어가 오래 사는지가
 아직 확인되지 않았다. 위 넷을 먼저 채운다.</p>
 <h4>투자 순서</h4>
-<pre><code>테이머 듀오 위주 (지금)    Fire -&gt; Water -&gt; Earth -&gt; Air -&gt; Daemon
-솔플 비중이 늘면           Water -&gt; Fire -&gt; Earth -&gt; Air -&gt; Daemon
-고 MR 맵을 자주 돌면       Fire -&gt; Air -&gt; Earth -&gt; Water -&gt; Daemon</code></pre>
+<table>
+<thead>
+<tr>
+<th>상황</th>
+<th>Tome 순서</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>테이머 듀오 위주 (지금)</td>
+<td>Fire → Water → Earth → Air → Daemon</td>
+</tr>
+<tr>
+<td>솔플 비중이 늘면</td>
+<td>Water → Fire → Earth → Air → Daemon</td>
+</tr>
+<tr>
+<td>고 MR 맵을 자주 돌면</td>
+<td>Fire → Air → Earth → Water → Daemon</td>
+</tr>
+</tbody>
+</table>
 
 <h3 id="4.7">4.7 스크립트 메모</h3>
 <ul>
@@ -1365,15 +1792,13 @@ Spirit Pact    T3   5
 Provocation 송 (팔로워 딜 +8.5%)만 이동 중 라운드로빈으로 받는다.</li>
 <li><code>Revolution Song</code> (프로보한 몹이 <code>40/120/200%</code> 추가 피해)은 Provocation을 찍었으므로
 선택지에 들어온다. 다만 코덱스 20점 안에서 다른 것과 경쟁한다.</li>
-<li><code>Air</code>를 쓰려면 소환수 감지 <code>findtype</code> 목록에 그래픽을 추가해야 한다.</li>
+<li>Air Elemental (Skeletal Fiend)을 쓰려면 <code>SUMMON NAMES</code>의 <code>findtype</code> 줄에 그 바디 번호를 더해야 이름이 붙는다. 번호는 아직 모른다 (아래 표).</li>
 <li><strong><code>bard-necro-enhanced</code>는 송을 위해 소환수를 추적하지 않는다.</strong> 송을 이동 중에 계속 갱신하므로
 재소환을 감지할 필요가 없다 (5.7절 "설계 결정"). 소환수를 찾는 유일한 블록은 이름을 붙이는 <code>SUMMON NAMES</code>다.</li>
 <li><strong>적 Lich와 내 Lich는 그래픽이 같다.</strong> 소환수를 타입으로 찾는 코드를 새로 쓸 일이 있으면
 <code>noto</code> 필터가 필수다. <code>bard-necro-enhanced.razor</code>의 <code>COMBAT TARGET CACHE</code>와 <code>SUMMON NAMES</code>가 그 형태다.</li>
 <li><strong>소환수 이름은 자동으로 바뀐다.</strong> <code>SUMMON NAMES</code> 블록이 새 소환수를 나온 순서대로 <code>nomeehei</code> / <code>nomeehel</code> /
-<code>nomeeheh</code>로 바꾼다. 본체 <code>nomeehej</code>와 한 글자 차이라 PK가 네임태그로 본체를 고르기 어렵다.
-종류와 무관하게 순서다. 바디 번호로 찾고, 죽은 소환수의 이름은 다음 소환이 이어받는다.
-설계와 실패 증상은 4.8절.</li>
+<code>nomeeheh</code>로 바꾼다. 설계와 실패 증상은 4.8절.</li>
 <li><strong>바디 번호 (<code>&gt;info</code>).</strong> 내 소환수의 Notoriety는 2 (friend).</li>
 </ul>
 <table>
@@ -1411,10 +1836,16 @@ Provocation 송 (팔로워 딜 +8.5%)만 이동 중 라운드로빈으로 받는
 <td>구식 <code>bard-necro</code> 팔로워 캐시</td>
 </tr>
 <tr>
-<td>Skeletal Fiend, Summon Creature 풀의 Outlands 언데드</td>
+<td>Summon Creature 풀의 표준 언데드</td>
+<td>3 26 50 56 57 147 148 153 155</td>
+<td></td>
+<td>표준 클라이언트 아트 (zombie, ghost, skeleton, skeletal knight, skeletal mage, ghoul, rotting corpse)</td>
+</tr>
+<tr>
+<td>Skeletal Fiend, 그리고 Summon Creature 풀의 skeletal marksman, rotting flesh</td>
 <td>모름</td>
 <td></td>
-<td>나오면 <code>&gt;info</code>로 읽는다 (7절)</td>
+<td>Outlands 바디다. 나오면 <code>&gt;info</code>로 읽는다 (7절)</td>
 </tr>
 </tbody>
 </table>
@@ -1459,12 +1890,10 @@ Provocation 송 (팔로워 딜 +8.5%)만 이동 중 라운드로빈으로 받는
 <ul>
 <li><strong>바디 번호로 찾는다.</strong> 프로브 (2026-09-28)로 확인한 것: <code>findtype</code>은 바디 번호로도 기본 이름으로도 소환수를 잡고
 <code>as</code> alias에 serial이 들어간다. 처음 두 판이 <code>noto - Mobile '4294967295' not found</code>로 죽은 건 검색이 아니라 <strong>alias를 <code>endif</code> 밖에서 읽어서</strong>였다.
-alias는 묶은 블록 안에서만 살므로 안에서 <code>@setvar! var__fresh_summon alias__fresh_summon</code>로
+alias는 묶은 블록 안에서만 살므로 안에서 <code>@setvar! var__fresh_summon alias__fresh_summon</code>으로
 복사하고 밖에서는 변수만 읽는다. 이름 대신 바디를 쓰는 이유는 이름을 바꾼 뒤 Razor 캐시가 갱신되는지 모르기
-때문이다. 바디 번호는 <code>&gt;info</code>로 읽는다: Lich 24,
-Ancient Mummy 158 (hue 2340). Vampire Thrall 722, Rag Witch 740은 구식 <code>bard-necro</code>의 팔로워 캐시 값이다.
-Summon Creature 풀의 표준 언데드 (3 26 50 56 57 147 148 153 155)도 같이 넣었다. VS 없이 나오는 맨 엘리멘탈 (9 13 14 15 16)은
-2026-09-29에 뺐다. 이 캐릭터는 늘 VS로 뽑고, 다른 메이지의 엘리멘탈이 내 소환수로 잡혀 셋째 이름을 가져갔다.
+때문이다. 번호와 출처는 4.7절 표다. Summon Creature 풀의 표준 언데드도 같이 넣었다.
+VS 없이 나오는 맨 엘리멘탈과 데몬 (9 13 14 15 16)은 2026-09-29에 뺐다. 이 캐릭터는 늘 VS로 뽑고, 다른 메이지의 엘리멘탈이 내 소환수로 잡혀 셋째 이름을 가져갔다.
 <strong>Skeletal Fiend, skeletal marksman, rotting flesh는 Outlands 바디라 번호를 모른다.</strong>
 나오면 <code>&gt;info</code>로 읽어 <code>findtype</code> 줄에 더한다.</li>
 <li><strong>"내 펫" 플래그는 상태 패킷 (0x11)에서 온다.</strong> ClassicUO는 새 모빌이 보일 때마다 상태를 요청하므로 (<code>PacketHandlers.UpdateMobile</code>: "a way to get all Hp from all new mobiles")
@@ -1477,13 +1906,13 @@ Razor는 소환 직후 <code>CanRename</code>을 안다. <code>rename</code>은 
 serial</strong>로 묻는다. 슬롯에 있는 serial은 건너뛰고, <code>find</code>가 살아 있는 걸 못 보면 슬롯을 비운다.
 죽거나 해제된 소환수의 이름을 다음 소환이 이어받는다. 스크립트를 다시 켜면 슬롯이 비므로 이미 이름 붙은
 소환수도 한 번 더 이름을 받는다 (같은 세 이름 안에서 순서만 바뀔 수 있다).</li>
-<li><strong>이름은 리스트에서 슬롯 번호로 꺼낸다.</strong> 빈 슬롯을 <code>var__free_slot</code> (0 1 2, 3은 없음)로 고르고 그 자리에서 슬롯 변수에 serial을
+<li><strong>이름은 리스트에서 슬롯 번호로 꺼낸다.</strong> 빈 슬롯을 <code>var__free_slot</code> (0 1 2, 빈 슬롯이 없으면 3)으로 고르고 그 자리에서 슬롯 변수에 serial을
 넣은 뒤, <code>foreach summon_name in list__summon_names</code> 안에서 <code>index = var__free_slot</code>인 항목으로 <code>rename</code> 한다. 내장 <code>index</code>가 왼쪽이라 변수와 비교해도 된다.</li>
-<li><strong>매치를 전부 훑는다.</strong>이 포크의 <code>findtype</code>은 부를 때마다 <strong>같은 모빌</strong>을 돌려준다 (Razor CE의 무작위가 아니다).
+<li><strong>매치를 전부 훑는다.</strong> 이 포크의 <code>findtype</code>은 부를 때마다 <strong>같은 모빌</strong>을 돌려준다 (Razor CE의 무작위가 아니다).
 한 번만 부르면 이미 이름 붙은 리치만 계속 나와 둘째 소환수에 닿지 못했다 (2026-09-28 인게임). 그래서 구식
 <code>bard-necro</code> 팔로워 캐시처럼 <code>while findtype … as</code> → 슬롯·<code>noto</code> 검사 → 아니면 <code>@ignore</code> → <code>endwhile</code> → <code>@clearignore</code>로
-한 윈도 안에서 다 본다. 이름은 한 윈도 (하우스키핑 틱, 5초)에 한 마리씩 붙는다. 연달아 둘을 뽑아도 먼저 나온 쪽이 먼저 잡힌다 --
-시전 6초 동안 혼자 있으니까. <code>@clearignore</code>는 5초마다 한 번이고, 이 루프의 다른 곳은 ignore 목록에 기대지 않는다.</li>
+한 틱 안에서 다 본다. 이름은 하우스키핑 틱 (5초)마다 한 마리씩 붙는다. 연달아 둘을 뽑아도 먼저 나온 쪽이 먼저 잡힌다.
+둘째를 시전하는 6초 동안 첫째가 혼자 있기 때문이다. <code>@clearignore</code>는 5초마다 한 번이고, 이 루프의 다른 곳은 ignore 목록에 기대지 않는다.</li>
 <li>시전도 커서도 없어서 교전 여부와 무관하게 돈다. <code>followers &gt; 0</code>일 때만.</li>
 </ul>
 <h4>실패하면 이렇게 보인다</h4>
@@ -1496,7 +1925,7 @@ serial</strong>로 묻는다. 슬롯에 있는 serial은 건너뛰고, <code>fin
 </thead>
 <tbody>
 <tr>
-<td>소환 후 5초 안에 <code>[ name, nomeehei ]</code>가 소환수 머리 위에 뜨고 네임태그가 바뀐다</td>
+<td>소환 후 5초 안에 <code>[ name, nomeehei ]</code>가 소환수 머리 위에 뜨고 (<code>config__chatty 1</code>일 때) 네임태그가 바뀐다</td>
 <td>정상</td>
 </tr>
 <tr>
@@ -1520,11 +1949,11 @@ serial</strong>로 묻는다. 슬롯에 있는 serial은 건너뛰고, <code>fin
 
 <h3 id="4.9">4.9 재소환, 설계만 하고 구현 보류</h3>
 <p>소환수가 죽으면 딜의 63%가 빠진다. 그런데 사실을 다 모으니 <strong>자동화의 값이 생각보다 작다.</strong></p>
-<h4>확정 사실 (3.3 절)</h4>
+<h4>확정 사실 (3.3절, 4.1절)</h4>
 <ul>
-<li>언데드는 <strong>Vengeful Spirit (심볼 1)을 켠 뒤</strong> 소환해야 나온다. Fire -&gt; Lich, Water -&gt; Rag Witch, Earth -&gt; Mummy, Daemon -&gt; Vampire</li>
+<li>언데드는 <strong>Vengeful Spirit (심볼 1)을 켠 뒤</strong> 소환해야 나온다. 어느 주문이 어느 언데드가 되는지는 3.3절 표</li>
 <li>8서클: <strong>마나 50, 시전 6초</strong>, Bloodmoss 필요</li>
-<li>소환수는 <strong>10초마다 최대 체력 1% 씩 썩어</strong> 맞지 않아도 죽는다. 즉 재소환은 반응이 아니라 <strong>주기 정비</strong>다</li>
+<li>소환수는 <strong>10초마다 최대 체력이 1%씩 썩는다.</strong> 0이 되지는 않지만 결국 쓸모가 없어지므로 재소환은 반응이 아니라 <strong>주기 정비</strong>다</li>
 <li><code>followers</code>는 슬롯 수. Lich 2 = 4</li>
 </ul>
 <h4>판단: 지금은 수동</h4>
@@ -1537,8 +1966,8 @@ serial</strong>로 묻는다. 슬롯에 있는 serial은 건너뛰고, <code>fin
 </thead>
 <tbody>
 <tr>
-<td><strong>한 세트가 VS + 6초 + 6초, 마나 101</strong></td>
-<td>교전 중엔 로테이션이 12초 서고 긴급 힐이 끊으면 50씩 날아간다. 이동 중엔 서 있어야 하므로(<code>cooldown "walk"</code>) 다음 몹 앞에 멈춘 순간에만 나간다 -- 수동과 같은 타이밍이다</td>
+<td><strong>한 세트가 VS + 6초 + 6초, 심볼 1 + 마나 100</strong></td>
+<td>교전 중엔 로테이션이 12초 서고 긴급 힐이 끊으면 50씩 날아간다. 이동 중엔 서 있어야 하므로 (<code>cooldown "walk"</code>) 다음 몹 앞에 멈춘 순간에만 나간다. 수동과 같은 타이밍이다</td>
 </tr>
 <tr>
 <td><strong>뭘 뽑을지는 상황이 정한다</strong></td>
@@ -1546,7 +1975,7 @@ serial</strong>로 묻는다. 슬롯에 있는 serial은 건너뛰고, <code>fin
 </tr>
 <tr>
 <td><strong>썩는 속도가 결정을 사람에게 준다</strong></td>
-<td>10초마다 남은 최대치의 1% (복리, 관찰: 30분 뒤에도 남는다)라 반이 되는 데 약 11.5분, 30분이면 16%, 0은 안 된다. "언제 갈아끼울지"는 남은 체력과 다음 몹을 보고 정하는 문제라 임계값 하나로 대신하기 어렵다</td>
+<td>10초마다 남은 최대치의 1% (복리, 관찰: 30분 뒤에도 남는다)라 반이 되는 데 약 11.5분, 30분이면 16%, 0은 안 된다. "언제 갈아 끼울지"는 남은 체력과 다음 몹을 보고 정하는 문제라 임계값 하나로 대신하기 어렵다</td>
 </tr>
 <tr>
 <td><strong>없을 때의 뒷정리는 이미 자동이다</strong></td>
@@ -1556,36 +1985,101 @@ serial</strong>로 묻는다. 슬롯에 있는 serial은 건너뛰고, <code>fin
 </table>
 <p>구식 두 스크립트도 재소환을 안 했다.</p>
 <h4>나중에 넣는다면 이 모양</h4>
-<p>이동 중 전용, 소환 종류는 config, VS를 먼저 켠다.</p>
-<pre><code>config__resummon 0                      기본 꺼짐
-config__summon_spell &#39;Fire Elemental&#39;
-config__followers_want 4                슬롯 수. Lich 2마리
-
-RESUMMON   [MUSHROOM 뒤, BARD SONG 앞]
-  var__engaged = 0 and followers &lt; config__followers_want
-    mana &gt;= 50 and var__regs_summon = 1          bloodmoss, mandrake, silk, ash
-      not targetexists and not casting and cooldown &quot;walk&quot; = 0
-        timer &quot;timer__vengeful_spirit&quot; &gt;= 30000  -&gt; yell &#39;[VengefulSpirit&#39;, 메시지 확인
-        else                                     -&gt; cast config__summon_spell, for 70 폴링, target</code></pre>
-<p>Bloodmoss 플래그 하나만 추가하면 된다. Vengeful Spirit은 채팅 명령 <code>[VengefulSpirit</code>이나 Razor 핫키 (<code>L:1060522</code>)로 켠다. 둘 다 동작한다. 남은 미확인은 <strong>소환 커서가 지점 지정인지 자동 배치인지</strong> 하나뿐이다.</p>
+<p>이동 블록 안, <code>MUSHROOM</code> 뒤 <code>BARD SONG</code> 앞에 둔다. VS를 먼저 켜고, 30초 안에 소환한다.
+소환 종류는 숫자 config로 고른다. 변수는 단어를 못 담으므로 (<a href="razor.html#3">razor.html</a> 3절) 주문 이름을 변수에 둘 수 없고, 갈래마다 리터럴 <code>cast</code>를 쓴다.</p>
+<table>
+<thead>
+<tr>
+<th>설정</th>
+<th>값</th>
+<th>뜻</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>config__resummon</code></td>
+<td>0</td>
+<td>기본 꺼짐</td>
+</tr>
+<tr>
+<td><code>config__summon_kind</code></td>
+<td>1</td>
+<td>1 Fire Elemental (Lich), 2 Water Elemental (Rag Witch), 3 Earth Elemental (Mummy)</td>
+</tr>
+<tr>
+<td><code>config__followers_want</code></td>
+<td>4</td>
+<td>슬롯 수. Lich 2마리</td>
+</tr>
+<tr>
+<td><code>config__mana_8th</code></td>
+<td>50</td>
+<td>8서클 소환 마나</td>
+</tr>
+</tbody>
+</table>
+<pre><code># RESUMMON: walk branch, after MUSHROOM and before BARD SONG
+if config__resummon = 1 and followers &lt; config__followers_want and var__regs_summon = 1 and mana &gt;= config__mana_8th and not warmode and not targetexists and not casting and cooldown "walk" = 0
+    if timer "timer__vengeful_spirit" &gt;= cooldown__vengeful_spirit
+        yell '[VengefulSpirit'
+    elseif config__summon_kind = 1
+        cast 'Fire Elemental'
+    elseif config__summon_kind = 2
+        cast 'Water Elemental'
+    elseif config__summon_kind = 3
+        cast 'Earth Elemental'
+    endif
+endif</code></pre>
+<ul>
+<li>VS는 켜졌다는 문장을 읽고 나서 <code>timer__vengeful_spirit</code>을 0으로 돌린다 (<code>cooldown__vengeful_spirit</code>은 30초).</li>
+<li>소환에 커서가 뜬다면 다른 주문처럼 폴링해 찍는다. 다만 6초 시전을 덮어야 한다. 지금의 <code>for 60</code>은 6서클 1.75초를 여유 있게 덮는 값이라 (스크립트 <code>wait__poll</code> 주석)
+소환에는 훨씬 큰 횟수가 필요하다. 몇이면 되는지는 확인되지 않았다.</li>
+<li>시약은 <code>PASS FLAGS</code> 리프레시에 Bloodmoss 읽기 하나와 <code>var__regs_summon</code> 하나를 더하면 된다 (Fire Elemental은 bloodmoss, mandrake, silk, ash). 지금은 Bloodmoss를 읽지 않는다.</li>
+<li>Vengeful Spirit은 채팅 명령 <code>[VengefulSpirit</code>이나 Razor 핫키 (<code>L:1060522</code>)로 켠다. 둘 다 동작한다.</li>
+<li>남은 질문은 <strong>소환 커서가 지점 지정인지 자동 배치인지</strong> 하나다. 확인되지 않았다.</li>
+</ul>
 
 <h2 id="5">5. 전투 루프 설계</h2>
-<p>대상 파일: <strong><code>script/combat/bard-necro-enhanced.razor</code> (신규)</strong></p>
+<p>대상 파일: <strong><code>script/combat/bard-necro-enhanced.razor</code></strong>. PvP 루프는 5.9절.</p>
 <p>구식 <code>bard-necro.razor</code> / <code>bard-necro-eval.razor</code>를 대체했다. 둘은 지웠고 git 이력에만 남아 있다.
 기존 파일을 고친 것이 아니라 <strong>새로 구현했다.</strong> 컨벤션은 <code>bard-throwing.razor</code>와 <code>loadout.razor</code>를 따른다
-(<code>config__</code> / <code>wait__</code> / <code>cooldown__</code> / <code>var__</code> / <code>alias__</code> / <code>label__</code> / <code>timer__</code> / <code>global__</code>).</p>
+(변수 접두는 <a href="conventions.html#3.1">conventions.html</a> 3.1절).</p>
 <p>바드 숫자와 공식은 전부 2절에 있다. 여기서 다시 추론하지 않는다.</p>
-<p><strong>핫키 <code>bard-buff</code>는 이 템플릿에서 필요 없어진다.</strong> 루프가 이동 중에 세 곡을 알아서 돌린다.
+<p><strong>핫키 <code>bard-buff</code>는 이 템플릿에서 필요 없다.</strong> 루프가 이동 중에 세 곡을 알아서 돌린다.
 다른 템플릿은 계속 쓰므로 파일 자체는 남긴다.</p>
 
 <h3 id="5.1">5.1 루프 한 장</h3>
 <p>교전인지는 <code>COMBAT OR WALK</code>에서 한 번만 묻고, 그 아래를 교전 블록과 이동 블록으로 나눈다 (5.8절). 아래 첫 그림의 "교전 중인가"가 그 자리다.
 블록 하나는 한 패스에 <strong>한 동작만</strong> 한다 (<code>elseif</code> 사슬). 하지만 동작한 블록이 <strong>패스를 끝내지는 않는다.</strong>
 시전이 끝나면 <code>casting</code>이 풀려서 아래 블록도 같은 패스에 차례를 받는다. 그래서 아래 그림은 우선순위일 뿐이고,
-블록 사이의 순서가 필요한 곳은 플래그로 막는다. 오프닝 → 프록은 <code>var__opener_done</code>, 프록 → Poison Strike · 필러는 <code>var__procs_done</code>이다.
-모든 블록이 같은 가드를 단다 -- <strong>가드를 빠뜨린 블록은 항상 이긴다.</strong></p>
-<pre><code>if not targetexists and not casting and not warmode</code></pre>
-<p>게이트 접기 (5.8절) 뒤로 이 가드는 따로 한 줄을 쓰지 않고 각 블록의 조건 줄 끝에 붙는다.</p>
+블록 사이의 순서가 필요한 곳은 플래그로 막는다. 오프닝 → 프록은 <code>var__opener_done</code>, 프록 → Poison Strike와 필러는 <code>var__procs_done</code>이다.</p>
+<p>행동하는 블록은 전부 행동 창 가드를 단다. <strong>가드를 빠뜨린 블록은 항상 이긴다.</strong> 무엇을 다는지는 블록이 하는 일이 정한다 (스크립트 머리의 Action guards).</p>
+<table>
+<thead>
+<tr>
+<th>블록</th>
+<th>가드</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>주문을 시전한다</td>
+<td><code>not targetexists and not casting and cooldown "walk" = 0</code></td>
+</tr>
+<tr>
+<td>아이템만 쓴다 (포션, 무게, 악기 회수)</td>
+<td><code>not targetexists and not casting</code></td>
+</tr>
+<tr>
+<td>읽기만 한다 (타겟 캐시, 패스 플래그)</td>
+<td>없음</td>
+</tr>
+</tbody>
+</table>
+<p>걸으면서 시전하면 걸음에 끊기지만 포션은 걸으면서 마셔도 된다. 그래서 <code>cooldown "walk"</code>는 시전하는 블록에만 붙는다.
+루프가 스스로 여는 시전과 커서 (공격 주문, 바드 스킬과 송, 자기 버프, Create Food, Corpse Skin, Evil Omen, Poison Strike, Vampiric Embrace)는 <code>not warmode</code>도 본다.
+warmode를 켜면 수동 모드라 이 블록들이 서고, 큐어, 힐, 포션, 버섯 먹기와 Blood Oath는 계속 돈다 (스크립트 머리의 Manual mode).
+게이트 접기 (5.8절) 뒤로 이 가드는 따로 한 줄을 쓰지 않고 각 블록의 조건 줄 끝에 붙는다.</p>
 <h4>한 패스</h4>
 <pre class="mermaid">flowchart TD
   drain("드레인&lt;br&gt;큐와 시전이 빌 때까지") --> survive("생존&lt;br&gt;마비 · 독 · HP") --> cache("타겟 캐시") --> flags("패스 플래그") --> house("하우스키핑&lt;br&gt;5초마다") --> engaged{"교전 중인가"}
@@ -1609,23 +2103,23 @@ RESUMMON   [MUSHROOM 뒤, BARD SONG 앞]
 <tr>
 <td>생존</td>
 <td><code>paralyzed or poisoned or diffhits &gt; config__light_hits</code></td>
-<td>세 상태를 한 줄로 묻고, 안에서 마비 → 큐어 → 힐 순으로 본다. 마비가 맨 앞: 그 상태에선 아래가 아무것도 못 한다.
-큐어가 힐보다 앞: 큐어는 즉시고 힐은 독 틱에 일부가 샌다</td>
+<td>세 상태를 한 줄로 묻고, 안에서 마비 → 큐어 → 힐 순으로 본다. 마비가 맨 앞인 것은 그 상태에선 아래가 아무것도 못 하기 때문이다.
+큐어가 힐보다 앞인 것은 큐어는 즉시고 힐은 독 틱에 일부가 새기 때문이다</td>
 </tr>
 <tr>
 <td>타겟 캐시</td>
 <td><code>lasttarget</code> + <code>noto</code>, 화면 거리</td>
-<td>18칸 (<code>config__acquire_range</code>) 안에서 받아 두고 10칸 안에서 교전. 노래·자기 대상 주문은 덮어쓰기 전에 lasttarget을 다시 본다</td>
+<td>18칸 (<code>config__acquire_range</code>) 안에서 받아 두고 10칸 (<code>config__target_range</code>) 안에서 교전. 송과 자기 대상 주문은 덮어쓰기 전에 lasttarget을 다시 본다</td>
 </tr>
 <tr>
 <td>패스 플래그</td>
 <td><code>timer "timer__regs_refresh"</code> 30초, 또는 시약 부족 메시지</td>
-<td>시약과 주문 플래그를 만든다. 아래 문단</td>
+<td>시약과 주문 플래그를 만든다 (아래 문단). 심볼 수를 읽는 <code>ingump</code> 사슬은 게이트 없이 매 패스 돈다 (5.8절)</td>
 </tr>
 <tr>
 <td>하우스키핑</td>
 <td><code>timer "timer__housekeeping"</code> 5초</td>
-<td>악기 회수 · 무게 · 리프레시 포션 · 소환수 이름은 틱마다, 악기 확인 30초 · 핫바 30초 · 음식 60초 · 스탯 포션 10초 (교전 중만).
+<td>악기 회수, 무게, 리프레시 포션, 소환수 이름은 틱마다 본다. 악기 확인 30초, 핫바 30초, 음식 60초, 스탯 포션 10초 (교전 중만)는 자기 시계로 본다.
 디스코를 건 대상도 여기서 30초 뒤에 잊는다 (5.8절)</td>
 </tr>
 <tr>
@@ -1635,7 +2129,7 @@ RESUMMON   [MUSHROOM 뒤, BARD SONG 앞]
 </tr>
 </tbody>
 </table>
-<p><strong><code>PASS FLAGS</code>의 시약 플래그는 30초에 한 번만 읽는다</strong> (<code>timer__regs_refresh</code>). 시약 일곱 종을 <code>findtype</code>로 한 번씩 찾아
+<p><strong><code>PASS FLAGS</code>의 시약 플래그는 30초에 한 번만 읽는다</strong> (<code>timer__regs_refresh</code>). 시약 일곱 종을 <code>findtype</code>으로 한 번씩 찾아
 <code>var__has_*</code>에 두고 주문 플래그 13개는 그 일곱을 비교해서 만든다. 매 패스 <code>findtype</code> 19~32번이던 것이 이렇게 됐다 (5.8절).</p>
 
 <h4>교전 블록</h4>
@@ -1662,17 +2156,17 @@ RESUMMON   [MUSHROOM 뒤, BARD SONG 앞]
 <tr>
 <td>피스</td>
 <td><code>cooldown "peace/provo" = 0 and cooldown "music" = 0</code></td>
-<td><strong>계속 다시 건다.</strong>이 Musicianship에서 12초 가고 슬롯 쿨은 10초다. 진정·브레이크 라벨은 2초에 한 번 본다 (<code>cooldown__peace_seen</code>)</td>
+<td><strong>계속 다시 건다.</strong> 이 Musicianship에서 12초 가고 슬롯 쿨은 10초다. 진정·브레이크 라벨은 2초에 한 번 본다 (<code>cooldown__peace_seen</code>)</td>
 </tr>
 <tr>
 <td>네크로 버스트</td>
 <td><code>list 'list__necro_symbols' &gt;= config__symbols_*</code></td>
-<td>Blood Oath → Corpse Skin → Evil Omen 순. Corpse Skin · Evil Omen은 서 있고 warmode가 아닐 때만. 심볼 몫은 3.4절</td>
+<td>Blood Oath → Corpse Skin → Evil Omen 순. Blood Oath는 소환수가 있을 때만, Corpse Skin과 Evil Omen은 서 있고 warmode가 아닐 때만. 심볼 몫은 3.4절</td>
 </tr>
 <tr>
 <td>오프닝</td>
 <td>마나 + 대상별 리스트</td>
-<td>Mana Drain → Curse</td>
+<td>Mana Drain → Curse. Curse 시약이 없으면 라이더 없이 넘어간다 (5.5절)</td>
 </tr>
 <tr>
 <td>프록 코어</td>
@@ -1687,14 +2181,16 @@ RESUMMON   [MUSHROOM 뒤, BARD SONG 앞]
 <tr>
 <td>Poison Strike</td>
 <td><code>var__procs_done</code> + <code>var__proc_target</code></td>
-<td>심볼 1. 맨 끝이라 같은 패스의 Energy Bolt 질병까지 터뜨린다. 마지막 프록이 이 대상일 때. Corpse Skin 조건은 3.4절</td>
+<td>심볼 1. 맨 끝이라 같은 패스의 Energy Bolt 질병까지 터뜨린다. 마지막 프록이 이 대상일 때만.
+네크로 능력이 나간 패스는 거른다 (<code>var__symbols_spent</code>). Corpse Skin 조건은 3.4절</td>
 </tr>
 </tbody>
 </table>
 
 <h4>이동 블록</h4>
 <pre class="mermaid">flowchart TD
-  mushroom("버섯&lt;br&gt;마나가 낮으면 먹고 모자라면 만든다") --> buffs("자기 버프&lt;br&gt;Reactive Armor · Magic Reflection") --> song("Barding Song&lt;br&gt;세 곡을 돌아가며") --> embrace("Vampiric Embrace&lt;br&gt;펫이 있고 시체가 가까울 때")</pre>
+  mushroom("버섯&lt;br&gt;마나가 낮으면 먹고 모자라면 만든다") --> buffs("자기 버프&lt;br&gt;Reactive Armor · Magic Reflection&lt;br&gt;Spell Siphon용 Magic Arrow")
+  buffs --> song("송&lt;br&gt;세 곡을 돌아가며") --> embrace("Vampiric Embrace&lt;br&gt;소환수가 있고 시체가 가까울 때")</pre>
 <p>몹이 없는 동안만 돈다. 쿨과 버프를 걷는 사이에 채워 두어, 다음 교전에서 로테이션과 겨루지 않게 한다.</p>
 <table>
 <thead>
@@ -1713,12 +2209,13 @@ RESUMMON   [MUSHROOM 뒤, BARD SONG 앞]
 <tr>
 <td>자기 버프</td>
 <td><code>not findbuff</code> + <code>cooldown "reflect"</code></td>
-<td>둘 다 시간이 아니라 소모로 끝난다. RA는 25 흡수, Reflect는 한 번 반사 뒤 30초 쿨 (반사 시점부터)</td>
+<td>둘 다 시간이 아니라 소모로 끝난다. RA는 25 흡수, Reflect는 한 번 반사 뒤 30초 쿨 (반사 시점부터).
+셋째 갈래는 Spell Siphon을 켜는 자기 대상 Magic Arrow다. 튕겨서 리플렉트를 태우지 않게 Magic Reflection이 없을 때만 쏜다</td>
 </tr>
 <tr>
-<td>Barding Song</td>
-<td><code>Music=0 and Song=0 and &lt;슬롯&gt;=0</code></td>
-<td>라운드로빈</td>
+<td>송</td>
+<td><code>cooldown "song" = 0 and cooldown "music" = 0</code> + 그 곡의 슬롯</td>
+<td>라운드로빈 (5.7절)</td>
 </tr>
 <tr>
 <td>Vampiric Embrace</td>
@@ -1729,19 +2226,104 @@ RESUMMON   [MUSHROOM 뒤, BARD SONG 앞]
 </table>
 <h4>데미지 사이클이 도는 모양</h4>
 <p>프록 네 개는 각자 쿨을 돌고, <strong>비는 시간은 전부 Energy Bolt가 채운다.</strong></p>
-<pre><code>0.0   Magic Arrow   1서클  0.50 + 0.2
-0.7   Harm          2서클  0.75 + 0.2
-1.7   Fireball      3서클  1.00 + 0.2
-2.9   Lightning     4서클  1.25 + 0.2
-4.3   ────── 프록 네 개 소진, 쿨 대기 ──────
-4.3   Energy Bolt   6서클  1.75 + 0.2   20마나, 5초 안에 죽이면 실질 5
-6.3   Poison Strike 심볼 1, 시전 없음. 질병 5개 (프록 4 + 볼트 1). Corpse Skin 켜짐 + 자기 쿨 30초가 돌았을 때
-6.3   Energy Bolt
-8.2   Energy Bolt
-10.2  Energy Bolt
-12.1  Energy Bolt
-14.1  ────── 프록이 돌아오면 다시 위로 ──────</code></pre>
-<p><strong>15초당 시전 4회 -&gt; 9회.</strong>이 순서는 저절로 지켜지지 않는다. 시전이 패스를 끝내지 않으므로
+<table>
+<thead>
+<tr>
+<th>초</th>
+<th>무엇</th>
+<th>서클</th>
+<th>시전 + 회복</th>
+<th>비고</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0.0</td>
+<td>Magic Arrow</td>
+<td>1서클</td>
+<td>0.50 + 0.2</td>
+<td></td>
+</tr>
+<tr>
+<td>0.7</td>
+<td>Harm</td>
+<td>2서클</td>
+<td>0.75 + 0.2</td>
+<td></td>
+</tr>
+<tr>
+<td>1.7</td>
+<td>Fireball</td>
+<td>3서클</td>
+<td>1.00 + 0.2</td>
+<td></td>
+</tr>
+<tr>
+<td>2.9</td>
+<td>Lightning</td>
+<td>4서클</td>
+<td>1.25 + 0.2</td>
+<td></td>
+</tr>
+<tr>
+<td>4.3</td>
+<td><strong>프록 네 개 소진, 쿨 대기</strong></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>4.3</td>
+<td>Energy Bolt</td>
+<td>6서클</td>
+<td>1.75 + 0.2</td>
+<td>20마나, 5초 안에 죽이면 실질 5</td>
+</tr>
+<tr>
+<td>6.3</td>
+<td>Poison Strike</td>
+<td>심볼 1</td>
+<td>시전 없음</td>
+<td>질병 5개 (프록 4 + 볼트 1). Corpse Skin 켜짐 + 자기 쿨 30초가 돌았을 때</td>
+</tr>
+<tr>
+<td>6.3</td>
+<td>Energy Bolt</td>
+<td>6서클</td>
+<td>1.75 + 0.2</td>
+<td></td>
+</tr>
+<tr>
+<td>8.2</td>
+<td>Energy Bolt</td>
+<td>6서클</td>
+<td>1.75 + 0.2</td>
+<td></td>
+</tr>
+<tr>
+<td>10.2</td>
+<td>Energy Bolt</td>
+<td>6서클</td>
+<td>1.75 + 0.2</td>
+<td></td>
+</tr>
+<tr>
+<td>12.1</td>
+<td>Energy Bolt</td>
+<td>6서클</td>
+<td>1.75 + 0.2</td>
+<td></td>
+</tr>
+<tr>
+<td>14.1</td>
+<td><strong>프록이 돌아오면 다시 위로</strong></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p><strong>15초당 시전 4회 → 9회.</strong> 이 순서는 저절로 지켜지지 않는다. 시전이 패스를 끝내지 않으므로
 Poison Strike와 필러는 <code>PROC CORE</code> 바로 뒤에서 계산하는 <code>var__procs_done</code>을 본다.
 네 프록이 저마다 바에 올라 있거나 시약이 없을 때만 1이다. 마나 부족은 해당하지 않는다.
 마나는 돌아오고 그동안 소환수가 싸우므로 Poison Strike도 프록을 기다린다. 필러는 바닥 (52)이 어차피 모든 프록 비용보다 높다.
@@ -1754,11 +2336,16 @@ Poison Strike와 필러는 <code>PROC CORE</code> 바로 뒤에서 계산하는 
 <p>Poison Strike는 <code>var__proc_target</code>도 본다. 프록이 시전될 때마다 그 대상을 적어 두고, 마지막 프록이 간 대상이 지금 대상일 때만 나간다.
 이전 몹에서 돌던 프록 쿨이 남은 채로 새 몹의 오프닝이 끝나면 <code>var__procs_done</code>은 이미 1이지만 그 몹에는 프록 질병이 없기 때문이다.
 그 사이 Energy Bolt는 그대로 나간다. 필러는 대상을 가리지 않는다.</p>
-<p><strong>마나가 모자라면 필러부터 잘린다.</strong> <code>config__filler_floor</code>를 52 이상 (오프닝 22 + 코어 30)으로
-두어 필러가 다음 몹의 오프닝 마나를 먹지 않게 한다.</p>
+<p><strong>마나가 모자라면 필러부터 잘린다.</strong> 바닥 <code>config__filler_floor</code>를 52로 둔 근거는 5.4절.</p>
 
 <h3 id="5.2">5.2 셋업에서 한 번만 하는 것</h3>
 <table>
+<thead>
+<tr>
+<th>무엇</th>
+<th>어떻게</th>
+</tr>
+</thead>
 <tbody>
 <tr>
 <td>악기</td>
@@ -1771,6 +2358,14 @@ Poison Strike와 필러는 <code>PROC CORE</code> 바로 뒤에서 계산하는 
 <tr>
 <td>네크로 핫바</td>
 <td>루프 안 <code>NECRO HOTBAR</code>가 첫 패스에 연다 (타이머가 만료 상태로 시작)</td>
+</tr>
+<tr>
+<td>시계</td>
+<td>하우스키핑, 핫바, 음식, 스탯 포션, 악기 확인, 피스 확인, 시약 리프레시 시계를 만료 상태로 둔다. 첫 패스가 전부 본다</td>
+</tr>
+<tr>
+<td>소환수 이름</td>
+<td><code>list__summon_names</code>를 시작할 때마다 다시 채운다. 이름을 고치면 다음 시작부터 그 이름이 붙는다</td>
 </tr>
 </tbody>
 </table>
@@ -1788,7 +2383,7 @@ Poison Strike와 필러는 <code>PROC CORE</code> 바로 뒤에서 계산하는 
 <tr>
 <td><code>cooldown "music"</code></td>
 <td>바드 <strong>스킬</strong> 사용</td>
-<td>글로벌 5초. <strong>Song은 이것을 세우지 않는다</strong></td>
+<td>글로벌 5초. <strong>송은 이것을 세우지 않는다</strong></td>
 </tr>
 <tr>
 <td><code>cooldown "disco"</code></td>
@@ -1801,43 +2396,68 @@ Poison Strike와 필러는 <code>PROC CORE</code> 바로 뒤에서 계산하는 
 <td><strong>공유 슬롯 10초.</strong> 합친 항목 하나</td>
 </tr>
 <tr>
-<td><strong>Barding Song 쿨</strong></td>
-<td>3곡 전체</td>
+<td><code>cooldown "song"</code></td>
+<td>세 곡 전체</td>
 <td><strong>별도 계열. <code>cooldown "music"</code>이 아니다.</strong> 세 곡이 공유</td>
 </tr>
 <tr>
 <td>Unholy Symbol</td>
-<td>Blood Oath(4), Corpse Skin(2), Evil Omen(2), Poison Strike(1), Vampiric Embrace(3)</td>
-<td>5초당 1개, 최대 Effective Necro/10 = <strong>10</strong></td>
+<td>Blood Oath (4), Corpse Skin (2), Evil Omen (2), Poison Strike (1), Vampiric Embrace (3)</td>
+<td>5초당 1개, 최대 Effective Necro / 10 = <strong>10</strong></td>
 </tr>
 <tr>
 <td>마나</td>
-<td>버프 + 오프닝 + 스팸 + 필러</td>
+<td>버프 + 오프닝 + 프록 코어 + 필러</td>
 <td>메디가 없어 가장 빡빡하다</td>
 </tr>
 </tbody>
 </table>
-<p><strong>자원이 독립이어도 행동 슬롯은 하나다.</strong> 교전 중 블록의 전체 가드는 이렇다.</p>
-<pre><code>if not targetexists and not casting and not warmode and find var__combat_target ground -1 -1 12 as alias__target</code></pre>
+<p><strong>자원이 독립이어도 행동 슬롯은 하나다.</strong> 교전 블록 하나는 이런 모양이다 (프록 코어의 Harm).</p>
+<pre><code>if cooldown "harm" = 0 and var__regs_harm = 1 and mana &gt;= config__mana_2nd and var__opener_done = 1 and not warmode and not targetexists and not casting and cooldown "walk" = 0
+    if find var__combat_target ground -1 -1 config__target_range as alias__proc_target
+        cast 'Harm'</code></pre>
+<p>조건 줄 끝의 행동 창이 행동 슬롯을 지키고, 대상 <code>find</code>는 쏘는 갈래 안에서만 한다 (5.8절 게이트 접기).</p>
 <h4>루프 규칙 하나</h4>
-<p><strong>송은 전투 중에 부르지 않는다. 이동 중에만 부른다.</strong></p>
-<p>전투 중에는 디스코와 피스가 <code>music</code>을 5초씩 계속 세워서 송이 거의 안 나간다.
-게다가 악기 연주는 시전을 끊어서 프록 주문을 날려먹는다.
-반대로 이동 구간 (10~20초)에는 <code>music</code>이 비어 있고 어차피 아무것도 안 하고 있다.</p>
-<pre><code>not targetexists and not casting and 근처에 몹 없음  -&gt;  송 한 곡</code></pre>
-<h4><code>cooldowns.xml</code> 은 이미 정리했다</h4>
+<p><strong>송은 전투 중에 부르지 않는다. 이동 블록에서만 부른다</strong> (5.1절). 이유는 2.5절이다.
+전투 중에는 디스코와 피스가 <code>music</code>을 계속 세우고, 악기 연주가 시전을 끊는다.</p>
+<h4><code>cooldowns.xml</code>은 이미 정리했다</h4>
 <p><code>config/indian/classicuo/nomeehej/cooldowns.xml</code>의 내역과 이유는 2.9절, 쿨 모델 자체는 2.5절.</p>
-<p>따라서 스크립트는 게임 값을 그대로 읽으면 된다. <strong>자체 타이머가 하나도 필요 없다.</strong></p>
-<pre><code>Disco 송    cooldown &quot;music&quot; = 0 and cooldown &quot;song&quot; = 0 and cooldown &quot;disco&quot; = 0
-Peace 송    cooldown &quot;music&quot; = 0 and cooldown &quot;song&quot; = 0 and cooldown &quot;peace/provo&quot; = 0
-Disco 스킬  cooldown &quot;music&quot; = 0 and cooldown &quot;disco&quot; = 0
-Peace 스킬  cooldown &quot;music&quot; = 0 and cooldown &quot;peace/provo&quot; = 0
-프록 스펠   cooldown &quot;magic arrow&quot; / &quot;harm&quot; / &quot;fireball&quot; / &quot;lightning&quot; = 0
-필러        프록 넷이 전부 쿨 (var__procs_done = 1) and mana &gt; config__filler_floor</code></pre>
-<p><strong>바드 외 스킬을 루프에 넣게 되면 <code>music</code> 대신 <code>skill</code>을 봐야 한다.</strong>
-서버 스킬 게이트가 하나라 Animal Lore 같은 것도 같은 타이머를 쓴다.</p>
-<p>Lyric Aspect 방어구의 리셋 프록이 <code>music</code> / 스킬 슬롯 / <code>song</code>을 전부 0으로 만드는데,
-게임 값을 직접 읽으므로 그 이득이 자동으로 따라온다.</p>
+<p>스크립트는 게임 값을 그대로 읽는다. <strong>바드 쿨을 흉내 내는 자체 타이머는 없다.</strong> Lyric 리셋 프록의 이득도 그래서 따라온다 (2.7절).</p>
+<table>
+<thead>
+<tr>
+<th>행동</th>
+<th>게이트</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Disco 송</td>
+<td><code>cooldown "music" = 0 and cooldown "song" = 0 and cooldown "disco" = 0</code></td>
+</tr>
+<tr>
+<td>Peace / Provo 송</td>
+<td><code>cooldown "music" = 0 and cooldown "song" = 0 and cooldown "peace/provo" = 0</code></td>
+</tr>
+<tr>
+<td>Disco 스킬</td>
+<td><code>cooldown "music" = 0 and cooldown "disco" = 0</code></td>
+</tr>
+<tr>
+<td>Peace 스킬</td>
+<td><code>cooldown "music" = 0 and cooldown "peace/provo" = 0</code></td>
+</tr>
+<tr>
+<td>프록 스펠</td>
+<td><code>cooldown "magic arrow"</code> / <code>"harm"</code> / <code>"fireball"</code> / <code>"lightning"</code> <code>= 0</code></td>
+</tr>
+<tr>
+<td>필러</td>
+<td>프록 넷이 전부 쿨 (<code>var__procs_done = 1</code>) and <code>mana &gt; config__filler_floor</code></td>
+</tr>
+</tbody>
+</table>
+<p>바드 외 스킬을 루프에 넣으면 <code>music</code> 대신 <code>skill</code>을 본다 (2.10절).</p>
 
 <h3 id="5.4">5.4 마나 예산</h3>
 <table>
@@ -1891,50 +2511,145 @@ Peace 스킬  cooldown &quot;music&quot; = 0 and cooldown &quot;peace/provo&quot
 </tr>
 </tbody>
 </table>
-<p><strong>15초 창을 시전 시간으로 정확히 나눈다</strong> (시전 + 회복 0.2초):</p>
-<pre><code>Magic Arrow   1서클  0.50 + 0.2 = 0.70
-Harm          2서클  0.75 + 0.2 = 0.95
-Fireball      3서클  1.00 + 0.2 = 1.20
-Lightning     4서클  1.25 + 0.2 = 1.45
-                              ------
-                프록 코어 합    4.30초
-
-15 - 4.30 = 10.70초가 비어 있었다
-
-Energy Bolt   6서클  1.75 + 0.2 = 1.95
-10.70 / 1.95 = 5.4  -&gt;  필러 5방</code></pre>
-<p><strong>15초당 시전 4회 -&gt; 9회. 2.25배다.</strong> 이것이 <code>Bless</code>를 버리고 <code>Energy Bolt</code>를 넣은 근거다.</p>
-<pre><code>오프닝 (몹 1마리당)   Mana Drain 11 + Curse 11          =  22
-프록 코어 (15초)      4 + 6 + 9 + 11                    =  30
-필러 (15초)           Energy Bolt x5, 20씩 (마무리면 5)      = 100 (~25)
-                                                       -----
-                                          15초당     152 (~55)
-
-1분 교전
-  코어 120 + 오프닝 22 = 142         환급 56% 적용 -&gt; 62
-  필러 20방 x 20, 환급 56% 적용 (마무리면 x 5)       -&gt; 176 (~100)
-                                                       ----
-                          실질 약 238/분 = 4.0 마나/초 (전부 마무리면 2.7)</code></pre>
+<p><strong>15초 창을 시전 시간으로 정확히 나눈다</strong> (시전 + 회복 0.2초).</p>
+<table>
+<thead>
+<tr>
+<th>주문</th>
+<th>서클</th>
+<th>시전 + 회복</th>
+<th>초</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Magic Arrow</td>
+<td>1서클</td>
+<td>0.50 + 0.2</td>
+<td>0.70</td>
+</tr>
+<tr>
+<td>Harm</td>
+<td>2서클</td>
+<td>0.75 + 0.2</td>
+<td>0.95</td>
+</tr>
+<tr>
+<td>Fireball</td>
+<td>3서클</td>
+<td>1.00 + 0.2</td>
+<td>1.20</td>
+</tr>
+<tr>
+<td>Lightning</td>
+<td>4서클</td>
+<td>1.25 + 0.2</td>
+<td>1.45</td>
+</tr>
+<tr>
+<td><strong>프록 코어 합</strong></td>
+<td></td>
+<td></td>
+<td><strong>4.30초</strong></td>
+</tr>
+<tr>
+<td>Energy Bolt</td>
+<td>6서클</td>
+<td>1.75 + 0.2</td>
+<td>1.95</td>
+</tr>
+</tbody>
+</table>
+<p><code>15 - 4.30 = 10.70</code>초가 비어 있었다. 여기에 Energy Bolt를 넣으면 <code>10.70 / 1.95 = 5.4</code>, 필러 5방이다.</p>
+<p><strong>15초당 시전 4회 → 9회. 2.25배다.</strong> 이것이 <code>Bless</code>를 버리고 <code>Energy Bolt</code>를 넣은 근거다.</p>
+<table>
+<thead>
+<tr>
+<th>15초 창</th>
+<th>식</th>
+<th>마나</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>오프닝 (몹 1마리당)</td>
+<td>Mana Drain 11 + Curse 11</td>
+<td>22</td>
+</tr>
+<tr>
+<td>프록 코어 (15초)</td>
+<td>4 + 6 + 9 + 11</td>
+<td>30</td>
+</tr>
+<tr>
+<td>필러 (15초)</td>
+<td>Energy Bolt x5, 20씩 (마무리면 5)</td>
+<td>100 (~25)</td>
+</tr>
+<tr>
+<td><strong>15초당</strong></td>
+<td></td>
+<td><strong>152 (~77)</strong></td>
+</tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr>
+<th>1분 교전</th>
+<th>식</th>
+<th>실질 마나</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>코어 + 오프닝</td>
+<td>코어 120 + 오프닝 22 = 142, 환급 56% 적용</td>
+<td>62</td>
+</tr>
+<tr>
+<td>필러</td>
+<td>20방 x 20, 환급 56% 적용 (마무리면 x 5)</td>
+<td>176 (~100)</td>
+</tr>
+<tr>
+<td><strong>합</strong></td>
+<td></td>
+<td><strong>실질 약 238/분 = 4.0 마나/초</strong> (전부 마무리면 2.7)</td>
+</tr>
+</tbody>
+</table>
+<p>괄호는 전부 마무리인 경우다. <code>Energy Bolt</code>의 15마나는 <strong>볼트 뒤 5초 안에 대상이 죽을 때만</strong> 돌아온다 (Grimoire 원문, 3.1절).
+잡몹 마무리에서만 실질 5고, 체력 큰 몹에는 20 그대로다.
+환급 56%는 Eldritch 26% (1.1절)와 Mana Drain 라이더 30% (5.5절)를 더한 값이다.</p>
 <p><strong>이동 10~20초 구간은 소모 0</strong>이고 거기에 Avarhide double mana regen 60%,
 <code>Create Food</code> 버섯 분당 25가 얹힌다. 그래도 <strong>메디 없이 2.7~4.0/초는 버겁다.</strong></p>
-<blockquote>
-<p><code>Energy Bolt</code>의 15 마나는 <strong>볼트 뒤 5초 안에 대상이 죽을 때만</strong> 돌아온다 (Grimoire 원문, 3.1절).
-잡몹 마무리에서만 실질 5고, 체력 큰 몹에는 20 그대로다. 위 표의 괄호가 전부 마무리인 경우다.</p>
-</blockquote>
-<p>여기에 <strong>이동 10~20초 동안 소모 0</strong>과 Avarhide double mana regen 60%,
-<code>Create Food</code> 버섯 분당 25가 얹힌다.</p>
-<blockquote>
-<p><strong>미확인 두 가지</strong></p>
+<p>확인되지 않은 것 둘:</p>
 <ol>
-<li>Eldritch 환급과 Grimoire 환급이 합산인지 각각 굴리는지. 각각이면 실효 <code>48%</code>.</li>
-<li>(해결) <code>Energy Bolt</code>의 15 마나는 5초 안에 죽을 때만 돌아온다. 환급 확률과 중첩되는지는 아직 모른다.</li>
+<li>Eldritch 환급과 Grimoire 환급이 합산인지 각각 굴리는지. 각각이면 실효 <code>48%</code>다.</li>
+<li><code>Energy Bolt</code>의 15마나 회수 (5초 안에 죽을 때만)가 환급 확률과 중첩되는지. 위 표는 중첩되지 않는다고 보고 마무리 볼트에는 환급을 적용하지 않았다.</li>
 </ol>
-</blockquote>
-<p><strong>프록 쿨다운이 더 이상 마나 조절기가 아니다.</strong> 빈 10.7초가 사라졌으니
+<p><strong>프록 쿨이 더 이상 마나 조절기가 아니다.</strong> 빈 10.7초가 사라졌으니
 이제 마나가 실제 상한이다. <strong>필러 5방은 이론치고, 실제로는 마나가 허락하는 만큼만 나간다.</strong></p>
-<pre><code>프록 4종      마나가 남는 한 항상.  창당 30마나
-Energy Bolt   mana &gt; config__filler_floor 일 때만       &lt;- 여기서 먼저 잘린다</code></pre>
-<p><code>config__filler_floor</code>를 오프닝 22 + 프록 코어 30 = <strong>52 이상</strong>으로 둔다.
+<table>
+<thead>
+<tr>
+<th>주문</th>
+<th>언제 나가나</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>프록 4종</td>
+<td>마나가 남는 한 항상. 창당 30마나</td>
+</tr>
+<tr>
+<td>Energy Bolt</td>
+<td><code>mana &gt; config__filler_floor</code>일 때만. <strong>여기서 먼저 잘린다</strong></td>
+</tr>
+</tbody>
+</table>
+<p><code>config__filler_floor</code>를 오프닝 22 + 프록 코어 30 = <strong>52 이상</strong>으로 둔다 (지금 52).
 그래야 필러가 마나를 다 먹어서 다음 몹의 오프닝을 못 거는 일이 없다.</p>
 
 <h3 id="5.5">5.5 오프닝은 대상마다 다시 건다</h3>
@@ -1944,36 +2659,96 @@ Mana Drain T3: "Increases mana refund chance by 30% for caster's hostile spells 
 </blockquote>
 <p><strong>둘 다 대상에 걸리는 디버프다.</strong> 몹을 바꾸면 따라오지 않는다. Discordance / Peace도 마찬가지다.</p>
 <h4>지속시간이 어긋난다</h4>
-<pre><code>베이스 디버프   2분    Curse -5%,  Mana Drain -20 Magic Resist
-그리모어 라이더  60초   +30% 데미지,  +30% 환급</code></pre>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>지속</th>
+<th>효과</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>베이스 디버프</td>
+<td>2분</td>
+<td>Curse -5%, Mana Drain -20 Magic Resist</td>
+</tr>
+<tr>
+<td>Grimoire 라이더</td>
+<td>60초</td>
+<td>+30% 데미지, +30% 환급</td>
+</tr>
+</tbody>
+</table>
 <p><strong>디버프 아이콘이 남아 있어도 +30% 두 개는 이미 꺼져 있다.</strong> <code>getlabel</code>로 판정할 수 없다.</p>
 <h4>리스트 두 개로 상태를 표현한다</h4>
-<pre><code>list &#39;list__magic_drained_targets&#39;    Mana Drain 완료 serial
-list &#39;list__magic_cursed_targets&#39;     Curse 완료 serial
-timer__magic_window             마지막 Curse 안착 이후 경과
-
-if timer &quot;timer__magic_window&quot; &gt;= cooldown__magic_window        60000
+<table>
+<thead>
+<tr>
+<th>상태</th>
+<th>뜻</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>list 'list__magic_drained_targets'</code></td>
+<td>Mana Drain 완료 serial</td>
+</tr>
+<tr>
+<td><code>list 'list__magic_cursed_targets'</code></td>
+<td>Curse 완료 serial</td>
+</tr>
+<tr>
+<td><code>timer__magic_window</code></td>
+<td>마지막 Curse 안착 이후 경과. <code>cooldown__magic_window</code> (60000)가 지나면 두 리스트를 비운다</td>
+</tr>
+</tbody>
+</table>
+<pre><code>if timer &quot;timer__magic_window&quot; &gt;= cooldown__magic_window
     clearlist &#39;list__magic_drained_targets&#39;
     clearlist &#39;list__magic_cursed_targets&#39;
     settimer &quot;timer__magic_window&quot; 0
-endif
-
-not inlist drained                  -&gt; Mana Drain
-inlist drained, not inlist cursed   -&gt; Curse   (안착하면 settimer 0)
-inlist cursed                       -&gt; 프록 코어</code></pre>
+endif</code></pre>
+<table>
+<thead>
+<tr>
+<th>대상이</th>
+<th>다음 시전</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>drained에 없다</td>
+<td>Mana Drain</td>
+</tr>
+<tr>
+<td>drained에 있고 cursed에 없다</td>
+<td>Curse (안착하면 <code>settimer</code> 0)</td>
+</tr>
+<tr>
+<td>cursed에 있다</td>
+<td>프록 코어</td>
+</tr>
+</tbody>
+</table>
 <p>타이머는 <strong>Curse가 안착할 때마다 0으로</strong> 돌아간다. 한 마리와 싸우는 보통의 경우 만료가 정확히
-60초에 맞고, 두 마리면 먼저 건 쪽이 몇 초 일찍 sweep 된다. 주기적 sweep보다 낫다.</p>
-<p>분기 자체가 상태라 <code>var_magic_stage</code> 같은 단계 변수가 필요 없다.</p>
+60초에 맞고, 두 마리면 먼저 건 쪽이 몇 초 일찍 지워진다. 주기적으로 지우는 것보다 낫다.</p>
+<p>분기 자체가 상태라 <code>var__magic_stage</code> 같은 단계 변수가 필요 없다.</p>
 <p><strong>이 두 리스트는 구식 <code>bard-necro.razor</code>에서 가져온 것이다.</strong> 그 파일은 지웠고 (git 이력),
 같은 두 리스트가 <code>bard-necro-enhanced.razor</code>의 <code>OPENER</code>에 그대로 산다.</p>
-<p><strong>트레이드오프</strong>: sweep이 전역이라 방금 건 대상까지 지운다. 동시 교전 1~2마리면 가끔 22마나 손해다. <strong>대상별 타임스탬프는 산술이 필요해서 못 쓴다.</strong></p>
+<p><strong>트레이드오프</strong>: 비우기가 전역이라 방금 건 대상까지 지운다. 동시 교전 1~2마리면 가끔 22마나 손해다. <strong>대상별 타임스탬프는 산술이 필요해서 못 쓴다.</strong></p>
 <p><strong>막힘 방지</strong>: 타이머가 아니라 <strong>조건</strong>으로 푼다. Curse 시약이 없으면
 <code>var__opener_done</code>이 그냥 1이 되어 프록과 필러가 라이더 없이 나간다. 시약은 다음 보급까지 돌아오지 않고,
-살아있는 몹 앞에서 스크립트가 서 있는 것보다 30% 덜 아프게 때리는 쪽이 낫다.</p>
+살아 있는 몹 앞에서 스크립트가 서 있는 것보다 30% 덜 아프게 때리는 쪽이 낫다.</p>
 <p><strong>마나 부족은 여기에 넣지 않는다.</strong> 마나는 돌아오고 그동안 소환수가 싸운다. 라이더 없는 주문에 흘린 마나만큼
 다음 오프닝이 늦어지므로, 22가 찰 때까지 기다렸다가 라이더를 달고 친다.</p>
-<pre><code>var__opener_done = 1  &lt;-  inlist cursed
-                     or  var__regs_curse = 0</code></pre>
+<pre><code>if inlist &#39;list__magic_cursed_targets&#39; var__combat_target
+    @setvar! var__opener_done 1
+elseif var__regs_curse = 0
+    @setvar! var__opener_done 1
+else
+    @setvar! var__opener_done 0
+endif</code></pre>
 <h4>구식 스크립트의 버그 (반복하지 말 것)</h4>
 <p><strong>두 구식 스크립트가 같은 버그를 갖고 있었다</strong> (둘 다 지웠다, git 이력). <code>clearlist</code>가 <strong>전투 대상이 사라지고 조용해졌을 때만</strong> 돌았다.</p>
 <p>한 마리와 60초 넘게 싸우면 Curse의 <code>+30%</code>가 꺼졌는데도 리스트가 "걸려 있음"이라고 답해서 <strong>영영 재시전하지 않는다.</strong> 난이도 300~500 몹은 대부분 여기 걸린다. <strong>만료는 교전 종료가 아니라 시간으로 재야 한다.</strong></p>
@@ -2014,19 +2789,19 @@ inlist cursed                       -&gt; 프록 코어</code></pre>
 <td><strong>세 곡이 쿨 하나를 공유한다.</strong> 3곡 연창은 곡당 11초씩 걸린다</td>
 </tr>
 <tr>
-<td><strong>Skill -&gt; Song</strong></td>
+<td><strong>Skill → Song</strong></td>
 <td><strong>꼬임</strong></td>
 <td>스킬이 <code>music</code> 5초를 세워 송을 밀어낸다. 송이 급하면 스킬을 참는다</td>
 </tr>
 <tr>
-<td>Song -&gt; Skill</td>
+<td>Song → Skill</td>
 <td>안 꼬임</td>
 <td>송은 <code>music</code>도 스킬 슬롯도 안 세운다. 1.5초 뒤 디스코가 나간다</td>
 </tr>
 <tr>
 <td><code>clearsysmsg</code> x <code>insysmsg</code></td>
 <td>위험</td>
-<td>한 패스 안에서 시전-&gt;판정을 끝낸다</td>
+<td>루프 안에서는 지우지 않는다. <code>clearsysmsg</code>는 셋업에 하나뿐이고, 판정은 시전한 블록 안에서 끝낸다</td>
 </tr>
 <tr>
 <td>송 x 시전</td>
@@ -2081,47 +2856,57 @@ inlist cursed                       -&gt; 프록 코어</code></pre>
 <p><strong>대가</strong>: 소환수가 전투 중에 죽고 다시 뽑히면 <strong>그 전투가 끝날 때까지는 송 버프가 없다.</strong>
 세 곡 각 8.5%이므로 한 판의 일부 구간에서 그만큼 손해다.
 위의 복잡도 전부와 바꿀 만하다.</p>
-<p><strong>라운드로빈은 산술 없이 리터럴 상태값으로 돈다.</strong></p>
-<pre><code>if var__song_next = 1
-    useskill &#39;Discordance&#39;
-    @setvar! var__song_next 2
-elseif var__song_next = 2
-    useskill &#39;Peacemaking&#39;
-    @setvar! var__song_next 3
-else
-    useskill &#39;Provocation&#39;
-    @setvar! var__song_next 1
-endif</code></pre>
-<p><code>findbuff "song of ..."</code>로 게이트하지 않는다. 15분 버프라 늘 참이어서 갱신이 영영 안 돈다. <strong><code>cooldown "song" = 0</code>을 보고 다음 곡을 부른다.</strong></p>
-<p>다만 <strong>곡마다 자기 슬롯을 함께 봐야 한다.</strong> 전투가 막 끝났으면 Peace 슬롯이 10초 남아 있어서
-Peace 송과 Provo 송이 둘 다 막힌다. 그때는 그 패스를 거르고 다음 패스에 다시 온다.</p>
-<pre><code>if cooldown &quot;music&quot; = 0 and cooldown &quot;song&quot; = 0
-    if var__song_next = 1 and cooldown &quot;disco&quot; = 0
-        ... Disco 송 ...   @setvar! var__song_next 2
-    elseif var__song_next = 2 and cooldown &quot;peace/provo&quot; = 0
-        ... Peace 송 ...   @setvar! var__song_next 3
-    elseif var__song_next = 3 and cooldown &quot;peace/provo&quot; = 0
-        ... Provo 송 ...   @setvar! var__song_next 1
+<p><strong>라운드로빈은 산술 없이 리터럴 상태값으로 돈다.</strong> <code>var__song_next</code>가 1, 2, 3을 돌고, 곡마다 자기 슬롯을 함께 본다.
+전투가 막 끝났으면 Peace 슬롯이 10초 남아 있어서 Peace 송과 Provo 송이 둘 다 막힌다. 그때는 그 패스를 거르고 다음 패스에 다시 온다.</p>
+<pre><code>if cooldown "song" = 0 and cooldown "music" = 0 and not warmode and var__instrument_ok = 1 and var__my_instrument != 0 and not targetexists and not casting
+    @setvar! var__song_after 0
+
+    if var__song_next = 1 and skill "Discordance" &gt; 0 and cooldown "disco" = 0
+        useskill 'Discordance'
+        @setvar! var__song_after 2
+    elseif var__song_next = 2 and skill "Peacemaking" &gt; 0 and cooldown "peace/provo" = 0
+        useskill 'Peacemaking'
+        @setvar! var__song_after 3
+    elseif var__song_next = 3 and skill "Provocation" &gt; 0 and cooldown "peace/provo" = 0
+        useskill 'Provocation'
+        @setvar! var__song_after 1
+    endif
+
+    if var__song_after != 0
+        waitfortarget wait__target
+        # the instrument prompt and the lasttarget check sit here, see BARD SONG
+        if targetexists
+            target backpack
+            @setvar! var__song_next var__song_after
+        endif
     endif
 endif</code></pre>
+<ul>
+<li><code>var__song_next</code>는 커서가 백팩에 간 뒤에만 넘어간다. 못 부른 곡은 건너뛰지 않고 다음 패스에 다시 부른다.</li>
+<li>스킬이 없는 곡 (<code>skill "..." = 0</code>)에서는 라운드로빈이 멈춘다. 그래서 바딩 세 스킬을 다 찍어야 한다.</li>
+<li>백팩을 찍기 직전에 lasttarget을 한 번 더 본다. 방금 고른 적이 있으면 커서를 취소하고 그 타겟을 다음 패스에 넘긴다.</li>
+<li><code>findbuff "song of ..."</code>로 게이트하지 않는다. 15분 버프라 늘 참이어서 갱신이 영영 안 돈다. <strong><code>cooldown "song" = 0</code>을 보고 다음 곡을 부른다.</strong></li>
+</ul>
 <p>이동 구간이 10~20초라 슬롯은 대개 그 안에 풀린다. 못 부른 곡은 다음 이동 때 잡힌다.</p>
 <p><strong>재소환해도 Bless는 다시 안 건다.</strong> 애초에 Grimoire에서 뺐다.</p>
 
 <h3 id="5.8">5.8 명령문 비용 적용</h3>
-<p>측정값과 원칙 (자주 안 변하는 상태는 타이머로 게이트하고, 흔한 경로가 밟는 줄을 줄인다)은 <a href="razor.html#6">razor.html</a> 6절. 이 루프에 적용한 것:</p>
+<p>측정값과 원칙 (자주 안 변하는 상태는 타이머로 게이트하고, 흔한 경로가 밟는 줄을 줄인다)은 <a href="razor.html#6">razor.html</a> 6절. 이 루프에는 이렇게 적용했다.</p>
 <ul>
-<li>예전 PASS FLAGS는 시약 플래그 13개를 <strong>매 패스</strong> <code>findtype</code> 19 ~ 32번으로 다시 읽었다. 패스당 0.4 ~ 1.3초.
+<li>예전 PASS FLAGS는 시약 플래그 13개를 <strong>매 패스</strong> <code>findtype</code> 19~32번으로 다시 읽었다. 패스당 0.4 ~ 1.3초.
 지금은 <code>timer__regs_refresh</code> (30초)마다 시약 일곱 종을 한 번씩만 찾아 <code>var__has_*</code>에 두고, 주문 플래그 13개는
 그 일곱을 <code>=</code>로 비교해서 만든다. 리프레시 한 번에 <code>findtype</code> 7번, 그 사이 패스는 타이머 비교 한 줄.
-<code>bard-necro-pvp</code>도 같은 모양 (<code>findtype</code> 14번 → 30초에 7번). 시작할 때 타이머를 만료시켜 첫 패스가 반드시 읽는다.
+시작할 때 타이머를 만료시켜 첫 패스가 반드시 읽는다.
 묵은 플래그의 대가는 시전 한 번 거부다. 거부 문장 <code>More reagents are needed for this spell.</code> (인게임 확인됨 2026-09-28)이 보이면
 창을 기다리지 않고 다음 패스에 다시 읽는다. 이것이 없던 때는 창이 끝날 때까지 같은 주문을 패스마다 다시 시도했다.
-시약은 대상을 찍을 때 검사하므로 (3.2절) 시도마다 시전 시간을 다 쓰고 실패했다.</li>
-<li>소환수 이름 블록의 5초당 (하우스키핑 틱) <code>findtype</code> 3번은 60 ~ 120ms로, 시약 읽기에 비하면 작다.</li>
+시약은 대상을 찍을 때 검사하므로 (3.2절) 시도마다 시전 시간을 다 쓰고 실패했다.
+<code>bard-necro-pvp</code>도 같은 모양이다 (<code>findtype</code> 14번 → 30초에 7번). 다만 거부 문장으로 앞당겨 읽지는 않는다.</li>
+<li>소환수 이름 블록은 하우스키핑 틱 (5초)마다 한 번 돈다. 이름 붙은 소환수마다 슬롯 확인 <code>find</code>가 하나 (최대 3),
+매치를 훑는 <code>findtype</code>이 매치 수 + 1번이다. 매 패스가 아니라서 이 정도는 둔다.</li>
 <li><strong>교전·이동 분기</strong> (2026-09-29). 모든 패스가 도는 블록 (드레인, 생존, 타겟 캐시, 플래그, 하우스키핑) 뒤에서
-<code>COMBAT OR WALK</code>가 <code>var__engaged</code>를 한 번만 묻고 둘로 나눈다. 교전 쪽은 Disco, Peace, 네크로, 오프닝, 프록 코어, 필러, Poison Strike,
-이동 쪽은 버섯, 자기 버프, 송, Vampiric Embrace. 스탯 포션은 하우스키핑 안에서 <code>var__engaged</code>를 직접 읽는다.
-전에는 블록마다 <code>var__engaged</code>를 따로 물어서, 이동 패스도 Disco·Peace를 실패하는 <code>find</code>까지 밟았다.</li>
+<code>COMBAT OR WALK</code>가 <code>var__engaged</code>를 한 번만 묻고 둘로 나눈다. 교전 쪽은 디스코, 피스, 네크로 버스트, 오프닝, 프록 코어, 필러, Poison Strike,
+이동 쪽은 버섯, 자기 버프, 송, Vampiric Embrace다. 스탯 포션은 하우스키핑 안에서 <code>var__engaged</code>를 직접 읽는다.
+전에는 블록마다 <code>var__engaged</code>를 따로 물어서, 이동 패스도 디스코와 피스의 실패하는 <code>find</code>까지 밟았다.</li>
 <li><strong>하우스키핑 틱</strong> (2026-09-29). 매 패스 볼 필요가 없는 확인은 5초짜리 <code>HOUSEKEEPING</code> 하나 안에 모았다. 패스는 그 게이트 한 줄만 밟는다.
 더 긴 주기가 있는 것은 안에서 자기 시계를 한 번 더 본다. 시작할 때 시계를 전부 만료시켜 첫 패스는 다 본다.
 시계가 조건 맨 앞에 온다. 대부분의 패스에서 그 뒤의 검색을 건너뛰는 것이 목적이라서다.</li>
@@ -2136,9 +2921,9 @@ endif</code></pre>
 </thead>
 <tbody>
 <tr>
-<td>악기 복구, 과적, 리프 포션, 소환수 이름</td>
+<td>악기 회수, 무게, 리프레시 포션, 소환수 이름</td>
 <td>틱마다 (5초)</td>
-<td>줍기·전투로만 바뀐다. 이름은 전에 3초 창이었다</td>
+<td>줍기와 전투로만 바뀐다. 이름은 전에 3초 창이었다</td>
 </tr>
 <tr>
 <td>악기 (<code>find var__my_instrument</code>)</td>
@@ -2148,7 +2933,7 @@ endif</code></pre>
 <tr>
 <td>핫바 (<code>gumpexists</code>)</td>
 <td>30초</td>
-<td>죽거나 재접속·실수로만 닫힌다. 닫힌 동안 네크로 능력이 선다</td>
+<td>죽거나, 재접속하거나, 잘못 눌렀을 때만 닫힌다. 닫힌 동안 네크로 능력이 선다</td>
 </tr>
 <tr>
 <td>음식 버프</td>
@@ -2161,24 +2946,24 @@ endif</code></pre>
 <td>버프가 몇 분 간다</td>
 </tr>
 <tr>
-<td>Disco 확인 (<code>var__disco_seen</code>)</td>
+<td>디스코 확인 (<code>var__disco_seen</code>)</td>
 <td>30초</td>
-<td>Discordance는 약 2분 간다. 한 번 확인한 대상은 30초 동안 <code>find</code> · <code>getlabel</code>을 건너뛴다</td>
+<td>Discordance는 1분 21초 ~ 1분 57초 간다 (1.4절). 한 번 확인한 대상은 30초 동안 <code>find</code>와 <code>getlabel</code>을 건너뛴다</td>
 </tr>
 <tr>
-<td>Peace 확인 (<code>timer__peace_seen</code>)</td>
+<td>피스 확인 (<code>timer__peace_seen</code>)</td>
 <td>2초 (게이트에서)</td>
 <td>진정 12초와 슬롯 10초의 차이. 브레이크 40초 동안은 매 패스 대신 2초에 한 번 읽는다</td>
 </tr>
 </tbody>
 </table>
 <ul>
-<li><strong>생존 게이트</strong> (2026-09-29). 마비·독·HP 세 블록을 <code>if paralyzed or poisoned or diffhits &gt; config__light_hits</code> 한 줄 뒤에 둔다. 멀쩡한 패스는 세 줄 대신 한 줄.</li>
-<li><strong>게이트 접기</strong> (2026-09-29). 늘 참인 바깥 <code>if</code> (수동 모드, 행동 창, 스킬·악기 준비)를 안쪽 조건 한 줄에 합쳤다. 할 일이 없는 블록은 패스마다 한 줄만 밟는다.
+<li><strong>생존 게이트</strong> (2026-09-29). 마비, 독, HP 세 블록을 <code>if paralyzed or poisoned or diffhits &gt; config__light_hits</code> 한 줄 뒤에 둔다. 멀쩡한 패스는 세 줄 대신 한 줄.</li>
+<li><strong>게이트 접기</strong> (2026-09-29). 늘 참인 바깥 <code>if</code> (수동 모드, 행동 창, 스킬과 악기 준비)를 안쪽 조건 한 줄에 합쳤다. 할 일이 없는 블록은 패스마다 한 줄만 밟는다.
 대상 <code>find</code>는 실제로 쏘는 갈래 안으로 옮겨서, 오프닝과 프록 코어는 주문이 나갈 때만 대상을 찾는다. 매 패스 세우던 플래그 둘 (<code>var__bard_ready</code>, <code>var__manual</code>)은 없애고
 게이트가 <code>warmode</code>와 악기 상태를 직접 읽는다. 드레인 둘은 <code>while queued or casting</code> 하나로, 시약 부족 문장은 리프레시 게이트의 <code>or</code>로 합쳤다.</li>
-<li><strong>패스당 대략</strong> (razor.html 6절 측정값, 줄 5 ~ 10ms, 거짓 <code>if</code> 10 ~ 20ms, <code>find</code> 20 ~ 40ms). 줄은 패스가 실제로 밟는 명령문이고,
-참이었던 <code>if</code>의 <code>endif</code>도 한 줄로 센다:</li>
+<li><strong>패스당 대략</strong> (<a href="razor.html#6">razor.html</a> 6절 측정값, 줄 5 ~ 10ms, 거짓 <code>if</code> 10 ~ 20ms, <code>find</code> 20 ~ 40ms). 줄은 패스가 실제로 밟는 명령문이고,
+참이었던 <code>if</code>의 <code>endif</code>도 한 줄로 센다.</li>
 </ul>
 <table>
 <thead>
@@ -2205,28 +2990,73 @@ endif</code></pre>
 Peace 슬롯이 열렸는데 대상이 진정이나 브레이크 중이면, 전에는 <code>find</code>와 <code>getlabel</code>이 든 7줄이 매 패스 더 붙었다. 지금은 2초에 한 번이다.</p>
 <ul>
 <li>남은 매 패스 검색: 타겟 캐시의 <code>find lasttarget</code>과 <code>find var__combat_target</code> (대상이 있을 때만) 둘뿐이다. 상태가 빨리 변하는 것들이라 둔다.
-버섯 <code>findtype</code> · <code>counttype</code>은 이동 쪽에서 서 있을 때만 조건 끝에서 읽힌다. 대상이 없는 동안이라 급하지 않다.</li>
-<li>심볼 수 읽기: <code>ingump</code> 사슬 한 줄, 각 갈래 안에서 <strong>읽은 값이 <code>var__symbols_listed</code>와 다를 때만</strong> 리스트를
-다시 채운다 (패스당 사슬 + 안쪽 <code>if</code> 두 줄). 채우기는 갈래별 리터럴 <code>for N</code>. <code>for</code> 횟수는 변수가 안 되고 (<code>Invalid for loop syntax</code>), <code>while not list … &gt;= var</code>는 파싱이 안 된다 (둘 다
-2026-09-28). 읽기 사슬은 20갈래에서 10갈래로 줄였다. Necromancy 100이면
-최대 10이고, 핫바가 그 이상을 보이면 위에 줄을 더한다.</li>
+버섯 <code>findtype</code>과 <code>counttype</code>은 이동 쪽에서 서 있을 때만 조건 끝에서 읽힌다. 대상이 없는 동안이라 급하지 않다.</li>
+<li><strong>심볼 수 읽기.</strong> 네크로 핫바 gump가 심볼을 <code>"&lt;have&gt;/&lt;max&gt;"</code>로 보여 주고, 루프는 그 글자를 <code>ingump</code>로 읽는다.
+<code>ingump</code>는 부분 문자열 매칭이라 큰 수부터 내려오는 사슬로 읽는다 (<code>10/</code>부터 <code>1/</code>까지). Necromancy 100이면 최대 10이다.
+핫바가 11 이상을 보이면 위에 줄을 더한다. <code>"11/11"</code>이 <code>"1/"</code>로 읽히기 때문이다. 핫바가 닫혀 있으면 0으로 읽혀 능력이 전부 선다.
+게이트는 수를 <code>list 'list__necro_symbols' &gt;= config__symbols_*</code>로 비교한다. 변수끼리는 크기 비교가 안 되기 때문이다 (<a href="razor.html#3">razor.html</a> 3절).
+그래서 각 갈래 안에서 <strong>읽은 값이 <code>var__symbols_listed</code>와 다를 때만</strong> 리스트를
+다시 채운다 (패스당 사슬 + 안쪽 <code>if</code> 두 줄). 채우기는 갈래별 리터럴 <code>for N</code>이다. <code>for</code> 횟수는 변수가 안 되고 (<code>Invalid for loop syntax</code>),
+<code>while not list … &gt;= var</code>는 파싱이 안 된다 (둘 다 2026-09-28). 읽기 사슬은 20갈래에서 10갈래로 줄였다.</li>
 </ul>
 
 <h3 id="5.9">5.9 bard-necro-pvp 루프</h3>
 <p><code>script/combat/bard-necro-pvp.razor</code> (F4). PK를 만나면 F1을 끄고 이것을 켠다. 컨벤션은 enhanced와 같고, 다른 점은 이렇다.</p>
 <ul>
-<li>대상은 <strong>내가 마지막으로 타겟한 플레이어뿐</strong> (Q, Shift+X/C). 스스로 고르지 않고, 파랑은 <code>config__attack_blue</code>가 아니면 건드리지 않는다.</li>
-<li>송·바드 스킬·네크로 능력·Grimoire 프록·Curse·Mana Drain이 없다. 플레이어 상대로는 시전 값어치가 없고 네크로는 아예 안 먹는다 (<a href="pvp.html#6.1">pvp.html</a> 6.1절).</li>
-<li>순서: 생존 (마비 → 파우치, 큐어, 힐 포션 35, 시전 힐 45, 버섯) → 유지 (Reactive Armor, Reflect, 시폰용 Magic Arrow, 포션 버프. 걷는 중엔 안 건다) → 펫 (<code>all kill</code> 15초마다) → Telekinesis (자기 먼저, 다음은 상대. 30초에 하나)
-→ 폭탄 (내 TK가 상대에게 붙어 있을
-때만 <code>Drink Explosion</code>) → 덤프 (Explosion을 미리 시전해 커서를 들고 있다가 사거리 안에 들어오면 Energy Bolt와 같이).</li>
+<li>대상은 <strong>내가 마지막으로 타겟한 플레이어뿐</strong> (Q나 Shift+X/C). 스스로 고르지 않고, 파랑은 <code>config__attack_blue</code>가 1이 아니면 건드리지 않는다.</li>
+<li>송, 바드 스킬, 네크로 능력, Grimoire 프록, Curse, Mana Drain이 없다. 플레이어 상대로는 시전 값어치가 없고 네크로는 아예 안 먹는다 (<a href="pvp.html#6.1">pvp.html</a> 6.1절).</li>
 <li>Explosion은 대상 뒤 2.5초, Energy Bolt는 시전 1.95 + 0.5초라 둘이 같이 맞는다.</li>
-<li>시약 플래그는 enhanced와 같이 30초 타이머 (5.8절).</li>
-<li>구조화 PvP · 팩션에서는 못 쓴다: <code>find</code>, 타이머, 플레이어 serial이 제한된다.</li>
+<li>시약 플래그는 enhanced와 같이 30초 타이머다 (5.8절). 시약 부족 문장으로 앞당겨 읽지는 않는다.</li>
+<li>구조화 PvP와 팩션에서는 못 쓴다. <code>find</code>, 타이머, 플레이어 serial이 제한된다 (<a href="razor.html#7">razor.html</a> 7절).</li>
 </ul>
+<p>블록은 이 순서로 돈다.</p>
+<table>
+<thead>
+<tr>
+<th>블록</th>
+<th>하는 일</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>대상</td>
+<td>lasttarget이 조건에 맞는 플레이어면 받아 둔다. 18칸 안이면 교전, 10칸 안이면 사거리</td>
+</tr>
+<tr>
+<td>생존</td>
+<td>마비 → 파우치, 큐어, 힐 포션 (35), 시전 힐 (45), 버섯</td>
+</tr>
+<tr>
+<td>유지</td>
+<td>Reactive Armor, Reflect, 시폰용 Magic Arrow. 주문은 걷는 중엔 안 건다. 포션 버프는 버프가 없으면 마신다</td>
+</tr>
+<tr>
+<td>소환수</td>
+<td><code>all kill</code> 15초마다</td>
+</tr>
+<tr>
+<td>Telekinesis</td>
+<td>자기 먼저, 다음은 상대. 30초에 하나</td>
+</tr>
+<tr>
+<td>폭탄</td>
+<td>내 TK가 상대에게 붙어 있을 때만 <code>Drink Explosion</code></td>
+</tr>
+<tr>
+<td>덤프</td>
+<td>Explosion을 미리 시전해 커서를 들고 있다가, 사거리 안에 들어오면 Energy Bolt와 같이</td>
+</tr>
+</tbody>
+</table>
 
 <h2 id="6">6. PvP</h2>
 <p>서버 규칙과 숫자 (Heat of Battle, 명중률, TK 폭탄, 소환수 PvP 규칙)는 <a href="pvp.html">pvp.html</a>. 여기는 이 캐릭터가 그 규칙으로 내린 판단이다.</p>
+<p><strong>이 캐릭터는 PK를 만나면 싸운다.</strong> 그래서 Herding 대신 Resisting Spells 80을 찍었고 (6.3절), F1을 끄고 F4 PvP 루프를 켠다 (5.9절).
+소환수는 사냥하던 그대로 쓴다 (6.4절).</p>
+<pre class="mermaid">flowchart TD
+  pk{"PK를 만났다&lt;br&gt;싸우나"} -- 예 --> f4("F1을 끄고 F4를 켠다&lt;br&gt;루프가 자기 TK부터 건다") --> hob("Heat of Battle이 켜진다&lt;br&gt;printed Resist 80만 남고 리콜이 막힌다")
+  pk -- 아니요 --> tk("자기 TK를 먼저 건다&lt;br&gt;해로운 주문 없이 힐과 큐어만") --> db("Defensive Barding 100이 남는다&lt;br&gt;리콜할 곳까지 뛴다")</pre>
+<p>이 캐릭터는 예 쪽이 기본이다. 어디서 리콜되는지는 <a href="pvp.html#1.3">pvp.html</a> 1.3절.</p>
 <p><strong>바드의 PvP 방어와 도주는 한 조건에 묶여 있다. 다른 플레이어에게 공격적 행동을 하지 않는 것이다.</strong>
 먼저 손을 쓰면 Defensive Barding과 리콜을 같이 잃는다. 이 절의 숫자는 전부 이 조건에서 갈린다.</p>
 
@@ -2244,12 +3074,12 @@ always take priority."
 from Wrestling / Magic Resist (such as Wrestling Mana Refund Chance or Magic Resist Siphon Spell Damage)"</p>
 </blockquote>
 <ul>
-<li>Disco/Peace/Provo 80/80/80이면 <code>240 / 2 = 120</code> -&gt; 상한 <strong>100</strong>. Wrestling과 Magic Resist 둘 다.</li>
+<li>Disco/Peace/Provo 80/80/80이면 <code>240 / 2 = 120</code> → 상한 <strong>100</strong>. Wrestling과 Magic Resist 둘 다.</li>
 <li><strong>방어에만 쓰인다.</strong> 내가 칠 때의 명중 판정에는 안 들어간다.</li>
-<li>printed가 <strong>더 높을 때만</strong> printed를 쓴다. 켜져 있는 동안 printed Wrestling 80 / Resist 80은 하는 일이 없다.</li>
+<li>printed가 <strong>더 높을 때만</strong> printed를 쓴다. 켜져 있는 동안 printed Resist 80은 하는 일이 없다 (printed Wrestling은 0이다, 1.1절).</li>
 <li><strong>Heat of Battle이 켜지면 통째로 꺼진다.</strong> 그때는 printed 값만 남는다.</li>
 </ul>
-<p>처음 들어온 패치 (2020-09-28) 원문은 지금 위키와 두 군데가 다르다.</p>
+<p>처음 들어온 패치 (2020-09-28) 원문은 지금 위키와 세 군데가 다르다.</p>
 <blockquote>
 <p>"Effective Wrestling skill value of ((Discordance Skill + Peacemaking Skill + Provocation Skill) / 2) up to a maximum of 100 Skill value, when defending against creatures and other players while
 unarmed"
@@ -2266,8 +3096,8 @@ unarmed"
 <tbody>
 <tr>
 <td>Magic Resist</td>
-<td><code>/ 3</code> -&gt; 80/80/80이면 <strong>80</strong></td>
-<td><code>/ 2</code> -&gt; <strong>100</strong></td>
+<td><code>/ 3</code> → 80/80/80이면 <strong>80</strong></td>
+<td><code>/ 2</code> → <strong>100</strong></td>
 </tr>
 <tr>
 <td>Wrestling 적용 범위</td>
@@ -2283,7 +3113,7 @@ unarmed"
 </table>
 <p>확인되지 않은 것:</p>
 <ul>
-<li>어느 Resist 공식이 지금 서버 값인지. <code>/ 3</code> 이어도 printed 80과 같으므로 printed가 더 주는 것은 없다.</li>
+<li>어느 Resist 공식이 지금 서버 값인지. <code>/ 3</code>이어도 printed 80과 같으므로 printed가 더 주는 것은 없다.</li>
 <li><strong>레슬링 무기를 들었을 때도 Effective Wrestling이 적용되는지.</strong> 2020 원문은 "while unarmed"다.</li>
 <li>"Flagged in PvP"가 무엇인지. 위키에 정의가 없다.</li>
 </ul>
@@ -2301,7 +3131,7 @@ unarmed"
 <tr>
 <td>맨손 근접 방어</td>
 <td>Effective Wrestling <strong>100</strong></td>
-<td>printed Wrestling</td>
+<td>printed Wrestling (0)</td>
 </tr>
 <tr>
 <td>마법 방어</td>
@@ -2309,23 +3139,26 @@ unarmed"
 <td>printed Resist</td>
 </tr>
 <tr>
-<td>리콜·문게이트</td>
+<td>리콜, 문게이트</td>
 <td>가능</td>
 <td><strong>막힘</strong></td>
 </tr>
 <tr>
-<td>printed Wrestling / Resist 80</td>
+<td>printed Resist 80</td>
 <td>하는 일 없음</td>
-<td><strong>유일한 방어</strong></td>
+<td><strong>유일한 마법 방어</strong></td>
 </tr>
 </tbody>
 </table>
 <p><strong>printed Resisting Spells는 도주 플랜에서는 0, 반격 플랜에서는 유일한 마법 방어다.</strong>
 PK를 어떻게 상대할지가 템플릿에 Resist를 넣을지를 정한다.</p>
-<p>던전에서는 리콜이 Golden Moongate 근처에서만 되므로 도주해도 printed 방어로 버티는 구간이 생긴다 (<a href="pvp.html#1.3">pvp.html</a> 1.3절).</p>
+<p>던전에서는 리콜이 Golden Moongate 8타일 안에서만 되므로 (<a href="pvp.html#1.3">pvp.html</a> 1.3절), 도주는 문게이트까지 맞으면서 뛰는 것이다.
+그동안 공격적 행동을 하지 않으면 Defensive Barding이 방어를 채운다.</p>
 
-<h3 id="6.3">6.3 Herding 을 Resist 로 바꿀 것인가</h3>
-<p>Bard Necro 기준으로 Herding 80 -&gt; Resisting Spells 80을 따져 본 결과다.</p>
+<h3 id="6.3">6.3 Herding을 Resist로 바꿀 것인가</h3>
+<p><strong>결론: PK를 만나면 싸우는 것이 기본이라 Resisting Spells 80으로 바꿨다</strong> (2026-09-27). 스크립트는 <code>config__use_herding 0</code>,
+1.1절의 캐릭터 전제는 Resisting Spells 80이다. 사냥이 본업이고 PK가 가끔인 캐릭터라면 Herding이 맞다.</p>
+<p>아래는 Bard Necro 기준으로 Herding 80 → Resisting Spells 80을 따져 본 결과다.</p>
 <ul>
 <li>잃는 것은 <strong>상시</strong>다. 팔로워 딜 +17.6% (스크립트 <code>config__use_herding</code> 주석 값). 소환수가 딜의 63.4%이므로 전체 딜 약 -9.5% (추정: <code>36.6 + 63.4 / 1.176</code>).</li>
 <li>얻는 것은 <strong>반격할 때만</strong>이다. 도주하는 동안에는 Defensive Barding이 이미 Resist를 준다.</li>
@@ -2347,7 +3180,7 @@ PK를 어떻게 상대할지가 템플릿에 Resist를 넣을지를 정한다.</
 </tr>
 <tr>
 <td>2</td>
-<td>해로운 주문을 쏘지 않는다. 힐·큐어만</td>
+<td>해로운 주문을 쏘지 않는다. 힐과 큐어만</td>
 <td>Defensive Barding (Resist)과 리콜을 지킨다</td>
 </tr>
 <tr>
@@ -2358,11 +3191,11 @@ PK를 어떻게 상대할지가 템플릿에 Resist를 넣을지를 정한다.</
 <tr>
 <td>4</td>
 <td>싸울 거면 그때 공격</td>
-<td>이 순간부터 Heat of Battle. Bard Necro는 Resist 0</td>
+<td>이 순간부터 Heat of Battle. Herding을 둔 Bard Necro는 Resist 0</td>
 </tr>
 </tbody>
 </table>
-<p><strong>싸우는 것이 기본이면 결론이 뒤집힌다.</strong> Heat of Battle이 켜진 뒤의 방어는 printed Resist 뿐이고,
+<p><strong>싸우는 것이 기본이면 결론이 뒤집힌다.</strong> Heat of Battle이 켜진 뒤의 방어는 printed Resist뿐이고,
 갈리는 것은 "한 방 덜 맞느냐"가 아니라 <strong>표준 덤프가 풀피에서 죽이느냐</strong>다.</p>
 <table>
 <thead>
@@ -2379,36 +3212,30 @@ PK를 어떻게 상대할지가 템플릿에 Resist를 넣을지를 정한다.</
 <td>50~64</td>
 </tr>
 <tr>
-<td>+ 붙은 폭발 포션 22~37 (Alchemy 80, 저항 안 됨)</td>
-<td><strong>84~117</strong></td>
-<td><strong>72~101</strong></td>
+<td>+ 붙은 폭발 포션 21~35 (Alchemy 80, 저항 안 됨, <a href="pvp.html#5">pvp.html</a> 5절)</td>
+<td><strong>83~115</strong></td>
+<td><strong>71~99</strong></td>
 </tr>
 </tbody>
 </table>
-<p>체력 100 언저리면 Resist 0은 덤프 한 번에 죽고, 80은 남아서 힐 포션·Greater Heal이 들어간다.
-잃는 것은 PvE 전체 딜 약 9.5%다. <strong>PK를 만나면 싸우는 것이 기본인 캐릭터는 Resist 80 이 맞다.</strong></p>
-<p>2026-09-27에 그렇게 바꿨다. 스크립트는 <code>config__use_herding 0</code>, 1.1 절의 캐릭터 전제는 Resisting Spells 80.</p>
+<p>체력 100 언저리면 Resist 0은 덤프 한 번에 죽고, 80은 남아서 힐 포션과 Greater Heal이 들어간다.
+잃는 것은 PvE 전체 딜 약 9.5%다. <strong>PK를 만나면 싸우는 것이 기본인 캐릭터는 Resist 80이 맞다.</strong></p>
 
 <h3 id="6.4">6.4 PK 앞의 소환수</h3>
-<p><strong>PK 전에 쓰는 소환수는 사냥하던 소환수다.</strong> PK 앞에서 다시 부를 수 없다고 본다. 5초 시전은 상대 4서클 이상 주문에 100% 끊기고, Vengeful Spirit도 다시 켜야 한다.</p>
-<ul>
-<li>PvP에서는 Summoner's Tome이 안 먹고 스탯이 printed Spirit Speak로 돌아간다. 그래서 PvM에서 Lich를 고른 이유 (Fire Tome의 Hex)가 사라진다.</li>
-<li>남는 차이는 버티는 힘이다 (Vampire HP 600, Rag Witch MR 150, Lich HP 400). 사냥 조합을 PvP 용으로 바꿀 만큼은 아니다.</li>
-<li>숫자와 소환수별 표는 <a href="pvp.html#6">pvp.html</a> 6절.</li>
-</ul>
+<p><strong>PK 앞에서도 사냥하던 소환수를 그대로 쓴다.</strong> 다시 부를 수 없다고 보고, PvP에서 소환수 사이의 차이가 사냥 조합을 바꿀 만큼은 아니라고 판단했다.
+PvP에서 소환수가 무엇을 잃고 어느 소환수가 더 버티는지는 <a href="pvp.html#6.1">pvp.html</a> 6.1절과 <a href="pvp.html#6.2">pvp.html</a> 6.2절.</p>
 
 <h3 id="6.5">6.5 레슬링과 반격 수단</h3>
 <ul>
-<li><strong>바드 메이지의 레슬링은 도주할 때만 Defensive Barding이 채운다.</strong> 첫 공격 주문을 쏘는 순간 Heat of Battle이 켜지고 printed 값이 된다. printed 0 이 치르는 값은 <a href="pvp.html#5">pvp.html</a> 5절.</li>
+<li><strong>바드 메이지의 레슬링은 도주할 때만 Defensive Barding이 채운다.</strong> 첫 공격 주문을 쏘는 순간 Heat of Battle이 켜지고 printed 값이 된다. printed 0이 치르는 값은 <a href="pvp.html#5">pvp.html</a> 5절.</li>
 <li>위키 Discordance / Peacemaking / Provocation 문서는 크리처 대상 효과만 적는다. 바드 스킬로 PK를 누르는 수단은 문서에 없다.</li>
 </ul>
 
-<h3 id="6.6">6.6 Tracking 과 바드</h3>
-<p>Tracking 자체의 규칙은 <a href="pvp.html#10">pvp.html</a> 10절.</p>
+<h3 id="6.6">6.6 Tracking과 바드</h3>
+<p>Tracking 자체의 규칙은 <a href="pvp.html#10">pvp.html</a> 10절, Hunting 판정이 5초 스킬 쿨을 쓰는 것은 <a href="pvp.html#10.1">pvp.html</a> 10.1절.</p>
 <ul>
-<li>Effective Barding 보너스는 Musicianship (또는 Self Taught 대체값) 상한 안에서만 붙는다 (2.13절).</li>
-<li><strong>Hunting의 자동 판정도 5초 스킬 쿨을 쓴다.</strong> 2.10절대로 서버 스킬 게이트가 하나라면,
-사냥 중 Hunting이 바드 스킬을 "use another skill"로 막을 수 있다. <strong>확인되지 않았다.</strong></li>
+<li>Tracking의 Effective Barding 보너스는 Musicianship (또는 Self Taught 대체값) 상한 안에서만 붙는다 (2.13절).</li>
+<li>서버 스킬 게이트가 하나라 (2.10절) 사냥 중 Hunting 판정이 바드 스킬을 "use another skill"로 막을 수 있다. 확인되지 않았다.</li>
 </ul>
 
 <h2 id="7">7. 인게임 확인</h2>
@@ -2442,11 +3269,11 @@ PK를 어떻게 상대할지가 템플릿에 Resist를 넣을지를 정한다.</
 <td>2.6절</td>
 </tr>
 <tr>
-<td>Song = 스킬을 백팩에 타겟. Music도 슬롯도 세우지 않고 읽기만 한다</td>
+<td>송은 스킬을 백팩에 타겟한 것이다. Music도 슬롯도 세우지 않고 읽기만 한다</td>
 <td>2.2, 2.5절</td>
 </tr>
 <tr>
-<td>Song 쿨은 세 곡이 공유하는 별도 계열이다. <code>cooldown "music"</code>이 아니다</td>
+<td>송 쿨은 세 곡이 공유하는 별도 계열이다. <code>cooldown "music"</code>이 아니다</td>
 <td>2.3절</td>
 </tr>
 <tr>
@@ -2496,20 +3323,20 @@ PK를 어떻게 상대할지가 템플릿에 Resist를 넣을지를 정한다.</
 <tbody>
 <tr>
 <td>1</td>
-<td>Song이 바드 스킬 슬롯까지 잠그는가</td>
+<td>송이 바드 스킬 슬롯까지 잠그는가</td>
 <td>2.5절 근거 표의 시퀀스를 <strong>Lyric 방어구 벗고</strong> 한 번 돌린다. probe 스크립트는 git 이력에 있다. 실행 중 수동 조작을 하지 않는다 (지난 로그가 그것 때문에 오염됐다)</td>
 <td>송 게이트의 모양</td>
 </tr>
 <tr>
 <td>2</td>
-<td>Song 쿨의 정확한 길이</td>
+<td>송 쿨의 정확한 길이</td>
 <td>같은 probe의 4단계 (약 11초 후 시도)</td>
 <td><code>song</code> 바 길이</td>
 </tr>
 <tr>
 <td>3</td>
 <td>Energy Bolt의 15마나 회수 (5초 안 마무리 때만)가 환급 확률과 중첩되는지</td>
-<td>방법 미정. 후보: 한 시전에 <code>[ mana, refund ]</code>와 <code>[ eb, refund ]</code>가 둘 다 뜨는지 본다 (overheads.html 7절)</td>
+<td>방법 미정. 후보: 한 시전에 <code>[ mana, refund ]</code>와 <code>[ eb, refund ]</code>가 둘 다 뜨는지 본다 (<a href="overheads.html#7">overheads.html</a> 7절)</td>
 <td>마나 예산이 2.7/초냐 훨씬 낮냐 (5.4절)</td>
 </tr>
 <tr>
@@ -2532,7 +3359,7 @@ PK를 어떻게 상대할지가 템플릿에 Resist를 넣을지를 정한다.</
 </tr>
 </tbody>
 </table>
-<p><strong>확인 대기 (2026-09-27)</strong></p>
+<p><strong>확인 대기</strong></p>
 <table>
 <thead>
 <tr>
@@ -2563,7 +3390,7 @@ PK를 어떻게 상대할지가 템플릿에 Resist를 넣을지를 정한다.</
 <td>새첼이나 루팅 파우치가 삐져나온다. <code>loadout.razor</code>의 좌표만 조정 (<code>y 200</code>, <code>x 120~140</code>은 감으로 잡은 값)</td>
 </tr>
 <tr>
-<td>Poison Strike · Energy Bolt는 프록 코어 뒤 (2026-09-28)</td>
+<td>Poison Strike와 Energy Bolt는 프록 코어 뒤 (2026-09-28)</td>
 <td>Curse 뒤로 네 프록이 이어서 나가고, 바 넷이 다 뜬 뒤 Energy Bolt 한 방, 그다음 <code>[ poison strike ]</code>. 몹을 바꾸면 그 몹에 프록이 간 뒤에만</td>
 <td>Curse나 첫 프록 바로 뒤에 <code>[ poison strike ]</code>나 Energy Bolt. 한 프록만 되풀이되면 그 바의 트리거 (3.1절)</td>
 </tr>
@@ -2573,19 +3400,19 @@ PK를 어떻게 상대할지가 템플릿에 Resist를 넣을지를 정한다.</
 <td>능력이 안 나가면 Razor 핫키 목록의 이름</td>
 </tr>
 <tr>
-<td>Corpse Skin · Evil Omen은 서 있고 warmode가 아닐 때만 (2026-09-28)</td>
+<td>Corpse Skin과 Evil Omen은 서 있고 warmode가 아닐 때만 (2026-09-28)</td>
 <td>교전 중 걷는 동안과 warmode에서는 둘이 안 나가고 <code>[ blood oath ]</code>만 뜬다. 멈추면 프록 앞에 나간다</td>
-<td>걷는 중이나 warmode에서 <code>[ corpse skin ]</code> · <code>[ evil omen ]</code></td>
+<td>걷는 중이나 warmode에서 <code>[ corpse skin ]</code>이나 <code>[ evil omen ]</code>이 뜬다</td>
 </tr>
 <tr>
-<td>Poison Strike · Vampiric Embrace 거절 (2026-09-28)</td>
+<td>Poison Strike와 Vampiric Embrace 거절 (2026-09-28)</td>
 <td>질병 없는 몹에 Poison Strike가 매 패스 되풀이되지 않고 다음 프록 뒤에 다시 시도한다. 시체가 멀면 Vampiric Embrace는 5초에 한 번만 시도한다</td>
 <td>같은 거절 줄이 매 패스 뜬다</td>
 </tr>
 <tr>
 <td>타겟을 화면 거리에서 받아 둔다 (2026-09-29)</td>
-<td>10칸 밖 몹을 All Kill로 찍으면 <code>[ target, set ]</code>이 뜨고, 다가오면 교전한다. 그 사이 노래가 나가도 타겟이 안 사라진다</td>
-<td>찍었는데 <code>[ target, set ]</code>이 안 뜬다. 몹이 붙었는데 노래·버프만 돈다</td>
+<td>10칸 밖 몹을 All Kill로 찍으면 <code>[ target, set ]</code>이 뜨고, 다가오면 교전한다. 그 사이 송이 나가도 타겟이 안 사라진다</td>
+<td>찍었는데 <code>[ target, set ]</code>이 안 뜬다. 몹이 붙었는데 송과 버프만 돈다</td>
 </tr>
 <tr>
 <td>SUMMON NAMES가 남의 소환수를 거른다 (2026-09-29)</td>
@@ -2614,12 +3441,12 @@ PK를 어떻게 상대할지가 템플릿에 Resist를 넣을지를 정한다.</
 <td><strong>찍었다.</strong> Self Taught가 Musicianship을 대체해서 Disco/Peace/Provo 80/80/80 구성이다</td>
 </tr>
 <tr>
-<td>Vampire Thrall은 근접딜러다</td>
-<td><strong>주문딜러다.</strong> "Spell Damage: 26 - 32"</td>
+<td>Vampire Thrall은 근접 딜러다</td>
+<td><strong>주문 딜러다.</strong> "Spell Damage: 26 - 32"</td>
 </tr>
 <tr>
 <td>Fury는 분당 5%</td>
-<td><strong>30초당 5%, 최대 +30%</strong> -- 3분이면 캡</td>
+<td><strong>30초당 5%, 최대 +30%.</strong> 3분이면 캡이다</td>
 </tr>
 <tr>
 <td>Music 쿨만 보면 된다</td>
@@ -2642,11 +3469,11 @@ PK를 어떻게 상대할지가 템플릿에 Resist를 넣을지를 정한다.</
 <td><strong>Effective Barding 보너스 상한에도 적용된다.</strong> 실측 170</td>
 </tr>
 <tr>
-<td>Song은 별도 명령이다</td>
+<td>송은 별도 명령이다</td>
 <td><strong>스킬을 백팩에 타겟한 것이다.</strong> 땅에 타겟하면 group effect</td>
 </tr>
 <tr>
-<td>Song과 Skill은 서로 막는다</td>
+<td>송과 스킬은 서로 막는다</td>
 <td><strong>비대칭이다.</strong> 송은 Music과 슬롯을 읽기만 하고 쓰지 않는다</td>
 </tr>
 <tr>
@@ -2666,7 +3493,7 @@ PK를 어떻게 상대할지가 템플릿에 Resist를 넣을지를 정한다.</
 <td><strong>"Your barding skill cooldowns reset." 프록이 있다</strong> (Lyric 방어구). 측정할 땐 벗는다</td>
 </tr>
 <tr>
-<td>Song 쿨은 <code>cooldown "music"</code>이다</td>
+<td>송 쿨은 <code>cooldown "music"</code>이다</td>
 <td><strong>아니다. 별도 계열이다.</strong> <code>music</code>이 둘을 섞어 덮어쓰던 버그는 고쳤다</td>
 </tr>
 <tr>
@@ -2682,7 +3509,7 @@ PK를 어떻게 상대할지가 템플릿에 Resist를 넣을지를 정한다.</
 <td><strong>시전은 끝까지 되고 대상을 찍을 때 실패한다.</strong> 마나도 그때 준다 (3.2절)</td>
 </tr>
 <tr>
-<td>Energy Bolt는 시전마다 15 마나가 돌아온다</td>
+<td>Energy Bolt는 시전마다 15마나가 돌아온다</td>
 <td><strong>5초 안에 대상이 죽을 때만.</strong> 잡몹에서만 실질 5다</td>
 </tr>
 <tr>
@@ -2691,19 +3518,20 @@ PK를 어떻게 상대할지가 템플릿에 Resist를 넣을지를 정한다.</
 </tr>
 <tr>
 <td>Spirit Speak만 있으면 언데드 소환이 나온다</td>
-<td><strong>Vengeful Spirit을 먼저 켜야 한다.</strong> 매핑은 위 표</td>
+<td><strong>Vengeful Spirit을 먼저 켜야 한다.</strong> 어느 주문이 어느 언데드가 되는지는 3.3절 표</td>
 </tr>
 <tr>
 <td>네크로 능력 Razor 핫키는 이 빌드에서 안 먹는다</td>
-<td><strong>먹는다.</strong> 능력이 안 나가던 원인은 심볼 수를 읽는 <code>ingump</code> 비교가 잘못돼 있던 것이다. Vengeful Spirit 핫키가 안 나간 건 macOS가 먹는 <code>Alt+`` </code> ``` 에 걸었기 때문이다</td>
+<td><strong>먹는다.</strong> 능력이 안 나가던 원인은 심볼 수를 읽는 <code>ingump</code> 비교가 잘못돼 있던 것이다.
+Vengeful Spirit 핫키가 안 나간 건 macOS에서 게임에 안 들어오는 <code>Alt+`</code>에 걸었기 때문이다 (<a href="hotkeys.html#2.2">hotkeys.html</a> 2.2절)</td>
 </tr>
 <tr>
 <td><code>followers</code>는 소환수 마릿수다</td>
 <td><strong>컨트롤 슬롯 수다.</strong> Lich 2마리 = 4</td>
 </tr>
 <tr>
-<td>소환수는 안 맞으면 안 죽는다</td>
-<td><strong>10초마다 최대 체력 1% 씩 썩는다.</strong> 재소환은 주기적이다</td>
+<td>소환수는 안 맞으면 그대로 간다</td>
+<td><strong>10초마다 최대 체력이 1%씩 썩는다.</strong> 0이 되지는 않지만 쓸모가 없어지므로 재소환은 주기적이다 (4.1절)</td>
 </tr>
 <tr>
 <td>바드에게 printed Resist는 PvP에서 쓸모없다</td>
@@ -2711,7 +3539,7 @@ PK를 어떻게 상대할지가 템플릿에 Resist를 넣을지를 정한다.</
 </tr>
 <tr>
 <td>바드 메이지는 Defensive Barding이 있어 레슬링이 필요 없다</td>
-<td><strong>도주할 때만 맞다.</strong> 첫 공격 주문에 Heat of Battle이 켜지고 printed 0 이 된다</td>
+<td><strong>도주할 때만 맞다.</strong> 첫 공격 주문에 Heat of Battle이 켜지고 printed 0이 된다</td>
 </tr>
 </tbody>
 </table>
@@ -2721,13 +3549,12 @@ PK를 어떻게 상대할지가 템플릿에 Resist를 넣을지를 정한다.</
 <ul>
 <li><a href="https://wiki.uooutlands.com/Musicianship">Musicianship</a> -- Barding Song, barding break 공식, Defensive Barding</li>
 <li><a href="https://wiki.uooutlands.com/Discordance">Discordance</a> -- 디버프 공식, Effective Barding 정의</li>
-<li><a href="https://wiki.uooutlands.com/Peacemaking">Peacemaking</a> -- 지속시간, 쿨다운</li>
+<li><a href="https://wiki.uooutlands.com/Peacemaking">Peacemaking</a> -- 지속시간, 쿨</li>
 <li><a href="https://wiki.uooutlands.com/Provocation">Provocation</a></li>
 <li><a href="https://wiki.uooutlands.com/Bard_Codex">Bard Codex</a></li>
 <li><a href="https://wiki.uooutlands.com/Heat_of_Battle">Heat of Battle</a> -- 공격적 행동의 정의, 자동 반격 예외</li>
-<li><a href="https://forums.uooutlands.com/index.php?threads/patch-murderer-and-pvp-overhaul-general-changes.3232/">PATCH: Murderer and PvP Overhaul (2020-09-28)</a> -- Heat of Battle 지속시간, Defensive
-Barding 원래
-공식, Telekinesis 포션</li>
+<li><a href="https://forums.uooutlands.com/index.php?threads/patch-murderer-and-pvp-overhaul-general-changes.3232/">PATCH: Murderer and PvP Overhaul (2020-09-28)</a>
+-- Heat of Battle 지속시간, Defensive Barding 원래 공식, Telekinesis 포션</li>
 <li><a href="https://wiki.uooutlands.com/Resisting_Spells">Resisting Spells</a></li>
 <li><a href="https://wiki.uooutlands.com/Tracking">Tracking</a></li>
 <li><a href="https://wiki.uooutlands.com/TemplatesBard">TemplatesBard</a></li>
