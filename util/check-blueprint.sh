@@ -5,7 +5,7 @@
 #   3. a tag outside the short list the pages use, which is almost always a < in the text that
 #      was not written as &lt; -- the browser swallows it as a tag and the words silently vanish
 #   4. a numbered heading whose text does not start with its id, or a data-part off an h2
-#   5. two docs in blueprint_docs whose names start with the same letter
+#   5. two docs in blueprint_docs whose names start with the same letter, or an <h1> that is not its name
 #
 # Section ids are section numbers (<h3 id="04.C">04.C ...), so renumbering a section breaks every
 # link that points at it. Run this after moving or renumbering sections.
@@ -30,6 +30,11 @@ for page in "$DIR"/*.html; do
 		echo "$name: not listed in blueprint_docs in _index.js"
 		status=1
 	fi
+
+	# The h1 is the doc's English name, the same one the sidebar and the index cards show.
+	docname="$(grep -o "{ file: '$name', name: '[^']*'" "$DIR/_index.js" | sed "s/.*name: '//; s/'$//")"
+	h1="$(grep -o '<h1>[^<]*</h1>' "$page" | head -n 1 | sed 's/<[^>]*>//g')"
+	[ "$h1" = "$docname" ] || { echo "$name: <h1> is \"$h1\" but its name in blueprint_docs is \"$docname\""; status=1; }
 
 	while IFS= read -r tag; do
 		echo "$name: unexpected <$tag> -- write a literal < as &lt;"

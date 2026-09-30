@@ -18,8 +18,9 @@ const theme_labels = { system: '테마 · 시스템', light: '테마 · 밝게',
 const theme_order = ['system', 'light', 'dark']
 
 // 문서 목록 — 새 문서를 만들면 여기에 한 줄을 더한다. 첫 줄은 첫 화면이다.
-// name 은 사이드바에 보이는 영어 이름이다 (문서 목록). 목록은 이 이름의 abc 순이고 첫 글자가 표지라, 첫 글자가 겹치지 않게 짓는다.
-// label 은 한글 이름 (카드 제목, 사이드바 이름에 올리면 뜨는 글), group 은 _index.html 카드의 묶음이다
+// name 은 영어 이름이다. 문서의 h1, 사이드바 문서 목록, 카드 제목이 이 이름을 쓴다. 목록은 이 이름의 abc 순이고
+// 첫 글자가 표지라 첫 글자가 겹치지 않게 짓는다. label 은 한글 이름 (카드의 둘째 줄, 사이드바 이름에 올리면 뜨는 글),
+// group 은 _index.html 카드의 묶음이다
 const blueprint_docs = [
   { file: '_index.html', name: 'Overview', label: '한눈에' },
   { file: 'workflow.html', name: 'Workflow', label: '작업 방식', group: '규칙' },
@@ -411,8 +412,8 @@ const buildCards = () => {
     card.href = item.file
     card.append(
       makeElement('span', 'bp_index__cardGroup', item.group),
-      makeElement('span', 'bp_index__cardTitle', item.label),
-      makeElement('span', 'bp_index__cardFile', item.file),
+      makeElement('span', 'bp_index__cardTitle', item.name),
+      makeElement('span', 'bp_index__cardLabel', item.label),
     )
     box.append(card)
   }

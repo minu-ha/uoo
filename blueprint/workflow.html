@@ -9,7 +9,7 @@
 
 <body class="bp_index__root">
 <main class="bp_index__doc">
-<h1>작업 방식</h1>
+<h1>Workflow</h1>
 <p>무엇을 근거로 삼고, 스크립트와 문서를 어떤 순서로 고치고, 게임에 어떻게 반영해 확인하고, 어떻게 커밋하는가.
 파일 이름과 스크립트 모양은 <a href="conventions.html">conventions.html</a>, 문법과 함정은 <a href="razor.html">razor.html</a>에 있다.</p>
 
@@ -202,7 +202,8 @@ Razor 프로필 xml뿐 아니라 ClassicUO의 <code>cooldowns.xml</code>, <code>
 <code>&lt;body&gt;</code>와 <code>&lt;main&gt;</code>의 class도 모든 문서가 같다.</li>
 <li>doctype이 빠지면 quirks 모드로 그려져 표 줄 높이가 달라진다.</li>
 <li><code>&lt;title&gt;</code>은 모든 문서가 <code>BLUEPRINT - UOO</code> 하나다. 문서 이름은 목차의 문서 목록이 보여 준다.</li>
-<li>맨 위에는 <code>&lt;h1&gt;</code> 제목, 이 문서가 답하는 것 한두 줄, 여기 없는 것은 어디 있는지 링크를 둔다.</li>
+<li>맨 위에는 <code>&lt;h1&gt;</code> 제목, 이 문서가 답하는 것 한두 줄, 여기 없는 것은 어디 있는지 링크를 둔다.
+제목은 <code>blueprint_docs</code>의 영어 이름 <code>name</code>과 같게 쓴다 (<code>&lt;h1&gt;Overheads&lt;/h1&gt;</code>). 한글 이름은 첫 화면 카드의 둘째 줄에 보인다.</li>
 </ul>
 <h4>절 번호와 가름</h4>
 <ul>
@@ -252,8 +253,8 @@ AGENTS.md와 스크립트 주석 (<code>part 5</code>)도 절 번호를 쓴다: 
 <li>아래 빈 틀에서 시작한다.</li>
 <li>만들면 <code>_index.js</code>의 <code>blueprint_docs</code>와 <a href="../AGENTS.md">AGENTS.md</a>의 문서 지도에 한 줄씩 더하고,
 루트 <a href="../README.md">README.md</a>의 <code>blueprint/</code> 칸에 주제를 더한다. 번역본도 같이 고친다 (05.D절).</li>
-<li><code>blueprint_docs</code>의 <code>name</code>은 사이드바의 문서 목록과 목차 머리에 보이는 영어 이름이다. 목록은 이 이름의 abc 순이고 첫 글자가 줄 앞 표지라,
-다른 문서와 첫 글자가 겹치지 않게 짓는다. 한글 이름 <code>label</code>은 카드 제목이 되고, 사이드바에서는 이름에 마우스를 올리면 뜬다.</li>
+<li><code>blueprint_docs</code>의 <code>name</code>은 문서의 <code>&lt;h1&gt;</code>, 사이드바 문서 목록, 첫 화면 카드 제목이 함께 쓰는 영어 이름이다. 목록은 이 이름의 abc 순이고 첫 글자가 줄 앞 표지라,
+다른 문서와 첫 글자가 겹치지 않게 짓는다. 한글 이름 <code>label</code>은 카드의 둘째 줄이 되고, 사이드바에서는 이름에 마우스를 올리면 뜬다.</li>
 </ul>
 <pre><code>&lt;!doctype html&gt;
 &lt;html lang=&quot;ko&quot;&gt;
@@ -266,7 +267,7 @@ AGENTS.md와 스크립트 주석 (<code>part 5</code>)도 절 번호를 쓴다: 
 
 &lt;body class=&quot;bp_index__root&quot;&gt;
 &lt;main class=&quot;bp_index__doc&quot;&gt;
-&lt;h1&gt;{제목}&lt;/h1&gt;
+&lt;h1&gt;{영어 이름, blueprint_docs의 name}&lt;/h1&gt;
 &lt;p&gt;{이 문서가 답하는 것 한두 줄. 여기 없는 것은 어디 있는지 링크}&lt;/p&gt;
 
 &lt;h2 id=&quot;00&quot;&gt;00 한눈에&lt;/h2&gt;
