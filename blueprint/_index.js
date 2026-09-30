@@ -2,7 +2,7 @@
  * blueprint 문서가 함께 쓰는 스크립트. 문서에는 글만 두고 목차와 부품은 이 파일이 붙인다.
  * <head> 에서 바로 돌아 그리기 전에 테마를 정하고, 나머지는 문서를 다 읽은 뒤에 한다.
  * 1. 테마를 밝게 · 어둡게 고정한다(기본은 시스템 설정)
- * 2. 목차를 만든다 — 문서 목록, 이 문서의 절(h2)과 소제목(h3). h2 의 data-part 는 가름 머리와 목차 묶음 이름이 된다
+ * 2. 사이드바를 만든다 — 문서 목록 (영어 이름 abc 순, 첫 글자가 표지), 이 문서의 절(h2)과 소제목(h3). h2 의 data-part 는 가름 머리와 목차 묶음이 된다
  * 3. 목차가 지금 읽는 절과 소제목을 표시하고, 그 절의 소제목만 펼친다
  * 4. 제목부터 첫 절 앞까지를 머리로 묶고, 제목 앞 절 번호를 번호 글자로 가른다
  * 5. 표를 가로로 밀리는 상자로 감싼다
@@ -17,19 +17,21 @@ const theme_storage_key = 'bp-theme'
 const theme_labels = { system: '테마 · 시스템', light: '테마 · 밝게', dark: '테마 · 어둡게' }
 const theme_order = ['system', 'light', 'dark']
 
-// 문서 목록 — 새 문서를 만들면 여기에 한 줄을 더한다. group 은 _index.html 카드의 묶음이다
+// 문서 목록 — 새 문서를 만들면 여기에 한 줄을 더한다. 첫 줄은 첫 화면이다.
+// name 은 사이드바 문서 목록의 영어 이름이다. 목록은 이 이름의 abc 순이고 첫 글자가 표지라, 첫 글자가 겹치지 않게 짓는다.
+// label 은 한글 이름 (카드 제목, 사이드바 이름에 올리면 뜨는 글), group 은 _index.html 카드의 묶음이다
 const blueprint_docs = [
-  { file: '_index.html', label: '한눈에' },
-  { file: 'workflow.html', label: '작업 방식', group: '규칙' },
-  { file: 'conventions.html', label: '저장소와 스크립트 규칙', group: '규칙' },
-  { file: 'razor.html', label: 'Outlands Razor 문법', group: '문법 · 규정' },
-  { file: 'pvp.html', label: 'PvP 규칙', group: '문법 · 규정' },
-  { file: 'overheads.html', label: '머리 위 메시지와 쿨다운 바', group: '사양' },
-  { file: 'hotkeys.html', label: '핫키 배치', group: '사양' },
-  { file: 'bard-necro-handbook.html', label: 'Bard Necro 핸드북', group: '템플릿' },
-  { file: 'lumberjack-pvp-handbook.html', label: '벌목 · PvP 핸드북', group: '템플릿' },
-  { file: 'item-list.txt', label: '아이템 목록', group: '자료' },
-  { file: 'open-items.html', label: '확인할 것', group: '기록' },
+  { file: '_index.html', name: 'Overview', label: '한눈에' },
+  { file: 'workflow.html', name: 'Workflow', label: '작업 방식', group: '규칙' },
+  { file: 'conventions.html', name: 'Conventions', label: '저장소와 스크립트 규칙', group: '규칙' },
+  { file: 'razor.html', name: 'Razor', label: 'Outlands Razor 문법', group: '문법 · 규정' },
+  { file: 'pvp.html', name: 'PvP', label: 'PvP 규칙', group: '문법 · 규정' },
+  { file: 'overheads.html', name: 'Overheads', label: '머리 위 메시지와 쿨다운 바', group: '사양' },
+  { file: 'hotkeys.html', name: 'Hotkeys', label: '핫키 배치', group: '사양' },
+  { file: 'bard-necro-handbook.html', name: 'Bard Necro Handbook', label: 'Bard Necro 핸드북', group: '템플릿' },
+  { file: 'lumberjack-pvp-handbook.html', name: 'Lumberjack PvP Handbook', label: '벌목 · PvP 핸드북', group: '템플릿' },
+  { file: 'item-list.txt', name: 'Item List', label: '아이템 목록', group: '자료' },
+  { file: 'open-items.html', name: 'Questions', label: '확인할 것', group: '기록' },
 ]
 
 /**
@@ -127,56 +129,75 @@ const wrapHead = (doc) => {
 }
 
 /**
- * 목차를 만든다. 절마다 목차 줄과 소제목 목록을 짝지어 돌려주어, 읽는 자리 표시가 같은 짝을 쓴다
+ * 사이드바 한 줄. 문서 목록과 목차가 같은 모양 (표지 글자 + 이름) 을 쓴다
+ */
+const navRow = (className, href, mark, text) => {
+  const link = makeElement('a', className)
+  const row = document.createElement('li')
+
+  link.href = href
+  link.append(makeElement('span', 'bp_index__navMark', mark), text)
+  row.append(link)
+
+  return { row, link }
+}
+
+/**
+ * 사이드바를 만든다. 문서 목록은 첫 화면 다음을 영어 이름 abc 순으로 두고, 목차는 가름마다 목록을 끊는다.
+ * 절마다 목차 줄과 소제목 목록을 짝지어 돌려주어, 읽는 자리 표시가 같은 짝을 쓴다
  */
 const buildNav = (doc) => {
   const nav = makeElement('nav', 'bp_index__nav')
   const brand = makeElement('a', 'bp_index__brand', 'UO Outlands · Razor')
-  const docs = makeElement('ul', 'bp_index__docs')
-  const toc = makeElement('ul', 'bp_index__toc')
+  const docs = makeElement('div', 'bp_index__docs')
+  const docList = makeElement('ul', 'bp_index__navList')
+  const toc = makeElement('div', 'bp_index__toc')
   const theme = makeElement('button', 'bp_index__theme')
+  const [home, ...rest] = blueprint_docs
   const sections = []
+  let list = null
 
   nav.setAttribute('aria-label', '목차')
   brand.href = '_index.html'
   theme.type = 'button'
 
-  for (const item of blueprint_docs) {
-    const link = makeElement('a', 'bp_index__docsLink', item.label)
-    const row = document.createElement('li')
+  for (const item of [home, ...rest.toSorted((a, b) => a.name.localeCompare(b.name, 'en'))]) {
+    const { row, link } = navRow('bp_index__navLink', item.file, item === home ? '·' : item.name[0], item.name)
 
-    link.href = item.file
+    link.title = item.label
 
     if (item.file === currentFile()) {
-      link.classList.add('bp_index__docsLink--current')
+      link.classList.add('bp_index__navLink--active')
       link.setAttribute('aria-current', 'page')
     }
 
-    row.append(link)
-    docs.append(row)
+    docList.append(row)
   }
+
+  docs.append(docList)
 
   for (const heading of doc.querySelectorAll('h2[id], h3[id]')) {
     const { number, title } = splitNumber(heading)
-    const link = makeElement('a', heading.tagName === 'H2' ? 'bp_index__tocLink' : 'bp_index__tocSubLink')
-    const row = document.createElement('li')
-
-    link.href = `#${heading.id}`
-    link.append(makeElement('span', 'bp_index__tocNum', number || '·'), title)
-    row.append(link)
+    const { row, link } = navRow(heading.tagName === 'H2' ? 'bp_index__navLink' : 'bp_index__tocSubLink', `#${heading.id}`, number || '·', title)
 
     if (heading.tagName === 'H2') {
-      // 가름은 그 첫 절의 data-part 가 연다. 본문에는 가름 머리를, 목차에는 묶음 이름을 단다
+      // 가름은 그 첫 절의 data-part 가 연다. 본문에는 가름 머리를, 목차에는 묶음 이름과 새 목록을 단다
       if (heading.dataset.part) {
         const part = makeElement('div', 'bp_index__part')
 
         part.append(makeElement('span', 'bp_index__partLabel', heading.dataset.part))
         heading.before(part)
-        toc.append(makeElement('li', 'bp_index__tocGroup', heading.dataset.part))
+        toc.append(makeElement('div', 'bp_index__navGroup', heading.dataset.part))
+        list = null
+      }
+
+      if (!list) {
+        list = makeElement('ul', 'bp_index__navList')
+        toc.append(list)
       }
 
       sections.push({ heading, link, list: null, subs: [] })
-      toc.append(row)
+      list.append(row)
       continue
     }
 
@@ -240,7 +261,7 @@ const startSectionSpy = (sections) => {
     for (const section of sections) {
       const isCurrent = section === current
 
-      section.link.classList.toggle('bp_index__tocLink--active', isCurrent)
+      section.link.classList.toggle('bp_index__navLink--active', isCurrent)
       section.list?.classList.toggle('bp_index__tocSub--open', isCurrent)
 
       for (const item of section.subs) {

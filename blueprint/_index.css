@@ -196,41 +196,11 @@
   letter-spacing: 0.08em;
 }
 
+/* 문서 목록을 감싸고 이 문서의 목차와 선으로 가른다. 목록 모양은 목차와 같은 .bp_index__navList 다 */
 .bp_index__docs {
-  display: flex;
-  flex-direction: column;
   margin: 0 0 18px;
   padding: 0 0 16px;
-  gap: 1px;
   border-bottom: 1px solid var(--app-color-border);
-  list-style: none;
-}
-
-.bp_index__docsLink {
-  display: block;
-  margin-left: -1px;
-  padding: 3px 0 3px 12px;
-  border-left: 2px solid transparent;
-  color: var(--app-color-text);
-  font-size: 13px;
-  line-height: 1.5;
-  text-decoration: none;
-
-  &:hover {
-    border-left-color: var(--app-color-border);
-    color: var(--app-color-text-strong);
-  }
-
-  &:focus-visible {
-    outline: 2px solid var(--app-color-accent);
-    outline-offset: 2px;
-  }
-}
-
-.bp_index__docsLink--current {
-  border-left-color: var(--app-color-accent);
-  color: var(--app-color-text-strong);
-  font-weight: 600;
 }
 
 .bp_index__navTitle {
@@ -242,7 +212,8 @@
   text-wrap: balance;
 }
 
-.bp_index__toc {
+/* 사이드바 목록 — 문서 목록과 목차가 함께 쓴다. 목차는 가름마다 목록이 끊겨 왼쪽 선도 끊긴다 */
+.bp_index__navList {
   display: flex;
   flex-direction: column;
   margin: 0;
@@ -252,7 +223,7 @@
   list-style: none;
 }
 
-.bp_index__tocLink {
+.bp_index__navLink {
   display: flex;
   align-items: baseline;
   margin-left: -1px;
@@ -275,15 +246,17 @@
   }
 }
 
-/* 지금 읽고 있는 절 */
-.bp_index__tocLink--active {
+/* 지금 연 문서, 지금 읽고 있는 절 */
+.bp_index__navLink--active {
   border-left-color: var(--app-color-accent);
   color: var(--app-color-text-strong);
   font-weight: 600;
 }
 
-.bp_index__tocNum {
+/* 줄 앞 표지 — 목차는 절 번호, 문서 목록은 영어 이름의 첫 글자. 두 칸 너비라 이름 줄이 맞는다 */
+.bp_index__navMark {
   flex: none;
+  min-width: 2ch;
   color: var(--app-color-text-muted);
   font-family: var(--app-font-mono);
   font-size: 11px;
@@ -291,12 +264,15 @@
 }
 
 /* 목차 묶음 이름 — 본문의 가름 머리 (.bp_index__part) 와 같은 이름으로 절을 가른다 */
-.bp_index__tocGroup {
-  margin: 18px 0 4px;
-  padding-left: 14px;
+.bp_index__navGroup {
+  margin: 0 0 8px;
   color: var(--app-color-text-muted);
   font-size: 10.5px;
   letter-spacing: 0.02em;
+}
+
+.bp_index__navList + .bp_index__navGroup {
+  margin-top: 24px;
 }
 
 /* 절 안의 소제목 — 지금 읽는 절의 것만 펼친다 */
@@ -778,13 +754,14 @@
   }
 
   /* 문서 목록과 목차를 알약 줄로 */
-  .bp_index__docs {
+  .bp_index__navList {
     flex-direction: row;
     flex-wrap: wrap;
     gap: 6px;
+    border-left: 0;
   }
 
-  .bp_index__docsLink {
+  .bp_index__navLink {
     margin-left: 0;
     padding: 3px 10px;
     border: 1px solid var(--app-color-border);
@@ -792,29 +769,17 @@
     font-size: 12.5px;
   }
 
-  .bp_index__docsLink--current {
+  .bp_index__navLink--active {
     border-color: var(--app-color-accent);
   }
 
   .bp_index__toc {
-    flex-direction: row;
-    flex-wrap: wrap;
     padding-top: 12px;
-    gap: 6px;
     border-top: 1px solid var(--app-color-border);
-    border-left: 0;
   }
 
-  .bp_index__tocLink {
-    margin-left: 0;
-    padding: 3px 10px;
-    border: 1px solid var(--app-color-border);
-    border-radius: 999px;
-    font-size: 12.5px;
-  }
-
-  .bp_index__tocLink--active {
-    border-color: var(--app-color-accent);
+  .bp_index__navList + .bp_index__navGroup {
+    margin-top: 14px;
   }
 
   /* 목차가 알약 줄이면 소제목은 두지 않는다 */

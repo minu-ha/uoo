@@ -1,10 +1,11 @@
 #!/usr/bin/env bash
-# Check blueprint/*.html for four things the browser will not tell you about:
+# Check blueprint/*.html for five things the browser will not tell you about:
 #   1. a link to a file that does not exist, or to an id the target page does not have
 #   2. a page that is missing from blueprint_docs in blueprint/_index.js (it would not show in the nav)
 #   3. a tag outside the short list the pages use, which is almost always a < in the text that
 #      was not written as &lt; -- the browser swallows it as a tag and the words silently vanish
 #   4. a numbered heading whose text does not start with its id, or a data-part off an h2
+#   5. two docs in blueprint_docs whose names start with the same letter
 #
 # Section ids are section numbers (<h3 id="04.C">04.C ...), so renumbering a section breaks every
 # link that points at it. Run this after moving or renumbering sections.
@@ -60,6 +61,11 @@ for page in "$DIR"/*.html; do
 		fi
 	done < <(grep -o 'href="[^"]*"' "$page" | sed 's/^href="//; s/"$//')
 done
+
+# The sidebar marks each doc with the first letter of its name, so two names must not share one.
+# The first entry is the index page, marked with a dot instead.
+dupes="$(grep -o "{ file: '[^_][^']*', name: '[^']*'" "$DIR/_index.js" | sed "s/.*name: '//" | cut -c1 | sort | uniq -d | tr '\n' ' ')"
+[ -n "$dupes" ] && { echo "_index.js: blueprint_docs names share a first letter: $dupes"; status=1; }
 
 [ $status -eq 0 ] && echo "ok: $pages pages"
 exit $status
