@@ -8,7 +8,7 @@
  * 5. 표를 가로로 밀리는 상자로 감싼다
  * 6. "인게임 확인됨" · "확인되지 않았다" 를 상태 알약으로 바꾸고, <code>#rrggbb</code> 앞에 색 칩을 붙이고, Razor 코드 블록에 색을 입힌다
  * 7. _index.html 의 문서 카드를 그린다
- * 8. mermaid 원문(pre.mermaid)을 격자 렌더러(beautiful-mermaid)로 흐름도 SVG 로 바꾼다 — 파일 끝, 쓰는 법은 workflow.html 05.B절
+ * 8. mermaid 원문(pre.mermaid)을 격자 렌더러(beautiful-mermaid)로 흐름도 SVG 로 바꾼다 — 파일 끝, 쓰는 법은 README.md 흐름도
  * 9. 주소의 #절로 들어오면, 위의 것들이 높이를 바꾼 뒤 그 절로 다시 맞춘다
  * 모양과 동작은 sk-ax-gas-pp 의 .ignore/blueprint/blueprint.js 에서 가져왔다.
  */
@@ -479,7 +479,7 @@ document.addEventListener('DOMContentLoaded', () => {
  * 원본과 다른 곳은 색 · 글꼴 변수(_index.css 토큰), 원문 선택자, 그림 상자 이름, 문서를 다 읽은 뒤에 도는 것뿐이다. 원본을 고치면 여기로 옮긴다.
  * 색은 CSS 변수로 그리므로 테마가 바뀌어도 다시 그리지 않는다.
  *
- * 원문 쓰는 규칙(괄호 금지 · 선 라벨 한 낱말 · 엉키는 모양)은 workflow.html 05.B절에 있다.
+ * 원문 쓰는 규칙(괄호 금지 · 선 라벨 한 낱말 · 엉키는 모양)은 README.md 흐름도에 있다.
  * 렌더러 모듈은 CDN 에서 늦게 온다. 오프라인이면 원문이 그대로 보인다.
  */
 const drawFlows = () => {

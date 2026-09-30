@@ -46,7 +46,7 @@
 </tr>
 <tr>
 <td><a href="#05">05</a></td>
-<td>문서를 어떻게 쓰고 새로 만드나. 틀, 절 번호와 가름, 흐름도, 언어</td>
+<td>문서 쓰는 법은 어디 있나, 글은 어느 언어로 쓰나</td>
 </tr>
 <tr>
 <td><a href="#06">06</a></td>
@@ -183,108 +183,15 @@ Razor 프로필 xml뿐 아니라 ClassicUO의 <code>cooldowns.xml</code>, <code>
 켜둔 채로 고치면 종료할 때 조용히 사라진다. 실제로 한 번 날아갔다.</p>
 
 <h2 id="05" data-part="문서 · 커밋">05 문서 고치기</h2>
+<p>설계 문서를 쓰고 고치는 법 (새 문서, 빈 틀, 짜임, 번호와 가름, 본문, 흐름도, 끝낼 때 확인)은 <a href="README.md">blueprint/README.md</a>에 있다.
+여기에는 저장소의 모든 글에 걸리는 규칙만 둔다.</p>
 
-<h3 id="05.A">05.A 한 사실은 한 곳에</h3>
-<p>같은 내용을 두 문서에 쓰지 않는다. 한 곳을 정본으로 두고 다른 곳은 절 번호로 링크한다.
-두 곳에 쓰면 한쪽만 고쳐지고, 어느 쪽이 맞는지 모르게 된다 (overheads.html의 옛 hue 표가 그렇게 틀렸다).</p>
-<p>무엇이 무엇의 정본인지는 <a href="../AGENTS.md">AGENTS.md</a> 3절 문서 지도 한 곳에 둔다.
-문서를 새로 만들거나 정본을 옮기면 그 표를 고친다.</p>
-<p>템플릿 문서 (bard-necro-handbook 같은)에는 <strong>그 템플릿이 내린 판단</strong>만 둔다. 서버 규칙이나 문법처럼
-다른 템플릿에서도 쓰는 내용이 생기면 공통 문서로 옮기고 링크를 남긴다.</p>
-
-<h3 id="05.B">05.B 문서 모양</h3>
-<p>문서는 <code>blueprint/</code>의 HTML 한 장이다. 모양과 글꼴은 <code>_index.css</code>가 맡는다.
-목차, 절 번호 글자, 표 상자, 확인 알약, 색 칩, 코드 색, 흐름도는 <code>_index.js</code>가 모든 문서에 붙인다.
-문서에는 <strong>글만</strong> 쓴다. 브라우저로 <code>_index.html</code>을 열면 문서 사이를 오간다.</p>
-<h4>틀</h4>
-<ul>
-<li><code>&lt;head&gt;</code>는 모든 문서가 같다 (05.C절의 빈 틀). 글꼴은 <code>_index.css</code>가 불러오므로 글꼴 링크를 따로 두지 않는다.
-<code>&lt;body&gt;</code>와 <code>&lt;main&gt;</code>의 class도 모든 문서가 같다.</li>
-<li>doctype이 빠지면 quirks 모드로 그려져 표 줄 높이가 달라진다.</li>
-<li><code>&lt;title&gt;</code>은 모든 문서가 <code>BLUEPRINT - UOO</code> 하나다. 문서 이름은 목차의 문서 목록이 보여 준다.</li>
-<li>맨 위에는 <code>&lt;h1&gt;</code> 제목, 이 문서가 답하는 것 한두 줄, 여기 없는 것은 어디 있는지 링크를 둔다.
-제목은 <code>blueprint_docs</code>의 영어 이름 <code>name</code>과 같게 쓴다 (<code>&lt;h1&gt;Overheads&lt;/h1&gt;</code>). 한글 이름은 첫 화면 카드의 둘째 줄에 보인다.</li>
-</ul>
-<h4>절 번호와 가름</h4>
-<ul>
-<li>목차는 쓰지 않는다. <code>_index.js</code>가 <code>id</code>가 있는 <code>&lt;h2&gt;</code>와 <code>&lt;h3&gt;</code>로 만든다.</li>
-<li>절은 두 자리로 <code>&lt;h2 id="01"&gt;01 이름&lt;/h2&gt;</code>, 소제목은 절 번호에 대문자를 붙여 <code>&lt;h3 id="01.A"&gt;01.A 이름&lt;/h3&gt;</code>처럼
-번호를 제목과 <code>id</code>에 같이 적는다 (sk-ax-gas-pp와 같다). <code>&lt;h4&gt;</code>와 <code>&lt;h5&gt;</code>에는 번호도 <code>id</code>도 달지 않는다. 목차에 들지 않는 작은 제목이다.</li>
-<li><code>00</code>은 한눈에 자리다. 문서를 처음 여는 사람이 먼저 알 것과 남은 것을 둔다.</li>
-<li>절이 많으면 몇 절씩 가름으로 묶는다. 가름을 여는 첫 절의 <code>&lt;h2&gt;</code>에 <code>data-part="이름"</code>을 단다 (<code>&lt;h2 id="05" data-part="문서 · 커밋"&gt;</code>).
-<code>_index.js</code>가 그 앞에 가름 머리를, 목차에 같은 이름의 묶음을 단다. 00 한눈에는 가름 밖에 두고, 끝의 확인 안 된 것 · 자주 틀렸던 것 · 참고 링크는 <code>기록</code> 가름으로 묶는다.</li>
-<li>글 안에서는 제목에 보이는 번호 그대로 "03절", "05.D절"로 가리킨다.</li>
-<li>절을 넣거나 빼면 번호와 <code>id</code>를 같이 고치고, 그 번호를 가리킨 곳도 저장소 전체에서 찾아 고친다.
-AGENTS.md와 스크립트 주석 (<code>part 5</code>)도 절 번호를 쓴다: <code>git grep -n -e '05.H' -e 'part 5'</code>.</li>
-</ul>
-<h4>본문</h4>
-<ul>
-<li>본문은 태그만 쓴다: <code>h1</code>–<code>h5</code> <code>p</code> <code>ul</code> <code>ol</code> <code>li</code> <code>table</code> <code>thead</code> <code>tbody</code> <code>tr</code> <code>th</code>
-<code>td</code> <code>pre</code> <code>code</code> <code>blockquote</code> <code>a</code> <code>strong</code> <code>em</code> <code>hr</code>.
-<code>class</code>와 <code>style</code>은 쓰지 않는다. 예외는 흐름도 원문 <code>&lt;pre class="mermaid"&gt;</code>와 가름을 여는 <code>&lt;h2&gt;</code>의 <code>data-part</code>다.</li>
-<li>글 속의 <code>&lt;</code> <code>&gt;</code> <code>&amp;</code>는 <code>&amp;lt;</code> <code>&amp;gt;</code> <code>&amp;amp;</code>로 쓴다. 그대로 쓰면 브라우저가 태그로 읽어 글이 조용히 사라진다.</li>
-<li><code>&lt;pre&gt;</code>에는 코드, 의사 코드, 파일 트리만 쓴다. 파일 트리의 한글은 줄 끝 주석에만 둔다. 칸을 맞춰야 하는 것은 <code>&lt;table&gt;</code>로 쓴다.
-코드 글꼴 JetBrains Mono에는 한글이 없어서 한글이 섞인 열은 어긋난다.</li>
-<li>Razor로 보이는 <code>&lt;pre&gt;&lt;code&gt;</code>에는 <code>_index.js</code>가 색을 입힌다 (주석, 문자열, 키워드, 명령, 접두 변수). 그러니 예시는 실제로 도는 Razor 줄로 쓴다.</li>
-<li>다른 문서는 상대 경로 링크로, 절은 "파일 N절"로 가리키고 링크에 절을 붙인다 (<code>&lt;a href="razor.html#03"&gt;razor.html&lt;/a&gt; 03절</code>).</li>
-<li>인용과 확인 표시는 01.C절에 적은 대로 쓴다. "인게임 확인됨"과 "확인되지 않았다"는 그 글자 그대로 쓰면 알약으로 보인다. 코드, 링크, 제목 안에서는 바뀌지 않는다.</li>
-<li><code>&lt;code&gt;#e80030&lt;/code&gt;</code>처럼 색 값만 든 코드에는 색 칩이 붙는다.</li>
-</ul>
-<h4>흐름도</h4>
-<ul>
-<li>흐름도는 <code>&lt;pre class="mermaid"&gt;</code> 안에 mermaid 원문을 쓴다. <code>_index.js</code>가 beautiful-mermaid 격자 렌더러로 SVG를 그린다.
-렌더러를 CDN에서 받아 오므로 오프라인이면 원문이 그대로 보인다. 격자 렌더러라 mermaid 문법이 전부 되지는 않는다.</li>
-<li>잘 되는 것: <code>flowchart TD</code> 사슬과 나무, <code>flowchart LR</code> 판단 사슬 (<code>예</code> 사슬을 윗줄로), <code>sequenceDiagram</code>.</li>
-<li>라벨에 괄호를 넣지 않는다. 렌더러가 괄호에서 글을 잘라 낸다. 긴 라벨은 <code>&amp;lt;br&amp;gt;</code>로 줄을 나눈다.</li>
-<li>선 라벨은 한 낱말로 쓴다 (<code>-- 예 --&gt;</code>). 띄어 쓰면 격자가 빈칸을 선으로 채워 라벨이 둘로 갈린다.</li>
-<li>되돌아가는 선과 라벨 달린 합류선은 엉킨다. 그림이 크거나 엉키면 여러 장으로 쪼갠다 (<a href="bard-necro-handbook.html#05.A">bard-necro-handbook.html</a> 05.A절).</li>
-<li>폭은 140칸 안쪽으로 둔다. 넘치면 <code>LR</code>을 <code>TD</code>로 바꾸거나 둘로 나눈다.</li>
-</ul>
-<h4>줄과 확인</h4>
-<ul>
-<li>한 줄은 200자까지다 (<code>.editorconfig</code>의 <code>max_line_length</code>). 넘으면 태그와 <code>&lt;code&gt;</code> 밖의 빈칸에서 줄을 바꾸고, 되도록 문장 끝에서 바꾼다.
-<code>&lt;pre&gt;</code> 안은 바꾸지 않는다. 그 밖에서는 줄바꿈이 빈칸 하나로 보이므로 화면이 달라지지 않는다.</li>
-<li>고친 뒤 <code>util/check-blueprint.sh</code>로 첫 줄 doctype, 끊긴 링크, 목록에 없는 문서, 이스케이프를 빠뜨린 꺾쇠, 제목 번호와 <code>id</code>가 어긋난 곳을 확인하고, 브라우저로 열어 본다.</li>
-</ul>
-
-<h3 id="05.C">05.C 새 문서</h3>
-<ul>
-<li><code>blueprint/</code>에 kebab-case <code>.html</code>로 만든다. 템플릿 전용이면 <code>&lt;템플릿&gt;-handbook.html</code>.</li>
-<li>아래 빈 틀에서 시작한다.</li>
-<li>만들면 <code>_index.js</code>의 <code>blueprint_docs</code>와 <a href="../AGENTS.md">AGENTS.md</a>의 문서 지도에 한 줄씩 더하고,
-루트 <a href="../README.md">README.md</a>의 <code>blueprint/</code> 칸에 주제를 더한다. 번역본도 같이 고친다 (05.D절).</li>
-<li><code>blueprint_docs</code>의 <code>name</code>은 문서의 <code>&lt;h1&gt;</code>, 사이드바 문서 목록, 첫 화면 카드 제목이 함께 쓰는 영어 이름이다. 목록은 이 이름의 abc 순이고 첫 글자가 줄 앞 표지라,
-다른 문서와 첫 글자가 겹치지 않게 짓는다. 한글 이름 <code>label</code>은 카드의 둘째 줄이 되고, 사이드바에서는 이름에 마우스를 올리면 뜬다.</li>
-</ul>
-<pre><code>&lt;!doctype html&gt;
-&lt;html lang=&quot;ko&quot;&gt;
-&lt;meta charset=&quot;utf-8&quot;&gt;
-&lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1&quot;&gt;
-&lt;title&gt;BLUEPRINT - UOO&lt;/title&gt;
-&lt;link rel=&quot;icon&quot; href=&quot;favicon.svg&quot; type=&quot;image/svg+xml&quot;&gt;
-&lt;link rel=&quot;stylesheet&quot; href=&quot;_index.css&quot;&gt;
-&lt;script src=&quot;_index.js&quot;&gt;&lt;/script&gt;
-
-&lt;body class=&quot;bp_index__root&quot;&gt;
-&lt;main class=&quot;bp_index__doc&quot;&gt;
-&lt;h1&gt;{영어 이름, blueprint_docs의 name}&lt;/h1&gt;
-&lt;p&gt;{이 문서가 답하는 것 한두 줄. 여기 없는 것은 어디 있는지 링크}&lt;/p&gt;
-
-&lt;h2 id=&quot;00&quot;&gt;00 한눈에&lt;/h2&gt;
-&lt;p&gt;{먼저 알 것과 남은 것}&lt;/p&gt;
-
-&lt;h2 id=&quot;01&quot; data-part=&quot;{가름}&quot;&gt;01 {절}&lt;/h2&gt;
-&lt;p&gt;{본문}&lt;/p&gt;
-
-&lt;h3 id=&quot;01.A&quot;&gt;01.A {소제목}&lt;/h3&gt;
-&lt;p&gt;{본문}&lt;/p&gt;
-&lt;/main&gt;</code></pre>
-
-<h3 id="05.D">05.D 언어와 번역본</h3>
+<h3 id="05.A">05.A 언어와 번역본</h3>
 <ul>
 <li>문서와 답변은 한국어, 스크립트 안 주석은 영어.</li>
 <li>사람이 처음 보는 README는 영어가 원본이다. 번역본은 <code>language/</code>에 <code>&lt;무엇&gt;.&lt;언어&gt;.md</code>로 둔다
 (<code>language/README.ko.md</code>는 루트 README, <code>language/config.ko.md</code>는 <code>config/README.md</code>).</li>
+<li><code>blueprint/README.md</code>는 예외다. 문서를 쓰는 사람을 위한 규칙이라 문서처럼 한국어로 쓰고 번역본을 두지 않는다.</li>
 <li>원본 맨 위에 번역본 링크, 번역본 맨 위에 원본 링크를 둔다. 원본을 고치면 번역본도 같은 커밋에서 고친다.</li>
 </ul>
 
