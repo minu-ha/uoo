@@ -2,7 +2,7 @@
  * blueprint 문서가 함께 쓰는 스크립트. 문서에는 글만 두고 목차와 부품은 이 파일이 붙인다.
  * <head> 에서 바로 돌아 그리기 전에 테마를 정하고, 나머지는 문서를 다 읽은 뒤에 한다.
  * 1. 테마를 밝게 · 어둡게 고정한다(기본은 시스템 설정)
- * 2. 사이드바를 만든다 — 문서 목록 (영어 이름 abc 순, 첫 글자가 표지), 이 문서의 절(h2)과 소제목(h3). h2 의 data-part 는 가름 머리와 목차 묶음이 된다
+ * 2. 사이드바를 만든다 — 문서 목록 (영어 이름 abc 순, 첫 글자가 표지)과 이 문서의 목차 (절 h2, 소제목 h3). h2 의 data-part 는 가름 머리와 목차 묶음이 된다
  * 3. 목차가 지금 읽는 절과 소제목을 표시하고, 그 절의 소제목만 펼친다
  * 4. 제목부터 첫 절 앞까지를 머리로 묶고, 제목 앞 절 번호를 번호 글자로 가른다
  * 5. 표를 가로로 밀리는 상자로 감싼다
@@ -18,7 +18,7 @@ const theme_labels = { system: '테마 · 시스템', light: '테마 · 밝게',
 const theme_order = ['system', 'light', 'dark']
 
 // 문서 목록 — 새 문서를 만들면 여기에 한 줄을 더한다. 첫 줄은 첫 화면이다.
-// name 은 사이드바에 보이는 영어 이름이다 (문서 목록, 목차 머리). 목록은 이 이름의 abc 순이고 첫 글자가 표지라, 첫 글자가 겹치지 않게 짓는다.
+// name 은 사이드바에 보이는 영어 이름이다 (문서 목록). 목록은 이 이름의 abc 순이고 첫 글자가 표지라, 첫 글자가 겹치지 않게 짓는다.
 // label 은 한글 이름 (카드 제목, 사이드바 이름에 올리면 뜨는 글), group 은 _index.html 카드의 묶음이다
 const blueprint_docs = [
   { file: '_index.html', name: 'Overview', label: '한눈에' },
@@ -216,12 +216,11 @@ const buildNav = (doc) => {
     section.list.append(row)
   }
 
-  nav.append(brand, makeElement('div', 'bp_index__docsLabel', '문서'), docs)
-  // 목차 머리는 문서 목록과 같은 영어 이름이다. 목록에 없는 문서만 제목을 쓴다
-  nav.append(makeElement('div', 'bp_index__navTitle', blueprint_docs.find((item) => item.file === currentFile())?.name ?? doc.querySelector('h1')?.textContent.trim() ?? ''))
+  // 지금 문서는 목록에서 이미 켜져 있으니 이름을 다시 쓰지 않는다. 두 목록 위에는 작은 표지만 둔다
+  nav.append(brand, makeElement('div', 'bp_index__navLabel', '문서'), docs)
 
   if (sections.length > 0) {
-    nav.append(toc)
+    nav.append(makeElement('div', 'bp_index__navLabel', '목차'), toc)
   }
 
   nav.append(theme)

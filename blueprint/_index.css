@@ -188,7 +188,8 @@
   }
 }
 
-.bp_index__docsLabel {
+/* 사이드바의 두 목록 (문서, 목차) 위에 붙는 작은 표지 */
+.bp_index__navLabel {
   margin: 16px 0 6px;
   color: var(--app-color-text-muted);
   font-family: var(--app-font-mono);
@@ -201,15 +202,6 @@
   margin: 0 0 18px;
   padding: 0 0 16px;
   border-bottom: 1px solid var(--app-color-border);
-}
-
-.bp_index__navTitle {
-  margin: 6px 0 18px;
-  color: var(--app-color-text-strong);
-  font-size: 17px;
-  font-weight: 600;
-  line-height: 1.35;
-  text-wrap: balance;
 }
 
 /* 사이드바 목록 — 문서 목록과 목차가 함께 쓴다. 목차는 가름마다 목록이 끊겨 왼쪽 선도 끊긴다 */
