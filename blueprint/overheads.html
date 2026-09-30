@@ -606,11 +606,14 @@ Heat of Battle은 <code>pvp</code> 바가 그 자리다.</li>
 </tr>
 <tr>
 <td><code>teleki, target</code> <code>teleki, me</code></td>
-<td>자기에게 TK를 걸면 둘 다 뜬다. 서버가 시전자 문장과 대상 문장을 둘 다 보내니 맞는 동작이다</td>
+<td>자기 TK뿐 아니라 적 TK 수신에도 둘 다 켜질 수 있다는 사용자 보고가 있다.
+서로 독립적인 성공 증거가 아니므로 target 바만으로 내 공격 TK 적용을 확정하지 않는다
+(<a href="pvp.html#04.D">pvp.html</a> 04.D절)</td>
 </tr>
 <tr>
 <td><code>reflect</code></td>
-<td>"Magic reflect removed."면 30초 (몹), "Magic reflect removed (PvP)"면 60초 (플레이어). 서버의 재시전 잠금 그대로다.
+<td>설정상 "Magic reflect removed."면 30초 (몹), "Magic reflect removed (PvP)"면 60초 (플레이어) 바를 세운다.
+실제 서버 제한과 시작 시점의 검증 범위는 <a href="pvp.html#05.A">pvp.html</a> 05.A절을 따른다.
 자기 주문으로 없애면 "You remove your magic reflect spell."이 한 줄 더 오지만 트리거가 아니다</td>
 </tr>
 <tr>
@@ -1338,7 +1341,7 @@ Heat of Battle은 <code>pvp</code> 바가 그 자리다.</li>
 <tr>
 <td>thrown at that player within 30</td>
 <td><code>[ teleki, target ] (43)</code></td>
-<td></td>
+<td>자기·수신 TK와 혼동 가능. 공격 대상 성공 인증이 아님 (<a href="pvp.html#04.D">pvp.html</a> 04.D절)</td>
 </tr>
 <tr>
 <td>has applied telekinesis to you</td>
@@ -1348,7 +1351,8 @@ Heat of Battle은 <code>pvp</code> 바가 그 자리다.</li>
 <tr>
 <td>An explosion potion has stuck to you</td>
 <td><code>[ bomb, me ] (33)</code></td>
-<td>퓨즈 5초. 바 <code>bomb, me</code>와 짝</td>
+<td>5초 표시의 바 <code>bomb, me</code>와 짝. 실제 점화부터의 퓨즈 측정과는 구분
+(<a href="open-items.html#08.C">open-items.html</a> 08.C절)</td>
 </tr>
 <tr>
 <td>Your explosion potion sticks to your target</td>

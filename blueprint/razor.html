@@ -112,6 +112,20 @@
 </tbody>
 </table>
 
+<h3 id="02.A">02.A 고정 문구 검사와 타겟 커서의 한계</h3>
+<p><a href="https://www.razorce.com/guide/expressions/">Razor CE 표현식</a>의 <code>insysmsg</code>는 고정 문구를 검사한다.
+<code>insysmsg "xuezhonglian has applied telekinesis to you."</code>처럼 이름을 리터럴에 포함하는 데 문자열용 <code>setvar</code>는 필요 없다.</p>
+<p><a href="https://wiki.uooutlands.com/Razor_Scripting">Outlands Razor Scripting</a>에는 <code>name</code> 표현식도 있다.
+그러나 이것이 Journal에서 시전자 이름을 추출하거나, 이름 변수를 메시지 검색 문자열에 동적으로 붙일 수 있다는 증거는 아니다.
+해당 조합의 인게임 검증은 아직 없고, 이름은 고유 serial도 아니다.</p>
+<p>메시지의 존재·신선함·현재 타겟만으로 서버 응답을 특정 시전 요청에 결속할 수 있다고 가정하지 않는다.
+TK 수신과 송신이 같은 안내를 만드는 사례는 <a href="pvp.html#04.D">pvp.html</a> 04.D절에 있다.
+<code>clearsysmsg</code>로 다른 루프의 신호까지 지우는 경쟁도 고려해야 하며, 단순 초기화로 이 모호성이 해결되지는 않는다.</p>
+<p><a href="https://www.razorce.com/guide/commands/">Razor CE 명령</a>에는 <code>targetrelloc</code>가 있지만,
+폭발 포션의 안전한 지면·LOS·높이·폭발 반경을 자동으로 보증하지 않는다.
+<code>targetexists</code>만으로 현재 커서가 포션인지 회복 주문인지 알았다고 처리하지 말고, 열었던 행동과 소유권을 함께 추적한다.</p>
+<p>이 절은 문서에서 확인한 문법과 설계 제한이다. 새로운 실행 선례나 실제 포션 복구 성공을 인증하는 절이 아니다.</p>
+
 <h2 id="03" data-part="함정 · 선례">03 확인된 함정</h2>
 <p><code>.razor</code>를 고치기 전에 이 절의 표를 읽는다. 대부분 인게임에서 깨졌거나 프로브로 잰 것이다. 선례가 없거나 확인되지 않은 것은 증상 칸에 그렇게 적었다.
 근거는 05절, 비용 숫자는 06절.</p>
