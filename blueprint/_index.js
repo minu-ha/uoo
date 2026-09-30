@@ -30,7 +30,7 @@ const blueprint_docs = [
   { file: 'hotkeys.html', name: 'Hotkeys', label: '핫키 배치', group: '사양' },
   { file: 'bard-necro-handbook.html', name: 'Bard Necro Handbook', label: 'Bard Necro 핸드북', group: '템플릿' },
   { file: 'lumberjack-pvp-handbook.html', name: 'Lumberjack PvP Handbook', label: '벌목 · PvP 핸드북', group: '템플릿' },
-  { file: 'item-list.txt', name: 'Item List', label: '아이템 목록', group: '자료' },
+  { file: 'item-list.html', name: 'Item List', label: '아이템 목록', group: '자료' },
   { file: 'open-items.html', name: 'Questions', label: '확인할 것', group: '기록' },
 ]
 

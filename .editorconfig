@@ -30,8 +30,9 @@ max_line_length = 200
 [*.sh]
 indent_style = tab
 
-# Graphic id list. Lines are long by design and scripts cite it by line number.
-[blueprint/item-list.txt]
+# Graphic id list. The lines inside its code blocks are long by design, and scripts cite
+# it by category name, not line number.
+[blueprint/item-list.html]
 indent_size = 4
 max_line_length = off
 
