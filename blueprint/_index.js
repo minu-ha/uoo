@@ -18,7 +18,7 @@ const theme_labels = { system: '테마 · 시스템', light: '테마 · 밝게',
 const theme_order = ['system', 'light', 'dark']
 
 // 문서 목록 — 새 문서를 만들면 여기에 한 줄을 더한다. 첫 줄은 첫 화면이다.
-// name 은 사이드바 문서 목록의 영어 이름이다. 목록은 이 이름의 abc 순이고 첫 글자가 표지라, 첫 글자가 겹치지 않게 짓는다.
+// name 은 사이드바에 보이는 영어 이름이다 (문서 목록, 목차 머리). 목록은 이 이름의 abc 순이고 첫 글자가 표지라, 첫 글자가 겹치지 않게 짓는다.
 // label 은 한글 이름 (카드 제목, 사이드바 이름에 올리면 뜨는 글), group 은 _index.html 카드의 묶음이다
 const blueprint_docs = [
   { file: '_index.html', name: 'Overview', label: '한눈에' },
@@ -217,7 +217,8 @@ const buildNav = (doc) => {
   }
 
   nav.append(brand, makeElement('div', 'bp_index__docsLabel', '문서'), docs)
-  nav.append(makeElement('div', 'bp_index__navTitle', doc.querySelector('h1')?.textContent.trim() ?? ''))
+  // 목차 머리는 문서 목록과 같은 영어 이름이다. 목록에 없는 문서만 제목을 쓴다
+  nav.append(makeElement('div', 'bp_index__navTitle', blueprint_docs.find((item) => item.file === currentFile())?.name ?? doc.querySelector('h1')?.textContent.trim() ?? ''))
 
   if (sections.length > 0) {
     nav.append(toc)
