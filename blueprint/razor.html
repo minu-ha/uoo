@@ -246,6 +246,10 @@ TK 수신과 송신이 같은 안내를 만드는 사례는 <a href="pvp.html#04
 </table>
 
 <h4>커서와 타겟</h4>
+<p><code>insysmsg</code>의 소비 범위도 주의한다. CE 원본의
+<a href="https://github.com/markdwags/Razor/blob/master/Razor/Core/SystemMessages.cs">SystemMessages.Exists</a>는
+일치한 최신 줄과 그보다 오래된 줄을 함께 제거한다. 한 줄에서 거리와 발견 문구를 각각 읽는 구조는 피하고, 중요한 경보를 먼저 읽는다.
+이 소비 범위가 Outlands 포크에서도 같은지는 인게임에서 확인되지 않았다.</p>
 <p>타겟 주문 한 번의 모양은 04절 끝에 있다.</p>
 <table>
 <thead>

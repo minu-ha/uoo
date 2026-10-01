@@ -30,6 +30,13 @@ Combat loops are named after the template (`bard-mace`, `hally-mage`), variants 
 A new combat loop gets a row here. Every loop has the same shape, set out in
 [blueprint/conventions.html](../blueprint/conventions.html#02.B) 02.B: config and state first, then one `while not dead` loop.
 
+## Lumberjacking loops
+
+Use [gather/lumberjack-enhanced.razor](gather/lumberjack-enhanced.razor) for lumberjacking.
+The existing `gather/lumberjack.razor` remains the legacy version. Configuration and in-game checks
+are in [blueprint/lumberjack-pvp-handbook.html](../blueprint/lumberjack-pvp-handbook.html#08) part 8.
+Switch manually to the future `lumberjack-pvp` loop with a separate hotkey.
+
 ## Personal values never go into a script
 
 These files are shared. A container serial typed into one is *someone else's* container for

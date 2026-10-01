@@ -22,7 +22,8 @@
 <li>상대도 자동 파우치·붕대·포션을 쓴다. Paralyze 동안 멈춰 기다려 주는 상대를 가정하지 않는다.</li>
 <li>TK는 자기 방어와 공격 부착 중 선택한다. <strong>반사 TK를 공짜 자기 방어로 계산하지 않는다.</strong></li>
 <li>Explosion → EB 자동 콤보는 제외한다. 마법은 짧은 견제·회복·이동, TK → 폭발 포션은 적용 확인이 가능한 경우에 한한다.</li>
-<li>이번 작업은 문서 갱신이다. 저장소 스크립트가 아래 설계를 구현·검증했다고 간주하지 않는다.</li>
+<li>채집용 <code>lumberjack-enhanced</code>를 구현했다. 동작과 설정은 08절에 있다. 아래 PvP 설계는 아직 별도 스크립트로 구현하지 않았다.
+채집과 PvP 모두 인게임 확인 전이다.</li>
 </ul>
 <table>
 <thead><tr><th>절</th><th>무엇</th></tr></thead>
@@ -30,6 +31,7 @@
 <tr><td>01~03</td><td>스킬·스탯·장비와 공유 스윙</td></tr>
 <tr><td>04~05</td><td>마나 예산과 이동 중심 교전</td></tr>
 <tr><td>06~07</td><td>자동화의 확인 한계와 피해 계산 예시</td></tr>
+<tr><td>08</td><td>enhanced 채집 루프, 구현 순서와 인게임 확인</td></tr>
 </tbody>
 </table>
 
@@ -288,4 +290,127 @@ AR의 감소식은 <a href="pvp.html#09.E">pvp.html</a> 09.E절이다.</p>
 <p>이 예시에서는 <strong>추가로 맞힌</strong> 근접 한 대가 Eval로 늘어나는 두 주문의 차이를 넘을 수 있다.
 하지만 명중·접근이 보장되지 않고, Eval 100을 얻으려면 다른 스킬 100점을 빼야 한다.
 두 빌드가 원래 둘 다 때릴 한 대를 한쪽에만 더해 유리하다고 계산하지 않는다.</p>
+<h2 id="08" data-part="채집">08 lumberjack-enhanced</h2>
+<p>대상은 <code>script/gather/lumberjack-enhanced.razor</code>다. 기존 <code>lumberjack.razor</code>를 구버전으로 보존하고,
+enhanced와 앞으로 만들 PvP 루프는 별도 핫키로 수동 전환한다. 자동 공격과 자동 PvP 전환은 넣지 않는다.</p>
+
+<h3 id="08.A">08.A 구현 순서</h3>
+<ol>
+<li>새 파일에 설정·대기·타이머·상태를 나누고, 마비 해제·해독·붕대·포션·주문 회복을 채집보다 먼저 처리한다.</li>
+<li>Tracking을 제한된 시도로 시작한다. 위험 감지, 무게 부족, 귀환 요청은 채집 중단 상태로 남기고 회복을 계속한다.</li>
+<li>Hatchet 장착을 실제 손 슬롯으로 확인한 뒤 Smart Harvest를 시작한다. 여행 제한 대기 중에도 생존 처리를 유지한다.</li>
+<li>재고·시약·음식·자기 버프와 선택적인 집 문·Stockpile 처리를 주기적으로 확인한다.</li>
+<li><code>util/check.sh script/gather/lumberjack-enhanced.razor</code>, <code>util/check-blueprint.sh</code>,
+<code>git diff --check</code>를 실행하고, 아래 인게임 확인 항목을 문서에 남긴다. 커밋과 설정 파일 수정은 하지 않는다.</li>
+</ol>
+
+<h3 id="08.B">08.B 채집 근거</h3>
+<blockquote>Lumberjacking always uses Smart Harvest</blockquote>
+<p><a href="https://wiki.uooutlands.com/Lumberjacking">공식 Lumberjacking 문서</a>는 장착한 Hatchet의 더블클릭으로 주변 나무를 채집한다고 설명한다.
+기본 구현은 도끼를 더블클릭하며 임의의 타겟 커서를 자기에게 보내지 않는다. 기존 Smart Harvest 문서의 자기 타겟 설명과 실제 클라이언트 동작은 인게임에서 비교한다.</p>
+<blockquote>they will have a 60 second delay before they can attempt to Harvest again</blockquote>
+<p>같은 문서는 Recall·Moongate·Hike 뒤의 제한을 60초로 설명하고 Teleport·Rope에도 적용한다고 덧붙인다.
+스크립트는 여행 제한 거절 문장을 받으면 그때부터 보수적으로 60초를 대기한다. 실제 이동 시각이나 서버의 남은 시간을 읽은 값은 아니다.</p>
+
+<h3 id="08.C">08.C 기본값과 상태</h3>
+<p>모든 세션 이름에 <code>lj_</code>를 붙였다. Bard Necro와 상태·타이머를 공유하지 않는다.
+숫자와 버프 비용은 <a href="item-list.html#19">item-list.html</a> 19절과 이 문서 04절의 마나 예산을 사용한다.</p>
+<table>
+<thead><tr><th>설정</th><th>기본값과 의미</th></tr></thead>
+<tbody>
+<tr><td><code>config__lj_use_tracking</code>, <code>track_red_only</code></td>
+<td>1, 0. 실행 첫 회에 기존 Hunting 버프와 별개로 All Hostile Players 필터를 확인한다.
+필터 확인과 Hunting 버프가 모두 있어야 채집한다. 필터 전환은 한 번에 최대 10회, 실패하면 10초 뒤 재시도한다</td></tr>
+<tr><td><code>config__lj_return_on_hostile</code>, <code>return_on_any_hostile</code></td>
+<td>1, 0. 기존 스크립트의 실제 거리 사슬인 1~45 steps를 유지한다. 근거리 감지는 실행을 다시 시작할 때까지 채집을 멈춘다.
+첫 설정만 0으로 바꿔도 위험 감지 시 채집 중단은 유지된다</td></tr>
+<tr><td><code>config__lj_return_on_weight</code>, <code>weight_remaining</code>, <code>require_runebook</code></td>
+<td>1, 10, 1. 남은 무게 10 이하에서 귀환을 요청한다. Runebook 또는 Runetome가 없으면 채집을 보류한다.
+이 검사는 충전량이나 Home 룬의 실제 존재까지 확인하지 않는다</td></tr>
+<tr><td><code>config__lj_heal_hits</code>, <code>emergency_hits</code>, <code>light_hits</code></td>
+<td>잃은 HP 35, 45, 15. 평소 붕대, 35부터 힐 포션, 45부터 Greater Heal을 보조로 쓴다.
+붕대를 쓸 수 없으면 15부터 Smart Heal/Cure를 시도한다. 독이면 Cure 포션과 해독 주문을 먼저 쓴다</td></tr>
+<tr><td><code>config__lj_use_reactive_armor</code>, <code>use_magic_reflect</code></td>
+<td>각 1. 안전할 때만 시도하며 마나 24, 34부터 각각 시전해 준비 버프 뒤 GH + Teleport 예산 20을 남긴다.
+이 설정은 시전 시작 조건이며 이후 생존 회복이 마나 20을 반드시 유지한다는 뜻은 아니다</td></tr>
+<tr><td><code>config__lj_use_stat_potions</code>, <code>close_house_door</code>, <code>deposit_at_stockpile</code></td>
+<td>각 0. 선택 기능이다. 문을 켜면 <code>global__my_house_door</code>를 한 번 고르고,
+Stockpile은 loadout과 같은 <code>global__my_resource_stockpile</code>을 사용한다. 문 graphic은 자기 집의 열린 문 값으로 바꾼다</td></tr>
+</tbody>
+</table>
+<p>표의 축약 설정 이름도 실제 파일에서는 모두 <code>config__lj_</code>로 시작한다.
+남은 설정은 포션 사용, Tracking 창 표시, 스태미나 15 이하의 Refresh, 예비 Hatchet 2개 이하의 경고와 출력 빈도다.</p>
+<table>
+<thead><tr><th>추가 이름</th><th>역할</th></tr></thead>
+<tbody>
+<tr><td><code>var__lj_danger</code>, <code>hostile_seen</code>, <code>tracking_filter</code>, <code>tracking_ready</code>, <code>tracking_response</code></td>
+<td>근거리 위험 고정, 이번 패스의 발견, 이번 실행에서 확인한 필터, 필터와 Hunting 버프 준비 상태, 이번 선택의 응답.
+각 버튼의 새 응답을 제한된 폴링으로 확인한 뒤 다음 버튼을 보낸다. 응답이 없으면 준비 상태로 만들지 않는다</td></tr>
+<tr><td><code>var__lj_return_reason</code>, <code>return_stage</code></td>
+<td>사유: 0 없음 / 1 적대 / 2 무게. 단계: 0 대기 / 1 요청 보냄 / 2 차단 / 3 결과 미확인.
+도착 성공을 추측하지 않고 귀환 요청 이후의 자동 채집 재개를 막는다</td></tr>
+<tr><td><code>var__lj_saving</code>, <code>book_ok</code>, <code>hatchet</code>, <code>hatchet_ready</code></td>
+<td>서버 저장 중 채집 중단, 주기적 책 확인, 손에 든 Hatchet serial 캐시와 이번 패스의 장착 확인</td></tr>
+<tr><td><code>var__lj_bandage_ok</code>, <code>heal_spell</code>, <code>buff_cast</code>, <code>regs_*</code></td>
+<td>붕대 보유와 사용할 회복, 자기 버프 시도, 주문별 시약 조합. 시약별 <code>garlic</code>, <code>ginseng</code>,
+<code>mandrake</code>, <code>ash</code>, <code>silk</code>로 조합을 갱신한다. 보유와 명령 호출을 치유 성공으로 취급하지 않는다</td></tr>
+<tr><td><code>alias__lj_*</code>, <code>label__lj_*</code></td>
+<td>힐 포션의 사용 가능 라벨, 손 슬롯, 예비 Hatchet, 음식, 열린 문. alias는 검색 블록 안에서만 사용한다</td></tr>
+<tr><td><code>timer__lj_*</code>, <code>cooldown__lj_*</code>, <code>wait__lj_*</code></td>
+<td>메시지·위험 알림, 재고·시약·음식, Tracking, 붕대·포션·회복·버프, 채집·여행 제한, 귀환 응답·Stockpile을 분리한다.
+여행 거절 타이머만 재실행 시 보존한다. 나머지는 실행 첫 회에 준비 상태로 만든다</td></tr>
+</tbody>
+</table>
+<p>상태 표의 축약 이름도 <code>var__lj_</code> 접두를 쓴다.
+대기 간격과 재시도 주기는 클라이언트 동작을 조절하는 값이고, 서버 쿨다운을 측정한 값이 아니다.</p>
+
+<h3 id="08.D">08.D 실행 준비와 인게임 확인</h3>
+<ol>
+<li>Tracking 창에서 Hunt Frequency를 <strong>Always Get Closest</strong>로 둔다.
+스크립트는 대상 필터를 맞추지만 추적 빈도 모드를 바꾸지는 않는다.
+공식 모드의 차이는 <a href="https://wiki.uooutlands.com/Tracking">Tracking 문서</a>의 Hunting 항목을 본다.</li>
+<li>충전한 책에 <code>Home</code> 룬을 준비한다. 다른 이름이면 파일의 <code>say "[RecallCharge Home"</code> 한 줄을 바꾼다.
+명령 의미는 <a href="https://wiki.uooutlands.com/Commands">공식 Commands 문서</a>의 RecallCharge 항목에 있다.</li>
+<li>Hatchet·붕대·시약·포션을 넣고 <code>Bandage Self</code>, 각 Drink 핫키,
+<code>&gt; Smart Heal/Cure Self</code>, <code>&gt; Greater Heal/Cure Self</code>, <code>&gt; Interrupt</code>,
+<code>Cancel Current Target</code>가 현재 캐릭터에서 동작하는지 확인한다.</li>
+<li>현재 캐릭터의 <code>heal pot</code>, <code>walk</code>, <code>reflect</code> 바를 확인한다.
+없는 바는 0으로 보이므로 이동 차단과 Reflect 재시전 제한을 보호하지 못한다. 설정 변경은 별도 작업이다.</li>
+</ol>
+<table>
+<thead><tr><th>상황</th><th>예상과 실패 판정</th></tr></thead>
+<tbody>
+<tr><td>안전한 나무 옆에서 시작, 기존 필터가 몬스터 또는 우호 플레이어</td>
+<td><code>[ lumberjack, on ]</code> 뒤 적대 필터를 새로 맞추고 Hunting을 유지한다.
+필터 확인 전 채집하거나 기존 Hunting을 꺼 버리면 실패. 응답이 없으면 <code>[ track, miss ]</code> 또는 <code>[ track, check ]</code> 후 채집을 보류해야 한다</td></tr>
+<tr><td>Hatchet 없음·교체·손에 다른 무기, 나무 고갈</td>
+<td>없으면 <code>[ hatchet, out ]</code>, 낮으면 <code>[ hatchet, low ]</code>.
+교체 후 손 슬롯을 확인하고 채집한다. 고갈 뒤 반복 시도 간격이 유지돼야 한다.
+더블클릭으로 커서가 뜨면 <code>[ harvest, cursor ]</code> 후 사용자의 확인을 기다린다</td></tr>
+<tr><td>독, 보통 피해, 큰 피해, 포션·붕대·시약 부족</td>
+<td>채집보다 해독과 회복이 먼저다. 부족하면 <code>[ cure pot, out ]</code>, <code>[ bandage, out ]</code>,
+<code>[ heal pot, out ]</code>. 포션 재사용 불가 중 반복 음용하거나 붕대 진행 중 계속 새 붕대를 쓰면 실패</td></tr>
+<tr><td>수동 프리캐스트·폭발 포션 커서, warmode, 이동</td>
+<td>기존 커서를 채집이 자기에게 보내지 않아야 한다. warmode에서는 채집·자동 주문을 보류한다.
+자체 회복 에이전트 실행 중 수동 입력까지 겹치는 경우는 별도로 시험한다. 커서 소유권을 자동으로 증명하는 장치는 없다</td></tr>
+<tr><td>적대 46 steps와 45 steps, 발견 문구에 거리 포함, 채집 거절 안내 동시 도착</td>
+<td>먼 거리는 <code>[ hostile, seen ]</code>, 가까워지면 <code>[ hostile, near ]</code>.
+근거리 경보를 먼저 읽어 채집을 중단한다. 자기 TK나 피격만으로 PvP 루프가 시작되면 실패</td></tr>
+<tr><td>귀환 허용·Heat of Battle·마나 부족·룬 없음·지연 응답</td>
+<td>요청하면 <code>[ return, on ]</code>, 차단은 <code>[ return, blocked ]</code>, 마나 부족은 <code>[ mana, low ]</code>.
+요청 후 5초에 <code>[ return, check ]</code>가 뜨며 채집을 재개하지 않는다.
+실제 도착은 화면으로 확인한다. 같은 실행에서 Recall을 다시 요청하면 실패</td></tr>
+<tr><td>남은 무게 10 이하, 여행 직후, 서버 저장</td>
+<td><code>[ weight, low ]</code> 이후 채집 중단. 여행 거절은 <code>[ harvest, wait ]</code> 뒤 60초 대기하며 회복은 계속한다.
+대기 중 재실행해도 여행 타이머를 초기화하지 않아야 한다. 서버 저장 완료 전 채집하면 실패</td></tr>
+<tr><td>집 문·Stockpile 선택 기능</td>
+<td>선택한 대상만 가까이에서 사용한다. 다른 문을 닫거나 필드에서 영속 serial을 지우면 실패.
+Stockpile 메뉴 커서와 수동 커서가 겹치는 시험은 선택 기능을 켠 경우에만 한다</td></tr>
+</tbody>
+</table>
+<p>정적 검사는 게임 응답과 커서 소유권을 증명하지 않는다. 이 표의 동작은 아직 인게임에서 확인되지 않았다.
+후속 확인은 <a href="open-items.html#09">open-items.html</a> 09절에 남겼다.</p>
+<p>반영은 <a href="workflow.html#04.A">workflow.html</a> 04.A절을 따른다.
+Scripts 탭의 Reload all scripts 뒤 Play로 반복 확인하고, 외부 파일을 수정한 뒤 핫키로 실행할 때는 클라이언트를 재시작한다.
+게임 종료 후 <code>git status --short</code>로 Razor가 덮어쓴 파일이 없는지 확인한다.</p>
 </main>

@@ -374,4 +374,21 @@ Bless 비용 9, 공식 +8.8의 정수 처리, 스크롤 소환에 실제 마나 
 </ol>
 <p>위 실험 전에는 완전 자동 공격 TK 확인이나 안전한 자동 폭탄 폐기가 구현됐다고 표시하지 않는다.
 수신 TK만으로 점화되는 경우는 기능 실패이고, 이미 확인된 공격 TK를 단순 me 바 때문에 취소하는 것도 별도의 판정 오류다.</p>
+
+<h2 id="09" data-part="채집">09 lumberjack-enhanced 인게임 확인</h2>
+<p>2026-10-01 새 파일을 구현했다. 설정과 예상 알림·실패 판정은
+<a href="lumberjack-pvp-handbook.html#08">lumberjack-pvp-handbook.html</a> 08절이 정본이다.</p>
+<table>
+<thead><tr><th>남은 항목</th><th>확인할 것</th></tr></thead>
+<tbody>
+<tr><td>실제 Smart Harvest 경로</td><td>Hatchet 더블클릭만으로 채집되는지, 자기 타겟 커서가 필요한 클라이언트인지 확인.
+현재는 예상 밖 커서를 자동으로 찍지 않는다</td></tr>
+<tr><td>Tracking 초기 필터와 새 메시지</td><td>Hunting이 켜진 상태에서 몬스터·우호 필터를 시작점으로 시험한다.
+10개 필터 순환, 기존 Hunting 유지, 근거리 안내와 다른 안내가 겹칠 때 경보를 놓치는지 확인</td></tr>
+<tr><td>회복 에이전트와 수동 입력</td><td>독·붕대·포션·부족한 시약·프리캐스트를 조합하고, 자동 회복 직후 수동 커서를 열 때 취소 충돌을 확인</td></tr>
+<tr><td>Home 귀환</td><td>책 충전량·룬 이름·Heat of Battle·지연·실패를 나눠 실제 도착과 한 번만 요청하는 동작을 확인</td></tr>
+<tr><td>현재 캐릭터의 쿨다운 바</td><td>heal pot·walk·reflect가 실제로 켜지는지 확인. 없거나 트리거가 다르면 해당 캐릭터만 후속 수정</td></tr>
+<tr><td>집 기능 사용 여부</td><td>기본값은 꺼져 있다. 문 자동 닫기·Stockpile 적재가 필요한지 정하고 실제 열린 문 graphic과 메뉴 응답을 확인</td></tr>
+</tbody>
+</table>
 </main>
