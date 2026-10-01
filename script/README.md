@@ -21,6 +21,7 @@ Combat loops are named after the template (`bard-mace`, `hally-mage`), variants 
 |-----------------------|----------------------------------------------------------------------------------------------|
 | `bard-necro-enhanced` | Discord / Peace / Provo + Necromancy summons + Spirit Speak, with the Grimoire proc rotation |
 | `bard-necro-pvp`      | Bard Necro against a player killer: survive, Telekinesis, explosion dump. F4 while hunting   |
+| `lumberjack-pvp`     | Field PvP with axes, bandages and reserved-mana short spells; switch manually from lumberjacking |
 | `bard-mace`           | Bard dexxer with maces                                                                       |
 | `bard-throwing`       | Bard dexxer with throwing weapons: Throwing Codex stances, moving-throw readout              |
 | `hally-mage`          | Weapon-swap mage: halberd / katana / viking sword                                            |
@@ -35,7 +36,8 @@ A new combat loop gets a row here. Every loop has the same shape, set out in
 Use [gather/lumberjack-enhanced.razor](gather/lumberjack-enhanced.razor) for lumberjacking.
 The existing `gather/lumberjack.razor` remains the legacy version. Configuration and in-game checks
 are in [blueprint/lumberjack-pvp-handbook.html](../blueprint/lumberjack-pvp-handbook.html#08) part 8.
-Switch manually to the future `lumberjack-pvp` loop with a separate hotkey.
+Switch manually to [combat/lumberjack-pvp.razor](combat/lumberjack-pvp.razor) with a separate hotkey.
+Its settings and in-game checks are in [the handbook](../blueprint/lumberjack-pvp-handbook.html#09) part 9.
 
 ## Personal values never go into a script
 

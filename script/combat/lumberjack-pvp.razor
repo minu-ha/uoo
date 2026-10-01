@@ -1,0 +1,700 @@
+# Lumberjack field-PvP loop: bandages and axes first, with a reserved-mana short spell.
+# Needs: Great Axe, Norse Axe, Hatchet, bandages, reagents and healing/potion hotkeys.
+# Cooldown bars: heal pot, walk, weapon swing, hams, target. Check the active character.
+# Bind separately from gather/lumberjack-enhanced. Select your opponent with Q, then use Tab.
+# Warmode ON allows new attacks. OFF keeps recovery and rearming without changing Warmode.
+# Set Hamstring untoggle handling to Never Untoggle if automatic first-contact preparation is enabled.
+# Target and weapon checks cannot prove LOS, a melee hit or an interrupt. The server decides.
+# TK, explosion potions, Teleport and Rope remain manual. Existing cursors are left alone.
+# Manual input during our own cast poll can still create a cursor ownership race.
+# Design, variables and in-game checks: blueprint/lumberjack-pvp-handbook.html part 9.
+# Hotkeys: Bandage Self, Drink Cure, Drink Heal, Drink Refresh, Drink Strength, Drink Agility,
+#          > Smart Heal/Cure Self, > Greater Heal/Cure Self, > Interrupt, Cancel Current Target.
+
+clearall
+clearsysmsg
+cleardragdrop
+clearignore
+
+if pvp
+    overhead "[ script, blocked ]" 53
+    stop
+endif
+
+# ####################################################################################
+# # CONFIG
+# ####################################################################################
+# Range values are client start thresholds, not a proof of server range or LOS.
+# Short spell: 0 off, 1 MA, 2 Harm within four tiles and MA farther out.
+# The offensive thresholds include the handbook's 20 mana GH + Teleport reserve.
+@setvar! config__ljp_chatty 1
+@setvar! config__ljp_attack_blue 0
+@setvar! config__ljp_use_potions 1
+@setvar! config__ljp_use_stat_potions 1
+@setvar! config__ljp_use_burst_axe 1
+@setvar! config__ljp_prepare_hamstring 1
+@setvar! config__ljp_short_spell 1
+@setvar! config__ljp_sight_range 18
+@setvar! config__ljp_melee_range 1
+@setvar! config__ljp_harm_range 4
+@setvar! config__ljp_spell_range 6
+@setvar! config__ljp_heal_hits 35
+@setvar! config__ljp_emergency_hits 45
+@setvar! config__ljp_light_hits 15
+@setvar! config__ljp_refresh_stam 15
+@setvar! config__ljp_mana_heal 4
+@setvar! config__ljp_mana_cure 6
+@setvar! config__ljp_mana_greater_heal 11
+@setvar! config__ljp_mana_magic_arrow 24
+@setvar! config__ljp_mana_harm 26
+@setvar! config__ljp_great_axe_graphic 31190
+@setvar! config__ljp_norse_axe_graphic 31128
+
+# ####################################################################################
+# # WAIT AND COOLDOWN
+# ####################################################################################
+@setvar! wait__ljp_short 200
+@setvar! wait__ljp_poll 100
+@setvar! wait__ljp_cast 300
+@setvar! cooldown__ljp_message 3000
+@setvar! cooldown__ljp_bandage_retry 1200
+@setvar! cooldown__ljp_potion_retry 1000
+@setvar! cooldown__ljp_heal_retry 2500
+@setvar! cooldown__ljp_reagents 30000
+@setvar! cooldown__ljp_stats 5000
+@setvar! cooldown__ljp_weapon 1000
+@setvar! cooldown__ljp_attack 1500
+@setvar! cooldown__ljp_poke 10000
+
+# ####################################################################################
+# # TIMER
+# ####################################################################################
+if not timerexists "timer__ljp_message"
+    createtimer "timer__ljp_message"
+endif
+if not timerexists "timer__ljp_bandage"
+    createtimer "timer__ljp_bandage"
+endif
+if not timerexists "timer__ljp_cure_potion"
+    createtimer "timer__ljp_cure_potion"
+endif
+if not timerexists "timer__ljp_heal_potion"
+    createtimer "timer__ljp_heal_potion"
+endif
+if not timerexists "timer__ljp_refresh"
+    createtimer "timer__ljp_refresh"
+endif
+if not timerexists "timer__ljp_heal"
+    createtimer "timer__ljp_heal"
+endif
+if not timerexists "timer__ljp_reagents"
+    createtimer "timer__ljp_reagents"
+endif
+if not timerexists "timer__ljp_stats"
+    createtimer "timer__ljp_stats"
+endif
+if not timerexists "timer__ljp_weapon"
+    createtimer "timer__ljp_weapon"
+endif
+if not timerexists "timer__ljp_attack"
+    createtimer "timer__ljp_attack"
+endif
+
+settimer "timer__ljp_message" cooldown__ljp_message
+settimer "timer__ljp_bandage" cooldown__ljp_bandage_retry
+settimer "timer__ljp_cure_potion" cooldown__ljp_potion_retry
+settimer "timer__ljp_heal_potion" cooldown__ljp_potion_retry
+settimer "timer__ljp_refresh" cooldown__ljp_potion_retry
+settimer "timer__ljp_heal" cooldown__ljp_heal_retry
+settimer "timer__ljp_reagents" cooldown__ljp_reagents
+settimer "timer__ljp_stats" cooldown__ljp_stats
+settimer "timer__ljp_weapon" cooldown__ljp_weapon
+settimer "timer__ljp_attack" cooldown__ljp_attack
+
+# Preserve this request throttle across restarts. It is not a server interrupt-window timer.
+if not timerexists "timer__ljp_poke"
+    createtimer "timer__ljp_poke"
+    settimer "timer__ljp_poke" cooldown__ljp_poke
+endif
+
+# ####################################################################################
+# # STATE
+# ####################################################################################
+@setvar! var__ljp_target 0
+@setvar! var__ljp_target_ok 0
+@setvar! var__ljp_fresh_ok 0
+@setvar! var__ljp_engaged 0
+@setvar! var__ljp_near 0
+@setvar! var__ljp_spell_range 0
+@setvar! var__ljp_weapon_kind 0
+@setvar! var__ljp_weapon_serial 0
+@setvar! var__ljp_wanted_weapon 0
+@setvar! var__ljp_weapon_ready 0
+@setvar! var__ljp_burst_armed 0
+@setvar! var__ljp_burst_done 0
+@setvar! var__ljp_hams_mode 0
+@setvar! var__ljp_hams_prepared 0
+@setvar! var__ljp_hams_response 0
+@setvar! var__ljp_bandage_ok 0
+@setvar! var__ljp_heal_spell 0
+@setvar! var__ljp_poke_spell 0
+@setvar! var__ljp_cast_target 0
+@setvar! var__ljp_cast_ready 0
+@setvar! var__ljp_cast_cut 0
+@setvar! var__ljp_regs_heal 0
+@setvar! var__ljp_regs_cure 0
+@setvar! var__ljp_regs_greater_heal 0
+@setvar! var__ljp_regs_magic_arrow 0
+@setvar! var__ljp_regs_harm 0
+
+if config__ljp_chatty = 1
+    overhead "[ pvp, on ]" 90
+endif
+overhead "[ target, pick ]" 55
+
+# ####################################################################################
+# # MAIN LOOP
+# ####################################################################################
+while not dead
+    # This expression is structured-PvP automation restriction, not Heat of Battle.
+    if pvp
+        overhead "[ script, blocked ]" 53
+        stop
+    endif
+
+    # ####################################################################################
+    # # TARGET
+    # ####################################################################################
+    # Only a player-selected Last Target can change the stored opponent. Self-targeted
+    # recovery leaves the stored serial intact. Do not discover a replacement target.
+    if find lasttarget ground -1 -1 config__ljp_sight_range as alias__ljp_fresh
+        if alias__ljp_fresh != self and var__ljp_target != alias__ljp_fresh
+            @setvar! var__ljp_fresh_ok 0
+            if not dead alias__ljp_fresh
+                if noto alias__ljp_fresh = "murderer" or noto alias__ljp_fresh = "criminal" or noto alias__ljp_fresh = "enemy" or noto alias__ljp_fresh = "hostile"
+                    @setvar! var__ljp_fresh_ok 1
+                elseif config__ljp_attack_blue = 1 and noto alias__ljp_fresh = "innocent"
+                    @setvar! var__ljp_fresh_ok 1
+                endif
+            endif
+            if var__ljp_fresh_ok = 1
+                @setvar! var__ljp_target alias__ljp_fresh
+                @setvar! var__ljp_burst_armed 0
+                @setvar! var__ljp_burst_done 0
+                if config__ljp_chatty = 1
+                    overhead "[ target, set ]" 705 alias__ljp_fresh
+                endif
+            else
+                @setvar! var__ljp_target 0
+                if timer "timer__ljp_message" >= cooldown__ljp_message
+                    overhead "[ target, blocked ]" 53
+                    settimer "timer__ljp_message" 0
+                endif
+            endif
+        endif
+    endif
+
+    @setvar! var__ljp_engaged 0
+    @setvar! var__ljp_near 0
+    @setvar! var__ljp_spell_range 0
+    if find var__ljp_target ground -1 -1 config__ljp_sight_range as alias__ljp_current
+        @setvar! var__ljp_target_ok 0
+        if not dead alias__ljp_current
+            if noto alias__ljp_current = "murderer" or noto alias__ljp_current = "criminal" or noto alias__ljp_current = "enemy" or noto alias__ljp_current = "hostile"
+                @setvar! var__ljp_target_ok 1
+            elseif config__ljp_attack_blue = 1 and noto alias__ljp_current = "innocent"
+                @setvar! var__ljp_target_ok 1
+            endif
+        endif
+        if var__ljp_target_ok = 1
+            @setvar! var__ljp_engaged 1
+            if find var__ljp_target ground -1 -1 config__ljp_melee_range
+                @setvar! var__ljp_near 1
+            elseif find var__ljp_target ground -1 -1 config__ljp_spell_range
+                @setvar! var__ljp_spell_range 1
+            endif
+        else
+            @setvar! var__ljp_target 0
+        endif
+    elseif var__ljp_target != 0 and timer "timer__ljp_message" >= cooldown__ljp_message
+        overhead "[ target, out ]" 53
+        settimer "timer__ljp_message" 0
+    endif
+
+    # Mode messages are server events. The profile displays them, this block tracks intent.
+    # An explicit OFF is kept OFF. Automatic preparation only resolves the initial unknown.
+    if insysmsg "You refrain from making hamstring attempts."
+        @setvar! var__ljp_hams_mode 2
+    elseif insysmsg "You will now attempt to hamstring your opponents."
+        @setvar! var__ljp_hams_mode 1
+    endif
+
+    # ####################################################################################
+    # # SURVIVAL
+    # ####################################################################################
+    # No unbounded casting drain. Manual casts and cursors block actions, not state reads.
+    if paralyzed
+        if findtype 3705 backpack 38
+            yell "[Pouch"
+            wait wait__ljp_short
+        elseif timer "timer__ljp_message" >= cooldown__ljp_message
+            overhead "[ pouch, out ]" 53
+            settimer "timer__ljp_message" 0
+        endif
+    endif
+
+    @setvar! var__ljp_heal_spell 0
+    if poisoned and config__ljp_use_potions = 1 and timer "timer__ljp_cure_potion" >= cooldown__ljp_potion_retry and not hidden and not queued and not casting and not targetexists
+        if findtype "Orange Potion" self
+            hotkey "Drink Cure"
+            settimer "timer__ljp_cure_potion" 0
+            wait wait__ljp_short
+        elseif timer "timer__ljp_message" >= cooldown__ljp_message
+            overhead "[ cure pot, out ]" 53
+            settimer "timer__ljp_message" 0
+        endif
+    endif
+
+    if poisoned and var__ljp_regs_cure = 1 and mana >= config__ljp_mana_cure
+        @setvar! var__ljp_heal_spell 1
+    endif
+
+    if diffhits > 0 or poisoned
+        if not bandaging and skill "Healing" > 0 and timer "timer__ljp_bandage" >= cooldown__ljp_bandage_retry and not hidden and not queued and not casting and not targetexists
+            @setvar! var__ljp_bandage_ok 0
+            if findtype 3617 self
+                @setvar! var__ljp_bandage_ok 1
+                hotkey "Bandage Self"
+                settimer "timer__ljp_bandage" 0
+                wait wait__ljp_short
+            elseif timer "timer__ljp_message" >= cooldown__ljp_message
+                overhead "[ bandage, out ]" 53
+                settimer "timer__ljp_message" 0
+            endif
+        endif
+    endif
+
+    if diffhits >= config__ljp_heal_hits and not poisoned and config__ljp_use_potions = 1 and cooldown "heal pot" = 0 and timer "timer__ljp_heal_potion" >= cooldown__ljp_potion_retry and not hidden and not queued and not casting and not targetexists
+        if findtype "Yellow Potion" self as alias__ljp_heal_potion
+            getlabel alias__ljp_heal_potion label__ljp_heal_potion
+            if "next usable" in label__ljp_heal_potion
+                # The label remains authoritative when the heal pot bar is missing.
+            else
+                hotkey "Drink Heal"
+                settimer "timer__ljp_heal_potion" 0
+                wait wait__ljp_short
+            endif
+        elseif timer "timer__ljp_message" >= cooldown__ljp_message
+            overhead "[ heal pot, out ]" 53
+            settimer "timer__ljp_message" 0
+        endif
+    endif
+
+    if diffhits >= config__ljp_emergency_hits and not poisoned and var__ljp_regs_greater_heal = 1 and mana >= config__ljp_mana_greater_heal
+        @setvar! var__ljp_heal_spell 2
+    elseif diffhits >= config__ljp_light_hits and not poisoned and not bandaging and var__ljp_regs_heal = 1 and mana >= config__ljp_mana_heal
+        if skill "Healing" = 0 or var__ljp_bandage_ok = 0
+            @setvar! var__ljp_heal_spell 1
+        endif
+    endif
+
+    if var__ljp_heal_spell != 0 and timer "timer__ljp_heal" >= cooldown__ljp_heal_retry and not hidden and not queued and not casting and not targetexists and cooldown "walk" = 0
+        # Read mode changes before consuming another system message.
+        if insysmsg "You refrain from making hamstring attempts."
+            @setvar! var__ljp_hams_mode 2
+        endif
+        if insysmsg "You will now attempt to hamstring your opponents."
+            @setvar! var__ljp_hams_mode 1
+        endif
+        if insysmsg "Your concentration is disturbed, thus ruining thy spell."
+            # Consume a previous cast's line before beginning our own agent.
+        endif
+        if var__ljp_heal_spell = 2
+            hotkey "> Greater Heal/Cure Self"
+        else
+            hotkey "> Smart Heal/Cure Self"
+        endif
+        settimer "timer__ljp_heal" 0
+        wait wait__ljp_short
+        for 60
+            if not casting
+                break
+            endif
+            # Read mode changes before consuming another system message.
+            if insysmsg "You refrain from making hamstring attempts."
+                @setvar! var__ljp_hams_mode 2
+            endif
+            if insysmsg "You will now attempt to hamstring your opponents."
+                @setvar! var__ljp_hams_mode 1
+            endif
+            if insysmsg "Your concentration is disturbed, thus ruining thy spell."
+                break
+            endif
+            wait wait__ljp_poll
+        endfor
+        # Read mode changes before consuming another system message.
+        if insysmsg "You refrain from making hamstring attempts."
+            @setvar! var__ljp_hams_mode 2
+        endif
+        if insysmsg "You will now attempt to hamstring your opponents."
+            @setvar! var__ljp_hams_mode 1
+        endif
+        if insysmsg "Your concentration is disturbed, thus ruining thy spell."
+            # Do not leave an agent's disturbance for a later targeted action.
+        endif
+        if targetexists and diffhits = 0 and not poisoned
+            hotkey "Cancel Current Target"
+            wait wait__ljp_short
+        endif
+    endif
+
+    if stam <= config__ljp_refresh_stam and config__ljp_use_potions = 1 and timer "timer__ljp_refresh" >= cooldown__ljp_potion_retry and not hidden and not queued and not casting and not targetexists
+        if findtype "Red Potion" backpack
+            hotkey "Drink Refresh"
+            settimer "timer__ljp_refresh" 0
+            wait wait__ljp_short
+        elseif timer "timer__ljp_message" >= cooldown__ljp_message
+            overhead "[ refresh, out ]" 53
+            settimer "timer__ljp_message" 0
+        endif
+    endif
+
+    # ####################################################################################
+    # # REAGENTS
+    # ####################################################################################
+    # Read mode changes before consuming another system message.
+    if insysmsg "You refrain from making hamstring attempts."
+        @setvar! var__ljp_hams_mode 2
+    endif
+    if insysmsg "You will now attempt to hamstring your opponents."
+        @setvar! var__ljp_hams_mode 1
+    endif
+    if timer "timer__ljp_reagents" >= cooldown__ljp_reagents or insysmsg "More reagents are needed"
+        settimer "timer__ljp_reagents" 0
+        @setvar! var__ljp_garlic 0
+        if findtype 3972 self
+            @setvar! var__ljp_garlic 1
+        endif
+        @setvar! var__ljp_ginseng 0
+        if findtype 3973 self
+            @setvar! var__ljp_ginseng 1
+        endif
+        @setvar! var__ljp_mandrake 0
+        if findtype 3974 self
+            @setvar! var__ljp_mandrake 1
+        endif
+        @setvar! var__ljp_ash 0
+        if findtype 3980 self
+            @setvar! var__ljp_ash 1
+        endif
+        @setvar! var__ljp_silk 0
+        if findtype 3981 self
+            @setvar! var__ljp_silk 1
+        endif
+        @setvar! var__ljp_nightshade 0
+        if findtype 3976 self
+            @setvar! var__ljp_nightshade 1
+        endif
+        @setvar! var__ljp_regs_heal 0
+        @setvar! var__ljp_regs_cure 0
+        @setvar! var__ljp_regs_greater_heal 0
+        @setvar! var__ljp_regs_magic_arrow 0
+        @setvar! var__ljp_regs_harm 0
+        if var__ljp_garlic = 1 and var__ljp_ginseng = 1
+            @setvar! var__ljp_regs_cure 1
+            if var__ljp_silk = 1
+                @setvar! var__ljp_regs_heal 1
+                if var__ljp_mandrake = 1
+                    @setvar! var__ljp_regs_greater_heal 1
+                endif
+            endif
+        endif
+        if var__ljp_ash = 1
+            @setvar! var__ljp_regs_magic_arrow 1
+        endif
+        if var__ljp_nightshade = 1 and var__ljp_silk = 1
+            @setvar! var__ljp_regs_harm 1
+        endif
+    endif
+
+    # ####################################################################################
+    # # STAT POTIONS
+    # ####################################################################################
+    if config__ljp_use_potions = 1 and config__ljp_use_stat_potions = 1 and var__ljp_engaged = 1 and timer "timer__ljp_stats" >= cooldown__ljp_stats and diffhits < config__ljp_heal_hits and not poisoned and not hidden and not queued and not casting and not targetexists
+        settimer "timer__ljp_stats" 0
+        if not findbuff "Strength" and findtype "White Potion" backpack
+            hotkey "Drink Strength"
+            wait wait__ljp_short
+        endif
+        if diffhits < config__ljp_heal_hits and not poisoned and not hidden and not queued and not casting and not targetexists and not findbuff "Agility" and findtype "Blue Potion" backpack
+            hotkey "Drink Agility"
+            wait wait__ljp_short
+        endif
+    endif
+
+    # ####################################################################################
+    # # AXES
+    # ####################################################################################
+    # A bar update after a ready Great Axe request is a swing observation, never a hit.
+    # Do not clear or manufacture the shared swing clock when the target or weapon changes.
+    # If the first contact starts with an active bar, its ownership is already ambiguous.
+    # Skip the burst phase rather than waiting for bar zero while the old combatant swings.
+    if config__ljp_use_burst_axe = 1 and var__ljp_burst_done = 0 and var__ljp_burst_armed = 0 and var__ljp_engaged = 1 and var__ljp_near = 1 and cooldown "weapon swing" > 0
+        @setvar! var__ljp_burst_done 1
+    endif
+    if var__ljp_burst_armed = 1 and cooldown "weapon swing" > 0
+        @setvar! var__ljp_burst_done 1
+        @setvar! var__ljp_burst_armed 0
+    endif
+
+    # Rearm after recovery or a short spell too, even outside melee or in peaceful mode.
+    # Readiness belongs to this pass, not the equipment before a heal or manual disarm.
+    @setvar! var__ljp_weapon_ready 0
+    if timer "timer__ljp_weapon" >= cooldown__ljp_weapon and not hidden and not queued and not casting and not targetexists
+        settimer "timer__ljp_weapon" 0
+        @setvar! var__ljp_weapon_kind 0
+        @setvar! var__ljp_weapon_serial 0
+        if findlayer self lefthand as alias__ljp_left
+            getlabel alias__ljp_left label__ljp_left
+            if "giant axe" in label__ljp_left
+                @setvar! var__ljp_weapon_kind 1
+                @setvar! var__ljp_weapon_serial alias__ljp_left
+            elseif "hatchet" in label__ljp_left
+                @setvar! var__ljp_weapon_kind 3
+                @setvar! var__ljp_weapon_serial alias__ljp_left
+            endif
+        endif
+        if var__ljp_weapon_kind = 0 and findlayer self righthand as alias__ljp_right
+            getlabel alias__ljp_right label__ljp_right
+            if "norse axe" in label__ljp_right
+                @setvar! var__ljp_weapon_kind 2
+                @setvar! var__ljp_weapon_serial alias__ljp_right
+            endif
+        endif
+
+        @setvar! var__ljp_wanted_weapon 2
+        if config__ljp_use_burst_axe = 1 and var__ljp_burst_done = 0 and var__ljp_engaged = 1
+            if var__ljp_weapon_kind = 1 or findtype config__ljp_great_axe_graphic backpack
+                @setvar! var__ljp_wanted_weapon 1
+            else
+                @setvar! var__ljp_burst_done 1
+            endif
+        endif
+        if var__ljp_wanted_weapon = 2 and var__ljp_weapon_kind != 2
+            if not findtype config__ljp_norse_axe_graphic backpack
+                if var__ljp_weapon_kind = 3 or findtype 3907|3908 backpack
+                    @setvar! var__ljp_wanted_weapon 3
+                elseif var__ljp_weapon_kind = 1 or findtype config__ljp_great_axe_graphic backpack
+                    @setvar! var__ljp_wanted_weapon 1
+                else
+                    @setvar! var__ljp_wanted_weapon 0
+                endif
+            endif
+        endif
+
+        if var__ljp_wanted_weapon != 0 and var__ljp_wanted_weapon = var__ljp_weapon_kind
+            @setvar! var__ljp_weapon_ready 1
+        elseif var__ljp_wanted_weapon = 1 and findtype config__ljp_great_axe_graphic backpack as alias__ljp_great_axe
+            dclick alias__ljp_great_axe
+            wait wait__ljp_short
+        elseif var__ljp_wanted_weapon = 2 and findtype config__ljp_norse_axe_graphic backpack as alias__ljp_norse_axe
+            dclick alias__ljp_norse_axe
+            wait wait__ljp_short
+        elseif var__ljp_wanted_weapon = 3 and findtype 3907|3908 backpack as alias__ljp_hatchet
+            dclick alias__ljp_hatchet
+            wait wait__ljp_short
+        elseif timer "timer__ljp_message" >= cooldown__ljp_message
+            overhead "[ axe, out ]" 53
+            settimer "timer__ljp_message" 0
+        endif
+    endif
+
+    # ####################################################################################
+    # # MELEE AND FIRST HAMSTRING
+    # ####################################################################################
+    if var__ljp_engaged = 1 and var__ljp_near = 1 and var__ljp_weapon_ready = 1 and warmode and diffhits < config__ljp_heal_hits and not poisoned and not paralyzed and not hidden and not queued and not casting and not targetexists
+        if config__ljp_prepare_hamstring = 1 and var__ljp_hams_prepared = 0 and var__ljp_hams_mode = 0 and cooldown "hams, target" = 0 and skill "Swordsmanship" >= 80 and skill "Anatomy" >= 80 and skill "Tracking" >= 80
+            @setvar! var__ljp_hams_prepared 1
+            # At most two toggles resolve unknown -> OFF -> ON, one response at a time.
+            for 2
+                if var__ljp_hams_mode = 1
+                    break
+                endif
+                if diffhits >= config__ljp_heal_hits or poisoned or not warmode or casting or targetexists
+                    break
+                endif
+                @setvar! var__ljp_hams_response 0
+                say "[Hamstring"
+                for 60
+                    if diffhits >= config__ljp_heal_hits or poisoned or not warmode or casting or targetexists
+                        break
+                    endif
+                    if insysmsg "You refrain from making hamstring attempts."
+                        @setvar! var__ljp_hams_mode 2
+                        @setvar! var__ljp_hams_response 1
+                        break
+                    elseif insysmsg "You will now attempt to hamstring your opponents."
+                        @setvar! var__ljp_hams_mode 1
+                        @setvar! var__ljp_hams_response 1
+                        break
+                    endif
+                    wait wait__ljp_poll
+                endfor
+                if var__ljp_hams_response = 0
+                    overhead "[ hams mode, check ]" 55
+                    break
+                endif
+            endfor
+        endif
+
+        # Revalidate after the mode poll. A newer eligible selection cancels this request.
+        @setvar! var__ljp_fresh_ok 1
+        if find lasttarget ground -1 -1 config__ljp_sight_range as alias__ljp_melee_selection
+            if alias__ljp_melee_selection != self and alias__ljp_melee_selection != var__ljp_target
+                @setvar! var__ljp_fresh_ok 0
+            endif
+        endif
+        # The response poll may outlive the equipment read. Confirm the same serial again.
+        @setvar! var__ljp_weapon_ready 0
+        if var__ljp_weapon_serial != 0
+            if findlayer self lefthand as alias__ljp_melee_left
+                if alias__ljp_melee_left = var__ljp_weapon_serial
+                    @setvar! var__ljp_weapon_ready 1
+                endif
+            endif
+            if var__ljp_weapon_ready = 0 and findlayer self righthand as alias__ljp_melee_right
+                if alias__ljp_melee_right = var__ljp_weapon_serial
+                    @setvar! var__ljp_weapon_ready 1
+                endif
+            endif
+        endif
+        if var__ljp_fresh_ok = 1 and var__ljp_weapon_ready = 1 and warmode and diffhits < config__ljp_heal_hits and not poisoned and not paralyzed and not hidden and not queued and not casting and not targetexists and timer "timer__ljp_attack" >= cooldown__ljp_attack
+            if find var__ljp_target ground -1 -1 config__ljp_melee_range as alias__ljp_melee_target
+                @setvar! var__ljp_target_ok 0
+                if not dead alias__ljp_melee_target
+                    if noto alias__ljp_melee_target = "murderer" or noto alias__ljp_melee_target = "criminal" or noto alias__ljp_melee_target = "enemy" or noto alias__ljp_melee_target = "hostile"
+                        @setvar! var__ljp_target_ok 1
+                    elseif config__ljp_attack_blue = 1 and noto alias__ljp_melee_target = "innocent"
+                        @setvar! var__ljp_target_ok 1
+                    endif
+                endif
+                if var__ljp_target_ok = 1
+                    # Attack selects the combatant. It does not guarantee or force a swing.
+                    # Arm only from an idle bar, before sending the ready Great Axe request.
+                    if var__ljp_weapon_kind = 1 and var__ljp_burst_done = 0 and cooldown "weapon swing" = 0
+                        @setvar! var__ljp_burst_armed 1
+                    endif
+                    attack var__ljp_target
+                    settimer "timer__ljp_attack" 0
+                endif
+            endif
+        endif
+    endif
+
+    # ####################################################################################
+    # # SHORT SPELL
+    # ####################################################################################
+    # No spell in melee, no held precast, no fixed rotation and no claim of Reflect depletion.
+    if config__ljp_short_spell != 0 and var__ljp_engaged = 1 and var__ljp_near = 0 and var__ljp_spell_range = 1 and timer "timer__ljp_poke" >= cooldown__ljp_poke and warmode and diffhits < config__ljp_light_hits and not poisoned and not paralyzed and not hidden and not queued and not casting and not targetexists and cooldown "walk" = 0
+        @setvar! var__ljp_poke_spell 0
+        if config__ljp_short_spell = 2 and find var__ljp_target ground -1 -1 config__ljp_harm_range and var__ljp_regs_harm = 1 and mana >= config__ljp_mana_harm
+            @setvar! var__ljp_poke_spell 2
+        elseif var__ljp_regs_magic_arrow = 1 and mana >= config__ljp_mana_magic_arrow
+            @setvar! var__ljp_poke_spell 1
+        endif
+
+        if var__ljp_poke_spell != 0
+            # Read mode changes before consuming another system message.
+            if insysmsg "You refrain from making hamstring attempts."
+                @setvar! var__ljp_hams_mode 2
+            endif
+            if insysmsg "You will now attempt to hamstring your opponents."
+                @setvar! var__ljp_hams_mode 1
+            endif
+            if insysmsg "Your concentration is disturbed, thus ruining thy spell."
+                # Consume an earlier cast's disturbance before issuing our own request.
+            endif
+            @setvar! var__ljp_cast_target var__ljp_target
+            @setvar! var__ljp_cast_ready 0
+            @setvar! var__ljp_cast_cut 0
+            @setvar! var__ljp_fresh_ok 1
+            if find lasttarget ground -1 -1 config__ljp_sight_range as alias__ljp_cast_selection
+                if alias__ljp_cast_selection != self and alias__ljp_cast_selection != var__ljp_cast_target
+                    @setvar! var__ljp_fresh_ok 0
+                endif
+            endif
+            if find var__ljp_cast_target ground -1 -1 config__ljp_spell_range as alias__ljp_cast_start
+                @setvar! var__ljp_target_ok 0
+                if not dead alias__ljp_cast_start
+                    if noto alias__ljp_cast_start = "murderer" or noto alias__ljp_cast_start = "criminal" or noto alias__ljp_cast_start = "enemy" or noto alias__ljp_cast_start = "hostile"
+                        @setvar! var__ljp_target_ok 1
+                    elseif config__ljp_attack_blue = 1 and noto alias__ljp_cast_start = "innocent"
+                        @setvar! var__ljp_target_ok 1
+                    endif
+                endif
+                if var__ljp_target_ok = 1 and var__ljp_fresh_ok = 1 and not find var__ljp_cast_target ground -1 -1 config__ljp_melee_range and warmode and diffhits < config__ljp_light_hits and not poisoned and not paralyzed and not hidden and not queued and not casting and not targetexists
+                    if var__ljp_poke_spell = 2
+                        cast "Harm"
+                    else
+                        cast "Magic Arrow"
+                    endif
+                    settimer "timer__ljp_poke" 0
+                    @setvar! var__ljp_weapon_ready 0
+                    for 60
+                        if diffhits >= config__ljp_heal_hits or poisoned or not warmode or hidden
+                            hotkey "> Interrupt"
+                            @setvar! var__ljp_cast_cut 1
+                            break
+                        endif
+                        if targetexists
+                            @setvar! var__ljp_cast_ready 1
+                            break
+                        endif
+                        # Read mode changes before consuming another system message.
+                        if insysmsg "You refrain from making hamstring attempts."
+                            @setvar! var__ljp_hams_mode 2
+                        endif
+                        if insysmsg "You will now attempt to hamstring your opponents."
+                            @setvar! var__ljp_hams_mode 1
+                        endif
+                        if insysmsg "Your concentration is disturbed, thus ruining thy spell."
+                            @setvar! var__ljp_cast_cut 1
+                            break
+                        endif
+                        wait wait__ljp_poll
+                    endfor
+
+                    @setvar! var__ljp_fresh_ok 1
+                    if find lasttarget ground -1 -1 config__ljp_sight_range as alias__ljp_spell_selection
+                        if alias__ljp_spell_selection != self and alias__ljp_spell_selection != var__ljp_cast_target
+                            @setvar! var__ljp_fresh_ok 0
+                        endif
+                    endif
+                    @setvar! var__ljp_target_ok 0
+                    if find var__ljp_cast_target ground -1 -1 config__ljp_spell_range as alias__ljp_cast_finish
+                        if not dead alias__ljp_cast_finish
+                            if noto alias__ljp_cast_finish = "murderer" or noto alias__ljp_cast_finish = "criminal" or noto alias__ljp_cast_finish = "enemy" or noto alias__ljp_cast_finish = "hostile"
+                                @setvar! var__ljp_target_ok 1
+                            elseif config__ljp_attack_blue = 1 and noto alias__ljp_cast_finish = "innocent"
+                                @setvar! var__ljp_target_ok 1
+                            endif
+                        endif
+                    endif
+                    if var__ljp_cast_ready = 1 and var__ljp_cast_cut = 0 and var__ljp_fresh_ok = 1 and var__ljp_target_ok = 1 and warmode and diffhits < config__ljp_heal_hits and not poisoned and not paralyzed and not hidden and not queued and not casting and targetexists
+                        target var__ljp_cast_target
+                        wait wait__ljp_cast
+                    elseif targetexists
+                        hotkey "Cancel Current Target"
+                        wait wait__ljp_short
+                    elseif var__ljp_cast_cut = 0
+                        # An unresolved request may still produce a late cursor. Do not reuse it.
+                        overhead "[ cast, check ]" 55
+                        stop
+                    endif
+                endif
+            endif
+        endif
+    endif
+
+    wait wait__ljp_poll
+endwhile
