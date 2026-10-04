@@ -1,17 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <cooldowns>
-	<cooldownentry name="mushroom" defaultcooldown="60" cooldownbartype="Regular" hue="73" hidewheninactive="True">
-		<trigger triggertype="SysMessage" duration="" triggertext="You consume a magic mushroom" />
-	</cooldownentry>
-	<cooldownentry name="CorpseSkin" defaultcooldown="0" cooldownbartype="Regular" hue="678" hidewheninactive="True" />
-	<cooldownentry name="EvilOmen" defaultcooldown="0" cooldownbartype="Regular" hue="673" hidewheninactive="True" />
-	<cooldownentry name="VampiricEmbrace" defaultcooldown="0" cooldownbartype="Regular" hue="0" hidewheninactive="True" />
-	<cooldownentry name="MindRot" defaultcooldown="0" cooldownbartype="Regular" hue="0" hidewheninactive="True" />
-	<cooldownentry name="Fireball" defaultcooldown="0" cooldownbartype="Regular" hue="88" hidewheninactive="True" />
-	<cooldownentry name="Harm" defaultcooldown="0" cooldownbartype="Regular" hue="0" hidewheninactive="True" />
-	<cooldownentry name="MagicArrow" defaultcooldown="0" cooldownbartype="Regular" hue="88" hidewheninactive="True" />
-	<cooldownentry name="Lightning" defaultcooldown="0" cooldownbartype="Regular" hue="88" hidewheninactive="True" />
-	<cooldownentry name="skill" defaultcooldown="0" cooldownbartype="Regular" hue="88" hidewheninactive="True">
+	<cooldownentry name="skill" defaultcooldown="0" cooldownbartype="Regular" hue="88" hidewheninactive="False">
 		<trigger triggertype="SysMessage" duration="2" triggertext="Whom shall I examine?" />
 		<trigger triggertype="SysMessage" duration="2" triggertext="What creature would you like to examine?" />
 		<trigger triggertype="SysMessage" duration="10" triggertext="Tame which animal?" />
@@ -22,14 +11,10 @@
 		<trigger triggertype="SysMessage" duration="2" triggertext="What would you like to evaluate?" />
 		<trigger triggertype="OverheadMessage" duration="2" triggertext="mental strength" />
 		<trigger triggertype="OverheadMessage" duration="2" triggertext="cannot quite judge" />
-		<trigger triggertype="OverheadMessage" duration="10" triggertext="You fail to hide" />
-		<trigger triggertype="OverheadMessage" duration="10" triggertext="You have hidden yourself well" />
 		<trigger triggertype="SysMessage" duration="2" triggertext="You focus your follower's aggression towards the target" />
 		<trigger triggertype="SysMessage" duration="2" triggertext="You fail to focus your follower's agression" />
 		<trigger triggertype="SysMessage" duration="1" triggertext="What do you wish to appraise and identify?" />
 		<trigger triggertype="SysMessage" duration="1" triggertext="You are not certain" />
-		<trigger triggertype="SysMessage" duration="10" triggertext="You are at peace" />
-		<trigger triggertype="SysMessage" duration="10" triggertext="You enter a meditative trance." />
 		<trigger triggertype="SysMessage" duration="2" triggertext="You establish contact with the netherworld." />
 		<trigger triggertype="SysMessage" duration="2" triggertext="You fail your attempt at contacting the netherworld." />
 		<trigger triggertype="SysMessage" duration="1" triggertext="What food, potion, or player would you like to inspect. Target the ground to scavenge for herbs." />
@@ -38,173 +23,395 @@
 		<trigger triggertype="OverheadMessage" duration="10" triggertext="You gather a handful of plants and fashion an herbal poultice" />
 		<trigger triggertype="SysMessage" duration="10" triggertext="You are unable to find any useful plants nearby." />
 		<trigger triggertype="SysMessage" duration="5" triggertext="What do you wish to track?" />
-		<trigger triggertype="SysMessage" duration="10" triggertext="You begin to move quietly." />
+		<trigger triggertype="SysMessage" duration="5" triggertext="play successfully" />
+		<trigger triggertype="SysMessage" duration="5" triggertext="fail to incite anger" />
+		<trigger triggertype="SysMessage" duration="5" triggertext="fail to discord" />
+		<trigger triggertype="SysMessage" duration="5" triggertext="fail to pacify" />
+		<trigger triggertype="OverheadMessage" duration="0" triggertext="Your barding skill cooldowns" />
 	</cooldownentry>
-	<cooldownentry name="Telekinesis" defaultcooldown="0" cooldownbartype="Regular" hue="223" hidewheninactive="True" />
-	<cooldownentry name="Purple Potion" defaultcooldown="0" cooldownbartype="Regular" hue="28" hidewheninactive="True" />
-	<cooldownentry name="FirstCircle" defaultcooldown="0" cooldownbartype="Regular" hue="53" hidewheninactive="True" />
-	<cooldownentry name="SecondCircle" defaultcooldown="0" cooldownbartype="Regular" hue="711" hidewheninactive="True" />
-	<cooldownentry name="ThirdCircle" defaultcooldown="0" cooldownbartype="Regular" hue="43" hidewheninactive="True" />
-	<cooldownentry name="PainSpike" defaultcooldown="0" cooldownbartype="Regular" hue="83" hidewheninactive="True" />
-	<cooldownentry name="Heal Potion" defaultcooldown="0" cooldownbartype="Regular" hue="53" hidewheninactive="True">
-		<trigger triggertype="OverheadMessage" duration="10" triggertext="You must wait 10 seconds before using another healing potion." />
-		<trigger triggertype="OverheadMessage" duration="9" triggertext="You must wait 9 seconds before using another healing potion." />
-		<trigger triggertype="OverheadMessage" duration="8" triggertext="You must wait 8 seconds before using another healing potion." />
-		<trigger triggertype="OverheadMessage" duration="7" triggertext="You must wait 7 seconds before using another healing potion." />
-		<trigger triggertype="OverheadMessage" duration="6" triggertext="You must wait 6 seconds before using another healing potion." />
-		<trigger triggertype="OverheadMessage" duration="5" triggertext="You must wait 5 seconds before using another healing potion." />
-		<trigger triggertype="OverheadMessage" duration="4" triggertext="You must wait 4 seconds before using another healing potion." />
-		<trigger triggertype="OverheadMessage" duration="3" triggertext="You must wait 3 seconds before using another healing potion." />
-		<trigger triggertype="OverheadMessage" duration="2" triggertext="You must wait 2 seconds before using another healing potion." />
-		<trigger triggertype="OverheadMessage" duration="1" triggertext="You must wait 1 second before using another healing potion." />
+	<cooldownentry name="music" defaultcooldown="0" cooldownbartype="Regular" hue="53" hidewheninactive="False">
+		<trigger triggertype="SysMessage" duration="5" triggertext="play successfully" />
+		<trigger triggertype="SysMessage" duration="5" triggertext="fail to incite anger" />
+		<trigger triggertype="SysMessage" duration="5" triggertext="fail to discord" />
+		<trigger triggertype="SysMessage" duration="5" triggertext="fail to pacify" />
+		<trigger triggertype="OverheadMessage" duration="0" triggertext="Your barding skill cooldowns" />
 	</cooldownentry>
-	<cooldownentry name="AutoPetHeal" defaultcooldown="0" cooldownbartype="Regular" hue="194" hidewheninactive="True" />
-	<cooldownentry name="Regs" defaultcooldown="0" cooldownbartype="Regular" hue="38" hidewheninactive="True">
-		<trigger triggertype="OverheadMessage" duration="10" triggertext="More reagents are needed for this spell" />
+	<cooldownentry name="disco" defaultcooldown="0" cooldownbartype="Regular" hue="53" hidewheninactive="False">
+		<trigger triggertype="SysMessage" duration="5" triggertext="successfully, disrupting your opponent" />
+		<trigger triggertype="SysMessage" duration="5" triggertext="fail to discord" />
+		<trigger triggertype="SysMessage" duration="5" triggertext="play successfully, briefly discording" />
+		<trigger triggertype="OverheadMessage" duration="0" triggertext="Your barding skill cooldowns" />
 	</cooldownentry>
-	<cooldownentry name="Disco" defaultcooldown="5" cooldownbartype="Regular" hue="68" hidewheninactive="True">
-		<trigger triggertype="OverheadMessage" duration="0" triggertext="Your barding skill cooldowns reset." />
-		<trigger triggertype="SysMessage" duration="5" triggertext="You play successfully, disrupting" />
-		<trigger triggertype="SysMessage" duration="5" triggertext="You play successfully, provoking" />
-		<trigger triggertype="SysMessage" duration="5" triggertext="You play successfully, pacifying" />
-		<trigger triggertype="SysMessage" duration="5" triggertext="You play successfully, briefly pacifying" />
-		<trigger triggertype="SysMessage" duration="5" triggertext="You play successfully, briefly discording" />
-		<trigger triggertype="SysMessage" duration="5" triggertext="You fail to incite" />
-		<trigger triggertype="SysMessage" duration="5" triggertext="You fail to pacify" />
-		<trigger triggertype="SysMessage" duration="5" triggertext="You fail to discord" />
+	<cooldownentry name="peace/provo" defaultcooldown="0" cooldownbartype="Regular" hue="53" hidewheninactive="False">
+		<trigger triggertype="SysMessage" duration="11" triggertext="You play successfully, pacifying your target." />
+		<trigger triggertype="SysMessage" duration="11" triggertext="successfully, briefly pacifying" />
+		<trigger triggertype="SysMessage" duration="11" triggertext="play successfully, provoking" />
+		<trigger triggertype="SysMessage" duration="5" triggertext="You fail to pacify any nearby creatures." />
+		<trigger triggertype="SysMessage" duration="5" triggertext="You fail to pacify your opponent." />
+		<trigger triggertype="SysMessage" duration="5" triggertext="fail to incite anger" />
+		<trigger triggertype="OverheadMessage" duration="0" triggertext="Your barding skill cooldowns" />
 	</cooldownentry>
-	<cooldownentry name="Peace-Provo" defaultcooldown="10" cooldownbartype="Regular" hue="133" hidewheninactive="True">
-		<trigger triggertype="OverheadMessage" duration="0" triggertext="Your barding skill cooldowns reset." />
-		<trigger triggertype="SysMessage" duration="5" triggertext="You play successfully, disrupting" />
-		<trigger triggertype="SysMessage" duration="10" triggertext="You play successfully, provoking" />
-		<trigger triggertype="SysMessage" duration="10" triggertext="You play successfully, pacifying" />
-		<trigger triggertype="SysMessage" duration="10" triggertext="You play successfully, briefly pacifying" />
-		<trigger triggertype="SysMessage" duration="5" triggertext="You play successfully, briefly discording" />
-		<trigger triggertype="SysMessage" duration="5" triggertext="You fail to incite" />
-		<trigger triggertype="SysMessage" duration="5" triggertext="You fail to pacify" />
-		<trigger triggertype="SysMessage" duration="5" triggertext="You fail to discord" />
+	<cooldownentry name="song" defaultcooldown="0" cooldownbartype="Regular" hue="53" hidewheninactive="False">
+		<trigger triggertype="SysMessage" duration="11" triggertext="under the effect of a song" />
+		<trigger triggertype="OverheadMessage" duration="0" triggertext="Your barding skill cooldowns" />
 	</cooldownentry>
-	<cooldownentry name="SmokeBomb" defaultcooldown="0" cooldownbartype="Regular" hue="1001" hidewheninactive="True">
-		<trigger triggertype="SysMessage" duration="0" triggertext="You may now use another smoke bomb." />
-		<trigger triggertype="SysMessage" duration="0" triggertext="You must wait another 0 seconds before you may use another smoke bomb." />
-		<trigger triggertype="SysMessage" duration="1" triggertext="You must wait another 1 seconds before you may use another smoke bomb." />
-		<trigger triggertype="SysMessage" duration="2" triggertext="You must wait another 2 seconds before you may use another smoke bomb." />
-		<trigger triggertype="SysMessage" duration="3" triggertext="You must wait another 3 seconds before you may use another smoke bomb." />
-		<trigger triggertype="SysMessage" duration="4" triggertext="You must wait another 4 seconds before you may use another smoke bomb." />
-		<trigger triggertype="SysMessage" duration="5" triggertext="You must wait another 5 seconds before you may use another smoke bomb." />
-		<trigger triggertype="SysMessage" duration="6" triggertext="You must wait another 6 seconds before you may use another smoke bomb." />
-		<trigger triggertype="SysMessage" duration="7" triggertext="You must wait another 7 seconds before you may use another smoke bomb." />
-		<trigger triggertype="SysMessage" duration="8" triggertext="You must wait another 8 seconds before you may use another smoke bomb." />
-		<trigger triggertype="SysMessage" duration="9" triggertext="You must wait another 9 seconds before you may use another smoke bomb." />
-		<trigger triggertype="SysMessage" duration="10" triggertext="You must wait another 10 seconds before you may use another smoke bomb." />
-		<trigger triggertype="SysMessage" duration="11" triggertext="You must wait another 11 seconds before you may use another smoke bomb." />
-		<trigger triggertype="SysMessage" duration="12" triggertext="You must wait another 12 seconds before you may use another smoke bomb." />
-		<trigger triggertype="SysMessage" duration="13" triggertext="You must wait another 13 seconds before you may use another smoke bomb." />
-		<trigger triggertype="SysMessage" duration="14" triggertext="You must wait another 14 seconds before you may use another smoke bomb." />
-		<trigger triggertype="SysMessage" duration="15" triggertext="You must wait another 15 seconds before you may use another smoke bomb." />
-		<trigger triggertype="SysMessage" duration="16" triggertext="You must wait another 16 seconds before you may use another smoke bomb." />
-		<trigger triggertype="SysMessage" duration="17" triggertext="You must wait another 17 seconds before you may use another smoke bomb." />
-		<trigger triggertype="SysMessage" duration="18" triggertext="You must wait another 18 seconds before you may use another smoke bomb." />
-		<trigger triggertype="SysMessage" duration="19" triggertext="You must wait another 19 seconds before you may use another smoke bomb." />
-		<trigger triggertype="SysMessage" duration="20" triggertext="You must wait another 20 seconds before you may use another smoke bomb." />
-		<trigger triggertype="SysMessage" duration="21" triggertext="You must wait another 21 seconds before you may use another smoke bomb." />
-		<trigger triggertype="SysMessage" duration="22" triggertext="You must wait another 22 seconds before you may use another smoke bomb." />
-		<trigger triggertype="SysMessage" duration="23" triggertext="You must wait another 23 seconds before you may use another smoke bomb." />
-		<trigger triggertype="SysMessage" duration="24" triggertext="You must wait another 24 seconds before you may use another smoke bomb." />
-		<trigger triggertype="SysMessage" duration="25" triggertext="You must wait another 25 seconds before you may use another smoke bomb." />
-		<trigger triggertype="SysMessage" duration="26" triggertext="You must wait another 26 seconds before you may use another smoke bomb." />
-		<trigger triggertype="SysMessage" duration="27" triggertext="You must wait another 27 seconds before you may use another smoke bomb." />
-		<trigger triggertype="SysMessage" duration="28" triggertext="You must wait another 28 seconds before you may use another smoke bomb." />
-		<trigger triggertype="SysMessage" duration="29" triggertext="You must wait another 29 seconds before you may use another smoke bomb." />
-		<trigger triggertype="SysMessage" duration="30" triggertext="You must wait another 30 seconds before you may use another smoke bomb." />
-		<trigger triggertype="SysMessage" duration="31" triggertext="You must wait another 31 seconds before you may use another smoke bomb." />
-		<trigger triggertype="SysMessage" duration="32" triggertext="You must wait another 32 seconds before you may use another smoke bomb." />
-		<trigger triggertype="SysMessage" duration="33" triggertext="You must wait another 33 seconds before you may use another smoke bomb." />
-		<trigger triggertype="SysMessage" duration="34" triggertext="You must wait another 34 seconds before you may use another smoke bomb." />
-		<trigger triggertype="SysMessage" duration="35" triggertext="You must wait another 35 seconds before you may use another smoke bomb." />
-		<trigger triggertype="SysMessage" duration="36" triggertext="You must wait another 36 seconds before you may use another smoke bomb." />
-		<trigger triggertype="SysMessage" duration="37" triggertext="You must wait another 37 seconds before you may use another smoke bomb." />
-		<trigger triggertype="SysMessage" duration="38" triggertext="You must wait another 38 seconds before you may use another smoke bomb." />
-		<trigger triggertype="SysMessage" duration="39" triggertext="You must wait another 39 seconds before you may use another smoke bomb." />
-		<trigger triggertype="SysMessage" duration="40" triggertext="You must wait another 40 seconds before you may use another smoke bomb." />
-		<trigger triggertype="SysMessage" duration="41" triggertext="You must wait another 41 seconds before you may use another smoke bomb." />
-		<trigger triggertype="SysMessage" duration="42" triggertext="You must wait another 42 seconds before you may use another smoke bomb." />
-		<trigger triggertype="SysMessage" duration="43" triggertext="You must wait another 43 seconds before you may use another smoke bomb." />
-		<trigger triggertype="SysMessage" duration="44" triggertext="You must wait another 44 seconds before you may use another smoke bomb." />
-		<trigger triggertype="SysMessage" duration="45" triggertext="You must wait another 45 seconds before you may use another smoke bomb." />
-		<trigger triggertype="SysMessage" duration="46" triggertext="You must wait another 46 seconds before you may use another smoke bomb." />
-		<trigger triggertype="SysMessage" duration="47" triggertext="You must wait another 47 seconds before you may use another smoke bomb." />
-		<trigger triggertype="SysMessage" duration="48" triggertext="You must wait another 48 seconds before you may use another smoke bomb." />
-		<trigger triggertype="SysMessage" duration="49" triggertext="You must wait another 49 seconds before you may use another smoke bomb." />
-		<trigger triggertype="SysMessage" duration="50" triggertext="You must wait another 50 seconds before you may use another smoke bomb." />
-		<trigger triggertype="SysMessage" duration="51" triggertext="You must wait another 51 seconds before you may use another smoke bomb." />
-		<trigger triggertype="SysMessage" duration="52" triggertext="You must wait another 52 seconds before you may use another smoke bomb." />
-		<trigger triggertype="SysMessage" duration="53" triggertext="You must wait another 53 seconds before you may use another smoke bomb." />
-		<trigger triggertype="SysMessage" duration="54" triggertext="You must wait another 54 seconds before you may use another smoke bomb." />
-		<trigger triggertype="SysMessage" duration="55" triggertext="You must wait another 55 seconds before you may use another smoke bomb." />
-		<trigger triggertype="SysMessage" duration="56" triggertext="You must wait another 56 seconds before you may use another smoke bomb." />
-		<trigger triggertype="SysMessage" duration="57" triggertext="You must wait another 57 seconds before you may use another smoke bomb." />
-		<trigger triggertype="SysMessage" duration="58" triggertext="You must wait another 58 seconds before you may use another smoke bomb." />
-		<trigger triggertype="SysMessage" duration="59" triggertext="You must wait another 59 seconds before you may use another smoke bomb." />
-		<trigger triggertype="SysMessage" duration="60" triggertext="You must wait another 1 minute 0 seconds before you may use another smoke bomb." />
-		<trigger triggertype="SysMessage" duration="61" triggertext="You must wait another 1 minute 1 seconds before you may use another smoke bomb." />
-		<trigger triggertype="SysMessage" duration="62" triggertext="You must wait another 1 minute 2 seconds before you may use another smoke bomb." />
-		<trigger triggertype="SysMessage" duration="63" triggertext="You must wait another 1 minute 3 seconds before you may use another smoke bomb." />
-		<trigger triggertype="SysMessage" duration="64" triggertext="You must wait another 1 minute 4 seconds before you may use another smoke bomb." />
-		<trigger triggertype="SysMessage" duration="65" triggertext="You must wait another 1 minute 5 seconds before you may use another smoke bomb." />
-		<trigger triggertype="SysMessage" duration="66" triggertext="You must wait another 1 minute 6 seconds before you may use another smoke bomb." />
-		<trigger triggertype="SysMessage" duration="67" triggertext="You must wait another 1 minute 7 seconds before you may use another smoke bomb." />
-		<trigger triggertype="SysMessage" duration="68" triggertext="You must wait another 1 minute 8 seconds before you may use another smoke bomb." />
-		<trigger triggertype="SysMessage" duration="69" triggertext="You must wait another 1 minute 9 seconds before you may use another smoke bomb." />
-		<trigger triggertype="SysMessage" duration="70" triggertext="You must wait another 1 minute 10 seconds before you may use another smoke bomb." />
-		<trigger triggertype="SysMessage" duration="71" triggertext="You must wait another 1 minute 11 seconds before you may use another smoke bomb." />
-		<trigger triggertype="SysMessage" duration="72" triggertext="You must wait another 1 minute 12 seconds before you may use another smoke bomb." />
-		<trigger triggertype="SysMessage" duration="73" triggertext="You must wait another 1 minute 13 seconds before you may use another smoke bomb." />
-		<trigger triggertype="SysMessage" duration="74" triggertext="You must wait another 1 minute 14 seconds before you may use another smoke bomb." />
-		<trigger triggertype="SysMessage" duration="75" triggertext="You must wait another 1 minute 15 seconds before you may use another smoke bomb." />
-		<trigger triggertype="SysMessage" duration="76" triggertext="You must wait another 1 minute 16 seconds before you may use another smoke bomb." />
-		<trigger triggertype="SysMessage" duration="77" triggertext="You must wait another 1 minute 17 seconds before you may use another smoke bomb." />
-		<trigger triggertype="SysMessage" duration="78" triggertext="You must wait another 1 minute 18 seconds before you may use another smoke bomb." />
-		<trigger triggertype="SysMessage" duration="79" triggertext="You must wait another 1 minute 19 seconds before you may use another smoke bomb." />
-		<trigger triggertype="SysMessage" duration="80" triggertext="You must wait another 1 minute 20 seconds before you may use another smoke bomb." />
-		<trigger triggertype="SysMessage" duration="81" triggertext="You must wait another 1 minute 21 seconds before you may use another smoke bomb." />
-		<trigger triggertype="SysMessage" duration="82" triggertext="You must wait another 1 minute 22 seconds before you may use another smoke bomb." />
-		<trigger triggertype="SysMessage" duration="83" triggertext="You must wait another 1 minute 23 seconds before you may use another smoke bomb." />
-		<trigger triggertype="SysMessage" duration="84" triggertext="You must wait another 1 minute 24 seconds before you may use another smoke bomb." />
-		<trigger triggertype="SysMessage" duration="85" triggertext="You must wait another 1 minute 25 seconds before you may use another smoke bomb." />
-		<trigger triggertype="SysMessage" duration="86" triggertext="You must wait another 1 minute 26 seconds before you may use another smoke bomb." />
-		<trigger triggertype="SysMessage" duration="87" triggertext="You must wait another 1 minute 27 seconds before you may use another smoke bomb." />
-		<trigger triggertype="SysMessage" duration="88" triggertext="You must wait another 1 minute 28 seconds before you may use another smoke bomb." />
-		<trigger triggertype="SysMessage" duration="89" triggertext="You must wait another 1 minute 29 seconds before you may use another smoke bomb." />
-		<trigger triggertype="SysMessage" duration="90" triggertext="You must wait another 1 minute 30 seconds before you may use another smoke bomb." />
-		<trigger triggertype="SysMessage" duration="91" triggertext="You must wait another 1 minute 31 seconds before you may use another smoke bomb." />
-		<trigger triggertype="SysMessage" duration="92" triggertext="You must wait another 1 minute 32 seconds before you may use another smoke bomb." />
-		<trigger triggertype="SysMessage" duration="93" triggertext="You must wait another 1 minute 33 seconds before you may use another smoke bomb." />
-		<trigger triggertype="SysMessage" duration="94" triggertext="You must wait another 1 minute 34 seconds before you may use another smoke bomb." />
-		<trigger triggertype="SysMessage" duration="95" triggertext="You must wait another 1 minute 35 seconds before you may use another smoke bomb." />
-		<trigger triggertype="SysMessage" duration="96" triggertext="You must wait another 1 minute 36 seconds before you may use another smoke bomb." />
-		<trigger triggertype="SysMessage" duration="97" triggertext="You must wait another 1 minute 37 seconds before you may use another smoke bomb." />
-		<trigger triggertype="SysMessage" duration="98" triggertext="You must wait another 1 minute 38 seconds before you may use another smoke bomb." />
-		<trigger triggertype="SysMessage" duration="99" triggertext="You must wait another 1 minute 39 seconds before you may use another smoke bomb." />
-		<trigger triggertype="SysMessage" duration="100" triggertext="You must wait another 1 minute 40 seconds before you may use another smoke bomb." />
-		<trigger triggertype="SysMessage" duration="101" triggertext="You must wait another 1 minute 41 seconds before you may use another smoke bomb." />
-		<trigger triggertype="SysMessage" duration="102" triggertext="You must wait another 1 minute 42 seconds before you may use another smoke bomb." />
-		<trigger triggertype="SysMessage" duration="103" triggertext="You must wait another 1 minute 43 seconds before you may use another smoke bomb." />
-		<trigger triggertype="SysMessage" duration="104" triggertext="You must wait another 1 minute 44 seconds before you may use another smoke bomb." />
-		<trigger triggertype="SysMessage" duration="105" triggertext="You must wait another 1 minute 45 seconds before you may use another smoke bomb." />
-		<trigger triggertype="SysMessage" duration="106" triggertext="You must wait another 1 minute 46 seconds before you may use another smoke bomb." />
-		<trigger triggertype="SysMessage" duration="107" triggertext="You must wait another 1 minute 47 seconds before you may use another smoke bomb." />
-		<trigger triggertype="SysMessage" duration="108" triggertext="You must wait another 1 minute 48 seconds before you may use another smoke bomb." />
-		<trigger triggertype="SysMessage" duration="109" triggertext="You must wait another 1 minute 49 seconds before you may use another smoke bomb." />
-		<trigger triggertype="SysMessage" duration="110" triggertext="You must wait another 1 minute 50 seconds before you may use another smoke bomb." />
-		<trigger triggertype="SysMessage" duration="111" triggertext="You must wait another 1 minute 51 seconds before you may use another smoke bomb." />
-		<trigger triggertype="SysMessage" duration="112" triggertext="You must wait another 1 minute 52 seconds before you may use another smoke bomb." />
-		<trigger triggertype="SysMessage" duration="113" triggertext="You must wait another 1 minute 53 seconds before you may use another smoke bomb." />
-		<trigger triggertype="SysMessage" duration="114" triggertext="You must wait another 1 minute 54 seconds before you may use another smoke bomb." />
-		<trigger triggertype="SysMessage" duration="115" triggertext="You must wait another 1 minute 55 seconds before you may use another smoke bomb." />
-		<trigger triggertype="SysMessage" duration="116" triggertext="You must wait another 1 minute 56 seconds before you may use another smoke bomb." />
-		<trigger triggertype="SysMessage" duration="117" triggertext="You must wait another 1 minute 57 seconds before you may use another smoke bomb." />
-		<trigger triggertype="SysMessage" duration="118" triggertext="You must wait another 1 minute 58 seconds before you may use another smoke bomb." />
-		<trigger triggertype="SysMessage" duration="119" triggertext="You must wait another 1 minute 59 seconds before you may use another smoke bomb." />
+	<cooldownentry name="magic arrow" defaultcooldown="0" cooldownbartype="Regular" hue="578" hidewheninactive="True">
+		<trigger triggertype="SysMessage" duration="15" triggertext="magic arrow activated" />
+		<trigger triggertype="SysMessage" duration="0" triggertext="cast a wizardry magic arrow spell again" />
 	</cooldownentry>
+	<cooldownentry name="harm" defaultcooldown="0" cooldownbartype="Regular" hue="438" hidewheninactive="True">
+		<trigger triggertype="SysMessage" duration="15" triggertext="harm activated" />
+		<trigger triggertype="SysMessage" duration="0" triggertext="cast a wizardry harm spell again" />
+	</cooldownentry>
+	<cooldownentry name="fireball" defaultcooldown="0" cooldownbartype="Regular" hue="143" hidewheninactive="True">
+		<trigger triggertype="SysMessage" duration="15" triggertext="fireball activated" />
+		<trigger triggertype="SysMessage" duration="0" triggertext="cast a wizardry fireball spell again" />
+	</cooldownentry>
+	<cooldownentry name="lightning" defaultcooldown="0" cooldownbartype="Regular" hue="93" hidewheninactive="True">
+		<trigger triggertype="SysMessage" duration="15" triggertext="lightning spell hinders" />
+		<trigger triggertype="SysMessage" duration="0" triggertext="cast a wizardry lightning spell again" />
+	</cooldownentry>
+	<cooldownentry name="mush" defaultcooldown="0" cooldownbartype="Regular" hue="72" hidewheninactive="True">
+		<trigger triggertype="SysMessage" duration="60" triggertext="consume a magic mushroom" />
+	</cooldownentry>
+	<cooldownentry name="heal pot" defaultcooldown="0" cooldownbartype="Regular" hue="153" hidewheninactive="True">
+		<trigger triggertype="SysMessage" duration="10" triggertext="You drink a healing potion" />
+	</cooldownentry>
+	<cooldownentry name="steal" defaultcooldown="0" cooldownbartype="Regular" hue="66" hidewheninactive="True">
+		<trigger triggertype="SysMessage" duration="10" triggertext="You can't steal from that" />
+		<trigger triggertype="SysMessage" duration="10" triggertext="You steal" />
+		<trigger triggertype="SysMessage" duration="10" triggertext="You have already stolen from this creature." />
+		<trigger triggertype="SysMessage" duration="10" triggertext="You fail to steal from the creature and it retaliates against you!" />
+		<trigger triggertype="SysMessage" duration="10" triggertext="You successfully steal the item." />
+		<trigger triggertype="SysMessage" duration="10" triggertext="You fail in your stealing attempt" />
+	</cooldownentry>
+	<cooldownentry name="hide" defaultcooldown="0" cooldownbartype="Regular" hue="66" hidewheninactive="True">
+		<trigger triggertype="OverheadMessage" duration="10" triggertext="You have hidden yourself well" />
+	</cooldownentry>
+	<cooldownentry name="stealth" defaultcooldown="0" cooldownbartype="Regular" hue="66" hidewheninactive="True">
+		<trigger triggertype="SysMessage" duration="10" triggertext="You begin to move quietly" />
+	</cooldownentry>
+	<cooldownentry name="void mana" defaultcooldown="0" cooldownbartype="Regular" hue="9" hidewheninactive="True">
+		<trigger triggertype="SysMessage" duration="60" triggertext="mana restored (next" />
+	</cooldownentry>
+	<cooldownentry name="void health" defaultcooldown="0" cooldownbartype="Regular" hue="9" hidewheninactive="True">
+		<trigger triggertype="SysMessage" duration="20" triggertext="hits restored (next" />
+	</cooldownentry>
+	<cooldownentry name="swing 1" defaultcooldown="2.27" cooldownbartype="WeaponSwing" hue="88" hidewheninactive="True" />
+	<cooldownentry name="swing 2" defaultcooldown="3.35" cooldownbartype="WeaponSwing" hue="73" hidewheninactive="True" />
+	<cooldownentry name="swing 3" defaultcooldown="4.07" cooldownbartype="WeaponSwing" hue="53" hidewheninactive="True" />
+	<cooldownentry name="swing 4" defaultcooldown="5.69" cooldownbartype="WeaponSwing" hue="38" hidewheninactive="True" />
+	<cooldownentry name="medi" defaultcooldown="0" cooldownbartype="Regular" hue="88" hidewheninactive="True">
+		<trigger triggertype="SysMessage" duration="10" triggertext="enter a meditative trance" />
+	</cooldownentry>
+	<cooldownentry name="pain spike" defaultcooldown="30" cooldownbartype="Regular" hue="39" hidewheninactive="True" />
+	<cooldownentry name="necrosis" defaultcooldown="29" cooldownbartype="Regular" hue="44" hidewheninactive="True" />
+	<cooldownentry name="hams, target" defaultcooldown="0" cooldownbartype="Regular" hue="68" hidewheninactive="True">
+		<trigger triggertype="SysMessage" duration="55" triggertext="hamstrings your target" />
+		<trigger triggertype="SysMessage" duration="15" triggertext="fail to hamstring" />
+	</cooldownentry>
+	<cooldownentry name="hams, me" defaultcooldown="0" cooldownbartype="Regular" hue="38" hidewheninactive="True">
+		<trigger triggertype="SysMessage" duration="3" triggertext="You have been hamstrung" />
+		<trigger triggertype="SysMessage" duration="3" triggertext="Their attack hamstrings you" />
+		<trigger triggertype="SysMessage" duration="0" triggertext="You are no longer hamstrung" />
+	</cooldownentry>
+	<cooldownentry name="hams, immune" defaultcooldown="0" cooldownbartype="Regular" hue="43" hidewheninactive="True">
+		<trigger triggertype="SysMessage" duration="30" triggertext="You have been hamstrung" />
+		<trigger triggertype="SysMessage" duration="30" triggertext="Their attack hamstrings you" />
+	</cooldownentry>
+	<cooldownentry name="disarm, target" defaultcooldown="0" cooldownbartype="Regular" hue="68" hidewheninactive="True">
+		<trigger triggertype="SysMessage" duration="30" triggertext="disarms your target" />
+		<trigger triggertype="SysMessage" duration="15" triggertext="fail to disarm" />
+	</cooldownentry>
+	<cooldownentry name="noble sacrifice" defaultcooldown="30" cooldownbartype="Regular" hue="88" hidewheninactive="True" />
+	<cooldownentry name="holy light" defaultcooldown="30" cooldownbartype="Regular" hue="53" hidewheninactive="True" />
+	<cooldownentry name="aspect" defaultcooldown="0" cooldownbartype="Regular" hue="43" hidewheninactive="True">
+		<trigger triggertype="SysMessage" duration="30" triggertext="aspect armor activated" />
+		<trigger triggertype="OverheadMessage" duration="30" triggertext="aspect armor activated" />
+	</cooldownentry>
+	<cooldownentry name="poison strike" defaultcooldown="0" cooldownbartype="Regular" hue="668" hidewheninactive="True" />
+	<cooldownentry name="corpse skin" defaultcooldown="0" cooldownbartype="Regular" hue="44" hidewheninactive="True" />
+	<cooldownentry name="curse" defaultcooldown="60" cooldownbartype="Regular" hue="438" hidewheninactive="True" />
+	<cooldownentry name="chain" defaultcooldown="0" cooldownbartype="Regular" hue="293" hidewheninactive="True">
+		<trigger triggertype="SysMessage" duration="15" triggertext="chain lightning activated" />
+		<trigger triggertype="SysMessage" duration="0" triggertext="cast a wizardry chain lightning spell again" />
+	</cooldownentry>
+	<cooldownentry name="meteor" defaultcooldown="0" cooldownbartype="Regular" hue="48" hidewheninactive="True">
+		<trigger triggertype="SysMessage" duration="15" triggertext="meteor swarm activated" />
+		<trigger triggertype="SysMessage" duration="0" triggertext="cast a wizardry meteor swarm spell again" />
+	</cooldownentry>
+	<cooldownentry name="mass curse" defaultcooldown="60" cooldownbartype="Regular" hue="0" hidewheninactive="True" />
+	<cooldownentry name="boarding" defaultcooldown="17" cooldownbartype="Regular" hue="220" hidewheninactive="True">
+		<trigger triggertype="SysMessage" duration="" triggertext="Your boarding party fails" />
+		<trigger triggertype="SysMessage" duration="" triggertext="board the ship" />
+	</cooldownentry>
+	<cooldownentry name="sea combat" defaultcooldown="60" cooldownbartype="Regular" hue="135" hidewheninactive="True">
+		<trigger triggertype="SysMessage" duration="62" triggertext="Hull Remaining:" />
+		<trigger triggertype="SysMessage" duration="62" triggertext="roped" />
+		<trigger triggertype="OverheadMessage" duration="0" triggertext="clear of the fray" />
+	</cooldownentry>
+	<cooldownentry name="repair" defaultcooldown="10" cooldownbartype="Regular" hue="288" hidewheninactive="True">
+		<trigger triggertype="SysMessage" duration="10" triggertext="activate repairing" />
+	</cooldownentry>
+	<cooldownentry name="spyglass" defaultcooldown="5" cooldownbartype="Regular" hue="54" hidewheninactive="True" />
+	<cooldownentry name="cannons" defaultcooldown="0" cooldownbartype="Regular" hue="806" hidewheninactive="True">
+		<trigger triggertype="SysMessage" duration="9" triggertext="Hull Remaining:" />
+	</cooldownentry>
+	<cooldownentry name="drain" defaultcooldown="0" cooldownbartype="Regular" hue="124" hidewheninactive="True">
+		<trigger triggertype="OverheadMessage" duration="300" triggertext="MV ON" />
+	</cooldownentry>
+	<cooldownentry name="herd" defaultcooldown="0" cooldownbartype="Regular" hue="199" hidewheninactive="True">
+		<trigger triggertype="SysMessage" duration="30" triggertext="You focus your follower's aggression towards the target" />
+	</cooldownentry>
+	<cooldownentry name="rope" defaultcooldown="0" cooldownbartype="Regular" hue="778" hidewheninactive="True">
+		<trigger triggertype="SysMessage" duration="120" triggertext="traverse" />
+	</cooldownentry>
+	<cooldownentry name="control points" defaultcooldown="0" cooldownbartype="Regular" hue="598" hidewheninactive="True">
+		<trigger triggertype="SysMessage" duration="30" triggertext="control points" />
+	</cooldownentry>
+	<cooldownentry name="teleki, target" defaultcooldown="0" cooldownbartype="Regular" hue="133" hidewheninactive="True">
+		<trigger triggertype="SysMessage" duration="30" triggertext="Your next explosion potion thrown at that player" />
+	</cooldownentry>
+	<cooldownentry name="teleki, me" defaultcooldown="0" cooldownbartype="Regular" hue="123" hidewheninactive="True">
+		<trigger triggertype="SysMessage" duration="30" triggertext="applied telekinesis to you" />
+	</cooldownentry>
+	<cooldownentry name="para" defaultcooldown="0" cooldownbartype="Regular" hue="33" hidewheninactive="True">
+		<trigger triggertype="SysMessage" duration="10" triggertext="You cannot move!" />
+		<trigger triggertype="SysMessage" duration="0" triggertext="You can move!" />
+	</cooldownentry>
+	<cooldownentry name="detonate" defaultcooldown="21" cooldownbartype="Regular" hue="253" hidewheninactive="True">
+		<trigger triggertype="SysMessage" duration="" triggertext="You may now detonate another trap" />
+	</cooldownentry>
+	<cooldownentry name="reflect" defaultcooldown="0" cooldownbartype="Regular" hue="153" hidewheninactive="True">
+		<trigger triggertype="SysMessage" duration="60" triggertext="Magic reflect removed (PvP)" />
+		<trigger triggertype="SysMessage" duration="30" triggertext="Magic reflect removed." />
+	</cooldownentry>
+	<cooldownentry name="fish" defaultcooldown="0" cooldownbartype="Regular" hue="1001" hidewheninactive="True">
+		<trigger triggertype="SysMessage" duration="10" triggertext="fish" />
+		<trigger triggertype="SysMessage" duration="10" triggertext="You retrieve" />
+		<trigger triggertype="OverheadMessage" duration="10" triggertext="You catch" />
+	</cooldownentry>
+	<cooldownentry name="sp keg" defaultcooldown="60" cooldownbartype="Regular" hue="573" hidewheninactive="True">
+		<trigger triggertype="OverheadMessage" duration="" triggertext="spkeg" />
+	</cooldownentry>
+	<cooldownentry name="defensive" defaultcooldown="0" cooldownbartype="Regular" hue="118" hidewheninactive="True">
+		<trigger triggertype="OverheadMessage" duration="30000" triggertext="Defensive stance activated." />
+		<trigger triggertype="OverheadMessage" duration="0" triggertext="Sunder stance" />
+		<trigger triggertype="OverheadMessage" duration="0" triggertext="Cleave stance" />
+		<trigger triggertype="OverheadMessage" duration="0" triggertext="Wild Swing" />
+	</cooldownentry>
+	<cooldownentry name="sunder" defaultcooldown="0" cooldownbartype="Regular" hue="118" hidewheninactive="True">
+		<trigger triggertype="OverheadMessage" duration="30000" triggertext="Sunder stance activated" />
+		<trigger triggertype="OverheadMessage" duration="0" triggertext="Defensive stance" />
+		<trigger triggertype="OverheadMessage" duration="0" triggertext="Cleave stance" />
+		<trigger triggertype="OverheadMessage" duration="0" triggertext="Wild Swing" />
+	</cooldownentry>
+	<cooldownentry name="cleave" defaultcooldown="0" cooldownbartype="Regular" hue="118" hidewheninactive="True">
+		<trigger triggertype="OverheadMessage" duration="30000" triggertext="Cleave stance activated" />
+		<trigger triggertype="OverheadMessage" duration="0" triggertext="Defensive stance" />
+		<trigger triggertype="OverheadMessage" duration="0" triggertext="Sunder stance" />
+		<trigger triggertype="OverheadMessage" duration="0" triggertext="Wild Swing" />
+	</cooldownentry>
+	<cooldownentry name="wild swing" defaultcooldown="0" cooldownbartype="Regular" hue="118" hidewheninactive="True">
+		<trigger triggertype="OverheadMessage" duration="30000" triggertext="Wild Swing stance activated" />
+		<trigger triggertype="OverheadMessage" duration="0" triggertext="Defensive stance" />
+		<trigger triggertype="OverheadMessage" duration="0" triggertext="Sunder stance" />
+		<trigger triggertype="OverheadMessage" duration="0" triggertext="CLEAVE" />
+	</cooldownentry>
+	<cooldownentry name="shield bash" defaultcooldown="0" cooldownbartype="Regular" hue="153" hidewheninactive="True">
+		<trigger triggertype="OverheadMessage" duration="30000" triggertext="Shield Bash stance" />
+		<trigger triggertype="OverheadMessage" duration="0" triggertext="Bulwark stance" />
+		<trigger triggertype="OverheadMessage" duration="0" triggertext="Warding stance" />
+		<trigger triggertype="OverheadMessage" duration="0" triggertext="Testudo stance" />
+		<trigger triggertype="OverheadMessage" duration="0" triggertext="Mirror stance" />
+		<trigger triggertype="SysMessage" duration="0" triggertext="You deactivate your stance" />
+	</cooldownentry>
+	<cooldownentry name="warding" defaultcooldown="0" cooldownbartype="Regular" hue="153" hidewheninactive="True">
+		<trigger triggertype="OverheadMessage" duration="30000" triggertext="Warding stance" />
+		<trigger triggertype="OverheadMessage" duration="0" triggertext="Shield Bash stance" />
+		<trigger triggertype="OverheadMessage" duration="0" triggertext="Bulwark stance" />
+		<trigger triggertype="OverheadMessage" duration="0" triggertext="Testudo stance" />
+		<trigger triggertype="OverheadMessage" duration="0" triggertext="Mirror stance" />
+	</cooldownentry>
+	<cooldownentry name="testudo" defaultcooldown="0" cooldownbartype="Regular" hue="253" hidewheninactive="True">
+		<trigger triggertype="OverheadMessage" duration="30000" triggertext="Testudo stance" />
+		<trigger triggertype="OverheadMessage" duration="0" triggertext="Shield Bash stance" />
+		<trigger triggertype="OverheadMessage" duration="0" triggertext="Warding stance" />
+		<trigger triggertype="OverheadMessage" duration="0" triggertext="Bulwark stance" />
+		<trigger triggertype="OverheadMessage" duration="0" triggertext="Mirror stance" />
+		<trigger triggertype="SysMessage" duration="0" triggertext="You deactivate your stance" />
+	</cooldownentry>
+	<cooldownentry name="mirror" defaultcooldown="0" cooldownbartype="Regular" hue="153" hidewheninactive="True">
+		<trigger triggertype="OverheadMessage" duration="3000000" triggertext="Mirror stance" />
+		<trigger triggertype="OverheadMessage" duration="0" triggertext="Shield Bash stance" />
+		<trigger triggertype="OverheadMessage" duration="0" triggertext="Warding stance" />
+		<trigger triggertype="OverheadMessage" duration="0" triggertext="Testudo stance" />
+		<trigger triggertype="OverheadMessage" duration="0" triggertext="Bulwark stance" />
+	</cooldownentry>
+	<cooldownentry name="bulwark" defaultcooldown="0" cooldownbartype="Regular" hue="153" hidewheninactive="True">
+		<trigger triggertype="OverheadMessage" duration="3000000" triggertext="Bulwark stance " />
+		<trigger triggertype="OverheadMessage" duration="0" triggertext="Shield Bash stance" />
+		<trigger triggertype="OverheadMessage" duration="0" triggertext="Warding stance" />
+		<trigger triggertype="OverheadMessage" duration="0" triggertext="Testudo stance" />
+		<trigger triggertype="OverheadMessage" duration="0" triggertext="Mirror stance" />
+	</cooldownentry>
+	<cooldownentry name="arcane" defaultcooldown="0" cooldownbartype="Regular" hue="118" hidewheninactive="True">
+		<trigger triggertype="OverheadMessage" duration="30000" triggertext="Arcane ammunition" />
+		<trigger triggertype="OverheadMessage" duration="0" triggertext="Fowling ammunition" />
+		<trigger triggertype="OverheadMessage" duration="0" triggertext="Incendiary ammunition" />
+		<trigger triggertype="OverheadMessage" duration="0" triggertext="Longshot ammunition" />
+		<trigger triggertype="OverheadMessage" duration="0" triggertext="Maiming ammunition" />
+	</cooldownentry>
+	<cooldownentry name="fowling" defaultcooldown="0" cooldownbartype="Regular" hue="118" hidewheninactive="True">
+		<trigger triggertype="OverheadMessage" duration="30000" triggertext="Fowling ammunition" />
+		<trigger triggertype="OverheadMessage" duration="0" triggertext="Arcane ammunition" />
+		<trigger triggertype="OverheadMessage" duration="0" triggertext="Incendiary ammunition" />
+		<trigger triggertype="OverheadMessage" duration="0" triggertext="Longshot ammunition" />
+		<trigger triggertype="OverheadMessage" duration="0" triggertext="Maiming ammunition" />
+	</cooldownentry>
+	<cooldownentry name="incendiary" defaultcooldown="0" cooldownbartype="Regular" hue="118" hidewheninactive="True">
+		<trigger triggertype="OverheadMessage" duration="30000" triggertext="Incendiary ammunition" />
+		<trigger triggertype="OverheadMessage" duration="0" triggertext="Arcane ammunition" />
+		<trigger triggertype="OverheadMessage" duration="0" triggertext="Fowling ammunition" />
+		<trigger triggertype="OverheadMessage" duration="0" triggertext="Longshot ammunition" />
+		<trigger triggertype="OverheadMessage" duration="0" triggertext="Maiming ammunition" />
+	</cooldownentry>
+	<cooldownentry name="longshot" defaultcooldown="0" cooldownbartype="Regular" hue="118" hidewheninactive="True">
+		<trigger triggertype="OverheadMessage" duration="30000" triggertext="Longshot ammunition" />
+		<trigger triggertype="OverheadMessage" duration="0" triggertext="Arcane ammunition" />
+		<trigger triggertype="OverheadMessage" duration="0" triggertext="Fowling ammunition" />
+		<trigger triggertype="OverheadMessage" duration="0" triggertext="Incendiary ammunition" />
+		<trigger triggertype="OverheadMessage" duration="0" triggertext="Maiming ammunition" />
+	</cooldownentry>
+	<cooldownentry name="maiming" defaultcooldown="0" cooldownbartype="Regular" hue="118" hidewheninactive="True">
+		<trigger triggertype="OverheadMessage" duration="30000" triggertext="Maiming ammunition" />
+		<trigger triggertype="OverheadMessage" duration="0" triggertext="Arcane ammunition" />
+		<trigger triggertype="OverheadMessage" duration="0" triggertext="Fowling ammunition" />
+		<trigger triggertype="OverheadMessage" duration="0" triggertext="Incendiary ammunition" />
+		<trigger triggertype="OverheadMessage" duration="0" triggertext="Longshot ammunition" />
+	</cooldownentry>
+	<cooldownentry name="walk" defaultcooldown="0.3" cooldownbartype="Walk" hue="1001" hidewheninactive="True" />
+	<cooldownentry name="explo pot" defaultcooldown="15" cooldownbartype="Regular" hue="333" hidewheninactive="True">
+		<trigger triggertype="SysMessage" duration="" triggertext="Where should I throw this potion" />
+	</cooldownentry>
+	<cooldownentry name="bandage" defaultcooldown="0" cooldownbartype="Bandage" hue="88" hidewheninactive="True" />
+	<cooldownentry name="pvp" defaultcooldown="0" cooldownbartype="PvP" hue="33" hidewheninactive="True" />
+	<cooldownentry name="crim" defaultcooldown="0" cooldownbartype="Criminal" hue="1001" hidewheninactive="True" />
+	<cooldownentry name="divine fury" defaultcooldown="0" cooldownbartype="Regular" hue="1001" hidewheninactive="True" />
+	<cooldownentry name="shrine" defaultcooldown="1200" cooldownbartype="Regular" hue="488" hidewheninactive="True">
+		<trigger triggertype="SysMessage" duration="" triggertext="fallen to corruption" />
+	</cooldownentry>
+	<cooldownentry name="bomb, target" defaultcooldown="5" cooldownbartype="Regular" hue="118" hidewheninactive="True">
+		<trigger triggertype="SysMessage" duration="" triggertext="Your explosion potion sticks" />
+	</cooldownentry>
+	<cooldownentry name="bomb, me" defaultcooldown="5" cooldownbartype="Regular" hue="33" hidewheninactive="True">
+		<trigger triggertype="SysMessage" duration="" triggertext="An explosion potion has stuck to you" />
+	</cooldownentry>
+	<cooldownentry name="siphon" defaultcooldown="0" cooldownbartype="Regular" hue="68" hidewheninactive="True">
+		<trigger triggertype="SysMessage" duration="3600" triggertext="Spell siphon active." />
+		<trigger triggertype="SysMessage" duration="0" triggertext="Your spell siphon bonus has expired" />
+	</cooldownentry>
+	<cooldownentry name="contested" defaultcooldown="1200" cooldownbartype="Regular" hue="488" hidewheninactive="True">
+		<trigger triggertype="SysMessage" duration="" triggertext="contested" />
+	</cooldownentry>
+	<cooldownentry name="eject" defaultcooldown="30" cooldownbartype="Regular" hue="523" hidewheninactive="True">
+		<trigger triggertype="SysMessage" duration="" triggertext="you have been eject" />
+	</cooldownentry>
+	<cooldownentry name="corpse creek" defaultcooldown="1800" cooldownbartype="Regular" hue="588" hidewheninactive="True">
+		<trigger triggertype="SysMessage" duration="" triggertext="The Corpse Creek Contest has begun" />
+	</cooldownentry>
+	<cooldownentry name="vip" defaultcooldown="600" cooldownbartype="Regular" hue="588" hidewheninactive="True">
+		<trigger triggertype="SysMessage" duration="" triggertext="A faction VIP has arrived" />
+	</cooldownentry>
+	<cooldownentry name="flashpoint" defaultcooldown="1800" cooldownbartype="Regular" hue="588" hidewheninactive="True">
+		<trigger triggertype="SysMessage" duration="" triggertext="A Dungeon Flashpoint" />
+	</cooldownentry>
+	<cooldownentry name="caravan" defaultcooldown="600" cooldownbartype="Regular" hue="588" hidewheninactive="True">
+		<trigger triggertype="SysMessage" duration="" triggertext="A faction caravan is now assembling" />
+	</cooldownentry>
+	<cooldownentry name="idoc" defaultcooldown="1800" cooldownbartype="Regular" hue="188" hidewheninactive="True">
+		<trigger triggertype="SysMessage" duration="" triggertext="A House in danger of" />
+	</cooldownentry>
+	<cooldownentry name="dock" defaultcooldown="60" cooldownbartype="Regular" hue="468" hidewheninactive="True">
+		<trigger triggertype="SysMessage" duration="" triggertext="You dock the ship" />
+	</cooldownentry>
+	<cooldownentry name="smoke" defaultcooldown="125" cooldownbartype="Regular" hue="442" hidewheninactive="True">
+		<trigger triggertype="SysMessage" duration="0" triggertext="You may now use another smoke bomb" />
+	</cooldownentry>
+	<cooldownentry name="backstab" defaultcooldown="10" cooldownbartype="Regular" hue="333" hidewheninactive="True">
+		<trigger triggertype="SysMessage" duration="" triggertext="You strike your target from the shadows" />
+	</cooldownentry>
+	<cooldownentry name="reveal" defaultcooldown="10" cooldownbartype="Regular" hue="23" hidewheninactive="True">
+		<trigger triggertype="SysMessage" duration="" triggertext="You have been revealed" />
+	</cooldownentry>
+	<cooldownentry name="taunt" defaultcooldown="15" cooldownbartype="Regular" hue="53" hidewheninactive="True">
+		<trigger triggertype="OverheadMessage" duration="15" triggertext="*area" />
+		<trigger triggertype="SysMessage" duration="0" triggertext="You may now taunt again" />
+	</cooldownentry>
+	<cooldownentry name="fortify rations" defaultcooldown="0" cooldownbartype="Regular" hue="13" hidewheninactive="True">
+		<trigger triggertype="OverheadMessage" duration="600" triggertext="*Fortify Rations*" />
+		<trigger triggertype="OverheadMessage" duration="601" triggertext="In Xen Mani" />
+	</cooldownentry>
+	<cooldownentry name="negate time" defaultcooldown="0" cooldownbartype="Regular" hue="28" hidewheninactive="True">
+		<trigger triggertype="OverheadMessage" duration="1200" triggertext="*negate time*" />
+		<trigger triggertype="OverheadMessage" duration="1200" triggertext="Xen Corp Tym" />
+	</cooldownentry>
+	<cooldownentry name="rune" defaultcooldown="0" cooldownbartype="Regular" hue="483" hidewheninactive="True">
+		<trigger triggertype="OverheadMessage" duration="62" triggertext="Ex Ylem" />
+		<trigger triggertype="OverheadMessage" duration="62" triggertext="Rel Mani" />
+		<trigger triggertype="OverheadMessage" duration="62" triggertext="In Ylem Sanct" />
+		<trigger triggertype="OverheadMessage" duration="62" triggertext="In Ort Sanct" />
+		<trigger triggertype="OverheadMessage" duration="62" triggertext="In Xen Mani" />
+		<trigger triggertype="OverheadMessage" duration="62" triggertext="In Bet Rel" />
+		<trigger triggertype="OverheadMessage" duration="62" triggertext="Kal Tym Ylem" />
+		<trigger triggertype="OverheadMessage" duration="62" triggertext="In Bet Xen" />
+		<trigger triggertype="OverheadMessage" duration="62" triggertext="In Vas Quas" />
+		<trigger triggertype="OverheadMessage" duration="62" triggertext="Xen Corp Tym" />
+		<trigger triggertype="OverheadMessage" duration="62" triggertext="In Mani Ort" />
+		<trigger triggertype="OverheadMessage" duration="62" triggertext="In Vas Ort" />
+		<trigger triggertype="OverheadMessage" duration="62" triggertext="An Zu Ylem" />
+		<trigger triggertype="OverheadMessage" duration="62" triggertext="In Bet Wis" />
+		<trigger triggertype="OverheadMessage" duration="62" triggertext="In Vas Ort Grav" />
+		<trigger triggertype="OverheadMessage" duration="62" triggertext="Kal Vas Rel Ylem" />
+		<trigger triggertype="OverheadMessage" duration="62" triggertext="Kal Des Flam Hur" />
+		<trigger triggertype="OverheadMessage" duration="62" triggertext="In Jux Por Ylem" />
+		<trigger triggertype="OverheadMessage" duration="62" triggertext="In Vas Ort Mani" />
+		<trigger triggertype="OverheadMessage" duration="62" triggertext="In Vas Zu" />
+	</cooldownentry>
+	<cooldownentry name="summon" defaultcooldown="0" cooldownbartype="Regular" hue="253" hidewheninactive="True">
+		<trigger triggertype="OverheadMessage" duration="301" triggertext="In Bat Rel" />
+		<trigger triggertype="OverheadMessage" duration="301" triggertext="In Mani Ort" />
+		<trigger triggertype="OverheadMessage" duration="301" triggertext="In Vas Ort" />
+		<trigger triggertype="OverheadMessage" duration="301" triggertext="An Zu Ylem" />
+		<trigger triggertype="OverheadMessage" duration="301" triggertext="In Jux Por Ylem" />
+	</cooldownentry>
+	<cooldownentry name="frost" defaultcooldown="0" cooldownbartype="Regular" hue="83" hidewheninactive="True">
+		<trigger triggertype="SysMessage" duration="19" triggertext="Frost shell" />
+	</cooldownentry>
+	<cooldownentry name="frost, on" defaultcooldown="0" cooldownbartype="Regular" hue="88" hidewheninactive="True">
+		<trigger triggertype="SysMessage" duration="5" triggertext="Frost shell" />
+	</cooldownentry>
+	<cooldownentry name="weapon swing" defaultcooldown="5" cooldownbartype="WeaponSwing" hue="1001" hidewheninactive="True" />
+	<cooldownentry name="consecrate weapon" defaultcooldown="0" cooldownbartype="Regular" hue="1001" hidewheninactive="True" />
+	<cooldownentry name="pedestal" defaultcooldown="0" cooldownbartype="Regular" hue="222" hidewheninactive="True">
+		<trigger triggertype="SysMessage" duration="900" triggertext="You disable the item for the next 15" />
+	</cooldownentry>
+	<cooldownentry name="bank note" defaultcooldown="0" cooldownbartype="Regular" hue="273" hidewheninactive="True">
+		<trigger triggertype="OverheadMessage" duration="120" triggertext="Timely Bank Note consumed." />
+	</cooldownentry>
+	<cooldownentry name="panacea" defaultcooldown="0" cooldownbartype="Regular" hue="363" hidewheninactive="True">
+		<trigger triggertype="SysMessage" duration="0" triggertext="Panacea upgrade is now ready" />
+	</cooldownentry>
+	<cooldownentry name="shoot" defaultcooldown="0" cooldownbartype="Regular" hue="68" hidewheninactive="True">
+		<trigger triggertype="SysMessage" duration="120" triggertext="You will automatically stealth when out of steps" />
+		<trigger triggertype="SysMessage" duration="0" triggertext="You strike your target from the shadows" />
+		<trigger triggertype="SysMessage" duration="0" triggertext="You begin to move quitely" />
+	</cooldownentry>
+	<cooldownentry name="spam" defaultcooldown="0" cooldownbartype="Regular" hue="618" hidewheninactive="True" />
+	<cooldownentry name="crew heal" defaultcooldown="5" cooldownbartype="Regular" hue="1001" hidewheninactive="True" />
+	<cooldownentry name="quest" defaultcooldown="10" cooldownbartype="Regular" hue="633" hidewheninactive="True" />
+	<cooldownentry name="omni pot" defaultcooldown="0" cooldownbartype="Regular" hue="293" hidewheninactive="True">
+		<trigger triggertype="OverheadMessage" duration="30" triggertext="+60 Hits" />
+	</cooldownentry>
+	<cooldownentry name="ability" defaultcooldown="0" cooldownbartype="Regular" hue="1001" hidewheninactive="True" />
 </cooldowns>

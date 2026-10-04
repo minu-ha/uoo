@@ -57,13 +57,13 @@
 		<gump type="15" x="1717" y="1396" serial="0" frozen="False" id="24" rel_x="1717" rel_y="1396" />
 	</anchored_group_gump>
 	<anchored_group_gump count="7">
-		<primary_gump type="7" x="834" y="1178" serial="1022" frozen="False" name="home" graphicId="61" hideLabel="False" scale="0.4" />
-		<gump type="7" x="834" y="1255" serial="1023" frozen="False" name="guild" graphicId="61" hideLabel="False" scale="0.4" rel_x="834" rel_y="1255" />
-		<gump type="7" x="834" y="1332" serial="1025" frozen="False" name="bank" graphicId="61" hideLabel="False" scale="0.4" rel_x="834" rel_y="1332" />
-		<gump type="7" x="764" y="1178" serial="1028" frozen="False" name="trans" graphicId="61" hideLabel="False" scale="0.4" rel_x="764" rel_y="1178" />
-		<gump type="7" x="764" y="1255" serial="1026" frozen="False" name="hide" graphicId="61" hideLabel="False" scale="0.4" rel_x="764" rel_y="1255" />
-		<gump type="7" x="764" y="1332" serial="1027" frozen="False" name="medi" graphicId="61" hideLabel="False" scale="0.4" rel_x="764" rel_y="1332" />
-		<gump type="7" x="694" y="1178" serial="1029" frozen="False" name="vendor" graphicId="61" hideLabel="False" scale="0.4" rel_x="694" rel_y="1178" />
+		<primary_gump type="7" x="834" y="1178" serial="1002" frozen="False" name="home" graphicId="61" hideLabel="False" scale="0.4" />
+		<gump type="7" x="834" y="1255" serial="1003" frozen="False" name="guild" graphicId="61" hideLabel="False" scale="0.4" rel_x="834" rel_y="1255" />
+		<gump type="7" x="834" y="1332" serial="1004" frozen="False" name="bank" graphicId="61" hideLabel="False" scale="0.4" rel_x="834" rel_y="1332" />
+		<gump type="7" x="764" y="1178" serial="1005" frozen="False" name="trans" graphicId="61" hideLabel="False" scale="0.4" rel_x="764" rel_y="1178" />
+		<gump type="7" x="764" y="1255" serial="1007" frozen="False" name="hide" graphicId="61" hideLabel="False" scale="0.4" rel_x="764" rel_y="1255" />
+		<gump type="7" x="764" y="1332" serial="1008" frozen="False" name="medi" graphicId="61" hideLabel="False" scale="0.4" rel_x="764" rel_y="1332" />
+		<gump type="7" x="694" y="1178" serial="1006" frozen="False" name="vendor" graphicId="61" hideLabel="False" scale="0.4" rel_x="694" rel_y="1178" />
 	</anchored_group_gump>
 	<anchored_group_gump count="6">
 		<primary_gump type="15" x="1821" y="1175" serial="0" frozen="False" id="34" />
@@ -74,11 +74,10 @@
 		<gump type="15" x="1821" y="1395" serial="0" frozen="False" id="39" rel_x="1821" rel_y="1395" />
 	</anchored_group_gump>
 	<gump />
+	<gump />
 	<gump type="20" x="2438" y="6" serial="0" frozen="False" minimized="True" />
 	<gump type="9" x="1348" y="1134" serial="1467299" frozen="False" isminimized="False" />
-	<gump type="10" x="100" y="100" serial="0" frozen="False" isminimized="False" height="551" />
 	<gump type="2" x="1083" y="1170" serial="1192877008" frozen="False" graphic="60" isminimized="False" iscarried="True" />
-	<gump type="2" x="861" y="1174" serial="1341405422" frozen="False" graphic="60" isminimized="False" iscarried="True" />
 	<gump type="4" x="153" y="569" serial="1467299" frozen="False" />
 	<gump type="7" x="1345" y="1175" serial="1000" frozen="False" name="Cmd Set Bag" graphicId="59" hideLabel="True" scale="0.6" />
 	<gump type="24" x="1906" y="56" serial="0" frozen="False" />
@@ -97,7 +96,7 @@
 			<control graphic="29012" hue="2963" />
 			<control graphic="0" hue="0" />
 			<control graphic="0" hue="0" />
-			<control graphic="5370" hue="2799" key="102" mousebutton="0" alt="False" ctrl="False" shift="False" />
+			<control graphic="5370" hue="2799" />
 			<control graphic="3962" hue="0" />
 			<control graphic="3963" hue="0" />
 			<control graphic="3974" hue="0" />
@@ -155,6 +154,7 @@
 			<control graphic="0" hue="0" />
 		</controls>
 	</gump>
+	<gump type="10" x="100" y="100" serial="0" frozen="False" isminimized="False" height="551" />
 	<gump type="18" x="2025" y="42" serial="0" frozen="False" />
 	<gump type="6" x="2026" y="560" serial="0" frozen="False" />
 	<gump type="28" x="25" y="357" serial="0" frozen="True" Width="507" Height="200" AnchorHealthBars="True" AutoCollectWhenIncoming="True" AutoRemoveWhenDisappearing="True" ReorderBarsWhenRemoved="True" ReorderBarsWhenAdded="True" DisplayMode="HideUnlessMouseOver" Direction="TopLeftToBottom" OrderType="Alphabetically" Hue="43" AddHealthbarPriority="1" Filter="2056" AutoCollectMaxRange="18" AutoRemoveMaxRange="18" />
