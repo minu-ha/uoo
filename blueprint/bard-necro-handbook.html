@@ -3001,15 +3001,16 @@ Peace 슬롯이 열렸는데 대상이 진정이나 브레이크 중이면, 전�
 </ul>
 
 <h3 id="05.I">05.I 공통 pvp의 mage 설정</h3>
-<p><a href="../script/combat/pvp.razor">combat/pvp.razor</a>에서 <code>config__pvp_preset = 1</code>로
-공통 <a href="pvp.html#05.E">PvP 자기관리 루프</a>의 mage 설정을 사용한다.
+<p><a href="../script/combat/pvp.razor">combat/pvp.razor</a>에서 <code>config__use_magery = 1</code>·<code>config__use_weapon = 0</code>으로
+공통 <a href="pvp.html#05.E">PvP 자기관리 루프</a>의 자기 마법을 사용한다. 각 기능은 독립 설정이며 템플릿 프리셋은 없다.
 PK를 만나면 F1을 끄고 이것을 켠다. 이전 템플릿별 PvP 파일은 삭제했으므로 F4를 Razor에서
 <code>Play Script: combat\pvp</code>로 다시 연결한다 (<a href="hotkeys.html#04">hotkeys.html</a> 04절).</p>
 <p>2026-10-05 상대 탐색·Q 대상 캐시·자동 TK·Explosion→EB·소환수 공격을 제거했다.
 TK·공격 주문·폭발 포션·소환수 명령은 사용자가 시전하고 타겟한다.
 상대의 색·거리·사망은 이 루프의 실행 조건이 아니며, Q는 사용자의 수동 Last Target 선택으로만 남는다.</p>
 <p>자동은 자기 해독·회복 포션·Refresh·스탯 포션·버섯·Cure/Heal/GH·RA·Reflect·시폰용 자기 Magic Arrow다.
-붕대와 무기 재장착은 기본 OFF다. 세부 스위치·타이머·수동 커서 보존 조건은 공통 문서 05.E절에서 관리한다.
+이 템플릿에서는 붕대와 무기 옵션을 0으로 둔다. 공통 본문의 무기는 기본 1이므로 직접 끈다.
+세부 스위치·타이머·수동 커서 보존 조건은 공통 문서 05.E절에서 관리한다.
 수동 시전·프리캐스트 보유 중에는 자기관리도 기다리며, 자기 자동 시전 중 새 주문을 시작할 때는 먼저 Stop한다.</p>
 <p>이전 직접 serial 버전의 alt TK와 Explosion→EB 적용은 인게임 확인됨 2026-10-04.
 그 결과는 <a href="razor.html#03">razor.html</a> 03절의 진단 근거로 남긴다.

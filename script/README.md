@@ -21,7 +21,7 @@ Combat loops are named after the template (`bard-mace`, `hally-mage`), variants 
 | Script                | Template                                                                                     |
 |-----------------------|----------------------------------------------------------------------------------------------|
 | `bard-necro-enhanced` | Discord / Peace / Provo + Necromancy summons + Spirit Speak, with the Grimoire proc rotation |
-| `pvp`                | Shared field PvP self sustain with Magery, bandage, potion and optional rearm settings; all offense stays manual |
+| `pvp`                | Shared field PvP self sustain with Magery, bandage, potion and swing-based weapon settings; all offense stays manual |
 | `bard-mace`           | Bard dexxer with maces                                                                       |
 | `bard-throwing`       | Bard dexxer with throwing weapons: Throwing Codex stances, moving-throw readout              |
 | `hally-mage`          | Weapon-swap mage: halberd / katana / viking sword                                            |
@@ -34,9 +34,17 @@ A new combat loop gets a row here. Every loop has the same shape, set out in
 ## Lumberjacking loops
 
 Use [gather/lumberjack-enhanced.razor](gather/lumberjack-enhanced.razor) for lumberjacking.
+It uses plain `config__*` settings and defaults to red-only Tracking.
+`config__use_tracking` controls one-time Tracking setup independently of automatic Recall.
+`config__auto_recall = 0` skips the loop's Recall detection, book checks and spare-weight decisions.
+Automatic Recall lives at the end of the loop; reagents and ordinary inventory checks stay in housekeeping.
+State comments explain the Recall decision, command sent and notice flags; harvest guards show each pause condition directly.
+Recall preparation uses no Strength or Agility potions. Fighting requires switching to the PvP script.
+Harvest refusal overheads are in both Razor profiles. The server enforces the 60-second post-travel harvest delay;
+the loop's 2-second command retry does not replace that rule or start a new 60-second delay from a refusal.
 The existing `gather/lumberjack.razor` remains the legacy version. Configuration and in-game checks
 are in [blueprint/lumberjack-pvp-handbook.html](../blueprint/lumberjack-pvp-handbook.html#08) part 8.
-Switch manually to [combat/pvp.razor](combat/pvp.razor) with a separate hotkey, using preset 2 for bandage mage sustain.
+Switch manually to [combat/pvp.razor](combat/pvp.razor) with a separate hotkey, enabling the independent bandage, Magery and weapon options as needed.
 Its settings and in-game checks are in [the handbook](../blueprint/lumberjack-pvp-handbook.html#09) part 9.
 
 ## Personal values never go into a script
@@ -68,13 +76,24 @@ assigns them, with line numbers. Bash and awk only.
 
 ## Shared PvP sustain
 
-Use [combat/pvp.razor](combat/pvp.razor) for every template. Set `config__pvp_preset` in that file (1: mage, 2: bandage mage),
-then put capability overrides after the preset block. Bind PvP hotkeys to `Play Script: combat\pvp`.
-`config__pvp_magery = 0` disables automatic spells, `config__pvp_bandage = 1` enables self bandages, and
-`config__pvp_weapon_graphic = 0` leaves equipment manual. A nonzero graphic ID rearms only when both hands are empty.
+Use [combat/pvp.razor](combat/pvp.razor) for every template. Configure independent options in that file.
+Bind PvP hotkeys to `Play Script: combat\pvp`.
+`config__use_magery` and `config__use_weapon` each accept 0/1: spells only, weapons only, both or neither.
+`config__use_bandages = 1` enables self bandages when Healing is available. No preset overrides these settings.
+Settings use `config__*`; state comments explain spell choices, cast waits, equipment serials and caches.
+Urgent item recovery runs before the 30-second supplies scan. Magery and bandages both off skip that scan.
+Stat potions yield only after a drink request; with no drink, the loop can check weapons in the same pass.
+The original action timer names keep their `timer__pvp_*` prefix to preserve retry clocks across Stop and avoid gathering timers.
 
-Attack spells, TK, explosion potions, pet attacks, Hamstring and weapon swaps stay manual. Existing casting or target cursors pause
-all automatic actions, including healing. Stop the script before starting another spell during an automatic self cast.
+Weapon slots default to Norse Axe (31128) on `swing 1` and Great Axe (31190) on `swing 4`.
+Slots 2/3 are disabled with graphic ID 0. Ready slots take priority 4 > 3 > 2 > 1, missing weapons fall through,
+and an already held selection stays equipped. With no ready slot, empty hands rearm in order 1 > 2 > 3 > 4.
+Set each enabled bar to `WeaponSwing` and calibrate its duration in the active client. Weapon checks use
+`cooldown__weapon_check = 300` ms. Arm/Dress must remove conflicting equipment for automatic swaps.
+
+Attack spells, TK, explosion potions, pet attacks, attack targeting and Hamstring stay manual.
+Existing casting or target cursors pause all automatic actions, including healing and equipment.
+Stop the script before starting another spell during an automatic self cast.
 Settings, cursor handling and pending in-game checks are in [the PvP blueprint](../blueprint/pvp.html#05.E).
 
 ## Debug scripts

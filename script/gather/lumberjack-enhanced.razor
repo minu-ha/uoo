@@ -1,16 +1,20 @@
-# Lumberjack gathering loop with bandages, defensive sustain, Tracking and a single home-return attempt.
-# Needs: Hatchets, bandages, reagents, potion and healing hotkeys. Charged runebook/runetome with a rune named Home for automatic return.
-# Before starting, set Tracking Hunt Frequency to Always Get Closest in the game window.
+# Lumberjack gathering with self recovery, independent Tracking setup and one automatic Recall attempt.
+# Needs: Hatchets, bandages, reagents, recovery hotkeys. Automatic Recall needs a charged book with a Home rune.
+# Tracking setup runs once per Play when use_tracking is on, regardless of auto_recall.
+# For Tracking-triggered Recall, set Hunt Frequency to Always Get Closest in the Tracking window.
 # Design and in-game checks: blueprint/lumberjack-pvp-handbook.html part 8.
-# Hotkeys: Bandage Self, Drink Cure, Drink Heal, Drink Refresh, Drink Strength,
-#          Drink Agility, > Smart Heal/Cure Self, > Greater Heal/Cure Self, > Interrupt, Cancel Current Target.
+# Hotkeys: Bandage Self, Drink Cure, Drink Heal, Drink Refresh,
+#          > Smart Heal/Cure Self, > Greater Heal/Cure Self, > Interrupt, Cancel Current Target.
 # Optional cooldown bars: heal pot, walk, reflect. A missing walk or reflect bar cannot
 # protect a cast from movement or reject an early Reflect retry. Check the active character.
 # Warmode and an existing cursor belong to the player. Gathering and self buffs stand down.
 # No attack, TK, summons, Meditation or automatic PvP-script switch belongs to this loop.
-# Session names are lj-prefixed so this loop does not reuse a bard loop's state or timers.
-# A return request stays paused until this script is restarted. Sending Recall is not arrival.
-# Nothing clears system messages inside the loop. Server-event overheads stay in the profile.
+# A Recall decision stops gathering until this script is restarted. Sending Recall is not arrival.
+# This script casts RecallCharge to Home. It does not walk to or enter a moongate.
+# Server-event overheads and manual Tracking displays stay in the profile.
+# The server blocks harvest for 60 seconds after Recall, Moongate, Hike, Teleport or Rope.
+# The profile displays recent-travel refusals. The script does not read that message or restart the delay.
+# The 2-second harvest retry only spaces attempts. It cannot shorten the server travel restriction.
 
 clearall
 clearsysmsg
@@ -25,680 +29,576 @@ endif
 # ####################################################################################
 # # CONFIG
 # ####################################################################################
-@setvar! config__lj_chatty 1
-@setvar! config__lj_use_potions 1
-@setvar! config__lj_use_tracking 1
-@setvar! config__lj_track_red_only 0
-@setvar! config__lj_show_tracking 0
+@setvar! config__chatty 1
+@setvar! config__use_potions 1
 
-# The near-distance chain below covers 1 through 45 reported steps, matching the old loop.
-# Near hostiles always pause harvesting. These switches only decide whether to request home.
-@setvar! config__lj_return_on_hostile 1
-@setvar! config__lj_return_on_any_hostile 0
-@setvar! config__lj_return_on_weight 1
-@setvar! config__lj_weight_remaining 10
-@setvar! config__lj_require_runebook 1
-@setvar! config__lj_low_hatchets 2
+# Automatic Recall only. 0 skips its detection reads, book checks and weight decisions.
+# use_tracking controls startup setup. The profile displays any server Tracking messages.
+@setvar! config__auto_recall 1
+
+# Tracking setup is independent of auto_recall and runs once before the loop.
+@setvar! config__use_tracking 1
+
+# Recall on a Tracking report within 1 through 45 steps. Requires auto_recall and use_tracking.
+@setvar! config__recall_on_detection 1
+
+# Tracking color: 1 red (murderer), 2 grey (criminal), 3 orange (enemy), 4 all three.
+# Grey here means Criminal Players. The profile displays server Tracking messages.
+@setvar! config__tracking_color 1
+@setvar! config__show_tracking 0
+
+@setvar! config__recall_at_any_distance 0
+@setvar! config__recall_on_weight 1
+@setvar! config__weight_remaining 10
+# When automatic Recall is on, pause harvest if no Recall book is available.
+@setvar! config__require_runebook 1
+
+# Warn about spare tools independently of automatic Recall.
+@setvar! config__low_hatchets 2
 
 # Missing hit points, rather than absolute HP. Bandages handle ordinary damage.
-@setvar! config__lj_heal_hits 35
-@setvar! config__lj_emergency_hits 45
-@setvar! config__lj_light_hits 15
-@setvar! config__lj_refresh_stam 15
-@setvar! config__lj_mana_heal 4
-@setvar! config__lj_mana_cure 6
-@setvar! config__lj_mana_greater_heal 11
-@setvar! config__lj_mana_recall 11
+@setvar! config__heal_hits 35
+@setvar! config__emergency_hits 45
+@setvar! config__light_hits 15
+@setvar! config__refresh_stam 15
+@setvar! config__mana_heal 4
+@setvar! config__mana_cure 6
+@setvar! config__mana_greater_heal 11
+@setvar! config__mana_recall 11
 
 # Keep the handbook's 20 mana GH + Teleport budget after a preparation buff.
-@setvar! config__lj_use_reactive_armor 1
-@setvar! config__lj_use_magic_reflect 1
-@setvar! config__lj_mana_reactive_armor 24
-@setvar! config__lj_mana_magic_reflect 34
-@setvar! config__lj_use_stat_potions 0
+@setvar! config__use_reactive_armor 1
+@setvar! config__use_magic_reflect 1
+@setvar! config__mana_reactive_armor 24
+@setvar! config__mana_magic_reflect 34
 
 # Opt in at home. Persistent serials are picked once, never hardcoded or erased in the field.
-@setvar! config__lj_close_house_door 0
-@setvar! config__lj_open_door_graphic 1712
-@setvar! config__lj_deposit_at_stockpile 0
+@setvar! config__close_house_door 0
+@setvar! config__open_door_graphic 1712
+@setvar! config__deposit_at_stockpile 0
 
 # ####################################################################################
 # # WAIT AND COOLDOWN
 # ####################################################################################
-@setvar! wait__lj_short 200
-@setvar! wait__lj_poll 100
-@setvar! wait__lj_target 1000
-@setvar! cooldown__lj_message 3000
-@setvar! cooldown__lj_hostile_alert 5000
-@setvar! cooldown__lj_housekeeping 5000
-@setvar! cooldown__lj_reagents 30000
-@setvar! cooldown__lj_food 60000
-@setvar! cooldown__lj_tracking_retry 10000
-@setvar! cooldown__lj_bandage_retry 1200
-@setvar! cooldown__lj_potion_retry 1000
-@setvar! cooldown__lj_heal_retry 2500
-@setvar! cooldown__lj_buff_retry 10000
-@setvar! cooldown__lj_harvest_retry 2000
-@setvar! cooldown__lj_return_response 5000
-@setvar! cooldown__lj_stockpile 10000
+@setvar! wait__short 200
+@setvar! wait__poll 100
+@setvar! wait__target 1000
 
-# The official harvest travel restriction is 60 seconds. Start a conservative wait only
-# when the server refuses a harvest. This is not a reading of the server's remaining time.
-@setvar! cooldown__lj_travel 60000
+@setvar! cooldown__message 3000
+@setvar! cooldown__housekeeping 5000
+@setvar! cooldown__reagents 30000
+@setvar! cooldown__food 60000
+
+@setvar! cooldown__bandage_retry 1200
+@setvar! cooldown__potion_retry 1000
+@setvar! cooldown__heal_retry 2500
+@setvar! cooldown__buff_retry 10000
+@setvar! cooldown__harvest_retry 2000
+
+@setvar! cooldown__recall_scan 5000
+@setvar! cooldown__recall_response 5000
+@setvar! cooldown__stockpile 10000
 
 # ####################################################################################
 # # TIMER
 # ####################################################################################
-# Only the travel rejection clock survives restarts without being made ready again.
-if not timerexists "timer__lj_travel"
-    createtimer "timer__lj_travel"
-    settimer "timer__lj_travel" cooldown__lj_travel
+# Retry clocks are made ready on startup. Recall requests remain single-attempt.
+if not timerexists "timer__message"
+    createtimer "timer__message"
 endif
 
-if not timerexists "timer__lj_message"
-    createtimer "timer__lj_message"
-endif
-if not timerexists "timer__lj_hostile_alert"
-    createtimer "timer__lj_hostile_alert"
-endif
-if not timerexists "timer__lj_housekeeping"
-    createtimer "timer__lj_housekeeping"
-endif
-if not timerexists "timer__lj_reagents"
-    createtimer "timer__lj_reagents"
-endif
-if not timerexists "timer__lj_food"
-    createtimer "timer__lj_food"
-endif
-if not timerexists "timer__lj_tracking"
-    createtimer "timer__lj_tracking"
-endif
-if not timerexists "timer__lj_bandage"
-    createtimer "timer__lj_bandage"
-endif
-if not timerexists "timer__lj_cure_potion"
-    createtimer "timer__lj_cure_potion"
-endif
-if not timerexists "timer__lj_heal_potion"
-    createtimer "timer__lj_heal_potion"
-endif
-if not timerexists "timer__lj_refresh"
-    createtimer "timer__lj_refresh"
-endif
-if not timerexists "timer__lj_heal"
-    createtimer "timer__lj_heal"
-endif
-if not timerexists "timer__lj_buff"
-    createtimer "timer__lj_buff"
-endif
-if not timerexists "timer__lj_harvest"
-    createtimer "timer__lj_harvest"
-endif
-if not timerexists "timer__lj_return"
-    createtimer "timer__lj_return"
-endif
-if not timerexists "timer__lj_stockpile"
-    createtimer "timer__lj_stockpile"
+if not timerexists "timer__housekeeping"
+    createtimer "timer__housekeeping"
 endif
 
-settimer "timer__lj_message" cooldown__lj_message
-settimer "timer__lj_hostile_alert" cooldown__lj_hostile_alert
-settimer "timer__lj_housekeeping" cooldown__lj_housekeeping
-settimer "timer__lj_reagents" cooldown__lj_reagents
-settimer "timer__lj_food" cooldown__lj_food
-settimer "timer__lj_tracking" cooldown__lj_tracking_retry
-settimer "timer__lj_bandage" cooldown__lj_bandage_retry
-settimer "timer__lj_cure_potion" cooldown__lj_potion_retry
-settimer "timer__lj_heal_potion" cooldown__lj_potion_retry
-settimer "timer__lj_refresh" cooldown__lj_potion_retry
-settimer "timer__lj_heal" cooldown__lj_heal_retry
-settimer "timer__lj_buff" cooldown__lj_buff_retry
-settimer "timer__lj_harvest" cooldown__lj_harvest_retry
-settimer "timer__lj_return" 0
-settimer "timer__lj_stockpile" cooldown__lj_stockpile
+if not timerexists "timer__reagents"
+    createtimer "timer__reagents"
+endif
+
+if not timerexists "timer__food"
+    createtimer "timer__food"
+endif
+
+if not timerexists "timer__bandage"
+    createtimer "timer__bandage"
+endif
+
+if not timerexists "timer__cure_potion"
+    createtimer "timer__cure_potion"
+endif
+
+if not timerexists "timer__heal_potion"
+    createtimer "timer__heal_potion"
+endif
+
+if not timerexists "timer__refresh"
+    createtimer "timer__refresh"
+endif
+
+if not timerexists "timer__heal"
+    createtimer "timer__heal"
+endif
+
+if not timerexists "timer__buff"
+    createtimer "timer__buff"
+endif
+
+if not timerexists "timer__harvest"
+    createtimer "timer__harvest"
+endif
+
+if not timerexists "timer__recall_scan"
+    createtimer "timer__recall_scan"
+endif
+
+if not timerexists "timer__recall"
+    createtimer "timer__recall"
+endif
+
+if not timerexists "timer__stockpile"
+    createtimer "timer__stockpile"
+endif
+
+settimer "timer__message" cooldown__message
+settimer "timer__housekeeping" cooldown__housekeeping
+settimer "timer__reagents" cooldown__reagents
+settimer "timer__food" cooldown__food
+settimer "timer__bandage" cooldown__bandage_retry
+settimer "timer__cure_potion" cooldown__potion_retry
+settimer "timer__heal_potion" cooldown__potion_retry
+settimer "timer__refresh" cooldown__potion_retry
+settimer "timer__heal" cooldown__heal_retry
+settimer "timer__buff" cooldown__buff_retry
+settimer "timer__harvest" cooldown__harvest_retry
+settimer "timer__recall_scan" cooldown__recall_scan
+settimer "timer__recall" 0
+settimer "timer__stockpile" cooldown__stockpile
 
 # ####################################################################################
 # # STATE
 # ####################################################################################
-@setvar! var__lj_danger 0
-@setvar! var__lj_hostile_seen 0
-# Return reason: 0 none, 1 hostile, 2 weight. Stage: 0 waiting, 1 sent, 2 blocked, 3 unknown.
-@setvar! var__lj_return_reason 0
-@setvar! var__lj_return_stage 0
-@setvar! var__lj_saving 0
-@setvar! var__lj_book_ok 0
-@setvar! var__lj_hatchet 0
-@setvar! var__lj_hatchet_ready 0
-@setvar! var__lj_tracking_filter 0
-@setvar! var__lj_tracking_ready 0
-@setvar! var__lj_tracking_response 0
-@setvar! var__lj_bandage_ok 0
-@setvar! var__lj_heal_spell 0
-@setvar! var__lj_regs_heal 0
-@setvar! var__lj_regs_cure 0
-@setvar! var__lj_regs_greater_heal 0
-@setvar! var__lj_regs_reactive_armor 0
-@setvar! var__lj_regs_reflect 0
+# 1 only on a pass that ran housekeeping. Poll reagent errors at that pass's end, after Tracking.
+@setvar! var__housekeeping_pass 0
 
-if config__lj_close_house_door = 1 and not varexist global__my_house_door
+# Recall decision: 0 keep gathering, 1 stop optional work and attempt Recall when input is free.
+# Detection or low spare weight sets this to 1. Only restarting the script resets it.
+@setvar! var__recall_needed 0
+
+# 1 after sending RecallCharge. Prevents repeated Recall commands, including after a failure.
+@setvar! var__recall_sent 0
+
+# 1 after showing a server refusal or the 5-second result-check notice. Does not prove arrival.
+@setvar! var__recall_notice_shown 0
+
+# Own-book presence, refreshed every 5 seconds before automatic Recall is sent.
+# Initial 0 keeps book-required gathering paused until the first inventory check.
+@setvar! var__recall_book_available 0
+
+# Last verified equipped Hatchet serial. 0 means no verified tool yet.
+@setvar! var__hatchet 0
+# 1 only after checking the equipped hand this harvest attempt. A dclick alone is not proof.
+@setvar! var__hatchet_equipped 0
+
+# 1 after the server confirms the configured hunt color during startup.
+@setvar! var__tracking_filter_confirmed 0
+# 1 if Hunting was active at startup or the last Recall scan. No repeated gump setup in the loop.
+@setvar! var__tracking_hunting_active 0
+# Temporary button-response flag. Wait for each response before cycling the next filter.
+@setvar! var__tracking_button_answered 0
+
+# 1 if the most recent bandage search found a bandage. 0 permits the light-Heal fallback.
+@setvar! var__bandage_available 0
+# This pass's healing choice: 0 none, 1 Smart Heal/Cure Self, 2 Greater Heal/Cure Self.
+@setvar! var__heal_spell 0
+
+# Own reagent presence: 0 missing, 1 found. Housekeeping refreshes these every 30 seconds.
+@setvar! var__garlic 0
+@setvar! var__ginseng 0
+@setvar! var__mandrake 0
+@setvar! var__ash 0
+@setvar! var__silk 0
+
+# Spell recipe availability: 1 only when all required reagents were found in the same refresh.
+@setvar! var__regs_heal 0
+@setvar! var__regs_cure 0
+@setvar! var__regs_greater_heal 0
+@setvar! var__regs_reactive_armor 0
+@setvar! var__regs_reflect 0
+# 1 when this pass issued a self-buff cast. Starts its retry clock and bounded cast wait.
+@setvar! var__buff_cast 0
+
+if config__close_house_door = 1 and not varexist global__my_house_door
     overhead "[ door, pick ]" 55
     setvar global__my_house_door
 endif
 
-if config__lj_deposit_at_stockpile = 1 and not varexist global__my_resource_stockpile
+if config__deposit_at_stockpile = 1 and not varexist global__my_resource_stockpile
     overhead "[ stockpile, pick ]" 55
     setvar global__my_resource_stockpile
 endif
 
-if config__lj_chatty = 1
+sysmsg "Lumberjack enhanced v4 loaded: auto recall={{config__auto_recall}}, tracking color={{config__tracking_color}}." 88
+if config__chatty = 1
     overhead "[ lumberjack, on ]" 90
+endif
+
+# ####################################################################################
+# # TRACKING SETUP
+# ####################################################################################
+# Set the selected color and Hunting once, even when automatic Recall is off.
+# A failed setup requires a restart. No danger decision belongs in this setup.
+if config__use_tracking = 1 and skill "Tracking" > 0
+    if diffhits < config__heal_hits and not poisoned and not warmode
+        if not hidden and not queued and not casting and not targetexists
+            # Discard a previous selection's confirmation before sending a new response.
+            if insysmsg "You will now hunt"
+                # No blanket journal clear belongs here.
+            endif
+            useskill "Tracking"
+            waitforgump 4267467659 wait__target
+            @setvar! var__tracking_filter_confirmed 0
+
+            if gumpexists 4267467659
+                # Button 8 cycles ten hunt filters. Bound the attempt to one complete rotation.
+                for 10
+                    if diffhits >= config__heal_hits or poisoned or warmode or hidden or queued or casting or targetexists
+                        break
+                    endif
+                    if not gumpexists 4267467659
+                        break
+                    endif
+                    gumpresponse 8 4267467659
+                    @setvar! var__tracking_button_answered 0
+                    # Only one selection is outstanding. Do not outrun a delayed server response.
+                    for 60
+                        if diffhits >= config__heal_hits or poisoned or warmode or hidden or queued or casting or targetexists
+                            break
+                        endif
+                        if config__tracking_color = 1
+                            if insysmsg "You will now hunt murderer players"
+                                @setvar! var__tracking_filter_confirmed 1
+                                @setvar! var__tracking_button_answered 1
+                                break
+                            endif
+                        elseif config__tracking_color = 2
+                            if insysmsg "You will now hunt criminal players"
+                                @setvar! var__tracking_filter_confirmed 1
+                                @setvar! var__tracking_button_answered 1
+                                break
+                            endif
+                        elseif config__tracking_color = 3
+                            if insysmsg "You will now hunt enemy players"
+                                @setvar! var__tracking_filter_confirmed 1
+                                @setvar! var__tracking_button_answered 1
+                                break
+                            endif
+                        elseif config__tracking_color = 4
+                            if insysmsg "You will now hunt all hostile players"
+                                @setvar! var__tracking_filter_confirmed 1
+                                @setvar! var__tracking_button_answered 1
+                                break
+                            endif
+                        endif
+                        if insysmsg "You will now hunt"
+                            @setvar! var__tracking_button_answered 1
+                            break
+                        endif
+                        wait wait__poll
+                    endfor
+                    if var__tracking_filter_confirmed = 1 or var__tracking_button_answered = 0
+                        break
+                    endif
+                endfor
+
+                if var__tracking_filter_confirmed = 1 and gumpexists 4267467659 and diffhits < config__heal_hits and not poisoned and not warmode and not hidden and not queued and not casting and not targetexists
+                    # Button 6 toggles Hunting. Keep an already active mode on.
+                    if not findbuff "tracking"
+                        gumpresponse 6 4267467659
+                        wait wait__short
+                    endif
+                    if findbuff "tracking"
+                        @setvar! var__tracking_hunting_active 1
+                    endif
+                    if config__show_tracking = 0
+                        gumpclose 4267467659
+                    endif
+                elseif timer "timer__message" >= cooldown__message
+                    overhead "[ track, miss ]" 53
+                    settimer "timer__message" 0
+                endif
+            elseif timer "timer__message" >= cooldown__message
+                overhead "[ track, miss ]" 53
+                settimer "timer__message" 0
+            endif
+        endif
+    endif
 endif
 
 # ####################################################################################
 # # MAIN LOOP
 # ####################################################################################
 while not dead
-    # The pvp expression means structured-PvP script restrictions, not a field PK encounter.
+    # The pvp expression means structured-PvP restrictions, not a field PK encounter.
     if pvp
         overhead "[ script, blocked ]" 53
         stop
     endif
 
-    # ####################################################################################
-    # # EVENTS AND PAUSE REQUESTS
-    # ####################################################################################
-    # A verified filter and a live Hunting buff are both required before gathering.
-    if not findbuff "tracking"
-        @setvar! var__lj_tracking_ready 0
-        @setvar! var__lj_tracking_filter 0
-    elseif var__lj_tracking_filter = 1
-        @setvar! var__lj_tracking_ready 1
-    endif
-
-    @setvar! var__lj_hostile_seen 0
-    if config__lj_use_tracking = 1
-        # The distance chain is inserted here as literal branches. Razor cannot compare a
-        # numeric script variable against a threshold or extract a number from this message.
-        if var__lj_tracking_ready = 1 and var__lj_danger = 0
-            if insysmsg "Distance to destination: 45 steps" or insysmsg "(45 spaces to target)"
-                @setvar! var__lj_danger 1
-            elseif insysmsg "Distance to destination: 44 steps" or insysmsg "(44 spaces to target)"
-                @setvar! var__lj_danger 1
-            elseif insysmsg "Distance to destination: 43 steps" or insysmsg "(43 spaces to target)"
-                @setvar! var__lj_danger 1
-            elseif insysmsg "Distance to destination: 42 steps" or insysmsg "(42 spaces to target)"
-                @setvar! var__lj_danger 1
-            elseif insysmsg "Distance to destination: 41 steps" or insysmsg "(41 spaces to target)"
-                @setvar! var__lj_danger 1
-            elseif insysmsg "Distance to destination: 40 steps" or insysmsg "(40 spaces to target)"
-                @setvar! var__lj_danger 1
-            elseif insysmsg "Distance to destination: 39 steps" or insysmsg "(39 spaces to target)"
-                @setvar! var__lj_danger 1
-            elseif insysmsg "Distance to destination: 38 steps" or insysmsg "(38 spaces to target)"
-                @setvar! var__lj_danger 1
-            elseif insysmsg "Distance to destination: 37 steps" or insysmsg "(37 spaces to target)"
-                @setvar! var__lj_danger 1
-            elseif insysmsg "Distance to destination: 36 steps" or insysmsg "(36 spaces to target)"
-                @setvar! var__lj_danger 1
-            elseif insysmsg "Distance to destination: 35 steps" or insysmsg "(35 spaces to target)"
-                @setvar! var__lj_danger 1
-            elseif insysmsg "Distance to destination: 34 steps" or insysmsg "(34 spaces to target)"
-                @setvar! var__lj_danger 1
-            elseif insysmsg "Distance to destination: 33 steps" or insysmsg "(33 spaces to target)"
-                @setvar! var__lj_danger 1
-            elseif insysmsg "Distance to destination: 32 steps" or insysmsg "(32 spaces to target)"
-                @setvar! var__lj_danger 1
-            elseif insysmsg "Distance to destination: 31 steps" or insysmsg "(31 spaces to target)"
-                @setvar! var__lj_danger 1
-            elseif insysmsg "Distance to destination: 30 steps" or insysmsg "(30 spaces to target)"
-                @setvar! var__lj_danger 1
-            elseif insysmsg "Distance to destination: 29 steps" or insysmsg "(29 spaces to target)"
-                @setvar! var__lj_danger 1
-            elseif insysmsg "Distance to destination: 28 steps" or insysmsg "(28 spaces to target)"
-                @setvar! var__lj_danger 1
-            elseif insysmsg "Distance to destination: 27 steps" or insysmsg "(27 spaces to target)"
-                @setvar! var__lj_danger 1
-            elseif insysmsg "Distance to destination: 26 steps" or insysmsg "(26 spaces to target)"
-                @setvar! var__lj_danger 1
-            elseif insysmsg "Distance to destination: 25 steps" or insysmsg "(25 spaces to target)"
-                @setvar! var__lj_danger 1
-            elseif insysmsg "Distance to destination: 24 steps" or insysmsg "(24 spaces to target)"
-                @setvar! var__lj_danger 1
-            elseif insysmsg "Distance to destination: 23 steps" or insysmsg "(23 spaces to target)"
-                @setvar! var__lj_danger 1
-            elseif insysmsg "Distance to destination: 22 steps" or insysmsg "(22 spaces to target)"
-                @setvar! var__lj_danger 1
-            elseif insysmsg "Distance to destination: 21 steps" or insysmsg "(21 spaces to target)"
-                @setvar! var__lj_danger 1
-            elseif insysmsg "Distance to destination: 20 steps" or insysmsg "(20 spaces to target)"
-                @setvar! var__lj_danger 1
-            elseif insysmsg "Distance to destination: 19 steps" or insysmsg "(19 spaces to target)"
-                @setvar! var__lj_danger 1
-            elseif insysmsg "Distance to destination: 18 steps" or insysmsg "(18 spaces to target)"
-                @setvar! var__lj_danger 1
-            elseif insysmsg "Distance to destination: 17 steps" or insysmsg "(17 spaces to target)"
-                @setvar! var__lj_danger 1
-            elseif insysmsg "Distance to destination: 16 steps" or insysmsg "(16 spaces to target)"
-                @setvar! var__lj_danger 1
-            elseif insysmsg "Distance to destination: 15 steps" or insysmsg "(15 spaces to target)"
-                @setvar! var__lj_danger 1
-            elseif insysmsg "Distance to destination: 14 steps" or insysmsg "(14 spaces to target)"
-                @setvar! var__lj_danger 1
-            elseif insysmsg "Distance to destination: 13 steps" or insysmsg "(13 spaces to target)"
-                @setvar! var__lj_danger 1
-            elseif insysmsg "Distance to destination: 12 steps" or insysmsg "(12 spaces to target)"
-                @setvar! var__lj_danger 1
-            elseif insysmsg "Distance to destination: 11 steps" or insysmsg "(11 spaces to target)"
-                @setvar! var__lj_danger 1
-            elseif insysmsg "Distance to destination: 10 steps" or insysmsg "(10 spaces to target)"
-                @setvar! var__lj_danger 1
-            elseif insysmsg "Distance to destination: 9 steps" or insysmsg "(9 spaces to target)"
-                @setvar! var__lj_danger 1
-            elseif insysmsg "Distance to destination: 8 steps" or insysmsg "(8 spaces to target)"
-                @setvar! var__lj_danger 1
-            elseif insysmsg "Distance to destination: 7 steps" or insysmsg "(7 spaces to target)"
-                @setvar! var__lj_danger 1
-            elseif insysmsg "Distance to destination: 6 steps" or insysmsg "(6 spaces to target)"
-                @setvar! var__lj_danger 1
-            elseif insysmsg "Distance to destination: 5 steps" or insysmsg "(5 spaces to target)"
-                @setvar! var__lj_danger 1
-            elseif insysmsg "Distance to destination: 4 steps" or insysmsg "(4 spaces to target)"
-                @setvar! var__lj_danger 1
-            elseif insysmsg "Distance to destination: 3 steps" or insysmsg "(3 spaces to target)"
-                @setvar! var__lj_danger 1
-            elseif insysmsg "Distance to destination: 2 steps" or insysmsg "(2 spaces to target)"
-                @setvar! var__lj_danger 1
-            elseif insysmsg "Distance to destination: 1 steps" or insysmsg "(1 spaces to target)"
-                @setvar! var__lj_danger 1
-            endif
-        endif
-        # Read the near-distance line first. A match can consume older journal events too.
-        if insysmsg "Now tracking:" or insysmsg "Distance to destination:"
-            if var__lj_tracking_ready = 1
-                @setvar! var__lj_hostile_seen 1
-                if config__lj_return_on_any_hostile = 1
-                    @setvar! var__lj_danger 1
-                endif
-            endif
-        endif
-    endif
-
-    if insysmsg "world will save" or insysmsg "world is saving"
-        @setvar! var__lj_saving 1
-    endif
-    if insysmsg "save complete"
-        @setvar! var__lj_saving 0
-    endif
-
-    if insysmsg "You have recently traveled"
-        settimer "timer__lj_travel" 0
-        overhead "[ harvest, wait ]" 53
-    elseif insysmsg "You do not see any harvestable resources nearby"
-        settimer "timer__lj_harvest" 0
-        if timer "timer__lj_message" >= cooldown__lj_message
-            overhead "[ harvest, out ]" 53
-            settimer "timer__lj_message" 0
-        endif
-    elseif insysmsg "There's not enough wood here to harvest."
-        # The profile already displays [ wood, out ] for this server line.
-        settimer "timer__lj_harvest" 0
-    elseif insysmsg "harvesting is not allowed"
-        settimer "timer__lj_harvest" 0
-        if timer "timer__lj_message" >= cooldown__lj_message
-            overhead "[ harvest, blocked ]" 53
-            settimer "timer__lj_message" 0
-        endif
-    endif
-
-    if var__lj_danger = 1
-        if timer "timer__lj_hostile_alert" >= cooldown__lj_hostile_alert
-            overhead "[ hostile, near ]" 53
-            settimer "timer__lj_hostile_alert" 0
-        endif
-        if config__lj_return_on_hostile = 1 and var__lj_return_reason = 0
-            @setvar! var__lj_return_reason 1
-        endif
-    elseif var__lj_hostile_seen = 1 and timer "timer__lj_hostile_alert" >= cooldown__lj_hostile_alert
-        overhead "[ hostile, seen ]" 53
-        settimer "timer__lj_hostile_alert" 0
-    endif
-
-    if diffweight <= config__lj_weight_remaining
-        if timer "timer__lj_message" >= cooldown__lj_message
-            overhead "[ weight, low ]" 53
-            settimer "timer__lj_message" 0
-        endif
-        if config__lj_return_on_weight = 1 and var__lj_return_reason = 0
-            @setvar! var__lj_return_reason 2
-        endif
-    endif
-
-    # Read return failures in later passes too. A slow response must not be taken as arrival.
-    if var__lj_return_stage = 1 or var__lj_return_stage = 3
-        if insysmsg "Magical travel is not allowed in this location." or insysmsg "Magical travel from inside a dungeon is only possible near golden moongates."
-            @setvar! var__lj_return_stage 2
-            overhead "[ return, blocked ]" 53
-        elseif var__lj_return_stage = 1 and timer "timer__lj_return" >= cooldown__lj_return_response
-            @setvar! var__lj_return_stage 3
-            overhead "[ return, check ]" 55
-        endif
-    endif
+    @setvar! var__housekeeping_pass 0
 
     # ####################################################################################
     # # SURVIVAL
     # ####################################################################################
     # No unbounded casting drain. Manual casts and cursors block actions, not state reads.
+    # PARALYSIS: use a trapped pouch before other recovery.
     if paralyzed
         if findtype 3705 backpack 38
             yell "[Pouch"
-            wait wait__lj_short
-        elseif timer "timer__lj_message" >= cooldown__lj_message
+            wait wait__short
+        elseif timer "timer__message" >= cooldown__message
             overhead "[ pouch, out ]" 53
-            settimer "timer__lj_message" 0
+            settimer "timer__message" 0
         endif
     endif
 
-    @setvar! var__lj_heal_spell 0
-    if poisoned and config__lj_use_potions = 1 and timer "timer__lj_cure_potion" >= cooldown__lj_potion_retry and not hidden and not queued and not casting and not targetexists
-        if findtype "Orange Potion" self
-            hotkey "Drink Cure"
-            settimer "timer__lj_cure_potion" 0
-            wait wait__lj_short
-        elseif timer "timer__lj_message" >= cooldown__lj_message
-            overhead "[ cure pot, out ]" 53
-            settimer "timer__lj_message" 0
+    # CURE: potions first, then select the self-healing agent if reagents permit.
+    @setvar! var__heal_spell 0
+    if poisoned and config__use_potions = 1
+        if timer "timer__cure_potion" >= cooldown__potion_retry
+            if not hidden and not queued and not casting and not targetexists
+                if findtype "Orange Potion" self
+                    hotkey "Drink Cure"
+                    settimer "timer__cure_potion" 0
+                    wait wait__short
+                elseif timer "timer__message" >= cooldown__message
+                    overhead "[ cure pot, out ]" 53
+                    settimer "timer__message" 0
+                endif
+            endif
         endif
     endif
 
-    if poisoned and var__lj_regs_cure = 1 and mana >= config__lj_mana_cure
-        @setvar! var__lj_heal_spell 1
+    if poisoned and var__regs_cure = 1 and mana >= config__mana_cure
+        @setvar! var__heal_spell 1
     endif
 
+    # BANDAGE: ordinary recovery, with no restart while a bandage is running.
     if diffhits > 0 or poisoned
-        if not bandaging and skill "Healing" > 0 and timer "timer__lj_bandage" >= cooldown__lj_bandage_retry and not hidden and not queued and not casting and not targetexists
-            @setvar! var__lj_bandage_ok 0
-            if findtype 3617 self
-                @setvar! var__lj_bandage_ok 1
-                hotkey "Bandage Self"
-                settimer "timer__lj_bandage" 0
-                wait wait__lj_short
-            elseif timer "timer__lj_message" >= cooldown__lj_message
-                overhead "[ bandage, out ]" 53
-                settimer "timer__lj_message" 0
-            endif
-        endif
-    endif
-
-    if diffhits >= config__lj_heal_hits and not poisoned and config__lj_use_potions = 1 and cooldown "heal pot" = 0 and timer "timer__lj_heal_potion" >= cooldown__lj_potion_retry and not hidden and not queued and not casting and not targetexists
-        if findtype "Yellow Potion" self as alias__lj_heal_potion
-            getlabel alias__lj_heal_potion label__lj_heal_potion
-            if "next usable" in label__lj_heal_potion
-                # The label remains authoritative when the heal pot bar is missing.
-            else
-                hotkey "Drink Heal"
-                settimer "timer__lj_heal_potion" 0
-                wait wait__lj_short
-            endif
-        elseif timer "timer__lj_message" >= cooldown__lj_message
-            overhead "[ heal pot, out ]" 53
-            settimer "timer__lj_message" 0
-        endif
-    endif
-
-    if diffhits >= config__lj_emergency_hits and not poisoned and var__lj_regs_greater_heal = 1 and mana >= config__lj_mana_greater_heal
-        @setvar! var__lj_heal_spell 2
-    elseif diffhits >= config__lj_light_hits and not poisoned and not bandaging and var__lj_regs_heal = 1 and mana >= config__lj_mana_heal
-        if skill "Healing" = 0 or var__lj_bandage_ok = 0
-            @setvar! var__lj_heal_spell 1
-        endif
-    endif
-
-    if var__lj_heal_spell != 0 and timer "timer__lj_heal" >= cooldown__lj_heal_retry and not warmode and not hidden and not queued and not casting and not targetexists and cooldown "walk" = 0
-        if insysmsg "Your concentration is disturbed, thus ruining thy spell."
-            # Consume a previous cast's line before beginning our own agent.
-        endif
-        if var__lj_heal_spell = 2
-            hotkey "> Greater Heal/Cure Self"
-        else
-            hotkey "> Smart Heal/Cure Self"
-        endif
-        settimer "timer__lj_heal" 0
-        wait wait__lj_short
-        for 60
-            if not casting
-                break
-            endif
-            if insysmsg "Your concentration is disturbed, thus ruining thy spell."
-                break
-            endif
-            wait wait__lj_poll
-        endfor
-        if insysmsg "Your concentration is disturbed, thus ruining thy spell."
-            # Do not leave an agent's disturbance for a later targeted action.
-        endif
-        if targetexists and diffhits = 0 and not poisoned
-            hotkey "Cancel Current Target"
-            wait wait__lj_short
-        endif
-    endif
-
-    if stam <= config__lj_refresh_stam and config__lj_use_potions = 1 and timer "timer__lj_refresh" >= cooldown__lj_potion_retry and not hidden and not queued and not casting and not targetexists
-        if findtype "Red Potion" backpack
-            hotkey "Drink Refresh"
-            settimer "timer__lj_refresh" 0
-            wait wait__lj_short
-        elseif timer "timer__lj_message" >= cooldown__lj_message
-            overhead "[ refresh, out ]" 53
-            settimer "timer__lj_message" 0
-        endif
-    endif
-
-    # ####################################################################################
-    # # REAGENTS
-    # ####################################################################################
-    if timer "timer__lj_reagents" >= cooldown__lj_reagents or insysmsg "More reagents are needed"
-        settimer "timer__lj_reagents" 0
-        @setvar! var__lj_garlic 0
-        @setvar! var__lj_ginseng 0
-        @setvar! var__lj_mandrake 0
-        @setvar! var__lj_ash 0
-        @setvar! var__lj_silk 0
-        if findtype 3972 self
-            @setvar! var__lj_garlic 1
-        endif
-        if findtype 3973 self
-            @setvar! var__lj_ginseng 1
-        endif
-        if findtype 3974 self
-            @setvar! var__lj_mandrake 1
-        endif
-        if findtype 3980 self
-            @setvar! var__lj_ash 1
-        endif
-        if findtype 3981 self
-            @setvar! var__lj_silk 1
-        endif
-        @setvar! var__lj_regs_heal 0
-        @setvar! var__lj_regs_cure 0
-        @setvar! var__lj_regs_greater_heal 0
-        @setvar! var__lj_regs_reactive_armor 0
-        @setvar! var__lj_regs_reflect 0
-        if var__lj_garlic = 1 and var__lj_ginseng = 1
-            @setvar! var__lj_regs_cure 1
-            if var__lj_silk = 1
-                @setvar! var__lj_regs_heal 1
-                if var__lj_mandrake = 1
-                    @setvar! var__lj_regs_greater_heal 1
+        if not bandaging and skill "Healing" > 0
+            if timer "timer__bandage" >= cooldown__bandage_retry
+                if not hidden and not queued and not casting and not targetexists
+                    @setvar! var__bandage_available 0
+                    if findtype 3617 self
+                        @setvar! var__bandage_available 1
+                        hotkey "Bandage Self"
+                        settimer "timer__bandage" 0
+                        wait wait__short
+                    elseif timer "timer__message" >= cooldown__message
+                        overhead "[ bandage, out ]" 53
+                        settimer "timer__message" 0
+                    endif
                 endif
             endif
         endif
-        if var__lj_garlic = 1 and var__lj_silk = 1
-            if var__lj_ash = 1
-                @setvar! var__lj_regs_reactive_armor 1
-            endif
-            if var__lj_mandrake = 1
-                @setvar! var__lj_regs_reflect 1
+    endif
+
+    # HEAL POTION: check both the bar and the potion label.
+    if diffhits >= config__heal_hits and not poisoned and config__use_potions = 1
+        if cooldown "heal pot" = 0 and timer "timer__heal_potion" >= cooldown__potion_retry
+            if not hidden and not queued and not casting and not targetexists
+                if findtype "Yellow Potion" self as alias__heal_potion
+                    getlabel alias__heal_potion label__heal_potion
+                    if "next usable" in label__heal_potion
+                        # The label remains authoritative when the heal pot bar is missing.
+                    else
+                        hotkey "Drink Heal"
+                        settimer "timer__heal_potion" 0
+                        wait wait__short
+                    endif
+                elseif timer "timer__message" >= cooldown__message
+                    overhead "[ heal pot, out ]" 53
+                    settimer "timer__message" 0
+                endif
             endif
         endif
     endif
 
-    # ####################################################################################
-    # # HOME RETURN
-    # ####################################################################################
-    # One command per run. Never turn a missing error message into a success signal.
-    if var__lj_return_reason != 0 and var__lj_return_stage = 0
-        if findbuff "Heat of Battle"
-            @setvar! var__lj_return_stage 2
-            overhead "[ return, blocked ]" 53
-        elseif mana >= config__lj_mana_recall and var__lj_saving = 0 and not paralyzed and not warmode and not hidden and not queued and not casting and not targetexists and cooldown "walk" = 0
-            if findtype "runebook" backpack or findtype "runetome" backpack
-                # Change Home here to the name of your rune. This is the only destination.
-                say "[RecallCharge Home"
-                @setvar! var__lj_return_stage 1
-                settimer "timer__lj_return" 0
-                if config__lj_chatty = 1
-                    overhead "[ return, on ]" 90
-                endif
-                wait wait__lj_short
-            elseif timer "timer__lj_message" >= cooldown__lj_message
-                overhead "[ runebook, out ]" 53
-                settimer "timer__lj_message" 0
+    # HEALING SPELL: stronger recovery takes priority over a light Heal.
+    if diffhits >= config__emergency_hits and not poisoned and var__regs_greater_heal = 1 and mana >= config__mana_greater_heal
+        @setvar! var__heal_spell 2
+    elseif diffhits >= config__light_hits and not poisoned and not bandaging
+        if var__regs_heal = 1 and mana >= config__mana_heal
+            if skill "Healing" = 0 or var__bandage_available = 0
+                @setvar! var__heal_spell 1
             endif
-        elseif mana < config__lj_mana_recall and timer "timer__lj_message" >= cooldown__lj_message
-            overhead "[ mana, low ]" 53
-            settimer "timer__lj_message" 0
         endif
     endif
 
-    # ####################################################################################
-    # # TRACKING
-    # ####################################################################################
-    if config__lj_use_tracking = 1 and skill "Tracking" > 0 and var__lj_tracking_ready = 0 and timer "timer__lj_tracking" >= cooldown__lj_tracking_retry and var__lj_danger = 0 and var__lj_return_reason = 0 and var__lj_saving = 0 and diffhits < config__lj_heal_hits and not poisoned and not warmode and not hidden and not queued and not casting and not targetexists
-        settimer "timer__lj_tracking" 0
-        # Discard a previous selection's confirmation before sending a new response.
-        if insysmsg "You will now hunt"
-            # No blanket journal clear belongs here.
-        endif
-        useskill "Tracking"
-        waitforgump 4267467659 wait__lj_target
-        @setvar! var__lj_tracking_filter 0
-        if gumpexists 4267467659
-            # Button 8 cycles ten hunt filters. Bound the attempt to one complete rotation.
-            for 10
-                if diffhits >= config__lj_heal_hits or poisoned or warmode or casting or targetexists
-                    break
+    # SELF AGENT: bound the cast wait and leave existing manual casts alone.
+    if var__heal_spell != 0 and not warmode
+        if timer "timer__heal" >= cooldown__heal_retry
+            if not hidden and not queued and not casting and not targetexists and cooldown "walk" = 0
+                if var__heal_spell = 2
+                    hotkey "> Greater Heal/Cure Self"
+                else
+                    hotkey "> Smart Heal/Cure Self"
                 endif
-                if not gumpexists 4267467659
-                    break
-                endif
-                gumpresponse 8 4267467659
-                @setvar! var__lj_tracking_response 0
-                # Only one selection is outstanding. Do not outrun a delayed server response.
+                settimer "timer__heal" 0
+                wait wait__short
                 for 60
-                    if diffhits >= config__lj_heal_hits or poisoned or warmode or casting or targetexists
+                    if not casting
                         break
                     endif
-                    if config__lj_track_red_only = 1
-                        if insysmsg "You will now hunt murderer players"
-                            @setvar! var__lj_tracking_filter 1
-                            @setvar! var__lj_tracking_response 1
-                            break
-                        endif
-                    elseif insysmsg "You will now hunt all hostile players"
-                        @setvar! var__lj_tracking_filter 1
-                        @setvar! var__lj_tracking_response 1
-                        break
-                    endif
-                    if insysmsg "You will now hunt"
-                        @setvar! var__lj_tracking_response 1
-                        break
-                    endif
-                    wait wait__lj_poll
+                    wait wait__poll
                 endfor
-                if var__lj_tracking_filter = 1 or var__lj_tracking_response = 0
-                    break
+                if targetexists and diffhits = 0 and not poisoned
+                    hotkey "Cancel Current Target"
+                    wait wait__short
                 endif
-            endfor
-            if var__lj_tracking_filter = 1 and gumpexists 4267467659 and diffhits < config__lj_heal_hits and not poisoned and not warmode and not casting and not targetexists
-                # Button 6 toggles Hunting. Keep an already active mode on.
-                if not findbuff "tracking"
-                    gumpresponse 6 4267467659
-                    wait wait__lj_short
-                endif
-                if findbuff "tracking"
-                    @setvar! var__lj_tracking_ready 1
-                endif
-                if config__lj_show_tracking = 0
-                    gumpclose 4267467659
-                endif
-            elseif timer "timer__lj_message" >= cooldown__lj_message
-                overhead "[ track, miss ]" 53
-                settimer "timer__lj_message" 0
             endif
-        elseif timer "timer__lj_message" >= cooldown__lj_message
-            overhead "[ track, miss ]" 53
-            settimer "timer__lj_message" 0
+        endif
+    endif
+
+    # STAMINA: use Refresh only when the input window is free.
+    if stam <= config__refresh_stam and config__use_potions = 1
+        if timer "timer__refresh" >= cooldown__potion_retry
+            if not hidden and not queued and not casting and not targetexists
+                if findtype "Red Potion" backpack
+                    hotkey "Drink Refresh"
+                    settimer "timer__refresh" 0
+                    wait wait__short
+                elseif timer "timer__message" >= cooldown__message
+                    overhead "[ refresh, out ]" 53
+                    settimer "timer__message" 0
+                endif
+            endif
         endif
     endif
 
     # ####################################################################################
     # # HOUSEKEEPING
     # ####################################################################################
-    if timer "timer__lj_housekeeping" >= cooldown__lj_housekeeping
-        settimer "timer__lj_housekeeping" 0
-        @setvar! var__lj_book_ok 0
-        if findtype "runebook" backpack or findtype "runetome" backpack
-            @setvar! var__lj_book_ok 1
-        elseif config__lj_require_runebook = 1 and timer "timer__lj_message" >= cooldown__lj_message
-            overhead "[ runebook, out ]" 53
-            settimer "timer__lj_message" 0
+    # Slow inventory reads share the housekeeping clock.
+    # Reagent shortages are marked after Recall detection, then refreshed here.
+    if timer "timer__housekeeping" >= cooldown__housekeeping
+        settimer "timer__housekeeping" 0
+        @setvar! var__housekeeping_pass 1
+
+        # REAGENTS: refresh presence once, then derive each spell recipe.
+        if timer "timer__reagents" >= cooldown__reagents
+            settimer "timer__reagents" 0
+
+            @setvar! var__garlic 0
+            @setvar! var__ginseng 0
+            @setvar! var__mandrake 0
+            @setvar! var__ash 0
+            @setvar! var__silk 0
+
+            if findtype 3972 self
+                @setvar! var__garlic 1
+            endif
+
+            if findtype 3973 self
+                @setvar! var__ginseng 1
+            endif
+
+            if findtype 3974 self
+                @setvar! var__mandrake 1
+            endif
+
+            if findtype 3980 self
+                @setvar! var__ash 1
+            endif
+
+            if findtype 3981 self
+                @setvar! var__silk 1
+            endif
+
+            @setvar! var__regs_heal 0
+            @setvar! var__regs_cure 0
+            @setvar! var__regs_greater_heal 0
+            @setvar! var__regs_reactive_armor 0
+            @setvar! var__regs_reflect 0
+
+            if var__garlic = 1 and var__ginseng = 1
+                @setvar! var__regs_cure 1
+            endif
+
+            if var__garlic = 1 and var__ginseng = 1 and var__silk = 1
+                @setvar! var__regs_heal 1
+            endif
+
+            if var__garlic = 1 and var__ginseng = 1 and var__silk = 1 and var__mandrake = 1
+                @setvar! var__regs_greater_heal 1
+            endif
+
+            if var__garlic = 1 and var__silk = 1 and var__ash = 1
+                @setvar! var__regs_reactive_armor 1
+            endif
+
+            if var__garlic = 1 and var__silk = 1 and var__mandrake = 1
+                @setvar! var__regs_reflect 1
+            endif
         endif
-        if config__lj_use_tracking = 1 and var__lj_tracking_ready = 0 and timer "timer__lj_message" >= cooldown__lj_message
-            overhead "[ track, check ]" 55
-            settimer "timer__lj_message" 0
-        endif
-        if counttype "hatchet" backpack <= config__lj_low_hatchets
-            if timer "timer__lj_message" >= cooldown__lj_message
+
+        # TOOLS: warn without affecting the automatic Recall setting.
+        if counttype "hatchet" backpack <= config__low_hatchets
+            if timer "timer__message" >= cooldown__message
                 overhead "[ hatchet, low ]" 53
-                settimer "timer__lj_message" 0
+                settimer "timer__message" 0
             endif
         endif
-        if timer "timer__lj_food" >= cooldown__lj_food and var__lj_danger = 0 and var__lj_return_stage != 1 and var__lj_saving = 0 and diffhits < config__lj_light_hits and not poisoned and not warmode and not findbuff "Food Satisfaction" and not hidden and not queued and not casting and not targetexists
-            settimer "timer__lj_food" 0
-            if findtype tray backpack as alias__lj_food
-                dclick alias__lj_food
-                wait wait__lj_short
-            endif
-        endif
-        if config__lj_use_stat_potions = 1 and config__lj_use_potions = 1 and var__lj_danger = 1 and not hidden and not queued and not casting and not targetexists
-            if not findbuff "Strength" and findtype "White Potion" backpack
-                hotkey "Drink Strength"
-                wait wait__lj_short
-            elseif not findbuff "Agility" and findtype "Blue Potion" backpack
-                hotkey "Drink Agility"
-                wait wait__lj_short
-            endif
-        endif
-        if config__lj_close_house_door = 1 and var__lj_danger = 0 and var__lj_return_stage != 1 and var__lj_saving = 0 and diffhits < config__lj_light_hits and not poisoned and not warmode and not hidden and not queued and not casting and not targetexists
-            if findtype config__lj_open_door_graphic ground -1 -1 2 as alias__lj_open_door
-                if alias__lj_open_door = global__my_house_door
-                    dclick alias__lj_open_door
-                    wait wait__lj_short
+
+        # FOOD: skip optional work once a Recall decision is latched.
+        if var__recall_needed = 0 and diffhits < config__light_hits
+            if timer "timer__food" >= cooldown__food
+                if not poisoned and not warmode and not findbuff "Food Satisfaction"
+                    if not hidden and not queued and not casting and not targetexists
+                        settimer "timer__food" 0
+                        if findtype tray backpack as alias__food
+                            dclick alias__food
+                            wait wait__short
+                        endif
+                    endif
                 endif
             endif
         endif
-        if config__lj_deposit_at_stockpile = 1 and timer "timer__lj_stockpile" >= cooldown__lj_stockpile and var__lj_danger = 0 and var__lj_return_stage != 1 and var__lj_saving = 0 and diffhits < config__lj_light_hits and not poisoned and not warmode and not hidden and not queued and not casting and not targetexists
-            if find global__my_resource_stockpile ground -1 -1 2
-                if findtype 7133|7127 backpack
-                    settimer "timer__lj_stockpile" 0
-                    menu global__my_resource_stockpile 0
-                    waitfortarget wait__lj_target
-                    if targetexists
-                        target self
-                        wait wait__lj_short
+
+        # HOUSE DOOR: act only on the persistent door selected before the loop.
+        if config__close_house_door = 1 and var__recall_needed = 0
+            if diffhits < config__light_hits and not poisoned and not warmode
+                if not hidden and not queued and not casting and not targetexists
+                    if findtype config__open_door_graphic ground -1 -1 2 as alias__open_door
+                        if alias__open_door = global__my_house_door
+                            dclick alias__open_door
+                            wait wait__short
+                        endif
                     endif
-                    if targetexists
-                        hotkey "Cancel Current Target"
+                endif
+            endif
+        endif
+
+        # STOCKPILE: keep its cursor separate from manual actions.
+        if config__deposit_at_stockpile = 1 and var__recall_needed = 0
+            if timer "timer__stockpile" >= cooldown__stockpile
+                if diffhits < config__light_hits and not poisoned and not warmode
+                    if not hidden and not queued and not casting and not targetexists
+                        if find global__my_resource_stockpile ground -1 -1 2
+                            if findtype 7133|7127 backpack
+                                settimer "timer__stockpile" 0
+                                menu global__my_resource_stockpile 0
+                                waitfortarget wait__target
+
+                                if targetexists
+                                    target self
+                                    wait wait__short
+                                endif
+
+                                if targetexists
+                                    hotkey "Cancel Current Target"
+                                endif
+                            endif
+                        endif
                     endif
                 endif
             endif
@@ -708,33 +608,33 @@ while not dead
     # ####################################################################################
     # # SELF BUFFS
     # ####################################################################################
-    if timer "timer__lj_buff" >= cooldown__lj_buff_retry and var__lj_danger = 0 and var__lj_return_reason = 0 and var__lj_saving = 0 and diffhits < config__lj_light_hits and not poisoned and not warmode and not hidden and not queued and not casting and not targetexists and cooldown "walk" = 0
-        @setvar! var__lj_buff_cast 0
-        if config__lj_use_reactive_armor = 1 and not findbuff "Reactive Armor" and var__lj_regs_reactive_armor = 1 and mana >= config__lj_mana_reactive_armor
-            cast "Reactive Armor"
-            @setvar! var__lj_buff_cast 1
-        elseif config__lj_use_magic_reflect = 1 and not findbuff "Magic Reflection" and cooldown "reflect" = 0 and var__lj_regs_reflect = 1 and mana >= config__lj_mana_magic_reflect
-            cast "Magic Reflection"
-            @setvar! var__lj_buff_cast 1
-        endif
-        if var__lj_buff_cast = 1
-            settimer "timer__lj_buff" 0
-            wait wait__lj_short
-            for 60
-                if not casting
-                    break
+    # Self buffs leave the GH + Teleport mana budget and yield to manual actions.
+    if var__recall_needed = 0 and diffhits < config__light_hits
+        if not poisoned and not warmode and timer "timer__buff" >= cooldown__buff_retry
+            if not hidden and not queued and not casting and not targetexists and cooldown "walk" = 0
+                @setvar! var__buff_cast 0
+                if config__use_reactive_armor = 1 and not findbuff "Reactive Armor" and var__regs_reactive_armor = 1 and mana >= config__mana_reactive_armor
+                    cast "Reactive Armor"
+                    @setvar! var__buff_cast 1
+                elseif config__use_magic_reflect = 1 and not findbuff "Magic Reflection" and cooldown "reflect" = 0 and var__regs_reflect = 1 and mana >= config__mana_magic_reflect
+                    cast "Magic Reflection"
+                    @setvar! var__buff_cast 1
                 endif
-                if diffhits >= config__lj_heal_hits or poisoned
-                    hotkey "> Interrupt"
-                    break
+
+                if var__buff_cast = 1
+                    settimer "timer__buff" 0
+                    wait wait__short
+                    for 60
+                        if not casting
+                            break
+                        endif
+                        if diffhits >= config__heal_hits or poisoned
+                            hotkey "> Interrupt"
+                            break
+                        endif
+                        wait wait__poll
+                    endfor
                 endif
-                if insysmsg "Your concentration is disturbed, thus ruining thy spell."
-                    break
-                endif
-                wait wait__lj_poll
-            endfor
-            if insysmsg "Your concentration is disturbed, thus ruining thy spell."
-                # Consume this cast's line without clearing other blocks' events.
             endif
         endif
     endif
@@ -742,40 +642,249 @@ while not dead
     # ####################################################################################
     # # SMART HARVEST
     # ####################################################################################
-    # An existing cursor is never answered by this block, including a manual potion cursor.
-    if var__lj_danger = 0 and var__lj_return_reason = 0 and var__lj_saving = 0 and diffweight > config__lj_weight_remaining and diffhits < config__lj_heal_hits and not poisoned and not paralyzed and not findbuff "Heat of Battle" and timer "timer__lj_travel" >= cooldown__lj_travel and timer "timer__lj_harvest" >= cooldown__lj_harvest_retry and not warmode and not hidden and not queued and not casting and not targetexists and cooldown "walk" = 0
-        if config__lj_use_tracking = 0 or var__lj_tracking_ready = 1
-            if config__lj_require_runebook = 0 or var__lj_book_ok = 1
-                @setvar! var__lj_hatchet_ready 0
-                if findlayer self lefthand as alias__lj_left_hand
-                    if var__lj_hatchet = alias__lj_left_hand
-                        @setvar! var__lj_hatchet_ready 1
-                    else
-                        getlabel alias__lj_left_hand label__lj_left_hand
-                        if "hatchet" in label__lj_left_hand
-                            @setvar! var__lj_hatchet alias__lj_left_hand
-                            @setvar! var__lj_hatchet_ready 1
+    # A Recall decision pauses harvest. Actual full weight also prevents harvesting when Recall is off.
+    if var__recall_needed = 0 and diffweight > 0
+        # A configured Recall book is required only for automatic-Recall gathering.
+        if config__auto_recall = 0 or config__require_runebook = 0 or var__recall_book_available = 1
+            # Require verified Hunting only if Tracking-triggered automatic Recall is enabled.
+            if config__auto_recall = 0 or config__recall_on_detection = 0 or config__use_tracking = 0 or var__tracking_hunting_active = 1
+                if diffhits < config__heal_hits and not poisoned and not paralyzed and not warmode
+                    if timer "timer__harvest" >= cooldown__harvest_retry
+                        if not hidden and not queued and not casting and not targetexists and cooldown "walk" = 0
+                            # Verify the equipped slot instead of assuming a previous dclick worked.
+                            @setvar! var__hatchet_equipped 0
+                            if findlayer self lefthand as alias__left_hand
+                                if var__hatchet = alias__left_hand
+                                    @setvar! var__hatchet_equipped 1
+                                else
+                                    getlabel alias__left_hand label__left_hand
+                                    if "hatchet" in label__left_hand
+                                        @setvar! var__hatchet alias__left_hand
+                                        @setvar! var__hatchet_equipped 1
+                                    endif
+                                endif
+                            endif
+
+                            settimer "timer__harvest" 0
+                            if var__hatchet_equipped = 1
+                                dclick var__hatchet
+                                wait wait__short
+
+                                if targetexists
+                                    overhead "[ harvest, cursor ]" 53
+                                endif
+                            elseif findtype 3907|3908 backpack as alias__spare_hatchet
+                                dclick alias__spare_hatchet
+                                wait wait__short
+                                # Check the newly equipped slot on the next pass.
+                            elseif timer "timer__message" >= cooldown__message
+                                overhead "[ hatchet, out ]" 53
+                                settimer "timer__message" 0
+                            endif
                         endif
                     endif
-                endif
-                settimer "timer__lj_harvest" 0
-                if var__lj_hatchet_ready = 1
-                    dclick var__lj_hatchet
-                    wait wait__lj_short
-                    if targetexists
-                        overhead "[ harvest, cursor ]" 53
-                    endif
-                elseif findtype 3907|3908 backpack as alias__lj_spare_hatchet
-                    dclick alias__lj_spare_hatchet
-                    wait wait__lj_short
-                    # Verify the equipped slot on the next pass instead of assuming dclick worked.
-                elseif timer "timer__lj_message" >= cooldown__lj_message
-                    overhead "[ hatchet, out ]" 53
-                    settimer "timer__lj_message" 0
                 endif
             endif
         endif
     endif
 
-    wait wait__lj_poll
+    # ####################################################################################
+    # # AUTO RECALL
+    # ####################################################################################
+    # This entire path is skipped when automatic Recall is disabled.
+    if config__auto_recall = 1
+        # Until the one Recall attempt, check books and Hunting on their own slow clock.
+        if var__recall_sent = 0 and timer "timer__recall_scan" >= cooldown__recall_scan
+            if config__recall_on_detection = 1 and config__use_tracking = 1
+                @setvar! var__tracking_hunting_active 0
+                if var__tracking_filter_confirmed = 1 and findbuff "tracking"
+                    @setvar! var__tracking_hunting_active 1
+                endif
+
+                if var__tracking_hunting_active = 0 and timer "timer__message" >= cooldown__message
+                    overhead "[ track, check ]" 55
+                    settimer "timer__message" 0
+                endif
+            endif
+
+            @setvar! var__recall_book_available 0
+            if findtype "runebook" backpack or findtype "runetome" backpack
+                @setvar! var__recall_book_available 1
+            elseif config__require_runebook = 1 and timer "timer__message" >= cooldown__message
+                overhead "[ runebook, out ]" 53
+                settimer "timer__message" 0
+            endif
+        endif
+
+        # Read Tracking before any other journal lookup. Profile overheads display it.
+        if config__recall_on_detection = 1 and config__use_tracking = 1
+            if var__tracking_hunting_active = 1 and var__recall_needed = 0
+                if config__recall_at_any_distance = 1
+                    if insysmsg "Now tracking:" or insysmsg "Distance to destination:" or insysmsg "spaces to target"
+                        @setvar! var__recall_needed 1
+                    endif
+                else
+                    # Keep all 45 literal distance branches. No player find is needed.
+                    if insysmsg "Distance to destination: 45 steps" or insysmsg "(45 spaces to target)"
+                        @setvar! var__recall_needed 1
+                    elseif insysmsg "Distance to destination: 44 steps" or insysmsg "(44 spaces to target)"
+                        @setvar! var__recall_needed 1
+                    elseif insysmsg "Distance to destination: 43 steps" or insysmsg "(43 spaces to target)"
+                        @setvar! var__recall_needed 1
+                    elseif insysmsg "Distance to destination: 42 steps" or insysmsg "(42 spaces to target)"
+                        @setvar! var__recall_needed 1
+                    elseif insysmsg "Distance to destination: 41 steps" or insysmsg "(41 spaces to target)"
+                        @setvar! var__recall_needed 1
+                    elseif insysmsg "Distance to destination: 40 steps" or insysmsg "(40 spaces to target)"
+                        @setvar! var__recall_needed 1
+                    elseif insysmsg "Distance to destination: 39 steps" or insysmsg "(39 spaces to target)"
+                        @setvar! var__recall_needed 1
+                    elseif insysmsg "Distance to destination: 38 steps" or insysmsg "(38 spaces to target)"
+                        @setvar! var__recall_needed 1
+                    elseif insysmsg "Distance to destination: 37 steps" or insysmsg "(37 spaces to target)"
+                        @setvar! var__recall_needed 1
+                    elseif insysmsg "Distance to destination: 36 steps" or insysmsg "(36 spaces to target)"
+                        @setvar! var__recall_needed 1
+                    elseif insysmsg "Distance to destination: 35 steps" or insysmsg "(35 spaces to target)"
+                        @setvar! var__recall_needed 1
+                    elseif insysmsg "Distance to destination: 34 steps" or insysmsg "(34 spaces to target)"
+                        @setvar! var__recall_needed 1
+                    elseif insysmsg "Distance to destination: 33 steps" or insysmsg "(33 spaces to target)"
+                        @setvar! var__recall_needed 1
+                    elseif insysmsg "Distance to destination: 32 steps" or insysmsg "(32 spaces to target)"
+                        @setvar! var__recall_needed 1
+                    elseif insysmsg "Distance to destination: 31 steps" or insysmsg "(31 spaces to target)"
+                        @setvar! var__recall_needed 1
+                    elseif insysmsg "Distance to destination: 30 steps" or insysmsg "(30 spaces to target)"
+                        @setvar! var__recall_needed 1
+                    elseif insysmsg "Distance to destination: 29 steps" or insysmsg "(29 spaces to target)"
+                        @setvar! var__recall_needed 1
+                    elseif insysmsg "Distance to destination: 28 steps" or insysmsg "(28 spaces to target)"
+                        @setvar! var__recall_needed 1
+                    elseif insysmsg "Distance to destination: 27 steps" or insysmsg "(27 spaces to target)"
+                        @setvar! var__recall_needed 1
+                    elseif insysmsg "Distance to destination: 26 steps" or insysmsg "(26 spaces to target)"
+                        @setvar! var__recall_needed 1
+                    elseif insysmsg "Distance to destination: 25 steps" or insysmsg "(25 spaces to target)"
+                        @setvar! var__recall_needed 1
+                    elseif insysmsg "Distance to destination: 24 steps" or insysmsg "(24 spaces to target)"
+                        @setvar! var__recall_needed 1
+                    elseif insysmsg "Distance to destination: 23 steps" or insysmsg "(23 spaces to target)"
+                        @setvar! var__recall_needed 1
+                    elseif insysmsg "Distance to destination: 22 steps" or insysmsg "(22 spaces to target)"
+                        @setvar! var__recall_needed 1
+                    elseif insysmsg "Distance to destination: 21 steps" or insysmsg "(21 spaces to target)"
+                        @setvar! var__recall_needed 1
+                    elseif insysmsg "Distance to destination: 20 steps" or insysmsg "(20 spaces to target)"
+                        @setvar! var__recall_needed 1
+                    elseif insysmsg "Distance to destination: 19 steps" or insysmsg "(19 spaces to target)"
+                        @setvar! var__recall_needed 1
+                    elseif insysmsg "Distance to destination: 18 steps" or insysmsg "(18 spaces to target)"
+                        @setvar! var__recall_needed 1
+                    elseif insysmsg "Distance to destination: 17 steps" or insysmsg "(17 spaces to target)"
+                        @setvar! var__recall_needed 1
+                    elseif insysmsg "Distance to destination: 16 steps" or insysmsg "(16 spaces to target)"
+                        @setvar! var__recall_needed 1
+                    elseif insysmsg "Distance to destination: 15 steps" or insysmsg "(15 spaces to target)"
+                        @setvar! var__recall_needed 1
+                    elseif insysmsg "Distance to destination: 14 steps" or insysmsg "(14 spaces to target)"
+                        @setvar! var__recall_needed 1
+                    elseif insysmsg "Distance to destination: 13 steps" or insysmsg "(13 spaces to target)"
+                        @setvar! var__recall_needed 1
+                    elseif insysmsg "Distance to destination: 12 steps" or insysmsg "(12 spaces to target)"
+                        @setvar! var__recall_needed 1
+                    elseif insysmsg "Distance to destination: 11 steps" or insysmsg "(11 spaces to target)"
+                        @setvar! var__recall_needed 1
+                    elseif insysmsg "Distance to destination: 10 steps" or insysmsg "(10 spaces to target)"
+                        @setvar! var__recall_needed 1
+                    elseif insysmsg "Distance to destination: 9 steps" or insysmsg "(9 spaces to target)"
+                        @setvar! var__recall_needed 1
+                    elseif insysmsg "Distance to destination: 8 steps" or insysmsg "(8 spaces to target)"
+                        @setvar! var__recall_needed 1
+                    elseif insysmsg "Distance to destination: 7 steps" or insysmsg "(7 spaces to target)"
+                        @setvar! var__recall_needed 1
+                    elseif insysmsg "Distance to destination: 6 steps" or insysmsg "(6 spaces to target)"
+                        @setvar! var__recall_needed 1
+                    elseif insysmsg "Distance to destination: 5 steps" or insysmsg "(5 spaces to target)"
+                        @setvar! var__recall_needed 1
+                    elseif insysmsg "Distance to destination: 4 steps" or insysmsg "(4 spaces to target)"
+                        @setvar! var__recall_needed 1
+                    elseif insysmsg "Distance to destination: 3 steps" or insysmsg "(3 spaces to target)"
+                        @setvar! var__recall_needed 1
+                    elseif insysmsg "Distance to destination: 2 steps" or insysmsg "(2 spaces to target)"
+                        @setvar! var__recall_needed 1
+                    elseif insysmsg "Distance to destination: 1 steps" or insysmsg "(1 spaces to target)"
+                        @setvar! var__recall_needed 1
+                    endif
+                endif
+            endif
+        endif
+
+        # Detection is read before weight. No more inventory scans after sending Recall.
+        if var__recall_sent = 0 and timer "timer__recall_scan" >= cooldown__recall_scan
+            if config__recall_on_weight = 1 and var__recall_needed = 0
+                if diffweight <= config__weight_remaining
+                    @setvar! var__recall_needed 1
+                    if timer "timer__message" >= cooldown__message
+                        overhead "[ weight, low ]" 53
+                        settimer "timer__message" 0
+                    endif
+                endif
+            endif
+
+            settimer "timer__recall_scan" 0
+        endif
+
+        # A single attempt per run. Neither silence nor a timed notice proves arrival.
+        if var__recall_sent = 1
+            if insysmsg "Magical travel is not allowed in this location." or insysmsg "Magical travel from inside a dungeon is only possible near golden moongates."
+                @setvar! var__recall_notice_shown 1
+                overhead "[ recall, blocked ]" 53
+            elseif var__recall_notice_shown = 0 and timer "timer__recall" >= cooldown__recall_response
+                @setvar! var__recall_notice_shown 1
+                overhead "[ recall, check ]" 55
+            endif
+
+        elseif var__recall_needed = 1
+            # Do not block on a Heat of Battle buff here. The server decides whether Recall is allowed.
+            # This path performs no combat preparation and drinks no Strength or Agility potion.
+            if mana >= config__mana_recall and not paralyzed and not warmode
+                if not hidden and not queued and not casting and not targetexists and cooldown "walk" = 0
+                    if var__recall_book_available = 1
+                        if findtype "runebook" backpack or findtype "runetome" backpack
+                            # Change Home here to your rune name. This command casts Recall, not Gate Travel.
+                            say "[RecallCharge Home"
+                            @setvar! var__recall_sent 1
+                            settimer "timer__recall" 0
+
+                            if config__chatty = 1
+                                overhead "[ recall, on ]" 90
+                            endif
+
+                            wait wait__short
+                        elseif timer "timer__message" >= cooldown__message
+                            overhead "[ runebook, out ]" 53
+                            settimer "timer__message" 0
+                        endif
+                    elseif timer "timer__message" >= cooldown__message
+                        overhead "[ runebook, out ]" 53
+                        settimer "timer__message" 0
+                    endif
+                endif
+            elseif mana < config__mana_recall and timer "timer__message" >= cooldown__message
+                overhead "[ mana, low ]" 53
+                settimer "timer__message" 0
+            endif
+        endif
+    endif
+
+    # A matching message may consume older events. Read shortages after Tracking.
+    # Housekeeping schedules the next refresh instead of polling this every pass.
+    if var__housekeeping_pass = 1
+        if insysmsg "More reagents are needed"
+            settimer "timer__reagents" cooldown__reagents
+        endif
+    endif
+
+    wait wait__poll
 endwhile

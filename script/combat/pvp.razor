@@ -1,5 +1,8 @@
-# Shared field PvP self sustain. Attack spells, pet commands and weapon swaps stay manual.
-# Needs: hotkeys "Pouch", "Bandage Self", "Target Self", "Drink Cure", "Drink Heal", "Drink Refresh", "Drink Strength", "Drink Agility", "Drink Magic Resist", "Eat Magic Mushroom" for enabled options. Bars "heal pot" and "reflect".
+# Shared field PvP self sustain and optional swing-based equipment. Offense stays manual.
+# Needs: hotkeys "Pouch", "Bandage Self", "Target Self", "Drink Cure", "Drink Heal", "Drink Refresh",
+# "Drink Strength", "Drink Agility", "Drink Magic Resist", "Eat Magic Mushroom" for enabled options.
+# Bars: heal pot, walk, reflect. Each enabled weapon slot needs its swing N WeaponSwing bar.
+# Arm/Dress must automatically remove conflicting equipment for weapon swaps.
 # Do not clear targets, messages or drag queues at startup. A manual precast may be held.
 # Use the Razor Stop hotkey before starting another spell during an automatic self cast.
 if pvp
@@ -11,122 +14,189 @@ endif
 # ####################################################################################
 # # CONFIG
 # ####################################################################################
-# 1 = mage, 2 = bandage mage. Change this here before running combat/pvp.
-@setvar! config__pvp_preset 1
+# CORE FEATURES: independent switches. No preset overwrites another option.
+# Magery 0 disables every automatic spell, including buffs and self Siphon.
+# Weapon 0 leaves equipment manual. Bandages also require Healing above zero.
+@setvar! config__use_magery 1
+@setvar! config__use_weapon 1
+@setvar! config__use_bandages 1
 
-# Preset defaults. Put personal overrides AFTER the preset block below.
-@setvar! config__pvp_magery 1
-@setvar! config__pvp_bandage 0
-@setvar! config__pvp_reactive 1
-@setvar! config__pvp_reflect 1
-@setvar! config__pvp_siphon 1
-@setvar! config__pvp_mushroom 1
-@setvar! config__pvp_resist_potion 1
-if config__pvp_preset = 2
-    @setvar! config__pvp_bandage 1
-    @setvar! config__pvp_reactive 0
-    @setvar! config__pvp_reflect 0
-    @setvar! config__pvp_siphon 0
-    @setvar! config__pvp_mushroom 0
-    @setvar! config__pvp_resist_potion 0
-endif
+# RECOVERY ITEMS: Cure, Heal and Refresh. Stat potions additionally require use_stat_potions.
+@setvar! config__use_potions 1
+@setvar! config__use_stat_potions 1
+@setvar! config__use_resist_potion 1
 
-# Personal overrides go here. Magery 0 disables every automatic spell, including buffs.
-# Bandages additionally require Healing above zero. Siphon uses Magic Arrow on self only.
-@setvar! config__pvp_chatty 1
-@setvar! config__pvp_potions 1
-@setvar! config__pvp_stat_potions 1
-# Graphic ID, never a serial. 0 leaves all equipment manual. Nonzero rearms this weapon.
-# No burst swap, attack request, Hamstring toggle or weapon swing clock manipulation.
-@setvar! config__pvp_weapon_graphic 0
-@setvar! config__pvp_heal_hits 35
-@setvar! config__pvp_emergency_hits 45
-@setvar! config__pvp_light_hits 15
-@setvar! config__pvp_refresh_stam 15
-@setvar! config__pvp_mushroom_mana 45
+# SELF BUFFS: all three require use_magery. Siphon uses Magic Arrow on self only.
+@setvar! config__use_reactive_armor 1
+@setvar! config__use_magic_reflect 1
+@setvar! config__use_spell_siphon 1
+
+# Mana item and diagnostic output are independent of automatic Magery.
+@setvar! config__use_magic_mushroom 1
+@setvar! config__chatty 1
+
+# WEAPONS: one graphic ID per swing bar, never a personal serial. 0 disables that slot.
+# Ready priority: 4, 3, 2, 1. Empty-hand rearm: 1, 2, 3, 4 even while bars run.
+# Set each bar duration for its weapon and current stamina in the active client.
+# WeaponSwing bars share the last actual swing. This script never starts or resets them.
+@setvar! config__weapon_1_graphic 31128
+@setvar! config__weapon_2_graphic 0
+@setvar! config__weapon_3_graphic 0
+@setvar! config__weapon_4_graphic 31190
+
+# RECOVERY THRESHOLDS: missing HP for healing, current stamina and mana for item use.
+# Heal potion at 35 missing HP, Greater Heal at 45, light Heal at 15 without usable bandages.
+@setvar! config__heal_hits 35
+@setvar! config__emergency_hits 45
+@setvar! config__light_hits 15
+@setvar! config__refresh_stam 15
+@setvar! config__mushroom_mana 45
+
+# Minimum current mana before each automatic self cast. Raise a value to leave a reserve.
+# Defaults retain the previous spell costs. They do not change the server's mana cost.
+@setvar! config__mana_cure 6
+@setvar! config__mana_greater_heal 11
+@setvar! config__mana_heal 4
+@setvar! config__mana_reactive_armor 4
+@setvar! config__mana_magic_reflect 14
+@setvar! config__mana_spell_siphon 4
 
 # ####################################################################################
 # # WAIT AND COOLDOWN
 # ####################################################################################
-@setvar! wait__pvp_poll 100
-@setvar! wait__pvp_action 200
-@setvar! cooldown__pvp_retry 1200
-@setvar! cooldown__pvp_heal 2500
-@setvar! cooldown__pvp_buff 5000
-@setvar! cooldown__pvp_reagents 30000
-@setvar! cooldown__pvp_message 3000
+@setvar! wait__poll 100
+@setvar! wait__action 200
 
-# Preserve action retry clocks across Stop and preset changes.
+# Poll/action waits and all retry thresholds below are milliseconds, not server cooldowns.
+# Separate action timers share these thresholds but never reset each other.
+@setvar! cooldown__item_retry 1200
+@setvar! cooldown__weapon_check 300
+@setvar! cooldown__heal_retry 2500
+@setvar! cooldown__support_retry 5000
+@setvar! cooldown__supplies 30000
+@setvar! cooldown__message 3000
+
+# ####################################################################################
+# # TIMER
+# ####################################################################################
+# Preserve action retry clocks across Stop and config changes.
+# Keep their pvp namespace to avoid sharing healing and item clocks with gathering scripts.
+# Only the supplies cache is made ready again on each Play.
 if not timerexists "timer__pvp_pouch"
     createtimer "timer__pvp_pouch"
-    settimer "timer__pvp_pouch" cooldown__pvp_retry
+    settimer "timer__pvp_pouch" cooldown__item_retry
 endif
+
 if not timerexists "timer__pvp_cure_potion"
     createtimer "timer__pvp_cure_potion"
-    settimer "timer__pvp_cure_potion" cooldown__pvp_retry
+    settimer "timer__pvp_cure_potion" cooldown__item_retry
 endif
+
 if not timerexists "timer__pvp_bandage"
     createtimer "timer__pvp_bandage"
-    settimer "timer__pvp_bandage" cooldown__pvp_retry
+    settimer "timer__pvp_bandage" cooldown__item_retry
 endif
+
 if not timerexists "timer__pvp_heal_potion"
     createtimer "timer__pvp_heal_potion"
-    settimer "timer__pvp_heal_potion" cooldown__pvp_retry
+    settimer "timer__pvp_heal_potion" cooldown__item_retry
 endif
+
 if not timerexists "timer__pvp_refresh"
     createtimer "timer__pvp_refresh"
-    settimer "timer__pvp_refresh" cooldown__pvp_retry
+    settimer "timer__pvp_refresh" cooldown__item_retry
 endif
+
 if not timerexists "timer__pvp_mushroom"
     createtimer "timer__pvp_mushroom"
-    settimer "timer__pvp_mushroom" cooldown__pvp_buff
+    settimer "timer__pvp_mushroom" cooldown__support_retry
 endif
+
 if not timerexists "timer__pvp_heal"
     createtimer "timer__pvp_heal"
-    settimer "timer__pvp_heal" cooldown__pvp_heal
+    settimer "timer__pvp_heal" cooldown__heal_retry
 endif
+
 if not timerexists "timer__pvp_buff"
     createtimer "timer__pvp_buff"
-    settimer "timer__pvp_buff" cooldown__pvp_buff
+    settimer "timer__pvp_buff" cooldown__support_retry
 endif
+
 if not timerexists "timer__pvp_stats"
     createtimer "timer__pvp_stats"
-    settimer "timer__pvp_stats" cooldown__pvp_buff
+    settimer "timer__pvp_stats" cooldown__support_retry
 endif
+
 if not timerexists "timer__pvp_weapon"
     createtimer "timer__pvp_weapon"
-    settimer "timer__pvp_weapon" cooldown__pvp_retry
+    settimer "timer__pvp_weapon" cooldown__weapon_check
 endif
+
 if not timerexists "timer__pvp_message"
     createtimer "timer__pvp_message"
-    settimer "timer__pvp_message" cooldown__pvp_message
+    settimer "timer__pvp_message" cooldown__message
 endif
-if not timerexists "timer__pvp_reagents"
-    createtimer "timer__pvp_reagents"
+
+if not timerexists "timer__pvp_supplies"
+    createtimer "timer__pvp_supplies"
 endif
-settimer "timer__pvp_reagents" cooldown__pvp_reagents
+settimer "timer__pvp_supplies" cooldown__supplies
 
 # ####################################################################################
 # # STATE
 # ####################################################################################
-@setvar! var__pvp_bandages 0
-@setvar! var__pvp_garlic 0
-@setvar! var__pvp_ginseng 0
-@setvar! var__pvp_mandrake 0
-@setvar! var__pvp_ash 0
-@setvar! var__pvp_silk 0
-@setvar! var__pvp_heal_regs 0
-@setvar! var__pvp_cure_regs 0
-@setvar! var__pvp_greater_heal_regs 0
-@setvar! var__pvp_reactive_regs 0
-@setvar! var__pvp_reflect_regs 0
-@setvar! var__pvp_self_spell 0
-@setvar! var__pvp_cast_done 0
-@setvar! var__pvp_weapon_equipped 0
+# Most recent bandage search: 0 no confirmed bandage, 1 found. Guides the light-Heal fallback.
+# Refreshed with supplies and immediately before a bandage attempt.
+@setvar! var__bandage_available 0
+
+# Cached own reagents: 0 no confirmed stock, 1 found at the last supplies scan.
+# Start at 0. Magery housekeeping refreshes the cache every 30 seconds.
+@setvar! var__garlic 0
+@setvar! var__ginseng 0
+@setvar! var__mandrake 0
+@setvar! var__ash 0
+@setvar! var__silk 0
+
+# Spell recipe availability: 1 only if all required reagents were found in the same refresh.
+@setvar! var__regs_heal 0
+@setvar! var__regs_cure 0
+@setvar! var__regs_greater_heal 0
+@setvar! var__regs_reactive_armor 0
+@setvar! var__regs_reflect 0
+
+# This pass's self spell: 0 none, 1 Cure, 2 Greater Heal, 3 Heal,
+# 4 Reactive Armor, 5 Magic Reflection, 6 Magic Arrow on self for Siphon.
+# Choose recovery first, then one preparation buff. Never select an opponent spell.
+@setvar! var__selected_self_spell 0
+
+# 1 ends our cast wait after targeting self, interruption or a cursorless buff finishing.
+# It is a wait-control flag, not proof that healing or a buff succeeded.
+@setvar! var__cast_wait_finished 0
+
+# Latest equipment scan: hand serials are read again before choosing a weapon. 0 means empty.
+# These are cached scan results, not live hand state while equipment checks are paused.
+@setvar! var__left_hand_serial 0
+@setvar! var__right_hand_serial 0
+
+# Candidate weapon: slot 1..4 names its swing bar, graphic identifies its type, serial its own item.
+# A graphic may be selected without finding its item. Only a nonzero serial is usable.
+# Reset on every scan. No opponent serial belongs to this script.
+@setvar! var__selected_weapon_slot 0
+@setvar! var__selected_weapon_graphic 0
+@setvar! var__selected_weapon_serial 0
+
+# Last found or requested weapon. Reuse only if its type matches and its serial is still in a hand.
+# A cached dress request is not proof of equip success. The next hand scan confirms it.
+@setvar! var__cached_weapon_graphic 0
+@setvar! var__cached_weapon_serial 0
 
 overhead "[ pvp, on ]" 90
-if config__pvp_chatty = 1
-    sysmsg "PvP sustain v1 loaded: preset={{config__pvp_preset}}, magery={{config__pvp_magery}}, bandage={{config__pvp_bandage}}, weapon={{config__pvp_weapon_graphic}}. Offense is manual." 90
+if config__chatty = 1
+    sysmsg "PvP sustain v3 loaded: magery={{config__use_magery}}, weapon={{config__use_weapon}}, bandage={{config__use_bandages}}. Manual offense." 90
+    if config__use_weapon = 1
+        sysmsg "PvP weapon slots: swing 1={{config__weapon_1_graphic}}, swing 2={{config__weapon_2_graphic}}." 90
+        sysmsg "PvP weapon slots: swing 3={{config__weapon_3_graphic}}, swing 4={{config__weapon_4_graphic}}. Priority 4 > 3 > 2 > 1." 90
+    endif
 endif
 
 # ####################################################################################
@@ -142,155 +212,192 @@ while not dead
     # Leave manual casting, precasts, item cursors and equipment queues alone.
     # Hidden characters also wait. Only our own cast below can answer Target Self.
     if casting or targetexists or queued or hidden
-        wait wait__pvp_poll
+        wait wait__poll
         continue
     endif
 
-    # Refresh only self inventory. No opponent serial, find, dead, label or range queries.
-    if timer "timer__pvp_reagents" >= cooldown__pvp_reagents
-        settimer "timer__pvp_reagents" 0
-        @setvar! var__pvp_bandages 0
-        if config__pvp_bandage = 1 and findtype 3617 self
-            @setvar! var__pvp_bandages 1
-        endif
-        if config__pvp_magery = 1
-            @setvar! var__pvp_garlic 0
-            @setvar! var__pvp_ginseng 0
-            @setvar! var__pvp_mandrake 0
-            @setvar! var__pvp_ash 0
-            @setvar! var__pvp_silk 0
-            if findtype 3972 self
-                @setvar! var__pvp_garlic 1
-            endif
-            if findtype 3973 self
-                @setvar! var__pvp_ginseng 1
-            endif
-            if findtype 3974 self
-                @setvar! var__pvp_mandrake 1
-            endif
-            if findtype 3980 self
-                @setvar! var__pvp_ash 1
-            endif
-            if findtype 3981 self
-                @setvar! var__pvp_silk 1
-            endif
-            @setvar! var__pvp_heal_regs 0
-            @setvar! var__pvp_cure_regs 0
-            @setvar! var__pvp_greater_heal_regs 0
-            @setvar! var__pvp_reactive_regs 0
-            @setvar! var__pvp_reflect_regs 0
-            if var__pvp_garlic = 1 and var__pvp_ginseng = 1
-                @setvar! var__pvp_cure_regs 1
-                if var__pvp_silk = 1
-                    @setvar! var__pvp_heal_regs 1
-                    if var__pvp_mandrake = 1
-                        @setvar! var__pvp_greater_heal_regs 1
-                    endif
-                endif
-            endif
-            if var__pvp_garlic = 1 and var__pvp_silk = 1
-                if var__pvp_ash = 1
-                    @setvar! var__pvp_reactive_regs 1
-                endif
-                if var__pvp_mandrake = 1
-                    @setvar! var__pvp_reflect_regs 1
-                endif
-            endif
-        endif
-        # Inventory reads take time. Recheck manual input before starting an action.
-        continue
-    endif
-
+    # ####################################################################################
+    # # RECOVERY ITEMS
+    # ####################################################################################
     # One action per pass. Every continue returns to the manual-input guard.
+    # PARALYSIS: escape first, before any slow supplies scan.
     if paralyzed
-        if timer "timer__pvp_pouch" >= cooldown__pvp_retry
+        if timer "timer__pvp_pouch" >= cooldown__item_retry
             settimer "timer__pvp_pouch" 0
             hotkey "Pouch"
         endif
-        wait wait__pvp_action
+        wait wait__action
         continue
     endif
 
-    if poisoned and config__pvp_potions = 1 and timer "timer__pvp_cure_potion" >= cooldown__pvp_retry
+    # CURE POTION: attempt before spending mana on Cure.
+    if poisoned and config__use_potions = 1 and timer "timer__pvp_cure_potion" >= cooldown__item_retry
         settimer "timer__pvp_cure_potion" 0
         if findtype "Orange Potion" self and not casting and not targetexists and not queued
             hotkey "Drink Cure"
-            wait wait__pvp_action
+            wait wait__action
             continue
         endif
     endif
 
-    if config__pvp_bandage = 1 and skill "Healing" > 0 and not bandaging and timer "timer__pvp_bandage" >= cooldown__pvp_retry
+    # BANDAGE: ordinary recovery. Never restart a bandage that is already running.
+    if config__use_bandages = 1 and skill "Healing" > 0 and not bandaging and timer "timer__pvp_bandage" >= cooldown__item_retry
         if diffhits > 0 or poisoned
             settimer "timer__pvp_bandage" 0
-            @setvar! var__pvp_bandages 0
+            @setvar! var__bandage_available 0
             if findtype 3617 self and not casting and not targetexists and not queued
-                @setvar! var__pvp_bandages 1
+                @setvar! var__bandage_available 1
                 hotkey "Bandage Self"
-                wait wait__pvp_action
+                wait wait__action
                 continue
-            elseif timer "timer__pvp_message" >= cooldown__pvp_message
+            elseif timer "timer__pvp_message" >= cooldown__message
                 overhead "[ bandage, out ]" 53
                 settimer "timer__pvp_message" 0
             endif
         endif
     endif
 
-    if config__pvp_potions = 1 and not poisoned and diffhits >= config__pvp_heal_hits and cooldown "heal pot" = 0 and timer "timer__pvp_heal_potion" >= cooldown__pvp_retry
+    # HEAL POTION: check both the bar and the item label before drinking.
+    if config__use_potions = 1 and not poisoned and diffhits >= config__heal_hits and cooldown "heal pot" = 0 and timer "timer__pvp_heal_potion" >= cooldown__item_retry
         settimer "timer__pvp_heal_potion" 0
-        if findtype "Yellow Potion" self as alias__pvp_heal_potion
-            getlabel alias__pvp_heal_potion label__pvp_heal_potion
-            if "next usable" in label__pvp_heal_potion
+        if findtype "Yellow Potion" self as alias__heal_potion
+            getlabel alias__heal_potion label__heal_potion
+            if "next usable" in label__heal_potion
                 # The item label also covers a missing heal pot bar.
             elseif not casting and not targetexists and not queued
                 hotkey "Drink Heal"
-                wait wait__pvp_action
+                wait wait__action
                 continue
             endif
         endif
     endif
 
-    # Select one automatic self spell. Bandages handle small injuries when available.
-    @setvar! var__pvp_self_spell 0
-    if config__pvp_magery = 1 and skill "Magery" > 0 and cooldown "walk" = 0 and timer "timer__pvp_heal" >= cooldown__pvp_heal
-        if poisoned and var__pvp_cure_regs = 1 and mana >= 6
-            @setvar! var__pvp_self_spell 1
-        elseif not poisoned and diffhits >= config__pvp_emergency_hits and var__pvp_greater_heal_regs = 1 and mana >= 11
-            @setvar! var__pvp_self_spell 2
-        elseif not poisoned and diffhits >= config__pvp_light_hits and not bandaging and var__pvp_heal_regs = 1 and mana >= 4
-            if config__pvp_bandage = 0 or skill "Healing" = 0 or var__pvp_bandages = 0
-                @setvar! var__pvp_self_spell 3
+    # ####################################################################################
+    # # HOUSEKEEPING
+    # ####################################################################################
+    # Own supplies only. No opponent find, dead, label or range query.
+    # Read once per 30 seconds, and return to the manual-input guard after these slower reads.
+    if config__use_magery = 1 or config__use_bandages = 1
+        if timer "timer__pvp_supplies" >= cooldown__supplies
+            settimer "timer__pvp_supplies" 0
+
+            @setvar! var__bandage_available 0
+            if config__use_bandages = 1 and findtype 3617 self
+                @setvar! var__bandage_available 1
             endif
-        endif
-    endif
-    if var__pvp_self_spell = 0 and config__pvp_magery = 1 and skill "Magery" > 0 and not poisoned and diffhits < config__pvp_light_hits and cooldown "walk" = 0 and timer "timer__pvp_buff" >= cooldown__pvp_buff
-        if config__pvp_reactive = 1 and not findbuff "Reactive Armor" and var__pvp_reactive_regs = 1 and mana >= 4
-            @setvar! var__pvp_self_spell 4
-        elseif config__pvp_reflect = 1 and not findbuff "Magic Reflection" and cooldown "reflect" = 0 and var__pvp_reflect_regs = 1 and mana >= 14
-            @setvar! var__pvp_self_spell 5
-        elseif config__pvp_siphon = 1 and not findbuff "Spell Siphon" and not findbuff "Magic Reflection" and var__pvp_ash = 1 and mana >= 4
-            @setvar! var__pvp_self_spell 6
+
+            if config__use_magery = 1
+                @setvar! var__garlic 0
+                @setvar! var__ginseng 0
+                @setvar! var__mandrake 0
+                @setvar! var__ash 0
+                @setvar! var__silk 0
+
+                if findtype 3972 self
+                    @setvar! var__garlic 1
+                endif
+
+                if findtype 3973 self
+                    @setvar! var__ginseng 1
+                endif
+
+                if findtype 3974 self
+                    @setvar! var__mandrake 1
+                endif
+
+                if findtype 3980 self
+                    @setvar! var__ash 1
+                endif
+
+                if findtype 3981 self
+                    @setvar! var__silk 1
+                endif
+
+                # Derive each recipe once. Cast selection uses these cached flags.
+                @setvar! var__regs_heal 0
+                @setvar! var__regs_cure 0
+                @setvar! var__regs_greater_heal 0
+                @setvar! var__regs_reactive_armor 0
+                @setvar! var__regs_reflect 0
+
+                if var__garlic = 1 and var__ginseng = 1
+                    @setvar! var__regs_cure 1
+                endif
+
+                if var__garlic = 1 and var__ginseng = 1 and var__silk = 1
+                    @setvar! var__regs_heal 1
+                endif
+
+                if var__garlic = 1 and var__ginseng = 1 and var__silk = 1 and var__mandrake = 1
+                    @setvar! var__regs_greater_heal 1
+                endif
+
+                if var__garlic = 1 and var__silk = 1 and var__ash = 1
+                    @setvar! var__regs_reactive_armor 1
+                endif
+
+                if var__garlic = 1 and var__silk = 1 and var__mandrake = 1
+                    @setvar! var__regs_reflect 1
+                endif
+            endif
+
+            # Inventory reads take time. Recheck manual input before starting any new action.
+            continue
         endif
     endif
 
-    if var__pvp_self_spell != 0 and not casting and not targetexists and not queued and not hidden and cooldown "walk" = 0
-        @setvar! var__pvp_cast_done 0
+    # ####################################################################################
+    # # SELF SPELL SELECTION
+    # ####################################################################################
+    # Select one automatic self spell. Bandages handle small injuries when available.
+    @setvar! var__selected_self_spell 0
+    if config__use_magery = 1 and skill "Magery" > 0 and cooldown "walk" = 0
+        # RECOVERY: Cure first, then emergency Greater Heal, then a bandage fallback Heal.
+        if timer "timer__pvp_heal" >= cooldown__heal_retry
+            if poisoned and var__regs_cure = 1 and mana >= config__mana_cure
+                @setvar! var__selected_self_spell 1
+            elseif not poisoned and diffhits >= config__emergency_hits and var__regs_greater_heal = 1 and mana >= config__mana_greater_heal
+                @setvar! var__selected_self_spell 2
+            elseif not poisoned and diffhits >= config__light_hits and not bandaging and var__regs_heal = 1 and mana >= config__mana_heal
+                if config__use_bandages = 0 or skill "Healing" = 0 or var__bandage_available = 0
+                    @setvar! var__selected_self_spell 3
+                endif
+            endif
+        endif
+
+        # PREPARATION: only without a selected heal, poison or a light-Heal-sized injury.
+        if var__selected_self_spell = 0 and not poisoned and diffhits < config__light_hits and timer "timer__pvp_buff" >= cooldown__support_retry
+            if config__use_reactive_armor = 1 and not findbuff "Reactive Armor" and var__regs_reactive_armor = 1 and mana >= config__mana_reactive_armor
+                @setvar! var__selected_self_spell 4
+            elseif config__use_magic_reflect = 1 and not findbuff "Magic Reflection" and cooldown "reflect" = 0 and var__regs_reflect = 1 and mana >= config__mana_magic_reflect
+                @setvar! var__selected_self_spell 5
+            elseif config__use_spell_siphon = 1 and not findbuff "Spell Siphon" and not findbuff "Magic Reflection" and var__ash = 1 and mana >= config__mana_spell_siphon
+                @setvar! var__selected_self_spell 6
+            endif
+        endif
+    endif
+
+    # ####################################################################################
+    # # SELF CAST
+    # ####################################################################################
+    if var__selected_self_spell != 0 and not casting and not targetexists and not queued and not hidden and cooldown "walk" = 0
+        @setvar! var__cast_wait_finished 0
         if insysmsg "Your concentration is disturbed, thus ruining thy spell."
             # Consume an earlier disturbance before starting our own request.
         endif
-        if var__pvp_self_spell = 1
+        if var__selected_self_spell = 1
             cast "Cure"
             settimer "timer__pvp_heal" 0
-        elseif var__pvp_self_spell = 2
+        elseif var__selected_self_spell = 2
             cast "Greater Heal"
             settimer "timer__pvp_heal" 0
-        elseif var__pvp_self_spell = 3
+        elseif var__selected_self_spell = 3
             cast "Heal"
             settimer "timer__pvp_heal" 0
-        elseif var__pvp_self_spell = 4
+        elseif var__selected_self_spell = 4
             cast "Reactive Armor"
             settimer "timer__pvp_buff" 0
-        elseif var__pvp_self_spell = 5
+        elseif var__selected_self_spell = 5
             cast "Magic Reflection"
             settimer "timer__pvp_buff" 0
         else
@@ -298,7 +405,7 @@ while not dead
             cast "Magic Arrow"
             settimer "timer__pvp_buff" 0
         endif
-        wait wait__pvp_action
+        wait wait__action
         for 60
             if dead
                 stop
@@ -308,86 +415,179 @@ while not dead
                 stop
             endif
             if targetexists
-                if var__pvp_self_spell = 4 or var__pvp_self_spell = 5
+                if var__selected_self_spell = 4 or var__selected_self_spell = 5
                     # Neither buff should open a cursor. Preserve unexpected manual input.
                     overhead "[ cast, check ]" 55
                     stop
                 endif
                 hotkey "Target Self"
-                @setvar! var__pvp_cast_done 1
+                @setvar! var__cast_wait_finished 1
                 break
             endif
             if insysmsg "Your concentration is disturbed, thus ruining thy spell."
-                @setvar! var__pvp_cast_done 1
+                @setvar! var__cast_wait_finished 1
                 break
             endif
-            if var__pvp_self_spell = 4 or var__pvp_self_spell = 5
+            if var__selected_self_spell = 4 or var__selected_self_spell = 5
                 if not casting and not queued
-                    @setvar! var__pvp_cast_done 1
+                    @setvar! var__cast_wait_finished 1
                     break
                 endif
             endif
-            wait wait__pvp_poll
+            wait wait__poll
         endfor
-        if var__pvp_cast_done = 0
+        if var__cast_wait_finished = 0
             # A delayed request may still open a cursor. Stop without cancelling it.
             overhead "[ cast, check ]" 55
             sysmsg "PvP sustain: self cast did not resolve. Check the cursor, then restart." 53
             stop
         endif
-        wait wait__pvp_action
+        wait wait__action
         continue
     endif
 
-    if config__pvp_mushroom = 1 and mana <= config__pvp_mushroom_mana and not findbuff "Magic Mushroom Cooldown" and timer "timer__pvp_mushroom" >= cooldown__pvp_buff
+    # ####################################################################################
+    # # SUPPORT ITEMS
+    # ####################################################################################
+    # MAGIC MUSHROOM: independent mana recovery item, not an automatic spell.
+    if config__use_magic_mushroom = 1 and mana <= config__mushroom_mana and not findbuff "Magic Mushroom Cooldown" and timer "timer__pvp_mushroom" >= cooldown__support_retry
         settimer "timer__pvp_mushroom" 0
         if findtype "mushroom" backpack and not casting and not targetexists and not queued
             hotkey "Eat Magic Mushroom"
-            wait wait__pvp_action
+            wait wait__action
             continue
         endif
     endif
 
-    if config__pvp_potions = 1 and stam <= config__pvp_refresh_stam and timer "timer__pvp_refresh" >= cooldown__pvp_retry
+    # REFRESH: uses current stamina, not the amount missing.
+    if config__use_potions = 1 and stam <= config__refresh_stam and timer "timer__pvp_refresh" >= cooldown__item_retry
         settimer "timer__pvp_refresh" 0
         if findtype "Red Potion" self and not casting and not targetexists and not queued
             hotkey "Drink Refresh"
-            wait wait__pvp_action
+            wait wait__action
             continue
         endif
     endif
 
-    if config__pvp_potions = 1 and config__pvp_stat_potions = 1 and not poisoned and diffhits < config__pvp_heal_hits and timer "timer__pvp_stats" >= cooldown__pvp_buff
+    # STAT POTIONS: one missing buff per attempt. No drink means no action wait or skipped weapon scan.
+    if config__use_potions = 1 and config__use_stat_potions = 1 and not poisoned and diffhits < config__heal_hits and timer "timer__pvp_stats" >= cooldown__support_retry
         settimer "timer__pvp_stats" 0
         if not findbuff "Strength" and findtype "White Potion" self and not casting and not targetexists and not queued
             hotkey "Drink Strength"
+            wait wait__action
+            continue
         elseif not findbuff "Agility" and findtype "Blue Potion" self and not casting and not targetexists and not queued
             hotkey "Drink Agility"
-        elseif config__pvp_resist_potion = 1 and not findbuff "Magic Resist Potion" and findtype "Black Potion" self and not casting and not targetexists and not queued
+            wait wait__action
+            continue
+        elseif config__use_resist_potion = 1 and not findbuff "Magic Resist Potion" and findtype "Black Potion" self and not casting and not targetexists and not queued
             hotkey "Drink Magic Resist"
+            wait wait__action
+            continue
         endif
-        wait wait__pvp_action
-        continue
     endif
 
-    if config__pvp_weapon_graphic != 0 and timer "timer__pvp_weapon" >= cooldown__pvp_retry
+    # ####################################################################################
+    # # WEAPON EQUIPMENT
+    # ####################################################################################
+    # Equipment only. Weapon hotkey scripts may cast Unlock and attack Last Target. Do not call them here.
+    if config__use_weapon = 1 and timer "timer__pvp_weapon" >= cooldown__weapon_check
         settimer "timer__pvp_weapon" 0
-        @setvar! var__pvp_weapon_equipped 0
-        # Preserve any manually held item, including shields and spellbooks.
-        if findlayer self lefthand
-            @setvar! var__pvp_weapon_equipped 1
+
+        # All slots off means no hand reads or weapon searches are needed.
+        if config__weapon_1_graphic = 0 and config__weapon_2_graphic = 0 and config__weapon_3_graphic = 0 and config__weapon_4_graphic = 0
+            wait wait__poll
+            continue
         endif
-        if findlayer self righthand
-            @setvar! var__pvp_weapon_equipped 1
+
+        @setvar! var__left_hand_serial 0
+        @setvar! var__right_hand_serial 0
+        @setvar! var__selected_weapon_serial 0
+        if findlayer self lefthand as alias__left_hand
+            @setvar! var__left_hand_serial alias__left_hand
         endif
-        if var__pvp_weapon_equipped = 0 and findtype config__pvp_weapon_graphic backpack as alias__pvp_weapon
-            if not casting and not targetexists and not queued and not hidden
-                dclick alias__pvp_weapon
-                wait wait__pvp_action
+        if findlayer self righthand as alias__right_hand
+            @setvar! var__right_hand_serial alias__right_hand
+        endif
+
+        # First scan ready slots 4 to 1. Missing weapons fall through to the next slot.
+        # Only empty hands use the second scan, 1 to 4, without claiming swing readiness.
+        # index 0..3 checks ready slots 4..1. index 4..7 rearms empty hands in order 1..4.
+        for 8
+            if index = 4
+                if var__left_hand_serial != 0 or var__right_hand_serial != 0
+                    break
+                endif
+            endif
+
+            @setvar! var__selected_weapon_graphic 0
+            @setvar! var__selected_weapon_slot 0
+            if index = 0 and config__weapon_4_graphic != 0 and cooldown "swing 4" = 0
+                @setvar! var__selected_weapon_graphic config__weapon_4_graphic
+                @setvar! var__selected_weapon_slot 4
+            elseif index = 1 and config__weapon_3_graphic != 0 and cooldown "swing 3" = 0
+                @setvar! var__selected_weapon_graphic config__weapon_3_graphic
+                @setvar! var__selected_weapon_slot 3
+            elseif index = 2 and config__weapon_2_graphic != 0 and cooldown "swing 2" = 0
+                @setvar! var__selected_weapon_graphic config__weapon_2_graphic
+                @setvar! var__selected_weapon_slot 2
+            elseif index = 3 and config__weapon_1_graphic != 0 and cooldown "swing 1" = 0
+                @setvar! var__selected_weapon_graphic config__weapon_1_graphic
+                @setvar! var__selected_weapon_slot 1
+            elseif var__left_hand_serial = 0 and var__right_hand_serial = 0
+                if index = 4
+                    @setvar! var__selected_weapon_graphic config__weapon_1_graphic
+                    @setvar! var__selected_weapon_slot 1
+                elseif index = 5
+                    @setvar! var__selected_weapon_graphic config__weapon_2_graphic
+                    @setvar! var__selected_weapon_slot 2
+                elseif index = 6
+                    @setvar! var__selected_weapon_graphic config__weapon_3_graphic
+                    @setvar! var__selected_weapon_slot 3
+                elseif index = 7
+                    @setvar! var__selected_weapon_graphic config__weapon_4_graphic
+                    @setvar! var__selected_weapon_slot 4
+                endif
+            endif
+
+            if var__selected_weapon_graphic != 0
+                # Prefer the same held serial, even when another copy is in the backpack.
+                if var__cached_weapon_graphic = var__selected_weapon_graphic and var__cached_weapon_serial != 0
+                    if var__cached_weapon_serial = var__left_hand_serial or var__cached_weapon_serial = var__right_hand_serial
+                        @setvar! var__selected_weapon_serial var__cached_weapon_serial
+                    endif
+                endif
+                if var__selected_weapon_serial = 0
+                    if findtype var__selected_weapon_graphic self as alias__own_weapon
+                        @setvar! var__selected_weapon_serial alias__own_weapon
+                    elseif findtype var__selected_weapon_graphic backpack as alias__packed_weapon
+                        @setvar! var__selected_weapon_serial alias__packed_weapon
+                    endif
+                endif
+                if var__selected_weapon_serial != 0
+                    break
+                endif
+            endif
+        endfor
+
+        if var__selected_weapon_serial != 0
+            if var__selected_weapon_serial = var__left_hand_serial or var__selected_weapon_serial = var__right_hand_serial
+                @setvar! var__cached_weapon_graphic var__selected_weapon_graphic
+                @setvar! var__cached_weapon_serial var__selected_weapon_serial
+            elseif not casting and not targetexists and not queued and not hidden and not dead and not pvp
+                # dress uses the item's own layer. Arm/Dress must remove conflicting equipment.
+                # Cache a request, then confirm ownership with findlayer on the next pass.
+                dress var__selected_weapon_serial
+                @setvar! var__cached_weapon_graphic var__selected_weapon_graphic
+                @setvar! var__cached_weapon_serial var__selected_weapon_serial
+                if config__chatty = 1
+                    sysmsg "PvP weapon: equip requested, swing {{var__selected_weapon_slot}}, graphic={{var__selected_weapon_graphic}}, serial={{var__selected_weapon_serial}}." 90
+                endif
+                wait wait__action
                 continue
             endif
         endif
     endif
 
-    wait wait__pvp_poll
+    wait wait__poll
 endwhile

@@ -851,51 +851,95 @@ Leather는 방어구 재생 페널티가 없다는 뜻이지 추가 재생 보�
 버프의 최대치 증가를 즉시 현재 마나 회복으로 간주하지 않는다. 예산의 적용은 <a href="lumberjack-pvp-handbook.html#04">벌목 핸드북 04절</a>.</p>
 
 <h3 id="05.E">05.E 수동 공격과 공통 자기관리 루프</h3>
-<p>2026-10-05 공격은 수동으로 두고 자기관리만 공통 <a href="../script/combat/pvp.razor">combat/pvp.razor</a>로 모았다.
-mage와 dexxer-mage는 별도 전투 알고리즘 대신 Magery·붕대·버프·재장착 설정으로 구분한다.
-상대의 serial·색·거리·사망을 조회하지 않으므로 플레이어 <code>find</code> 실패가 회복을 막지 않는다.</p>
-<p>TK, MA/Harm·Explosion/EB 등 공격 주문, 폭발 포션, 소환수 공격, Hamstring, 공격 대상 지정과 무기 교체는 수동이다.
-자동은 자기 파우치·포션·붕대·Cure/Heal/GH·선택한 자기 버프·버섯뿐이다.
+<p>2026-10-05 자기관리와 선택적 무기 장착을 공통 <a href="../script/combat/pvp.razor">combat/pvp.razor</a>로 모았다.
+템플릿 프리셋 없이 Magery·무기·붕대·버프를 각각 설정한다.
+상대의 serial·색·거리·사망을 조회하지 않으므로 플레이어 <code>find</code> 실패가 회복과 무기 선택을 막지 않는다.</p>
+<p>TK, MA/Harm·Explosion/EB 등 공격 주문, 폭발 포션, 소환수 공격, Hamstring, 공격 대상 지정은 수동이다.
+자동은 자기 파우치·포션·붕대·Cure/Heal/GH·선택한 자기 버프·버섯과 켜 둔 무기 장착이다.
 시폰을 켠 경우의 Magic Arrow는 자기에게만 보낸다. Magery를 끄면 이 주문을 포함한 모든 자동 시전을 끈다.</p>
-<table>
-<thead><tr><th>실행 파일</th><th>설정 선택</th></tr></thead>
-<tbody>
-<tr><td><code>combat/pvp</code></td><td>본문의 <code>config__pvp_preset</code>. 1: mage / 2: 붕대 mage. 기본 1</td></tr>
-</tbody>
-</table>
-<p>이전 두 템플릿별 PvP 파일은 삭제했다. 다른 스크립트의 프리셋 요청을 읽지 않고 이 파일의 설정만 사용한다.
+<p>이전 두 템플릿별 PvP 파일과 프리셋 분기는 삭제했다. CONFIG의 값만 읽으며 한 옵션으로 다른 옵션을 덮어쓰지 않는다.
 기존 PvP 핫키는 Razor에서 <code>Play Script: combat\pvp</code>로 다시 연결한다.
-현재 클라이언트에서 새 공통 본문의 실행은 아직 인게임에서 확인되지 않았다.</p>
+현재 v3 본문의 실행과 무기 교체는 아직 인게임에서 확인되지 않았다.</p>
 
-<h4>설정</h4>
-<p>아래 이름은 <code>config__pvp_</code> 접두를 생략했다. 모두 공통 본문의 CONFIG에서 조정한다.
-프리셋 기본값은 위쪽에서 선택하고, 개인 변경은 <code>Personal overrides go here</code> 주석 뒤에
-<code>@setvar! config__pvp_magery 0</code> 같은 줄로 둔다. 재실행마다 기본값부터 다시 읽는다.</p>
+<h4>독립 설정</h4>
+<p>아래 이름은 <code>config__</code> 접두를 생략했다. 공통 본문의 CONFIG에서 각 값을 직접 바꾼다.
+<code>use_magery=1, use_weapon=0</code>은 자동 자기 마법만, <code>use_magery=0, use_weapon=1</code>은 자동 무기만 사용하며
+둘 다 1이면 함께 사용한다. 붕대·포션·버섯은 별도 스위치다.</p>
 <table>
-<thead><tr><th>옵션</th><th>mage 1 / 붕대 mage 2</th><th>효과</th></tr></thead>
+<thead><tr><th>옵션</th><th>기본값</th><th>효과</th></tr></thead>
 <tbody>
-<tr><td><code>magery</code></td><td>1 / 1</td><td>자기 마법 회복과 선택한 버프. 0이면 모든 자동 마법 OFF</td></tr>
-<tr><td><code>bandage</code></td><td>0 / 1</td><td>Healing이 있고 피해·독이 있을 때 자기 붕대. 작은 피해는 붕대를 우선</td></tr>
-<tr><td><code>reactive</code>, <code>reflect</code>, <code>siphon</code></td><td>각 1 / 각 0</td>
-<td>RA·Reflect·자기 Magic Arrow. Reflect가 있으면 시폰용 화살 보류</td></tr>
-<tr><td><code>mushroom</code>, <code>resist_potion</code></td><td>각 1 / 각 0</td><td>버섯과 Magic Resist 포션의 자동 보충</td></tr>
-<tr><td><code>potions</code>, <code>stat_potions</code></td><td>각 1 / 각 1</td>
+<tr><td><code>use_magery</code></td><td>1</td><td>자기 마법 회복과 선택한 버프. 0이면 모든 자동 마법 OFF</td></tr>
+<tr><td><code>use_weapon</code></td><td>1</td><td>스윙 바에 따른 자동 무기 장착. 0이면 장착·교체 수동</td></tr>
+<tr><td><code>use_bandages</code></td><td>0</td><td>Healing이 있고 피해·독이 있을 때 자기 붕대. 작은 피해는 붕대를 우선</td></tr>
+<tr><td><code>use_reactive_armor</code>, <code>use_magic_reflect</code>, <code>use_spell_siphon</code></td><td>각 1</td>
+<td>RA·Reflect·자기 Magic Arrow. Magery OFF면 함께 보류. Reflect가 있으면 시폰용 화살 보류</td></tr>
+<tr><td><code>use_magic_mushroom</code>, <code>use_resist_potion</code></td><td>각 1</td><td>버섯은 독립 스위치. Magic Resist 포션은 포션·스탯 포션 스위치도 켜야 사용</td></tr>
+<tr><td><code>use_potions</code>, <code>use_stat_potions</code></td><td>각 1</td>
 <td>해독·힐·Refresh·스탯 포션의 공통 스위치와 Strength·Agility·선택한 Resist 포션의 스위치</td></tr>
-<tr><td><code>weapon_graphic</code></td><td>0 / 0</td>
-<td>0은 장착 수동. ID를 넣으면 양손 슬롯이 모두 비었을 때 배낭에서 그 무기를 재장착. 이미 든 무기·방패·책은 교체하지 않음</td></tr>
+<tr><td><code>weapon_1_graphic</code>~<code>weapon_4_graphic</code></td><td>아래 표</td><td>각 스윙 바에 연결한 무기의 단일 graphic ID. 0은 그 슬롯 OFF</td></tr>
 <tr><td><code>heal_hits</code>, <code>emergency_hits</code>, <code>light_hits</code></td><td>35 / 45 / 15</td>
 <td>최대 HP 대비 손실량. 힐 포션 / GH / 붕대가 없거나 비활성일 때 Heal</td></tr>
 <tr><td><code>refresh_stam</code>, <code>mushroom_mana</code></td><td>15 / 45</td><td>현재 STA·마나가 이 값 이하일 때 보충</td></tr>
-<tr><td><code>chatty</code></td><td>1 / 1</td><td>시작 시 적용된 프리셋·Magery·붕대·무기 ID 출력</td></tr>
+<tr><td><code>mana_cure</code>, <code>mana_greater_heal</code>, <code>mana_heal</code></td><td>6 / 11 / 4</td>
+<td>Cure·GH·Heal을 시작할 최소 현재 마나. 기존 조건을 이름 있는 설정으로 옮겼다</td></tr>
+<tr><td><code>mana_reactive_armor</code>, <code>mana_magic_reflect</code>, <code>mana_spell_siphon</code></td><td>4 / 14 / 4</td>
+<td>RA·Reflect·시폰 MA를 시작할 최소 현재 마나. 값을 높이면 예비 마나를 남긴다. 서버 주문 비용을 바꾸지는 않는다</td></tr>
+<tr><td><code>chatty</code></td><td>1</td><td>시작 설정·슬롯 ID와 장착 요청 출력</td></tr>
 </tbody>
 </table>
-<p>무기 옵션에는 개인 serial 대신 <a href="item-list.html">item-list.html</a>의 graphic ID만 넣는다.
-자동 도끼 교체·스윙 관찰·Hamstring 토글은 없으며, 무기 종류로 Magery나 회복 정책을 추측하지 않는다.</p>
+
+<h4>루프 순서와 조회 주기</h4>
+<ol>
+<li>명령 제한·수동 시전·커서·큐·은신을 확인한다.</li>
+<li>마비 해제·Cure 포션·붕대·힐 포션을 먼저 시도한다. 한 행동을 요청하면 수동 입력 가드로 돌아간다.</li>
+<li><code>HOUSEKEEPING</code>에서 켜 둔 Magery·붕대에 필요한 자기 보급품만 30초마다 읽는다.
+둘 다 OFF면 이 조회와 조회 뒤의 루프 재시작을 생략한다. 시약별 보유 여부에서 각 주문의 조합을 한 번 계산한다.</li>
+<li>해독·큰 피해·붕대 대체 Heal 순서로 자기 회복 주문을 선택한다. 없으면 안전한 상태에서 RA·Reflect·시폰을 선택한다.
+Magery 스킬과 이동 조건은 선택 단계에서 공통으로 검사하고, 요청 직전에 수동 입력과 이동을 다시 확인한다.</li>
+<li>자기 시전의 커서·끊김·완료 대기를 처리한다. 버섯·Refresh·스탯 포션이 이어진다.
+스탯 포션은 실제 Drink 요청을 보냈을 때만 대기하고 루프를 재시작한다. 사용할 포션이 없으면 무기 단계로 진행한다.</li>
+<li>무기 옵션이 켜져 있으면 300ms 주기로 장비를 점검한다.
+네 graphic이 모두 0이면 손 슬롯 조회와 무기 검색을 생략한다. 손이 비어 있지 않으면 빈손 재장착용 후반 반복도 생략한다.</li>
+</ol>
+<p>시약 캐시는 즉시 재고가 아니다. 시작 또는 재실행 후 첫 보급품 조회에서 준비하며 이후 30초까지 이전 값이 남을 수 있다.
+독·큰 피해 상황의 실제 자동 마법 반응과 시약 소진·보충 직후의 동작은 인게임에서 확인한다.</p>
+
+<h4>스윙 바와 무기 선택</h4>
+<table>
+<thead><tr><th>설정</th><th>읽는 바</th><th>기본 무기 / graphic ID</th></tr></thead>
+<tbody>
+<tr><td><code>weapon_4_graphic</code></td><td><code>swing 4</code></td><td>Great Axe / 31190</td></tr>
+<tr><td><code>weapon_3_graphic</code></td><td><code>swing 3</code></td><td>0 — 사용 안 함</td></tr>
+<tr><td><code>weapon_2_graphic</code></td><td><code>swing 2</code></td><td>0 — 사용 안 함</td></tr>
+<tr><td><code>weapon_1_graphic</code></td><td><code>swing 1</code></td><td>Norse Axe / 31128</td></tr>
+</tbody>
+</table>
+<p>슬롯은 바 이름과 연결한 설정이며 서버가 무기 종류를 자동 분류한 결과가 아니다.
+다른 무기를 쓰면 <a href="item-list.html">item-list.html</a>의 단일 graphic ID로 바꾼다.
+예를 들어 Battle Axe는 3911, Halberd는 5182, Katana는 5119, Viking Sword는 5049다.
+개인 serial이나 <code>3911|5187</code> 같은 목록을 CONFIG 값에 넣지 않는다.</p>
+<p>시전·커서·큐·은신이 없을 때 자기 회복을 먼저 처리한 뒤, 바가 0인 슬롯을 4 → 3 → 2 → 1 순서로 찾는다.
+무기가 내 장비·배낭에 없거나 ID가 0이면 다음 슬롯을 본다. 고른 serial이 이미 어느 손에 들려 있으면 유지한다.
+다른 무기·책·방패를 들고 있으면 선택한 무기로 교체할 수 있다. 같은 무기의 여분이 있어도 마지막으로 선택한 serial이 손에 있으면 그 물건을 우선한다.</p>
+<p>모든 바가 진행 중이면 현재 장비를 유지한다. 양손이 모두 비었을 때만 1 → 2 → 3 → 4 순서로 가용 무기를 재장착한다.
+이 재장착은 스윙 준비·명중 판정이 아니다. 거리·Q·Warmode를 전제조건으로 쓰지 않으므로 대기 중에도 장착할 수 있다.
+상대 공격·Warmode 변경·Hamstring 토글은 요청하지 않는다.</p>
+<p><a href="https://www.razorce.com/guide/commands/#dress">Razor CE의 dress serial</a>로 아이템에 맞는 장착 레이어를 사용한다.
+CE의 <a href="https://github.com/markdwags/Razor/blob/master/Razor/Core/DressList.cs">DressList.Dress</a>는
+<code>UndressConflicts</code>가 켜져 있을 때 충돌 장비를 해제하므로, 활성 Razor 프로필의 Arm/Dress에서도 해당 옵션을 켠다.
+저장소의 indian 프로필 사본은 True지만 현재 UI 설정과 Outlands 포크의 실제 교체는 인게임 확인이 필요하다.
+기존 <code>hotkey/weapon-*</code>는 Unlock·Peace·공격을 요청하고 실행 중인 루프를 바꾸므로 자동 루프에서 호출하지 않는다.</p>
+<p><code>swing 1</code>~<code>swing 4</code>는 활성 캐릭터에 <code>WeaponSwing</code> 타입으로 존재해야 하며,
+각 바의 기본 시간은 연결한 무기와 현재 스태미나에 맞춘다. 현재 저장 사본의 2.27 / 3.35 / 4.07 / 5.69초를
+Norse·Great Axe에 맞는 시간으로 검증한 것은 아니다. 이 작업은 클라이언트 XML을 수정하지 않았고 자동 STA 보정도 하지 않는다.
+바의 구조는 <a href="overheads.html#06.A">overheads.html</a> 06.A절, 시간 계산과 공유 스윙 기준은 <a href="#09.B">09.B절</a>이다.</p>
+<p>스윙 바를 읽기만 하고 시작·초기화하지 않는다. 무기 장착이나 <code>equip requested</code> 출력은 서버 스윙·명중을 증명하지 않는다.
+빠른 무기로 실제 스윙하면 느린 무기의 다음 준비 시점도 밀릴 수 있으므로, 이 선택 정책은 큰 무기 한 방의 시점을 보장하지 않는다.</p>
 
 <h4>시전과 커서</h4>
 <p>시작 4줄의 일괄 초기화는 이 루프에서 생략한다. 시작 전에 보유한 타깃·시전·아이템 큐를 보존하기 위한 예외다.
 <code>casting</code>·<code>targetexists</code>·<code>queued</code>·은신 중에는 모든 자동 행동을 보류한다.
-따라서 공격 프리캐스트나 포션 커서를 들고 있으면 파우치·회복도 기다린다. 긴급 회복이 필요하면 사용자가 커서를 취소한다.</p>
+따라서 공격 프리캐스트나 포션 커서를 들고 있으면 파우치·회복·장착도 기다린다. 긴급 회복이 필요하면 사용자가 커서를 취소한다.</p>
 <p>한 패스에 한 행동을 요청하고 다시 수동 입력 가드를 본다. 자동 시전은 정지한 상태에서 시작하며,
 자기 주문의 커서에만 <code>Target Self</code>를 요청한다. 결과가 60회 폴링 안에 나오지 않으면
 <code>[ cast, check ]</code> 후 정지하고 커서를 남겨 둔다. 커서가 닫혔다는 이유로 공격 후속을 시작하지 않는다.</p>
@@ -904,13 +948,52 @@ mage와 dexxer-mage는 별도 전투 알고리즘 대신 Magery·붕대·버프�
 겹친 입력·지연된 응답에서의 귀속은 아직 인게임에서 확인되지 않았다.</p>
 
 <h4>상태·타이머와 확인</h4>
-<p>설정·상태는 <code>config__pvp_</code>·<code>var__pvp_</code>로 모았다. 상태는 자기 시약·붕대·선택한 자기 주문·폴링 결과·손 슬롯만 둔다.
-이전 <code>var__target</code>·<code>var__armed</code>·덤프 대상과 <code>var__ljp_</code>의 상대·거리·공격·Hamstring 상태는 사용하지 않는다.
-Razor 세션에 남은 옛 값과 타이머를 삭제하는 작업은 하지 않는다.</p>
-<p><code>timer__pvp_</code> 접두로 pouch·cure_potion·bandage·heal_potion·refresh·weapon은 1.2초 재시도,
-heal은 2.5초, buff·mushroom·stats는 5초, message는 3초, reagents는 30초다.
-이 간격은 요청 제한이며 서버 성공·쿨다운 완료를 증명하지 않는다. 힐 포션은 별도로 <code>heal pot</code> 바와 자기 포션 라벨을 본다.
-재실행은 시약 읽기만 앞당기며 행동 재시도 타이머는 유지한다.</p>
+<p>설정은 <code>config__</code>, 상태는 <code>var__</code>로 통일하고 각 선언 위에 값과 필요한 이유를 적었다.
+상대·거리·공격·Hamstring 상태는 없다. 다음 표는 코드의 상태를 읽는 기준이다.</p>
+<table>
+<thead><tr><th>상태</th><th>뜻과 사용 이유</th></tr></thead>
+<tbody>
+<tr><td><code>var__bandage_available</code></td>
+<td>최근 붕대 검색에서 0은 확인한 붕대 없음, 1은 있음. 붕대를 사용할 수 없을 때 가벼운 Heal을 선택하기 위한 값이다.
+보급품 조회와 실제 붕대 시도 직전에 갱신한다</td></tr>
+<tr><td><code>var__garlic</code>·<code>ginseng</code>·<code>mandrake</code>·<code>ash</code>·<code>silk</code>, <code>regs_*</code></td>
+<td>시약별 0/1 보유와 주문별 전체 시약 조합. 매 패스 재검색하지 않고 보급품 점검 때 갱신한다</td></tr>
+<tr><td><code>var__selected_self_spell</code></td>
+<td>0 없음 / 1 Cure / 2 GH / 3 Heal / 4 RA / 5 Reflect / 6 시폰용 자기 MA.
+주문 선택과 공통 시전 처리를 잇는 값으로, 상대에게 보낼 주문 번호가 아니다</td></tr>
+<tr><td><code>var__cast_wait_finished</code></td>
+<td>자기 타겟 명령·시전 끊김·커서 없는 버프 종료 중 하나로 대기를 마쳤으면 1.
+치유·버프 성공을 의미하지 않는다. 제한된 대기가 끝나도 0이면 확인 알림 후 정지한다</td></tr>
+<tr><td><code>var__left_hand_serial</code>, <code>right_hand_serial</code></td>
+<td>무기 점검 직전에 읽은 양손 serial. 0은 빈손이다. 장착 유지와 빈손 재장착 분기를 판단한다</td></tr>
+<tr><td><code>var__selected_weapon_slot</code>, <code>selected_weapon_graphic</code>, <code>selected_weapon_serial</code></td>
+<td>검사 중인 스윙 슬롯·무기 종류·찾은 자기 물건의 serial. graphic이 있어도 serial 0이면 가용 무기를 찾지 못한 상태다.
+slot은 진단 출력에도 사용한다</td></tr>
+<tr><td><code>var__cached_weapon_graphic</code>, <code>cached_weapon_serial</code></td>
+<td>마지막으로 찾거나 장착을 요청한 무기. 같은 종류이고 해당 serial이 현재 손에 있을 때만 검색 없이 재사용한다.
+배낭의 여분으로 반복 교체하는 것을 줄인다. 캐시 자체는 장착 성공의 증거가 아니다</td></tr>
+</tbody>
+</table>
+<p>행동 타이머의 <code>timer__pvp_</code> 접두는 유지한다. 채집 루프의 회복 타이머와 충돌하지 않고,
+Stop·재실행·설정 변경으로 행동 재시도 시간이 초기화되는 것을 막기 위한 이름이다.
+Razor 세션에 남은 옛 변수와 타이머를 별도로 삭제하지 않는다.</p>
+<table>
+<thead><tr><th>타이머 / 비교 설정</th><th>기본 주기와 의미</th></tr></thead>
+<tbody>
+<tr><td><code>timer__pvp_pouch</code>·<code>cure_potion</code>·<code>bandage</code>·<code>heal_potion</code>·<code>refresh</code>
+/ <code>cooldown__item_retry</code></td><td>각 1.2초. 아이템 회복 재시도는 서로 다른 타이머를 쓴다</td></tr>
+<tr><td><code>timer__pvp_weapon</code> / <code>cooldown__weapon_check</code></td><td>300ms. 장비 조회·장착 점검 주기이며 스윙 쿨다운이 아니다</td></tr>
+<tr><td><code>timer__pvp_heal</code> / <code>cooldown__heal_retry</code></td><td>2.5초. 자기 회복 마법 요청 제한</td></tr>
+<tr><td><code>timer__pvp_buff</code>·<code>mushroom</code>·<code>stats</code> / <code>cooldown__support_retry</code></td>
+<td>각 5초. 자기 버프·버섯·스탯 포션은 타이머를 따로 쓴다</td></tr>
+<tr><td><code>timer__pvp_message</code> / <code>cooldown__message</code></td><td>3초. 반복 경고 출력 제한</td></tr>
+<tr><td><code>timer__pvp_supplies</code> / <code>cooldown__supplies</code></td>
+<td>30초. 시약·붕대 보유 캐시. 기존 reagents 타이머를 역할에 맞게 바꿨다. 이 캐시만 실행할 때 즉시 갱신 가능하게 만든다</td></tr>
+</tbody>
+</table>
+<p>이 주기는 요청 제한이며 서버 성공·쿨다운 완료를 증명하지 않는다. 힐 포션은 별도로 <code>heal pot</code> 바와 자기 포션 라벨을 본다.
+<code>wait__poll</code>은 100ms, <code>wait__action</code>은 200ms다.
+타이머 표의 축약 항목도 <code>timer__pvp_</code>로 시작하고, 상태 표의 축약 항목은 <code>var__</code>로 시작한다.</p>
 <p>필드 자기관리용이다. 구조화 PvP·팩션의 <code>pvp</code> 제한이 활성화되면 <code>[ script, blocked ]</code> 후 정지한다.
 정적 검사는 실행 성공을 증명하지 않는다. 새 공통 루프의 인게임 확인은 <a href="open-items.html#10">open-items.html</a> 10절이다.</p>
 

@@ -295,14 +295,22 @@ AR의 감소식은 <a href="pvp.html#09.E">pvp.html</a> 09.E절이다.</p>
 <p>대상은 <code>script/gather/lumberjack-enhanced.razor</code>다. 기존 <code>lumberjack.razor</code>를 구버전으로 보존하고,
 enhanced와 PvP 자기관리 루프는 별도 핫키로 수동 전환한다. 자동 공격과 자동 PvP 전환은 넣지 않는다.</p>
 
-<h3 id="08.A">08.A 구현 순서</h3>
+<h3 id="08.A">08.A 실행 흐름</h3>
 <ol>
-<li>새 파일에 설정·대기·타이머·상태를 나누고, 마비 해제·해독·붕대·포션·주문 회복을 채집보다 먼저 처리한다.</li>
-<li>Tracking을 제한된 시도로 시작한다. 위험 감지, 무게 부족, 귀환 요청은 채집 중단 상태로 남기고 회복을 계속한다.</li>
-<li>Hatchet 장착을 실제 손 슬롯으로 확인한 뒤 Smart Harvest를 시작한다. 여행 제한 대기 중에도 생존 처리를 유지한다.</li>
-<li>재고·시약·음식·자기 버프와 선택적인 집 문·Stockpile 처리를 주기적으로 확인한다.</li>
+<li>설정·타이머·상태를 초기화한다. <code>config__use_tracking = 1</code>이면 시작 부분에서
+Tracking 필터와 Hunting을 한 번 설정한다. 자동 리콜 설정과 무관하며 기본 필터는 red다.</li>
+<li>루프에서는 마비 해제·해독·붕대·포션·주문 회복을 먼저 처리한다.
+Housekeeping의 시약·도구·음식·선택적 집 기능, 자기 버프, Hatchet 확인과 Smart Harvest가 이어진다.</li>
+<li>루프 하단의 <code>AUTO RECALL</code>에서 리콜용 Tracking 감지·책·무게·요청·실패 응답을 한 곳에서 처리한다.
+자동 리콜을 끄면 이 블록 전체를 건너뛴다. 감지 때문에 채집이나 자기 버프를 별도로 중단하지 않는다.</li>
+<li>리콜이 필요해지면 다음 패스부터 채집·선택적 집 기능·준비 버프를 보류하고 회복을 계속한다.
+<code>RecallCharge Home</code>은 실제 Recall 주문 요청이다. Moongate를 이용하는 동작은 없다.
+요청은 실행당 한 번이며, 명령 전송을 도착으로 취급하지 않는다. 싸우려면 사용자가 PvP 스크립트로 전환한다.</li>
+<li>서버의 Tracking·저장·채집 거절 안내는 프로필 오버헤드에서 표시한다.
+시약 부족 메시지는 리콜 감지 뒤에 읽고 다음 housekeeping의 시약 재검색을 예약한다.</li>
 <li><code>util/check.sh script/gather/lumberjack-enhanced.razor</code>, <code>util/check-blueprint.sh</code>,
-<code>git diff --check</code>를 실행하고, 아래 인게임 확인 항목을 문서에 남긴다. 커밋과 설정 파일 수정은 하지 않는다.</li>
+<code>git diff --check</code>와 두 프로필의 XML·오버헤드 변경 범위를 확인한다.
+아래 인게임 확인 항목은 정적 검증과 구분한다.</li>
 </ol>
 
 <h3 id="08.B">08.B 채집 근거</h3>
@@ -310,67 +318,106 @@ enhanced와 PvP 자기관리 루프는 별도 핫키로 수동 전환한다. 자
 <p><a href="https://wiki.uooutlands.com/Lumberjacking">공식 Lumberjacking 문서</a>는 장착한 Hatchet의 더블클릭으로 주변 나무를 채집한다고 설명한다.
 기본 구현은 도끼를 더블클릭하며 임의의 타겟 커서를 자기에게 보내지 않는다. 기존 Smart Harvest 문서의 자기 타겟 설명과 실제 클라이언트 동작은 인게임에서 비교한다.</p>
 <blockquote>they will have a 60 second delay before they can attempt to Harvest again</blockquote>
-<p>같은 문서는 Recall·Moongate·Hike 뒤의 제한을 60초로 설명하고 Teleport·Rope에도 적용한다고 덧붙인다.
-스크립트는 여행 제한 거절 문장을 받으면 그때부터 보수적으로 60초를 대기한다. 실제 이동 시각이나 서버의 남은 시간을 읽은 값은 아니다.</p>
+<p>같은 문서는 Recall·Moongate·Hike 뒤의 채집 제한을 60초로 명시하고 Teleport·Rope에도 적용한다고 덧붙인다.
+<strong>60초는 확인된 서버 규칙이다.</strong> 스크립트가 이동 성공 시각이나 서버의 남은 시간을 읽는 것은 별개의 문제다.
+이동 거절 안내는 두 프로필에서 <code>[ harvest, wait ]</code>로 표시하고 스크립트에서는 조회하지 않는다.
+2초는 채집 명령의 재시도 간격이며, 서버의 60초 제한을 줄이거나 대체하지 않는다.
+거절 안내를 받은 시점부터 새 60초 대기를 시작하는 타이머도 없다. 매핑은 <a href="overheads.html#07">overheads.html</a> 07절에 있다.</p>
 
 <h3 id="08.C">08.C 기본값과 상태</h3>
-<p>모든 세션 이름에 <code>lj_</code>를 붙였다. Bard Necro와 상태·타이머를 공유하지 않는다.
-숫자와 버프 비용은 <a href="item-list.html#19">item-list.html</a> 19절과 이 문서 04절의 마나 예산을 사용한다.</p>
+<p>2026-10-05 v4는 Tracking 시작 설정과 자동 리콜 판정을 분리한다.
+채집 허용 캐시와 숫자 단계 대신, 실제 중단 조건과 리콜 상태의 의미를 코드에 직접 적었다.
+변수 이름은 <code>config__</code>, <code>var__</code>, <code>timer__</code> 등 공통 접두를 사용한다.
+집 문·Stockpile의 영속 이름은 유지하며, 실행할 때 상태와 재시도 타이머를 초기화한다.</p>
 <table>
 <thead><tr><th>설정</th><th>기본값과 의미</th></tr></thead>
 <tbody>
-<tr><td><code>config__lj_use_tracking</code>, <code>track_red_only</code></td>
-<td>1, 0. 실행 첫 회에 기존 Hunting 버프와 별개로 All Hostile Players 필터를 확인한다.
-필터 확인과 Hunting 버프가 모두 있어야 채집한다. 필터 전환은 한 번에 최대 10회, 실패하면 10초 뒤 재시도한다</td></tr>
-<tr><td><code>config__lj_return_on_hostile</code>, <code>return_on_any_hostile</code></td>
-<td>1, 0. 기존 스크립트의 실제 거리 사슬인 1~45 steps를 유지한다. 근거리 감지는 실행을 다시 시작할 때까지 채집을 멈춘다.
-첫 설정만 0으로 바꿔도 위험 감지 시 채집 중단은 유지된다</td></tr>
-<tr><td><code>config__lj_return_on_weight</code>, <code>weight_remaining</code>, <code>require_runebook</code></td>
-<td>1, 10, 1. 남은 무게 10 이하에서 귀환을 요청한다. Runebook 또는 Runetome가 없으면 채집을 보류한다.
-이 검사는 충전량이나 Home 룬의 실제 존재까지 확인하지 않는다</td></tr>
-<tr><td><code>config__lj_heal_hits</code>, <code>emergency_hits</code>, <code>light_hits</code></td>
+<tr><td><code>config__auto_recall</code></td>
+<td>1. 리콜에만 적용한다. 0이면 하단 리콜 블록의 감지 메시지·Hunting 점검·책·여유 무게·실패 응답 조회를 건너뛴다.
+시작 부분의 Tracking 설정과 프로필 화면 표시는 유지한다. 가까운 red 때문에 채집·자기 회복을 중단하지 않는다</td></tr>
+<tr><td><code>config__recall_on_detection</code>, <code>use_tracking</code>, <code>tracking_color</code>, <code>show_tracking</code></td>
+<td>1, 1, 1, 0. <code>use_tracking</code>은 시작 설정을 독립적으로 제어한다.
+색상 값은 1 red / 2 grey / 3 orange / 4 세 그룹 전체다. 설정은 시작 부분에서 한 번만 한다.
+감지 리콜은 <code>auto_recall</code>·<code>recall_on_detection</code>·<code>use_tracking</code>을 모두 켠 경우에만 동작한다</td></tr>
+<tr><td><code>config__recall_at_any_distance</code></td>
+<td>0. 기본은 기존 1~45 steps 분기에서 리콜 필요 여부를 기록한다.
+1이면 준비된 필터의 발견 문구만으로 리콜을 요청한다. 화면 알림은 프로필에서 처리한다</td></tr>
+<tr><td><code>config__recall_on_weight</code>, <code>weight_remaining</code>, <code>require_runebook</code></td>
+<td>1, 10, 1. 자동 리콜을 켠 경우 남은 무게 10 이하에서 리콜 필요 여부를 기록한다.
+책은 5초 주기로 보유 여부를 캐시하고, 마지막 설정은 책 없음으로 채집을 보류할지 정한다.
+0이어도 실제 리콜에는 책이 필요하다. 책 검사는 충전량이나 Home 룬의 존재를 확인하지 않는다</td></tr>
+<tr><td><code>config__heal_hits</code>, <code>emergency_hits</code>, <code>light_hits</code></td>
 <td>잃은 HP 35, 45, 15. 평소 붕대, 35부터 힐 포션, 45부터 Greater Heal을 보조로 쓴다.
 붕대를 쓸 수 없으면 15부터 Smart Heal/Cure를 시도한다. 독이면 Cure 포션과 해독 주문을 먼저 쓴다</td></tr>
-<tr><td><code>config__lj_use_reactive_armor</code>, <code>use_magic_reflect</code></td>
-<td>각 1. 안전할 때만 시도하며 마나 24, 34부터 각각 시전해 준비 버프 뒤 GH + Teleport 예산 20을 남긴다.
-이 설정은 시전 시작 조건이며 이후 생존 회복이 마나 20을 반드시 유지한다는 뜻은 아니다</td></tr>
-<tr><td><code>config__lj_use_stat_potions</code>, <code>close_house_door</code>, <code>deposit_at_stockpile</code></td>
-<td>각 0. 선택 기능이다. 문을 켜면 <code>global__my_house_door</code>를 한 번 고르고,
-Stockpile은 loadout과 같은 <code>global__my_resource_stockpile</code>을 사용한다. 문 graphic은 자기 집의 열린 문 값으로 바꾼다</td></tr>
+<tr><td><code>config__use_reactive_armor</code>, <code>use_magic_reflect</code></td>
+<td>각 1. 리콜이 필요하지 않고 안전할 때 마나 24, 34부터 각각 시전한다.
+준비 버프 뒤 GH + Teleport 마나 예산 20을 남기기 위한 시작 조건이다.
+숫자 근거는 <a href="item-list.html#19">item-list.html</a> 19절과 이 문서 04절에 있다</td></tr>
+<tr><td><code>config__use_potions</code></td>
+<td>1. 독·피해·스태미나에 대한 기존 Cure·Heal·Refresh 포션을 사용한다.
+리콜 준비용 Strength·Agility 포션과 그 옵션은 제거했다</td></tr>
+<tr><td><code>config__close_house_door</code>, <code>deposit_at_stockpile</code></td>
+<td>각 0. 집 문은 <code>global__my_house_door</code>, Stockpile은 <code>global__my_resource_stockpile</code>을 사용한다.
+문 graphic은 자기 집의 열린 문 값으로 바꾼다</td></tr>
 </tbody>
 </table>
-<p>표의 축약 설정 이름도 실제 파일에서는 모두 <code>config__lj_</code>로 시작한다.
-남은 설정은 포션 사용, Tracking 창 표시, 스태미나 15 이하의 Refresh, 예비 Hatchet 2개 이하의 경고와 출력 빈도다.</p>
+<p>축약 설정 이름도 실제 파일에서는 모두 <code>config__</code>로 시작한다.
+남은 설정은 포션 사용, 스태미나 15 이하의 Refresh, 예비 Hatchet 2개 이하의 경고와 출력 빈도다.
+자동 리콜을 꺼도 실제 남은 무게가 0 이하이면 채집을 보류한다.</p>
+<p>red는 Tracking의 Murderer Players, grey는 Criminal Players, orange는 Enemy Players에 대응한다.
+grey는 범죄자 필터의 이름이며 모든 회색 대상을 따로 검색하는 기능이 아니다.
+전체 선택은 서버의 All Hostile Players 필터다. grey·orange 확인 문장의 실제 서버 일치는 인게임에서 확인한다.
+추적 화면 표시는 <a href="overheads.html#07">overheads.html</a> 07절의 프로필 매핑을 사용한다.</p>
 <table>
 <thead><tr><th>추가 이름</th><th>역할</th></tr></thead>
 <tbody>
-<tr><td><code>var__lj_danger</code>, <code>hostile_seen</code>, <code>tracking_filter</code>, <code>tracking_ready</code>, <code>tracking_response</code></td>
-<td>근거리 위험 고정, 이번 패스의 발견, 이번 실행에서 확인한 필터, 필터와 Hunting 버프 준비 상태, 이번 선택의 응답.
-각 버튼의 새 응답을 제한된 폴링으로 확인한 뒤 다음 버튼을 보낸다. 응답이 없으면 준비 상태로 만들지 않는다</td></tr>
-<tr><td><code>var__lj_return_reason</code>, <code>return_stage</code></td>
-<td>사유: 0 없음 / 1 적대 / 2 무게. 단계: 0 대기 / 1 요청 보냄 / 2 차단 / 3 결과 미확인.
-도착 성공을 추측하지 않고 귀환 요청 이후의 자동 채집 재개를 막는다</td></tr>
-<tr><td><code>var__lj_saving</code>, <code>book_ok</code>, <code>hatchet</code>, <code>hatchet_ready</code></td>
-<td>서버 저장 중 채집 중단, 주기적 책 확인, 손에 든 Hatchet serial 캐시와 이번 패스의 장착 확인</td></tr>
-<tr><td><code>var__lj_bandage_ok</code>, <code>heal_spell</code>, <code>buff_cast</code>, <code>regs_*</code></td>
-<td>붕대 보유와 사용할 회복, 자기 버프 시도, 주문별 시약 조합. 시약별 <code>garlic</code>, <code>ginseng</code>,
-<code>mandrake</code>, <code>ash</code>, <code>silk</code>로 조합을 갱신한다. 보유와 명령 호출을 치유 성공으로 취급하지 않는다</td></tr>
-<tr><td><code>alias__lj_*</code>, <code>label__lj_*</code></td>
-<td>힐 포션의 사용 가능 라벨, 손 슬롯, 예비 Hatchet, 음식, 열린 문. alias는 검색 블록 안에서만 사용한다</td></tr>
-<tr><td><code>timer__lj_*</code>, <code>cooldown__lj_*</code>, <code>wait__lj_*</code></td>
-<td>메시지·위험 알림, 재고·시약·음식, Tracking, 붕대·포션·회복·버프, 채집·여행 제한, 귀환 응답·Stockpile을 분리한다.
-여행 거절 타이머만 재실행 시 보존한다. 나머지는 실행 첫 회에 준비 상태로 만든다</td></tr>
+<tr><td><code>var__recall_needed</code></td>
+<td>0은 채집 계속, 1은 리콜 필요. 감지 또는 여유 무게 부족으로 1이 되면 실행을 다시 시작할 때까지 유지한다.
+채집·준비 버프·집 기능의 중단 조건으로 직접 사용한다. 숨은 <code>gather_ready</code> 캐시는 없다</td></tr>
+<tr><td><code>var__recall_sent</code></td>
+<td>0은 명령 미전송, 1은 RecallCharge 전송. 중복 리콜 요청을 막는다. 전송 성공을 도착 성공으로 보지 않는다</td></tr>
+<tr><td><code>var__recall_notice_shown</code></td>
+<td>거절 안내 또는 전송 후 5초 확인 안내를 표시했으면 1. 시간 경과 안내의 반복 출력을 막기 위한 상태다.
+늦게 도착한 거절 응답도 계속 확인한다</td></tr>
+<tr><td><code>var__recall_book_available</code></td>
+<td>리콜 책 보유 캐시. 시작값 0에서 첫 하단 점검으로 갱신하고 이후 5초마다 읽는다.
+책 필수 설정은 채집 조건에 직접 표시한다. 요청 직전에 책을 한 번 더 확인한다</td></tr>
+<tr><td><code>var__tracking_filter_confirmed</code>, <code>tracking_hunting_active</code>, <code>tracking_button_answered</code></td>
+<td>설정한 색상에 대한 서버 확인, 최근 확인한 Hunting 활성 여부, 현재 필터 버튼의 응답 여부다.
+필터·버튼 상태는 시작 설정에 필요하며, Hunting 상태의 루프 점검은 감지 리콜을 켰을 때만 한다.
+감지 리콜을 켰으면 채집 조건에도 확인한 Hunting 활성 여부를 직접 적는다</td></tr>
+<tr><td><code>var__housekeeping_pass</code>, <code>regs_*</code>, 시약별 보유 변수</td>
+<td>이번 패스의 housekeeping 실행 여부와 주문별 시약 조합이다. 시약은 첫 housekeeping과 이후 30초마다 갱신한다.
+부족 안내는 housekeeping을 수행한 패스의 끝에서 확인하고 다음 housekeeping 재검색을 예약한다</td></tr>
+<tr><td><code>var__hatchet</code>, <code>hatchet_equipped</code>, <code>bandage_available</code>, <code>heal_spell</code>, <code>buff_cast</code></td>
+<td>확인한 도끼 serial, 이번 시도의 손 슬롯 확인, 최근 붕대 검색 결과, 이번 패스의 회복 주문 선택, 자기 버프 명령 호출 여부다.
+<code>heal_spell</code>은 0 없음 / 1 Smart Heal·Cure / 2 Greater Heal·Cure다.
+각 선언 위 주석에 값과 사용 이유를 적었다. 명령 호출을 실제 장착·치유·시전 성공으로 취급하지 않는다</td></tr>
+<tr><td><code>timer__recall_scan</code>, <code>cooldown__recall_scan</code></td>
+<td>책·Hunting 상태·무게를 읽는 5초 주기다. 리콜 블록에서 명령을 보내기 전까지만 사용한다.
+Tracking 메시지는 준비 상태일 때 매 패스 확인하며 무게 판정보다 먼저 처리한다</td></tr>
+<tr><td><code>timer__recall</code>, <code>cooldown__recall_response</code></td>
+<td>RecallCharge 전송 후 확인 안내까지 5초다. 실제 도착 또는 채집 제한의 남은 시간을 측정하는 타이머가 아니다</td></tr>
+<tr><td>채집 조건과 나머지 타이머</td>
+<td>리콜 필요 여부·실제 무게 한도·책 필수 설정·Hunting 필요 설정·건강·수동 입력 조건을 채집 블록에서 직접 읽는다.
+회복·버프·채집 재시도와 시약·음식·도구·집 기능 주기는 각각 유지한다. 서버 저장 상태는 별도로 관리하지 않는다</td></tr>
 </tbody>
 </table>
-<p>상태 표의 축약 이름도 <code>var__lj_</code> 접두를 쓴다.
-대기 간격과 재시도 주기는 클라이언트 동작을 조절하는 값이고, 서버 쿨다운을 측정한 값이 아니다.</p>
+<p>상태 표의 축약 이름도 <code>var__</code> 접두를 쓴다. 주기는 클라이언트 재시도 값이며 서버 남은 시간의 측정값이 아니다.
+회복·버프의 대기는 기존 <code>casting</code>과 제한된 반복으로 처리하고, 끊김 메시지를 별도로 소비하지 않는다.
+Tracking 감지보다 앞에서 메시지를 소비하는 경로를 없앴다.</p>
+<p>하단 리콜 판정 전 진행한 채집을 되돌리지는 않는다. 새 감지는 다음 패스부터 채집을 보류하며,
+진행 중인 자기 시전·에이전트 대기 때문에 실제 판정이 늦어질 수 있다.
+시약 부족 안내도 5초 주기로 확인한 뒤 다음 housekeeping에 반영하므로 즉시 갱신되는 값은 아니다.
+실행 중 추적 필터를 수동으로 바꿨으면 다시 실행해 필터를 확인한다.</p>
 
 <h3 id="08.D">08.D 실행 준비와 인게임 확인</h3>
 <ol>
-<li>Tracking 창에서 Hunt Frequency를 <strong>Always Get Closest</strong>로 둔다.
+<li>Tracking 감지 리콜을 사용할 때 Tracking 창의 Hunt Frequency를 <strong>Always Get Closest</strong>로 둔다.
 스크립트는 대상 필터를 맞추지만 추적 빈도 모드를 바꾸지는 않는다.
 공식 모드의 차이는 <a href="https://wiki.uooutlands.com/Tracking">Tracking 문서</a>의 Hunting 항목을 본다.</li>
-<li>충전한 책에 <code>Home</code> 룬을 준비한다. 다른 이름이면 파일의 <code>say "[RecallCharge Home"</code> 한 줄을 바꾼다.
+<li><code>config__auto_recall = 1</code>로 사용할 때는 충전한 책에 <code>Home</code> 룬을 준비한다.
+다른 이름이면 파일의 <code>say "[RecallCharge Home"</code> 한 줄을 바꾼다.
 명령 의미는 <a href="https://wiki.uooutlands.com/Commands">공식 Commands 문서</a>의 RecallCharge 항목에 있다.</li>
 <li>Hatchet·붕대·시약·포션을 넣고 <code>Bandage Self</code>, 각 Drink 핫키,
 <code>&gt; Smart Heal/Cure Self</code>, <code>&gt; Greater Heal/Cure Self</code>, <code>&gt; Interrupt</code>,
@@ -382,67 +429,96 @@ Stockpile은 loadout과 같은 <code>global__my_resource_stockpile</code>을 사
 <thead><tr><th>상황</th><th>예상과 실패 판정</th></tr></thead>
 <tbody>
 <tr><td>안전한 나무 옆에서 시작, 기존 필터가 몬스터 또는 우호 플레이어</td>
-<td><code>[ lumberjack, on ]</code> 뒤 적대 필터를 새로 맞추고 Hunting을 유지한다.
-필터 확인 전 채집하거나 기존 Hunting을 꺼 버리면 실패. 응답이 없으면 <code>[ track, miss ]</code> 또는 <code>[ track, check ]</code> 후 채집을 보류해야 한다</td></tr>
+<td><code>Lumberjack enhanced v4 loaded</code>와 <code>[ lumberjack, on ]</code> 뒤 기본 red 필터를 맞추고 Hunting을 유지한다.
+자동 리콜 OFF에서도 <code>use_tracking = 1</code>이면 설정해야 한다. 기존 Hunting을 꺼 버리면 실패.
+감지 리콜 ON에서 필터 확인이 안 되면 <code>[ track, miss ]</code> 또는 <code>[ track, check ]</code> 후 채집을 보류한다</td></tr>
+<tr><td>Tracking 설정 후 장시간 채집, Hunting 해제, 시작할 때 수동 시전</td>
+<td>채집 중 Tracking 창이나 필터 버튼을 다시 조작하면 실패.
+Hunting 해제는 감지 리콜 ON일 때 다음 하단 상태 점검에서 채집 보류로 반영한다.
+자동 리콜 OFF에서는 Hunting 때문에 채집을 보류하지 않는다.
+초기 설정을 못 마친 경우 회복은 계속하며, 안전해진 뒤 재실행해 필터와 Hunting을 다시 확인한다</td></tr>
+<tr><td>grey·orange·전체 필터 선택</td>
+<td>2·3·4로 각각 재실행해 범죄자·적대 길드·전체 필터 확인 문장이 맞는지 기록한다.
+선택한 필터와 다르면 감지 리콜 ON일 때 채집을 보류한다. 감지 화면 표시는 프로필의 <code>[ track, … ]</code>를 사용한다</td></tr>
 <tr><td>Hatchet 없음·교체·손에 다른 무기, 나무 고갈</td>
 <td>없으면 <code>[ hatchet, out ]</code>, 낮으면 <code>[ hatchet, low ]</code>.
 교체 후 손 슬롯을 확인하고 채집한다. 고갈 뒤 반복 시도 간격이 유지돼야 한다.
 더블클릭으로 커서가 뜨면 <code>[ harvest, cursor ]</code> 후 사용자의 확인을 기다린다</td></tr>
 <tr><td>독, 보통 피해, 큰 피해, 포션·붕대·시약 부족</td>
 <td>채집보다 해독과 회복이 먼저다. 부족하면 <code>[ cure pot, out ]</code>, <code>[ bandage, out ]</code>,
-<code>[ heal pot, out ]</code>. 포션 재사용 불가 중 반복 음용하거나 붕대 진행 중 계속 새 붕대를 쓰면 실패</td></tr>
+<code>[ heal pot, out ]</code>. 시약은 첫 housekeeping에서 준비되고, 부족 안내를 패스 끝에서 확인한 뒤 다음 housekeeping에서 다시 읽어야 한다.
+포션 재사용 불가 중 반복 음용하거나 붕대 진행 중 계속 새 붕대를 쓰면 실패</td></tr>
 <tr><td>수동 프리캐스트·폭발 포션 커서, warmode, 이동</td>
 <td>기존 커서를 채집이 자기에게 보내지 않아야 한다. warmode에서는 채집·자동 주문을 보류한다.
 자체 회복 에이전트 실행 중 수동 입력까지 겹치는 경우는 별도로 시험한다. 커서 소유권을 자동으로 증명하는 장치는 없다</td></tr>
-<tr><td>적대 46 steps와 45 steps, 발견 문구에 거리 포함, 채집 거절 안내 동시 도착</td>
-<td>먼 거리는 <code>[ hostile, seen ]</code>, 가까워지면 <code>[ hostile, near ]</code>.
-근거리 경보를 먼저 읽어 채집을 중단한다. 자기 TK나 피격만으로 PvP 루프가 시작되면 실패</td></tr>
-<tr><td>귀환 허용·Heat of Battle·마나 부족·룬 없음·지연 응답</td>
-<td>요청하면 <code>[ return, on ]</code>, 차단은 <code>[ return, blocked ]</code>, 마나 부족은 <code>[ mana, low ]</code>.
-요청 후 5초에 <code>[ return, check ]</code>가 뜨며 채집을 재개하지 않는다.
-실제 도착은 화면으로 확인한다. 같은 실행에서 Recall을 다시 요청하면 실패</td></tr>
-<tr><td>남은 무게 10 이하, 여행 직후, 서버 저장</td>
-<td><code>[ weight, low ]</code> 이후 채집 중단. 여행 거절은 <code>[ harvest, wait ]</code> 뒤 60초 대기하며 회복은 계속한다.
-대기 중 재실행해도 여행 타이머를 초기화하지 않아야 한다. 서버 저장 완료 전 채집하면 실패</td></tr>
+<tr><td>red 46 steps와 45 steps, 발견 문구에 거리 포함, 채집 거절 안내 동시 도착</td>
+<td>기본 설정에서는 46 steps로 리콜하지 않고, 45 steps에서 리콜 필요 여부를 기록한다.
+화면의 추적 안내는 프로필에서 나온다. 하단에서 감지한 다음 패스부터 채집을 보류해야 한다.
+시약 부족·시전 끊김 안내가 함께 도착해도 감지를 놓치지 않는지 확인한다</td></tr>
+<tr><td>자동 리콜 끔, 책 없음, 남은 무게 1~10, 가까운 red</td>
+<td><code>config__auto_recall = 0</code>이면 책이나 여유 무게 때문에 채집을 보류하거나 RecallCharge를 요청하면 실패.
+Tracking 시작 설정은 <code>use_tracking</code>에 따라 실행한다.
+루프에서 리콜용 버프·감지 메시지를 조회하거나 가까운 red 때문에 채집·자기 버프를 중단하면 실패. 화면 안내는 유지한다</td></tr>
+<tr><td>리콜 허용·Heat of Battle·마나 부족·룬 없음·지연 응답</td>
+<td>요청하면 <code>[ recall, on ]</code>, 읽은 서버 거절은 <code>[ recall, blocked ]</code>, 마나 부족은 <code>[ mana, low ]</code>.
+Heat of Battle 버프만 보고 명령 전송 전에 차단하면 실패. 실제 서버의 허용·거절을 별도로 기록한다.
+전송 타이머가 5초를 지나면 다음 하단 판정에서 <code>[ recall, check ]</code>가 한 번 뜨며 채집을 재개하지 않는다.
+실제 도착은 화면으로 확인한다. 같은 실행에서 Recall을 다시 요청하거나 준비용 Strength·Agility 포션을 마시면 실패</td></tr>
+<tr><td>무게 리콜 켬·끔, 실제 무게 한도, 여행 직후</td>
+<td>자동 리콜과 무게 리콜을 모두 켜면 다음 하단 상태 점검에서 <code>[ weight, low ]</code> 이후 채집 중단과 리콜 요청이 나와야 한다.
+무게 리콜을 끄면 여유 조건으로 멈추지 않는다. 실제 남은 무게 0 이하에서는 채집을 보류한다.
+여행 거절은 두 프로필에서 <code>[ harvest, wait ]</code>로 표시한다.
+서버는 실제 이동 후 60초 동안 채집을 제한한다. 스크립트의 2초 재시도로 이 제한이 풀리지는 않는다.
+거절 안내를 받은 때부터 새 60초를 세는 동작은 없다.
+자원 없음·채집 불가도 프로필에서 한 번 표시되며, 스크립트의 중복 알림이 뜨면 실패</td></tr>
+<tr><td>서버 저장 안내</td>
+<td>저장 시작·완료 알림은 기존 프로필에서 나온다. 스크립트에 별도 저장 상태나 저장 문구에 따른 중단·재개 분기는 없다</td></tr>
 <tr><td>집 문·Stockpile 선택 기능</td>
 <td>선택한 대상만 가까이에서 사용한다. 다른 문을 닫거나 필드에서 영속 serial을 지우면 실패.
 Stockpile 메뉴 커서와 수동 커서가 겹치는 시험은 선택 기능을 켠 경우에만 한다</td></tr>
 </tbody>
 </table>
+<p>Heat of Battle에 따른 이동 제한의 정본은 <a href="pvp.html#01">pvp.html</a> 01절이다.
+2026-10-05 확인한 공식 문서는 Recall도 제한한다고 설명한다. 이번 변경은 스크립트의 선제 버프 차단을 제거한 것으로,
+서버에서 Recall이 허용된다는 판정을 새로 내린 것이 아니다.</p>
 <p>정적 검사는 게임 응답과 커서 소유권을 증명하지 않는다. 이 표의 동작은 아직 인게임에서 확인되지 않았다.
 후속 확인은 <a href="open-items.html#09">open-items.html</a> 09절에 남겼다.</p>
 <p>반영은 <a href="workflow.html#04.A">workflow.html</a> 04.A절을 따른다.
 Scripts 탭의 Reload all scripts 뒤 Play로 반복 확인하고, 외부 파일을 수정한 뒤 핫키로 실행할 때는 클라이언트를 재시작한다.
 게임 종료 후 <code>git status --short</code>로 Razor가 덮어쓴 파일이 없는지 확인한다.</p>
 
-<h2 id="09" data-part="필드 PvP">09 공통 pvp의 붕대 mage 설정</h2>
-<p><a href="../script/combat/pvp.razor">combat/pvp.razor</a>의 <code>config__pvp_preset = 2</code>로
-공통 <a href="pvp.html#05.E">PvP 자기관리 루프</a>의 붕대 mage 설정을 사용한다.
+<h2 id="09" data-part="필드 PvP">09 공통 pvp의 마법·무기·붕대 설정</h2>
+<p><a href="../script/combat/pvp.razor">combat/pvp.razor</a>의 독립 옵션으로
+공통 <a href="pvp.html#05.E">PvP 자기관리 루프</a>를 사용한다.
 채집 enhanced를 멈추고 <code>Play Script: combat\pvp</code>에 연결한 별도 핫키로 전환한다.
-이전 템플릿별 PvP 파일은 삭제했고 본문 하나에서 설정한다.</p>
+이전 템플릿별 PvP 파일과 프리셋 분기는 삭제했고 본문 하나에서 설정한다.</p>
 
-<h3 id="09.A">09.A 수동 공격과 자동 회복</h3>
-<p>Q 대상 선택·Tab·근접 공격·Great Axe/Norse 교체·Hamstring·MA/Harm·TK·폭발 포션·Teleport·Rope는 수동이다.
-이전 noto 필터·거리 검색·상대 사망 조회·스윙 관찰·공격 재요청·Hamstring 준비·자동 견제는 제거했다.
-서버에 이미 남아 있는 자동공격·반격은 사용자가 제어한다.</p>
-<p>자동은 자기 파우치·큐어·힐·Refresh·Strength/Agility 포션, Healing이 있으면 붕대,
-큰 피해의 GH와 해독·붕대 부족 시 Heal이다. Warmode ON/OFF와 상대 선택 여부에 상관없이 자기 상태만 본다.
-수동 시전이나 커서가 있으면 자동 회복도 기다린다. 입력 경합의 한계는 공통 문서 05.E절을 따른다.</p>
+<h3 id="09.A">09.A 수동 공격과 자동 회복·장착</h3>
+<p>Q 대상 선택·Tab·근접 공격 요청·Hamstring·MA/Harm·TK·폭발 포션·Teleport·Rope는 수동이다.
+상대 noto 필터·거리 검색·사망 조회·공격 재요청은 없다. 서버에 이미 남아 있는 자동공격·반격은 사용자가 제어한다.</p>
+<p>자기 파우치·큐어·힐·Refresh·Strength/Agility 포션, Healing이 있으면 붕대,
+큰 피해의 GH와 해독·붕대 부족 시 Heal을 자동으로 처리한다.
+무기 옵션을 켜면 시전·커서가 없을 때 스윙 바를 읽고 Great Axe/Norse를 자동 장착한다.
+준비된 무기와 빈손 재장착의 순서는 공통 문서 05.E절을 따른다. 무기를 들었다고 새 공격 요청을 보내지는 않는다.</p>
+<p>Warmode ON/OFF와 상대 선택 여부에 상관없이 자기 상태만 본다.
+수동 시전이나 커서가 있으면 자동 회복과 장착도 기다린다. 입력 경합의 한계는 공통 문서 05.E절을 따른다.</p>
 
-<h3 id="09.B">09.B 공통 설정</h3>
-<p>프리셋 2는 <code>config__pvp_magery = 1</code>·<code>config__pvp_bandage = 1</code>이다.
-RA·Reflect·시폰·버섯·Resist 포션의 자동 보충은 기본 OFF로 두어 회복 마나와 자원을 남긴다.
-무기 재장착도 기본 OFF다. 활성화하거나 임계값을 바꾸는 곳은 <code>combat/pvp.razor</code>의 CONFIG 하나다.</p>
-<p>Magery가 없는 템플릿은 프리셋 선택 뒤 <code>@setvar! config__pvp_magery 0</code>으로 끈다.
-무기 옵션은 <code>config__pvp_weapon_graphic</code>에 ID를 넣으면 양손이 비었을 때 그 무기를 재장착하는 기능이다.
-이미 든 도끼·방패·책은 교체하지 않는다. 스탯·회복 임계값·상태·타이머 표는 공통 문서 05.E절이 정본이다.</p>
+<h3 id="09.B">09.B 독립 설정</h3>
+<p>마법·무기·붕대를 모두 사용하려면 <code>config__use_magery = 1</code>·<code>config__use_weapon = 1</code>·<code>config__use_bandages = 1</code>로 둔다.
+공통 본문의 붕대는 기본 0이므로 직접 켠다. Magery가 없는 템플릿은 Magery만 0으로 바꾼다.
+회복 마나와 자원을 남기려면 RA·Reflect·시폰·버섯·Resist 포션 중 불필요한 옵션을 각각 0으로 끈다.
+한 기능을 바꾸어도 다른 기능의 설정은 덮어쓰지 않는다.</p>
+<p>이 도끼 조합은 <code>swing 4</code>에 Great Axe, <code>swing 1</code>에 Norse Axe를 연결한다.
+바 시간은 현재 STA의 <a href="#03">03절 계산</a>과 비교해 활성 클라이언트에서 맞춘다.
+빠른 스윙으로 큰 한 방의 시점이 밀릴 수 있으므로, 그 시점을 수동으로 고르고 싶으면 무기 옵션을 끈다.
+슬롯 ID·충돌 장비 해제·회복 임계값·상태·타이머의 정본은 공통 문서 05.E절이다.</p>
 
 <h3 id="09.C">09.C 인게임 반영과 확인</h3>
-<p>본문에서 프리셋을 2로 바꾼 뒤 Stop → Reload all scripts → <code>pvp</code> Play로
-<code>PvP sustain v1 loaded</code>와 <code>preset=2</code>·<code>magery=1</code>·<code>bandage=1</code>을 확인한다.
+<p>본문 CONFIG를 바꾼 뒤 Stop → Reload all scripts → <code>pvp</code> Play로
+<code>PvP sustain v3 loaded</code>의 기능 스위치와 무기 슬롯 출력이 설정과 같은지 확인한다.
 Q로 alt를 선택해도 자동 공격이나 자동 TK가 나가지 않아야 한다. 피해·독에는 자기 회복이 동작해야 한다.</p>
-<p>새 공통 본문은 아직 인게임에서 확인되지 않았다.
-수동 프리캐스트·붕대·회복·옵션·정지 조건별 예상 알림과 실패 판정은 <a href="open-items.html#10">open-items.html</a> 10절에 모았다.
+<p>새 v3 본문은 아직 인게임에서 확인되지 않았다.
+수동 프리캐스트·회복·무기 교체·옵션·정지 조건별 예상 알림과 실패 판정은 <a href="open-items.html#10">open-items.html</a> 10절에 모았다.
 외부 수정 후 기존 핫키로 실행할 때는 <a href="workflow.html#04.A">workflow.html</a> 04.A절대로 재시작하여 옛 캐시를 비운다.
 종료 후 <code>git status --short</code>로 덮어쓰기를 확인한다.</p>
 </main>
