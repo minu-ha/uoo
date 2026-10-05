@@ -298,9 +298,10 @@ enhanced와 PvP 자기관리 루프는 별도 핫키로 수동 전환한다. 자
 <h3 id="08.A">08.A 실행 흐름</h3>
 <ol>
 <li>설정·타이머·상태를 초기화한다. <code>config__use_tracking = 1</code>이면 시작 부분에서
-Tracking 필터와 Hunting을 한 번 설정한다. 자동 리콜 설정과 무관하며 기본 필터는 red다.</li>
+Tracking을 준비한다. 같은 클라이언트 세션에서 확인한 색상으로 Hunting이 켜져 있으면 재사용한다.
+첫 실행은 현재 창의 색상을 읽고, 변경할 때만 Hunting을 끈 뒤 필터를 순환한다. 자동 리콜과 무관하며 기본 필터는 red다.</li>
 <li>루프에서는 마비 해제·해독·붕대·포션·주문 회복을 먼저 처리한다.
-Housekeeping의 시약·음식·선택적 집 기능, 자기 버프, Hatchet 확인과 Smart Harvest가 이어진다.</li>
+Housekeeping의 시약·음식·주기적 목재 가공·파우치 정리·선택적 집 기능, 자기 버프, Hatchet 확인과 Smart Harvest가 이어진다.</li>
 <li>루프 하단의 <code>AUTO RECALL</code>에서 리콜용 Tracking 감지·책·무게·요청·실패 응답을 한 곳에서 처리한다.
 자동 리콜을 끄면 이 블록 전체를 건너뛴다. 감지 때문에 채집이나 자기 버프를 별도로 중단하지 않는다.</li>
 <li>리콜이 필요해지면 다음 패스부터 채집·선택적 집 기능·준비 버프를 보류하고 회복을 계속한다.
@@ -321,17 +322,33 @@ v4에서 도구 사용 뒤 커서만 남는 화면을 받았다. v5는 기존 <c
 <code>Use item in hand</code> → 커서 대기 → <code>Target Self</code> 순서를 사용한다.
 <a href="https://wiki.uooutlands.com/Smart_Harvest">공식 Smart Harvest 문서</a>도 도구 사용 뒤 자신이나 상태바를 타깃하는 경로를 설명한다.
 손의 Hatchet을 확인한 뒤 사용하며, 기존 수동 커서가 있으면 새 채집을 시작하지 않는다.
-백팩의 도끼는 <code>dress</code>로 장착 요청하고 다음 시도에서 손을 다시 확인한다.
-새 입력 경로의 채집 성공과 교체 뒤 장착은 인게임에서 아직 확인하지 않았다.</p>
+v7은 현재 클라이언트의 <code>dress serial</code> 실패 보고에 따라
+<code>lift</code> → <code>drop self lefthand</code>로 장착하고 다음 시도에서 손을 다시 확인한다.
+Hatchet은 <a href="https://wiki.uooutlands.com/Template:SwordsWeaponClass">공식 무기 표</a>에서 2H다.
+<a href="https://github.com/ServUO/ServUO/blob/pub57/Server/Item.cs">UO의 양손 장비 레이어는 0x02</a>이며,
+<a href="https://github.com/markdwags/Razor/blob/master/Razor/Core/Item.cs">Razor는 이를 LeftHand로 부른다</a>.
+v9에서 빈손인데 백팩 Hatchet을 장착하지 않는다는 사용자 보고를 받았다. 인게임 확인됨 2026-10-05.
+<code>findtype … self</code>의 실제 검색 범위나 실패한 가드까지 확인한 것은 아니므로, <code>lefthand</code> 문법 오류라고 단정하지 않는다.
+v10은 <a href="../script/combat/bard-mace.razor">bard-mace</a>처럼 <code>lhandempty</code>를 먼저 읽고,
+저장한 <code>var__my_hatchet</code>을 백팩에서 찾아 <code>lift</code> → <code>drop self lefthand</code>로 장착한다.
+장착 다음 시도에서는 <code>findlayer self lefthand</code>의 serial이 저장한 도끼와 같은 경우에만 사용한다.
+검색 성공이나 장착 요청을 실제 장착으로 취급하지 않는다. 다른 왼손 장비만 비우며 오른손 무기 처리는 수동 장비 핫키에 맡긴다.
+주변 나무 선택은 Smart Harvest가 맡으며 개별 나무 검색은 넣지 않는다.
+공식 문구만으로 한 번의 요청이 고갈까지 계속 도는지 확정하지 않는다. 명령 재시도는 커서 처리 뒤 현재 사용자가 지정한 3.5초 간격을 유지한다.
+v8의 기본 채집은 사용자가 정상 작동을 보고했다. 인게임 확인됨 2026-10-05.
+v10의 빈손 장착·serial 확인 경로와 아래 목재 정리 경로는 아직 확인되지 않았다.</p>
 <blockquote>they will have a 60 second delay before they can attempt to Harvest again</blockquote>
 <p>같은 문서는 Recall·Moongate·Hike 뒤의 채집 제한을 60초로 명시하고 Teleport·Rope에도 적용한다고 덧붙인다.
 <strong>60초는 확인된 서버 규칙이다.</strong> 스크립트가 이동 성공 시각이나 서버의 남은 시간을 읽는 것은 별개의 문제다.
 이동 거절 안내는 두 프로필에서 <code>[ harvest, wait ]</code>로 표시하고 스크립트에서는 조회하지 않는다.
-2초는 채집 명령의 재시도 간격이며, 서버의 60초 제한을 줄이거나 대체하지 않는다.
+3.5초는 현재 채집 명령의 재시도 간격이며, 서버의 60초 제한을 줄이거나 대체하지 않는다.
 거절 안내를 받은 시점부터 새 60초 대기를 시작하는 타이머도 없다. 매핑은 <a href="overheads.html#07">overheads.html</a> 07절에 있다.</p>
 
 <h3 id="08.C">08.C 기본값과 상태</h3>
-<p>2026-10-05 v6는 v5의 채집 입력과 예비 도끼 수량 경고 제거를 유지한다.
+<p>2026-10-05 v10은 장착 판정을 실제 왼손 슬롯과 저장한 도끼 serial의 일치로 바꾼다.
+도끼 상태는 <code>var__my_hatchet</code> 하나이며 별도 equipped 플래그는 없다. 오른손 제어도 추가하지 않는다.
+도구 사용·커서 대기·자기 타깃을 채집 블록 하나에서 끝내는 v8 경로와 pending 없는 구조는 유지한다.
+목재 가공과 파우치 이동은 housekeeping에 묶으며 별도 처리 단계나 pending 상태를 추가하지 않는다.
 책·Hunting·무게 점검은 기존 housekeeping 주기를 사용하고, 리콜 결과를 확인하지 않는 5초 안내 타이머와 안내 상태는 제거한다.
 Tracking 시작 설정과 자동 리콜 판정은 계속 분리한다.
 채집 허용 캐시와 숫자 단계 대신, 실제 중단 조건과 리콜 상태의 의미를 코드에 직접 적었다.
@@ -365,6 +382,11 @@ Tracking 시작 설정과 자동 리콜 판정은 계속 분리한다.
 <tr><td><code>config__use_potions</code></td>
 <td>1. 독·피해·스태미나에 대한 기존 Cure·Heal·Refresh 포션을 사용한다.
 리콜 준비용 Strength·Agility 포션과 그 옵션은 제거했다</td></tr>
+<tr><td><code>config__pack_lumber</code></td>
+<td>1. Logs 가공과 Boards 파우치 이동을 한 묶음으로 켠다. 0이면 선택·정리 모두 건너뛴다.
+<code>loadout</code>에서 선택한 <code>global__my_looting_pouch</code>를 재사용하고, 없거나 백팩에 없으면 시작할 때 파우치를 선택한다.
+Logs 7133·Boards 7127은 <a href="item-list.html#15">item-list.html</a> 15절의 값이며 색상은 제한하지 않는다.
+<a href="https://wiki.uooutlands.com/Lumberjacking">공식 Lumberjacking 문서</a>의 Logs 더블클릭 가공 경로를 사용한다</td></tr>
 <tr><td><code>config__close_house_door</code>, <code>deposit_at_stockpile</code></td>
 <td>각 0. 집 문은 <code>global__my_house_door</code>, Stockpile은 <code>global__my_resource_stockpile</code>을 사용한다.
 문 graphic은 자기 집의 열린 문 값으로 바꾼다</td></tr>
@@ -372,6 +394,7 @@ Tracking 시작 설정과 자동 리콜 판정은 계속 분리한다.
 </table>
 <p>축약 설정 이름도 실제 파일에서는 모두 <code>config__</code>로 시작한다.
 남은 설정은 스태미나 15 이하의 Refresh와 출력 빈도다. Hatchet 한 개로 채집하며 예비 수량은 검사하지 않는다.
+빈손 장착은 책·Hunting·무게 준비 조건을 기다리지 않는다. 리콜 결정·회복·수동 입력 가드는 장착과 채집에 공통 적용한다.
 자동 리콜을 꺼도 실제 남은 무게가 0 이하이면 채집을 보류한다.</p>
 <p>Smart Harvest의 <code>or</code> 조건은 추적 준비를 기다릴 필요가 없는 경우를 연결한다.
 세 설정 중 하나라도 0이면 Hunting 준비 없이 채집할 수 있다. 세 설정이 모두 1이면 확인한 Hunting이 필요하다.
@@ -398,16 +421,40 @@ grey는 범죄자 필터의 이름이며 모든 회색 대상을 따로 검색�
 <td>설정한 색상에 대한 서버 확인, 최근 확인한 Hunting 활성 여부, 현재 필터 버튼의 응답 여부다.
 필터·버튼 상태는 시작 설정에 필요하며, Hunting 상태의 루프 점검은 감지 리콜을 켜고 리콜 결정을 하기 전까지만 한다.
 감지 리콜을 켰으면 채집 조건에도 확인한 Hunting 활성 여부를 직접 적는다</td></tr>
+<tr><td><code>var__tracking_setup_color</code></td>
+<td>같은 클라이언트 세션에서 확인한 색상 값. Hunting이 켜져 있고 config 색상과 같으면 시작 설정을 재사용한다.
+버프만으로 색상을 알 수 없으므로 첫 실행은 창 또는 서버 응답으로 확인한다.
+수동으로 필터를 바꿨으면 Hunting을 끈 상태로 재실행한다. 클라이언트 종료 후에는 캐시가 사라진다</td></tr>
+<tr><td><code>wait__harvest_target</code></td>
+<td>3000ms. 손 도구 핫키 직후 <code>waitfortarget</code>으로 커서를 기다리는 한도다.
+같은 채집 블록에서 중립 커서를 <code>target self</code>로 처리하므로 대기 중 다른 자동 행동이 끼어들지 않는다.
+도구 큐가 남았다는 이유로 자기 타깃을 건너뛰지 않는다. 새 수동 시전·숨기·warmode·다른 종류의 커서는 처리하지 않는다.
+시간 초과 뒤 커서가 없으면 자기 타깃을 보내지 않으며, 다음 시도 간격은 이 블록이 끝난 뒤부터 센다</td></tr>
 <tr><td><code>var__housekeeping_pass</code>, <code>regs_*</code>, 시약별 보유 변수</td>
 <td>이번 패스의 housekeeping 실행 여부와 주문별 시약 조합이다. 같은 플래그로 하단 리콜의 책·Hunting·무게 점검도 예약한다.
 시약은 첫 housekeeping과 이후 30초마다 갱신한다. 부족 안내는 housekeeping을 수행한 패스의 끝에서 확인하고 다음 재검색을 예약한다</td></tr>
-<tr><td><code>var__hatchet</code>, <code>hatchet_equipped</code>, <code>bandage_available</code>, <code>heal_spell</code>, <code>buff_cast</code></td>
-<td>확인한 도끼 serial, 이번 시도의 손 슬롯 확인, 최근 붕대 검색 결과, 이번 패스의 회복 주문 선택, 자기 버프 명령 호출 여부다.
+<tr><td><code>var__my_hatchet</code>, <code>wait__equip</code></td>
+<td>선택한 도끼 serial 하나와 장착 후 1000ms 대기다. 처음 값은 0이며 Stop·Play 사이에는 재사용한다.
+왼손이 비었을 때 캐시가 백팩에 없으면 3907·3908로 다시 찾는다. 이 graphic 검색은 도끼 발견에만 사용한다.
+이미 든 도끼가 캐시와 다르면 라벨을 한 번 읽고 도끼 serial을 저장한다. 다른 왼손 도구면 비워 다음 시도에서 도끼를 장착한다.
+새 타이머는 만들지 않고 기존 <code>timer__harvest</code>로 장착 재시도와 채집을 함께 조절한다.
+장착 뒤에는 손 슬롯 serial을 다시 확인하며, 캐시나 요청만으로 성공했다고 표시하지 않는다</td></tr>
+<tr><td><code>var__bandage_available</code>, <code>heal_spell</code>, <code>buff_cast</code></td>
+<td>최근 붕대 검색 결과, 이번 패스의 회복 주문 선택, 자기 버프 명령 호출 여부다.
 <code>heal_spell</code>은 0 없음 / 1 Smart Heal·Cure / 2 Greater Heal·Cure다.
 각 선언 위 주석에 값과 사용 이유를 적었다. 명령 호출을 실제 장착·치유·시전 성공으로 취급하지 않는다</td></tr>
 <tr><td><code>timer__housekeeping</code>, <code>cooldown__housekeeping</code></td>
 <td>기존 5초 주기를 재사용하며 리콜 전용 scan 타이머는 없다. 리콜 책과 무게는 명령 전송 전까지 점검한다.
 Hunting 상태는 리콜 필요 여부를 정하기 전까지만 읽는다. Tracking 메시지는 준비 상태일 때 매 패스 확인하며 무게 판정보다 먼저 처리한다</td></tr>
+<tr><td><code>cooldown__pack_lumber</code>, <code>timer__pack_lumber</code>, <code>wait__lumber_item</code></td>
+<td>120000ms 주기로 housekeeping에서 정리한다. 180000ms로 바꾸면 3분이다. 실행 후 첫 정리도 이 주기 뒤에 한다.
+입력이 비어 있고 회복이 필요하지 않을 때 시작하며, 묶음별 사용·이동 뒤 500ms를 기다린다.
+실패한 요청은 같은 패스에서 반복하지 않고 다음 주기에 다시 시도한다. 파우치가 없어도 반복 확인은 이 주기로 제한한다</td></tr>
+<tr><td><code>list__lumber_stacks</code>, <code>global__my_looting_pouch</code></td>
+<td>Logs를 먼저 수집한 뒤 한 묶음씩 더블클릭하고, 가공 후 같은 임시 목록에 Boards를 다시 수집해 이동한다.
+가공으로 serial이 바뀌거나 기존 묶음과 합쳐져도 가공 전 serial을 이동하지 않는다. 파우치 안 Boards는 제외한다.
+목록 수집의 ignore는 처리 전에 비운다. 입력·회복 상태가 바뀌면 다음 묶음 전에 중단한다.
+파우치 값은 로드아웃과 공유하는 영속 선택값이며 실행마다 새 serial이나 처리 단계 변수를 만들지 않는다</td></tr>
 <tr><td>리콜 응답 안내</td>
 <td>전송 뒤 실제 서버 거절 메시지만 확인한다. 5초 경과 안내와 그 반복 방지 상태는 없다.
 도착과 남은 채집 제한 시간을 추정하지 않고, 거절이나 응답 지연 뒤에도 채집을 자동 재개하지 않는다</td></tr>
@@ -418,11 +465,15 @@ Hunting 상태는 리콜 필요 여부를 정하기 전까지만 읽는다. Trac
 </table>
 <p>상태 표의 축약 이름도 <code>var__</code> 접두를 쓴다. 주기는 클라이언트 재시도 값이며 서버 남은 시간의 측정값이 아니다.
 회복·버프의 대기는 기존 <code>casting</code>과 제한된 반복으로 처리하고, 끊김 메시지를 별도로 소비하지 않는다.
-Tracking 감지보다 앞에서 메시지를 소비하는 경로를 없앴다.</p>
+메인 루프에서는 Tracking 감지보다 앞에서 메시지를 소비하지 않는다.
+시작 설정에서 Hunting을 멈추고 필터를 확인한 뒤에는 <code>clearsysmsg</code>로 이전·중간 필터의 메시지를 비운다.</p>
 <p>하단 리콜 판정 전 진행한 채집을 되돌리지는 않는다. 새 감지는 다음 패스부터 채집을 보류하며,
 진행 중인 자기 시전·에이전트 대기 때문에 실제 판정이 늦어질 수 있다.
 시약 부족 안내도 5초 주기로 확인한 뒤 다음 housekeeping에 반영하므로 즉시 갱신되는 값은 아니다.
-실행 중 추적 필터를 수동으로 바꿨으면 다시 실행해 필터를 확인한다.</p>
+도구 커서를 기다리는 3초 타임아웃과 목재 묶음 처리 동안은 하단 감지 점검이 지연된다.
+목재 정리는 각 묶음 전에 회복·수동 입력 조건을 다시 확인하지만, 아직 하단에서 읽지 않은 새 Tracking 경보까지 선행 판정하지는 않는다.
+이 대기 중 새 중립 커서를 수동으로 열면 도구 커서와 구분할 수 없으므로 수동 작업 전에 Stop한다.
+실행 중 추적 필터를 수동으로 바꿨으면 Hunting을 끄고 다시 실행해 필터를 확인한다.</p>
 
 <h3 id="08.D">08.D 실행 준비와 인게임 확인</h3>
 <ol>
@@ -432,9 +483,11 @@ Tracking 감지보다 앞에서 메시지를 소비하는 경로를 없앴다.</
 <li><code>config__auto_recall = 1</code>로 사용할 때는 충전한 책에 <code>Home</code> 룬을 준비한다.
 다른 이름이면 파일의 <code>say "[RecallCharge Home"</code> 한 줄을 바꾼다.
 명령 의미는 <a href="https://wiki.uooutlands.com/Commands">공식 Commands 문서</a>의 RecallCharge 항목에 있다.</li>
-<li>Hatchet·붕대·시약·포션을 넣고 <code>Use item in hand</code>, <code>Target Self</code>, <code>Bandage Self</code>, 각 Drink 핫키,
+<li>Hatchet·붕대·시약·포션을 넣고 <code>Use item in hand</code>, <code>Bandage Self</code>, 각 Drink 핫키,
 <code>&gt; Smart Heal/Cure Self</code>, <code>&gt; Greater Heal/Cure Self</code>, <code>&gt; Interrupt</code>,
 <code>Cancel Current Target</code>가 현재 캐릭터에서 동작하는지 확인한다.</li>
+<li><code>config__pack_lumber = 1</code>이면 백팩 안의 파우치를 준비한다. 시작 시 <code>[ loot pouch, pick ]</code>이 뜨면 한 번 선택한다.
+이미 <code>loadout</code>으로 지정했다면 그 값을 사용한다. 실행 중 파우치가 없으면 <code>[ loot pouch, out ]</code>을 표시하고 정리는 건너뛴다.</li>
 <li>현재 캐릭터의 <code>heal pot</code>, <code>walk</code>, <code>reflect</code> 바를 확인한다.
 없는 바는 0으로 보이므로 이동 차단과 Reflect 재시전 제한을 보호하지 못한다. 설정 변경은 별도 작업이다.</li>
 </ol>
@@ -442,11 +495,13 @@ Tracking 감지보다 앞에서 메시지를 소비하는 경로를 없앴다.</
 <thead><tr><th>상황</th><th>예상과 실패 판정</th></tr></thead>
 <tbody>
 <tr><td>안전한 나무 옆에서 시작, 기존 필터가 몬스터 또는 우호 플레이어</td>
-<td><code>Lumberjack enhanced v6 loaded</code>와 <code>[ lumberjack, on ]</code> 뒤 기본 red 필터를 맞추고 Hunting을 유지한다.
+<td><code>Lumberjack enhanced v10 loaded</code>와 <code>[ lumberjack, on ]</code> 뒤 기본 red 필터를 확인하고 Hunting을 유지한다.
+재실행에서 확인한 색상의 Hunting이 켜져 있으면 창·버튼 조작이 없어야 한다.
 자동 리콜 OFF에서도 <code>use_tracking = 1</code>이면 설정해야 한다. 기존 Hunting을 꺼 버리면 실패.
 감지 리콜 ON에서 필터 확인이 안 되면 <code>[ track, miss ]</code> 또는 <code>[ track, check ]</code> 후 채집을 보류한다</td></tr>
 <tr><td>Tracking 설정 후 장시간 채집, Hunting 해제, 시작할 때 수동 시전</td>
-<td>채집 중 Tracking 창이나 필터 버튼을 다시 조작하면 실패.
+<td>채집 중 Tracking 창이나 필터 버튼을 다시 조작하면 실패. 다른 색상으로 바꾸기 전 Hunting을 먼저 끄고,
+설정 중 곰 같은 중간 필터의 추적 문구로 리콜하지 않아야 한다.
 Hunting 해제는 감지 리콜 ON일 때 다음 하단 상태 점검에서 채집 보류로 반영한다.
 자동 리콜 OFF에서는 Hunting 때문에 채집을 보류하지 않는다.
 초기 설정을 못 마친 경우 회복은 계속하며, 안전해진 뒤 재실행해 필터와 Hunting을 다시 확인한다</td></tr>
@@ -455,9 +510,19 @@ Hunting 해제는 감지 리콜 ON일 때 다음 하단 상태 점검에서 채�
 선택한 필터와 다르면 감지 리콜 ON일 때 채집을 보류한다. 감지 화면 표시는 프로필의 <code>[ track, … ]</code>를 사용한다</td></tr>
 <tr><td>Hatchet 없음·교체·손에 다른 무기, 나무 고갈</td>
 <td>손과 백팩에 도끼가 모두 없으면 <code>[ hatchet, out ]</code>. 한 개만 있어도 수량 경고 없이 채집한다.
-교체 후 손 슬롯을 확인하고 <code>Use item in hand</code>로 사용한다.
-<code>wait__target = 1000</code> ms 안에 뜬 커서를 <code>Target Self</code>로 처리하며, 다음 시도 간격은 2초다.
-커서를 남기고 루프가 멈추거나 도끼 대신 다른 손 도구를 사용하면 실패다</td></tr>
+빈손이면 책·Hunting이 미준비이거나 무게가 가득 차도 캐시한 백팩 도끼를 장착한다.
+chatty ON이면 <code>Hatchet equip requested: stored serial=…</code>이 나오고 1000ms 뒤 루프로 돌아온다.
+다음 시도에서 왼손 serial이 <code>var__my_hatchet</code>과 같은 경우에만 <code>Use item in hand</code>로 사용한다.
+장착을 거절한 경우나 캐시가 백팩에만 남은 경우 채집으로 넘어가면 실패다. 다른 왼손 장비만 비우고 오른손은 수동으로 처리한다.
+같은 블록에서 3000ms 한도로 커서를 기다린 뒤 중립 커서를 <code>target self</code>로 처리한다.
+도구 큐가 남아 있어도 자기 타깃을 보내야 한다. 커서가 없으면 보내지 않고 다음 시도까지 3.5초를 둔다.
+커서를 다음 패스에서 처리하거나 전체 스크립트가 종료되거나, 다음 도구 요청으로 기존 커서를 덮으면 실패다</td></tr>
+<tr><td>일반·특수 목재 가공과 파우치 이동</td>
+<td>실행 후 2분에 일반·특수 Logs가 Boards로 바뀌고 선택한 파우치로 이동해야 한다.
+기존 Boards와 합쳐진 묶음도 옮기며 이미 파우치에 있던 Boards를 다시 들어 올리면 실패다.
+가공 실패·파우치 용량 부족은 묶음당 한 번만 요청하고 다음 주기까지 기다려야 한다.
+옵션 OFF·아직 주기 전·기존 커서·시전·피해·리콜 결정 뒤에는 정리하지 않는다.
+중간에 수동 입력이나 회복 조건이 생기면 다음 묶음 전 중단하고 기존 커서는 건드리지 않아야 한다</td></tr>
 <tr><td>채집 성공·실패·추가 수확·스킬 안내</td>
 <td>두 프로필에서 로그 획득은 <code>[ lumber, logs ]</code> 또는 <code>[ lumber, dullwood ]</code>처럼 목재 종류를 표시한다.
 <code>You chop some</code> 한 항목이 전체 문장의 네 번째 단어를 받는다. 수확 실패는 <code>[ lumber, miss ]</code>,
@@ -482,6 +547,8 @@ Tracking 시작 설정은 <code>use_tracking</code>에 따라 실행한다.
 루프에서 리콜용 버프·감지 메시지를 조회하거나 가까운 red 때문에 채집·자기 버프를 중단하면 실패. 화면 안내는 유지한다</td></tr>
 <tr><td>리콜 허용·Heat of Battle·마나 부족·룬 없음·지연 응답</td>
 <td>요청하면 <code>[ recall, on ]</code>, 읽은 서버 거절은 <code>[ recall, blocked ]</code>, 마나 부족은 <code>[ mana, low ]</code>.
+chatty ON이면 <code>Recall trigger: Tracking report</code> 또는 <code>Recall trigger: spare weight</code>로 요청 이유를 기록한다.
+집 접근 거절 문구도 실제 서버 거절로 안내하며, Home 룬의 위치와 접근 권한은 사용자가 확인한다.
 Heat of Battle 버프만 보고 명령 전송 전에 차단하면 실패. 실제 서버의 허용·거절을 별도로 기록한다.
 시간만 지나서는 결과 안내를 띄우지 않는다. 전송 뒤 회복은 계속하고 채집은 재실행 전까지 보류한다.
 실제 도착은 화면으로 확인한다. 같은 실행에서 Recall을 다시 요청하거나 준비용 Strength·Agility 포션을 마시면 실패.
@@ -490,7 +557,7 @@ Heat of Battle 버프만 보고 명령 전송 전에 차단하면 실패. 실제
 <td>자동 리콜과 무게 리콜을 모두 켜면 다음 하단 상태 점검에서 <code>[ weight, low ]</code> 이후 채집 중단과 리콜 요청이 나와야 한다.
 무게 리콜을 끄면 여유 조건으로 멈추지 않는다. 실제 남은 무게 0 이하에서는 채집을 보류한다.
 여행 거절은 두 프로필에서 <code>[ harvest, wait ]</code>로 표시한다.
-서버는 실제 이동 후 60초 동안 채집을 제한한다. 스크립트의 2초 재시도로 이 제한이 풀리지는 않는다.
+서버는 실제 이동 후 60초 동안 채집을 제한한다. 스크립트의 3.5초 재시도로 이 제한이 풀리지는 않는다.
 거절 안내를 받은 때부터 새 60초를 세는 동작은 없다.
 주변 자원이 없으면 <code>[ harvest, out ]</code>, 나무 고갈 문장이면 <code>[ wood, out ]</code>을 보고 다음 장소로 이동한다.
 채집 불가도 프로필에서 한 번 표시되며, 스크립트의 중복 알림이 뜨면 실패</td></tr>

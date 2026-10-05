@@ -35,20 +35,39 @@ A new combat loop gets a row here. Every loop has the same shape, set out in
 
 Use [gather/lumberjack-enhanced.razor](gather/lumberjack-enhanced.razor) for lumberjacking.
 It uses plain `config__*` settings and defaults to red-only Tracking.
-`config__use_tracking` controls one-time Tracking setup independently of automatic Recall.
+`config__use_tracking` controls Tracking setup independently of automatic Recall.
+An active hunt reuses the color already verified by this script. A first run checks the current window before cycling filters.
+Filter changes stop Hunting first and discard setup reports before resuming. Turn Hunting off before Play after a manual filter change.
 `config__auto_recall = 0` skips the loop's Recall detection, book checks and spare-weight decisions.
 Automatic Recall lives at the end of the loop; reagents and ordinary inventory checks stay in housekeeping.
 State comments explain the Recall decision and command-sent flag; harvest guards show each pause condition directly.
 Book, Hunting and spare-weight checks reuse housekeeping's 5-second clock. Detection messages are read before weight and reagent errors.
 One Recall command is sent per Play. Recovery continues afterwards; harvesting stays paused until restart.
 Only an actual server refusal produces a result notice. There is no response timer or notice state.
-Harvest verifies an equipped Hatchet, uses `Use item in hand`, waits for the cursor, then sends `Target Self`.
-A backpack Hatchet is equipped with `dress` and verified on the next attempt. One tool is enough; only absence is reported.
+With `config__chatty = 1`, the journal identifies Tracking or spare weight as the Recall trigger.
+The v10 equip path follows `bard-mace`: `lhandempty` first, then equip the cached `var__my_hatchet` from the backpack.
+Graphic searches discover a missing backpack tool; they do not prove equipment. The cache survives Stop/Play in this client session.
+An unfamiliar held tool is read once: adopt a Hatchet serial or clear only the different left-hand item.
+Book, Hunting and weight readiness gate harvesting, rather than empty-hand equipment.
+`lift` → `drop self lefthand` waits `wait__equip = 1000`; the next attempt must match the hand slot to the cached serial.
+With chatty on, `Hatchet equip requested` records the request. It does not claim successful equipment.
+Right-hand weapon management belongs to manual gear hotkeys.
+Harvest completes `Use item in hand` → `waitfortarget wait__harvest_target` → `target self` in one block.
+The 3-second cursor timeout keeps other automatic actions out of that request; no pending state crosses loop passes.
+A neutral cursor is answered even if the use queue is still pending. New manual casts, hiding, warmode and other cursor types are left alone.
+No self-target is sent after a timeout without a cursor. Existing cursors block another tool use through the ordinary input guard.
+The next 3.5-second retry starts when this block finishes. One tool is enough; only absence is reported.
+`config__pack_lumber = 1` converts Logs and moves Boards to `global__my_looting_pouch` during housekeeping.
+It reuses the pouch selected by `loadout`; if unavailable at startup, select a carried pouch once.
+`cooldown__pack_lumber = 120000` means every 2 minutes; use `180000` for 3 minutes.
+One scratch list snapshots Logs, then Boards after conversion; every wood hue is included.
+Already packed Boards are skipped. Requests are tried once per stack; failures wait for the next interval.
+Manual actions, recovery needs and a latched Recall decision defer this optional work.
 Tracking-triggered Recall requires all three options: `auto_recall`, `recall_on_detection` and `use_tracking`.
 Disabling any one bypasses the Hunting requirement for harvesting. Disabling Tracking keeps weight Recall and book requirements.
 Recall preparation uses no Strength or Agility potions. Fighting requires switching to the PvP script.
 Harvest results, skill reports and refusal overheads are in both Razor profiles. The server enforces the 60-second post-travel harvest delay;
-the loop's 2-second command retry does not replace that rule or start a new 60-second delay from a refusal.
+the loop's 3.5-second command retry does not replace that rule or start a new 60-second delay from a refusal.
 The existing `gather/lumberjack.razor` remains the legacy version. Configuration and in-game checks
 are in [blueprint/lumberjack-pvp-handbook.html](../blueprint/lumberjack-pvp-handbook.html#08) part 8.
 Switch manually to [combat/pvp.razor](combat/pvp.razor) with a separate hotkey, enabling the independent bandage, Magery and weapon options as needed.

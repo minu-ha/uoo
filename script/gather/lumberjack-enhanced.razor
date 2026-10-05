@@ -1,9 +1,10 @@
 # Lumberjack gathering with self recovery, independent Tracking setup and one automatic Recall attempt.
 # Needs: One Hatchet, bandages, reagents, recovery and harvest hotkeys. Automatic Recall needs a charged book with a Home rune.
-# Tracking setup runs once per Play when use_tracking is on, regardless of auto_recall.
+# Tracking reuses a confirmed, active hunt color. Setup is independent of auto_recall.
+# Housekeeping converts all wood colors to Boards and packs them in the loadout looting pouch every 2 minutes.
 # For Tracking-triggered Recall, set Hunt Frequency to Always Get Closest in the Tracking window.
 # Design and in-game checks: blueprint/lumberjack-pvp-handbook.html part 8.
-# Hotkeys: Use item in hand, Target Self, Bandage Self, Drink Cure, Drink Heal, Drink Refresh,
+# Hotkeys: Use item in hand, Bandage Self, Drink Cure, Drink Heal, Drink Refresh,
 #          > Smart Heal/Cure Self, > Greater Heal/Cure Self, > Interrupt, Cancel Current Target.
 # Optional cooldown bars: heal pot, walk, reflect. A missing walk or reflect bar cannot
 # protect a cast from movement or reject an early Reflect retry. Check the active character.
@@ -14,7 +15,7 @@
 # Server-event overheads and manual Tracking displays stay in the profile.
 # The server blocks harvest for 60 seconds after Recall, Moongate, Hike, Teleport or Rope.
 # The profile displays recent-travel refusals. The script does not read that message or restart the delay.
-# The 2-second harvest retry only spaces attempts. It cannot shorten the server travel restriction.
+# The 3.5-second harvest retry only spaces attempts. It cannot shorten the server travel restriction.
 
 clearall
 clearsysmsg
@@ -32,11 +33,14 @@ endif
 @setvar! config__chatty 1
 @setvar! config__use_potions 1
 
+# Convert Logs and pack Boards together. Reuse the looting pouch selected by loadout.
+@setvar! config__pack_lumber 1
+
 # Automatic Recall only. 0 skips its detection reads, book checks and weight decisions.
 # use_tracking controls startup setup. The profile displays any server Tracking messages.
 @setvar! config__auto_recall 1
 
-# Tracking setup is independent of auto_recall and runs once before the loop.
+# Reuse an active, confirmed hunt color. Otherwise check the window and set the color before the loop.
 @setvar! config__use_tracking 1
 
 # Recall on a Tracking report within 1 through 45 steps. Requires auto_recall and use_tracking.
@@ -80,17 +84,25 @@ endif
 @setvar! wait__short 200
 @setvar! wait__poll 100
 @setvar! wait__target 1000
+# Wait for the hand tool cursor in the same block before any other automatic action.
+@setvar! wait__harvest_target 3000
+# Allow inventory updates after conversion, opening the pouch and drag/drop.
+@setvar! wait__lumber_item 500
+# Let the equip request settle before the next hand verification.
+@setvar! wait__equip 1000
 
 @setvar! cooldown__message 3000
 @setvar! cooldown__housekeeping 5000
 @setvar! cooldown__reagents 30000
 @setvar! cooldown__food 60000
+# 120000 = 2 minutes. Use 180000 for 3 minutes.
+@setvar! cooldown__pack_lumber 120000
 
 @setvar! cooldown__bandage_retry 1200
 @setvar! cooldown__potion_retry 1000
 @setvar! cooldown__heal_retry 2500
 @setvar! cooldown__buff_retry 10000
-@setvar! cooldown__harvest_retry 2000
+@setvar! cooldown__harvest_retry 4000
 
 @setvar! cooldown__stockpile 10000
 
@@ -112,6 +124,10 @@ endif
 
 if not timerexists "timer__food"
     createtimer "timer__food"
+endif
+
+if not timerexists "timer__pack_lumber"
+    createtimer "timer__pack_lumber"
 endif
 
 if not timerexists "timer__bandage"
@@ -150,6 +166,7 @@ settimer "timer__message" cooldown__message
 settimer "timer__housekeeping" cooldown__housekeeping
 settimer "timer__reagents" cooldown__reagents
 settimer "timer__food" cooldown__food
+settimer "timer__pack_lumber" 0
 settimer "timer__bandage" cooldown__bandage_retry
 settimer "timer__cure_potion" cooldown__potion_retry
 settimer "timer__heal_potion" cooldown__potion_retry
@@ -179,12 +196,19 @@ settimer "timer__stockpile" cooldown__stockpile
 # Initial 0 keeps book-required gathering paused until the first inventory check.
 @setvar! var__recall_book_available 0
 
-# Last verified equipped Hatchet serial. 0 means no verified tool yet.
-@setvar! var__hatchet 0
-# 1 only after checking the equipped hand this harvest attempt. A dress request alone is not proof.
-@setvar! var__hatchet_equipped 0
+# Selected Hatchet serial, reused across Stop and Play in this client session.
+# 0 means no tool selected yet. Backpack discovery is used only when this cached tool is missing.
+if not varexist var__my_hatchet
+    @setvar! var__my_hatchet 0
+endif
 
-# 1 after the server confirms the configured hunt color during startup.
+# Last color confirmed in this client session. Survives Stop and Play only while Hunting stays active.
+# If the filter was changed manually, turn Hunting off before Play so it is checked again.
+if not varexist var__tracking_setup_color
+    @setvar! var__tracking_setup_color 0
+endif
+
+# 1 when this run reused a confirmed color or verified it during startup.
 @setvar! var__tracking_filter_confirmed 0
 # 1 if Hunting was active at startup or the last housekeeping check. No repeated gump setup.
 @setvar! var__tracking_hunting_active 0
@@ -212,6 +236,17 @@ settimer "timer__stockpile" cooldown__stockpile
 # 1 when this pass issued a self-buff cast. Starts its retry clock and bounded cast wait.
 @setvar! var__buff_cast 0
 
+# One scratch list for inventory snapshots, reused for Logs and Boards. No processing stages.
+removelist list__lumber_stacks
+createlist list__lumber_stacks
+
+if config__pack_lumber = 1
+    if not varexist global__my_looting_pouch or not find global__my_looting_pouch backpack
+        overhead "[ loot pouch, pick ]" 55
+        setvar global__my_looting_pouch
+    endif
+endif
+
 if config__close_house_door = 1 and not varexist global__my_house_door
     overhead "[ door, pick ]" 55
     setvar global__my_house_door
@@ -222,7 +257,7 @@ if config__deposit_at_stockpile = 1 and not varexist global__my_resource_stockpi
     setvar global__my_resource_stockpile
 endif
 
-sysmsg "Lumberjack enhanced v6 loaded: auto recall={{config__auto_recall}}, tracking color={{config__tracking_color}}." 88
+sysmsg "Lumberjack enhanced v10 loaded: auto recall={{config__auto_recall}}, tracking color={{config__tracking_color}}." 88
 if config__chatty = 1
     overhead "[ lumberjack, on ]" 90
 endif
@@ -230,79 +265,108 @@ endif
 # ####################################################################################
 # # TRACKING SETUP
 # ####################################################################################
-# Set the selected color and Hunting once, even when automatic Recall is off.
-# A failed setup requires a restart. No danger decision belongs in this setup.
+# Reuse the color verified by this script while Hunting remains active.
+# A buff alone does not identify the filter. A first run checks the current window instead.
 if config__use_tracking = 1 and skill "Tracking" > 0
-    if diffhits < config__heal_hits and not poisoned and not warmode
+    if findbuff "tracking" and var__tracking_setup_color = config__tracking_color
+        @setvar! var__tracking_filter_confirmed 1
+        @setvar! var__tracking_hunting_active 1
+    elseif diffhits < config__heal_hits and not poisoned and not warmode
         if not hidden and not queued and not casting and not targetexists
-            # Discard a previous selection's confirmation before sending a new response.
-            if insysmsg "You will now hunt"
-                # No blanket journal clear belongs here.
-            endif
             useskill "Tracking"
             waitforgump 4267467659 wait__target
-            @setvar! var__tracking_filter_confirmed 0
 
             if gumpexists 4267467659
-                # Button 8 cycles ten hunt filters. Bound the attempt to one complete rotation.
-                for 10
-                    if diffhits >= config__heal_hits or poisoned or warmode or hidden or queued or casting or targetexists
-                        break
+                # Do not cycle past an already correct filter. The window displays the selected type.
+                if config__tracking_color = 1 and ingump "Murderer Players" 4267467659
+                    @setvar! var__tracking_filter_confirmed 1
+                elseif config__tracking_color = 2 and ingump "Criminal Players" 4267467659
+                    @setvar! var__tracking_filter_confirmed 1
+                elseif config__tracking_color = 3 and ingump "Enemy Players" 4267467659
+                    @setvar! var__tracking_filter_confirmed 1
+                elseif config__tracking_color = 4 and ingump "All Hostile Players" 4267467659
+                    @setvar! var__tracking_filter_confirmed 1
+                endif
+
+                if var__tracking_filter_confirmed = 0
+                    # An active hunt must stop before cycling through animals and other player colors.
+                    if findbuff "tracking"
+                        gumpresponse 6 4267467659
+                        wait wait__short
+                        for 60
+                            if not findbuff "tracking"
+                                break
+                            endif
+                            wait wait__poll
+                        endfor
                     endif
-                    if not gumpexists 4267467659
-                        break
+
+                    # Discard the old target and old filter replies only while setting up.
+                    clearsysmsg
+                    if not findbuff "tracking" and gumpexists 4267467659
+                        # Button 8 cycles ten hunt filters. Bound the attempt to one complete rotation.
+                        for 10
+                            if diffhits >= config__heal_hits or poisoned or warmode or hidden or queued or casting or targetexists
+                                break
+                            endif
+                            if not gumpexists 4267467659
+                                break
+                            endif
+                            gumpresponse 8 4267467659
+                            @setvar! var__tracking_button_answered 0
+                            # Only one selection is outstanding. Do not outrun a delayed server response.
+                            for 60
+                                if diffhits >= config__heal_hits or poisoned or warmode or hidden or queued or casting or targetexists
+                                    break
+                                endif
+                                if config__tracking_color = 1
+                                    if insysmsg "You will now hunt murderer players"
+                                        @setvar! var__tracking_filter_confirmed 1
+                                        @setvar! var__tracking_button_answered 1
+                                        break
+                                    endif
+                                elseif config__tracking_color = 2
+                                    if insysmsg "You will now hunt criminal players"
+                                        @setvar! var__tracking_filter_confirmed 1
+                                        @setvar! var__tracking_button_answered 1
+                                        break
+                                    endif
+                                elseif config__tracking_color = 3
+                                    if insysmsg "You will now hunt enemy players"
+                                        @setvar! var__tracking_filter_confirmed 1
+                                        @setvar! var__tracking_button_answered 1
+                                        break
+                                    endif
+                                elseif config__tracking_color = 4
+                                    if insysmsg "You will now hunt all hostile players"
+                                        @setvar! var__tracking_filter_confirmed 1
+                                        @setvar! var__tracking_button_answered 1
+                                        break
+                                    endif
+                                endif
+                                if insysmsg "You will now hunt"
+                                    @setvar! var__tracking_button_answered 1
+                                    break
+                                endif
+                                wait wait__poll
+                            endfor
+                            if var__tracking_filter_confirmed = 1 or var__tracking_button_answered = 0
+                                break
+                            endif
+                        endfor
                     endif
-                    gumpresponse 8 4267467659
-                    @setvar! var__tracking_button_answered 0
-                    # Only one selection is outstanding. Do not outrun a delayed server response.
-                    for 60
-                        if diffhits >= config__heal_hits or poisoned or warmode or hidden or queued or casting or targetexists
-                            break
-                        endif
-                        if config__tracking_color = 1
-                            if insysmsg "You will now hunt murderer players"
-                                @setvar! var__tracking_filter_confirmed 1
-                                @setvar! var__tracking_button_answered 1
-                                break
-                            endif
-                        elseif config__tracking_color = 2
-                            if insysmsg "You will now hunt criminal players"
-                                @setvar! var__tracking_filter_confirmed 1
-                                @setvar! var__tracking_button_answered 1
-                                break
-                            endif
-                        elseif config__tracking_color = 3
-                            if insysmsg "You will now hunt enemy players"
-                                @setvar! var__tracking_filter_confirmed 1
-                                @setvar! var__tracking_button_answered 1
-                                break
-                            endif
-                        elseif config__tracking_color = 4
-                            if insysmsg "You will now hunt all hostile players"
-                                @setvar! var__tracking_filter_confirmed 1
-                                @setvar! var__tracking_button_answered 1
-                                break
-                            endif
-                        endif
-                        if insysmsg "You will now hunt"
-                            @setvar! var__tracking_button_answered 1
-                            break
-                        endif
-                        wait wait__poll
-                    endfor
-                    if var__tracking_filter_confirmed = 1 or var__tracking_button_answered = 0
-                        break
-                    endif
-                endfor
+                endif
 
                 if var__tracking_filter_confirmed = 1 and gumpexists 4267467659 and diffhits < config__heal_hits and not poisoned and not warmode and not hidden and not queued and not casting and not targetexists
-                    # Button 6 toggles Hunting. Keep an already active mode on.
+                    # Setup reports belong to the old/intermediate filter, never to Recall detection.
+                    clearsysmsg
                     if not findbuff "tracking"
                         gumpresponse 6 4267467659
                         wait wait__short
                     endif
                     if findbuff "tracking"
                         @setvar! var__tracking_hunting_active 1
+                        @setvar! var__tracking_setup_color config__tracking_color
                     endif
                     if config__show_tracking = 0
                         gumpclose 4267467659
@@ -541,6 +605,67 @@ while not dead
             endif
         endif
 
+        # LUMBER: snapshot, convert, then pack. Failed requests wait for the next interval.
+        if config__pack_lumber = 1 and var__recall_needed = 0
+            if timer "timer__pack_lumber" >= cooldown__pack_lumber
+                if diffhits < config__light_hits and not poisoned and not paralyzed and not warmode
+                    if not hidden and not queued and not casting and not targetexists
+                        settimer "timer__pack_lumber" 0
+                        if find global__my_looting_pouch backpack
+                            dclick global__my_looting_pouch
+                            wait wait__lumber_item
+
+                            # Logs 7133, Boards 7127. No hue filter: include every wood color.
+                            # Collect first so conversion cannot change the source being scanned.
+                            clearlist list__lumber_stacks
+                            while findtype 7133 backpack as alias__logs
+                                pushlist list__lumber_stacks alias__logs
+                                @ignore alias__logs
+                            endwhile
+                            @clearignore
+
+                            foreach lumber_stack in list__lumber_stacks
+                                if dead or pvp or diffhits >= config__light_hits or poisoned or paralyzed or warmode or hidden or queued or casting or targetexists
+                                    break
+                                endif
+                                if find lumber_stack backpack
+                                    dclick lumber_stack
+                                    wait wait__lumber_item
+                                endif
+                            endfor
+
+                            # Take a fresh snapshot after conversion creates or merges Board stacks.
+                            clearlist list__lumber_stacks
+                            while findtype 7127 backpack as alias__boards
+                                pushlist list__lumber_stacks alias__boards
+                                @ignore alias__boards
+                            endwhile
+                            @clearignore
+
+                            foreach lumber_stack in list__lumber_stacks
+                                if dead or pvp or diffhits >= config__light_hits or poisoned or paralyzed or warmode or hidden or queued or casting or targetexists
+                                    break
+                                endif
+                                if find global__my_looting_pouch backpack and find lumber_stack backpack
+                                    # Backpack searches may include the pouch. Never move an already packed stack.
+                                    if not find lumber_stack global__my_looting_pouch
+                                        lift lumber_stack 60000
+                                        wait wait__lumber_item
+                                        drop global__my_looting_pouch -1 -1
+                                        wait wait__lumber_item
+                                    endif
+                                endif
+                            endfor
+                            clearlist list__lumber_stacks
+                        elseif timer "timer__message" >= cooldown__message
+                            overhead "[ loot pouch, out ]" 53
+                            settimer "timer__message" 0
+                        endif
+                    endif
+                endif
+            endif
+        endif
+
         # HOUSE DOOR: act only on the persistent door selected before the loop.
         if config__close_house_door = 1 and var__recall_needed = 0
             if diffhits < config__light_hits and not poisoned and not warmode
@@ -619,52 +744,65 @@ while not dead
     # ####################################################################################
     # # SMART HARVEST
     # ####################################################################################
-    # A Recall decision pauses harvest. Actual full weight also prevents harvesting when Recall is off.
-    if var__recall_needed = 0 and diffweight > 0
-        # A configured Recall book is required only for automatic-Recall gathering.
-        if config__auto_recall = 0 or config__require_runebook = 0 or var__recall_book_available = 1
-            # All three switches must be 1 to require Hunting. Any disabled switch bypasses this guard.
-            # recall_on_detection stops harvest only after a report requests Recall in the block below.
-            if config__auto_recall = 0 or config__recall_on_detection = 0 or config__use_tracking = 0 or var__tracking_hunting_active = 1
-                if diffhits < config__heal_hits and not poisoned and not paralyzed and not warmode
-                    if timer "timer__harvest" >= cooldown__harvest_retry
-                        if not hidden and not queued and not casting and not targetexists and cooldown "walk" = 0
-                            # Verify the equipped slot instead of assuming a previous dress request worked.
-                            @setvar! var__hatchet_equipped 0
-                            if findlayer self lefthand as alias__left_hand
-                                if var__hatchet = alias__left_hand
-                                    @setvar! var__hatchet_equipped 1
-                                else
-                                    getlabel alias__left_hand label__left_hand
-                                    if "hatchet" in label__left_hand
-                                        @setvar! var__hatchet alias__left_hand
-                                        @setvar! var__hatchet_equipped 1
-                                    endif
-                                endif
-                            endif
+    # Equip independently of book, Hunting and weight readiness. Only a Recall decision pauses both.
+    if var__recall_needed = 0 and diffhits < config__heal_hits and not poisoned and not paralyzed and not warmode
+        if timer "timer__harvest" >= cooldown__harvest_retry
+            if not hidden and not queued and not casting and not targetexists and cooldown "walk" = 0
+                settimer "timer__harvest" 0
 
-                            settimer "timer__harvest" 0
-                            if var__hatchet_equipped = 1
-                                # Recheck input after the hand and label reads, immediately before use.
+                # Follow bard-mace: an empty left hand needs equipment, regardless of type-search results.
+                if lhandempty
+                    if not find var__my_hatchet backpack
+                        @setvar! var__my_hatchet 0
+                        if findtype 3907|3908 backpack as alias__packed_hatchet
+                            @setvar! var__my_hatchet alias__packed_hatchet
+                        endif
+                    endif
+
+                    if find var__my_hatchet backpack as alias__hatchet_to_equip
+                        # lift waits for the held item. Do not infer equipped state from this request.
+                        lift alias__hatchet_to_equip
+                        drop self lefthand
+                        if config__chatty = 1
+                            sysmsg "Hatchet equip requested: stored serial={{var__my_hatchet}}. Next attempt checks lefthand." 88
+                        endif
+                        wait wait__equip
+                    elseif timer "timer__message" >= cooldown__message
+                        overhead "[ hatchet, out ]" 53
+                        settimer "timer__message" 0
+                    endif
+                elseif findlayer self lefthand as alias__equipped_hatchet
+                    # Adopt an already held Hatchet once, including replacement tools with a new serial.
+                    if var__my_hatchet != alias__equipped_hatchet
+                        getlabel alias__equipped_hatchet label__hand_tool
+                        if "hatchet" in label__hand_tool or "Hatchet" in label__hand_tool
+                            @setvar! var__my_hatchet alias__equipped_hatchet
+                        elseif not hidden and not queued and not casting and not targetexists and not warmode
+                            # Clear only a different left-hand tool. The next attempt equips our Hatchet.
+                            lift alias__equipped_hatchet
+                            drop backpack
+                            wait wait__short
+                        endif
+                    endif
+
+                    # A slot-to-serial match proves this selected tool is actually in lefthand.
+                    if var__my_hatchet = alias__equipped_hatchet and diffweight > 0
+                        # A configured Recall book is required only for automatic-Recall gathering.
+                        if config__auto_recall = 0 or config__require_runebook = 0 or var__recall_book_available = 1
+                            # All three switches must be 1 to require Hunting. Any disabled switch bypasses this guard.
+                            if config__auto_recall = 0 or config__recall_on_detection = 0 or config__use_tracking = 0 or var__tracking_hunting_active = 1
+                                # Recheck input after discovery, then complete tool use and self-target here.
                                 if not hidden and not queued and not casting and not targetexists and not warmode
-                                    # Self-target only after this tool request. Leave pre-existing cursors alone.
                                     hotkey "Use item in hand"
-                                    waitfortarget wait__target
+                                    waitfortarget wait__harvest_target
 
-                                    if targetexists and not casting and not queued and not warmode
-                                        hotkey "Target Self"
+                                    # The tool queue can still be pending. A neutral cursor is ready to answer.
+                                    if targetexists "neutral" and not hidden and not casting and not warmode
+                                        target self
                                         wait wait__short
                                     endif
+                                    settimer "timer__harvest" 0
                                 endif
-                            elseif findtype 3907|3908 backpack as alias__spare_hatchet
-                                if not hidden and not queued and not casting and not targetexists and not warmode
-                                    dress alias__spare_hatchet
-                                    wait wait__short
-                                    # Verify the newly equipped hand on the next pass before using it.
-                                endif
-                            elseif timer "timer__message" >= cooldown__message
-                                overhead "[ hatchet, out ]" 53
-                                settimer "timer__message" 0
                             endif
                         endif
                     endif
@@ -803,6 +941,9 @@ while not dead
                             @setvar! var__recall_needed 1
                         endif
                     endif
+                    if var__recall_needed = 1 and config__chatty = 1
+                        sysmsg "Recall trigger: Tracking report, configured color={{config__tracking_color}}." 88
+                    endif
                 endif
             endif
 
@@ -811,6 +952,9 @@ while not dead
                 if config__recall_on_weight = 1 and var__recall_needed = 0
                     if diffweight <= config__weight_remaining
                         @setvar! var__recall_needed 1
+                        if config__chatty = 1
+                            sysmsg "Recall trigger: spare weight at or below {{config__weight_remaining}}." 88
+                        endif
                         if timer "timer__message" >= cooldown__message
                             overhead "[ weight, low ]" 53
                             settimer "timer__message" 0
@@ -855,7 +999,7 @@ while not dead
         else
             # One request per Play. Recovery keeps running, but harvest and repeat Recall stay paused.
             # Only an actual refusal gets a result notice. Silence or elapsed time does not prove arrival.
-            if insysmsg "Magical travel is not allowed in this location." or insysmsg "Magical travel from inside a dungeon is only possible near golden moongates."
+            if insysmsg "Magical travel is not allowed in this location." or insysmsg "Magical travel from inside a dungeon is only possible near golden moongates." or insysmsg "You do not have access to travel inside this house."
                 overhead "[ recall, blocked ]" 53
             endif
         endif

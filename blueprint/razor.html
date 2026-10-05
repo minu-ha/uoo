@@ -292,6 +292,27 @@ Razor의 <code>Last Target</code> 거리 검사로 보유할 수 있다.
 CE 공식 문서에 있는 패턴이며 현재 Outlands 클라이언트에서의 새 본문 실행은 아직 확인되지 않았다.</p>
 
 <h4>커서와 타겟</h4>
+<p>장착과 손 도구도 현재 포크의 실행 결과를 기준으로 선택한다.
+CE의 <a href="https://www.razorce.com/guide/commands/#dress">dress 문서</a>는 serial 장착을 지원하지만,
+현재 벌목 본문의 <code>dress alias__spare_hatchet</code>는 백팩에서 검색한 도끼에 <code>not found</code>를 반복했다.
+인게임 확인됨 2026-10-05. Outlands 내부의 실패 원인은 확인되지 않았다.
+벌목은 기존 무기 핫키의 <code>lift</code> → <code>drop self lefthand</code> 경로를 사용한다.
+v9에서 빈손인데 백팩 도끼를 장착하지 않는다는 보고를 받았다. 인게임 확인됨 2026-10-05.
+<code>findtype … self</code>의 실제 반환이나 실패한 가드가 기록된 것은 아니므로 검색 범위가 원인이라고 확정하지 않는다.
+v10은 <a href="../script/combat/bard-mace.razor">bard-mace의 장착 선례</a>처럼 <code>lhandempty</code>를 먼저 확인한다.
+캐시한 serial을 장착한 뒤 <code>findlayer self lefthand</code> 결과와 일치해야 도구를 사용한다.
+<a href="https://www.razorce.com/guide/expressions/#lhandempty">CE 공식 문서</a>도 <code>lhandempty</code>를 손이 빈 상태의 표현식으로 설명한다.
+수정한 새 경로의 실제 장착은 아직 확인되지 않았다.</p>
+<p><a href="https://github.com/markdwags/Razor/blob/master/Razor/HotKeys/Misc.cs">CE UseItemInHand</a>는 오른손을 먼저 사용한다.
+왼손 Hatchet만 확인하고 일반 손 사용 핫키를 호출하면 오른손의 다른 도구를 사용할 수 있다.
+CE의 <a href="https://github.com/markdwags/Razor/blob/master/Razor/Scripts/Expressions.cs">Queued 표현식</a>은 행동 큐의 비어 있음 여부다.
+도구 요청 뒤 커서가 나타났어도 큐가 남아 있으면 <code>not queued</code>로 자기 타깃을 건너뛸 수 있다.
+벌목 v8은 손 도구 사용 직후 같은 블록에서 3000ms 한도로 커서를 기다리고 중립 커서를 자기 타깃으로 처리한다.
+기다리는 명령이 실행 흐름을 유지하므로 별도 pending 상태나 다음 패스의 커서 처리 블록을 두지 않는다.
+현재 클라이언트에서 큐가 실제 원인이었는지는 아직 확인되지 않았다.
+v8의 기본 채집은 사용자가 정상 작동을 보고했다. 인게임 확인됨 2026-10-05.
+v10은 오른손 제어를 추가하지 않고 실제 왼손과 캐시 serial을 비교한다.
+이 새 장착·교체 경로의 확인 항목은 <a href="open-items.html#09">open-items.html</a> 09절에 남긴다.</p>
 <p><code>insysmsg</code>의 소비 범위도 주의한다. CE 원본의
 <a href="https://github.com/markdwags/Razor/blob/master/Razor/Core/SystemMessages.cs">SystemMessages.Exists</a>는
 일치한 최신 줄과 그보다 오래된 줄을 함께 제거한다. 한 줄에서 거리와 발견 문구를 각각 읽는 구조는 피하고, 중요한 경보를 먼저 읽는다.

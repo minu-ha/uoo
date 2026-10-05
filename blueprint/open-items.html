@@ -249,7 +249,8 @@ bard-throwing · bard-mace는 <code>clearsysmsg</code> → <code>clearall</code>
 </tr>
 <tr>
 <td>세션 값과 영속 값 (<a href="conventions.html#03.B">conventions.html</a> 03.B절)</td>
-<td>stock-vendor의 <code>setvar var__…</code> (영속 <code>var__</code>), loadout의 <code>setvar! global__my_recall_scroll</code> (세션 <code>global__</code>), loadout의 <code>as item</code> (<code>alias__</code> 없음)</td>
+<td>stock-vendor의 <code>setvar var__…</code> (영속 <code>var__</code>), loadout의 <code>setvar! global__my_recall_scroll</code> (세션 <code>global__</code>),
+loadout의 <code>as item</code> (<code>alias__</code> 없음)</td>
 <td>스크립트를 규칙에 맞출까</td>
 </tr>
 </tbody>
@@ -387,24 +388,41 @@ Bless 비용 9, 공식 +8.8의 정수 처리, 스크롤 소환에 실제 마나 
 수신 TK만으로 점화되는 경우는 기능 실패이고, 이미 확인된 공격 TK를 단순 me 바 때문에 취소하는 것도 별도의 판정 오류다.</p>
 
 <h2 id="09" data-part="채집">09 lumberjack-enhanced 인게임 확인</h2>
-<p>2026-10-05 v6는 v5의 손 도구 → 자기 타깃 채집과 예비 도끼 수량 경고 제거를 유지한다.
+<p>2026-10-05 v8의 기본 채집은 사용자가 정상 작동을 보고했다. 인게임 확인됨 2026-10-05.
+v9에서는 손이 비었는데 백팩 도끼를 장착하지 않는다는 보고를 받았다. 인게임 확인됨 2026-10-05.
+실제 검색 범위·실패한 가드는 미확인이므로 레이어 문법 오류로 단정하지 않는다.
+v10은 lhandempty → 저장한 var__my_hatchet 장착 → 실제 왼손 serial 일치 확인으로 바꾼다.
+목재 가공·파우치 정리는 유지하며 도끼 장착에 책·Hunting·무게 준비 조건을 요구하지 않는다.
+도구 사용·커서 대기·자기 타깃은 같은 채집 블록에서 처리하고 별도 pending 상태는 두지 않는다.
 리콜용 책·Hunting·무게 점검은 기존 housekeeping 주기를 재사용하며, 시간 경과만 알리는 응답 타이머와 안내 상태는 제거했다.
 Tracking 시작 설정과 자동 리콜 판정의 분리는 유지한다.
-새 본문은 인게임에서 아직 확인하지 않았다. 설정·상태·타이머와 반영 절차의 정본은
+v10의 장착 수정과 목재 정리는 인게임에서 아직 확인되지 않았다. 설정·상태·타이머와 반영 절차의 정본은
 <a href="lumberjack-pvp-handbook.html#08">lumberjack-pvp-handbook.html</a> 08절이다.</p>
 <table>
 <thead><tr><th>남은 항목</th><th>확인할 것</th></tr></thead>
 <tbody>
-<tr><td>실제 Smart Harvest 경로</td><td>Hatchet 한 개만 준비해 손 슬롯 확인 → Use item in hand → Target Self 채집을 확인한다.
-백팩에서 dress로 장착한 뒤 다음 시도에서 손을 확인하는지, 도끼 없음만 경고하는지 기록한다.
-기존 수동 커서는 채집이 사용하지 않아야 한다. 요청 뒤 늦은 커서와 대기 중 수동 입력도 시험한다</td></tr>
-<tr><td>자동 리콜 OFF, Tracking ON·OFF</td><td>ON이면 시작 때 한 번 설정하고 Hunting과 화면 표시를 유지한다.
+<tr><td>실제 Smart Harvest 경로</td><td>Hatchet 한 개만 준비해 손 슬롯 확인 → Use item in hand → target self 채집을 확인한다.
+빈손에서는 var__my_hatchet으로 백팩 도끼를 장착하고 다음 시도에서 왼손 serial과 일치하는지 확인한다.
+chatty ON의 Hatchet equip requested 줄은 요청 기록이며 성공 증거가 아니다.
+책·Hunting 미준비·무게 한도에서도 빈손 장착이 실행되는지 확인한다. 장착 거절·도끼 파손·교체·이미 장착한 상태로 재실행도 시험한다.
+백팩에만 도끼가 있을 때 장착된 것으로 판정하면 실패다. 다른 왼손 장비만 비우고 오른손 장비는 수동으로 처리한다.
+1초 이후 도착한 중립 커서도 3초 타임아웃 안에 같은 블록에서 처리하고, 도구 큐가 남아 있어도 자기 타깃을 보내야 한다.
+3초 무응답이면 자기 타깃을 보내지 않고 다음 요청을 3.5초 더 보류하는지 확인한다.
+기존 커서가 있으면 새 채집 요청은 보류하고 루프는 유지해야 한다. 대기 중 수동 입력과 중립 커서 겹침도 시험한다</td></tr>
+<tr><td>주기적 목재 가공·파우치 정리</td><td>config__pack_lumber ON·OFF, 2분·3분 주기, 파우치 최초 선택·제거·용량 부족을 시험한다.
+일반·특수 Logs가 Boards로 바뀌고, 기존 Boards와 합쳐져도 새 묶음을 옮겨야 한다. 이미 파우치 안 Boards는 제외한다.
+가공·이동 실패가 반복 루프를 만들지 않고 다음 주기까지 남기는지 확인한다.
+수동 커서·시전·피해·리콜 결정은 정리를 보류하며, 처리 중 상태가 바뀌면 다음 묶음 전에 양보해야 한다.
+실제 서버의 인벤토리 갱신에 500ms 대기가 충분한지도 기록한다</td></tr>
+<tr><td>자동 리콜 OFF, Tracking ON·OFF</td><td>ON이면 확인한 Hunting을 재사용하고 필요한 경우에만 시작 설정을 한다.
 OFF이면 시작 설정도 없다. 어느 경우에도 루프의 리콜용 감지·책·여유 무게 조회가 없어야 한다.
 가까운 red가 있어도 자기 회복·버프·채집은 계속한다</td></tr>
 <tr><td>감지 리콜과 채집의 설정 조합</td><td>auto_recall·recall_on_detection·use_tracking을 모두 켠 경우에만
 Hunting 준비를 채집 조건으로 요구한다. 하나라도 끄면 Hunting 때문에 채집을 보류하지 않아야 한다.
 use_tracking만 끄면 무게 리콜과 책 필수 조건은 유지된다</td></tr>
-<tr><td>Tracking 초기 필터·상태</td><td>기본 red, 최대 10개 필터 순환, 기존 Hunting 유지.
+<tr><td>Tracking 초기 필터·상태</td><td>기본 red, 현재 창의 필터 확인과 세션 색상 캐시 재사용.
+변경이 필요하면 Hunting을 먼저 끄고 최대 10개 필터를 순환하며, 설정 중 곰 같은 추적 문구를 비운 뒤 Hunting을 켠다.
+다른 필터의 활성 Hunting·반복 Play·수동 필터 변경 뒤 Hunting OFF·클라이언트 재시작을 각각 시험한다.
 초기 응답 누락·피해·수동 시전이면 안전해진 뒤 재실행해 준비 상태로 복구.
 감지 리콜 ON이고 리콜 결정 전일 때만 housekeeping의 5초 주기로 상태를 점검하며 Hunting 미확인 시 채집을 보류한다.
 grey·orange 확인 문장의 서버 일치도 기록한다</td></tr>
@@ -413,10 +431,12 @@ spaces to target가 포함된 전체 서버 문장을 받은 뒤 거리 숫자�
 이름의 단어 수가 달라질 때 고정된 {n}이 같은 숫자를 가리키는지도 확인한다</td></tr>
 <tr><td>하단 리콜 판정과 메시지 순서</td><td>45·46 steps, 거리 무관 옵션, 같은 패스의 무게 부족,
 시약 부족·시전 끊김 안내의 동시 도착을 시험한다. 감지는 무게보다 먼저 읽으며 다음 패스부터 채집을 보류한다.
-자기 시전 대기 중 판정 지연과 입력 충돌도 기록한다</td></tr>
+자기 시전·최대 3초 도구 커서 대기·목재 정리 중 판정 지연과 입력 충돌도 기록한다.
+chatty ON의 Recall trigger 로그로 Tracking 또는 여유 무게 중 실제 요청 원인을 구분한다</td></tr>
 <tr><td>회복 에이전트·시약과 수동 입력</td><td>독·붕대·회복 포션·시약 부족·프리캐스트 조합과 자동 회복 직후 커서 충돌.
 첫 housekeeping과 이후 30초 시약 갱신, 패스 끝에서 부족을 확인한 뒤 다음 housekeeping 재검색을 확인한다</td></tr>
 <tr><td>Home 리콜·책 캐시</td><td>책 충전량·룬 이름·지연·실패와 실행당 한 번의 요청.
+사용자 화면의 집 접근 거절은 도착 성공이 아니다. Home 룬의 목적지·집 권한을 확인하고 실제 거절 안내가 뜨는지 기록한다.
 책 없음·제거·새로 넣기와 책 필수 OFF를 나눠 확인한다. 정기 책·무게 점검은 housekeeping 패스의 하단에서만 한다.
 요청 직전 책이 사라졌으면 캐시를 0으로 바꾸고 다음 housekeeping까지 재검색을 보류해야 한다.
 준비용 Strength·Agility 포션은 사용하지 않는다</td></tr>
@@ -429,7 +449,7 @@ spaces to target가 포함된 전체 서버 문장을 받은 뒤 거리 숫자�
 <tr><td>채집 결과·스킬·거절 프로필 안내</td><td>default·summoner 각각에서 일반 logs와 특수 목재 종류 표시·수확 실패·두 배 수확·스킬 확률·스킬 상승 안내를 확인한다.
 재질은 You chop some으로 검색하고 전체 문장의 {4}를 표시한다. 고갈 안내를 보고 다음 장소로 이동한다.
 확률 숫자를 실제 스킬 상승으로 해석하지 않는다. 이동 제한·주변 자원 없음·채집 불가 안내도 한 번 표시돼야 한다.
-실제 이동 후 서버의 60초 제한과 스크립트의 2초 명령 재시도 간격을 구분한다.
+실제 이동 후 서버의 60초 제한과 스크립트의 3.5초 명령 재시도 간격을 구분한다.
 거절 메시지를 받은 시점부터 새 60초를 세지 않는다.
 매핑 정본은 <a href="overheads.html#07">overheads.html</a> 07절이다</td></tr>
 <tr><td>현재 캐릭터의 쿨다운 바</td><td>heal pot·walk·reflect의 실제 트리거. 없거나 다르면 해당 캐릭터만 후속 수정한다</td></tr>
