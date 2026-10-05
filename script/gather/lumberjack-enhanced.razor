@@ -15,7 +15,7 @@
 # Server-event overheads and manual Tracking displays stay in the profile.
 # The server blocks harvest for 60 seconds after Recall, Moongate, Hike, Teleport or Rope.
 # The profile displays recent-travel refusals. The script does not read that message or restart the delay.
-# The 3.5-second harvest retry only spaces attempts. It cannot shorten the server travel restriction.
+# The harvest retry only spaces attempts. It cannot shorten the server travel restriction.
 
 clearall
 clearsysmsg
@@ -30,7 +30,10 @@ endif
 # ####################################################################################
 # # CONFIG
 # ####################################################################################
+# Optional script overheads. Essential warnings remain visible.
 @setvar! config__chatty 1
+# Journal diagnostics: startup, Recall reasons, Hatchet requests and lumber batches.
+@setvar! config__sysmsg 1
 @setvar! config__use_potions 1
 
 # Convert Logs and pack Boards together. Reuse the looting pouch selected by loadout.
@@ -73,11 +76,6 @@ endif
 @setvar! config__mana_reactive_armor 24
 @setvar! config__mana_magic_reflect 34
 
-# Opt in at home. Persistent serials are picked once, never hardcoded or erased in the field.
-@setvar! config__close_house_door 0
-@setvar! config__open_door_graphic 1712
-@setvar! config__deposit_at_stockpile 0
-
 # ####################################################################################
 # # WAIT AND COOLDOWN
 # ####################################################################################
@@ -88,6 +86,8 @@ endif
 @setvar! wait__harvest_target 3000
 # Allow inventory updates after conversion, opening the pouch and drag/drop.
 @setvar! wait__lumber_item 500
+# Per-phase request budget: Logs and Boards each yield after 2.5 seconds, between item requests.
+@setvar! wait__lumber_batch 2500
 # Let the equip request settle before the next hand verification.
 @setvar! wait__equip 1000
 
@@ -103,8 +103,6 @@ endif
 @setvar! cooldown__heal_retry 2500
 @setvar! cooldown__buff_retry 10000
 @setvar! cooldown__harvest_retry 4000
-
-@setvar! cooldown__stockpile 10000
 
 # ####################################################################################
 # # TIMER
@@ -158,10 +156,6 @@ if not timerexists "timer__harvest"
     createtimer "timer__harvest"
 endif
 
-if not timerexists "timer__stockpile"
-    createtimer "timer__stockpile"
-endif
-
 settimer "timer__message" cooldown__message
 settimer "timer__housekeeping" cooldown__housekeeping
 settimer "timer__reagents" cooldown__reagents
@@ -174,13 +168,12 @@ settimer "timer__refresh" cooldown__potion_retry
 settimer "timer__heal" cooldown__heal_retry
 settimer "timer__buff" cooldown__buff_retry
 settimer "timer__harvest" cooldown__harvest_retry
-settimer "timer__stockpile" cooldown__stockpile
 
 # ####################################################################################
 # # STATE
 # ####################################################################################
-# 1 on a housekeeping pass. Its 5-second clock also schedules the book, Hunting and weight checks.
-# Reagent errors are read at that pass's end, after Tracking detection.
+# 1 when housekeeping is due this pass. Recall uses this clock before harvesting.
+# Inventory maintenance runs last, with reagent errors read after Tracking detection.
 @setvar! var__housekeeping_pass 0
 
 # Recall decision: 0 keep gathering, 1 stop optional work and attempt Recall when input is free.
@@ -195,6 +188,9 @@ settimer "timer__stockpile" cooldown__stockpile
 # Own-book presence, refreshed on housekeeping passes before automatic Recall is sent.
 # Initial 0 keeps book-required gathering paused until the first inventory check.
 @setvar! var__recall_book_available 0
+
+# Scratch graphic for the two lumber passes: 7133 Logs, then 7127 Boards. No persistent batch stage.
+@setvar! var__lumber_graphic 0
 
 # Selected Hatchet serial, reused across Stop and Play in this client session.
 # 0 means no tool selected yet. Backpack discovery is used only when this cached tool is missing.
@@ -236,10 +232,6 @@ endif
 # 1 when this pass issued a self-buff cast. Starts its retry clock and bounded cast wait.
 @setvar! var__buff_cast 0
 
-# One scratch list for inventory snapshots, reused for Logs and Boards. No processing stages.
-removelist list__lumber_stacks
-createlist list__lumber_stacks
-
 if config__pack_lumber = 1
     if not varexist global__my_looting_pouch or not find global__my_looting_pouch backpack
         overhead "[ loot pouch, pick ]" 55
@@ -247,17 +239,9 @@ if config__pack_lumber = 1
     endif
 endif
 
-if config__close_house_door = 1 and not varexist global__my_house_door
-    overhead "[ door, pick ]" 55
-    setvar global__my_house_door
+if config__sysmsg = 1
+    sysmsg "Lumberjack enhanced v12 loaded: auto recall={{config__auto_recall}}, tracking color={{config__tracking_color}}." 88
 endif
-
-if config__deposit_at_stockpile = 1 and not varexist global__my_resource_stockpile
-    overhead "[ stockpile, pick ]" 55
-    setvar global__my_resource_stockpile
-endif
-
-sysmsg "Lumberjack enhanced v10 loaded: auto recall={{config__auto_recall}}, tracking color={{config__tracking_color}}." 88
 if config__chatty = 1
     overhead "[ lumberjack, on ]" 90
 endif
@@ -393,7 +377,11 @@ while not dead
         stop
     endif
 
+    # Schedule slow checks without running optional inventory work ahead of recovery or harvest.
     @setvar! var__housekeeping_pass 0
+    if timer "timer__housekeeping" >= cooldown__housekeeping
+        @setvar! var__housekeeping_pass 1
+    endif
 
     # ####################################################################################
     # # SURVIVAL
@@ -525,293 +513,6 @@ while not dead
     endif
 
     # ####################################################################################
-    # # HOUSEKEEPING
-    # ####################################################################################
-    # Slow inventory reads share the housekeeping clock.
-    # Reagent shortages are marked after Recall detection, then refreshed here.
-    if timer "timer__housekeeping" >= cooldown__housekeeping
-        settimer "timer__housekeeping" 0
-        @setvar! var__housekeeping_pass 1
-
-        # REAGENTS: refresh presence once, then derive each spell recipe.
-        if timer "timer__reagents" >= cooldown__reagents
-            settimer "timer__reagents" 0
-
-            @setvar! var__garlic 0
-            @setvar! var__ginseng 0
-            @setvar! var__mandrake 0
-            @setvar! var__ash 0
-            @setvar! var__silk 0
-
-            if findtype 3972 self
-                @setvar! var__garlic 1
-            endif
-
-            if findtype 3973 self
-                @setvar! var__ginseng 1
-            endif
-
-            if findtype 3974 self
-                @setvar! var__mandrake 1
-            endif
-
-            if findtype 3980 self
-                @setvar! var__ash 1
-            endif
-
-            if findtype 3981 self
-                @setvar! var__silk 1
-            endif
-
-            @setvar! var__regs_heal 0
-            @setvar! var__regs_cure 0
-            @setvar! var__regs_greater_heal 0
-            @setvar! var__regs_reactive_armor 0
-            @setvar! var__regs_reflect 0
-
-            if var__garlic = 1 and var__ginseng = 1
-                @setvar! var__regs_cure 1
-            endif
-
-            if var__garlic = 1 and var__ginseng = 1 and var__silk = 1
-                @setvar! var__regs_heal 1
-            endif
-
-            if var__garlic = 1 and var__ginseng = 1 and var__silk = 1 and var__mandrake = 1
-                @setvar! var__regs_greater_heal 1
-            endif
-
-            if var__garlic = 1 and var__silk = 1 and var__ash = 1
-                @setvar! var__regs_reactive_armor 1
-            endif
-
-            if var__garlic = 1 and var__silk = 1 and var__mandrake = 1
-                @setvar! var__regs_reflect 1
-            endif
-        endif
-
-        # FOOD: skip optional work once a Recall decision is latched.
-        if var__recall_needed = 0 and diffhits < config__light_hits
-            if timer "timer__food" >= cooldown__food
-                if not poisoned and not warmode and not findbuff "Food Satisfaction"
-                    if not hidden and not queued and not casting and not targetexists
-                        settimer "timer__food" 0
-                        if findtype tray backpack as alias__food
-                            dclick alias__food
-                            wait wait__short
-                        endif
-                    endif
-                endif
-            endif
-        endif
-
-        # LUMBER: snapshot, convert, then pack. Failed requests wait for the next interval.
-        if config__pack_lumber = 1 and var__recall_needed = 0
-            if timer "timer__pack_lumber" >= cooldown__pack_lumber
-                if diffhits < config__light_hits and not poisoned and not paralyzed and not warmode
-                    if not hidden and not queued and not casting and not targetexists
-                        settimer "timer__pack_lumber" 0
-                        if find global__my_looting_pouch backpack
-                            dclick global__my_looting_pouch
-                            wait wait__lumber_item
-
-                            # Logs 7133, Boards 7127. No hue filter: include every wood color.
-                            # Collect first so conversion cannot change the source being scanned.
-                            clearlist list__lumber_stacks
-                            while findtype 7133 backpack as alias__logs
-                                pushlist list__lumber_stacks alias__logs
-                                @ignore alias__logs
-                            endwhile
-                            @clearignore
-
-                            foreach lumber_stack in list__lumber_stacks
-                                if dead or pvp or diffhits >= config__light_hits or poisoned or paralyzed or warmode or hidden or queued or casting or targetexists
-                                    break
-                                endif
-                                if find lumber_stack backpack
-                                    dclick lumber_stack
-                                    wait wait__lumber_item
-                                endif
-                            endfor
-
-                            # Take a fresh snapshot after conversion creates or merges Board stacks.
-                            clearlist list__lumber_stacks
-                            while findtype 7127 backpack as alias__boards
-                                pushlist list__lumber_stacks alias__boards
-                                @ignore alias__boards
-                            endwhile
-                            @clearignore
-
-                            foreach lumber_stack in list__lumber_stacks
-                                if dead or pvp or diffhits >= config__light_hits or poisoned or paralyzed or warmode or hidden or queued or casting or targetexists
-                                    break
-                                endif
-                                if find global__my_looting_pouch backpack and find lumber_stack backpack
-                                    # Backpack searches may include the pouch. Never move an already packed stack.
-                                    if not find lumber_stack global__my_looting_pouch
-                                        lift lumber_stack 60000
-                                        wait wait__lumber_item
-                                        drop global__my_looting_pouch -1 -1
-                                        wait wait__lumber_item
-                                    endif
-                                endif
-                            endfor
-                            clearlist list__lumber_stacks
-                        elseif timer "timer__message" >= cooldown__message
-                            overhead "[ loot pouch, out ]" 53
-                            settimer "timer__message" 0
-                        endif
-                    endif
-                endif
-            endif
-        endif
-
-        # HOUSE DOOR: act only on the persistent door selected before the loop.
-        if config__close_house_door = 1 and var__recall_needed = 0
-            if diffhits < config__light_hits and not poisoned and not warmode
-                if not hidden and not queued and not casting and not targetexists
-                    if findtype config__open_door_graphic ground -1 -1 2 as alias__open_door
-                        if alias__open_door = global__my_house_door
-                            dclick alias__open_door
-                            wait wait__short
-                        endif
-                    endif
-                endif
-            endif
-        endif
-
-        # STOCKPILE: keep its cursor separate from manual actions.
-        if config__deposit_at_stockpile = 1 and var__recall_needed = 0
-            if timer "timer__stockpile" >= cooldown__stockpile
-                if diffhits < config__light_hits and not poisoned and not warmode
-                    if not hidden and not queued and not casting and not targetexists
-                        if find global__my_resource_stockpile ground -1 -1 2
-                            if findtype 7133|7127 backpack
-                                settimer "timer__stockpile" 0
-                                menu global__my_resource_stockpile 0
-                                waitfortarget wait__target
-
-                                if targetexists
-                                    target self
-                                    wait wait__short
-                                endif
-
-                                if targetexists
-                                    hotkey "Cancel Current Target"
-                                endif
-                            endif
-                        endif
-                    endif
-                endif
-            endif
-        endif
-    endif
-
-    # ####################################################################################
-    # # SELF BUFFS
-    # ####################################################################################
-    # Self buffs leave the GH + Teleport mana budget and yield to manual actions.
-    if var__recall_needed = 0 and diffhits < config__light_hits
-        if not poisoned and not warmode and timer "timer__buff" >= cooldown__buff_retry
-            if not hidden and not queued and not casting and not targetexists and cooldown "walk" = 0
-                @setvar! var__buff_cast 0
-                if config__use_reactive_armor = 1 and not findbuff "Reactive Armor" and var__regs_reactive_armor = 1 and mana >= config__mana_reactive_armor
-                    cast "Reactive Armor"
-                    @setvar! var__buff_cast 1
-                elseif config__use_magic_reflect = 1 and not findbuff "Magic Reflection" and cooldown "reflect" = 0 and var__regs_reflect = 1 and mana >= config__mana_magic_reflect
-                    cast "Magic Reflection"
-                    @setvar! var__buff_cast 1
-                endif
-
-                if var__buff_cast = 1
-                    settimer "timer__buff" 0
-                    wait wait__short
-                    for 60
-                        if not casting
-                            break
-                        endif
-                        if diffhits >= config__heal_hits or poisoned
-                            hotkey "> Interrupt"
-                            break
-                        endif
-                        wait wait__poll
-                    endfor
-                endif
-            endif
-        endif
-    endif
-
-    # ####################################################################################
-    # # SMART HARVEST
-    # ####################################################################################
-    # Equip independently of book, Hunting and weight readiness. Only a Recall decision pauses both.
-    if var__recall_needed = 0 and diffhits < config__heal_hits and not poisoned and not paralyzed and not warmode
-        if timer "timer__harvest" >= cooldown__harvest_retry
-            if not hidden and not queued and not casting and not targetexists and cooldown "walk" = 0
-                settimer "timer__harvest" 0
-
-                # Follow bard-mace: an empty left hand needs equipment, regardless of type-search results.
-                if lhandempty
-                    if not find var__my_hatchet backpack
-                        @setvar! var__my_hatchet 0
-                        if findtype 3907|3908 backpack as alias__packed_hatchet
-                            @setvar! var__my_hatchet alias__packed_hatchet
-                        endif
-                    endif
-
-                    if find var__my_hatchet backpack as alias__hatchet_to_equip
-                        # lift waits for the held item. Do not infer equipped state from this request.
-                        lift alias__hatchet_to_equip
-                        drop self lefthand
-                        if config__chatty = 1
-                            sysmsg "Hatchet equip requested: stored serial={{var__my_hatchet}}. Next attempt checks lefthand." 88
-                        endif
-                        wait wait__equip
-                    elseif timer "timer__message" >= cooldown__message
-                        overhead "[ hatchet, out ]" 53
-                        settimer "timer__message" 0
-                    endif
-                elseif findlayer self lefthand as alias__equipped_hatchet
-                    # Adopt an already held Hatchet once, including replacement tools with a new serial.
-                    if var__my_hatchet != alias__equipped_hatchet
-                        getlabel alias__equipped_hatchet label__hand_tool
-                        if "hatchet" in label__hand_tool or "Hatchet" in label__hand_tool
-                            @setvar! var__my_hatchet alias__equipped_hatchet
-                        elseif not hidden and not queued and not casting and not targetexists and not warmode
-                            # Clear only a different left-hand tool. The next attempt equips our Hatchet.
-                            lift alias__equipped_hatchet
-                            drop backpack
-                            wait wait__short
-                        endif
-                    endif
-
-                    # A slot-to-serial match proves this selected tool is actually in lefthand.
-                    if var__my_hatchet = alias__equipped_hatchet and diffweight > 0
-                        # A configured Recall book is required only for automatic-Recall gathering.
-                        if config__auto_recall = 0 or config__require_runebook = 0 or var__recall_book_available = 1
-                            # All three switches must be 1 to require Hunting. Any disabled switch bypasses this guard.
-                            if config__auto_recall = 0 or config__recall_on_detection = 0 or config__use_tracking = 0 or var__tracking_hunting_active = 1
-                                # Recheck input after discovery, then complete tool use and self-target here.
-                                if not hidden and not queued and not casting and not targetexists and not warmode
-                                    hotkey "Use item in hand"
-                                    waitfortarget wait__harvest_target
-
-                                    # The tool queue can still be pending. A neutral cursor is ready to answer.
-                                    if targetexists "neutral" and not hidden and not casting and not warmode
-                                        target self
-                                        wait wait__short
-                                    endif
-                                    settimer "timer__harvest" 0
-                                endif
-                            endif
-                        endif
-                    endif
-                endif
-            endif
-        endif
-    endif
-
-    # ####################################################################################
     # # AUTO RECALL
     # ####################################################################################
     # This entire path is skipped when automatic Recall is disabled.
@@ -840,7 +541,7 @@ while not dead
                 endif
             endif
 
-            # Read Tracking before any other journal lookup. Profile overheads display it.
+            # Read Tracking before harvesting and inventory maintenance. Profile overheads display it.
             if config__recall_on_detection = 1 and config__use_tracking = 1
                 if var__tracking_hunting_active = 1 and var__recall_needed = 0
                     if config__recall_at_any_distance = 1
@@ -941,7 +642,7 @@ while not dead
                             @setvar! var__recall_needed 1
                         endif
                     endif
-                    if var__recall_needed = 1 and config__chatty = 1
+                    if var__recall_needed = 1 and config__sysmsg = 1
                         sysmsg "Recall trigger: Tracking report, configured color={{config__tracking_color}}." 88
                     endif
                 endif
@@ -952,7 +653,7 @@ while not dead
                 if config__recall_on_weight = 1 and var__recall_needed = 0
                     if diffweight <= config__weight_remaining
                         @setvar! var__recall_needed 1
-                        if config__chatty = 1
+                        if config__sysmsg = 1
                             sysmsg "Recall trigger: spare weight at or below {{config__weight_remaining}}." 88
                         endif
                         if timer "timer__message" >= cooldown__message
@@ -1001,6 +702,278 @@ while not dead
             # Only an actual refusal gets a result notice. Silence or elapsed time does not prove arrival.
             if insysmsg "Magical travel is not allowed in this location." or insysmsg "Magical travel from inside a dungeon is only possible near golden moongates." or insysmsg "You do not have access to travel inside this house."
                 overhead "[ recall, blocked ]" 53
+            endif
+        endif
+    endif
+
+    # ####################################################################################
+    # # SMART HARVEST
+    # ####################################################################################
+    # Equip independently of book, Hunting and weight readiness. Only a Recall decision pauses both.
+    if var__recall_needed = 0 and diffhits < config__heal_hits and not poisoned and not paralyzed and not warmode and timer "timer__harvest" >= cooldown__harvest_retry
+        if not hidden and not queued and not casting and not targetexists and cooldown "walk" = 0
+            settimer "timer__harvest" 0
+
+            # Follow bard-mace: an empty left hand needs equipment, regardless of type-search results.
+            if lhandempty
+                if not find var__my_hatchet backpack
+                    @setvar! var__my_hatchet 0
+                    if findtype 3907|3908 backpack as alias__packed_hatchet
+                        @setvar! var__my_hatchet alias__packed_hatchet
+                    endif
+                endif
+
+                if find var__my_hatchet backpack as alias__hatchet_to_equip
+                    # lift waits for the held item. Do not infer equipped state from this request.
+                    lift alias__hatchet_to_equip
+                    drop self lefthand
+                    if config__sysmsg = 1
+                        sysmsg "Hatchet equip requested: stored serial={{var__my_hatchet}}. Next attempt checks lefthand." 88
+                    endif
+                    wait wait__equip
+                elseif timer "timer__message" >= cooldown__message
+                    overhead "[ hatchet, out ]" 53
+                    settimer "timer__message" 0
+                endif
+            elseif findlayer self lefthand as alias__equipped_hatchet
+                # Adopt an already held Hatchet once, including replacement tools with a new serial.
+                if var__my_hatchet != alias__equipped_hatchet
+                    getlabel alias__equipped_hatchet label__hand_tool
+                    if "hatchet" in label__hand_tool or "Hatchet" in label__hand_tool
+                        @setvar! var__my_hatchet alias__equipped_hatchet
+                    elseif not hidden and not queued and not casting and not targetexists and not warmode
+                        # Clear only a different left-hand tool. The next attempt equips our Hatchet.
+                        lift alias__equipped_hatchet
+                        drop backpack
+                        wait wait__short
+                    endif
+                endif
+
+                # A slot-to-serial match proves this selected tool is actually in lefthand.
+                # One guard chain preserves book/Hunting bypasses without mixing and/or.
+                # Recheck input after tool discovery. Do not add a separate ready state.
+                if var__my_hatchet != alias__equipped_hatchet or diffweight <= 0 or hidden or queued or casting or targetexists or warmode
+                    # The hand, spare weight or player input is not ready for harvesting.
+                elseif config__auto_recall != 0 and config__require_runebook != 0 and var__recall_book_available != 1
+                    # Automatic Recall requires a carried book only when require_runebook is on.
+                elseif config__auto_recall != 0 and config__recall_on_detection != 0 and config__use_tracking != 0 and var__tracking_hunting_active != 1
+                    # Hunting is required only when all three detection switches are on.
+                else
+                    hotkey "Use item in hand"
+                    waitfortarget wait__harvest_target
+
+                    # The tool queue can still be pending. A neutral cursor is ready to answer.
+                    if targetexists "neutral" and not hidden and not casting and not warmode
+                        target self
+                        wait wait__short
+                    endif
+                    settimer "timer__harvest" 0
+                endif
+            endif
+        endif
+    endif
+
+    # ####################################################################################
+    # # SELF BUFFS
+    # ####################################################################################
+    # Self buffs leave the GH + Teleport mana budget and yield to manual actions.
+    if var__recall_needed = 0 and diffhits < config__light_hits
+        if not poisoned and not warmode and timer "timer__buff" >= cooldown__buff_retry
+            if not hidden and not queued and not casting and not targetexists and cooldown "walk" = 0
+                @setvar! var__buff_cast 0
+                if config__use_reactive_armor = 1 and not findbuff "Reactive Armor" and var__regs_reactive_armor = 1 and mana >= config__mana_reactive_armor
+                    cast "Reactive Armor"
+                    @setvar! var__buff_cast 1
+                elseif config__use_magic_reflect = 1 and not findbuff "Magic Reflection" and cooldown "reflect" = 0 and var__regs_reflect = 1 and mana >= config__mana_magic_reflect
+                    cast "Magic Reflection"
+                    @setvar! var__buff_cast 1
+                endif
+
+                if var__buff_cast = 1
+                    settimer "timer__buff" 0
+                    wait wait__short
+                    for 60
+                        if not casting
+                            break
+                        endif
+                        if diffhits >= config__heal_hits or poisoned
+                            hotkey "> Interrupt"
+                            break
+                        endif
+                        wait wait__poll
+                    endfor
+                endif
+            endif
+        endif
+    endif
+
+    # ####################################################################################
+    # # HOUSEKEEPING
+    # ####################################################################################
+    # Slow inventory reads share the housekeeping clock.
+    # Reagent shortages are marked after Recall detection, then refreshed here.
+    if var__housekeeping_pass = 1
+        settimer "timer__housekeeping" 0
+
+        # REAGENTS: refresh presence once, then derive each spell recipe.
+        if timer "timer__reagents" >= cooldown__reagents
+            settimer "timer__reagents" 0
+
+            @setvar! var__garlic 0
+            @setvar! var__ginseng 0
+            @setvar! var__mandrake 0
+            @setvar! var__ash 0
+            @setvar! var__silk 0
+
+            if findtype 3972 self
+                @setvar! var__garlic 1
+            endif
+
+            if findtype 3973 self
+                @setvar! var__ginseng 1
+            endif
+
+            if findtype 3974 self
+                @setvar! var__mandrake 1
+            endif
+
+            if findtype 3980 self
+                @setvar! var__ash 1
+            endif
+
+            if findtype 3981 self
+                @setvar! var__silk 1
+            endif
+
+            @setvar! var__regs_heal 0
+            @setvar! var__regs_cure 0
+            @setvar! var__regs_greater_heal 0
+            @setvar! var__regs_reactive_armor 0
+            @setvar! var__regs_reflect 0
+
+            if var__garlic = 1 and var__ginseng = 1
+                @setvar! var__regs_cure 1
+            endif
+
+            if var__garlic = 1 and var__ginseng = 1 and var__silk = 1
+                @setvar! var__regs_heal 1
+            endif
+
+            if var__garlic = 1 and var__ginseng = 1 and var__silk = 1 and var__mandrake = 1
+                @setvar! var__regs_greater_heal 1
+            endif
+
+            if var__garlic = 1 and var__silk = 1 and var__ash = 1
+                @setvar! var__regs_reactive_armor 1
+            endif
+
+            if var__garlic = 1 and var__silk = 1 and var__mandrake = 1
+                @setvar! var__regs_reflect 1
+            endif
+        endif
+
+        # FOOD: skip optional work once a Recall decision is latched.
+        if var__recall_needed = 0 and diffhits < config__light_hits
+            if timer "timer__food" >= cooldown__food
+                if not poisoned and not warmode and not findbuff "Food Satisfaction"
+                    if not hidden and not queued and not casting and not targetexists
+                        settimer "timer__food" 0
+                        if findtype tray backpack as alias__food
+                            dclick alias__food
+                            wait wait__short
+                        endif
+                    endif
+                endif
+            endif
+        endif
+
+        # LUMBER: try each selected stack once, with no snapshots or foreach iterator.
+        # Bound both scans and the work budget. A failed conversion/drop waits for the next interval.
+        if config__pack_lumber = 1 and var__recall_needed = 0 and timer "timer__pack_lumber" >= cooldown__pack_lumber
+            if diffhits < config__light_hits and not poisoned and not paralyzed and not warmode
+                if not hidden and not queued and not casting and not targetexists
+                    settimer "timer__pack_lumber" 0
+                    if find global__my_looting_pouch backpack
+                        if config__sysmsg = 1
+                            sysmsg "Lumber pack BEGIN: convert Logs, then move Boards." 88
+                        endif
+                        dclick global__my_looting_pouch
+                        wait wait__lumber_item
+
+                        # Two phases share one body: Logs first, then current Boards.
+                        # for is a safety cap, not a faster inventory search. Each phase has its own budget.
+                        # Do not reuse pre-conversion serials after conversion or stack merging.
+                        for 2
+                            if index = 0
+                                @setvar! var__lumber_graphic 7133
+                            else
+                                @setvar! var__lumber_graphic 7127
+                            endif
+                            settimer "timer__pack_lumber" 0
+                            @clearignore
+
+                            # No hue filter. Ignore each selected stack before acting, even if it fails.
+                            # A literal cap also ends this scan if the ignore list does not advance it.
+                            for 125
+                                # Only enter the bounded wait when a previous request is still queued.
+                                if queued
+                                    for 60
+                                        if not queued or dead or pvp or diffhits >= config__light_hits or poisoned or paralyzed or warmode or hidden or casting or targetexists or timer "timer__pack_lumber" >= wait__lumber_batch
+                                            break
+                                        endif
+                                        wait wait__poll
+                                    endfor
+                                endif
+
+                                # Recheck input, recovery and the budget immediately before each search.
+                                if queued or dead or pvp or diffhits >= config__light_hits or poisoned or paralyzed or warmode or hidden or casting or targetexists or timer "timer__pack_lumber" >= wait__lumber_batch
+                                    break
+                                endif
+
+                                if findtype var__lumber_graphic backpack as alias__lumber_stack
+                                    @ignore alias__lumber_stack
+                                    if var__lumber_graphic = 7133
+                                        if config__sysmsg = 1
+                                            sysmsg "Lumber convert: serial={{alias__lumber_stack}}." 88
+                                        endif
+                                        dclick alias__lumber_stack
+                                        wait wait__lumber_item
+                                    elseif not find alias__lumber_stack global__my_looting_pouch
+                                        # Backpack searches can include the pouch. Skip already packed Boards.
+                                        if find global__my_looting_pouch backpack
+                                            if config__sysmsg = 1
+                                                sysmsg "Lumber move: serial={{alias__lumber_stack}}, pouch={{global__my_looting_pouch}}." 88
+                                            endif
+                                            # Complete lift/drop together. Do not leave the item held during a wait.
+                                            lift alias__lumber_stack 60000
+                                            drop global__my_looting_pouch -1 -1
+                                            wait wait__lumber_item
+                                        else
+                                            break
+                                        endif
+                                    endif
+                                else
+                                    break
+                                endif
+                            endfor
+                            @clearignore
+                        endfor
+                        if config__sysmsg = 1
+                            sysmsg "Lumber pack END: returning to recovery and harvest checks." 88
+                            if queued
+                                sysmsg "Lumber pack: item queue still active. Harvest waits for queued=0." 88
+                            endif
+                            if targetexists
+                                sysmsg "Lumber pack: target cursor active. Harvest leaves it to the player." 88
+                            endif
+                        endif
+                    elseif timer "timer__message" >= cooldown__message
+                        overhead "[ loot pouch, out ]" 53
+                        settimer "timer__message" 0
+                    endif
+                    # The next interval starts after this batch, including a missing-pouch attempt.
+                    settimer "timer__pack_lumber" 0
+                endif
             endif
         endif
     endif

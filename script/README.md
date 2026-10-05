@@ -39,35 +39,48 @@ It uses plain `config__*` settings and defaults to red-only Tracking.
 An active hunt reuses the color already verified by this script. A first run checks the current window before cycling filters.
 Filter changes stop Hunting first and discard setup reports before resuming. Turn Hunting off before Play after a manual filter change.
 `config__auto_recall = 0` skips the loop's Recall detection, book checks and spare-weight decisions.
-Automatic Recall lives at the end of the loop; reagents and ordinary inventory checks stay in housekeeping.
+The loop runs Survival → automatic Recall → Smart Harvest → self buffs → housekeeping.
+Reagents, food and lumber maintenance run last. House door and Stockpile code has been removed.
 State comments explain the Recall decision and command-sent flag; harvest guards show each pause condition directly.
 Book, Hunting and spare-weight checks reuse housekeeping's 5-second clock. Detection messages are read before weight and reagent errors.
 One Recall command is sent per Play. Recovery continues afterwards; harvesting stays paused until restart.
 Only an actual server refusal produces a result notice. There is no response timer or notice state.
-With `config__chatty = 1`, the journal identifies Tracking or spare weight as the Recall trigger.
+`config__chatty = 1` enables optional script overheads. `config__sysmsg = 1` independently enables Journal diagnostics.
+Both default to 1; essential warnings remain visible with both off. With sysmsg on, the journal identifies Tracking or spare weight as the Recall trigger.
 The v10 equip path follows `bard-mace`: `lhandempty` first, then equip the cached `var__my_hatchet` from the backpack.
 Graphic searches discover a missing backpack tool; they do not prove equipment. The cache survives Stop/Play in this client session.
 An unfamiliar held tool is read once: adopt a Hatchet serial or clear only the different left-hand item.
 Book, Hunting and weight readiness gate harvesting, rather than empty-hand equipment.
+v12 replaces the four nested positive gates with one `if / elseif / else` chain of blocking conditions.
+Each condition uses only `and` or only `or`, preserving disabled-option bypasses without parentheses or a readiness flag.
+Adjacent `and`-only schedule guards are combined for harvest and lumber maintenance.
 `lift` → `drop self lefthand` waits `wait__equip = 1000`; the next attempt must match the hand slot to the cached serial.
-With chatty on, `Hatchet equip requested` records the request. It does not claim successful equipment.
+With sysmsg on, `Hatchet equip requested` records the request. It does not claim successful equipment.
 Right-hand weapon management belongs to manual gear hotkeys.
 Harvest completes `Use item in hand` → `waitfortarget wait__harvest_target` → `target self` in one block.
 The 3-second cursor timeout keeps other automatic actions out of that request; no pending state crosses loop passes.
 A neutral cursor is answered even if the use queue is still pending. New manual casts, hiding, warmode and other cursor types are left alone.
 No self-target is sent after a timeout without a cursor. Existing cursors block another tool use through the ordinary input guard.
-The next 3.5-second retry starts when this block finishes. One tool is enough; only absence is reported.
+The next 4-second retry starts when this block finishes. One tool is enough; only absence is reported.
 `config__pack_lumber = 1` converts Logs and moves Boards to `global__my_looting_pouch` during housekeeping.
 It reuses the pouch selected by `loadout`; if unavailable at startup, select a carried pouch once.
 `cooldown__pack_lumber = 120000` means every 2 minutes; use `180000` for 3 minutes.
-One scratch list snapshots Logs, then Boards after conversion; every wood hue is included.
+v11 removes the scratch list and `foreach`. It searches current Logs, then current Boards, with no hue filter.
+Each phase has a `wait__lumber_batch = 2500` request budget and a literal iteration cap.
+`for 2` shares one body between Logs and Boards; `for 125` bounds a scan that fails to advance.
+These are safety bounds, rather than a claim that `for` searches faster than `while`.
+The single scratch `var__lumber_graphic` selects 7133 or 7127; it does not persist a batch stage.
+v12 enters the bounded queue wait only when queued, then rechecks input, recovery and time before searching.
+Queues are allowed to settle within that budget. Lift/drop stay adjacent, with the wait after the drop.
+Unprocessed stacks wait for the next interval. The budget is checked between requests, rather than cancelling an active command.
+With sysmsg on, diagnostics mark `Lumber pack BEGIN`, each convert/move serial and `Lumber pack END`, followed by any queue/cursor guard.
 Already packed Boards are skipped. Requests are tried once per stack; failures wait for the next interval.
 Manual actions, recovery needs and a latched Recall decision defer this optional work.
 Tracking-triggered Recall requires all three options: `auto_recall`, `recall_on_detection` and `use_tracking`.
 Disabling any one bypasses the Hunting requirement for harvesting. Disabling Tracking keeps weight Recall and book requirements.
 Recall preparation uses no Strength or Agility potions. Fighting requires switching to the PvP script.
 Harvest results, skill reports and refusal overheads are in both Razor profiles. The server enforces the 60-second post-travel harvest delay;
-the loop's 3.5-second command retry does not replace that rule or start a new 60-second delay from a refusal.
+the loop's 4-second command retry does not replace that rule or start a new 60-second delay from a refusal.
 The existing `gather/lumberjack.razor` remains the legacy version. Configuration and in-game checks
 are in [blueprint/lumberjack-pvp-handbook.html](../blueprint/lumberjack-pvp-handbook.html#08) part 8.
 Switch manually to [combat/pvp.razor](combat/pvp.razor) with a separate hotkey, enabling the independent bandage, Magery and weapon options as needed.
