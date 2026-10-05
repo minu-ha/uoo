@@ -235,7 +235,6 @@
 		<key mod="0" key="86" send="False">L:2013</key>
 		<key mod="0" key="27" send="False">L:2101</key>
 		<key mod="0" key="112" send="False">Play Script: combat\bard-necro-enhanced</key>
-		<key mod="0" key="115" send="False">Play Script: combat\bard-necro-pvp</key>
 		<key mod="0" key="113" send="False">Play Script: hotkey\cancel-target</key>
 		<key mod="1" key="48" send="False">Play Script: hotkey\dress</key>
 		<key mod="0" key="66" send="False">Play Script: hotkey\moongate</key>
@@ -270,6 +269,11 @@
 		<overheadmessage searchtext="script variable updated" message="[ var, set ]" hue="90" />
 		<overheadmessage searchtext="Your attack hamstrings your target" message="[ hams, target ]" hue="43" />
 		<overheadmessage searchtext="There's not enough wood here to harvest." message="[ wood, out ]" hue="53" />
+		<overheadmessage searchtext="Harvest double yield/loot triggered" message="[ harvest, double ]" hue="68" />
+		<overheadmessage searchtext="You chop some" message="[ lumber, {4} ]" hue="68" />
+		<overheadmessage searchtext="You hack at the tree for a while, but fail to produce any useable wood." message="[ lumber, miss ]" hue="53" />
+		<overheadmessage searchtext="Lumberjacking skillgain:" message="[ lumber, {3} ]" hue="90" />
+		<overheadmessage searchtext="Your skill in Lumberjacking has increased" message="[ lumber, gain ]" hue="90" />
 		<overheadmessage searchtext="You have recently traveled" message="[ harvest, wait ]" hue="53" />
 		<overheadmessage searchtext="You do not see any harvestable resources nearby" message="[ harvest, out ]" hue="53" />
 		<overheadmessage searchtext="harvesting is not allowed" message="[ harvest, blocked ]" hue="53" />

@@ -27,8 +27,8 @@
 	<property name="ImageFormat" type="System.String">jpg</property>
 	<property name="UndressConflicts" type="System.Boolean">True</property>
 	<property name="Systray" type="System.Boolean">False</property>
-	<property name="RazorWidth" type="System.Int32">1020</property>
-	<property name="RazorHeight" type="System.Int32">653</property>
+	<property name="RazorWidth" type="System.Int32">1106</property>
+	<property name="RazorHeight" type="System.Int32">784</property>
 	<property name="SellAgentMax" type="System.Int32">99</property>
 	<property name="SkillListCol" type="System.Int32">1</property>
 	<property name="SkillListAsc" type="System.Boolean">True</property>
@@ -258,6 +258,11 @@
 		<overheadmessage searchtext="script variable updated" message="[ var, set ]" hue="90" />
 		<overheadmessage searchtext="Your attack hamstrings your target" message="[ hams, target ]" hue="43" />
 		<overheadmessage searchtext="There's not enough wood here to harvest." message="[ wood, out ]" hue="53" />
+		<overheadmessage searchtext="Harvest double yield/loot triggered" message="[ harvest, double ]" hue="68" />
+		<overheadmessage searchtext="You chop some" message="[ lumber, {4} ]" hue="68" />
+		<overheadmessage searchtext="You hack at the tree for a while, but fail to produce any useable wood." message="[ lumber, miss ]" hue="53" />
+		<overheadmessage searchtext="Lumberjacking skillgain:" message="[ lumber, {3} ]" hue="90" />
+		<overheadmessage searchtext="Your skill in Lumberjacking has increased" message="[ lumber, gain ]" hue="90" />
 		<overheadmessage searchtext="You have recently traveled" message="[ harvest, wait ]" hue="53" />
 		<overheadmessage searchtext="You do not see any harvestable resources nearby" message="[ harvest, out ]" hue="53" />
 		<overheadmessage searchtext="harvesting is not allowed" message="[ harvest, blocked ]" hue="53" />

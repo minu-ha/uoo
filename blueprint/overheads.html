@@ -189,6 +189,7 @@
 <tr>
 <td>값</td>
 <td>서버 문장의 n번째 단어는 <code>{n}</code>으로 그대로 넣는다 (<strong>1부터</strong>, 공백 기준). "You must wait another 4 minutes"의 <code>{5}</code>가 4다.
+검색어로 잘라 낸 부분이 아니라 전체 서버 문장의 단어 위치다. 구두점도 그대로 들어온다.
 스크립트 변수는 <code>{{var}}</code>로 넣는다 (<code>[ inst, {{label__picked_instrument}} ]</code>)</td>
 </tr>
 <tr>
@@ -205,6 +206,9 @@
 </tr>
 </tbody>
 </table>
+<p><code>{n}</code>의 치환 방향은 Razor CE 원본의
+<a href="https://github.com/markdwags/Razor/blob/master/Razor/Core/OverheadManager.cs">OverheadManager.DisplayOverheadMessage</a>에서도 확인했다.
+원문 전체를 공백으로 나눈 다음 첫 단어를 <code>{1}</code>에 넣는다. Outlands의 새 문장도 실제 단어 위치를 확인해서 매핑한다.</p>
 
 <h2 id="03">03 상태 어휘</h2>
 <table>
@@ -714,6 +718,32 @@ Heat of Battle은 <code>pvp</code> 바가 그 자리다.</li>
 <td></td>
 </tr>
 <tr>
+<td>Harvest double yield/loot triggered</td>
+<td><code>[ harvest, double ] (68)</code></td>
+<td>default·summoner 공통. 추가 수확 발동 성공</td>
+</tr>
+<tr>
+<td>You chop some</td>
+<td><code>[ lumber, {4} ] (68)</code></td>
+<td>default·summoner 공통. 네 번째 단어를 표시한다.
+일반 목재는 <code>logs</code>, 특수 목재는 <code>dullwood</code>·<code>shadowwood</code> 등 재질 이름이다. 수확 성공 색은 공통으로 68</td>
+</tr>
+<tr>
+<td>You hack at the tree for a while, but fail to produce any useable wood.</td>
+<td><code>[ lumber, miss ] (53)</code></td>
+<td>default·summoner 공통. 채집은 시도했으나 목재를 얻지 못함. 자원 고갈 안내와 구분</td>
+</tr>
+<tr>
+<td>Lumberjacking skillgain:</td>
+<td><code>[ lumber, {3} ] (90)</code></td>
+<td>default·summoner 공통. 세 번째 단어는 스킬 상승 확률이다. 실제 스킬 상승을 뜻하지 않음</td>
+</tr>
+<tr>
+<td>Your skill in Lumberjacking has increased</td>
+<td><code>[ lumber, gain ] (90)</code></td>
+<td>default·summoner 공통. 실제 스킬 상승</td>
+</tr>
+<tr>
 <td>You have recently traveled</td>
 <td><code>[ harvest, wait ] (53)</code></td>
 <td>default·summoner 공통. 여행 뒤 채집 거절 안내다. 대기 표시이며 별도 타이머를 시작하지 않는다</td>
@@ -721,7 +751,7 @@ Heat of Battle은 <code>pvp</code> 바가 그 자리다.</li>
 <tr>
 <td>You do not see any harvestable resources nearby</td>
 <td><code>[ harvest, out ] (53)</code></td>
-<td>default·summoner 공통. 주변 채집 자원 없음</td>
+<td>default·summoner 공통. 주변 채집 자원 없음. 다음 채집 장소로 이동할 안내</td>
 </tr>
 <tr>
 <td>harvesting is not allowed</td>

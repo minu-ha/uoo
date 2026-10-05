@@ -35,6 +35,10 @@ clearignore
 # which is what you want when a crafted one comes out of the shelf resupply instead.
 @setvar! config__use_magic_instrument 0
 
+# 1 keeps one Sewing Kit and one ID Wand from the supply box. 0 skips both tools here,
+# including duplicate returns. Sorting still arranges tools already in the backpack.
+@setvar! config__use_sewing_kit_and_id_wand 0
+
 # Everything a hand can touch is 2 tiles away at most, so that is the range every check uses.
 @setvar! config__reach 2
 
@@ -374,7 +378,7 @@ endif
 #
 # This also replaced the Restock 10 agent, which only carried the sewing kit, so the
 # identification wand was checked for and then never actually fetched.
-if find global__my_supply_box ground -1 -1 config__reach
+if config__use_sewing_kit_and_id_wand = 1 and find global__my_supply_box ground -1 -1 config__reach
     @setvar! var__kept_sewing_kit 0
 
     while findtype 3997 backpack as alias__found_sewing_kit

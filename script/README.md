@@ -38,14 +38,27 @@ It uses plain `config__*` settings and defaults to red-only Tracking.
 `config__use_tracking` controls one-time Tracking setup independently of automatic Recall.
 `config__auto_recall = 0` skips the loop's Recall detection, book checks and spare-weight decisions.
 Automatic Recall lives at the end of the loop; reagents and ordinary inventory checks stay in housekeeping.
-State comments explain the Recall decision, command sent and notice flags; harvest guards show each pause condition directly.
+State comments explain the Recall decision and command-sent flag; harvest guards show each pause condition directly.
+Book, Hunting and spare-weight checks reuse housekeeping's 5-second clock. Detection messages are read before weight and reagent errors.
+One Recall command is sent per Play. Recovery continues afterwards; harvesting stays paused until restart.
+Only an actual server refusal produces a result notice. There is no response timer or notice state.
+Harvest verifies an equipped Hatchet, uses `Use item in hand`, waits for the cursor, then sends `Target Self`.
+A backpack Hatchet is equipped with `dress` and verified on the next attempt. One tool is enough; only absence is reported.
+Tracking-triggered Recall requires all three options: `auto_recall`, `recall_on_detection` and `use_tracking`.
+Disabling any one bypasses the Hunting requirement for harvesting. Disabling Tracking keeps weight Recall and book requirements.
 Recall preparation uses no Strength or Agility potions. Fighting requires switching to the PvP script.
-Harvest refusal overheads are in both Razor profiles. The server enforces the 60-second post-travel harvest delay;
+Harvest results, skill reports and refusal overheads are in both Razor profiles. The server enforces the 60-second post-travel harvest delay;
 the loop's 2-second command retry does not replace that rule or start a new 60-second delay from a refusal.
 The existing `gather/lumberjack.razor` remains the legacy version. Configuration and in-game checks
 are in [blueprint/lumberjack-pvp-handbook.html](../blueprint/lumberjack-pvp-handbook.html#08) part 8.
 Switch manually to [combat/pvp.razor](combat/pvp.razor) with a separate hotkey, enabling the independent bandage, Magery and weapon options as needed.
 Its settings and in-game checks are in [the handbook](../blueprint/lumberjack-pvp-handbook.html#09) part 9.
+
+## Loadout tools
+
+In [restock/loadout.razor](restock/loadout.razor), `config__use_sewing_kit_and_id_wand` controls both tools together.
+Set it to `1` to keep one Sewing Kit and one ID Wand: duplicates go back to the supply box, and missing tools are fetched.
+Set it to `0` to skip both duplicate returns and fetching. Sorting still arranges tools already in the backpack.
 
 ## Personal values never go into a script
 
