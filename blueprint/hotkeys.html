@@ -604,14 +604,14 @@ Guard는 잘못 눌러도 펫이 싸움을 이어 가지만 Follow를 누르면 
 <td>nomeehej, Bard Necro (summoner)</td>
 <td>Disco / Peace / Provo</td>
 <td>bard-necro-enhanced</td>
-<td>pvp (재연결 필요)</td>
+<td>pvp</td>
 <td>소환 5 + VS</td>
 </tr>
 <tr>
-<td>xuezhonglian, PK 메이지 (basic)</td>
+<td>nomeehui (옛 xuezhonglian), PK 메이지 (default)</td>
 <td>Curse / Weaken / Clumsy</td>
-<td>hally-mage</td>
-<td>—</td>
+<td>lumberjack-enhanced (현재 연결)</td>
+<td>pvp</td>
 <td>Water El · Earth El만 (<code>Alt+3</code>, <code>Alt+4</code>)</td>
 </tr>
 </tbody>
@@ -619,10 +619,15 @@ Guard는 잘못 눌러도 펫이 싸움을 이어 가지만 Follow를 누르면 
 
 <h2 id="04">04 손에 잡히는 흐름</h2>
 <p>2026-10-05 템플릿별 PvP 스크립트를 삭제하고 <code>combat/pvp</code> 하나로 통합했다.
-저장소의 summoner 프로필 F4는 아직 삭제한 옛 PvP 경로를 가리킨다.
-Razor Hotkeys에서 F4를 <code>Play Script: combat\pvp</code>로 다시 연결한다.
+저장소의 default·summoner 프로필 F4는 <code>Play Script: combat\pvp</code>에 연결돼 있다.
 진단 파일은 <code>debug\...</code> 경로로 연결한다. 프로필 원본을 편집할 때는 게임을 먼저 종료한다
 (<a href="workflow.html#04.C">workflow.html</a> 04.C절).</p>
+<p>2026-10-05 <code>xuezhonglian</code>을 <code>nomeehui</code>로 변경했다.
+ClassicUO 설정 정본은 <code>config/indian/classicuo/nomeehui/</code>이며, 게임의 새 이름 폴더를 여기에 연결했다.
+캐릭터 serial이 그대로라 <code>chars.lst</code>의 <code>default</code> 선택은 유지된다.
+default의 현재 연결은 <code>F1=lumberjack-enhanced</code>, <code>F4=pvp</code>, <code>T=Telekinesis</code>다.
+저장된 연결과 게임의 반응이 다르면 게임을 완전히 종료한 뒤 재실행하고 Razor Profile이 <code>default</code>인지 확인한다.
+실제 입력 동작은 재실행 후 인게임 확인이 필요하다.</p>
 <table>
 <thead>
 <tr>
