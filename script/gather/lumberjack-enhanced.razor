@@ -102,7 +102,9 @@ endif
 @setvar! cooldown__potion_retry 1000
 @setvar! cooldown__heal_retry 2500
 @setvar! cooldown__buff_retry 10000
+# Normal tool retry. Resource exhaustion uses the shorter interval below.
 @setvar! cooldown__harvest_retry 4000
+@setvar! cooldown__harvest_out_retry 2000
 
 # ####################################################################################
 # # TIMER
@@ -192,6 +194,10 @@ settimer "timer__harvest" cooldown__harvest_retry
 # Scratch graphic for the two lumber passes: 7133 Logs, then 7127 Boards. No persistent batch stage.
 @setvar! var__lumber_graphic 0
 
+# Delay for the next tool attempt, in ms. Resource exhaustion selects the shorter retry.
+# Each attempt restores the normal interval. Reuse timer__harvest without another timer.
+@setvar! var__harvest_retry cooldown__harvest_retry
+
 # Selected Hatchet serial, reused across Stop and Play in this client session.
 # 0 means no tool selected yet. Backpack discovery is used only when this cached tool is missing.
 if not varexist var__my_hatchet
@@ -240,7 +246,7 @@ if config__pack_lumber = 1
 endif
 
 if config__sysmsg = 1
-    sysmsg "Lumberjack enhanced v14 loaded: auto recall={{config__auto_recall}}, tracking color={{config__tracking_color}}." 88
+    sysmsg "Lumberjack enhanced v15 loaded: auto recall={{config__auto_recall}}, tracking color={{config__tracking_color}}." 88
 endif
 if config__chatty = 1
     overhead "[ lumberjack, on ]" 90
@@ -709,10 +715,18 @@ while not dead
     # ####################################################################################
     # # SMART HARVEST
     # ####################################################################################
+    # Tracking/Recall reads take priority over this lower-priority result message.
+    # The profile displays harvest,out. Start the next retry from this response, without blocking recovery.
+    if insysmsg "You do not see any harvestable resources nearby"
+        @setvar! var__harvest_retry cooldown__harvest_out_retry
+        settimer "timer__harvest" 0
+    endif
+
     # Equip independently of book, Hunting and weight readiness. Only a Recall decision pauses both.
-    if var__recall_needed = 0 and diffhits < config__heal_hits and not poisoned and not paralyzed and not warmode and timer "timer__harvest" >= cooldown__harvest_retry
+    if var__recall_needed = 0 and diffhits < config__heal_hits and not poisoned and not paralyzed and not warmode and timer "timer__harvest" >= var__harvest_retry
         if not hidden and not queued and not casting and not targetexists and cooldown "walk" = 0
             settimer "timer__harvest" 0
+            @setvar! var__harvest_retry cooldown__harvest_retry
 
             # Follow bard-mace: an empty left hand needs equipment, regardless of type-search results.
             if lhandempty

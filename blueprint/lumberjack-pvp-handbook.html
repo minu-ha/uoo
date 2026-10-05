@@ -335,7 +335,9 @@ v10은 <a href="../script/combat/bard-mace.razor">bard-mace</a>처럼 <code>lhan
 장착 다음 시도에서는 <code>findlayer self lefthand</code>의 serial이 저장한 도끼와 같은 경우에만 사용한다.
 검색 성공이나 장착 요청을 실제 장착으로 취급하지 않는다. 다른 왼손 장비만 비우며 오른손 무기 처리는 수동 장비 핫키에 맡긴다.
 주변 나무 선택은 Smart Harvest가 맡으며 개별 나무 검색은 넣지 않는다.
-공식 문구만으로 한 번의 요청이 고갈까지 계속 도는지 확정하지 않는다. 명령 재시도는 커서 처리 뒤 현재 사용자가 지정한 4초 간격을 유지한다.
+공식 문구만으로 한 번의 요청이 고갈까지 계속 도는지 확정하지 않는다. 기본 명령 재시도는 커서 처리 뒤 4초다.
+v15는 주변 채집 자원이 없다는 응답을 읽으면 다음 시도만 2초로 예약한다. 다음 요청부터 기본 간격으로 돌아간다.
+이 응답은 Tracking·리콜 감지 뒤에 읽으며, 대기 중 회복 루프와 수동 입력·리콜 차단 조건은 유지한다.
 v8의 기본 채집은 사용자가 정상 작동을 보고했다. 인게임 확인됨 2026-10-05.
 v10의 빈손 장착·serial 확인 경로는 아직 확인되지 않았다.
 v13의 END와 이후 채집 응답은 사용자 Journal에서 확인했다. 인게임 확인됨 2026-10-05.
@@ -464,6 +466,11 @@ grey는 범죄자 필터의 이름이며 모든 회색 대상을 따로 검색�
 <td>이번 패스의 housekeeping 예정 여부와 주문별 시약 조합이다. 루프 시작에서 5초 주기의 도래만 기록한다.
 리콜의 책·Hunting·무게 점검은 이 예정값으로 채집 전에 처리하고, 시약·음식·목재 정리는 루프 끝에서 실행한다.
 시약은 첫 housekeeping과 이후 30초마다 갱신한다. 부족 안내는 housekeeping을 수행한 패스의 끝에서 확인하고 다음 재검색을 예약한다</td></tr>
+<tr><td><code>cooldown__harvest_retry</code>, <code>cooldown__harvest_out_retry</code>, <code>var__harvest_retry</code></td>
+<td>기본 재시도 4000ms와 주변 자원 없음 응답 뒤 재시도 2000ms다.
+var__harvest_retry는 다음 시도에 적용할 간격을 기억한다. 처음과 각 시도 직후는 기본값, 자원 없음 응답을 읽으면 짧은 값이다.
+기존 timer__harvest를 응답을 읽은 시각에 0으로 돌리고 새 간격과 비교한다. 별도 타이머나 2초짜리 wait는 없다.
+수확 성공·실패·여행 제한·채집 불가 응답은 기본 간격을 유지한다. 실제 새 경로는 아직 인게임에서 확인되지 않았다</td></tr>
 <tr><td><code>var__my_hatchet</code>, <code>wait__equip</code></td>
 <td>선택한 도끼 serial 하나와 장착 후 1000ms 대기다. 처음 값은 0이며 Stop·Play 사이에는 재사용한다.
 왼손이 비었을 때 캐시가 백팩에 없으면 3907·3908로 다시 찾는다. 이 graphic 검색은 도끼 발견에만 사용한다.
@@ -517,7 +524,7 @@ Boards는 가공 후 현재 인벤토리에서 찾아 변환·병합 전 serial�
 화면에는 가공 성공 문구가 있으며 <code>Script Error</code>와 줄 번호는 확인되지 않았다.
 Play 상태라는 보고만으로 오류 위치를 확정하지 않는다. 기존 코드는 전체 스택 처리가 끝날 때까지 메인 루프로 돌아오지 않고,
 <code>queued</code>가 남으면 다음 스택부터 처리를 중단하는 조건이 있었다.
-현재 v14의 sysmsg 기록은 <code>Lumber pack BEGIN</code> → 가공·<code>Lumber skip</code>·<code>Lumber move request</code> → <code>Lumber pack END</code>다.
+현재 v15의 sysmsg 기록은 <code>Lumber pack BEGIN</code> → 가공·<code>Lumber skip</code>·<code>Lumber move request</code> → <code>Lumber pack END</code>다.
 <code>skip: … already in pouch</code>는 기존 Boards를 들어 올리지 않았다는 판별 기록이다.
 <code>move request</code>는 lift/drop 직전 요청 기록이며 서버 이동·병합 성공을 보증하지 않는다.
 같은 hue의 새 Boards가 기존 묶음에 합쳐지면 원래 파우치 묶음의 serial이 유지될 수 있으므로 요청한 serial이 사라져도 실패로 단정하지 않는다.
@@ -546,7 +553,7 @@ END 뒤에도 채집이 보류되면 큐·커서 안내와 리콜·책·Hunting 
 <thead><tr><th>상황</th><th>예상과 실패 판정</th></tr></thead>
 <tbody>
 <tr><td>안전한 나무 옆에서 시작, 기존 필터가 몬스터 또는 우호 플레이어</td>
-<td>sysmsg ON의 <code>Lumberjack enhanced v14 loaded</code>와 chatty ON의 <code>[ lumberjack, on ]</code> 뒤 기본 red 필터를 확인하고 Hunting을 유지한다.
+<td>sysmsg ON의 <code>Lumberjack enhanced v15 loaded</code>와 chatty ON의 <code>[ lumberjack, on ]</code> 뒤 기본 red 필터를 확인하고 Hunting을 유지한다.
 재실행에서 확인한 색상의 Hunting이 켜져 있으면 창·버튼 조작이 없어야 한다.
 자동 리콜 OFF에서도 <code>use_tracking = 1</code>이면 설정해야 한다. 기존 Hunting을 꺼 버리면 실패.
 감지 리콜 ON에서 필터 확인이 안 되면 <code>[ track, miss ]</code> 또는 <code>[ track, check ]</code> 후 채집을 보류한다</td></tr>
@@ -568,6 +575,12 @@ sysmsg ON이면 <code>Hatchet equip requested: stored serial=…</code>이 나�
 같은 블록에서 3000ms 한도로 커서를 기다린 뒤 중립 커서를 <code>target self</code>로 처리한다.
 도구 큐가 남아 있어도 자기 타깃을 보내야 한다. 커서가 없으면 보내지 않고 다음 시도까지 4초를 둔다.
 커서를 다음 패스에서 처리하거나 전체 스크립트가 종료되거나, 다음 도구 요청으로 기존 커서를 덮으면 실패다</td></tr>
+<tr><td>자원 없음 뒤 짧은 채집 재시도</td>
+<td><code>[ harvest, out ]</code>의 원문 응답을 읽은 뒤 약 2초 후 다음 도구 요청을 해야 한다.
+새 장소에서 채집을 시작하면 이후 요청은 기본 4초 간격으로 돌아가야 한다.
+자원 없음이 반복되면 각 응답을 읽은 뒤 2초를 다시 센다. 여행 대기·수확 실패는 짧은 재시도의 조건이 아니다.
+2초 동안 회복 루프가 멈추거나, 시전·기존 커서·walk 바·리콜 결정을 무시하고 채집하면 실패다.
+두 간격과 재시도 후 복귀는 모의 검사했으며 실제 서버 응답 시각과의 간격은 아직 확인되지 않았다</td></tr>
 <tr><td>오버헤드·Journal 설정 분리</td>
 <td>chatty·sysmsg의 0·1 조합 네 가지를 시험한다. chatty는 lumberjack·recall 시작 오버헤드만, sysmsg는 진단 줄만 제어해야 한다.
 둘을 모두 꺼도 도끼·파우치·시약 부족 경고와 프로필 채집 결과는 유지해야 한다</td></tr>

@@ -61,7 +61,11 @@ Harvest completes `Use item in hand` â†’ `waitfortarget wait__harvest_target` â†
 The 3-second cursor timeout keeps other automatic actions out of that request; no pending state crosses loop passes.
 A neutral cursor is answered even if the use queue is still pending. New manual casts, hiding, warmode and other cursor types are left alone.
 No self-target is sent after a timeout without a cursor. Existing cursors block another tool use through the ordinary input guard.
-The next 4-second retry starts when this block finishes. One tool is enough; only absence is reported.
+The normal `cooldown__harvest_retry = 4000` retry starts when this block finishes.
+v15 reads `You do not see any harvestable resources nearby` after Tracking/Recall and schedules the next attempt in 2 seconds.
+`cooldown__harvest_out_retry = 2000` sets that interval; `var__harvest_retry` holds the next delay on the existing timer.
+Each attempt restores the normal interval. Recovery continues during the delay, and player input/Recall guards still apply.
+Other refusals keep the normal retry. One tool is enough; only absence is reported.
 `config__pack_lumber = 1` converts Logs and moves Boards to `global__my_looting_pouch` during housekeeping.
 It reuses the pouch selected by `loadout`; if unavailable at startup, select a carried pouch once.
 `cooldown__pack_lumber = 120000` means every 2 minutes; use `180000` for 3 minutes.
