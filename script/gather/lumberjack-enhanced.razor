@@ -240,7 +240,7 @@ if config__pack_lumber = 1
 endif
 
 if config__sysmsg = 1
-    sysmsg "Lumberjack enhanced v12 loaded: auto recall={{config__auto_recall}}, tracking color={{config__tracking_color}}." 88
+    sysmsg "Lumberjack enhanced v14 loaded: auto recall={{config__auto_recall}}, tracking color={{config__tracking_color}}." 88
 endif
 if config__chatty = 1
     overhead "[ lumberjack, on ]" 90
@@ -888,7 +888,7 @@ while not dead
         endif
 
         # LUMBER: try each selected stack once, with no snapshots or foreach iterator.
-        # Bound both scans and the work budget. A failed conversion/drop waits for the next interval.
+        # Bound scans by the existing timer. A failed conversion/drop waits for the next interval.
         if config__pack_lumber = 1 and var__recall_needed = 0 and timer "timer__pack_lumber" >= cooldown__pack_lumber
             if diffhits < config__light_hits and not poisoned and not paralyzed and not warmode
                 if not hidden and not queued and not casting and not targetexists
@@ -901,7 +901,7 @@ while not dead
                         wait wait__lumber_item
 
                         # Two phases share one body: Logs first, then current Boards.
-                        # for is a safety cap, not a faster inventory search. Each phase has its own budget.
+                        # Both scans end by their conditions. Each phase has its own time budget.
                         # Do not reuse pre-conversion serials after conversion or stack merging.
                         for 2
                             if index = 0
@@ -912,50 +912,44 @@ while not dead
                             settimer "timer__pack_lumber" 0
                             @clearignore
 
-                            # No hue filter. Ignore each selected stack before acting, even if it fails.
-                            # A literal cap also ends this scan if the ignore list does not advance it.
-                            for 125
-                                # Only enter the bounded wait when a previous request is still queued.
-                                if queued
-                                    for 60
-                                        if not queued or dead or pvp or diffhits >= config__light_hits or poisoned or paralyzed or warmode or hidden or casting or targetexists or timer "timer__pack_lumber" >= wait__lumber_batch
-                                            break
-                                        endif
-                                        wait wait__poll
-                                    endfor
-                                endif
+                            # End loops by their conditions. No break skips an if scope or resets the outer for.
+                            # Settle the pouch/previous-phase queue within this phase's existing budget.
+                            while queued and timer "timer__pack_lumber" < wait__lumber_batch and not dead and not pvp and diffhits < config__light_hits and not poisoned and not paralyzed and not warmode and not hidden and not casting and not targetexists
+                                wait wait__poll
+                            endwhile
 
-                                # Recheck input, recovery and the budget immediately before each search.
-                                if queued or dead or pvp or diffhits >= config__light_hits or poisoned or paralyzed or warmode or hidden or casting or targetexists or timer "timer__pack_lumber" >= wait__lumber_batch
-                                    break
-                                endif
-
-                                if findtype var__lumber_graphic backpack as alias__lumber_stack
-                                    @ignore alias__lumber_stack
-                                    if var__lumber_graphic = 7133
-                                        if config__sysmsg = 1
-                                            sysmsg "Lumber convert: serial={{alias__lumber_stack}}." 88
-                                        endif
-                                        dclick alias__lumber_stack
-                                        wait wait__lumber_item
-                                    elseif not find alias__lumber_stack global__my_looting_pouch
-                                        # Backpack searches can include the pouch. Skip already packed Boards.
-                                        if find global__my_looting_pouch backpack
-                                            if config__sysmsg = 1
-                                                sysmsg "Lumber move: serial={{alias__lumber_stack}}, pouch={{global__my_looting_pouch}}." 88
-                                            endif
-                                            # Complete lift/drop together. Do not leave the item held during a wait.
-                                            lift alias__lumber_stack 60000
-                                            drop global__my_looting_pouch -1 -1
-                                            wait wait__lumber_item
-                                        else
-                                            break
-                                        endif
+                            # No hue filter. Search current inventory after each conversion or move.
+                            # The timer advances even when ignore cannot advance a failed/packed stack.
+                            while timer "timer__pack_lumber" < wait__lumber_batch and not queued and not dead and not pvp and diffhits < config__light_hits and not poisoned and not paralyzed and not warmode and not hidden and not casting and not targetexists and find global__my_looting_pouch backpack and findtype var__lumber_graphic backpack as alias__lumber_stack
+                                if var__lumber_graphic = 7133
+                                    if config__sysmsg = 1
+                                        sysmsg "Lumber convert: serial={{alias__lumber_stack}}." 88
                                     endif
-                                else
-                                    break
+                                    dclick alias__lumber_stack
+                                    wait wait__lumber_item
+                                elseif find alias__lumber_stack global__my_looting_pouch
+                                    # Recursive backpack searches can return Boards already in the pouch.
+                                    if config__sysmsg = 1
+                                        sysmsg "Lumber skip: serial={{alias__lumber_stack}}, already in pouch." 88
+                                    endif
+                                elseif find global__my_looting_pouch backpack
+                                    if config__sysmsg = 1
+                                        sysmsg "Lumber move request: serial={{alias__lumber_stack}}, pouch={{global__my_looting_pouch}}." 88
+                                    endif
+                                    # Complete lift/drop together. Do not leave the item held during a wait.
+                                    lift alias__lumber_stack 60000
+                                    drop global__my_looting_pouch -1 -1
+                                    wait wait__lumber_item
                                 endif
-                            endfor
+                                # Check container membership before ignore, which can hide it from find.
+                                # Skip this selected serial only for this phase, including failed requests.
+                                @ignore alias__lumber_stack
+
+                                # A pending item queue pauses the next search, without leaving its loop scope.
+                                while queued and timer "timer__pack_lumber" < wait__lumber_batch and not dead and not pvp and diffhits < config__light_hits and not poisoned and not paralyzed and not warmode and not hidden and not casting and not targetexists
+                                    wait wait__poll
+                                endwhile
+                            endwhile
                             @clearignore
                         endfor
                         if config__sysmsg = 1

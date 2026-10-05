@@ -399,7 +399,15 @@ Tracking 시작 설정과 자동 리콜 판정의 분리는 유지한다.
 목재 가공·파우치 이동 후 채집 중단과 남은 Logs를 보고받았다. 인게임 보고 2026-10-05.
 화면의 오류 문구·줄 번호는 확인되지 않았다. v11은 목록·foreach를 제거하고 작업 예산과 횟수를 제한한다.
 생존 → 자동 리콜 → 채집 → 자기 버프 → housekeeping 순서로 정리하며 집 문·Stockpile 코드는 제거했다.
-현재 v12에서도 실제 실행 종료 원인과 정리 후 채집 재개는 아직 확인되지 않았다.
+v12 화면에서도 BEGIN 뒤 convert만 계속 나오는 현상을 보고받았다. 인게임 보고 2026-10-05.
+CE 원본의 제어 흐름 재현에서 if 안 break가 반복문 범위를 남겨 바깥 for 2를 Logs 단계로 되돌리는 경로를 확인했다.
+v13은 목재 검색·큐 대기를 조건 종료 while로 바꾸고 break·continue를 제거한다. 새 상태나 타이머는 없다.
+기존 모의 검사가 엔진 범위 처리를 놓친 점을 기록한다. 실제 Outlands 내부의 동일 동작은 확인되지 않았다.
+이후 사용자 Journal에서 v13의 END와 채집 응답을 확인했다. 인게임 확인됨 2026-10-05.
+두 정리에서 같은 Boards serial이 이동 대상으로 반복되고 일부가 안 옮겨진다는 보고는 남았다.
+v14는 파우치 소속을 ignore 전에 판별하고 이미 보관한 Boards는 skip, 나머지는 move request로 기록한다.
+검색이 ignore를 적용하거나 적용하지 않는 경우 모두와 병합·다음 주기 재시도는 모의 검사했다.
+현재 포크의 직접 serial 검색에서 ignore가 적용되는지와 v14의 실제 이동 성공은 아직 확인되지 않았다.
 v12는 네 겹의 채집 조건을 차단 사슬로 정리하고, 큐가 남아 있을 때만 대기하며 진단 출력을 sysmsg로 분리한다. 설정·상태·타이머와 반영 절차의 정본은
 <a href="lumberjack-pvp-handbook.html#08">lumberjack-pvp-handbook.html</a> 08절이다.</p>
 <table>
@@ -420,7 +428,10 @@ sysmsg ON의 Hatchet equip requested 줄은 요청 기록이며 성공 증거가
 가공·이동 실패가 반복 루프를 만들지 않고 다음 주기까지 남기는지 확인한다.
 수동 커서·시전·피해·리콜 결정은 정리를 보류하며, 처리 중 상태가 바뀌면 다음 묶음 전에 양보해야 한다.
 2.5초씩의 가공·이동 예산이 끝나면 남은 목재는 다음 주기로 넘기고 채집을 재개하는지 확인한다.
-sysmsg의 Lumber pack BEGIN → convert/move serial → END와 큐·커서 안내를 남긴다.
+v14 loaded를 확인한 뒤 sysmsg의 Lumber pack BEGIN → convert/skip/move request → END와 큐·커서 안내를 남긴다.
+기존 파우치 Boards는 skip만 기록되어야 한다. move request는 완료 증거가 아니므로 백팩·파우치의 실제 묶음 수량을 확인한다.
+같은 hue 병합 뒤 다음 주기에 새 Boards만 들어 올리고, 거절된 이동은 다음 주기에 다시 시도하는지 확인한다.
+한 정리에서 BEGIN은 한 번이며 다른 색상·큐 지연·목재 없음·이미 보관한 Boards에서도 END에 도달해야 한다.
 실행이 Play로 돌아가면 Script Error·Line 번호·Script finished 문구도 함께 기록한다.
 실제 서버의 인벤토리 갱신에 500ms 대기가 충분한지도 기록한다</td></tr>
 <tr><td>자동 리콜 OFF, Tracking ON·OFF</td><td>ON이면 확인한 Hunting을 재사용하고 필요한 경우에만 시작 설정을 한다.

@@ -168,6 +168,24 @@ TK 수신과 송신이 같은 안내를 만드는 사례는 <a href="pvp.html#04
 </tbody>
 </table>
 
+<h4>중첩 반복의 조기 종료</h4>
+<table>
+<thead><tr><th>함정</th><th>증상과 근거 범위</th><th>대신</th></tr></thead>
+<tbody>
+<tr><td>중첩 반복에서 <code>if</code> 안의 <code>break</code></td>
+<td><a href="https://github.com/markdwags/Razor/blob/master/Razor/Scripts/Engine/Interpreter.cs">CE Script.ExecuteNext의 BREAK</a>는
+반복문 뒤로 이동하지만 현재 범위는 <code>PopScope</code> 한 번으로 제거한다.
+if 범위만 제거되고 안쪽 반복 범위가 남으면 바깥 FOR가 새 진입으로 판단해 index를 0으로 초기화할 수 있다.
+2026-10-05 CE 원본의 제어 흐름 재현에서 for 2 안 for 1 → if → break가 바깥 0단계를 반복했다.
+lumberjack v12 본문도 Logs 단계만 반복하고 END에 도달하지 않았다.
+이는 CE 소스 재현이며 Outlands 내부 구현과 동일하다는 인게임 확인은 아니다.
+기존 재귀형 모의 검사는 정상 Python 반복 종료로 처리하여 이 차이를 놓쳤다</td>
+<td>시간·존재·입력 조건으로 끝나는 <code>while</code>을 쓰고 이 중첩 블록에서는 break·continue로 if를 건너뛰지 않는다.
+v13 목재 정리는 이 경로를 제거했다. 다른 기존 루프까지 일괄 변경하거나 모든 break가 실패한다고 일반화하지 않는다.
+실제 재확인은 <a href="open-items.html#09">open-items.html</a> 09절</td></tr>
+</tbody>
+</table>
+
 <h4>조건과 변수</h4>
 <table>
 <thead>
@@ -235,6 +253,15 @@ CE 소스의 변환 방향을 따라 serial 범위 검사는 <code>0x40000000 &g
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>아이템을 ignore한 뒤 <code>find serial container</code>로 소속 판별</td>
+<td><a href="https://wiki.uooutlands.com/Razor_Scripting#ignore">공식 문서</a>는 ignore가 검색 명령에서 객체를 제외한다고 설명한다.
+2026-10-05 v13 목재 정리는 파우치 소속 검사보다 먼저 ignore했다. 검색 제외가 적용되는 모의 재현에서는 기존 파우치 Boards를 다시 들어 올렸다.
+앞선 NPC 직접 serial 프로브는 ignore 후에도 TRUE였으므로 현재 포크의 아이템 검색에 같은 동작이 적용되는지는 아직 확인되지 않았다</td>
+<td>소속을 먼저 판별하고 처리·생략 뒤 ignore한다. v14는 두 검색 동작에서 모두 기존 파우치 Boards를 제외하도록 했다.
+clearignore는 단계 시작·끝에 두어 다음 정리 주기에 실패한 요청과 새 묶음을 다시 찾는다.
+단계 중 매번 비우면 방문한 묶음을 다시 고를 수 있다. 실제 확인은 <a href="open-items.html#09">open-items.html</a> 09절</td>
+</tr>
 <tr>
 <td>플레이어 serial의 <code>find</code>를 대상 존재·거리의 전제조건으로 쓰기</td>
 <td>인게임 확인됨 2026-10-04. 현재 클라이언트의 파란 alt 테스트에서 Q serial은 유효했지만

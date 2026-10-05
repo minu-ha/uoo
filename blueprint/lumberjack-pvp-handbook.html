@@ -337,7 +337,9 @@ v10은 <a href="../script/combat/bard-mace.razor">bard-mace</a>처럼 <code>lhan
 주변 나무 선택은 Smart Harvest가 맡으며 개별 나무 검색은 넣지 않는다.
 공식 문구만으로 한 번의 요청이 고갈까지 계속 도는지 확정하지 않는다. 명령 재시도는 커서 처리 뒤 현재 사용자가 지정한 4초 간격을 유지한다.
 v8의 기본 채집은 사용자가 정상 작동을 보고했다. 인게임 확인됨 2026-10-05.
-v10의 빈손 장착·serial 확인 경로와 현재 v12의 목재 정리 이후 채집 재개는 아직 확인되지 않았다.</p>
+v10의 빈손 장착·serial 확인 경로는 아직 확인되지 않았다.
+v13의 END와 이후 채집 응답은 사용자 Journal에서 확인했다. 인게임 확인됨 2026-10-05.
+목재 이동 전체의 완료와 v14의 파우치 제외는 아직 확인되지 않았다.</p>
 <blockquote>they will have a 60 second delay before they can attempt to Harvest again</blockquote>
 <p>같은 문서는 Recall·Moongate·Hike 뒤의 채집 제한을 60초로 명시하고 Teleport·Rope에도 적용한다고 덧붙인다.
 <strong>60초는 확인된 서버 규칙이다.</strong> 스크립트가 이동 성공 시각이나 서버의 남은 시간을 읽는 것은 별개의 문제다.
@@ -360,6 +362,20 @@ v11은 집 문·Stockpile의 설정·선택·동작·타이머를 제거하고 h
 채집·목재 정리의 주기 조건은 인접한 다른 <code>and</code> 조건과 합쳐 허용 경로의 명령문 수를 줄인다.
 Journal 진단은 새 <code>config__sysmsg</code>로 분리하고, 목재 큐가 비어 있으면 대기 반복에 진입하지 않는다.
 새 상태나 타이머는 추가하지 않는다. 명령문 비용의 근거는 <a href="razor.html#06">razor.html</a> 06절이다.</p>
+<p>v12 실행 화면에서 <code>BEGIN</code> 뒤 <code>convert</code>만 이어지고 다음 단계에 도달하지 않는 보고를 받았다. 인게임 보고 2026-10-05.
+CE 원본의 명령 단위 제어 흐름을 재현하면 <code>if</code> 안의 <code>break</code>가 현재 범위를 한 단계만 제거한다.
+안쪽 반복문 범위가 남아 바깥 <code>for 2</code>가 첫 진입으로 판정하고 index를 0으로 되돌리는 경로가 있다.
+그 결과 Logs 단계와 작업 타이머가 반복해서 초기화되어 Boards 단계와 END에 도달하지 않는다.
+v13은 목재 검색과 큐 대기를 종료 조건을 가진 <code>while</code>로 바꿔 이 블록의 <code>break</code>·<code>continue</code>를 제거한다.
+이전 Python 모의 검사는 재귀 반복으로 실행하여 범위 정리 차이를 놓쳤다.
+CE 흐름 재현에서는 이전 본문이 반복하고 새 본문은 END와 범위 정리까지 완료했다.
+Outlands 내부 구현이 CE와 동일하다는 확인은 아니다.
+이후 사용자 Journal에서 v13의 가공 → 이동 요청 → END와 채집 응답을 확인했다. 인게임 확인됨 2026-10-05.
+다만 두 정리에서 같은 Boards serial이 이동 대상으로 반복 기록됐고 사용자가 일부 미이동을 보고했다.
+v14는 파우치 소속 검사 전에 ignore하던 순서를 바로잡는다.
+공식 문서상 ignore는 검색을 제외하므로 판별은 ignore 전에 한다. 직접 serial 검색의 적용 차이는
+<a href="razor.html#03">razor.html</a> 03절과 구분하며, 현재 포크에서 이 순서가 실제 반복 이동의 원인인지는 아직 확인되지 않았다.
+근거와 재확인 범위는 <a href="razor.html#03">razor.html</a> 03절과 <a href="open-items.html#09">open-items.html</a> 09절에 있다.</p>
 <table>
 <thead><tr><th>설정</th><th>기본값과 의미</th></tr></thead>
 <tbody>
@@ -468,11 +484,14 @@ Hunting 상태는 리콜 필요 여부를 정하기 전까지만 읽는다. Trac
 가공·이동 실패와 남은 묶음은 다음 주기에 시도한다. 파우치가 없는 경우도 이 주기로 제한한다</td></tr>
 <tr><td><code>wait__lumber_batch</code>, <code>var__lumber_graphic</code>, <code>global__my_looting_pouch</code></td>
 <td>요청 사이에서 확인하는 단계별 2500ms 작업 예산, 현재 검색 graphic, 로드아웃과 공유하는 영속 파우치다.
-graphic은 7133 Logs → 7127 Boards 순서이며 색상 필터는 없다. 단계별 검색은 리터럴 <code>for 125</code>로도 제한한다.
+graphic은 7133 Logs → 7127 Boards 순서이며 색상 필터는 없다. 검색은 시간·입력·대상 존재 조건으로 끝나는 <code>while</code>이다.
 <code>for 2</code>는 가공·이동 두 단계를 같은 본문으로 처리한다. <code>for</code> 자체가 <code>while</code>보다 빠르다는 뜻은 아니다.
-임시 스택 목록과 <code>foreach</code>는 제거했다. 선택한 serial을 ignore한 뒤 요청해 실패한 동일 스택을 다시 고르지 않는다.
-Boards는 가공 후 현재 인벤토리에서 찾고, 파우치 안 묶음은 제외한다. 별도 pending·처리 단계 플래그나 타이머는 없다.
-큐가 남아 있을 때만 제한된 대기에 들어가며, 검색 직전 회복·수동 입력·큐·예산을 함께 다시 확인한다.
+임시 스택 목록과 <code>foreach</code>는 제거했다. v14는 파우치 소속을 먼저 확인하여 이미 보관한 Boards는 요청 없이 건너뛴다.
+판별·요청 뒤 선택한 serial을 ignore하여 같은 단계에서 실패한 묶음도 다시 고르지 않는다.
+각 단계 시작·끝에는 clearignore가 있어 영구 제외가 아니다. 실패한 묶음은 다음 2분 주기에 다시 시도한다.
+Boards는 가공 후 현재 인벤토리에서 찾아 변환·병합 전 serial을 재사용하지 않는다. 별도 pending·처리 단계 플래그나 타이머는 없다.
+단계 시작과 각 요청 뒤 큐가 남으면 예산 안에서 기다린다. 큐 대기와 검색은 조건이 거짓이면 정상 종료한다.
+목재 블록에는 break·continue와 별도 125회 검색 반복이 없다. 회복·수동 입력·큐·파우치·예산을 다음 요청 전에 확인한다.
 <code>findtype graphic backpack</code>에서 hue를 생략하므로 같은 graphic의 모든 목재 색상이 검색 대상이다.
 남은 다른 색상의 Logs는 색상 배제가 아니라 작업 예산 때문에 다음 주기로 넘어갈 수 있다.
 <code>lift</code>와 <code>drop</code>는 붙여 처리한다. 개별 명령의 대기를 포함한 절대 실행 시간 상한은 아니다.
@@ -498,9 +517,13 @@ Boards는 가공 후 현재 인벤토리에서 찾고, 파우치 안 묶음은 �
 화면에는 가공 성공 문구가 있으며 <code>Script Error</code>와 줄 번호는 확인되지 않았다.
 Play 상태라는 보고만으로 오류 위치를 확정하지 않는다. 기존 코드는 전체 스택 처리가 끝날 때까지 메인 루프로 돌아오지 않고,
 <code>queued</code>가 남으면 다음 스택부터 처리를 중단하는 조건이 있었다.
-현재 v12의 sysmsg 기록은 <code>Lumber pack BEGIN</code> → <code>Lumber convert/move: serial=</code> → <code>Lumber pack END</code>다.
+현재 v14의 sysmsg 기록은 <code>Lumber pack BEGIN</code> → 가공·<code>Lumber skip</code>·<code>Lumber move request</code> → <code>Lumber pack END</code>다.
+<code>skip: … already in pouch</code>는 기존 Boards를 들어 올리지 않았다는 판별 기록이다.
+<code>move request</code>는 lift/drop 직전 요청 기록이며 서버 이동·병합 성공을 보증하지 않는다.
+같은 hue의 새 Boards가 기존 묶음에 합쳐지면 원래 파우치 묶음의 serial이 유지될 수 있으므로 요청한 serial이 사라져도 실패로 단정하지 않는다.
+기존 파우치 묶음 자체를 다시 이동시켜 합치는 로직은 없다. 실제 병합 결과·용량·서버 응답은 인벤토리에서 확인한다.
 END 뒤에도 채집이 보류되면 큐·커서 안내와 리콜·책·Hunting 조건을 함께 확인한다.
-실제 종료 오류와 새 본문의 인게임 재개 여부는 <a href="open-items.html#09">open-items.html</a> 09절에서 확인한다.</p>
+남은 확인은 <a href="open-items.html#09">open-items.html</a> 09절에 있다.</p>
 
 
 <h3 id="08.D">08.D 실행 준비와 인게임 확인</h3>
@@ -523,7 +546,7 @@ END 뒤에도 채집이 보류되면 큐·커서 안내와 리콜·책·Hunting 
 <thead><tr><th>상황</th><th>예상과 실패 판정</th></tr></thead>
 <tbody>
 <tr><td>안전한 나무 옆에서 시작, 기존 필터가 몬스터 또는 우호 플레이어</td>
-<td>sysmsg ON의 <code>Lumberjack enhanced v12 loaded</code>와 chatty ON의 <code>[ lumberjack, on ]</code> 뒤 기본 red 필터를 확인하고 Hunting을 유지한다.
+<td>sysmsg ON의 <code>Lumberjack enhanced v14 loaded</code>와 chatty ON의 <code>[ lumberjack, on ]</code> 뒤 기본 red 필터를 확인하고 Hunting을 유지한다.
 재실행에서 확인한 색상의 Hunting이 켜져 있으면 창·버튼 조작이 없어야 한다.
 자동 리콜 OFF에서도 <code>use_tracking = 1</code>이면 설정해야 한다. 기존 Hunting을 꺼 버리면 실패.
 감지 리콜 ON에서 필터 확인이 안 되면 <code>[ track, miss ]</code> 또는 <code>[ track, check ]</code> 후 채집을 보류한다</td></tr>
@@ -554,8 +577,11 @@ sysmsg ON이면 <code>Hatchet equip requested: stored serial=…</code>이 나�
 가공 실패·파우치 용량 부족은 묶음당 한 번만 요청하고 다음 주기까지 기다려야 한다.
 옵션 OFF·아직 주기 전·기존 커서·시전·피해·리콜 결정 뒤에는 정리하지 않는다.
 중간에 수동 입력이나 회복 조건이 생기면 다음 묶음 전 중단하고 기존 커서는 건드리지 않아야 한다
-sysmsg ON에서 Lumber pack BEGIN → convert/move serial → END가 나오고 채집이 재개되는지 확인한다.
-시간 예산으로 남은 묶음은 다음 정리 주기에 처리한다. END가 없으면 마지막 serial과 Script Error·Line 번호를 기록한다</td></tr>
+sysmsg ON에서 Lumber pack BEGIN → convert/skip/move request → END가 나오고 채집이 재개되는지 확인한다.
+파우치 안 Boards는 skip만 기록하고 이동시키지 않아야 한다. 다음 주기에도 새로 생긴 백팩 Boards만 이동 요청해야 한다.
+같은 hue 병합·다른 hue 분리와 실패한 이동의 다음 주기 재시도를 인벤토리와 함께 확인한다.
+시간 예산으로 남은 묶음은 다음 정리 주기에 처리한다. BEGIN 한 번 뒤 convert → move → END로 이어져야 한다.
+목재가 없는 단계는 해당 요청을 생략하고 END까지 도달해야 한다. END가 없으면 마지막 serial과 Script Error·Line 번호를 기록한다</td></tr>
 <tr><td>채집 성공·실패·추가 수확·스킬 안내</td>
 <td>두 프로필에서 로그 획득은 <code>[ lumber, logs ]</code> 또는 <code>[ lumber, dullwood ]</code>처럼 목재 종류를 표시한다.
 <code>You chop some</code> 한 항목이 전체 문장의 네 번째 단어를 받는다. 수확 실패는 <code>[ lumber, miss ]</code>,

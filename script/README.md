@@ -66,15 +66,21 @@ The next 4-second retry starts when this block finishes. One tool is enough; onl
 It reuses the pouch selected by `loadout`; if unavailable at startup, select a carried pouch once.
 `cooldown__pack_lumber = 120000` means every 2 minutes; use `180000` for 3 minutes.
 v11 removes the scratch list and `foreach`. It searches current Logs, then current Boards, with no hue filter.
-Each phase has a `wait__lumber_batch = 2500` request budget and a literal iteration cap.
-`for 2` shares one body between Logs and Boards; `for 125` bounds a scan that fails to advance.
-These are safety bounds, rather than a claim that `for` searches faster than `while`.
+Each phase has a `wait__lumber_batch = 2500` request budget. `for 2` shares one body between Logs and Boards.
+v13 replaces the inner scans and queue polling with condition-terminated `while` loops, without `break` or `continue`.
+A CE-source control-flow replay showed v12 retaining the inner loop scope after `break` inside `if`.
+That restarted the outer loop at Logs and reset the budget before reaching Boards or END.
+The earlier recursive Python replay did not reproduce this scope handling. This remains a CE-source reproduction, not a live-client confirmation.
 The single scratch `var__lumber_graphic` selects 7133 or 7127; it does not persist a batch stage.
-v12 enters the bounded queue wait only when queued, then rechecks input, recovery and time before searching.
+Queue polling ends on queue completion, the time budget or changed recovery/manual-input conditions.
+Work stops when no matching stack remains, the pouch is absent, input is busy or the phase budget expires.
 Queues are allowed to settle within that budget. Lift/drop stay adjacent, with the wait after the drop.
 Unprocessed stacks wait for the next interval. The budget is checked between requests, rather than cancelling an active command.
-With sysmsg on, diagnostics mark `Lumber pack BEGIN`, each convert/move serial and `Lumber pack END`, followed by any queue/cursor guard.
-Already packed Boards are skipped. Requests are tried once per stack; failures wait for the next interval.
+2026-10-05 사용자 Journal에서 v13의 `END`와 이후 채집 응답을 확인했다. Boards 이동 완료 전체를 확인한 것은 아니다.
+v14는 파우치 소속을 먼저 검사한 뒤 `ignore`한다. 검색 제외 전에 소속을 판별해야 이미 보관한 Boards를 다시 들어 올리지 않는다.
+`clearignore`는 각 단계 시작·끝에 있어 이전 정리에서 실패한 묶음과 이후 추가된 묶음을 다음 주기에 다시 찾는다.
+`config__sysmsg = 1`이면 `BEGIN` → 가공·`skip: already in pouch`·`move request` → `END`를 기록한다.
+이동 요청 로그는 서버 이동·병합 완료의 증거가 아니다. 파우치 제외와 병합 후 새 묶음 처리는 모의 검사했으며 실제 v14는 재확인이 필요하다.
 Manual actions, recovery needs and a latched Recall decision defer this optional work.
 Tracking-triggered Recall requires all three options: `auto_recall`, `recall_on_detection` and `use_tracking`.
 Disabling any one bypasses the Hunting requirement for harvesting. Disabling Tracking keeps weight Recall and book requirements.
