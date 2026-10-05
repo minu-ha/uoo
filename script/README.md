@@ -135,10 +135,9 @@ Use [combat/pvp.razor](combat/pvp.razor) for every template. Configure independe
 Bind PvP hotkeys to `Play Script: combat\pvp`.
 `config__use_magery` and `config__use_weapon` each accept 0/1: spells only, weapons only, both or neither.
 `config__use_bandages = 1` enables self bandages when Healing is available. No preset overrides these settings.
-Settings use `config__*`; state comments explain spell choices, cast waits, equipment serials and caches.
-Urgent item recovery runs before the 30-second supplies scan. Magery and bandages both off skip that scan.
-Stat potions yield only after a drink request; with no drink, the loop can check weapons in the same pass.
-The original action timer names keep their `timer__pvp_*` prefix to preserve retry clocks across Stop and avoid gathering timers.
+Recovery selects an available potion or self spell before bandages, preparation and equipment.
+Reagents are checked only for needed spells; there is no supplies cache or 30-second scan.
+Preparation shares one five-second timer. Action retry clocks keep their `timer__pvp_*` namespace across Stop.
 
 Weapon slots default to Norse Axe (31128) on `swing 1` and Great Axe (31190) on `swing 4`.
 Slots 2/3 are disabled with graphic ID 0. Ready slots take priority 4 > 3 > 2 > 1, missing weapons fall through,
@@ -147,7 +146,10 @@ Set each enabled bar to `WeaponSwing` and calibrate its duration in the active c
 `cooldown__weapon_check = 300` ms. Arm/Dress must remove conflicting equipment for automatic swaps.
 
 Attack spells, TK, explosion potions, pet attacks, attack targeting and Hamstring stay manual.
-Existing casting or target cursors pause all automatic actions, including healing and equipment.
+Ordinary casting and cursors pause automatic actions. With `config__interrupt_to_heal = 1`,
+35 missing HP and an available immediate recovery allow the script to interrupt a manual spell and cancel its cursor.
+Neutral item cursors stay manual. Self MA to prepare the next bandage also stays manual.
+The v5 loop removes Siphon and mushroom automation, and checks equipment after recovery.
 Stop the script before starting another spell during an automatic self cast.
 Settings, cursor handling and pending in-game checks are in [the PvP blueprint](../blueprint/pvp.html#05.E).
 
