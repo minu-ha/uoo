@@ -115,6 +115,12 @@
 <td><code>weapon-katana</code>, <code>cancel-target</code>, <code>dress</code>, <code>moongate</code></td>
 </tr>
 <tr>
+<td><code>script/debug/</code></td>
+<td>진단·동작 시험용 단발 스크립트. 필요하면 핫키에 연결</td>
+<td><code>&lt;검사&gt;[-&lt;대상&gt;]</code></td>
+<td><code>dump-label</code>, <code>debug-target-find</code>, <code>debug-target-state</code>, <code>test-telekinesis-var</code></td>
+</tr>
+<tr>
 <td><code>script/train/</code></td>
 <td>스킬 트레이닝</td>
 <td><code>&lt;스킬&gt;</code></td>
@@ -147,6 +153,9 @@
 </tbody>
 </table>
 <p>전투 루프와 템플릿의 대응은 <a href="../script/README.md">script/README.md</a>의 전투 루프 표가 정본이다.</p>
+<p><code>combat/pvp</code>는 여러 템플릿이 공유하는 자기관리 루프다.
+프리셋과 기능 옵션을 본문에서 선택하며, 별도 템플릿별 PvP 진입 파일은 두지 않는다
+(<a href="pvp.html#05.E">pvp.html</a> 05.E절).</p>
 
 <h3 id="01.C">01.C 파일 규칙</h3>
 <ul>
@@ -226,6 +235,9 @@ cleardragdrop
 clearignore</code></pre>
 <p>들여쓰기는 스페이스 4칸, 줄 끝은 CRLF (Razor가 그렇게 다시 쓴다). 탭은 쓰지 않는다.
 편집기 설정은 <code>.editorconfig</code>가 정본이다.</p>
+<p>수동 입력과 함께 도는 공통 <code>combat/pvp</code>는 시작 4줄을 생략한다.
+실행 전에 보유한 주문·아이템 커서와 시전·장착 큐를 초기화하지 않기 위한 예외다.
+대신 자동 행동 직전에 수동 시전·타깃·큐를 검사한다 (<a href="pvp.html#05.E">pvp.html</a> 05.E절).</p>
 
 <h3 id="02.E">02.E 주석</h3>
 <ul>
@@ -365,7 +377,7 @@ endif</code></pre>
 </tr>
 <tr>
 <td>라벨로 분기</td>
-<td><code>getlabel alias__x label__x</code> → <code>if "문자열" in label__x</code>. <code>in</code>은 대소문자를 가리므로 정확한 글자는 <code>hotkey/dump-label</code>로 확인한다</td>
+<td><code>getlabel alias__x label__x</code> → <code>if "문자열" in label__x</code>. <code>in</code>은 대소문자를 가리므로 정확한 글자는 <code>debug/dump-label</code>로 확인한다</td>
 </tr>
 <tr>
 <td>검프·핫바 조작</td>

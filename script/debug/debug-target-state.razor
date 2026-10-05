@@ -1,0 +1,177 @@
+# Inspect target state, variable comparisons and the current combat readiness gates.
+# Needs: target previously chosen with Q/Last Target, unrestricted PvP context.
+# Each G/S step prints BEGIN and its returned value. Keep any Razor warning between them.
+# A warning such as Cannot check death status means UNKNOWN, even if the expression returns 0.
+# No spells, attacks, pet commands, clearsysmsg, clearall or ignore changes.
+# Gates are read before the optional target prompt, so the prompt does not fake a held cursor.
+# Use the default Q mode to inspect a running cast or held cursor without cancelling it.
+# getlabel is last, so a blocked or failing label request cannot hide the earlier results.
+
+# 1 reads Q/Last Target without opening a cursor. 0 prompts for a fresh target when idle.
+@setvar! config__probe_state_use_last_target 1
+
+sysmsg "TARGET STATE PROBE v1 loaded" 90
+if pvp
+    sysmsg "S STOP: pvp=1, script restrictions are active. State reads would be restricted." 53
+    stop
+endif
+sysmsg "S context: pvp=0. A returned value plus a Razor warning must be read together." 90
+
+@setvar! var__probe_state_casting 0
+@setvar! var__probe_state_cursor 0
+@setvar! var__probe_state_walk 0
+@setvar! var__probe_state_tk_mana 0
+@setvar! var__probe_state_dump_mana 0
+@setvar! var__probe_state_bloodmoss 0
+@setvar! var__probe_state_mandrake 0
+@setvar! var__probe_state_tk_ready 0
+@setvar! var__probe_state_tk_me 0
+@setvar! var__probe_state_tk_target 0
+sysmsg "G01 BEGIN casting, targetexists, walk cooldown" 90
+if casting
+    @setvar! var__probe_state_casting 1
+endif
+if targetexists
+    @setvar! var__probe_state_cursor 1
+endif
+if cooldown "walk" > 0
+    @setvar! var__probe_state_walk 1
+endif
+sysmsg "G01 RETURN casting={{var__probe_state_casting}}, cursor={{var__probe_state_cursor}}, walk_cooldown={{var__probe_state_walk}}" 90
+
+sysmsg "G02 BEGIN mana >= 9, mana >= 40" 90
+if mana >= 9
+    @setvar! var__probe_state_tk_mana 1
+endif
+if mana >= 40
+    @setvar! var__probe_state_dump_mana 1
+endif
+sysmsg "G02 RETURN mana_for_TK={{var__probe_state_tk_mana}}, mana_for_dump={{var__probe_state_dump_mana}}" 90
+
+sysmsg "G03 BEGIN findtype bloodmoss/mandrake self" 90
+if findtype 3963 self
+    @setvar! var__probe_state_bloodmoss 1
+endif
+if findtype 3974 self
+    @setvar! var__probe_state_mandrake 1
+endif
+sysmsg "G03 RETURN TK_bloodmoss={{var__probe_state_bloodmoss}}, TK_mandrake={{var__probe_state_mandrake}}" 90
+
+sysmsg "G04 BEGIN existing combat timer__tk >= 30500, read only" 90
+if timerexists "timer__tk"
+    if timer "timer__tk" >= 30500
+        @setvar! var__probe_state_tk_ready 1
+    endif
+    sysmsg "G04 RETURN combat_timer_TK_exists=1, ready={{var__probe_state_tk_ready}}" 90
+else
+    sysmsg "G04 RETURN combat_timer_TK_exists=0. No combat attempt timer to inspect." 90
+endif
+
+sysmsg "G05 BEGIN teleki me/target cooldown bars" 90
+if cooldown "teleki, me" > 0
+    @setvar! var__probe_state_tk_me 1
+endif
+if cooldown "teleki, target" > 0
+    @setvar! var__probe_state_tk_target 1
+endif
+sysmsg "G05 RETURN teleki_me_bar={{var__probe_state_tk_me}}, teleki_target_bar={{var__probe_state_tk_target}}. Bars do not prove outgoing TK ownership." 90
+
+@unsetvar! var__probe_state_target
+if config__probe_state_use_last_target = 1
+    @setvar! var__probe_state_target lasttarget
+else
+    if casting or targetexists
+        sysmsg "S STOP: cast/cursor already active. Use Q mode to inspect without replacing it." 53
+        stop
+    endif
+    overhead "[ target, pick ]" 55
+    setvar! var__probe_state_target
+endif
+if not varexist var__probe_state_target
+    sysmsg "S STOP: no target variable was created." 53
+    stop
+endif
+if var__probe_state_target = 0
+    sysmsg "S STOP: serial=0. Choose a target with Q, then run again." 53
+    stop
+endif
+@setvar! var__probe_state_copy var__probe_state_target
+@setvar! var__probe_state_self self
+@setvar! var__probe_state_q lasttarget
+@setvar! var__probe_state_return 0
+@setvar! var__probe_state_noto 0
+@setvar! var__probe_state_layer 0
+sysmsg "S context: selected={{var__probe_state_target}}, session_copy={{var__probe_state_copy}}, lasttarget={{var__probe_state_q}}, self={{var__probe_state_self}}" 90
+
+sysmsg "S01 BEGIN dead (self)" 90
+@setvar! var__probe_state_return 0
+if dead
+    @setvar! var__probe_state_return 1
+endif
+sysmsg "S01 RETURN={{var__probe_state_return}}" 90
+
+sysmsg "S02 BEGIN dead selected" 90
+@setvar! var__probe_state_return 0
+if dead var__probe_state_target
+    @setvar! var__probe_state_return 1
+endif
+sysmsg "S02 RETURN={{var__probe_state_return}}. Any restriction warning makes the result UNKNOWN." 90
+
+sysmsg "S03 BEGIN notoriety selected, all seven categories" 90
+if noto var__probe_state_target = "innocent"
+    @setvar! var__probe_state_noto 1
+elseif noto var__probe_state_target = "friend"
+    @setvar! var__probe_state_noto 2
+elseif noto var__probe_state_target = "hostile"
+    @setvar! var__probe_state_noto 3
+elseif noto var__probe_state_target = "criminal"
+    @setvar! var__probe_state_noto 4
+elseif noto var__probe_state_target = "enemy"
+    @setvar! var__probe_state_noto 5
+elseif noto var__probe_state_target = "murderer"
+    @setvar! var__probe_state_noto 6
+elseif noto var__probe_state_target = "invulnerable"
+    @setvar! var__probe_state_noto 7
+endif
+sysmsg "S03 RETURN={{var__probe_state_noto}}: 0=unknown, 1=blue, 2=green, 3=hostile, 4=criminal, 5=orange, 6=red, 7=invulnerable" 90
+
+sysmsg "S04 BEGIN findlayer selected backpack" 90
+if findlayer var__probe_state_target backpack as alias__probe_state_layer
+    @setvar! var__probe_state_layer alias__probe_state_layer
+    sysmsg "S04 TRUE layer_serial={{var__probe_state_layer}}" 90
+else
+    sysmsg "S04 FALSE: no layer returned. This does not prove that the target is missing." 53
+endif
+
+# The protocol boundary separates mobile serials from item serials, not personal targets.
+sysmsg "S05 BEGIN session_copy < 0x40000000 (variable on left)" 90
+@setvar! var__probe_state_return 0
+if var__probe_state_copy < 0x40000000
+    @setvar! var__probe_state_return 1
+endif
+sysmsg "S05 RETURN={{var__probe_state_return}}" 90
+
+sysmsg "S06 BEGIN 0x40000000 > session_copy (number on left)" 90
+@setvar! var__probe_state_return 0
+if 0x40000000 > var__probe_state_copy
+    @setvar! var__probe_state_return 1
+endif
+sysmsg "S06 RETURN={{var__probe_state_return}}. Compare S05/S06 for the same stored serial." 90
+
+sysmsg "S07 BEGIN session_copy = selected" 90
+@setvar! var__probe_state_return 0
+if var__probe_state_copy = var__probe_state_target
+    @setvar! var__probe_state_return 1
+endif
+sysmsg "S07 RETURN={{var__probe_state_return}}" 90
+
+# Remove the previous label before querying, so a skipped request cannot display stale text.
+@unsetvar! label__probe_state
+sysmsg "S08 BEGIN getlabel selected. Preserve any skipped/blocked warning." 90
+getlabel var__probe_state_target label__probe_state
+if varexist label__probe_state
+    sysmsg "S08 LABEL={{label__probe_state}}" 90
+else
+    sysmsg "S08 NO_LABEL: request returned without creating a label variable." 53
+endif
+sysmsg "S END: state checks completed. A missing RETURN/END identifies where execution stopped." 90

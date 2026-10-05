@@ -304,7 +304,7 @@ bard-throwing · bard-mace는 <code>clearsysmsg</code> → <code>clearall</code>
 <tbody>
 <tr>
 <td>hally-mage</td>
-<td><code>[ cure pot, on ]</code> 90을 아직 띄워 프로필 줄과 겹친다. <code>[ pvp, on ]</code>이 33이다 (bard-necro-pvp는 90).
+<td><code>[ cure pot, on ]</code> 90을 아직 띄워 프로필 줄과 겹친다. <code>[ pvp, on ]</code>이 33이다 (공통 pvp는 90).
 읽는 무기 바 <code>Halberd</code> <code>Battle Axe</code> <code>Viking Sword</code> <code>Katana</code>가 어느 <code>cooldowns.xml</code>에도 없다</td>
 </tr>
 <tr>
@@ -337,9 +337,19 @@ bard-throwing · bard-mace는 <code>clearsysmsg</code> → <code>clearall</code>
 <table>
 <thead><tr><th>항목</th><th>현재 근거</th><th>다음 확인 또는 수정 범위</th></tr></thead>
 <tbody>
+<tr><td>플레이어 조회 진단과 이전 Q 전투 버전</td>
+<td>직접 serial의 alt TK·Explosion→EB 적용, 플레이어 find 실패, 변수 비교 방향 문제와
+조회별 제한은 인게임 확인됨 2026-10-04. 결과는 <a href="razor.html#03.A">razor.html</a> 03.A절이 정본이다</td>
+<td>2026-10-05 공격을 수동으로 바꾸고 상대 조회와 자동 공격을 현재 루프에서 제거했다.
+새 자기관리 루프의 확인은 10절이다. 이전 자동 공격의 캐시·후속 주문 테스트는 현재 동작의 요구사항이 아니다.
+사용자는 실행 중 <code>Range check Last Target</code> ON·12타일이라고 확인했다.
+현재 Outlands에서 거리 밖 → 안 전환 때 수동 Last Target의 커서 보유·방출은 확인되지 않았다.
+검색이 플레이어를 누락하는 내부 원인도 미확인이다. 진단 핫키는 유지한다.
+남은 진단은 바디 ID를 넣은 findtype 비교, 실제 거리를 기록한 반복 검사, NPC getlabel에 label이 오지 않은 이유다</td></tr>
 <tr><td>자기·수신 TK로 target 바가 켜짐</td><td>사용자 후속 보고상 적 TK 수신도 공통 안내와 me·target 바를 만들 수 있음</td>
 <td>응답 대기 + 새 안내 + 같은 대상만으로 성공 처리 금지. 수신만 있는 시행에서 절대로 점화하지 않는지 검증.
-독립 성공 신호를 확보하지 못하면 자동 점화 보류. bard-necro-pvp를 포함한 스크립트·설정 수정은 이번 작업 범위 밖</td></tr>
+독립 성공 신호를 확보하지 못하면 자동 점화 보류.
+2026-10-04 bard-necro-pvp에서는 공통 바를 근거로 한 자동 점화 블록을 제거했다. 실제 포션은 수동으로 던진다</td></tr>
 <tr><td>나에게 걸린 TK의 소유자</td><td>me 바는 <code>applied telekinesis to you</code>만 읽음</td>
 <td>화면 주인별 고정 문구 검사와 name 표현식을 테스트. 동적 문자열 조합은 미확인.
 확인된 공격 TK를 me 바만으로 취소하지 않되, 동시 시도로 귀속이 모호하면 점화하지 않는지 검증</td></tr>
@@ -349,7 +359,8 @@ bard-throwing · bard-mace는 <code>clearsysmsg</code> → <code>clearall</code>
 <td>Magery 80에서 포션만 / Bless만 / 둘 다 순서를 바꿔 STR·DEX·INT·최댓값과 현재 마나 기록.
 Bless 비용 9, 공식 +8.8의 정수 처리, 스크롤 소환에 실제 마나 50이 필요한 조건을 구분</td></tr>
 <tr><td>프리캐스트와 자동 회복</td><td>공식은 완료한 프리캐스트 보유 중 포션 음용이 주문을 취소한다고 설명</td>
-<td>기본 루프의 EB 프리캐스트는 제외. 수동 주문 보유·짧은 견제·포션 타겟과 자동 회복의 충돌은 여전히 확인 필요</td></tr>
+<td>현재 자기관리 루프는 기존 수동 시전·커서가 있으면 회복도 보류한다 (pvp.html 05.E절).
+자체 자기 시전 도중 새 수동 입력이 겹치는 경우는 10절에서 확인</td></tr>
 <tr><td>출발 스탯과 무기 교체</td><td>핸드북 표는 공식 대입 계산</td>
 <td>현재안 100/80/45, 포션 후 DEX 100에서 붕대 10초와 STA 100의 GA 3초·Norse 1.5625초 확인.
 공유 마지막 스윙, 피격 후 스태미나 감소, 가죽·Meditation 0의 30초 재생량도 기록</td></tr>
@@ -392,22 +403,41 @@ Bless 비용 9, 공식 +8.8의 정수 처리, 스크롤 소환에 실제 마나 
 </tbody>
 </table>
 
-<h2 id="10" data-part="필드 PvP">10 lumberjack-pvp 인게임 확인</h2>
-<p>2026-10-01 새 파일을 구현했다. 설정·예상 알림·실패 판정은
-<a href="lumberjack-pvp-handbook.html#09">lumberjack-pvp-handbook.html</a> 09절이 정본이다.
-TK·폭발 포션 자동 점화는 08절의 독립 성공 신호를 확보하기 전까지 보류한다.</p>
+<h2 id="10" data-part="필드 PvP">10 공통 pvp 자기관리 인게임 확인</h2>
+<p>2026-10-05 <code>combat/pvp.razor</code>로 자기관리를 통합하고 기존 두 PvP 파일은 삭제했다.
+현재 본문은 아직 인게임에서 확인되지 않았다. 설정·변수·타이머와 커서 처리의 정본은 <a href="pvp.html#05.E">pvp.html</a> 05.E절이다.</p>
+<p>Scripts 탭에서 Stop → Reload all scripts → Play로 먼저 확인한다.
+외부 편집 뒤 기존 핫키로 실행할 때는 클라이언트를 재시작한다 (<a href="workflow.html#04.A">workflow.html</a> 04.A절).
+게임 종료 후 <code>git status --short</code>로 옛 본문 덮어쓰기를 확인한다.</p>
 <table>
-<thead><tr><th>남은 항목</th><th>확인할 것</th></tr></thead>
+<thead><tr><th>상황</th><th>예상 알림·동작과 실패 판정</th></tr></thead>
 <tbody>
-<tr><td>수동 전환과 전투 대상</td><td>두 핫키 전환, Tab ON/OFF, Q 변경, 자기 회복 뒤 대상 보존,
-스윙 바가 켜진 상태의 새 공격 대상 갱신을 확인한다</td></tr>
-<tr><td>현재 캐릭터의 무기와 바</td><td>GA/Norse 라벨·손 슬롯, WeaponSwing 갱신과 연속 자동공격,
-회복 후 재장착, bar 부재 때 Norse 중심 설정을 확인한다</td></tr>
-<tr><td>Hamstring 준비와 수동 의도</td><td>Never Untoggle 옵션, 새 ON/OFF 응답, 응답 지연, 수동 OFF 뒤 힐 끊김,
-자체 토글 폴링 중 사용자의 수동 입력을 나눠 시험한다</td></tr>
-<tr><td>회복과 견제 경합</td><td>붕대·독·큰 피해, 이동과 LOS, MA/Harm 마나 임계값,
-자체 시전 중 대상 변경·수동 커서·지연 커서·Tab OFF를 확인한다</td></tr>
-<tr><td>구조화 PvP 구분</td><td>명령 제한의 정지와 필드 Heat of Battle 중 회복을 별도로 확인한다</td></tr>
+<tr><td>pvp 프리셋 1·2와 핫키 재연결</td>
+<td>본문의 <code>config__pvp_preset</code>을 바꿔 재실행한다. <code>[ pvp, on ]</code>·<code>PvP sustain v1 loaded</code>와
+프리셋·Magery·붕대·무기 ID 출력이 설정과 같아야 한다. F4와 별도 PvP 키는 <code>combat\pvp</code>로 재연결한다.
+삭제한 파일을 부르거나 이전 프리셋 요청이 설정을 덮어쓰면 실패</td></tr>
+<tr><td>Q alt·NPC 선택, Q 변경, Tab ON/OFF</td>
+<td>스크립트는 자동 TK·공격 주문·소환수 공격·근접 공격·Hamstring 토글·도끼 교체를 요청하지 않는다.
+상대 find·dead·getlabel 제한 경고가 뜨면 실패. 서버의 기존 자동공격과 수동 요청은 구분한다</td></tr>
+<tr><td>피해·독·마비·낮은 STA, 포션·붕대·시약 부족</td>
+<td>가용 포션 → 붕대 → 마법 회복, 큰 피해는 GH. Healing이 없거나 붕대가 없으면 Heal 경로를 확인한다.
+붕대 부족은 <code>[ bandage, out ]</code>. 회복 커서는 자기에게 보내며 진행 중 붕대를 반복 시작하면 실패</td></tr>
+<tr><td>Magery OFF·붕대 OFF와 프리셋별 버프·버섯·스탯 포션</td>
+<td>OFF 기능의 자동 요청이 없어야 한다. RA·Reflect는 자기 버프, 시폰 MA는 자기에게만 나가야 한다.
+Resist 포션과 시폰을 각각 끄고 기존 수동 공격이 계속 가능한지 확인한다</td></tr>
+<tr><td>시작 전에 수동 시전·프리캐스트·포션·소환수 커서 보유</td>
+<td>시작·반복 중 커서를 취소하거나 자기에게 보내지 않는다. 포션·파우치·붕대·버프·재장착도 보류한다.
+사용자가 커서를 방출하거나 취소한 뒤 자동 자기관리가 재개되어야 한다. 커서 종료를 공격 성공으로 해석하면 실패</td></tr>
+<tr><td>자동 자기 시전 중 끊김·응답 지연·새 수동 입력</td>
+<td>새 수동 시전은 먼저 Stop하여 분리한다. 겹친 입력 시험은 별도로 기록한다.
+결과가 불명확하면 <code>[ cast, check ]</code> 후 정지하고 커서는 남겨 둔다.
+자동 회복의 Target Self가 Q 선택·수동 Last Target에 미치는 영향도 확인한다</td></tr>
+<tr><td>weapon_graphic 0·원하는 ID, 양손 공백·다른 무기·방패·책</td>
+<td>0이면 장착 명령 없음. ID를 넣으면 양손이 비어 있고 배낭에 해당 무기가 있을 때만 재장착.
+이미 든 물건을 바꾸거나 공격·스윙·명중을 성공으로 처리하면 실패</td></tr>
+<tr><td>Stop 재실행, 은신·이동·구조화 PvP·필드 Heat of Battle</td>
+<td>재시도 타이머는 유지, 시약은 다시 읽는다. 은신은 대기하고 걷는 중에는 자동 주문을 시작하지 않는다.
+명령 제한은 <code>[ script, blocked ]</code> 후 정지. 필드 HoB만으로 같은 차단이 발생하면 구분 실패</td></tr>
 </tbody>
 </table>
 </main>

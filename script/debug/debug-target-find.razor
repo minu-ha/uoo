@@ -1,0 +1,233 @@
+# Compare serial lookup and range filters on a manually selected monster, player or item.
+# Needs: combat stopped, visible target, unrestricted PvP context. Stand still during each run.
+# Each F step prints BEGIN, then TRUE/FALSE or SKIP. Keep any Razor warning between them.
+# FALSE alone does not prove that an object is missing, dead or beyond the requested range.
+# No spells, attacks or pet commands. This probe cancels old cursors and clears ignores.
+# Optional body scans need the selected mobile's graphic/body ID from Razor >info.
+
+clearall
+clearsysmsg
+cleardragdrop
+clearignore
+
+# 0 asks for a fresh pick. 1 reads the target previously chosen with Q.
+@setvar! config__probe_find_use_last_target 0
+# 0 skips findtype scans. Set a graphic/body ID here to scan for this exact serial.
+@setvar! config__probe_find_body 0
+
+sysmsg "TARGET FIND PROBE v1 loaded" 90
+if pvp
+    sysmsg "F STOP: pvp=1, script restrictions are active. Use an unrestricted control run." 53
+    stop
+endif
+sysmsg "F context: pvp=0, ignore list cleared. Remain still until F END." 90
+
+@unsetvar! var__probe_find_target
+if config__probe_find_use_last_target = 1
+    @setvar! var__probe_find_target lasttarget
+else
+    overhead "[ target, pick ]" 55
+    setvar! var__probe_find_target
+endif
+
+if not varexist var__probe_find_target
+    sysmsg "F STOP: no target variable was created. Selection was cancelled or timed out." 53
+    stop
+endif
+if var__probe_find_target = 0
+    sysmsg "F STOP: selected serial is zero. No search results would be meaningful." 53
+    stop
+endif
+
+@setvar! var__probe_find_copy var__probe_find_target
+@setvar! var__probe_find_q lasttarget
+@setvar! var__probe_find_self self
+@setvar! var__probe_find_backpack backpack
+@setvar! var__probe_find_result 0
+@setvar! var__probe_find_same 0
+@setvar! var__probe_find_match 0
+@setvar! var__probe_find_limited 0
+sysmsg "F context: selected={{var__probe_find_target}}, session_copy={{var__probe_find_copy}}" 90
+sysmsg "F context: lasttarget={{var__probe_find_q}}, self={{var__probe_find_self}}, backpack={{var__probe_find_backpack}}" 90
+
+sysmsg "F00 BEGIN find backpack" 90
+if find backpack
+    sysmsg "F00 TRUE" 90
+else
+    sysmsg "F00 FALSE" 53
+endif
+
+sysmsg "F01 BEGIN find var__probe_find_target" 90
+if find var__probe_find_target
+    sysmsg "F01 TRUE" 90
+else
+    sysmsg "F01 FALSE" 53
+endif
+
+sysmsg "F02 BEGIN find var__probe_find_target as alias" 90
+@setvar! var__probe_find_result 0
+@setvar! var__probe_find_same 0
+if find var__probe_find_target as alias__probe_find_result
+    @setvar! var__probe_find_result alias__probe_find_result
+    if var__probe_find_result = var__probe_find_target
+        @setvar! var__probe_find_same 1
+    endif
+    sysmsg "F02 TRUE serial={{var__probe_find_result}}, same_selected={{var__probe_find_same}}" 90
+else
+    sysmsg "F02 FALSE" 53
+endif
+
+sysmsg "F03 BEGIN find var__probe_find_target ground" 90
+if find var__probe_find_target ground
+    sysmsg "F03 TRUE" 90
+else
+    sysmsg "F03 FALSE" 53
+endif
+
+sysmsg "F04 BEGIN find var__probe_find_target ground -1 -1 18" 90
+if find var__probe_find_target ground -1 -1 18
+    sysmsg "F04 TRUE" 90
+else
+    sysmsg "F04 FALSE" 53
+endif
+
+sysmsg "F05 BEGIN find var__probe_find_target ground -1 -1 18 as alias" 90
+@setvar! var__probe_find_result 0
+@setvar! var__probe_find_same 0
+if find var__probe_find_target ground -1 -1 18 as alias__probe_find_result
+    @setvar! var__probe_find_result alias__probe_find_result
+    if var__probe_find_result = var__probe_find_target
+        @setvar! var__probe_find_same 1
+    endif
+    sysmsg "F05 TRUE serial={{var__probe_find_result}}, same_selected={{var__probe_find_same}}" 90
+else
+    sysmsg "F05 FALSE" 53
+endif
+
+sysmsg "F06 BEGIN find var__probe_find_target ground -1 -1 2" 90
+if find var__probe_find_target ground -1 -1 2
+    sysmsg "F06 TRUE" 90
+else
+    sysmsg "F06 FALSE" 53
+endif
+
+sysmsg "F07 BEGIN find var__probe_find_target ground -1 -1 5" 90
+if find var__probe_find_target ground -1 -1 5
+    sysmsg "F07 TRUE" 90
+else
+    sysmsg "F07 FALSE" 53
+endif
+
+sysmsg "F08 BEGIN find var__probe_find_target ground -1 -1 10" 90
+if find var__probe_find_target ground -1 -1 10
+    sysmsg "F08 TRUE" 90
+else
+    sysmsg "F08 FALSE" 53
+endif
+
+sysmsg "F09 BEGIN find var__probe_find_target ground -1 -1 12" 90
+if find var__probe_find_target ground -1 -1 12
+    sysmsg "F09 TRUE" 90
+else
+    sysmsg "F09 FALSE" 53
+endif
+
+sysmsg "F10 BEGIN find var__probe_find_copy ground -1 -1 18" 90
+if find var__probe_find_copy ground -1 -1 18
+    sysmsg "F10 TRUE" 90
+else
+    sysmsg "F10 FALSE" 53
+endif
+
+# Compare lasttarget only when it names the same object, so another target cannot pass for it.
+@setvar! var__probe_find_q lasttarget
+if var__probe_find_q = var__probe_find_target
+    sysmsg "F11 BEGIN find lasttarget ground -1 -1 18" 90
+    if find lasttarget ground -1 -1 18
+        sysmsg "F11 TRUE" 90
+    else
+        sysmsg "F11 FALSE" 53
+    endif
+else
+    sysmsg "F11 SKIP: lasttarget and selected serial differ. Choose this target with Q and repeat." 53
+endif
+
+# Controlled ignore test. A failed baseline cannot demonstrate that ignore works.
+sysmsg "F12 BEGIN ignore selected, then find selected ground 18" 90
+ignore var__probe_find_target
+if find var__probe_find_target ground -1 -1 18
+    sysmsg "F12 TRUE" 90
+else
+    sysmsg "F12 FALSE" 53
+endif
+sysmsg "F13 BEGIN unignore selected, then find selected ground 18" 90
+unignore var__probe_find_target
+if find var__probe_find_target ground -1 -1 18
+    sysmsg "F13 TRUE" 90
+else
+    sysmsg "F13 FALSE" 53
+endif
+
+# Match the selected serial, rather than accepting a different mobile with the same body.
+if config__probe_find_body = 0
+    sysmsg "F14 SKIP: set config__probe_find_body from >info for the optional findtype scan." 90
+else
+    sysmsg "F14 BEGIN findtype body={{config__probe_find_body}} ground range=18, exact serial scan" 90
+    @setvar! var__probe_find_match 0
+    @setvar! var__probe_find_limited 1
+    for 40
+        if findtype config__probe_find_body ground -1 -1 18 as alias__probe_find_mobile
+            @setvar! var__probe_find_result alias__probe_find_mobile
+            if var__probe_find_result = var__probe_find_target
+                @setvar! var__probe_find_match 1
+                @setvar! var__probe_find_limited 0
+                break
+            endif
+            @ignore alias__probe_find_mobile
+        else
+            @setvar! var__probe_find_limited 0
+            break
+        endif
+    endfor
+    @clearignore
+    if var__probe_find_match = 1
+        sysmsg "F14 TRUE: selected serial found by body scan" 90
+    elseif var__probe_find_limited = 1
+        sysmsg "F14 INCOMPLETE: 40 matches scanned, selected serial not reached" 53
+    else
+        sysmsg "F14 FALSE: selected serial not returned by body scan" 53
+    endif
+endif
+
+# Match the selected serial, rather than accepting a different mobile with the same body.
+if config__probe_find_body = 0
+    sysmsg "F15 SKIP: set config__probe_find_body from >info for the optional findtype scan." 90
+else
+    sysmsg "F15 BEGIN findtype body={{config__probe_find_body}} ground range=10, exact serial scan" 90
+    @setvar! var__probe_find_match 0
+    @setvar! var__probe_find_limited 1
+    for 40
+        if findtype config__probe_find_body ground -1 -1 10 as alias__probe_find_mobile
+            @setvar! var__probe_find_result alias__probe_find_mobile
+            if var__probe_find_result = var__probe_find_target
+                @setvar! var__probe_find_match 1
+                @setvar! var__probe_find_limited 0
+                break
+            endif
+            @ignore alias__probe_find_mobile
+        else
+            @setvar! var__probe_find_limited 0
+            break
+        endif
+    endfor
+    @clearignore
+    if var__probe_find_match = 1
+        sysmsg "F15 TRUE: selected serial found by body scan" 90
+    elseif var__probe_find_limited = 1
+        sysmsg "F15 INCOMPLETE: 40 matches scanned, selected serial not reached" 53
+    else
+        sysmsg "F15 FALSE: selected serial not returned by body scan" 53
+    endif
+endif
+
+sysmsg "F END: searches completed. Compare identical F rows across monster/player and distance runs." 90

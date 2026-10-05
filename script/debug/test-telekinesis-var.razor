@@ -1,0 +1,54 @@
+# Test one Telekinesis cast using a manually selected target stored in a session variable.
+# Needs: Magery, mana and Telekinesis reagents. Test with your own alt in ordinary field PvP.
+# Stop other scripts and stand still. Let any existing Telekinesis effect expire first.
+# No getlabel, find or notoriety filter is used. Pick your alt when the prompt appears.
+# The final message only records a target command. Check the alt's journal for application.
+
+clearall
+clearsysmsg
+cleardragdrop
+clearignore
+
+sysmsg "TK variable test: revised script loaded" 90
+
+if pvp
+    overhead "[ script, blocked ]" 53
+    sysmsg "TK test: PvP script restrictions are active." 53
+    stop
+endif
+
+if casting or targetexists
+    overhead "[ cast, wait ]" 53
+    stop
+endif
+
+# Clear the previous pick so cancelling cannot reuse another run's target.
+@unsetvar! var__tk_test_target
+overhead "[ teleki, pick ]" 55
+setvar! var__tk_test_target
+
+if not varexist var__tk_test_target
+    overhead "[ var, out ]" 53
+    stop
+endif
+
+sysmsg "TK test: stored target serial = {{var__tk_test_target}}" 90
+
+# Pass the stored serial directly to target, without comparing it to numeric literals.
+overhead "[ var, set ]" 90
+
+# Wait for this cast's cursor and send the stored serial only once.
+overhead "[ teleki ]" 83
+sysmsg "TK variable test: casting Telekinesis" 90
+cast "Telekinesis"
+waitfortarget 5000
+
+if not targetexists
+    overhead "[ cast, out ]" 53
+    sysmsg "TK test: no spell target cursor appeared. Check the journal for the cast failure." 53
+    stop
+endif
+
+target var__tk_test_target
+overhead "[ teleki, sent ]" 90
+sysmsg "TK test: target command sent for serial {{var__tk_test_target}}. Check the alt's journal." 90

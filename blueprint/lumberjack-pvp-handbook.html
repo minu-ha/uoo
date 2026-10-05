@@ -22,7 +22,7 @@
 <li>상대도 자동 파우치·붕대·포션을 쓴다. Paralyze 동안 멈춰 기다려 주는 상대를 가정하지 않는다.</li>
 <li>TK는 자기 방어와 공격 부착 중 선택한다. <strong>반사 TK를 공짜 자기 방어로 계산하지 않는다.</strong></li>
 <li>Explosion → EB 자동 콤보는 제외한다. 마법은 짧은 견제·회복·이동, TK → 폭발 포션은 적용 확인이 가능한 경우에 한한다.</li>
-<li>채집용 <code>lumberjack-enhanced</code>와 전투용 <code>lumberjack-pvp</code>를 구현했다. 각각 08절과 09절에 동작·설정을 적었다.
+<li>채집용 <code>lumberjack-enhanced</code>와 공통 PvP 자기관리 <code>pvp</code>를 쓴다. 각각 08절과 09절에 적었다.
 별도 핫키로 수동 전환하며, 두 파일 모두 인게임 확인 전이다.</li>
 </ul>
 <table>
@@ -229,8 +229,8 @@ Paralyze도 자동 파우치 상대를 긴 콤보 동안 고정하는 도구로 
 </ul>
 
 <h2 id="06" data-part="구현 · 확인">06 자동화 요구사항</h2>
-<p>기존 <code>script/combat/bard-necro-pvp.razor</code>는 참고 자료다. 아래는 자동화 판단의 기준이며, 실제 구현 범위는 08·09절에 있다.
-TK·폭발 포션·Teleport·Rope 자동화는 이번 PvP 루프에서 제외했다.</p>
+<p>2026-10-05 공격은 수동, 자기관리는 공통 <code>script/combat/pvp.razor</code>로 변경했다. 실제 구현은 09절이다.
+아래 TK·공격 타겟·스윙·포션 복구 항목은 향후 자동화 검토의 기준이며 현재 루프의 동작이 아니다.</p>
 <table>
 <thead><tr><th>상태</th><th>요구사항</th></tr></thead>
 <tbody>
@@ -293,7 +293,7 @@ AR의 감소식은 <a href="pvp.html#09.E">pvp.html</a> 09.E절이다.</p>
 두 빌드가 원래 둘 다 때릴 한 대를 한쪽에만 더해 유리하다고 계산하지 않는다.</p>
 <h2 id="08" data-part="채집">08 lumberjack-enhanced</h2>
 <p>대상은 <code>script/gather/lumberjack-enhanced.razor</code>다. 기존 <code>lumberjack.razor</code>를 구버전으로 보존하고,
-enhanced와 앞으로 만들 PvP 루프는 별도 핫키로 수동 전환한다. 자동 공격과 자동 PvP 전환은 넣지 않는다.</p>
+enhanced와 PvP 자기관리 루프는 별도 핫키로 수동 전환한다. 자동 공격과 자동 PvP 전환은 넣지 않는다.</p>
 
 <h3 id="08.A">08.A 구현 순서</h3>
 <ol>
@@ -415,143 +415,34 @@ Stockpile 메뉴 커서와 수동 커서가 겹치는 시험은 선택 기능을
 Scripts 탭의 Reload all scripts 뒤 Play로 반복 확인하고, 외부 파일을 수정한 뒤 핫키로 실행할 때는 클라이언트를 재시작한다.
 게임 종료 후 <code>git status --short</code>로 Razor가 덮어쓴 파일이 없는지 확인한다.</p>
 
-<h2 id="09" data-part="필드 PvP">09 lumberjack-pvp</h2>
-<p>대상은 <code>script/combat/lumberjack-pvp.razor</code>다. enhanced와 별도 핫키로 수동 전환한다.
-필드 전투용이며 구조화 PvP·팩션의 명령 제한이 활성화되면 시작 전에 멈춘다.</p>
+<h2 id="09" data-part="필드 PvP">09 공통 pvp의 붕대 mage 설정</h2>
+<p><a href="../script/combat/pvp.razor">combat/pvp.razor</a>의 <code>config__pvp_preset = 2</code>로
+공통 <a href="pvp.html#05.E">PvP 자기관리 루프</a>의 붕대 mage 설정을 사용한다.
+채집 enhanced를 멈추고 <code>Play Script: combat\pvp</code>에 연결한 별도 핫키로 전환한다.
+이전 템플릿별 PvP 파일은 삭제했고 본문 하나에서 설정한다.</p>
 
-<h3 id="09.A">09.A 동작 순서</h3>
-<ol>
-<li><code>ljp_</code> 접두의 설정·타이머·상태를 만들고 enhanced의 해독·붕대·포션·회복 흐름을 전투용으로 옮긴다.
-Warmode ON에서도 회복한다. 기존 시전·커서가 있으면 해독·붕대·포션·장착·공격을 보류한다. 마비 파우치는 별도다.</li>
-<li>사용자가 고른 Last Target에서 허용한 noto의 대상을 serial로 저장한다. 매 패스 생존·noto·거리와 수동 대상 변경을 확인한다.
-Warmode를 자동으로 바꾸지 않고 ON에서만 새 공격 요청을 보낸다.</li>
-<li>손 슬롯으로 도끼 장착을 확인한다. 새 스윙을 관찰할 수 있으면 첫 Great Axe 요청 뒤 Norse Axe 압박으로 전환한다.
-첫 접촉부터 스윙 바가 켜져 있으면 Norse로 바로 넘어간다. Hamstring은 새 모드 응답을 확인하며 한 번 준비한다.</li>
-<li>근접 밖 6타일 이내에서 선택한 짧은 주문 한 번을 사용한다. MA는 마나 24, Harm은 26부터 시작한다.
-시전 뒤 대상 변경·사망·거리 이탈·긴급 HP·Warmode OFF를 다시 확인한다. TK·폭발 포션·Teleport·Rope는 수동으로 남긴다.</li>
-<li>도끼가 없으면 <code>[ axe, out ]</code>, 대상을 벗어나면 <code>[ target, out ]</code>로 알린다.
-제한된 주문 폴링 뒤에도 결과를 알 수 없으면 <code>[ cast, check ]</code>로 멈춰 늦게 뜬 커서를 다음 행동에 재사용하지 않는다.</li>
-</ol>
+<h3 id="09.A">09.A 수동 공격과 자동 회복</h3>
+<p>Q 대상 선택·Tab·근접 공격·Great Axe/Norse 교체·Hamstring·MA/Harm·TK·폭발 포션·Teleport·Rope는 수동이다.
+이전 noto 필터·거리 검색·상대 사망 조회·스윙 관찰·공격 재요청·Hamstring 준비·자동 견제는 제거했다.
+서버에 이미 남아 있는 자동공격·반격은 사용자가 제어한다.</p>
+<p>자동은 자기 파우치·큐어·힐·Refresh·Strength/Agility 포션, Healing이 있으면 붕대,
+큰 피해의 GH와 해독·붕대 부족 시 Heal이다. Warmode ON/OFF와 상대 선택 여부에 상관없이 자기 상태만 본다.
+수동 시전이나 커서가 있으면 자동 회복도 기다린다. 입력 경합의 한계는 공통 문서 05.E절을 따른다.</p>
 
-<p>Q로 <strong>화면 안의 전투 대상</strong>을 고르고 Tab으로 Warmode를 켠다. Warmode OFF에서는 새 공격 요청을 보내지 않고 회복·재장착을 유지한다.
-서버의 기존 자동공격·반격까지 스크립트가 종료시키는 것은 아니다. Last Target이 자기로 바뀌어도 저장한 상대를 유지하고,
-새 비우호 대상 선택은 갱신하되 우호·사망·허용하지 않은 noto 선택은 저장 대상을 비운다.</p>
-<p>noto와 거리 검색만으로 플레이어인지, LOS가 열렸는지, 근접 명중했는지 증명하지 못한다.
-<code>attack</code>은 전투 대상 요청이고 스윙을 강제로 만드는 명령이 아니다.
-따라서 새 공격 대상 지정은 공유 스윙 바 0을 기다리지 않는다. 첫 스윙 관찰만 바 0에서 준비하고 이후 양수 갱신을 본다.
-이 관찰도 Great Axe 명중·Hamstring 성공을 뜻하지 않으며, 다른 자동공격과 겹칠 수 있다.</p>
-<p>회복·견제 뒤에도 손 슬롯의 도끼 serial을 확인한다. Norse가 없으면 Hatchet, Great Axe 순으로 대체한다.
-근접 밖의 주문은 시작 직전 거리를 다시 보고, 시작 때 이동 바가 0이어야 한다. 자동 추격이나 이동 중 연속 시전은 하지 않는다.
-MA/Harm 바는 Wizardry 프록용이므로 PvP 인터럽트 시계로 쓰지 않는다
-(<a href="overheads.html#06.C">overheads.html</a> 06.C절). 견제의 10초 타이머는 이 루프의 요청 간격이며 서버의 서클별 제한과 다르다.</p>
+<h3 id="09.B">09.B 공통 설정</h3>
+<p>프리셋 2는 <code>config__pvp_magery = 1</code>·<code>config__pvp_bandage = 1</code>이다.
+RA·Reflect·시폰·버섯·Resist 포션의 자동 보충은 기본 OFF로 두어 회복 마나와 자원을 남긴다.
+무기 재장착도 기본 OFF다. 활성화하거나 임계값을 바꾸는 곳은 <code>combat/pvp.razor</code>의 CONFIG 하나다.</p>
+<p>Magery가 없는 템플릿은 프리셋 선택 뒤 <code>@setvar! config__pvp_magery 0</code>으로 끈다.
+무기 옵션은 <code>config__pvp_weapon_graphic</code>에 ID를 넣으면 양손이 비었을 때 그 무기를 재장착하는 기능이다.
+이미 든 도끼·방패·책은 교체하지 않는다. 스탯·회복 임계값·상태·타이머 표는 공통 문서 05.E절이 정본이다.</p>
 
-<h3 id="09.B">09.B 설정·상태·타이머</h3>
-<p>설정은 모두 <code>config__ljp_</code> 접두다. 아래 표에는 접두를 뺀 이름을 쓴다.
-기본값은 실전 최적값이 아니라 인게임에서 조정할 시작점이다.</p>
-<table>
-<thead><tr><th>설정</th><th>기본값과 용도</th></tr></thead>
-<tbody>
-<tr><td><code>chatty</code>, <code>attack_blue</code></td><td>1: 시작·대상 알림 / 0: innocent 자동 공격 제외.
-<code>friend</code> noto는 허용 목록에 넣지 않는다</td></tr>
-<tr><td><code>use_potions</code>, <code>use_stat_potions</code></td><td>각 1. 전자는 해독·힐·Refresh와 스탯 포션의 공통 사용 설정,
-후자는 Strength·Agility 자동 보충 설정이다</td></tr>
-<tr><td><code>use_burst_axe</code></td><td>1: 관찰 가능한 첫 Great Axe 단계 / 0: Norse 중심.
-스윙 바가 없거나 동작이 맞지 않으면 0으로 두고 Norse 중심으로 사용한다</td></tr>
-<tr><td><code>prepare_hamstring</code></td><td>1: 이번 실행에서 처음 확인되지 않은 모드를 최대 두 토글로 준비.
-이미 관찰한 OFF는 다시 켜지 않는다. 0이면 모드를 전부 수동으로 관리한다</td></tr>
-<tr><td><code>short_spell</code></td><td>1: MA / 2: 4타일 안 Harm 우선, 그 밖 MA / 0: 자동 공격 주문 제외</td></tr>
-<tr><td><code>sight_range</code>, <code>melee_range</code>, <code>harm_range</code>, <code>spell_range</code></td>
-<td>18 / 1 / 4 / 6타일. 클라이언트의 대상 검색·행동 시작 임계값이다</td></tr>
-<tr><td><code>heal_hits</code>, <code>emergency_hits</code>, <code>light_hits</code>, <code>refresh_stam</code></td>
-<td>부족한 HP 35: 힐 포션과 공격 보류 / 45: GH / 15: 붕대가 불가하면 Smart Heal, 새 공격 주문 보류.
-스태미나 15 이하: Refresh</td></tr>
-<tr><td><code>mana_heal</code>, <code>mana_cure</code>, <code>mana_greater_heal</code></td><td>4 / 6 / 11부터 회복 에이전트 요청.
-회복은 공격용 예약 마나도 사용할 수 있다</td></tr>
-<tr><td><code>mana_magic_arrow</code>, <code>mana_harm</code></td><td>24 / 26. 04절의 GH + Teleport 예약 20에 주문 비용을 더했다.
-다른 수동 시전으로 예약량이 줄어드는 것까지 막지는 않는다</td></tr>
-<tr><td><code>great_axe_graphic</code>, <code>norse_axe_graphic</code></td><td>31190 / 31128.
-Great Axe의 실제 라벨은 <code>giant axe</code>로 검색한다. 아이템 정본은 <a href="item-list.html#29">item-list.html</a> 29절</td></tr>
-</tbody>
-</table>
-<table>
-<thead><tr><th>추가 이름</th><th>역할</th></tr></thead>
-<tbody>
-<tr><td><code>var__ljp_target</code>, <code>target_ok</code>, <code>fresh_ok</code>, <code>engaged</code>, <code>near</code>, <code>spell_range</code></td>
-<td>저장 대상, noto·생존 재검증, 수동 대상 변경, 현재 검색 범위와 거리 분기.
-주문 시작·완료와 근접 요청 직전에 다시 검사한다</td></tr>
-<tr><td><code>var__ljp_weapon_kind</code>, <code>weapon_serial</code>, <code>wanted_weapon</code>, <code>weapon_ready</code></td>
-<td>0 없음 / 1 Great Axe / 2 Norse / 3 Hatchet, 실제 손의 serial, 원하는 도끼, 이번 패스의 장착 확인.
-Hamstring 응답을 기다린 뒤에도 같은 serial을 다시 확인한다</td></tr>
-<tr><td><code>var__ljp_burst_armed</code>, <code>burst_done</code></td>
-<td>바 0에서 Great Axe 요청을 보낼 준비와 첫 단계 종료. 종료는 바 갱신 관찰·처음부터 활성 바·Great Axe 부재를 포함한다.
-성공이나 명중 플래그가 아니다</td></tr>
-<tr><td><code>var__ljp_hams_mode</code>, <code>hams_prepared</code>, <code>hams_response</code></td>
-<td>0 미확인 / 1 ON / 2 OFF, 이번 실행의 자동 준비 시도, 새 응답 확인.
-회복 끊김·시약 부족 메시지를 소비하기 전에 모드 안내를 먼저 읽는다. 실제 Hamstring 성공 알림은 프로필이 담당한다</td></tr>
-<tr><td><code>var__ljp_bandage_ok</code>, <code>heal_spell</code>, <code>poke_spell</code>, <code>cast_target</code>, <code>cast_ready</code>, <code>cast_cut</code></td>
-<td>붕대 보유, 요청할 회복과 짧은 주문, 이번 시전 대상·커서 확인·취소 또는 끊김.
-회복·공격 성공을 추측하는 플래그가 아니다</td></tr>
-<tr><td><code>var__ljp_regs_*</code>, <code>garlic</code>, <code>ginseng</code>, <code>mandrake</code>, <code>ash</code>, <code>silk</code>, <code>nightshade</code></td>
-<td>30초 또는 시약 부족 안내 때 읽는 재료와 주문별 조합. 매 패스 여섯 재료를 다시 검색하지 않는다</td></tr>
-<tr><td><code>alias__ljp_*</code>, <code>label__ljp_*</code></td>
-<td>대상·손 슬롯·백팩 무기·힐 포션 라벨. 검색 블록 안에서만 alias를 쓰고 저장할 serial은 상태 변수로 복사한다</td></tr>
-</tbody>
-</table>
-<p>상태 이름도 축약한 곳은 모두 <code>var__ljp_</code> 접두다.
-<code>timer__ljp_*</code>는 메시지 3초, 붕대 재시도 1.2초, 각 포션 재시도 1초, 회복 2.5초,
-시약 30초, 스탯 포션 점검 5초, 장비 점검 1초, 공격 대상 요청 1.5초, 견제 10초로 나눴다.
-견제 타이머만 재실행 때 보존한다. 대응하는 <code>cooldown__ljp_*</code>는 요청 간격이고 서버 쿨다운이 아니다.
-<code>wait__ljp_short</code> / <code>poll</code> / <code>cast</code>는 200 / 100 / 300ms다.</p>
-
-<h3 id="09.C">09.C 실행 준비와 인게임 확인</h3>
-<ol>
-<li>enhanced와 PvP를 서로 다른 스크립트 핫키에 연결한다. 먼저 기존 루프를 멈추고 전환한다.
-피격이나 TK 안내로 자동 전환하지 않는다. 실제 키 번호를 설정 파일에 추가한 것은 아니다.</li>
-<li>Great Axe·Norse Axe·Hatchet, 붕대·시약·포션을 준비한다. 08.D절의 회복·음용 핫키와 Interrupt·Cancel Current Target을 확인한다.</li>
-<li><code>heal pot</code>, <code>walk</code>, <code>weapon swing</code>, <code>hams, target</code> 바가 현재 캐릭터에서 동작하는지 확인한다.
-WeaponSwing 바의 표시 시간은 무기별 실제 공속을 증명하지 않는다. 없으면 첫 단계가 끝나지 않을 수 있으므로 <code>use_burst_axe = 0</code>으로 둔다.
-<code>hams, target</code>도 보수적인 클라이언트 표시이며 실제 서버 준비를 보장하지 않는다.</li>
-<li>자동 Hamstring 준비를 쓸 때는 Paperdoll → Help → Commands → Mechanics에서 <strong>Never Untoggle</strong>로 둔다.
-토글 접근과 자동 해제 옵션은 <a href="pvp.html#03">pvp.html</a> 03절이 정본이다.
-스크립트 실행 전 모드는 알 수 없으므로 첫 요청이 OFF 응답이면 한 번 더 토글한다.
-직접 모드를 관리하려면 <code>prepare_hamstring = 0</code>으로 둔다.</li>
-</ol>
-<table>
-<thead><tr><th>상황</th><th>예상과 실패 판정</th></tr></thead>
-<tbody>
-<tr><td>대상 없이 실행, 적 선택, innocent·우호·사망 대상 선택</td>
-<td><code>[ pvp, on ]</code>, <code>[ target, pick ]</code>. 허용 대상은 <code>[ target, set ]</code> 705가 상대 위에 뜬다.
-허용하지 않은 새 대상은 <code>[ target, blocked ]</code> 후 저장 대상 해제. 자동으로 다른 상대를 찾아 공격하면 실패</td></tr>
-<tr><td>Tab OFF·ON, 전투 중 Q로 다른 적 선택, 자기 회복</td>
-<td>OFF에서 새 공격 요청 없이 회복한다. ON에서는 새 적으로 요청 대상을 갱신하고 자기 회복 뒤에도 저장한 적을 유지한다.
-스윙 바가 켜져 있다는 이유로 이전 적에게만 요청이 계속 남으면 실패. 화면 밖·안 대상과 기존 서버 자동공격은 별도로 확인한다</td></tr>
-<tr><td>Great Axe 시작, 이미 켜진 스윙 바, Norse·Hatchet 부족, 회복 후 손이 비어 있음</td>
-<td>새 바 갱신을 관찰할 때 GA → Norse. 처음부터 활성 바면 Norse부터 압박하며 바를 재설정하지 않는다.
-도끼가 없으면 <code>[ axe, out ]</code>. 확인 전 맨손으로 새 attack을 보내거나 장착만으로 명중 처리하면 실패</td></tr>
-<tr><td>Hamstring 초기 ON/OFF·자격 부족·수동 OFF·응답 없음</td>
-<td>새 ON/OFF 응답으로 준비한다. 읽어 둔 수동 OFF를 자동으로 다시 켜면 실패.
-응답이 없으면 <code>[ hams mode, check ]</code> 후 자동 토글을 반복하지 않는다.
-실제 성공·실패는 프로필의 <code>[ hams, target ]</code> / <code>[ hams, miss ]</code>를 본다</td></tr>
-<tr><td>독·큰 피해·마비, 붕대·포션·시약 부족</td>
-<td>해독과 회복이 공격보다 우선이다. 부족 알림은 08.D절과 같다.
-붕대 진행 중 계속 새로 쓰거나 포션 쿨 중 반복 음용하면 실패. Warmode ON에서도 큰 피해에 GH가 동작해야 한다</td></tr>
-<tr><td>MA/Harm 선택, 마나 23/24·25/26, 이동, 근접 진입</td>
-<td>예약 마나 아래에서는 새 공격 주문을 보류한다. 이동·근접에서 시작하지 않는다.
-Harm 선택 시 4타일 밖은 MA로 대체한다. 같은 서클을 고정 회전하거나 요청 실패 직후 연속 시전하면 실패</td></tr>
-<tr><td>견제 중 Q 변경·사망·noto 변경·거리 이탈·피해·Tab OFF·끊김·지연</td>
-<td>유효하지 않으면 해당 요청의 커서를 취소한다. HP가 크게 줄거나 OFF이면 시전을 끊고 회복으로 돌아간다.
-폴링 결과 불명은 <code>[ cast, check ]</code> 후 정지. 지연된 커서를 다음 공격에서 쓰면 실패.
-10초 안 재실행해도 견제 요청 제한을 초기화하지 않아야 한다</td></tr>
-<tr><td>이미 가진 수동 프리캐스트·포션 커서, 자체 회복·Hamstring 준비·견제 폴링 중 수동 입력</td>
-<td>기존 커서는 자동 행동에 쓰지 않아야 한다. 자체 요청 중 새 수동 커서·토글이 겹치면 소유권과 응답 귀속은 증명되지 않는다.
-힐 중 수동 Hamstring OFF 뒤 끊김 안내가 올 때 OFF를 지워 다시 켜는지도 시험한다.
-입력을 겹쳐 확인한 결과를 별도로 기록한다</td></tr>
-<tr><td>구조화 PvP·팩션 제한과 필드 Heat of Battle</td>
-<td>명령 제한에서는 <code>[ script, blocked ]</code> 후 정지한다. 필드 HoB만으로 같은 차단이 발생하면 구분 실패</td></tr>
-</tbody>
-</table>
-<p>두 파일은 정적 검사 대상이며 위 동작은 아직 인게임에서 확인되지 않았다. 남은 확인은
-<a href="open-items.html#10">open-items.html</a> 10절에 모았다.
-인게임 반영은 <a href="workflow.html#04.A">workflow.html</a> 04.A절대로 Scripts 탭 Reload all scripts 뒤 Play로 확인한다.
-외부 수정 파일을 핫키로 실행할 때는 클라이언트를 재시작하고, 종료 후 <code>git status --short</code>로 덮어쓰기를 확인한다.</p>
+<h3 id="09.C">09.C 인게임 반영과 확인</h3>
+<p>본문에서 프리셋을 2로 바꾼 뒤 Stop → Reload all scripts → <code>pvp</code> Play로
+<code>PvP sustain v1 loaded</code>와 <code>preset=2</code>·<code>magery=1</code>·<code>bandage=1</code>을 확인한다.
+Q로 alt를 선택해도 자동 공격이나 자동 TK가 나가지 않아야 한다. 피해·독에는 자기 회복이 동작해야 한다.</p>
+<p>새 공통 본문은 아직 인게임에서 확인되지 않았다.
+수동 프리캐스트·붕대·회복·옵션·정지 조건별 예상 알림과 실패 판정은 <a href="open-items.html#10">open-items.html</a> 10절에 모았다.
+외부 수정 후 기존 핫키로 실행할 때는 <a href="workflow.html#04.A">workflow.html</a> 04.A절대로 재시작하여 옛 캐시를 비운다.
+종료 후 <code>git status --short</code>로 덮어쓰기를 확인한다.</p>
 </main>

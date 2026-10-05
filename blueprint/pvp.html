@@ -569,9 +569,9 @@ another 30 seconds after that point)"</p>
 </table>
 <p>Razor의 <code>[ teleki, me ]</code>·<code>[ teleki, target ]</code>는 서버의 대상 확인 메시지와 구분한다.
 현재 <code>config/indian/classicuo/nomeehej/cooldowns.xml</code>의 target 바는 위 포션 안내로 켜지므로 자기 TK에도 반응할 수 있다.
-<code>script/combat/bard-necro-pvp.razor</code>의 BOMB 분기는 그 바를 적에게 부착 가능한 상태로 사용한다.</p>
+현재 PvP 루프는 TK와 포션 투척을 수동으로 남기며, 그 바를 자동 점화 조건으로 사용하지 않는다 (05.E절).</p>
 <p><strong>문서상 구현 주의점:</strong> 내 직전 TK의 대상·성공·대상 변경 추적은 필요하지만 그것만으로 충분하지 않다.
-상대 TK도 같은 안내를 만들 수 있다는 후속 관찰과 자동화 한계는 04.D절에 보완했다. 이번 작업은 스크립트·설정 수정이 아니다.</p>
+상대 TK도 같은 안내를 만들 수 있다는 후속 관찰과 자동화 한계는 04.D절에 보완했다.</p>
 <p>스크린샷만으로는 상대 Inscription·양측 버프·실제 포션 부착 결과까지 모두 알 수 없다.
 필요한 추가 확인은 <a href="open-items.html#08.A">open-items.html</a> 08.A절에 둔다.
 <strong>반사 발생과 Reflect 소진은 별개</strong>이며, 소진 판단은 05.A절을 따른다.</p>
@@ -849,6 +849,70 @@ Leather는 방어구 재생 페널티가 없다는 뜻이지 추가 재생 보�
 만마나에서 지나간 재생은 저장되지 않으며, 시전 비용·시점·장비 변경에 따라 실제 잔량은 달라진다.</p>
 <p>기본 최대 마나와 현재 마나도 구분한다. INT 45에서 Earth Elemental의 50마나 비용은 스크롤 성공률 보정만으로 해결되지 않는다.
 버프의 최대치 증가를 즉시 현재 마나 회복으로 간주하지 않는다. 예산의 적용은 <a href="lumberjack-pvp-handbook.html#04">벌목 핸드북 04절</a>.</p>
+
+<h3 id="05.E">05.E 수동 공격과 공통 자기관리 루프</h3>
+<p>2026-10-05 공격은 수동으로 두고 자기관리만 공통 <a href="../script/combat/pvp.razor">combat/pvp.razor</a>로 모았다.
+mage와 dexxer-mage는 별도 전투 알고리즘 대신 Magery·붕대·버프·재장착 설정으로 구분한다.
+상대의 serial·색·거리·사망을 조회하지 않으므로 플레이어 <code>find</code> 실패가 회복을 막지 않는다.</p>
+<p>TK, MA/Harm·Explosion/EB 등 공격 주문, 폭발 포션, 소환수 공격, Hamstring, 공격 대상 지정과 무기 교체는 수동이다.
+자동은 자기 파우치·포션·붕대·Cure/Heal/GH·선택한 자기 버프·버섯뿐이다.
+시폰을 켠 경우의 Magic Arrow는 자기에게만 보낸다. Magery를 끄면 이 주문을 포함한 모든 자동 시전을 끈다.</p>
+<table>
+<thead><tr><th>실행 파일</th><th>설정 선택</th></tr></thead>
+<tbody>
+<tr><td><code>combat/pvp</code></td><td>본문의 <code>config__pvp_preset</code>. 1: mage / 2: 붕대 mage. 기본 1</td></tr>
+</tbody>
+</table>
+<p>이전 두 템플릿별 PvP 파일은 삭제했다. 다른 스크립트의 프리셋 요청을 읽지 않고 이 파일의 설정만 사용한다.
+기존 PvP 핫키는 Razor에서 <code>Play Script: combat\pvp</code>로 다시 연결한다.
+현재 클라이언트에서 새 공통 본문의 실행은 아직 인게임에서 확인되지 않았다.</p>
+
+<h4>설정</h4>
+<p>아래 이름은 <code>config__pvp_</code> 접두를 생략했다. 모두 공통 본문의 CONFIG에서 조정한다.
+프리셋 기본값은 위쪽에서 선택하고, 개인 변경은 <code>Personal overrides go here</code> 주석 뒤에
+<code>@setvar! config__pvp_magery 0</code> 같은 줄로 둔다. 재실행마다 기본값부터 다시 읽는다.</p>
+<table>
+<thead><tr><th>옵션</th><th>mage 1 / 붕대 mage 2</th><th>효과</th></tr></thead>
+<tbody>
+<tr><td><code>magery</code></td><td>1 / 1</td><td>자기 마법 회복과 선택한 버프. 0이면 모든 자동 마법 OFF</td></tr>
+<tr><td><code>bandage</code></td><td>0 / 1</td><td>Healing이 있고 피해·독이 있을 때 자기 붕대. 작은 피해는 붕대를 우선</td></tr>
+<tr><td><code>reactive</code>, <code>reflect</code>, <code>siphon</code></td><td>각 1 / 각 0</td>
+<td>RA·Reflect·자기 Magic Arrow. Reflect가 있으면 시폰용 화살 보류</td></tr>
+<tr><td><code>mushroom</code>, <code>resist_potion</code></td><td>각 1 / 각 0</td><td>버섯과 Magic Resist 포션의 자동 보충</td></tr>
+<tr><td><code>potions</code>, <code>stat_potions</code></td><td>각 1 / 각 1</td>
+<td>해독·힐·Refresh·스탯 포션의 공통 스위치와 Strength·Agility·선택한 Resist 포션의 스위치</td></tr>
+<tr><td><code>weapon_graphic</code></td><td>0 / 0</td>
+<td>0은 장착 수동. ID를 넣으면 양손 슬롯이 모두 비었을 때 배낭에서 그 무기를 재장착. 이미 든 무기·방패·책은 교체하지 않음</td></tr>
+<tr><td><code>heal_hits</code>, <code>emergency_hits</code>, <code>light_hits</code></td><td>35 / 45 / 15</td>
+<td>최대 HP 대비 손실량. 힐 포션 / GH / 붕대가 없거나 비활성일 때 Heal</td></tr>
+<tr><td><code>refresh_stam</code>, <code>mushroom_mana</code></td><td>15 / 45</td><td>현재 STA·마나가 이 값 이하일 때 보충</td></tr>
+<tr><td><code>chatty</code></td><td>1 / 1</td><td>시작 시 적용된 프리셋·Magery·붕대·무기 ID 출력</td></tr>
+</tbody>
+</table>
+<p>무기 옵션에는 개인 serial 대신 <a href="item-list.html">item-list.html</a>의 graphic ID만 넣는다.
+자동 도끼 교체·스윙 관찰·Hamstring 토글은 없으며, 무기 종류로 Magery나 회복 정책을 추측하지 않는다.</p>
+
+<h4>시전과 커서</h4>
+<p>시작 4줄의 일괄 초기화는 이 루프에서 생략한다. 시작 전에 보유한 타깃·시전·아이템 큐를 보존하기 위한 예외다.
+<code>casting</code>·<code>targetexists</code>·<code>queued</code>·은신 중에는 모든 자동 행동을 보류한다.
+따라서 공격 프리캐스트나 포션 커서를 들고 있으면 파우치·회복도 기다린다. 긴급 회복이 필요하면 사용자가 커서를 취소한다.</p>
+<p>한 패스에 한 행동을 요청하고 다시 수동 입력 가드를 본다. 자동 시전은 정지한 상태에서 시작하며,
+자기 주문의 커서에만 <code>Target Self</code>를 요청한다. 결과가 60회 폴링 안에 나오지 않으면
+<code>[ cast, check ]</code> 후 정지하고 커서를 남겨 둔다. 커서가 닫혔다는 이유로 공격 후속을 시작하지 않는다.</p>
+<p>시작 전에 있던 수동 커서를 기다리는 조건과, 자동 시전 도중 새 수동 입력이 끼어드는 경우는 구분한다.
+<code>targetexists</code>는 커서 소유자를 알려 주지 않는다. 자동 자기 시전 중 새 주문을 시작할 때는 먼저 Razor Stop을 사용한다.
+겹친 입력·지연된 응답에서의 귀속은 아직 인게임에서 확인되지 않았다.</p>
+
+<h4>상태·타이머와 확인</h4>
+<p>설정·상태는 <code>config__pvp_</code>·<code>var__pvp_</code>로 모았다. 상태는 자기 시약·붕대·선택한 자기 주문·폴링 결과·손 슬롯만 둔다.
+이전 <code>var__target</code>·<code>var__armed</code>·덤프 대상과 <code>var__ljp_</code>의 상대·거리·공격·Hamstring 상태는 사용하지 않는다.
+Razor 세션에 남은 옛 값과 타이머를 삭제하는 작업은 하지 않는다.</p>
+<p><code>timer__pvp_</code> 접두로 pouch·cure_potion·bandage·heal_potion·refresh·weapon은 1.2초 재시도,
+heal은 2.5초, buff·mushroom·stats는 5초, message는 3초, reagents는 30초다.
+이 간격은 요청 제한이며 서버 성공·쿨다운 완료를 증명하지 않는다. 힐 포션은 별도로 <code>heal pot</code> 바와 자기 포션 라벨을 본다.
+재실행은 시약 읽기만 앞당기며 행동 재시도 타이머는 유지한다.</p>
+<p>필드 자기관리용이다. 구조화 PvP·팩션의 <code>pvp</code> 제한이 활성화되면 <code>[ script, blocked ]</code> 후 정지한다.
+정적 검사는 실행 성공을 증명하지 않는다. 새 공통 루프의 인게임 확인은 <a href="open-items.html#10">open-items.html</a> 10절이다.</p>
 
 <h2 id="06">06 소환수로 싸울 때</h2>
 
