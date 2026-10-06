@@ -51,10 +51,10 @@
 #
 # Overhead policy
 #   Every message is "[ subject, state ]" in lowercase, see blueprint/overheads.html for the words and the hue palette.
-#     90  status and information, suppressed by config__chatty
-#     53  warning, something is missing, wrong or running out
-#     55  a prompt waiting on the player
-#     118 / 83  a necro ability or a magery spell going out, subject only, the hue is the state
+#     290 status and information, suppressed by config__chatty
+#     254 warning, something is missing, wrong or running out
+#     255 a prompt waiting on the player
+#     219 / 284  a necro ability or a magery spell going out, subject only, the hue is the state
 #   A resource problem leads with the noun so it reads at a glance. No exclamation marks.
 #
 # System message buffer
@@ -184,7 +184,7 @@ clearignore
 # Potions are consumables. Turn this off when farming somewhere that does not need them.
 @setvar! config__use_potion 1
 
-# 1 narrates what the script is doing, 0 keeps it quiet. Covers every 90 hue line: target
+# 1 narrates what the script is doing, 0 keeps it quiet. Covers every 290 hue line: target
 # changes, gold dropped, and every cast cut short for a heal, named by spell.
 # A cast the server disturbs is not reported here: the profile's "[ cast, disturbed ]"
 # overhead already says so, the script only consumes the line. Warnings and errors ignore
@@ -584,7 +584,7 @@ endif
 # If auto detect found nothing, ask for a manual pick exactly once. A barding script with
 # no instrument has nothing to do, so a failed pick stops rather than limping on.
 if not find var__my_instrument backpack
-    overhead "[ inst, pick ]" 55
+    overhead "[ inst, pick ]" 255
     @setvar! var__my_instrument
     wait wait__long
 
@@ -592,15 +592,15 @@ if not find var__my_instrument backpack
         getlabel alias__picked_instrument label__picked_instrument
 
         if "flute" in label__picked_instrument or "drums" in label__picked_instrument or "harp" in label__picked_instrument or "lute" in label__picked_instrument or "tambourine" in label__picked_instrument or "gemshorn" in label__picked_instrument or "hurdy" in label__picked_instrument or "psaltery" in label__picked_instrument or "sackbut" in label__picked_instrument or "shawm" in label__picked_instrument or "vielle" in label__picked_instrument
-            overhead "[ inst, {{label__picked_instrument}} ]" 55
+            overhead "[ inst, {{label__picked_instrument}} ]" 255
         else
             @setvar! var__my_instrument 0
-            overhead "[ inst, wrong ]" 53
+            overhead "[ inst, wrong ]" 254
             stop
         endif
     else
         @setvar! var__my_instrument 0
-        overhead "[ inst, out ]" 53
+        overhead "[ inst, out ]" 254
         stop
     endif
 endif
@@ -616,11 +616,11 @@ if config__use_herding = 1
         dclick alias__crook
         wait wait__short
     else
-        overhead "[ crook, out ]" 53
+        overhead "[ crook, out ]" 254
     endif
 endif
 
-overhead "[ bard necro, on ]" 90
+overhead "[ bard necro, on ]" 290
 
 while not dead
     # Let anything already in flight finish before the pass reads state. Both reference
@@ -646,7 +646,7 @@ while not dead
                 yell "[Pouch"
                 wait wait__short
             elseif timer "timer__message" >= cooldown__message
-                overhead "[ pouch, out ]" 53
+                overhead "[ pouch, out ]" 254
                 settimer "timer__message" 0
             endif
         endif
@@ -664,7 +664,7 @@ while not dead
                     wait wait__short
                 else
                     if timer "timer__message" >= cooldown__message
-                        overhead "[ cure pot, out ]" 53
+                        overhead "[ cure pot, out ]" 254
                         settimer "timer__message" 0
                     endif
 
@@ -756,7 +756,7 @@ while not dead
                     endif
                 else
                     if timer "timer__message" >= cooldown__message
-                        overhead "[ heal pot, out ]" 53
+                        overhead "[ heal pot, out ]" 254
                         settimer "timer__message" 0
                     endif
 
@@ -816,7 +816,7 @@ while not dead
                 settimer "timer__target_grace" 0
 
                 if config__chatty = 1
-                    overhead "[ target, set ]" 705 var__combat_target
+                    overhead "[ target, set ]" 1288 var__combat_target
                 endif
             endif
         endif
@@ -1135,10 +1135,10 @@ while not dead
                     @setvar! var__instrument_ok 1
 
                     if config__chatty = 1
-                        overhead "[ inst, set ]" 90
+                        overhead "[ inst, set ]" 290
                     endif
                 elseif timer "timer__message" >= cooldown__message
-                    overhead "[ inst, out ]" 53
+                    overhead "[ inst, out ]" 254
                     settimer "timer__message" 0
                 endif
             endif
@@ -1178,11 +1178,11 @@ while not dead
                     wait wait__long
 
                     if config__chatty = 1
-                        overhead "[ gold, dropped ]" 90
+                        overhead "[ gold, dropped ]" 290
                     endif
                 else
                     if timer "timer__message" >= cooldown__message
-                        overhead "[ weight, over ]" 53
+                        overhead "[ weight, over ]" 254
                         settimer "timer__message" 0
                     endif
 
@@ -1202,7 +1202,7 @@ while not dead
                     hotkey 'Drink Refresh'
                     wait wait__short
                 elseif timer "timer__message" >= cooldown__message
-                    overhead "[ refresh, out ]" 53
+                    overhead "[ refresh, out ]" 254
                     settimer "timer__message" 0
                 endif
             endif
@@ -1243,7 +1243,7 @@ while not dead
                         yell '[necromancyhotbar'
                         waitforgump 622436516 wait__target
                     elseif timer "timer__message" >= cooldown__message
-                        overhead "[ necro book, out ]" 53
+                        overhead "[ necro book, out ]" 254
                         settimer "timer__message" 0
                     endif
                 endif
@@ -1267,7 +1267,7 @@ while not dead
                         hotkey 'Drink Strength'
                         wait wait__short
                     elseif timer "timer__message" >= cooldown__message
-                        overhead "[ str, out ]" 53
+                        overhead "[ str, out ]" 254
                         settimer "timer__message" 0
                     endif
                 endif
@@ -1277,7 +1277,7 @@ while not dead
                         hotkey 'Drink Agility'
                         wait wait__short
                     elseif timer "timer__message" >= cooldown__message
-                        overhead "[ agi, out ]" 53
+                        overhead "[ agi, out ]" 254
                         settimer "timer__message" 0
                     endif
                 endif
@@ -1287,7 +1287,7 @@ while not dead
                         hotkey 'Drink Magic Resist'
                         wait wait__short
                     elseif timer "timer__message" >= cooldown__message
-                        overhead "[ resist, out ]" 53
+                        overhead "[ resist, out ]" 254
                         settimer "timer__message" 0
                     endif
                 endif
@@ -1398,7 +1398,7 @@ while not dead
                         @rename var__fresh_summon summon_name
 
                         if config__chatty = 1
-                            overhead "[ name, {{summon_name}} ]" 9 var__fresh_summon
+                            overhead "[ name, {{summon_name}} ]" 209 var__fresh_summon
                         endif
                     endif
                 endfor
@@ -1500,7 +1500,7 @@ while not dead
 
                                 if find var__combat_target ground -1 -1 config__target_range as alias__disco_target
                                     if config__chatty = 1
-                                        overhead "[ target, set ]" 705 var__combat_target
+                                        overhead "[ target, set ]" 1288 var__combat_target
                                     endif
                                 endif
                             endif
@@ -1570,7 +1570,7 @@ while not dead
 
                                 if find var__combat_target ground -1 -1 config__target_range as alias__peace_target
                                     if config__chatty = 1
-                                        overhead "[ target, set ]" 705 var__combat_target
+                                        overhead "[ target, set ]" 1288 var__combat_target
                                     endif
                                 endif
                             endif
@@ -1626,7 +1626,7 @@ while not dead
                 @setvar! var__symbols_spent 1
 
                 if config__chatty = 1
-                    overhead "[ blood oath ]" 118
+                    overhead "[ blood oath ]" 219
                 endif
             elseif insysmsg "seconds before you may use that ability again."
                 settimer "timer__blood_oath" 0
@@ -1640,7 +1640,7 @@ while not dead
                 @setvar! var__symbols_spent 1
 
                 if config__chatty = 1
-                    overhead "[ corpse skin ]" 118
+                    overhead "[ corpse skin ]" 219
                 endif
             elseif insysmsg "seconds before you may use that ability again."
                 settimer "timer__corpse_skin" 0
@@ -1654,7 +1654,7 @@ while not dead
                 @setvar! var__symbols_spent 1
 
                 if config__chatty = 1
-                    overhead "[ evil omen ]" 118
+                    overhead "[ evil omen ]" 219
                 endif
             elseif insysmsg "seconds before you may use that ability again."
                 settimer "timer__evil_omen" 0
@@ -1695,7 +1695,7 @@ while not dead
 
                     if config__interrupt_to_heal = 1 and diffhits >= config__emergency_hits
                         if config__chatty = 1
-                            overhead "[ drain, cut ]" 53
+                            overhead "[ drain, cut ]" 254
                         endif
 
                         hotkey "> Interrupt"
@@ -1714,7 +1714,7 @@ while not dead
 
                                 if find var__combat_target ground -1 -1 config__target_range as alias__opener_target
                                     if config__chatty = 1
-                                        overhead "[ target, set ]" 705 var__combat_target
+                                        overhead "[ target, set ]" 1288 var__combat_target
                                     endif
                                 endif
                             endif
@@ -1752,7 +1752,7 @@ while not dead
 
                     if config__interrupt_to_heal = 1 and diffhits >= config__emergency_hits
                         if config__chatty = 1
-                            overhead "[ curse, cut ]" 53
+                            overhead "[ curse, cut ]" 254
                         endif
 
                         hotkey "> Interrupt"
@@ -1771,7 +1771,7 @@ while not dead
 
                                 if find var__combat_target ground -1 -1 config__target_range as alias__opener_target
                                     if config__chatty = 1
-                                        overhead "[ target, set ]" 705 var__combat_target
+                                        overhead "[ target, set ]" 1288 var__combat_target
                                     endif
                                 endif
                             endif
@@ -1847,7 +1847,7 @@ while not dead
 
                     if config__interrupt_to_heal = 1 and diffhits >= config__emergency_hits
                         if config__chatty = 1
-                            overhead "[ magic arrow, cut ]" 53
+                            overhead "[ magic arrow, cut ]" 254
                         endif
 
                         hotkey "> Interrupt"
@@ -1866,7 +1866,7 @@ while not dead
 
                                 if find var__combat_target ground -1 -1 config__target_range as alias__proc_target
                                     if config__chatty = 1
-                                        overhead "[ target, set ]" 705 var__combat_target
+                                        overhead "[ target, set ]" 1288 var__combat_target
                                     endif
                                 endif
                             endif
@@ -1898,7 +1898,7 @@ while not dead
 
                     if config__interrupt_to_heal = 1 and diffhits >= config__emergency_hits
                         if config__chatty = 1
-                            overhead "[ harm, cut ]" 53
+                            overhead "[ harm, cut ]" 254
                         endif
 
                         hotkey "> Interrupt"
@@ -1917,7 +1917,7 @@ while not dead
 
                                 if find var__combat_target ground -1 -1 config__target_range as alias__proc_target
                                     if config__chatty = 1
-                                        overhead "[ target, set ]" 705 var__combat_target
+                                        overhead "[ target, set ]" 1288 var__combat_target
                                     endif
                                 endif
                             endif
@@ -1949,7 +1949,7 @@ while not dead
 
                     if config__interrupt_to_heal = 1 and diffhits >= config__emergency_hits
                         if config__chatty = 1
-                            overhead "[ fireball, cut ]" 53
+                            overhead "[ fireball, cut ]" 254
                         endif
 
                         hotkey "> Interrupt"
@@ -1968,7 +1968,7 @@ while not dead
 
                                 if find var__combat_target ground -1 -1 config__target_range as alias__proc_target
                                     if config__chatty = 1
-                                        overhead "[ target, set ]" 705 var__combat_target
+                                        overhead "[ target, set ]" 1288 var__combat_target
                                     endif
                                 endif
                             endif
@@ -2000,7 +2000,7 @@ while not dead
 
                     if config__interrupt_to_heal = 1 and diffhits >= config__emergency_hits
                         if config__chatty = 1
-                            overhead "[ lightning, cut ]" 53
+                            overhead "[ lightning, cut ]" 254
                         endif
 
                         hotkey "> Interrupt"
@@ -2019,7 +2019,7 @@ while not dead
 
                                 if find var__combat_target ground -1 -1 config__target_range as alias__proc_target
                                     if config__chatty = 1
-                                        overhead "[ target, set ]" 705 var__combat_target
+                                        overhead "[ target, set ]" 1288 var__combat_target
                                     endif
                                 endif
                             endif
@@ -2094,7 +2094,7 @@ while not dead
 
                     if config__interrupt_to_heal = 1 and diffhits >= config__emergency_hits
                         if config__chatty = 1
-                            overhead "[ eb, cut ]" 53
+                            overhead "[ eb, cut ]" 254
                         endif
 
                         hotkey "> Interrupt"
@@ -2113,7 +2113,7 @@ while not dead
 
                                 if find var__combat_target ground -1 -1 config__target_range as alias__filler_target
                                     if config__chatty = 1
-                                        overhead "[ target, set ]" 705 var__combat_target
+                                        overhead "[ target, set ]" 1288 var__combat_target
                                     endif
                                 endif
                             endif
@@ -2171,7 +2171,7 @@ while not dead
 
                                 if find var__combat_target ground -1 -1 config__target_range as alias__strike_target
                                     if config__chatty = 1
-                                        overhead "[ target, set ]" 705 var__combat_target
+                                        overhead "[ target, set ]" 1288 var__combat_target
                                     endif
                                 endif
                             endif
@@ -2189,7 +2189,7 @@ while not dead
                             settimer "timer__poison_strike" 0
 
                             if config__chatty = 1
-                                overhead "[ poison strike ]" 118
+                                overhead "[ poison strike ]" 219
                             endif
                         elseif insysmsg "seconds before you may use that ability again."
                             settimer "timer__poison_strike" 0
@@ -2427,7 +2427,7 @@ while not dead
                             settimer "timer__vampiric_embrace" 0
 
                             if config__chatty = 1
-                                overhead "[ vampiric embrace ]" 118
+                                overhead "[ vampiric embrace ]" 219
                             endif
                         elseif insysmsg "seconds before you may use that ability again."
                             settimer "timer__vampiric_embrace" 0

@@ -6,7 +6,7 @@
 # Stop before starting another manual spell during an automatic self cast.
 
 if pvp
-    overhead "[ script, blocked ]" 53
+    overhead "[ script, blocked ]" 254
     stop
 endif
 
@@ -115,7 +115,7 @@ endif
 @setvar! var__cached_weapon_graphic 0
 @setvar! var__cached_weapon_serial 0
 
-overhead "[ pvp, on ]" 90
+overhead "[ pvp, on ]" 290
 if config__chatty = 1
     sysmsg "PvP sustain v5 loaded. Manual offense, recovery first. Interrupt={{config__interrupt_to_heal}}." 90
 endif
@@ -125,7 +125,7 @@ endif
 # ####################################################################################
 while not dead
     if pvp
-        overhead "[ script, blocked ]" 53
+        overhead "[ script, blocked ]" 254
         stop
     endif
     if not hidden and not queued
@@ -190,7 +190,7 @@ while not dead
                     if findtype 3617 self
                         @setvar! var__selected_item 4
                     elseif timer "timer__pvp_message" >= cooldown__message
-                        overhead "[ bandage, out ]" 53
+                        overhead "[ bandage, out ]" 254
                         settimer "timer__pvp_message" 0
                     endif
                 endif
@@ -208,7 +208,7 @@ while not dead
             if var__selected_item = 1 or var__selected_item = 2 or var__selected_item = 3 or var__selected_self_spell != 0
                 if casting or targetexists
                     if config__chatty = 1
-                        overhead "[ cast, cut ]" 53
+                        overhead "[ cast, cut ]" 254
                     endif
                     if casting
                         hotkey "> Interrupt"
@@ -297,7 +297,7 @@ while not dead
                     endif
                     if targetexists
                         if var__selected_self_spell = 4 or var__selected_self_spell = 5 or not targetexists "beneficial"
-                            overhead "[ cast, check ]" 55
+                            overhead "[ cast, check ]" 255
                             stop
                         endif
                         hotkey "Target Self"
@@ -317,7 +317,7 @@ while not dead
                     endif
                 endwhile
                 if var__cast_wait_finished = 0
-                    overhead "[ cast, check ]" 55
+                    overhead "[ cast, check ]" 255
                     stop
                 endif
                 wait wait__action

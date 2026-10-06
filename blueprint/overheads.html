@@ -15,8 +15,8 @@
 스크립트 모양은 <a href="conventions.html">conventions.html</a>, 명령 문법은 <a href="razor.html">razor.html</a>에 있다.</p>
 <ul>
 <li>설정 파일은 게임을 끈 상태에서만 고친다 (<a href="workflow.html#04.C">workflow.html</a> 04.C절).</li>
-<li>외부 출처 스크립트 (<code>loot/recycle</code> <code>loot/bank-pouch</code> <code>train/barding</code> <code>train/carto</code> <code>train/magery</code> <code>train/steal</code> <code>gather/*</code>
-<code>shelf/*</code>)는 이 형식을 따르지 않고 그대로 둔다.</li>
+<li>외부 출처 스크립트 (<code>loot/recycle</code> <code>loot/bank-pouch</code> <code>train/barding</code> <code>train/carto</code> <code>train/magery</code> <code>train/steal</code> <code>gather/mining</code>
+<code>gather/lumberjack</code> <code>shelf/*</code>)는 이 형식을 따르지 않고 그대로 둔다.</li>
 </ul>
 
 <h2 id="00">00 한눈에</h2>
@@ -134,7 +134,7 @@
 </tr>
 <tr>
 <td>여러 명 중 <strong>누구인지</strong>가 곧 정보인 것</td>
-<td>스크립트 <code>overhead "…" 705 &lt;serial&gt;</code>로 그 대상 머리 위에 (01.C)</td>
+<td>스크립트 <code>overhead "…" 1288 &lt;serial&gt;</code>로 그 대상 머리 위에 (01.C)</td>
 <td><code>[ target, set ]</code> <code>[ explo, on ]</code></td>
 </tr>
 </tbody>
@@ -155,7 +155,7 @@
 <h3 id="01.C">01.C 누구 머리 위에</h3>
 <ul>
 <li>스크립트 <code>overhead</code>는 셋째 인자에 serial을 주면 그 대상 머리 위에 뜬다.</li>
-<li>상대에 관한 줄 (<code>[ target, set ]</code>, 커서에 쥔 Explosion의 <code>[ explo, on ]</code>)은 상대 위에 hue 705로, 소환수에 붙인 이름 <code>[ name, nomeehei ]</code>는 그 소환수 위에 hue 9로 띄운다.</li>
+<li>상대에 관한 줄 (<code>[ target, set ]</code>, 커서에 쥔 Explosion의 <code>[ explo, on ]</code>)은 상대 위에 hue 1288로, 소환수에 붙인 이름 <code>[ name, nomeehei ]</code>는 그 소환수 위에 hue 209로 띄운다.</li>
 <li>나머지는 내 위에 띄운다. 프로필 오버헤드는 항상 내 위다.</li>
 </ul>
 
@@ -184,7 +184,7 @@
 </tr>
 <tr>
 <td>시전 알림</td>
-<td><code>[ blood oath ]</code>처럼 <strong>대상만</strong>. hue 118 / 83이 "지금 나간다"를 말하므로 상태가 필요 없다</td>
+<td><code>[ blood oath ]</code>처럼 <strong>대상만</strong>. hue 219 / 284가 "지금 나간다"를 말하므로 상태가 필요 없다</td>
 </tr>
 <tr>
 <td>값</td>
@@ -434,9 +434,32 @@
 <p><code>heal</code> <code>cure</code>는 주문 이름이라 포션은 <code>heal pot</code> <code>cure pot</code>으로 쓴다. 힘·민·레지 주문은 쓰지 않으니 포션도 <code>str</code> <code>agi</code> <code>resist</code> 그대로다.</p>
 
 <h2 id="05">05 hue 팔레트</h2>
-<p>색은 <strong>뜻</strong> 열이 정한다. 상태 단어 열은 그 뜻에 흔히 붙는 단어라서 같은 <code>on</code>이라도 나에게 걸린 <code>[ poison, on ]</code>은 33,
-정보인 <code>[ medi, on ]</code>은 90이다. 색은 <a href="https://outlands.uorazorscripts.com/hues">Razor 색표</a>에서 골랐고, 뜻이 다르면 색 계열도 다르게 했다.
+<p>색은 <strong>뜻</strong> 열이 정한다. 상태 단어 열은 그 뜻에 흔히 붙는 단어라서 같은 <code>on</code>이라도 나에게 걸린 <code>[ poison, on ]</code>은 234,
+정보인 <code>[ medi, on ]</code>은 290이다. 색은 <a href="https://outlands.uorazorscripts.com/hues">Razor 색표</a>에서 골랐고, 뜻이 다르면 색 계열도 다르게 했다.
 따뜻한 색은 전투, 차가운 색은 정보, 초록은 준비와 해제다.</p>
+<p>2026-10-07 사용자 요청으로 채도와 밝기를 한 단계 낮췄다. 색 값은 클라이언트 <code>hues.mul</code>에서 각 hue 색표의 맨 위 색 (index 31)을 읽었다.
+옛 표의 값과 이 방식이 맞는 것도 확인했다. UO hue 표는 100 단위 띠마다 같은 색이 더 탁해지므로, 같은 색 계열을 +200 띠로 옮겨 채도 0.50~0.67, 밝기 0.87~0.90으로 맞췄다.</p>
+<table>
+<thead>
+<tr>
+<th>옛 hue</th>
+<th>새 hue</th>
+<th>옛 hue</th>
+<th>새 hue</th>
+</tr>
+</thead>
+<tbody>
+<tr><td>33 <code>#ee0031</code></td><td>234 <code>#de4a6a</code></td><td>9 <code>#6a31ee</code></td><td>209 <code>#734ade</code></td></tr>
+<tr><td>43 <code>#ee6200</code></td><td>244 <code>#de834a</code></td><td>118 <code>#c510de</code></td><td>219 <code>#cd4ade</code></td></tr>
+<tr><td>53 <code>#eeee00</code></td><td>254 <code>#dede4a</code></td><td>83 <code>#00eebd</code></td><td>284 <code>#4adebd</code></td></tr>
+<tr><td>90 <code>#62e6f6</code></td><td>290 <code>#73d5e6</code></td><td>55 <code>#f6f662</code></td><td>255 <code>#e6e673</code></td></tr>
+<tr><td>68 <code>#18ee00</code></td><td>269 <code>#5ade4a</code></td><td>123 <code>#de10b4</code></td><td>224 <code>#de4abd</code></td></tr>
+<tr><td>65 <code>#9cf662</code></td><td>265 <code>#a4e673</code></td><td>705 <code>#9c9cbd</code></td><td>1288 <code>#ff0008</code></td></tr>
+</tbody>
+</table>
+<p>상대 머리 위 표시만은 반대로 갔다. 회보라 705가 잘 안 보인다는 사용자 보고로 선명한 빨강 1288로 바꿨다.
+1288은 외부 출처 벌목·채광 스크립트가 이미 오버헤드에 쓰는 hue다. 내 머리 위 234와는 뜨는 자리와 채도가 달라 섞이지 않는다.</p>
+<p>쿨다운 바의 hue (<code>cooldowns.xml</code>)는 이 팔레트와 따로이며 이번에 바꾸지 않았다.</p>
 <table>
 <thead>
 <tr>
@@ -449,86 +472,86 @@
 </thead>
 <tbody>
 <tr>
-<td>33</td>
-<td>진홍 <code>#e80030</code></td>
+<td>234</td>
+<td>진홍 <code>#de4a6a</code></td>
 <td><strong>나에게 걸린 것</strong>, 지금 손써야 하는 것</td>
 <td><code>me</code>, 나쁜 효과의 <code>on</code>, 바닥이 보이는 카운터</td>
 <td><code>[ hams, me ]</code> <code>[ teleki, me ]</code> <code>[ poison, on ]</code> <code>[ throws, 0 ]</code></td>
 </tr>
 <tr>
-<td>43</td>
-<td>주황 <code>#e86000</code></td>
+<td>244</td>
+<td>주황 <code>#de834a</code></td>
 <td><strong>내 공격·스킬이 먹힘</strong></td>
 <td><code>target</code> <code>area</code></td>
 <td><code>[ disco, target ]</code> <code>[ fireball, target ]</code> <code>[ bleed, target ]</code></td>
 </tr>
 <tr>
-<td>53</td>
-<td>노랑 <code>#e8e800</code></td>
+<td>254</td>
+<td>노랑 <code>#dede4a</code></td>
 <td>경고. 실패, 막힘, 재고 없음, 버프 빠짐. 스크립트를 멈추게 하는 <code>out</code>도 여기에 든다</td>
 <td><code>miss</code> <code>wrong</code> <code>out</code> <code>disturbed</code> <code>cut</code> <code>over</code> <code>blocked</code>, 버프의 <code>off</code></td>
 <td><code>[ hams, miss ]</code> <code>[ heal pot, out ]</code> <code>[ reflect, off ]</code> <code>[ wait, 4m ]</code></td>
 </tr>
 <tr>
-<td>90</td>
-<td>하늘 <code>#60e0f0</code></td>
+<td>290</td>
+<td>하늘 <code>#73d5e6</code></td>
 <td>정보, 카운터, 진행, 끝남. 스크립트에서는 <code>config__chatty</code>로 끈다</td>
 <td><code>on</code> 숫자 <code>refund</code> <code>set</code> <code>done</code></td>
 <td><code>[ unholy, 6/10 ]</code> <code>[ mana, refund ]</code> <code>[ lock, done ]</code> <code>[ var, set ]</code></td>
 </tr>
 <tr>
-<td>68</td>
-<td>초록 <code>#18e800</code></td>
+<td>269</td>
+<td>초록 <code>#5ade4a</code></td>
 <td>준비됨, 내 것 성공</td>
 <td><code>ready</code></td>
 <td><code>[ str, ready ]</code> <code>[ house, clear ]</code> <code>[ siphon, on ]</code></td>
 </tr>
 <tr>
-<td>65</td>
-<td>연두 <code>#98f060</code></td>
+<td>265</td>
+<td>연두 <code>#a4e673</code></td>
 <td>나쁜 것이 풀림</td>
 <td>나쁜 효과의 <code>off</code></td>
 <td><code>[ para, off ]</code> <code>[ poison, off ]</code> <code>[ hams, off ]</code></td>
 </tr>
 <tr>
-<td>9</td>
-<td>남보라 <code>#6830e8</code></td>
+<td>209</td>
+<td>남보라 <code>#734ade</code></td>
 <td>아군, 파티, 내 소환수</td>
 <td><code>coming</code> 붙인 이름</td>
 <td><code>[ heal, coming ]</code> <code>[ party, on ]</code> <code>[ name, nomeehei ]</code> (소환수 머리 위)</td>
 </tr>
 <tr>
-<td>118</td>
-<td>보라 <code>#c010d8</code></td>
+<td>219</td>
+<td>보라 <code>#cd4ade</code></td>
 <td>네크로 주문이나 무기 능력 시전 (대상만)</td>
 <td>—</td>
 <td><code>[ blood oath ]</code> <code>[ pummel ]</code></td>
 </tr>
 <tr>
-<td>83</td>
-<td>청록 <code>#00e8b8</code></td>
+<td>284</td>
+<td>청록 <code>#4adebd</code></td>
 <td>매저리 시전 (대상만). 지금 쓰는 줄은 없다. Drain / Curse는 프로필이 <code>[ drain, target ]</code> <code>[ curse, target ]</code>으로 띄운다</td>
 <td>—</td>
 <td><code>[ eb ]</code></td>
 </tr>
 <tr>
-<td>55</td>
-<td>연노랑 <code>#f0f060</code></td>
+<td>255</td>
+<td>연노랑 <code>#e6e673</code></td>
 <td>프롬프트</td>
 <td><code>pick</code></td>
 <td><code>[ inst, pick ]</code> <code>[ shelf, pick ]</code></td>
 </tr>
 <tr>
-<td>123</td>
-<td>자홍 <code>#d810b0</code></td>
+<td>224</td>
+<td>자홍 <code>#de4abd</code></td>
 <td>월드 이벤트</td>
 <td>—</td>
 <td><code>[ world, saving ]</code> <code>[ boss, {7} ]</code></td>
 </tr>
 <tr>
-<td>705</td>
-<td>회보라 <code>#9898b8</code></td>
-<td><strong>상대 머리 위 표시</strong>. 스크립트가 <code>overhead "…" 705 &lt;serial&gt;</code>로 그 대상 위에 띄운다</td>
+<td>1288</td>
+<td>빨강 <code>#ff0008</code></td>
+<td><strong>상대 머리 위 표시</strong>. 스크립트가 <code>overhead "…" 1288 &lt;serial&gt;</code>로 그 대상 위에 띄운다</td>
 <td><code>set</code> <code>on</code></td>
 <td><code>[ target, set ]</code> <code>[ explo, on ]</code></td>
 </tr>
@@ -542,7 +565,7 @@
 <pre class="mermaid">flowchart TD
   sentence("서버 문장&lt;br&gt;nomeehej has applied telekinesis to you.")
   sentence -- cooldowns.xml --> bar("쿨다운 바&lt;br&gt;teleki, me 30초") --> read("스크립트가 읽는다&lt;br&gt;cooldown teleki, me")
-  sentence -- 프로필 --> line("머리 위 한 줄&lt;br&gt;[ teleki, me ] hue 33")</pre>
+  sentence -- 프로필 --> line("머리 위 한 줄&lt;br&gt;[ teleki, me ] hue 234")</pre>
 <ul>
 <li>이름은 짝 오버헤드의 대상 단어를 소문자로 대괄호 없이 쓴다. 쉼표 뒤에는 방향 (<code>me</code> <code>target</code>)이나 상태 (<code>immune</code> <code>on</code>)만 붙인다
 (<code>hams, me</code> <code>teleki, target</code> <code>hams, immune</code> <code>frost, on</code>). 그 밖에는 쉼표 없이 대상만 쓴다 (<code>music</code> <code>heal pot</code>).</li>
@@ -679,133 +702,133 @@ Heat of Battle은 <code>pvp</code> 바가 그 자리다.</li>
 <tbody>
 <tr>
 <td>: Attempting to heal you.</td>
-<td><code>[ heal, coming ] (9)</code></td>
+<td><code>[ heal, coming ] (209)</code></td>
 <td></td>
 </tr>
 <tr>
 <td>You do not have a full suit of armor</td>
-<td><code>[ armor, out ] (53)</code></td>
+<td><code>[ armor, out ] (254)</code></td>
 <td></td>
 </tr>
 <tr>
 <td>Now tracking</td>
-<td><code>[ track, {3} {4} {5} ] (90)</code></td>
+<td><code>[ track, {3} {4} {5} ] (290)</code></td>
 <td></td>
 </tr>
 <tr>
 <td>spaces to target</td>
-<td><code>[ track, {3} {4} {5} ] (90)</code></td>
+<td><code>[ track, {3} {4} {5} ] (290)</code></td>
 <td></td>
 </tr>
 <tr>
 <td>You search the home and find no one hiding within.</td>
-<td><code>[ house, clear ] (68)</code></td>
+<td><code>[ house, clear ] (269)</code></td>
 <td></td>
 </tr>
 <tr>
 <td>script variable updated</td>
-<td><code>[ var, set ] (90)</code></td>
+<td><code>[ var, set ] (290)</code></td>
 <td></td>
 </tr>
 <tr>
 <td>Your attack hamstrings your target</td>
-<td><code>[ hams, target ] (43)</code></td>
+<td><code>[ hams, target ] (244)</code></td>
 <td></td>
 </tr>
 <tr>
 <td>There's not enough wood here to harvest.</td>
-<td><code>[ wood, out ] (53)</code></td>
+<td><code>[ wood, out ] (254)</code></td>
 <td></td>
 </tr>
 <tr>
 <td>Harvest double yield/loot triggered</td>
-<td><code>[ harvest, double ] (68)</code></td>
+<td><code>[ harvest, double ] (269)</code></td>
 <td>default·summoner 공통. 추가 수확 발동 성공</td>
 </tr>
 <tr>
 <td>You chop some</td>
-<td><code>[ lumber, {4} ] (68)</code></td>
+<td><code>[ lumber, {4} ] (269)</code></td>
 <td>default·summoner 공통. 네 번째 단어를 표시한다.
 일반 목재는 <code>logs</code>, 특수 목재는 <code>dullwood</code>·<code>shadowwood</code> 등 재질 이름이다. 수확 성공 색은 공통으로 68</td>
 </tr>
 <tr>
 <td>You hack at the tree for a while, but fail to produce any useable wood.</td>
-<td><code>[ lumber, miss ] (53)</code></td>
+<td><code>[ lumber, miss ] (254)</code></td>
 <td>default·summoner 공통. 채집은 시도했으나 목재를 얻지 못함. 자원 고갈 안내와 구분</td>
 </tr>
 <tr>
 <td>Lumberjacking skillgain:</td>
-<td><code>[ lumber, {3} ] (90)</code></td>
+<td><code>[ lumber, {3} ] (290)</code></td>
 <td>default·summoner 공통. 세 번째 단어는 스킬 상승 확률이다. 실제 스킬 상승을 뜻하지 않음</td>
 </tr>
 <tr>
 <td>Your skill in Lumberjacking has increased</td>
-<td><code>[ lumber, gain ] (90)</code></td>
+<td><code>[ lumber, gain ] (290)</code></td>
 <td>default·summoner 공통. 실제 스킬 상승</td>
 </tr>
 <tr>
 <td>You have recently traveled</td>
-<td><code>[ harvest, wait ] (53)</code></td>
+<td><code>[ harvest, wait ] (254)</code></td>
 <td>default·summoner 공통. 여행 뒤 채집 거절 안내다. 대기 표시이며 별도 타이머를 시작하지 않는다</td>
 </tr>
 <tr>
 <td>You do not see any harvestable resources nearby</td>
-<td><code>[ harvest, out ] (53)</code></td>
+<td><code>[ harvest, out ] (254)</code></td>
 <td>default·summoner 공통. 주변 채집 자원 없음. 다음 채집 장소로 이동할 안내</td>
 </tr>
 <tr>
 <td>harvesting is not allowed</td>
-<td><code>[ harvest, blocked ] (53)</code></td>
+<td><code>[ harvest, blocked ] (254)</code></td>
 <td>default·summoner 공통. 채집 불가 안내</td>
 </tr>
 <tr>
 <td>you notice</td>
-<td><code>[ thief, me ] (33)</code></td>
+<td><code>[ thief, me ] (234)</code></td>
 <td></td>
 </tr>
 <tr>
 <td>you have already used the maximum</td>
-<td><code>[ field, out ] (53)</code></td>
+<td><code>[ field, out ] (254)</code></td>
 <td></td>
 </tr>
 <tr>
 <td>You finish applying the bandages.</td>
-<td><code>[ bandage, done ] (90)</code></td>
+<td><code>[ bandage, done ] (290)</code></td>
 <td><code>default.xml</code>에만 있다</td>
 </tr>
 <tr>
 <td>You have been poisoned!</td>
-<td><code>[ poison, on ] (33)</code></td>
+<td><code>[ poison, on ] (234)</code></td>
 <td></td>
 </tr>
 <tr>
 <td>You have been cured of all poisons.</td>
-<td><code>[ poison, off ] (65)</code></td>
+<td><code>[ poison, off ] (265)</code></td>
 <td></td>
 </tr>
 <tr>
 <td>You have been cured of all poisons!</td>
-<td><code>[ poison, off ] (65)</code></td>
+<td><code>[ poison, off ] (265)</code></td>
 <td></td>
 </tr>
 <tr>
 <td>You are already at full health.</td>
-<td><code>[ hits, full ] (90)</code></td>
+<td><code>[ hits, full ] (290)</code></td>
 <td></td>
 </tr>
 <tr>
 <td>You increase your damage resistance to creature-casted spells</td>
-<td><code>[ resist, on ] (90)</code></td>
+<td><code>[ resist, on ] (290)</code></td>
 <td></td>
 </tr>
 <tr>
 <td>You cannot move!</td>
-<td><code>[ para, on ] (33)</code></td>
+<td><code>[ para, on ] (234)</code></td>
 <td></td>
 </tr>
 <tr>
 <td>You can move!</td>
-<td><code>[ para, off ] (65)</code></td>
+<td><code>[ para, off ] (265)</code></td>
 <td></td>
 </tr>
 <tr>
@@ -820,913 +843,913 @@ Heat of Battle은 <code>pvp</code> 바가 그 자리다.</li>
 </tr>
 <tr>
 <td>you are already at full stamina.</td>
-<td><code>[ stam, full ] (90)</code></td>
+<td><code>[ stam, full ] (290)</code></td>
 <td></td>
 </tr>
 <tr>
 <td>You are not poisoned.</td>
-<td><code>[ poison, off ] (65)</code></td>
+<td><code>[ poison, off ] (265)</code></td>
 <td></td>
 </tr>
 <tr>
 <td>You may now use a strength potion.</td>
-<td><code>[ str, ready ] (68)</code></td>
+<td><code>[ str, ready ] (269)</code></td>
 <td></td>
 </tr>
 <tr>
 <td>You may now use an agility potion.</td>
-<td><code>[ agi, ready ] (68)</code></td>
+<td><code>[ agi, ready ] (269)</code></td>
 <td></td>
 </tr>
 <tr>
 <td>Looting this corpse will be a criminal act!</td>
-<td><code>[ loot, crim ] (53)</code></td>
+<td><code>[ loot, crim ] (254)</code></td>
 <td></td>
 </tr>
 <tr>
 <td>Looting this monster corpse will be a criminal act!</td>
-<td><code>[ loot, crim ] (53)</code></td>
+<td><code>[ loot, crim ] (254)</code></td>
 <td></td>
 </tr>
 <tr>
 <td>You are now a criminal.</td>
-<td><code>[ crim, on ] (33)</code></td>
+<td><code>[ crim, on ] (234)</code></td>
 <td></td>
 </tr>
 <tr>
 <td>You have been reported for a murder!</td>
-<td><code>[ murder, +1 ] (33)</code></td>
+<td><code>[ murder, +1 ] (234)</code></td>
 <td></td>
 </tr>
 <tr>
 <td>You summon an ancient</td>
-<td><code>[ ancient, on ] (68)</code></td>
+<td><code>[ ancient, on ] (269)</code></td>
 <td></td>
 </tr>
 <tr>
 <td>Your spellbook generates mana for your spell.</td>
-<td><code>[ mana, refund ] (90)</code></td>
+<td><code>[ mana, refund ] (290)</code></td>
 <td></td>
 </tr>
 <tr>
 <td>You fail to ignite the campfire.</td>
-<td><code>[ camp, miss ] (53)</code></td>
+<td><code>[ camp, miss ] (254)</code></td>
 <td></td>
 </tr>
 <tr>
 <td>Your campfire is now secure.</td>
-<td><code>[ camp, on ] (68)</code></td>
+<td><code>[ camp, on ] (269)</code></td>
 <td></td>
 </tr>
 <tr>
 <td>You feel it would take a few moments to secure your camp.</td>
-<td><code>[ camp, coming ] (90)</code></td>
+<td><code>[ camp, coming ] (290)</code></td>
 <td></td>
 </tr>
 <tr>
 <td>You enter a meditative trance.</td>
-<td><code>[ medi, on ] (90)</code></td>
+<td><code>[ medi, on ] (290)</code></td>
 <td></td>
 </tr>
 <tr>
 <td>Your concentration is disturbed, thus ruining thy spell.</td>
-<td><code>[ cast, disturbed ] (53)</code></td>
+<td><code>[ cast, disturbed ] (254)</code></td>
 <td></td>
 </tr>
 <tr>
 <td>Being perfectly rested, you shove something invisible out of the way.</td>
-<td><code>[ hidden, near ] (53)</code></td>
+<td><code>[ hidden, near ] (254)</code></td>
 <td></td>
 </tr>
 <tr>
 <td>You may now attempt to</td>
-<td><code>[ hams, ready ] (68)</code></td>
+<td><code>[ hams, ready ] (269)</code></td>
 <td></td>
 </tr>
 <tr>
 <td>You refrain from making hamstring attempts.</td>
-<td><code>[ hams mode, off ] (90)</code></td>
+<td><code>[ hams mode, off ] (290)</code></td>
 <td></td>
 </tr>
 <tr>
 <td>You will now attempt to hamstring your opponents.</td>
-<td><code>[ hams mode, on ] (90)</code></td>
+<td><code>[ hams mode, on ] (290)</code></td>
 <td></td>
 </tr>
 <tr>
 <td>You fail to hamstring your opponent.</td>
-<td><code>[ hams, miss ] (53)</code></td>
+<td><code>[ hams, miss ] (254)</code></td>
 <td></td>
 </tr>
 <tr>
 <td>Their attack hamstrings you!</td>
-<td><code>[ hams, me ] (33)</code></td>
+<td><code>[ hams, me ] (234)</code></td>
 <td></td>
 </tr>
 <tr>
 <td>You are no longer hamstrung</td>
-<td><code>[ hams, off ] (65)</code></td>
+<td><code>[ hams, off ] (265)</code></td>
 <td></td>
 </tr>
 <tr>
 <td>You will now attempt to disarm your opponents.</td>
-<td><code>[ disarm mode, on ] (90)</code></td>
+<td><code>[ disarm mode, on ] (290)</code></td>
 <td></td>
 </tr>
 <tr>
 <td>You refrain from making disarm attempts.</td>
-<td><code>[ disarm mode, off ] (90)</code></td>
+<td><code>[ disarm mode, off ] (290)</code></td>
 <td></td>
 </tr>
 <tr>
 <td>Your strike disarms your target!</td>
-<td><code>[ disarm, target ] (43)</code></td>
+<td><code>[ disarm, target ] (244)</code></td>
 <td></td>
 </tr>
 <tr>
 <td>You fail to disarm your opponent.</td>
-<td><code>[ disarm, miss ] (53)</code></td>
+<td><code>[ disarm, miss ] (254)</code></td>
 <td></td>
 </tr>
 <tr>
 <td>Their attack disarms you!</td>
-<td><code>[ disarm, me ] (33)</code></td>
+<td><code>[ disarm, me ] (234)</code></td>
 <td></td>
 </tr>
 <tr>
 <td>Where do you wish to traverse to?</td>
-<td><code>[ rope, pick ] (55)</code></td>
+<td><code>[ rope, pick ] (255)</code></td>
 <td></td>
 </tr>
 <tr>
 <td>That location is blocked.</td>
-<td><code>[ spot, blocked ] (53)</code></td>
+<td><code>[ spot, blocked ] (254)</code></td>
 <td></td>
 </tr>
 <tr>
 <td>Target cannot be seen.</td>
-<td><code>[ range, out ] (53)</code></td>
+<td><code>[ range, out ] (254)</code></td>
 <td></td>
 </tr>
 <tr>
 <td>You are now under the protection of the town guards.</td>
-<td><code>[ guard, on ] (90)</code></td>
+<td><code>[ guard, on ] (290)</code></td>
 <td></td>
 </tr>
 <tr>
 <td>You have left the protection of the town guards.</td>
-<td><code>[ guard, off ] (53)</code></td>
+<td><code>[ guard, off ] (254)</code></td>
 <td></td>
 </tr>
 <tr>
 <td>Someone tried to steal from you.</td>
-<td><code>[ thief, me ] (33)</code></td>
+<td><code>[ thief, me ] (234)</code></td>
 <td></td>
 </tr>
 <tr>
 <td>You have been revealed!</td>
-<td><code>[ reveal, me ] (33)</code></td>
+<td><code>[ reveal, me ] (234)</code></td>
 <td></td>
 </tr>
 <tr>
 <td>You have been banned from this house.</td>
-<td><code>[ ban, me ] (53)</code></td>
+<td><code>[ ban, me ] (254)</code></td>
 <td></td>
 </tr>
 <tr>
 <td>You have been ejected from this house!</td>
-<td><code>[ eject, me ] (53)</code></td>
+<td><code>[ eject, me ] (254)</code></td>
 <td></td>
 </tr>
 <tr>
 <td>You have been added to the party.</td>
-<td><code>[ party, on ] (9)</code></td>
+<td><code>[ party, on ] (209)</code></td>
 <td></td>
 </tr>
 <tr>
 <td>You have been removed from the party.</td>
-<td><code>[ party, off ] (9)</code></td>
+<td><code>[ party, off ] (209)</code></td>
 <td></td>
 </tr>
 <tr>
 <td>You feel ready to continue stealthing</td>
-<td><code>[ stealth, ready ] (68)</code></td>
+<td><code>[ stealth, ready ] (269)</code></td>
 <td></td>
 </tr>
 <tr>
 <td>You feel comfortable enough to begin stealthing</td>
-<td><code>[ stealth, ready ] (68)</code></td>
+<td><code>[ stealth, ready ] (269)</code></td>
 <td></td>
 </tr>
 <tr>
 <td>You have 5 stealth steps remaining</td>
-<td><code>[ stealth, 5 ] (90)</code></td>
+<td><code>[ stealth, 5 ] (290)</code></td>
 <td></td>
 </tr>
 <tr>
 <td>You have successfully cleared it of traps</td>
-<td><code>[ trap, done ] (90)</code></td>
+<td><code>[ trap, done ] (290)</code></td>
 <td></td>
 </tr>
 <tr>
 <td>You successfully pick the lock</td>
-<td><code>[ lock, done ] (90)</code></td>
+<td><code>[ lock, done ] (290)</code></td>
 <td></td>
 </tr>
 <tr>
 <td>You fail to make any progress on the lock</td>
-<td><code>[ lock, miss ] (53)</code></td>
+<td><code>[ lock, miss ] (254)</code></td>
 <td></td>
 </tr>
 <tr>
 <td>You fail to make any progress towards removing traps</td>
-<td><code>[ trap, miss ] (53)</code></td>
+<td><code>[ trap, miss ] (254)</code></td>
 <td></td>
 </tr>
 <tr>
 <td>You finish using veterinary supplies</td>
-<td><code>[ vet, done ] (90)</code></td>
+<td><code>[ vet, done ] (290)</code></td>
 <td></td>
 </tr>
 <tr>
 <td>You begin using veterinary supplies</td>
-<td><code>[ vet, on ] (90)</code></td>
+<td><code>[ vet, on ] (290)</code></td>
 <td></td>
 </tr>
 <tr>
 <td>What do you wish to focus your follower's aggression towards?</td>
-<td><code>[ herd, pick ] (55)</code></td>
+<td><code>[ herd, pick ] (255)</code></td>
 <td></td>
 </tr>
 <tr>
 <td>you extend the life of your creature</td>
-<td><code>[ summon, extended ] (90)</code></td>
+<td><code>[ summon, extended ] (290)</code></td>
 <td></td>
 </tr>
 <tr>
 <td>you are now under the effect of herbal poultice</td>
-<td><code>[ herb, on ] (90)</code></td>
+<td><code>[ herb, on ] (290)</code></td>
 <td></td>
 </tr>
 <tr>
 <td>Your herbal poultice has lost its effectiveness.</td>
-<td><code>[ herb, off ] (53)</code></td>
+<td><code>[ herb, off ] (254)</code></td>
 <td></td>
 </tr>
 <tr>
 <td>That spell is already currently in effect.</td>
-<td><code>[ buff, on ] (90)</code></td>
+<td><code>[ buff, on ] (290)</code></td>
 <td></td>
 </tr>
 <tr>
 <td>already at full repair</td>
-<td><code>[ repair, done ] (90)</code></td>
+<td><code>[ repair, done ] (290)</code></td>
 <td></td>
 </tr>
 <tr>
 <td>You may now use another magic mushroom</td>
-<td><code>[ mush, ready ] (68)</code></td>
+<td><code>[ mush, ready ] (269)</code></td>
 <td></td>
 </tr>
 <tr>
 <td>before you may consume another magic mushroom</td>
-<td><code>[ mush, {5} ] (90)</code></td>
+<td><code>[ mush, {5} ] (290)</code></td>
 <td></td>
 </tr>
 <tr>
 <td>One of more of your ship crewmembers</td>
-<td><code>[ crew, ready ] (68)</code></td>
+<td><code>[ crew, ready ] (269)</code></td>
 <td></td>
 </tr>
 <tr>
 <td>Criminal healing will now be allowed</td>
-<td><code>[ crim heal, on ] (90)</code></td>
+<td><code>[ crim heal, on ] (290)</code></td>
 <td></td>
 </tr>
 <tr>
 <td>Criminal healing will now be prevented</td>
-<td><code>[ crim heal, off ] (90)</code></td>
+<td><code>[ crim heal, off ] (290)</code></td>
 <td></td>
 </tr>
 <tr>
 <td>Criminal looting will now be allowed</td>
-<td><code>[ crim loot, on ] (90)</code></td>
+<td><code>[ crim loot, on ] (290)</code></td>
 <td></td>
 </tr>
 <tr>
 <td>Criminal looting will now be prevented</td>
-<td><code>[ crim loot, off ] (90)</code></td>
+<td><code>[ crim loot, off ] (290)</code></td>
 <td></td>
 </tr>
 <tr>
 <td>Your lightning spell hinders your target</td>
-<td><code>[ lightning, target ] (43)</code></td>
+<td><code>[ lightning, target ] (244)</code></td>
 <td>라이트닝 프록</td>
 </tr>
 <tr>
 <td>Your attack cripples your target, lowering their defense</td>
-<td><code>[ cripple, target ] (43)</code></td>
+<td><code>[ cripple, target ] (244)</code></td>
 <td></td>
 </tr>
 <tr>
 <td>You smash through</td>
-<td><code>[ smash, target ] (43)</code></td>
+<td><code>[ smash, target ] (244)</code></td>
 <td></td>
 </tr>
 <tr>
 <td>susceptible to special</td>
-<td><code>[ bleed, target ] (43)</code></td>
+<td><code>[ bleed, target ] (244)</code></td>
 <td></td>
 </tr>
 <tr>
 <td>armslore skillgain</td>
-<td><code>[ swing ] (90)</code></td>
+<td><code>[ swing ] (290)</code></td>
 <td></td>
 </tr>
 <tr>
 <td>attack causes your target to bleed</td>
-<td><code>[ bleed, target ] (43)</code></td>
+<td><code>[ bleed, target ] (244)</code></td>
 <td></td>
 </tr>
 <tr>
 <td>minutes before / minute before</td>
-<td><code>[ wait, {5}m ] (53)</code></td>
+<td><code>[ wait, {5}m ] (254)</code></td>
 <td>"…wait another 2 minutes before…"처럼 초가 없는 형태. 초가 있는 형태보다 앞에 둔다</td>
 </tr>
 <tr>
 <td>minutes / minute (뒤 공백)</td>
-<td><code>[ wait, {5}m {7}s ] (53)</code></td>
+<td><code>[ wait, {5}m {7}s ] (254)</code></td>
 <td>"You must wait another 4 minutes 17 seconds …"</td>
 </tr>
 <tr>
 <td>must wait another</td>
-<td><code>[ wait, {5}s ] (53)</code></td>
+<td><code>[ wait, {5}s ] (254)</code></td>
 <td></td>
 </tr>
 <tr>
 <td>0 Trapped pouches remain</td>
-<td><code>[ pouch, out ] (53)</code></td>
+<td><code>[ pouch, out ] (254)</code></td>
 <td></td>
 </tr>
 <tr>
 <td>No trapped pouches found</td>
-<td><code>[ pouch, out ] (53)</code></td>
+<td><code>[ pouch, out ] (254)</code></td>
 <td></td>
 </tr>
 <tr>
 <td>restricted from performing aggressive</td>
-<td><code>[ restrict, {14} ] (33)</code></td>
+<td><code>[ restrict, {14} ] (234)</code></td>
 <td></td>
 </tr>
 <tr>
 <td>world will save</td>
-<td><code>[ world, coming ] (123)</code></td>
+<td><code>[ world, coming ] (224)</code></td>
 <td></td>
 </tr>
 <tr>
 <td>world is saving</td>
-<td><code>[ world, saving ] (123)</code></td>
+<td><code>[ world, saving ] (224)</code></td>
 <td></td>
 </tr>
 <tr>
 <td>save complete</td>
-<td><code>[ world, done ] (123)</code></td>
+<td><code>[ world, done ] (224)</code></td>
 <td></td>
 </tr>
 <tr>
 <td>aspect and other bonuses return</td>
-<td><code>[ aspect, on ] (68)</code></td>
+<td><code>[ aspect, on ] (269)</code></td>
 <td></td>
 </tr>
 <tr>
 <td>free cure potion</td>
-<td><code>[ cure pot, free ] (90)</code></td>
+<td><code>[ cure pot, free ] (290)</code></td>
 <td></td>
 </tr>
 <tr>
 <td>too fatiqued</td>
-<td><code>[ weight, over ] (53)</code></td>
+<td><code>[ weight, over ] (254)</code></td>
 <td></td>
 </tr>
 <tr>
 <td>too fatigued</td>
-<td><code>[ weight, over ] (53)</code></td>
+<td><code>[ weight, over ] (254)</code></td>
 <td></td>
 </tr>
 <tr>
 <td>are overloaded</td>
-<td><code>[ weight, over ] (53)</code></td>
+<td><code>[ weight, over ] (254)</code></td>
 <td></td>
 </tr>
 <tr>
 <td>contested boss has spawned</td>
-<td><code>[ boss, {7} ] (123)</code></td>
+<td><code>[ boss, {7} ] (224)</code></td>
 <td></td>
 </tr>
 <tr>
 <td>control points earned for current beacon</td>
-<td><code>[ beacon, +{2} {12} ] (90)</code></td>
+<td><code>[ beacon, +{2} {12} ] (290)</code></td>
 <td></td>
 </tr>
 <tr>
 <td>kill points earned</td>
-<td><code>[ kill, +{2} {9} ] (90)</code></td>
+<td><code>[ kill, +{2} {9} ] (290)</code></td>
 <td></td>
 </tr>
 <tr>
 <td>DF A Dungeon Flashpoint will begin in 15 minutes.</td>
-<td><code>[ flashpoint, coming ] (123)</code></td>
+<td><code>[ flashpoint, coming ] (224)</code></td>
 <td></td>
 </tr>
 <tr>
 <td>cured the target of all poisons</td>
-<td><code>[ cure, target ] (68)</code></td>
+<td><code>[ cure, target ] (269)</code></td>
 <td></td>
 </tr>
 <tr>
 <td>cast a wizardry magic arrow spell again</td>
-<td><code>[ magic arrow, ready ] (68)</code></td>
+<td><code>[ magic arrow, ready ] (269)</code></td>
 <td>검색어를 준비 문장으로 좁혔다. "activated"는 아래 줄</td>
 </tr>
 <tr>
 <td>cast a wizardry harm spell again</td>
-<td><code>[ harm, ready ] (68)</code></td>
+<td><code>[ harm, ready ] (269)</code></td>
 <td></td>
 </tr>
 <tr>
 <td>cast a wizardry fireball spell again</td>
-<td><code>[ fireball, ready ] (68)</code></td>
+<td><code>[ fireball, ready ] (269)</code></td>
 <td></td>
 </tr>
 <tr>
 <td>cast a wizardry lightning spell again</td>
-<td><code>[ lightning, ready ] (68)</code></td>
+<td><code>[ lightning, ready ] (269)</code></td>
 <td></td>
 </tr>
 <tr>
 <td>cast a wizardry chain lightning spell again</td>
-<td><code>[ chain, ready ] (68)</code></td>
+<td><code>[ chain, ready ] (269)</code></td>
 <td></td>
 </tr>
 <tr>
 <td>cast a wizardry meteor swarm spell again</td>
-<td><code>[ meteor, ready ] (68)</code></td>
+<td><code>[ meteor, ready ] (269)</code></td>
 <td></td>
 </tr>
 <tr>
 <td>magic arrow / harm / fireball / chain lightning / meteor swarm activated</td>
-<td><code>[ 주문, target ] (43)</code></td>
+<td><code>[ 주문, target ] (244)</code></td>
 <td>프록이 터졌다. 15초 바가 시작된다 (06.C)</td>
 </tr>
 <tr>
 <td>upgraded to Deadly</td>
-<td><code>[ poison, deadly ] (43)</code></td>
+<td><code>[ poison, deadly ] (244)</code></td>
 <td></td>
 </tr>
 <tr>
 <td>upgraded to Lethal</td>
-<td><code>[ poison, lethal ] (43)</code></td>
+<td><code>[ poison, lethal ] (244)</code></td>
 <td></td>
 </tr>
 <tr>
 <td>Triggered (Epic)</td>
-<td><code>[ aspect, on ] (68)</code></td>
+<td><code>[ aspect, on ] (269)</code></td>
 <td></td>
 </tr>
 <tr>
 <td>enough experience to upgrade</td>
-<td><code>[ aspect, upgrade ] (90)</code></td>
+<td><code>[ aspect, upgrade ] (290)</code></td>
 <td></td>
 </tr>
 <tr>
 <td>Society Job Progress</td>
-<td><code>[ society, {4} ] (90)</code></td>
+<td><code>[ society, {4} ] (290)</code></td>
 <td></td>
 </tr>
 <tr>
 <td>You have completed a society job</td>
-<td><code>[ society, done ] (90)</code></td>
+<td><code>[ society, done ] (290)</code></td>
 <td></td>
 </tr>
 <tr>
 <td>aspect experience</td>
-<td><code>[ {4}, {7} ] (90)</code></td>
+<td><code>[ {4}, {7} ] (290)</code></td>
 <td></td>
 </tr>
 <tr>
 <td>resist a bleed</td>
-<td><code>[ bleed, off ] (65)</code></td>
+<td><code>[ bleed, off ] (265)</code></td>
 <td></td>
 </tr>
 <tr>
 <td>resist a disease effect</td>
-<td><code>[ disease, off ] (65)</code></td>
+<td><code>[ disease, off ] (265)</code></td>
 <td></td>
 </tr>
 <tr>
 <td>been struck by an ancient blight</td>
-<td><code>[ disease, on ] (33)</code></td>
+<td><code>[ disease, on ] (234)</code></td>
 <td></td>
 </tr>
 <tr>
 <td>may now review results</td>
-<td><code>[ boss, done ] (90)</code></td>
+<td><code>[ boss, done ] (290)</code></td>
 <td></td>
 </tr>
 <tr>
 <td>struck by an evil omen</td>
-<td><code>[ omen, target ] (43)</code></td>
+<td><code>[ omen, target ] (244)</code></td>
 <td></td>
 </tr>
 <tr>
 <td>enough unholy</td>
-<td><code>[ unholy, out ] (53)</code></td>
+<td><code>[ unholy, out ] (254)</code></td>
 <td></td>
 </tr>
 <tr>
 <td>unholy symbols remaining</td>
-<td><code>[ unholy, {4} ] (90)</code></td>
+<td><code>[ unholy, {4} ] (290)</code></td>
 <td></td>
 </tr>
 <tr>
 <td>max unholy</td>
-<td><code>[ unholy, max ] (68)</code></td>
+<td><code>[ unholy, max ] (269)</code></td>
 <td>원문은 "Max unholy symbols earned (10/10)". <code>{5}</code>는 괄호째 뜨므로 쓰지 않는다</td>
 </tr>
 <tr>
 <td>consume a magic mushroom</td>
-<td><code>[ mush, on ] (90)</code></td>
+<td><code>[ mush, on ] (290)</code></td>
 <td>원문은 "You consume a magic mushroom and restore some mana." 범용 <code>You consume</code>보다 앞에 둔다. 뒤에 두면 <code>[ essence, +a ]</code>가 뜬다</td>
 </tr>
 <tr>
 <td>mana from your mana well</td>
-<td><code>[ eldritch, +{3} ] (90)</code></td>
+<td><code>[ eldritch, +{3} ] (290)</code></td>
 <td>원문은 "You draw 11 mana from your mana well." Eldritch 아스펙트</td>
 </tr>
 <tr>
 <td>You consume</td>
-<td><code>[ essence, +{3} ] (90)</code></td>
+<td><code>[ essence, +{3} ] (290)</code></td>
 <td></td>
 </tr>
 <tr>
 <td>generates mana</td>
-<td><code>[ mana, refund ] (90)</code></td>
+<td><code>[ mana, refund ] (290)</code></td>
 <td></td>
 </tr>
 <tr>
 <td>progress on the lock</td>
-<td><code>[ lock, {8} ] (90)</code></td>
+<td><code>[ lock, {8} ] (290)</code></td>
 <td></td>
 </tr>
 <tr>
 <td>clearing it of traps</td>
-<td><code>[ trap, {10} ] (90)</code></td>
+<td><code>[ trap, {10} ] (290)</code></td>
 <td></td>
 </tr>
 <tr>
 <td>thrown at that player within 30</td>
-<td><code>[ teleki, target ] (43)</code></td>
+<td><code>[ teleki, target ] (244)</code></td>
 <td>자기·수신 TK와 혼동 가능. 공격 대상 성공 인증이 아님 (<a href="pvp.html#04.D">pvp.html</a> 04.D절)</td>
 </tr>
 <tr>
 <td>has applied telekinesis to you</td>
-<td><code>[ teleki, me ] (33)</code></td>
+<td><code>[ teleki, me ] (234)</code></td>
 <td>원문은 "nomeehej has applied telekinesis to you." 건 사람 이름은 저널에 남는다</td>
 </tr>
 <tr>
 <td>An explosion potion has stuck to you</td>
-<td><code>[ bomb, me ] (33)</code></td>
+<td><code>[ bomb, me ] (234)</code></td>
 <td>5초 표시의 바 <code>bomb, me</code>와 짝. 실제 점화부터의 퓨즈 측정과는 구분
 (<a href="open-items.html#08.C">open-items.html</a> 08.C절)</td>
 </tr>
 <tr>
 <td>Your explosion potion sticks to your target</td>
-<td><code>[ bomb, target ] (43)</code></td>
+<td><code>[ bomb, target ] (244)</code></td>
 <td></td>
 </tr>
 <tr>
 <td>free hand to drink</td>
-<td><code>[ hands, full ] (53)</code></td>
+<td><code>[ hands, full ] (254)</code></td>
 <td></td>
 </tr>
 <tr>
 <td>You drink a healing potion</td>
-<td><code>[ heal pot, on ] (90)</code></td>
+<td><code>[ heal pot, on ] (290)</code></td>
 <td>스크립트의 같은 줄은 뺐다</td>
 </tr>
 <tr>
 <td>You drink a cure potion</td>
-<td><code>[ cure pot, on ] (90)</code></td>
+<td><code>[ cure pot, on ] (290)</code></td>
 <td>스크립트의 같은 줄은 뺐다. 리프레시는 서버가 문장을 보내지 않아 없다. 힘·민 포션은 "Your strength has changed by 20"뿐인데 Weaken을 맞아도 같은 문장이라 잡지 않는다</td>
 </tr>
 <tr>
 <td>You will now automatically</td>
-<td><code>[ scroll mode, on ] (90)</code></td>
+<td><code>[ scroll mode, on ] (290)</code></td>
 <td></td>
 </tr>
 <tr>
 <td>You may only cast that spell on a player once every 30 seconds.</td>
-<td><code>[ limit, 30s ] (53)</code></td>
+<td><code>[ limit, 30s ] (254)</code></td>
 <td></td>
 </tr>
 <tr>
 <td>Your boarding party fails to board the ship</td>
-<td><code>[ boarding, miss ] (53)</code></td>
+<td><code>[ boarding, miss ] (254)</code></td>
 <td></td>
 </tr>
 <tr>
 <td>That ship is too far away to board.</td>
-<td><code>[ range, out ] (53)</code></td>
+<td><code>[ range, out ] (254)</code></td>
 <td></td>
 </tr>
 <tr>
 <td>Your shot hinders your target!</td>
-<td><code>[ hinder, target ] (43)</code></td>
+<td><code>[ hinder, target ] (244)</code></td>
 <td></td>
 </tr>
 <tr>
 <td>You deactivate your stance.</td>
-<td><code>[ stance, off ] (53)</code></td>
+<td><code>[ stance, off ] (254)</code></td>
 <td></td>
 </tr>
 <tr>
 <td>You smash the unprotected</td>
-<td><code>[ smash, target ] (43)</code></td>
+<td><code>[ smash, target ] (244)</code></td>
 <td></td>
 </tr>
 <tr>
 <td>fallen to corruption</td>
-<td><code>[ shrine, on ] (123)</code></td>
+<td><code>[ shrine, on ] (224)</code></td>
 <td></td>
 </tr>
 <tr>
 <td>You begin to move quietly</td>
-<td><code>[ stealth, on ] (90)</code></td>
+<td><code>[ stealth, on ] (290)</code></td>
 <td></td>
 </tr>
 <tr>
 <td>You have 4 stealth</td>
-<td><code>[ stealth, 4 ] (53)</code></td>
+<td><code>[ stealth, 4 ] (254)</code></td>
 <td></td>
 </tr>
 <tr>
 <td>You have 3 stealth</td>
-<td><code>[ stealth, 3 ] (53)</code></td>
+<td><code>[ stealth, 3 ] (254)</code></td>
 <td></td>
 </tr>
 <tr>
 <td>You have 2 stealth</td>
-<td><code>[ stealth, 2 ] (53)</code></td>
+<td><code>[ stealth, 2 ] (254)</code></td>
 <td></td>
 </tr>
 <tr>
 <td>You have 1 stealth</td>
-<td><code>[ stealth, 1 ] (33)</code></td>
+<td><code>[ stealth, 1 ] (234)</code></td>
 <td></td>
 </tr>
 <tr>
 <td>You have 0 stealth</td>
-<td><code>[ stealth, 0 ] (33)</code></td>
+<td><code>[ stealth, 0 ] (234)</code></td>
 <td></td>
 </tr>
 <tr>
 <td>You must hide first</td>
-<td><code>[ hide, off ] (53)</code></td>
+<td><code>[ hide, off ] (254)</code></td>
 <td></td>
 </tr>
 <tr>
 <td>Those cannons are out of ammunition</td>
-<td><code>[ cannon, out ] (53)</code></td>
+<td><code>[ cannon, out ] (254)</code></td>
 <td></td>
 </tr>
 <tr>
 <td>You fail to steal</td>
-<td><code>[ steal, miss ] (53)</code></td>
+<td><code>[ steal, miss ] (254)</code></td>
 <td></td>
 </tr>
 <tr>
 <td>You fail in your stealing attempt</td>
-<td><code>[ steal, miss ] (53)</code></td>
+<td><code>[ steal, miss ] (254)</code></td>
 <td></td>
 </tr>
 <tr>
 <td>You steal</td>
-<td><code>[ steal, done ] (90)</code></td>
+<td><code>[ steal, done ] (290)</code></td>
 <td></td>
 </tr>
 <tr>
 <td>You successfully steal</td>
-<td><code>[ steal, done ] (90)</code></td>
+<td><code>[ steal, done ] (290)</code></td>
 <td></td>
 </tr>
 <tr>
 <td>You have already stolen from this creature</td>
-<td><code>[ steal, wrong ] (53)</code></td>
+<td><code>[ steal, wrong ] (254)</code></td>
 <td></td>
 </tr>
 <tr>
 <td>You may now taunt again.</td>
-<td><code>[ taunt, ready ] (68)</code></td>
+<td><code>[ taunt, ready ] (269)</code></td>
 <td></td>
 </tr>
 <tr>
 <td>Potion codex Panaccea upgrade is now ready.</td>
-<td><code>[ panacea, ready ] (68)</code></td>
+<td><code>[ panacea, ready ] (269)</code></td>
 <td></td>
 </tr>
 <tr>
 <td>Your ability to hide is no longer impeded</td>
-<td><code>[ hide, ready ] (68)</code></td>
+<td><code>[ hide, ready ] (269)</code></td>
 <td></td>
 </tr>
 <tr>
 <td>Weapon ability ready</td>
-<td><code>[ ability, ready ] (68)</code></td>
+<td><code>[ ability, ready ] (269)</code></td>
 <td></td>
 </tr>
 <tr>
 <td>your rapid</td>
-<td><code>[ move, slow ] (53)</code></td>
+<td><code>[ move, slow ] (254)</code></td>
 <td></td>
 </tr>
 <tr>
 <td>your movements attract</td>
-<td><code>[ move, slow ] (53)</code></td>
+<td><code>[ move, slow ] (254)</code></td>
 <td></td>
 </tr>
 <tr>
 <td>your quick movements draw the attention</td>
-<td><code>[ move, slow ] (53)</code></td>
+<td><code>[ move, slow ] (254)</code></td>
 <td></td>
 </tr>
 <tr>
 <td>iron flesh charges remaining</td>
-<td><code>[ iron flesh, {1} ] (90)</code></td>
+<td><code>[ iron flesh, {1} ] (290)</code></td>
 <td></td>
 </tr>
 <tr>
 <td>You detonate a ground trap</td>
-<td><code>[ detonate, done ] (90)</code></td>
+<td><code>[ detonate, done ] (290)</code></td>
 <td></td>
 </tr>
 <tr>
 <td>You may now detonate another trap</td>
-<td><code>[ detonate, ready ] (68)</code></td>
+<td><code>[ detonate, ready ] (269)</code></td>
 <td></td>
 </tr>
 <tr>
 <td>You increase your [EventScore</td>
-<td><code>[ event, +{6} ] (90)</code></td>
+<td><code>[ event, +{6} ] (290)</code></td>
 <td></td>
 </tr>
 <tr>
 <td>You are now under the effect of a Song</td>
-<td><code>[ song, on ] (90)</code></td>
+<td><code>[ song, on ] (290)</code></td>
 <td></td>
 </tr>
 <tr>
 <td>You fail to discord</td>
-<td><code>[ disco, miss ] (53)</code></td>
+<td><code>[ disco, miss ] (254)</code></td>
 <td></td>
 </tr>
 <tr>
 <td>fail to pacify any nearby creatures</td>
-<td><code>[ peace, area miss ] (53)</code></td>
+<td><code>[ peace, area miss ] (254)</code></td>
 <td></td>
 </tr>
 <tr>
 <td>fail to pacify your opponent</td>
-<td><code>[ peace, miss ] (53)</code></td>
+<td><code>[ peace, miss ] (254)</code></td>
 <td></td>
 </tr>
 <tr>
 <td>disrupting your opponent</td>
-<td><code>[ disco, target ] (43)</code></td>
+<td><code>[ disco, target ] (244)</code></td>
 <td></td>
 </tr>
 <tr>
 <td>briefly discording</td>
-<td><code>[ disco, area ] (43)</code></td>
+<td><code>[ disco, area ] (244)</code></td>
 <td>자기를 찍으면 8타일 광역, 각 5초</td>
 </tr>
 <tr>
 <td>pacifying your target</td>
-<td><code>[ peace, target ] (43)</code></td>
+<td><code>[ peace, target ] (244)</code></td>
 <td></td>
 </tr>
 <tr>
 <td>briefly pacifying</td>
-<td><code>[ peace, area ] (43)</code></td>
+<td><code>[ peace, area ] (244)</code></td>
 <td>자기를 찍으면 8타일 광역, 각 2초</td>
 </tr>
 <tr>
 <td>play successfully, provoking</td>
-<td><code>[ provo, target ] (43)</code></td>
+<td><code>[ provo, target ] (244)</code></td>
 <td>프로보는 광역이 없다. 자기를 찍으면 송이다</td>
 </tr>
 <tr>
 <td>fail to incite anger</td>
-<td><code>[ provo, miss ] (53)</code></td>
+<td><code>[ provo, miss ] (254)</code></td>
 <td></td>
 </tr>
 <tr>
 <td>Song of Discordance / Peacemaking / Provocation effect ends</td>
-<td><code>[ disco song / peace song / provo song, off ] (53)</code></td>
+<td><code>[ disco song / peace song / provo song, off ] (254)</code></td>
 <td>15분 송이 끝났다. 범용 <code>You play successfully</code>는 뺐다</td>
 </tr>
 <tr>
 <td>additional energy</td>
-<td><code>[ spell, charged ] (43)</code></td>
+<td><code>[ spell, charged ] (244)</code></td>
 <td></td>
 </tr>
 <tr>
 <td>What instrument shall you play</td>
-<td><code>[ inst, out ] (53)</code></td>
+<td><code>[ inst, out ] (254)</code></td>
 <td></td>
 </tr>
 <tr>
 <td>now planted</td>
-<td><code>[ planted, on ] (90)</code></td>
+<td><code>[ planted, on ] (290)</code></td>
 <td></td>
 </tr>
 <tr>
 <td>5 moving throws</td>
-<td><code>[ throws, 5 ] (90)</code></td>
+<td><code>[ throws, 5 ] (290)</code></td>
 <td></td>
 </tr>
 <tr>
 <td>4 moving throws</td>
-<td><code>[ throws, 4 ] (90)</code></td>
+<td><code>[ throws, 4 ] (290)</code></td>
 <td></td>
 </tr>
 <tr>
 <td>3 moving throws</td>
-<td><code>[ throws, 3 ] (90)</code></td>
+<td><code>[ throws, 3 ] (290)</code></td>
 <td></td>
 </tr>
 <tr>
 <td>2 moving throws</td>
-<td><code>[ throws, 2 ] (90)</code></td>
+<td><code>[ throws, 2 ] (290)</code></td>
 <td></td>
 </tr>
 <tr>
 <td>1 moving throws</td>
-<td><code>[ throws, 1 ] (33)</code></td>
+<td><code>[ throws, 1 ] (234)</code></td>
 <td></td>
 </tr>
 <tr>
 <td>0 moving throws</td>
-<td><code>[ throws, 0 ] (33)</code></td>
+<td><code>[ throws, 0 ] (234)</code></td>
 <td></td>
 </tr>
 <tr>
 <td>wing your target</td>
-<td><code>[ wing, target ] (43)</code></td>
+<td><code>[ wing, target ] (244)</code></td>
 <td></td>
 </tr>
 <tr>
 <td>Magic reflect removed</td>
-<td><code>[ reflect, off ] (53)</code></td>
+<td><code>[ reflect, off ] (254)</code></td>
 <td>바 <code>reflect</code>와 짝 (06.C)</td>
 </tr>
 <tr>
 <td>Spell siphon active.</td>
-<td><code>[ siphon, on ] (68)</code></td>
+<td><code>[ siphon, on ] (269)</code></td>
 <td>5분마다 첫 주문 피격에 켜지는 60분 PvM 버프. 바 <code>siphon</code>과 짝</td>
 </tr>
 <tr>
 <td>Your spell siphon bonus has expired</td>
-<td><code>[ siphon, off ] (53)</code></td>
+<td><code>[ siphon, off ] (254)</code></td>
 <td></td>
 </tr>
 <tr>
 <td>You absorb their spell.</td>
-<td><code>[ spell, absorbed ] (68)</code></td>
+<td><code>[ spell, absorbed ] (269)</code></td>
 <td>Resist의 <code>25% x Resist/100</code> 확률, 피해 -75%</td>
 </tr>
 <tr>
 <td>You mana drain your target. / You curse your target.</td>
-<td><code>[ drain, target ]</code> / <code>[ curse, target ] (43)</code></td>
+<td><code>[ drain, target ]</code> / <code>[ curse, target ] (244)</code></td>
 <td>스크립트의 <code>[ drain ]</code> <code>[ curse ]</code> 시전 알림은 뺐다</td>
 </tr>
 <tr>
 <td>Your reactive armor spell has been nullified.</td>
-<td><code>[ reactive, off ] (53)</code></td>
+<td><code>[ reactive, off ] (254)</code></td>
 <td>25를 흡수하고 빠진다. 다음에 서 있을 때 다시 건다</td>
 </tr>
 <tr>
 <td>You generate mana for your spell.</td>
-<td><code>[ mana, refund ] (90)</code></td>
+<td><code>[ mana, refund ] (290)</code></td>
 <td>기존 <code>generates mana</code>는 이 문장을 못 잡았다</td>
 </tr>
 <tr>
 <td>recovered from energy bolt kill</td>
-<td><code>[ eb, refund ] (90)</code></td>
+<td><code>[ eb, refund ] (290)</code></td>
 <td>회수량은 티어마다 달라 숫자는 띄우지 않는다 (<a href="bard-necro-handbook.html#03.A">bard-necro-handbook.html</a> 03.A절)</td>
 </tr>
 <tr>
 <td>That is too far away.</td>
-<td><code>[ range, out ] (53)</code></td>
+<td><code>[ range, out ] (254)</code></td>
 <td></td>
 </tr>
 </tbody>

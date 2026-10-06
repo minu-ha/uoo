@@ -12,43 +12,43 @@ clearignore
 sysmsg "TK variable test: revised script loaded" 90
 
 if pvp
-    overhead "[ script, blocked ]" 53
+    overhead "[ script, blocked ]" 254
     sysmsg "TK test: PvP script restrictions are active." 53
     stop
 endif
 
 if casting or targetexists
-    overhead "[ cast, wait ]" 53
+    overhead "[ cast, wait ]" 254
     stop
 endif
 
 # Clear the previous pick so cancelling cannot reuse another run's target.
 @unsetvar! var__tk_test_target
-overhead "[ teleki, pick ]" 55
+overhead "[ teleki, pick ]" 255
 setvar! var__tk_test_target
 
 if not varexist var__tk_test_target
-    overhead "[ var, out ]" 53
+    overhead "[ var, out ]" 254
     stop
 endif
 
 sysmsg "TK test: stored target serial = {{var__tk_test_target}}" 90
 
 # Pass the stored serial directly to target, without comparing it to numeric literals.
-overhead "[ var, set ]" 90
+overhead "[ var, set ]" 290
 
 # Wait for this cast's cursor and send the stored serial only once.
-overhead "[ teleki ]" 83
+overhead "[ teleki ]" 284
 sysmsg "TK variable test: casting Telekinesis" 90
 cast "Telekinesis"
 waitfortarget 5000
 
 if not targetexists
-    overhead "[ cast, out ]" 53
+    overhead "[ cast, out ]" 254
     sysmsg "TK test: no spell target cursor appeared. Check the journal for the cast failure." 53
     stop
 endif
 
 target var__tk_test_target
-overhead "[ teleki, sent ]" 90
+overhead "[ teleki, sent ]" 290
 sysmsg "TK test: target command sent for serial {{var__tk_test_target}}. Check the alt's journal." 90

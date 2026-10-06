@@ -34,7 +34,7 @@ endif
 
 while not dead
     if pvp
-        overhead "[ pvp, on ]" 33
+        overhead "[ pvp, on ]" 234
         stop
     endif
 
@@ -57,7 +57,7 @@ while not dead
             endif
 
             wait 1000
-            overhead "[ gold, dropped ]" 90
+            overhead "[ gold, dropped ]" 290
         endif
     endwhile
 
@@ -73,7 +73,7 @@ while not dead
             yell "[Pouch"
             getlabel backpack ping
         else
-            overhead "[ pouch, out ]" 53
+            overhead "[ pouch, out ]" 254
         endif
     endif
 
@@ -111,7 +111,7 @@ while not dead
 
             if "next usable" in found_potion_description
                 if timer "overhead_message_timer" > overhead_message_timer_frequency
-                    overhead "[ heal pot, {{found_potion_description}} ]" 90
+                    overhead "[ heal pot, {{found_potion_description}} ]" 290
                     settimer "overhead_message_timer" 0
                 endif
 
@@ -136,7 +136,7 @@ while not dead
             endif
         else
             if timer "overhead_message_timer" > overhead_message_timer_frequency
-                overhead "[ heal pot, out ]" 53
+                overhead "[ heal pot, out ]" 254
                 settimer "overhead_message_timer" 0
             endif
 
@@ -158,12 +158,12 @@ while not dead
                 break
             endif
 
-            overhead "[ cure pot, on ]" 90
+            overhead "[ cure pot, on ]" 290
             dclick found_potion
             getlabel backpack ping
         else
             if timer "overhead_message_timer" > overhead_message_timer_frequency
-                overhead "[ cure pot, out ]" 53
+                overhead "[ cure pot, out ]" 254
                 settimer "overhead_message_timer" 0
             endif
 
@@ -184,7 +184,7 @@ while not dead
             wait 200
         else
             if timer "overhead_message_timer" > overhead_message_timer_frequency
-                overhead "[ refresh, out ]" 53
+                overhead "[ refresh, out ]" 254
                 settimer "overhead_message_timer" 0
             endif
         endif
@@ -196,7 +196,7 @@ while not dead
             wait 200
         else
             if timer "overhead_message_timer" > overhead_message_timer_frequency
-                overhead "[ str, out ]" 53
+                overhead "[ str, out ]" 254
                 settimer "overhead_message_timer" 0
             endif
         endif
@@ -208,7 +208,7 @@ while not dead
             wait 200
         else
             if timer "overhead_message_timer" > overhead_message_timer_frequency
-                overhead "[ agi, out ]" 53
+                overhead "[ agi, out ]" 254
                 settimer "overhead_message_timer" 0
             endif
         endif
@@ -220,7 +220,7 @@ while not dead
             wait 200
         else
             if timer "overhead_message_timer" > overhead_message_timer_frequency
-                overhead "[ resist, out ]" 53
+                overhead "[ resist, out ]" 254
                 settimer "overhead_message_timer" 0
             endif
         endif

@@ -67,11 +67,11 @@ while not dead
 
         if is_stealth = 1 or is_stealth = 2
             if insysmsg "Vanish activated."
-                overhead "[ vanish, on ]" 90
+                overhead "[ vanish, on ]" 290
                 setvar is_stealth 2
                 break
             else
-                overhead "[ hide, off ]" 53
+                overhead "[ hide, off ]" 254
                 setvar is_stealth 0
             endif
 
@@ -84,7 +84,7 @@ while not dead
                 yell "[Pouch"
                 getlabel backpack ping
             else
-                overhead "[ pouch, out ]" 53
+                overhead "[ pouch, out ]" 254
             endif
         endif
 
@@ -94,7 +94,7 @@ while not dead
 
                 if "next usable" in found_potion_description
                     if timer "overhead_message_timer" > overhead_message_timer_frequency
-                        overhead "[ heal pot, {{found_potion_description}} ]" 90
+                        overhead "[ heal pot, {{found_potion_description}} ]" 290
                         settimer "overhead_message_timer" 0
                     endif
                 else
@@ -108,7 +108,7 @@ while not dead
                 endif
             else
                 if timer "overhead_message_timer" > overhead_message_timer_frequency
-                    overhead "[ heal pot, out ]" 53
+                    overhead "[ heal pot, out ]" 254
                     settimer "overhead_message_timer" 0
                 endif
             endif
@@ -124,7 +124,7 @@ while not dead
                 getlabel backpack ping
             else
                 if timer "overhead_message_timer" > overhead_message_timer_frequency
-                    overhead "[ cure pot, out ]" 53
+                    overhead "[ cure pot, out ]" 254
                     settimer "overhead_message_timer" 0
                 endif
             endif
@@ -144,13 +144,13 @@ while not dead
 
                     if insysmsg "You carve materials from the corpse"
                         if timer "corpse_carving_timer" >= corpse_carving_timer_frequency
-                            overhead "[ carve, done ]" 90
+                            overhead "[ carve, done ]" 290
                             settimer "corpse_carving_timer" 0
                             ignore found_corpse
                         endif
                     elseif insysmsg "You dont see anything nearby worth carving or investigating."
                         if timer "corpse_carving_timer" >= corpse_carving_timer_frequency
-                            overhead "[ corpse, out ]" 53
+                            overhead "[ corpse, out ]" 254
                             settimer "corpse_carving_timer" 0
                             ignore found_corpse
                         endif
@@ -158,7 +158,7 @@ while not dead
                 endif
             else
                 if timer "overhead_message_timer" >= overhead_message_timer_frequency
-                    overhead "[ blade, out ]" 53
+                    overhead "[ blade, out ]" 254
                     settimer "overhead_message_timer" 0
                 endif
             endif
@@ -175,12 +175,12 @@ while not dead
                 endif
 
                 wait 1000
-                overhead "[ gold, dropped ]" 90
+                overhead "[ gold, dropped ]" 290
             endif
         endwhile
 
         if cooldown "skill" = 0 and timer "hide_reminder_timer" > hide_reminder_timer_frequency
-            overhead "[ hide, ready ]" 68
+            overhead "[ hide, ready ]" 269
             settimer "hide_reminder_timer" 0
         endif
 
@@ -201,7 +201,7 @@ while not dead
         endif
 
         if findbuff "Stationary Penalty" and timer "overhead_message_timer" >= overhead_message_timer_frequency
-            overhead "[ penalty, on ]" 53
+            overhead "[ penalty, on ]" 254
             settimer "overhead_message_timer" 0
         endif
 
@@ -228,7 +228,7 @@ while not dead
             endif
 
             if timer "overhead_message_timer" > overhead_message_timer_frequency
-                overhead "[ stealth, off ]" 53
+                overhead "[ stealth, off ]" 254
                 settimer "overhead_message_timer" 0
             endif
         endif
@@ -238,12 +238,12 @@ while not dead
         endif
 
         if is_stealth = 1 and timer "overhead_message_timer" > overhead_message_timer_frequency
-            overhead "[ position, ready ]" 68
+            overhead "[ position, ready ]" 269
             settimer "overhead_message_timer" 0
         endif
 
         if is_stealth = 2 and timer "overhead_message_timer" > overhead_message_timer_frequency
-            overhead "[ stealth, ready ]" 68
+            overhead "[ stealth, ready ]" 269
             settimer "overhead_message_timer" 0
         endif
 
@@ -257,7 +257,7 @@ while not dead
                     clearsysmsg
                     break
                 else
-                    overhead "[ skill, off ]" 53
+                    overhead "[ skill, off ]" 254
                 endif
 
                 wait 1000
@@ -280,7 +280,7 @@ while not dead
                     wait 300
                     break
                 elseif timer "target_timer" > target_timer_frequency
-                    overhead "[ range, out ]" 53 lasttarget
+                    overhead "[ range, out ]" 254 lasttarget
                     settimer "target_timer" 0
                 endif
             endwhile

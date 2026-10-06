@@ -322,7 +322,7 @@ clearignore</code></pre>
 <p><strong>serial 리터럴 (<code>0x45147618</code> 같은 값)을 스크립트에 쓰지 않는다.</strong> <code>script/</code>는 공유 파일이라 남의 컨테이너 번호가
 pull 한 사람 모두의 게임에 들어간다. 개인 값은 프로필에 저장하고 스크립트에는 이름만 남긴다 (<code>script/loot/claim-loot.razor</code>).</p>
 <pre><code>if not varexist global__my_loot_container
-    overhead &quot;[ loot chest, pick ]&quot; 55
+    overhead &quot;[ loot chest, pick ]&quot; 255
     setvar global__my_loot_container
 endif</code></pre>
 <p><code>setvar 이름</code>은 타겟을 요구하고 그 serial을 프로필 script variable로 저장한다.</p>
@@ -332,7 +332,7 @@ endif</code></pre>
 <code>find</code>로 실제로 있는지까지 보고, 없으면 지우고 다시 묻는다 (<code>script/restock/loadout.razor</code>).</p>
 <pre><code>if not varexist global__my_supply_box or not find global__my_supply_box ground -1 -1 config__reach
     unsetvar global__my_supply_box
-    overhead &quot;[ supply box, pick ]&quot; 55
+    overhead &quot;[ supply box, pick ]&quot; 255
     setvar global__my_supply_box
 endif</code></pre>
 <p><strong>그 밖의 곳에는 붙이지 않는다.</strong> <code>find</code>는 클라이언트가 지금 인식하는 것만 찾으므로, 집에 있는 상자를 던전에서 검사하면 멀쩡한 값을 지운다.</p>
@@ -352,7 +352,7 @@ endif
 settimer &quot;timer__overhead_message&quot; cooldown__overhead_message</code></pre>
 <p>루프 안에서는 <code>timer</code>로 지난 시간을 읽고, 할 일을 한 뒤 <code>settimer</code>로 0부터 다시 잰다.</p>
 <pre><code>if timer &quot;timer__overhead_message&quot; &gt; cooldown__overhead_message
-    overhead &quot;[ heal pot, out ]&quot; 53
+    overhead &quot;[ heal pot, out ]&quot; 254
     settimer &quot;timer__overhead_message&quot; 0
 endif</code></pre>
 

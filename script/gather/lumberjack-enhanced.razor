@@ -23,7 +23,7 @@ cleardragdrop
 clearignore
 
 if pvp
-    overhead "[ script, blocked ]" 53
+    overhead "[ script, blocked ]" 254
     stop
 endif
 
@@ -240,7 +240,7 @@ endif
 
 if config__pack_lumber = 1
     if not varexist global__my_looting_pouch or not find global__my_looting_pouch backpack
-        overhead "[ loot pouch, pick ]" 55
+        overhead "[ loot pouch, pick ]" 255
         setvar global__my_looting_pouch
     endif
 endif
@@ -249,7 +249,7 @@ if config__sysmsg = 1
     sysmsg "Lumberjack enhanced v15 loaded: auto recall={{config__auto_recall}}, tracking color={{config__tracking_color}}." 88
 endif
 if config__chatty = 1
-    overhead "[ lumberjack, on ]" 90
+    overhead "[ lumberjack, on ]" 290
 endif
 
 # ####################################################################################
@@ -362,11 +362,11 @@ if config__use_tracking = 1 and skill "Tracking" > 0
                         gumpclose 4267467659
                     endif
                 elseif timer "timer__message" >= cooldown__message
-                    overhead "[ track, miss ]" 53
+                    overhead "[ track, miss ]" 254
                     settimer "timer__message" 0
                 endif
             elseif timer "timer__message" >= cooldown__message
-                overhead "[ track, miss ]" 53
+                overhead "[ track, miss ]" 254
                 settimer "timer__message" 0
             endif
         endif
@@ -379,7 +379,7 @@ endif
 while not dead
     # The pvp expression means structured-PvP restrictions, not a field PK encounter.
     if pvp
-        overhead "[ script, blocked ]" 53
+        overhead "[ script, blocked ]" 254
         stop
     endif
 
@@ -399,7 +399,7 @@ while not dead
             yell "[Pouch"
             wait wait__short
         elseif timer "timer__message" >= cooldown__message
-            overhead "[ pouch, out ]" 53
+            overhead "[ pouch, out ]" 254
             settimer "timer__message" 0
         endif
     endif
@@ -414,7 +414,7 @@ while not dead
                     settimer "timer__cure_potion" 0
                     wait wait__short
                 elseif timer "timer__message" >= cooldown__message
-                    overhead "[ cure pot, out ]" 53
+                    overhead "[ cure pot, out ]" 254
                     settimer "timer__message" 0
                 endif
             endif
@@ -437,7 +437,7 @@ while not dead
                         settimer "timer__bandage" 0
                         wait wait__short
                     elseif timer "timer__message" >= cooldown__message
-                        overhead "[ bandage, out ]" 53
+                        overhead "[ bandage, out ]" 254
                         settimer "timer__message" 0
                     endif
                 endif
@@ -459,7 +459,7 @@ while not dead
                         wait wait__short
                     endif
                 elseif timer "timer__message" >= cooldown__message
-                    overhead "[ heal pot, out ]" 53
+                    overhead "[ heal pot, out ]" 254
                     settimer "timer__message" 0
                 endif
             endif
@@ -511,7 +511,7 @@ while not dead
                     settimer "timer__refresh" 0
                     wait wait__short
                 elseif timer "timer__message" >= cooldown__message
-                    overhead "[ refresh, out ]" 53
+                    overhead "[ refresh, out ]" 254
                     settimer "timer__message" 0
                 endif
             endif
@@ -533,7 +533,7 @@ while not dead
                     endif
 
                     if var__tracking_hunting_active = 0 and timer "timer__message" >= cooldown__message
-                        overhead "[ track, check ]" 55
+                        overhead "[ track, check ]" 255
                         settimer "timer__message" 0
                     endif
                 endif
@@ -542,7 +542,7 @@ while not dead
                 if findtype "runebook" backpack or findtype "runetome" backpack
                     @setvar! var__recall_book_available 1
                 elseif config__require_runebook = 1 and timer "timer__message" >= cooldown__message
-                    overhead "[ runebook, out ]" 53
+                    overhead "[ runebook, out ]" 254
                     settimer "timer__message" 0
                 endif
             endif
@@ -663,7 +663,7 @@ while not dead
                             sysmsg "Recall trigger: spare weight at or below {{config__weight_remaining}}." 88
                         endif
                         if timer "timer__message" >= cooldown__message
-                            overhead "[ weight, low ]" 53
+                            overhead "[ weight, low ]" 254
                             settimer "timer__message" 0
                         endif
                     endif
@@ -683,7 +683,7 @@ while not dead
                                 @setvar! var__recall_sent 1
 
                                 if config__chatty = 1
-                                    overhead "[ recall, on ]" 90
+                                    overhead "[ recall, on ]" 290
                                 endif
 
                                 wait wait__short
@@ -694,12 +694,12 @@ while not dead
                         endif
 
                         if var__recall_book_available = 0 and timer "timer__message" >= cooldown__message
-                            overhead "[ runebook, out ]" 53
+                            overhead "[ runebook, out ]" 254
                             settimer "timer__message" 0
                         endif
                     endif
                 elseif mana < config__mana_recall and timer "timer__message" >= cooldown__message
-                    overhead "[ mana, low ]" 53
+                    overhead "[ mana, low ]" 254
                     settimer "timer__message" 0
                 endif
             endif
@@ -707,7 +707,7 @@ while not dead
             # One request per Play. Recovery keeps running, but harvest and repeat Recall stay paused.
             # Only an actual refusal gets a result notice. Silence or elapsed time does not prove arrival.
             if insysmsg "Magical travel is not allowed in this location." or insysmsg "Magical travel from inside a dungeon is only possible near golden moongates." or insysmsg "You do not have access to travel inside this house."
-                overhead "[ recall, blocked ]" 53
+                overhead "[ recall, blocked ]" 254
             endif
         endif
     endif
@@ -746,7 +746,7 @@ while not dead
                     endif
                     wait wait__equip
                 elseif timer "timer__message" >= cooldown__message
-                    overhead "[ hatchet, out ]" 53
+                    overhead "[ hatchet, out ]" 254
                     settimer "timer__message" 0
                 endif
             elseif findlayer self lefthand as alias__equipped_hatchet
@@ -976,7 +976,7 @@ while not dead
                             endif
                         endif
                     elseif timer "timer__message" >= cooldown__message
-                        overhead "[ loot pouch, out ]" 53
+                        overhead "[ loot pouch, out ]" 254
                         settimer "timer__message" 0
                     endif
                     # The next interval starts after this batch, including a missing-pouch attempt.

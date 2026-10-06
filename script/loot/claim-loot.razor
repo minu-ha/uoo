@@ -9,12 +9,12 @@ clearignore
 # Personal container. Asked for once and kept in your Razor profile, so no serial sits in
 # this shared file. To point the script at something else, run unsetvar on the name and rerun.
 if not varexist global__my_loot_container
-    overhead "[ loot chest, pick ]" 55
+    overhead "[ loot chest, pick ]" 255
     setvar global__my_loot_container
 endif
 
 if not find global__my_loot_container ground -1 -1 2
-    overhead "[ loot chest, out ]" 53
+    overhead "[ loot chest, out ]" 254
     stop
 endif
 
@@ -176,7 +176,7 @@ clearignore
 
 foreach distribute_item in distribute_item_list
     getlabel distribute_item distribute_item_description
-    overhead "[ claim, {{distribute_item_description}} ]" 90
+    overhead "[ claim, {{distribute_item_description}} ]" 290
     lift distribute_item 60000
     wait 500
     drop global__my_loot_container -1 -1 1
@@ -189,4 +189,4 @@ clearsysmsg
 cleardragdrop
 clearignore
 
-overhead "[ claim loot, done ]" 90
+overhead "[ claim loot, done ]" 290

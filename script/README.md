@@ -109,7 +109,7 @@ everyone who pulls it. Keep such values in your Razor profile instead:
 
 ```
 if not varexist global__my_loot_container
-    overhead "[ loot chest, pick ]" 55
+    overhead "[ loot chest, pick ]" 255
     setvar global__my_loot_container
 endif
 ```

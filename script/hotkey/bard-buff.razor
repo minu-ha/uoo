@@ -25,7 +25,7 @@ endwhile
 
 if not find var_my_instrument backpack
     clearsysmsg
-    overhead "[ inst, pick ]" 55
+    overhead "[ inst, pick ]" 255
     @setvar var_my_instrument
     wait 200
 
@@ -40,17 +40,17 @@ if not find var_my_instrument backpack
         getlabel found_instrument found_instrument_description
 
         if "flute" in found_instrument_description or "drums" in found_instrument_description or "harp" in found_instrument_description or "lute" in found_instrument_description or "tambourine" in found_instrument_description or "gemshorn" in found_instrument_description or "hurdy" in found_instrument_description or "psaltery" in found_instrument_description or "sackbut" in found_instrument_description or "shawm" in found_instrument_description or "Vielle" in found_instrument_description
-            overhead "[ inst, {{found_instrument_description}} ]" 55
+            overhead "[ inst, {{found_instrument_description}} ]" 255
             dclick var_my_instrument
             wait 7000
         else
             @setvar var_my_instrument 0
-            overhead "[ inst, wrong ]" 53
+            overhead "[ inst, wrong ]" 254
             stop
         endif
     else
         @setvar var_my_instrument 0
-        overhead "[ inst, out ]" 53
+        overhead "[ inst, out ]" 254
         stop
     endif
 endif

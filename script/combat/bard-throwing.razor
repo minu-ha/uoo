@@ -27,10 +27,10 @@
 #   A line that echoes a game event keeps the game's own sentence.
 #   No exclamation marks.
 #   Hue carries the category, see blueprint/overheads.html for the words and the palette:
-#     90  status and information
-#     53  warning, something is missing, wrong or running out
-#     55  a prompt waiting on the player
-#     118 a weapon ability going out, subject only
+#     290 status and information
+#     254 warning, something is missing, wrong or running out
+#     255 a prompt waiting on the player
+#     219 a weapon ability going out, subject only
 #
 # Throw status readout
 #   The moving throw count, the planted reload and the wing proc are printed by Razor's
@@ -232,7 +232,7 @@ endif
 # If auto detect fails, ask for a manual pick exactly once.
 if not find var__my_instrument backpack
     clearsysmsg
-    overhead "[ inst, pick ]" 55
+    overhead "[ inst, pick ]" 255
     @setvar! var__my_instrument
     wait wait__long
 
@@ -240,17 +240,17 @@ if not find var__my_instrument backpack
         getlabel alias__picked_instrument label__picked_instrument
 
         if "flute" in label__picked_instrument or "drums" in label__picked_instrument or "harp" in label__picked_instrument or "lute" in label__picked_instrument or "tambourine" in label__picked_instrument or "gemshorn" in label__picked_instrument or "hurdy" in label__picked_instrument or "psaltery" in label__picked_instrument or "sackbut" in label__picked_instrument or "shawm" in label__picked_instrument or "vielle" in label__picked_instrument
-            overhead "[ inst, {{label__picked_instrument}} ]" 55
+            overhead "[ inst, {{label__picked_instrument}} ]" 255
             dclick var__my_instrument
             wait wait__long
         else
             @setvar! var__my_instrument 0
-            overhead "[ inst, wrong ]" 53
+            overhead "[ inst, wrong ]" 254
             stop
         endif
     else
         @setvar! var__my_instrument 0
-        overhead "[ inst, out ]" 53
+        overhead "[ inst, out ]" 254
         stop
     endif
 endif
@@ -306,7 +306,7 @@ while not dead
             wait wait__long
         else
             if timer "timer__overhead_message" > cooldown__overhead_message
-                overhead "[ weapon, out ]" 53
+                overhead "[ weapon, out ]" 254
                 settimer "timer__overhead_message" 0
             endif
         endif
@@ -325,7 +325,7 @@ while not dead
             wait wait__long
         else
             if timer "timer__overhead_message" > cooldown__overhead_message
-                overhead "[ gauche, out ]" 53
+                overhead "[ gauche, out ]" 254
                 settimer "timer__overhead_message" 0
             endif
         endif
@@ -344,7 +344,7 @@ while not dead
 
     if insysmsg "That is not a musical instrument"
         @setvar! var__my_instrument 0
-        overhead "[ inst, wrong ]" 53
+        overhead "[ inst, wrong ]" 254
         replay
     endif
 
@@ -376,27 +376,27 @@ while not dead
         endif
 
         if var__planted_step = 0 and timer "timer__planted" >= cooldown__planted_2
-            overhead "[ planted, 2s ]" 90
+            overhead "[ planted, 2s ]" 290
             @setvar! var__planted_step 1
         endif
 
         if var__planted_step = 1 and timer "timer__planted" >= cooldown__planted_4
-            overhead "[ planted, 4s ]" 90
+            overhead "[ planted, 4s ]" 290
             @setvar! var__planted_step 2
         endif
 
         if var__planted_step = 2 and timer "timer__planted" >= cooldown__planted_6
-            overhead "[ planted, 6s ]" 90
+            overhead "[ planted, 6s ]" 290
             @setvar! var__planted_step 3
         endif
 
         if var__planted_step = 3 and timer "timer__planted" >= cooldown__planted_8
-            overhead "[ planted, 8s ]" 90
+            overhead "[ planted, 8s ]" 290
             @setvar! var__planted_step 4
         endif
 
         if var__planted_step = 4 and timer "timer__planted" >= cooldown__planted_10
-            overhead "[ throws, out ]" 53
+            overhead "[ throws, out ]" 254
             @setvar! var__planted_step 5
         endif
     endif
@@ -440,10 +440,10 @@ while not dead
             endif
 
             wait wait__long
-            overhead "[ gold, dropped ]" 90
+            overhead "[ gold, dropped ]" 290
         else
             if timer "timer__overhead_message" > cooldown__overhead_message
-                overhead "[ weight, over ]" 53
+                overhead "[ weight, over ]" 254
                 settimer "timer__overhead_message" 0
             endif
 
@@ -471,7 +471,7 @@ while not dead
                 wait wait__short
             else
                 if timer "timer__overhead_message" > cooldown__overhead_message
-                    overhead "[ bandage, out ]" 53
+                    overhead "[ bandage, out ]" 254
                     settimer "timer__overhead_message" 0
                 endif
             endif
@@ -487,7 +487,7 @@ while not dead
             wait wait__short
         else
             if timer "timer__overhead_message" > cooldown__overhead_message
-                overhead "[ pouch, out ]" 53
+                overhead "[ pouch, out ]" 254
                 settimer "timer__overhead_message" 0
             endif
         endif
@@ -502,7 +502,7 @@ while not dead
 
             if "next usable" in label__heal_potion
                 if timer "timer__overhead_message" > cooldown__overhead_message
-                    overhead "[ heal pot, {{label__heal_potion}} ]" 90
+                    overhead "[ heal pot, {{label__heal_potion}} ]" 290
                     settimer "timer__overhead_message" 0
                 endif
             else
@@ -513,7 +513,7 @@ while not dead
             endif
         else
             if timer "timer__overhead_message" > cooldown__overhead_message
-                overhead "[ heal pot, out ]" 53
+                overhead "[ heal pot, out ]" 254
                 settimer "timer__overhead_message" 0
             endif
         endif
@@ -529,7 +529,7 @@ while not dead
             wait wait__short
         else
             if timer "timer__overhead_message" > cooldown__overhead_message
-                overhead "[ cure pot, out ]" 53
+                overhead "[ cure pot, out ]" 254
                 settimer "timer__overhead_message" 0
             endif
         endif
@@ -545,7 +545,7 @@ while not dead
             wait wait__short
         else
             if timer "timer__overhead_message" > cooldown__overhead_message
-                overhead "[ refresh, out ]" 53
+                overhead "[ refresh, out ]" 254
                 settimer "timer__overhead_message" 0
             endif
         endif
@@ -560,7 +560,7 @@ while not dead
             wait wait__short
         else
             if timer "timer__overhead_message" > cooldown__overhead_message
-                overhead "[ str, out ]" 53
+                overhead "[ str, out ]" 254
                 settimer "timer__overhead_message" 0
             endif
         endif
@@ -575,7 +575,7 @@ while not dead
             wait wait__short
         else
             if timer "timer__overhead_message" > cooldown__overhead_message
-                overhead "[ agi, out ]" 53
+                overhead "[ agi, out ]" 254
                 settimer "timer__overhead_message" 0
             endif
         endif
@@ -590,7 +590,7 @@ while not dead
             wait wait__short
         else
             if timer "timer__overhead_message" > cooldown__overhead_message
-                overhead "[ resist, out ]" 53
+                overhead "[ resist, out ]" 254
                 settimer "timer__overhead_message" 0
             endif
         endif
@@ -653,7 +653,7 @@ while not dead
                     @setvar! var__stance_active config__stance_kite
                 else
                     @setvar! var__stance_disabled 1
-                    overhead "[ stance, out ]" 53
+                    overhead "[ stance, out ]" 254
                 endif
 
                 if var__stance_disabled = 0 and var__stance_want != var__stance_active
@@ -675,9 +675,9 @@ while not dead
                     settimer "timer__stance_resync" 0
 
                     if var__stance_want = config__stance_suppress
-                        overhead "[ stance, suppress ]" 90
+                        overhead "[ stance, suppress ]" 290
                     else
-                        overhead "[ stance, rake ]" 90
+                        overhead "[ stance, rake ]" 290
                     endif
                 endif
             endif
@@ -717,9 +717,9 @@ while not dead
         endif
 
         if var__ability_want = config__ability_clash
-            overhead "[ clash ]" 118
+            overhead "[ clash ]" 219
         else
-            overhead "[ blitz ]" 118
+            overhead "[ blitz ]" 219
         endif
 
         cooldown "ability" cooldown__ability

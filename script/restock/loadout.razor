@@ -56,20 +56,20 @@ clearignore
 if config__use_furniture_container = 1
     if not varexist global__my_furniture_container or not find global__my_furniture_container ground -1 -1 config__reach
         unsetvar global__my_furniture_container
-        overhead "[ furniture, pick ]" 55
+        overhead "[ furniture, pick ]" 255
         setvar global__my_furniture_container
     endif
 endif
 
 if not varexist global__my_supply_box or not find global__my_supply_box ground -1 -1 config__reach
     unsetvar global__my_supply_box
-    overhead "[ supply box, pick ]" 55
+    overhead "[ supply box, pick ]" 255
     setvar global__my_supply_box
 endif
 
 if not varexist global__my_recall_scroll_container or not find global__my_recall_scroll_container ground -1 -1 config__reach
     unsetvar global__my_recall_scroll_container
-    overhead "[ scroll box, pick ]" 55
+    overhead "[ scroll box, pick ]" 255
     setvar global__my_recall_scroll_container
 endif
 
@@ -106,7 +106,7 @@ wait wait__short
 if config__use_furniture_container = 1
     if not varexist global__my_bank_deposit_safe or not find global__my_bank_deposit_safe global__my_furniture_container
         unsetvar global__my_bank_deposit_safe
-        overhead "[ bank safe, pick ]" 55
+        overhead "[ bank safe, pick ]" 255
         setvar global__my_bank_deposit_safe
     endif
 
@@ -116,7 +116,7 @@ if config__use_furniture_container = 1
 else
     if not varexist global__my_bank_deposit_safe or not find global__my_bank_deposit_safe ground -1 -1 config__reach
         unsetvar global__my_bank_deposit_safe
-        overhead "[ bank safe, pick ]" 55
+        overhead "[ bank safe, pick ]" 255
         setvar global__my_bank_deposit_safe
     endif
 
@@ -130,7 +130,7 @@ endif
 if config__use_furniture_container = 1
     if not varexist global__my_resource_stockpile or not find global__my_resource_stockpile global__my_furniture_container
         unsetvar global__my_resource_stockpile
-        overhead "[ stockpile, pick ]" 55
+        overhead "[ stockpile, pick ]" 255
         setvar global__my_resource_stockpile
     endif
 
@@ -140,7 +140,7 @@ if config__use_furniture_container = 1
 else
     if not varexist global__my_resource_stockpile or not find global__my_resource_stockpile ground -1 -1 config__reach
         unsetvar global__my_resource_stockpile
-        overhead "[ stockpile, pick ]" 55
+        overhead "[ stockpile, pick ]" 255
         setvar global__my_resource_stockpile
     endif
 
@@ -154,7 +154,7 @@ endif
 if config__use_furniture_container = 1
     if not varexist global__my_repair_bench or not find global__my_repair_bench global__my_furniture_container
         unsetvar global__my_repair_bench
-        overhead "[ repair bench, pick ]" 55
+        overhead "[ repair bench, pick ]" 255
         setvar global__my_repair_bench
     endif
 
@@ -164,7 +164,7 @@ if config__use_furniture_container = 1
 else
     if not varexist global__my_repair_bench or not find global__my_repair_bench ground -1 -1 config__reach
         unsetvar global__my_repair_bench
-        overhead "[ repair bench, pick ]" 55
+        overhead "[ repair bench, pick ]" 255
         setvar global__my_repair_bench
     endif
 
@@ -178,7 +178,7 @@ endif
 if config__use_furniture_container = 1
     if not varexist global__my_storage_shelf or not find global__my_storage_shelf global__my_furniture_container
         unsetvar global__my_storage_shelf
-        overhead "[ shelf, pick ]" 55
+        overhead "[ shelf, pick ]" 255
         setvar global__my_storage_shelf
     endif
 
@@ -188,7 +188,7 @@ if config__use_furniture_container = 1
 else
     if not varexist global__my_storage_shelf or not find global__my_storage_shelf ground -1 -1 config__reach
         unsetvar global__my_storage_shelf
-        overhead "[ shelf, pick ]" 55
+        overhead "[ shelf, pick ]" 255
         setvar global__my_storage_shelf
     endif
 
@@ -202,7 +202,7 @@ endif
 if config__use_furniture_container = 1
     if not varexist global__my_magic_item_recycler or not find global__my_magic_item_recycler global__my_furniture_container
         unsetvar global__my_magic_item_recycler
-        overhead "[ recycler, pick ]" 55
+        overhead "[ recycler, pick ]" 255
         setvar global__my_magic_item_recycler
     endif
 
@@ -212,7 +212,7 @@ if config__use_furniture_container = 1
 else
     if not varexist global__my_magic_item_recycler or not find global__my_magic_item_recycler ground -1 -1 config__reach
         unsetvar global__my_magic_item_recycler
-        overhead "[ recycler, pick ]" 55
+        overhead "[ recycler, pick ]" 255
         setvar global__my_magic_item_recycler
     endif
 
@@ -233,7 +233,7 @@ endif
 # closes its own gump before it ends, so the block after it does not have to defend against
 # anything. That is why none of these start with a cancel or a gumpclose.
 if var__has_bank_deposit_safe = 1 and findtype 3821 backpack
-    overhead "[ bank safe, on ]" 90
+    overhead "[ bank safe, on ]" 290
     menu global__my_bank_deposit_safe 0
     waitfortarget wait__target
 
@@ -257,7 +257,7 @@ endif
 # this one and the shelf restock never ran. target self was already here, but it does not
 # always take, and the block had nothing to clean up after itself.
 if var__has_resource_stockpile = 1
-    overhead "[ stockpile, on ]" 90
+    overhead "[ stockpile, on ]" 290
     menu global__my_resource_stockpile 0
     waitfortarget wait__target
 
@@ -280,9 +280,9 @@ if var__has_repair_bench = 1
     wait wait__repair
 
     if insysmsg "You do not have any items equipped or in your backpack in need of repairs."
-        overhead "[ repair bench, skip ]" 90
+        overhead "[ repair bench, skip ]" 290
     else
-        overhead "[ repair bench, on ]" 90
+        overhead "[ repair bench, on ]" 290
         waitforsysmsg "Repaired"
     endif
 endif
@@ -305,7 +305,7 @@ endif
 @setvar! config__recycle_unidentified_only 1
 
 if var__has_magic_item_recycler = 1
-    overhead "[ recycler, on ]" 90
+    overhead "[ recycler, on ]" 290
 
     if config__recycle_unidentified_only = 1
         menu global__my_magic_item_recycler 1
@@ -332,7 +332,7 @@ endif
 # opening, so waiting on that gump ended the run right here. The gumpclose at the end covers
 # the times it does open.
 if var__has_storage_shelf = 1
-    overhead "[ shelf, restock ]" 90
+    overhead "[ shelf, restock ]" 290
     menu global__my_storage_shelf 0
     waitfortarget wait__target
 
@@ -356,7 +356,7 @@ endif
 # colliding with it. That was wrong. The run was dying on an undeclared wait__long, and the
 # context menu left on screen was the symptom, not the cause.
 if var__has_storage_shelf = 1
-    overhead "[ shelf, resupply ]" 90
+    overhead "[ shelf, resupply ]" 290
     menu global__my_storage_shelf 1
     wait wait__short
     gumpclose
@@ -390,7 +390,7 @@ if config__use_sewing_kit_and_id_wand = 1 and find global__my_supply_box ground 
             drop global__my_supply_box
             wait wait__short
             if config__chatty = 1
-                overhead "[ sewing kit, back ]" 90
+                overhead "[ sewing kit, back ]" 290
             endif
         endif
 
@@ -406,10 +406,10 @@ if config__use_sewing_kit_and_id_wand = 1 and find global__my_supply_box ground 
             drop backpack
             wait wait__short
             if config__chatty = 1
-                overhead "[ sewing kit, take ]" 90
+                overhead "[ sewing kit, take ]" 290
             endif
         else
-            overhead "[ sewing kit, out ]" 53
+            overhead "[ sewing kit, out ]" 254
         endif
     endif
 
@@ -424,7 +424,7 @@ if config__use_sewing_kit_and_id_wand = 1 and find global__my_supply_box ground 
             drop global__my_supply_box
             wait wait__short
             if config__chatty = 1
-                overhead "[ id wand, back ]" 90
+                overhead "[ id wand, back ]" 290
             endif
         endif
 
@@ -440,10 +440,10 @@ if config__use_sewing_kit_and_id_wand = 1 and find global__my_supply_box ground 
             drop backpack
             wait wait__short
             if config__chatty = 1
-                overhead "[ id wand, take ]" 90
+                overhead "[ id wand, take ]" 290
             endif
         else
-            overhead "[ id wand, out ]" 53
+            overhead "[ id wand, out ]" 254
         endif
     endif
 endif
@@ -478,7 +478,7 @@ if config__use_magic_instrument = 1
                 drop global__my_supply_box
                 wait wait__short
                 if config__chatty = 1
-                    overhead "[ inst, back ]" 90
+                    overhead "[ inst, back ]" 290
                 endif
             endif
         endif
@@ -498,7 +498,7 @@ if config__use_magic_instrument = 1
                 drop backpack
                 wait wait__short
                 if config__chatty = 1
-                    overhead "[ inst, take ]" 90
+                    overhead "[ inst, take ]" 290
                 endif
                 @setvar! var__kept_instrument 1
                 break
@@ -510,7 +510,7 @@ if config__use_magic_instrument = 1
         clearignore
 
         if var__kept_instrument = 0
-            overhead "[ inst, out ]" 53
+            overhead "[ inst, out ]" 254
         endif
     endif
 endif
@@ -519,7 +519,7 @@ endif
 # # Looting bag
 # ####################################################################################
 if not varexist global__my_looting_pouch
-    overhead "[ loot pouch, set ]" 90
+    overhead "[ loot pouch, set ]" 290
     wait wait__short
 
     if findtype 3705 backpack 0 as alias__found_pouch
@@ -530,7 +530,7 @@ if not varexist global__my_looting_pouch
 else
     if not find global__my_looting_pouch backpack
         wait wait__short
-        overhead "[ loot pouch, out ]" 53
+        overhead "[ loot pouch, out ]" 254
 
         if findtype 3705 backpack 0 as alias__found_pouch
             setvar global__my_looting_pouch alias__found_pouch
@@ -595,7 +595,7 @@ if findtype 30765 backpack as alias__found_reagent_satchel
     drop backpack 130 200
     wait wait__short
     if config__chatty = 1
-        overhead "[ reg satchel, moved ]" 90
+        overhead "[ reg satchel, moved ]" 290
     endif
     dclick alias__found_reagent_satchel
     wait wait__short
@@ -607,7 +607,7 @@ if findtype 31262 backpack as alias__found_alchemists_satchel
     drop backpack 130 200
     wait wait__short
     if config__chatty = 1
-        overhead "[ alch satchel, moved ]" 90
+        overhead "[ alch satchel, moved ]" 290
     endif
     dclick alias__found_alchemists_satchel
     wait wait__short
@@ -620,7 +620,7 @@ while findtype 3705 backpack 0 as alias__found_pouch
     drop backpack 130 200
     wait wait__short
     if config__chatty = 1
-        overhead "[ pouch, moved ]" 90
+        overhead "[ pouch, moved ]" 290
     endif
     dclick alias__found_pouch
     wait wait__short
@@ -638,7 +638,7 @@ if findtype 3705 backpack 38 as alias__found_trap_pouch
     drop backpack 120 200
     wait wait__short
     if config__chatty = 1
-        overhead "[ trapped pouch, moved ]" 90
+        overhead "[ trapped pouch, moved ]" 290
     endif
     @ignore alias__found_trap_pouch
 endif
@@ -649,7 +649,7 @@ if findtype 3705 backpack 38 as alias__found_trap_pouch
     drop backpack 125 200
     wait wait__short
     if config__chatty = 1
-        overhead "[ trapped pouch, moved ]" 90
+        overhead "[ trapped pouch, moved ]" 290
     endif
     @ignore alias__found_trap_pouch
 endif
@@ -660,7 +660,7 @@ if findtype 3705 backpack 38 as alias__found_trap_pouch
     drop backpack 130 200
     wait wait__short
     if config__chatty = 1
-        overhead "[ trapped pouch, moved ]" 90
+        overhead "[ trapped pouch, moved ]" 290
     endif
     @ignore alias__found_trap_pouch
 endif
@@ -671,7 +671,7 @@ if findtype 3705 backpack 38 as alias__found_trap_pouch
     drop backpack 135 200
     wait wait__short
     if config__chatty = 1
-        overhead "[ trapped pouch, moved ]" 90
+        overhead "[ trapped pouch, moved ]" 290
     endif
     @ignore alias__found_trap_pouch
 endif
@@ -682,7 +682,7 @@ if findtype 3705 backpack 38 as alias__found_trap_pouch
     drop backpack 140 200
     wait wait__short
     if config__chatty = 1
-        overhead "[ trapped pouch, moved ]" 90
+        overhead "[ trapped pouch, moved ]" 290
     endif
     @ignore alias__found_trap_pouch
 endif
@@ -693,7 +693,7 @@ while findtype 3705 backpack 38 as alias__found_trap_pouch
     drop backpack 140 200
     wait wait__short
     if config__chatty = 1
-        overhead "[ trapped pouch, moved ]" 90
+        overhead "[ trapped pouch, moved ]" 290
     endif
     @ignore alias__found_trap_pouch
 endwhile
@@ -714,7 +714,7 @@ foreach alias__sorting_item in sorting_item_list
     getlabel alias__sorting_item label__sorting_item
 
     if config__chatty = 1
-        overhead "[ sort, {{label__sorting_item}} ]" 90
+        overhead "[ sort, {{label__sorting_item}} ]" 290
     endif
 
     lift alias__sorting_item 1000
@@ -749,7 +749,7 @@ if findlayer self righthand as item
 
     if config__chatty = 1
         getlabel item label__right_hand
-        overhead "[ right hand, {{label__right_hand}} ]" 90
+        overhead "[ right hand, {{label__right_hand}} ]" 290
     endif
 endif
 
@@ -758,7 +758,7 @@ if findlayer self lefthand as item
 
     if config__chatty = 1
         getlabel item label__left_hand
-        overhead "[ left hand, {{label__left_hand}} ]" 90
+        overhead "[ left hand, {{label__left_hand}} ]" 290
     endif
 endif
 
@@ -767,7 +767,7 @@ if findlayer self onehandedsecondary as item
 
     if config__chatty = 1
         getlabel item label__one_handed_secondary
-        overhead "[ secondary, {{label__one_handed_secondary}} ]" 90
+        overhead "[ secondary, {{label__one_handed_secondary}} ]" 290
     endif
 endif
 
@@ -776,7 +776,7 @@ if findlayer self head as item
 
     if config__chatty = 1
         getlabel item label__head
-        overhead "[ head, {{label__head}} ]" 90
+        overhead "[ head, {{label__head}} ]" 290
     endif
 endif
 
@@ -785,7 +785,7 @@ if findlayer self neck as item
 
     if config__chatty = 1
         getlabel item label__neck
-        overhead "[ neck, {{label__neck}} ]" 90
+        overhead "[ neck, {{label__neck}} ]" 290
     endif
 endif
 
@@ -794,7 +794,7 @@ if findlayer self earrings as item
 
     if config__chatty = 1
         getlabel item label__earrings
-        overhead "[ earrings, {{label__earrings}} ]" 90
+        overhead "[ earrings, {{label__earrings}} ]" 290
     endif
 endif
 
@@ -803,7 +803,7 @@ if findlayer self face as item
 
     if config__chatty = 1
         getlabel item label__face
-        overhead "[ face, {{label__face}} ]" 90
+        overhead "[ face, {{label__face}} ]" 290
     endif
 endif
 
@@ -812,7 +812,7 @@ if findlayer self shirt as item
 
     if config__chatty = 1
         getlabel item label__shirt
-        overhead "[ shirt, {{label__shirt}} ]" 90
+        overhead "[ shirt, {{label__shirt}} ]" 290
     endif
 endif
 
@@ -821,7 +821,7 @@ if findlayer self innertorso as item
 
     if config__chatty = 1
         getlabel item label__inner_torso
-        overhead "[ inner torso, {{label__inner_torso}} ]" 90
+        overhead "[ inner torso, {{label__inner_torso}} ]" 290
     endif
 endif
 
@@ -830,7 +830,7 @@ if findlayer self middletorso as item
 
     if config__chatty = 1
         getlabel item label__middle_torso
-        overhead "[ middle torso, {{label__middle_torso}} ]" 90
+        overhead "[ middle torso, {{label__middle_torso}} ]" 290
     endif
 endif
 
@@ -839,7 +839,7 @@ if findlayer self outertorso as item
 
     if config__chatty = 1
         getlabel item label__outer_torso
-        overhead "[ outer torso, {{label__outer_torso}} ]" 90
+        overhead "[ outer torso, {{label__outer_torso}} ]" 290
     endif
 endif
 
@@ -848,7 +848,7 @@ if findlayer self arms as item
 
     if config__chatty = 1
         getlabel item label__arms
-        overhead "[ arms, {{label__arms}} ]" 90
+        overhead "[ arms, {{label__arms}} ]" 290
     endif
 endif
 
@@ -857,7 +857,7 @@ if findlayer self gloves as item
 
     if config__chatty = 1
         getlabel item label__gloves
-        overhead "[ gloves, {{label__gloves}} ]" 90
+        overhead "[ gloves, {{label__gloves}} ]" 290
     endif
 endif
 
@@ -866,7 +866,7 @@ if findlayer self ring as item
 
     if config__chatty = 1
         getlabel item label__ring
-        overhead "[ ring, {{label__ring}} ]" 90
+        overhead "[ ring, {{label__ring}} ]" 290
     endif
 endif
 
@@ -875,7 +875,7 @@ if findlayer self bracelet as item
 
     if config__chatty = 1
         getlabel item label__bracelet
-        overhead "[ bracelet, {{label__bracelet}} ]" 90
+        overhead "[ bracelet, {{label__bracelet}} ]" 290
     endif
 endif
 
@@ -884,7 +884,7 @@ if findlayer self waist as item
 
     if config__chatty = 1
         getlabel item label__waist
-        overhead "[ waist, {{label__waist}} ]" 90
+        overhead "[ waist, {{label__waist}} ]" 290
     endif
 endif
 
@@ -893,7 +893,7 @@ if findlayer self pants as item
 
     if config__chatty = 1
         getlabel item label__pants
-        overhead "[ pants, {{label__pants}} ]" 90
+        overhead "[ pants, {{label__pants}} ]" 290
     endif
 endif
 
@@ -902,7 +902,7 @@ if findlayer self innerlegs as item
 
     if config__chatty = 1
         getlabel item label__inner_legs
-        overhead "[ inner legs, {{label__inner_legs}} ]" 90
+        overhead "[ inner legs, {{label__inner_legs}} ]" 290
     endif
 endif
 
@@ -911,7 +911,7 @@ if findlayer self outerlegs as item
 
     if config__chatty = 1
         getlabel item label__outer_legs
-        overhead "[ outer legs, {{label__outer_legs}} ]" 90
+        overhead "[ outer legs, {{label__outer_legs}} ]" 290
     endif
 endif
 
@@ -920,7 +920,7 @@ if findlayer self shoes as item
 
     if config__chatty = 1
         getlabel item label__shoes
-        overhead "[ shoes, {{label__shoes}} ]" 90
+        overhead "[ shoes, {{label__shoes}} ]" 290
     endif
 endif
 
@@ -929,7 +929,7 @@ if findlayer self cloak as item
 
     if config__chatty = 1
         getlabel item label__cloak
-        overhead "[ cloak, {{label__cloak}} ]" 90
+        overhead "[ cloak, {{label__cloak}} ]" 290
     endif
 endif
 
@@ -938,7 +938,7 @@ if findlayer self talisman as item
 
     if config__chatty = 1
         getlabel item label__talisman
-        overhead "[ talisman, {{label__talisman}} ]" 90
+        overhead "[ talisman, {{label__talisman}} ]" 290
     endif
 endif
 
@@ -947,7 +947,7 @@ if findlayer self quiver as item
 
     if config__chatty = 1
         getlabel item label__quiver
-        overhead "[ quiver, {{label__quiver}} ]" 90
+        overhead "[ quiver, {{label__quiver}} ]" 290
     endif
 endif
 
@@ -956,7 +956,7 @@ if findlayer self outerbody as item
 
     if config__chatty = 1
         getlabel item label__outer_body
-        overhead "[ outer body, {{label__outer_body}} ]" 90
+        overhead "[ outer body, {{label__outer_body}} ]" 290
     endif
 endif
 
@@ -965,11 +965,11 @@ if findlayer self backpack as item
 
     if config__chatty = 1
         getlabel item label__backpack
-        overhead "[ backpack, {{label__backpack}} ]" 90
+        overhead "[ backpack, {{label__backpack}} ]" 290
     endif
 endif
 
-overhead "[ dress, set ]" 90
+overhead "[ dress, set ]" 290
 
 # ####################################################################################
 # # Refill runebook
@@ -983,18 +983,18 @@ if findtype 8012 global__my_recall_scroll_container as alias__found_recall_scrol
 endif
 
 if global__my_recall_scroll = 0
-    overhead "[ recall scroll, out ]" 53
+    overhead "[ recall scroll, out ]" 254
     stop
 endif
 
 # Backpack
 while findtype "runetome|runebook" backpack as alias__found_runetome
     getlabel global__my_recall_scroll label__found_runetome
-    overhead "[ scroll, {{label__found_runetome}} ]" 90
+    overhead "[ scroll, {{label__found_runetome}} ]" 290
 
     lift global__my_recall_scroll 6000
     if insysmsg 'not found or out of range'
-        overhead "[ recall scroll, out ]" 53
+        overhead "[ recall scroll, out ]" 254
         stop
     endif
 
@@ -1005,11 +1005,11 @@ endwhile
 # Nearby tomes
 while findtype "runetome|runebook" ground -1 -1 2 as alias__found_runetome
     getlabel global__my_recall_scroll label__found_runetome
-    overhead "[ scroll, {{label__found_runetome}} ]" 90
+    overhead "[ scroll, {{label__found_runetome}} ]" 290
 
     lift global__my_recall_scroll 6000
     if insysmsg 'not found or out of range'
-        overhead "[ recall scroll, out ]" 53
+        overhead "[ recall scroll, out ]" 254
         stop
     endif
 
@@ -1021,11 +1021,11 @@ endwhile
 while findtype 47202|62764|2473|3710|41451|41452|3646|3647|3644|3645|41449|41450|29832|29833|2472|29077|29078|2475|3648|3649|3708|3650|3651|41453|41454|2474|3709|3650|3651|41455|41456|29086|29087 true as alias__found_container
     while findtype "runetome|runebook" alias__found_container as alias__found_runetome
         getlabel global__my_recall_scroll label__found_runetome
-        overhead "[ scroll, {{label__found_runetome}} ]" 90
+        overhead "[ scroll, {{label__found_runetome}} ]" 290
 
         lift global__my_recall_scroll 60000
         if insysmsg 'not found or out of range'
-            overhead "[ recall scroll, out ]" 53
+            overhead "[ recall scroll, out ]" 254
             stop
         endif
 
@@ -1038,5 +1038,5 @@ endwhile
 
 cleardragdrop
 clearignore
-overhead "[ loadout, done ]" 90
+overhead "[ loadout, done ]" 290
 stop

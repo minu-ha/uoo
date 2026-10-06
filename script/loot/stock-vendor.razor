@@ -63,12 +63,12 @@ cleardragdrop
 # from another script and rerun this one.
 # ####################################################################################
 if not varexist var__vendor_container
-    overhead "[ vendor, pick ]" 55
+    overhead "[ vendor, pick ]" 255
     setvar var__vendor_container
 endif
 
 if not varexist var__source_container
-    overhead "[ sell box, pick ]" 55
+    overhead "[ sell box, pick ]" 255
     setvar var__source_container
 endif
 
@@ -1902,8 +1902,8 @@ foreach alias__place_item in list__vendor_items
     waitforgump 685310710 3000
 
     if not gumpexists 685310710
-        overhead "[ pricing, out ]" 53
-        overhead "[ pricing menu, off ]" 53
+        overhead "[ pricing, out ]" 254
+        overhead "[ pricing menu, off ]" 254
         @clearignore
         stop
     endif
@@ -1912,19 +1912,19 @@ foreach alias__place_item in list__vendor_items
         gumpresponse 16 685310710
         wait var__delay_place
     else
-        overhead "[ {{label__item}}, {{var__price_hint}} ]" 90
+        overhead "[ {{label__item}}, {{var__price_hint}} ]" 290
         settimer "timer__hint_repeat" 0
 
         @setvar! var__gump_done 0
 
         while var__gump_done = 0
             if timer "timer__hint_repeat" >= var__delay_hint_repeat
-                overhead "[ {{label__item}}, {{var__price_hint}} ]" 90
+                overhead "[ {{label__item}}, {{var__price_hint}} ]" 290
                 settimer "timer__hint_repeat" 0
             endif
 
             if warmode
-                overhead "[ vendor, cut ]" 53
+                overhead "[ vendor, cut ]" 254
                 @clearignore
                 stop
             endif
@@ -1943,4 +1943,4 @@ foreach alias__place_item in list__vendor_items
 endfor
 
 @clearignore
-overhead "[ vendor, done ]" 90
+overhead "[ vendor, done ]" 290
