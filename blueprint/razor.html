@@ -373,6 +373,13 @@ v10은 오른손 제어를 추가하지 않고 실제 왼손과 캐시 serial을
 <td>lasttarget이 백팩이나 나로 바뀐다. 10칸 밖에서 고른 타겟을 노래가 덮어써 교전을 못 했다 (2026-09-29)</td>
 <td>타겟은 화면 거리에서 받아 두고, 백팩이나 나를 찍기 전에 lasttarget을 한 번 더 본다</td>
 </tr>
+<tr>
+<td><code>setlasttarget alias__x</code>로 lasttarget 되돌리기</td>
+<td>Razor CE 문서의 <code>setlasttarget ('serial')</code>과 달리 <code>Target a new 'Last Target'</code> 커서가 떴다.
+그 뒤의 sysmsg 줄이 나오지 않았고, 커서를 취소할 때마다 <code>Target queue cleared.</code>와 같은 커서가 번갈아 찍혔다.
+인게임 확인됨 2026-10-07 (skinning-enhanced v3 Journal). 스크립트가 그 줄에서 커서를 기다린 것으로 보이며, 인자를 무시한 원인은 확인되지 않았다</td>
+<td>쓰지 않는다. lasttarget을 덮어쓰는 동작은 기억한 적이 없을 때만 한다 (<code>skinning-enhanced.razor</code> SKINNING)</td>
+</tr>
 </tbody>
 </table>
 
