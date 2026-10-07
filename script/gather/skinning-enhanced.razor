@@ -25,7 +25,8 @@ endif
 # ####################################################################################
 # Optional script overheads. Essential warnings remain visible.
 @setvar! config__chatty 1
-# Journal diagnostics: startup, carve requests and the grey only carve mode.
+# Journal diagnostics: startup, combat target changes, carve requests and results, carve mode,
+# codex switches, heal and buff casts, axe equip, gold drops and leather packing.
 @setvar! config__sysmsg 1
 @setvar! config__use_potion 1
 @setvar! config__use_magery 1
@@ -38,8 +39,8 @@ endif
 @setvar! config__use_gold_drop 1
 @setvar! config__gold_drop_amount 2000
 
-# Skinning. 1 carves every corpse within 2 tiles, grey or not, by targeting each corpse.
-# 0 carves grey corpses only, through Smart Harvest on self.
+# Skinning. 1 carves every creature corpse within 2 tiles, grey or not, by targeting each corpse.
+# Player remains are never targeted. 0 carves grey corpses only, through Smart Harvest on self.
 # Where the server refuses the first as a criminal action, grey corpses only for 5 minutes.
 @setvar! config__use_skinning 1
 @setvar! config__skin_unowned 1
@@ -272,6 +273,13 @@ endif
 @setvar! var__pick_during_carve 0
 # Scratch: 1 targets the corpse, 0 uses Smart Harvest. Chosen for each carve.
 @setvar! var__carve_direct 0
+# Scratch: 1 when the corpse found this pass may be carved.
+@setvar! var__corpse_ok 0
+# 1 after a corpse carving criminal act, read from the carve reply. The label check should keep
+# player remains out, so this is only a safety net. Direct carving then stays off until the next Play.
+@setvar! var__carve_crime 0
+# Corpse that missed once (too far or busy). It gets one more request, then it is ignored.
+@setvar! var__carve_retry 0
 
 # Selected axe and knife serials, reused across Stop and Play. 0 means rediscover from the backpack.
 if not varexist var__my_weapon
@@ -329,7 +337,7 @@ if config__pack_leather = 1
 endif
 
 if config__sysmsg = 1
-    sysmsg "Skinning enhanced v6 loaded: skin unowned={{config__skin_unowned}}, parry stance={{config__parry_stance_main}}." 88
+    sysmsg "Skinning enhanced v8 loaded: skin unowned={{config__skin_unowned}}, sword stance={{config__sword_stance_main}}, parry stance={{config__parry_stance_main}}." 88
 endif
 if config__chatty = 1
     overhead "[ skinning, on ]" 290
@@ -359,6 +367,9 @@ while not dead
                     if noto alias__fresh_target = "hostile" or noto alias__fresh_target = "criminal" or noto alias__fresh_target = "enemy" or noto alias__fresh_target = "murderer"
                         @setvar! var__combat_target alias__fresh_target
                         settimer "timer__combat_target_grace" 0
+                        if config__sysmsg = 1
+                            sysmsg "Combat target: {{alias__fresh_target}}. Skinning and leather packing wait." 88
+                        endif
                     endif
                 endif
             endif
@@ -368,6 +379,9 @@ while not dead
     if find var__combat_target ground -1 -1 12 as alias__stored_target
         if dead alias__stored_target
             @setvar! var__combat_target 0
+            if config__sysmsg = 1
+                sysmsg "Combat target cleared: dead." 88
+            endif
         elseif noto alias__stored_target != "hostile" and noto alias__stored_target != "criminal" and noto alias__stored_target != "enemy" and noto alias__stored_target != "murderer"
             @setvar! var__combat_target 0
         else
@@ -375,6 +389,9 @@ while not dead
         endif
     elseif var__combat_target != 0 and timer "timer__combat_target_grace" >= cooldown__combat_target_grace
         @setvar! var__combat_target 0
+        if config__sysmsg = 1
+            sysmsg "Combat target cleared: gone from 12 tiles." 88
+        endif
     endif
 
     # ################################################################################
@@ -473,8 +490,14 @@ while not dead
         if not hidden and not queued and not casting and not targetexists and cooldown "walk" = 0
             if var__heal_spell = 2
                 hotkey "> Greater Heal/Cure Self"
+                if config__sysmsg = 1
+                    sysmsg "Heal agent: Greater Heal/Cure Self." 88
+                endif
             else
                 hotkey "> Smart Heal/Cure Self"
+                if config__sysmsg = 1
+                    sysmsg "Heal agent: Smart Heal/Cure Self." 88
+                endif
             endif
             settimer "timer__heal" 0
             wait wait__short
@@ -529,6 +552,9 @@ while not dead
                     # so a refused equip after a disarm does not stall recovery.
                     lift alias__weapon_to_equip
                     drop self lefthand
+                    if config__sysmsg = 1
+                        sysmsg "Axe equip requested: serial={{alias__weapon_to_equip}}. The next check reads the hand." 88
+                    endif
                     wait wait__short
                 elseif timer "timer__overhead_message" >= cooldown__overhead_message
                     overhead "[ axe, out ]" 254
@@ -542,6 +568,9 @@ while not dead
                 # item-list names the type "two handed axe" and hally-mage reads "two-handed axe".
                 if "two-handed axe" in label__hand_weapon or "two handed axe" in label__hand_weapon or "Two-Handed Axe" in label__hand_weapon or "Two Handed Axe" in label__hand_weapon
                     @setvar! var__my_weapon alias__equipped_weapon
+                    if config__sysmsg = 1
+                        sysmsg "Axe adopted from the left hand: serial={{alias__equipped_weapon}}." 88
+                    endif
                 endif
             endif
         endif
@@ -556,6 +585,9 @@ while not dead
             if findtype "gold coin" backpack as alias__found_gold
                 lift alias__found_gold config__gold_drop_amount
                 droprelloc 0 0
+                if config__sysmsg = 1
+                    sysmsg "Gold drop: up to {{config__gold_drop_amount}} at your feet, weight over max." 88
+                endif
                 wait wait__short
 
                 if insysmsg "cannot drop anything"
@@ -657,6 +689,9 @@ while not dead
                 else
                     @setvar! var__sword_disabled 1
                     overhead "[ sword stance, off ]" 254
+                    if config__sysmsg = 1
+                        sysmsg "Sword codex label names no stance, sword stance stands down: {{label__sword_codex}}" 88
+                    endif
                 endif
 
                 # FINISHER: one finisher triggers once per creature at its health threshold.
@@ -690,6 +725,9 @@ while not dead
                         elseif config__sword_finisher_main = 2
                             say "[SwordsFinisher2"
                         endif
+                        if config__sysmsg = 1
+                            sysmsg "Sword finisher switch: slot {{config__sword_finisher_main}}." 88
+                        endif
                         # Keep the finisher and stance commands apart.
                         wait wait__short
                         if config__chatty = 1
@@ -709,6 +747,9 @@ while not dead
                 endif
 
                 if var__sword_disabled = 0 and var__sword_want != var__sword_active
+                    if config__sysmsg = 1
+                        sysmsg "Sword stance switch: slot {{var__sword_active}} to {{var__sword_want}}." 88
+                    endif
                     if var__sword_want = 1
                         say "[SwordsStance1"
                     elseif var__sword_want = 2
@@ -799,6 +840,9 @@ while not dead
                 else
                     @setvar! var__parry_disabled 1
                     overhead "[ parry stance, off ]" 254
+                    if config__sysmsg = 1
+                        sysmsg "Parry codex label names no stance, parry stance stands down: {{label__parry_codex}}" 88
+                    endif
                 endif
 
                 # FINISHER: checked once per Play, only when the label proved it carries the stance.
@@ -825,6 +869,9 @@ while not dead
                         elseif config__parry_finisher_main = 2
                             say "[ShieldsFinisher2"
                         endif
+                        if config__sysmsg = 1
+                            sysmsg "Parry finisher switch: slot {{config__parry_finisher_main}}." 88
+                        endif
                         # Keep the finisher and stance commands apart.
                         wait wait__short
                         if config__chatty = 1
@@ -844,6 +891,9 @@ while not dead
                 endif
 
                 if var__parry_disabled = 0 and var__parry_want != var__parry_active
+                    if config__sysmsg = 1
+                        sysmsg "Parry stance switch: slot {{var__parry_active}} to {{var__parry_want}}. Damage over time and melee decide Warding." 88
+                    endif
                     if var__parry_want = 1
                         say "[ShieldsStance1"
                     elseif var__parry_want = 2
@@ -898,6 +948,9 @@ while not dead
             say "[WeaponAbility3"
         endif
         settimer "timer__ability" 0
+        if config__sysmsg = 1
+            sysmsg "Weapon ability request: slot {{config__ability_main}}. Fires on the next melee hit." 88
+        endif
 
         if config__chatty = 1
             if config__ability_main = config__ability_chop
@@ -922,9 +975,15 @@ while not dead
             if config__use_reactive_armor = 1 and not findbuff "Reactive Armor" and var__regs_reactive_armor = 1 and mana >= config__mana_reactive_armor
                 cast "Reactive Armor"
                 @setvar! var__buff_cast 1
+                if config__sysmsg = 1
+                    sysmsg "Buff cast: Reactive Armor." 88
+                endif
             elseif config__use_magic_reflect = 1 and not findbuff "Magic Reflection" and cooldown "reflect" = 0 and var__regs_reflect = 1 and mana >= config__mana_magic_reflect
                 cast "Magic Reflection"
                 @setvar! var__buff_cast 1
+                if config__sysmsg = 1
+                    sysmsg "Buff cast: Magic Reflection." 88
+                endif
             endif
 
             if var__buff_cast = 1
@@ -936,6 +995,9 @@ while not dead
                     endif
                     if diffhits >= config__heal_hits or poisoned
                         hotkey "> Interrupt"
+                        if config__sysmsg = 1
+                            sysmsg "Buff cast interrupted for recovery." 88
+                        endif
                         break
                     endif
                     wait wait__poll
@@ -955,7 +1017,12 @@ while not dead
     #
     # Handled corpses are ignored so findtype returns the next one. Only the startup clearignore
     # empties the list. Leather packing ignores pouch leather without clearing it.
-    #   direct: one request per corpse, then ignore that corpse.
+    #   direct: creature corpses only. A finished or refused corpse is ignored. A miss (too far,
+    #           busy) gets one more request, and a second miss ignores it.
+    #           A creature corpse label reads "<creature> corpse". A player corpse reads
+    #           "the remains of <name>", and carving one without looting rights is a criminal
+    #           act (in-game 2026-10-07). Any label without "corpse", or with "remains", is
+    #           ignored without a request.
     #   Smart Harvest: until the server finds nothing worth carving here, then ignore every
     #                  corpse within 2 tiles until a new one drops.
     #
@@ -975,82 +1042,162 @@ while not dead
     if config__use_skinning = 1 and timer "timer__carve" >= cooldown__carve and var__combat_target = 0
         settimer "timer__carve" 0
         @setvar! var__carve_direct 0
-        if config__skin_unowned = 1 and timer "timer__grey_only" >= cooldown__grey_only
+        if config__skin_unowned = 1 and var__carve_crime = 0 and timer "timer__grey_only" >= cooldown__grey_only
             @setvar! var__carve_direct 1
         endif
 
         if diffhits < config__heal_hits and not poisoned and not paralyzed and not hidden and not queued and not casting and not targetexists and findtype 8198 ground -1 -1 2 as alias__corpse
-            if not find var__my_knife backpack
-                @setvar! var__my_knife 0
-                if findtype 11552|11564 backpack as alias__packed_knife
-                    @setvar! var__my_knife alias__packed_knife
+            @setvar! var__corpse_ok 1
+            if var__carve_direct = 1
+                getlabel alias__corpse label__corpse
+                @setvar! var__corpse_ok 0
+                if "corpse" in label__corpse or "Corpse" in label__corpse
+                    @setvar! var__corpse_ok 1
+                endif
+                if "remains" in label__corpse or "Remains" in label__corpse
+                    @setvar! var__corpse_ok 0
+                endif
+                if var__corpse_ok = 0
+                    @ignore alias__corpse
+                    if config__sysmsg = 1
+                        sysmsg "Carve skip: corpse={{alias__corpse}}, label={{label__corpse}}." 88
+                    endif
                 endif
             endif
 
-            if find var__my_knife backpack as alias__knife
-                dclick alias__knife
-                waitfortarget wait__carve_target
-
-                if targetexists "neutral" and not hidden
-                    # No enemy was remembered when this block started, so a live enemy in lasttarget
-                    # now is a Z pressed during the cursor wait.
-                    @setvar! var__pick_during_carve 0
-                    if find lasttarget ground -1 -1 12 as alias__fresh_target
-                        @setvar! var__fresh_serial alias__fresh_target
-                        if 0x40000000 > var__fresh_serial
-                            if not dead alias__fresh_target
-                                if noto alias__fresh_target = "hostile" or noto alias__fresh_target = "criminal" or noto alias__fresh_target = "enemy" or noto alias__fresh_target = "murderer"
-                                    @setvar! var__pick_during_carve 1
-                                    @setvar! var__combat_target alias__fresh_target
-                                    settimer "timer__combat_target_grace" 0
-                                endif
-                            endif
-                        endif
-                    endif
-
-                    if var__pick_during_carve = 1
-                        # Leave lasttarget on the new enemy. The corpse is tried again after the fight.
-                        hotkey "Cancel Current Target"
-                        wait wait__short
-                    elseif var__carve_direct = 1
-                        target alias__corpse
-                        if config__sysmsg = 1
-                            sysmsg "Carve request: corpse={{alias__corpse}}." 88
-                        endif
-                        # One request per corpse. A refusal is not retried.
-                        @ignore alias__corpse
-                        wait wait__short
-                    else
-                        target self
-                        if config__sysmsg = 1
-                            sysmsg "Carve request: Smart Harvest." 88
-                        endif
-                        # Condition-terminated wait, without break.
-                        @setvar! var__carve_reply 0
-                        settimer "timer__carve" 0
-                        while var__carve_reply = 0 and timer "timer__carve" < wait__carve_reply
-                            if insysmsg "worth carving"
-                                @setvar! var__carve_reply 2
-                            elseif insysmsg "You carve materials"
-                                @setvar! var__carve_reply 1
-                            else
-                                wait wait__poll
-                            endif
-                        endwhile
-
-                        # Nothing grey is left here. Bounded sweep, no break.
-                        if var__carve_reply = 2
-                            for 10
-                                if findtype 8198 ground -1 -1 2 as alias__carved_corpse
-                                    @ignore alias__carved_corpse
-                                endif
-                            endfor
-                        endif
+            if var__corpse_ok = 1
+                if not find var__my_knife backpack
+                    @setvar! var__my_knife 0
+                    if findtype 11552|11564 backpack as alias__packed_knife
+                        @setvar! var__my_knife alias__packed_knife
                     endif
                 endif
-            elseif timer "timer__overhead_message" >= cooldown__overhead_message
-                overhead "[ knife, out ]" 254
-                settimer "timer__overhead_message" 0
+
+                if find var__my_knife backpack as alias__knife
+                    dclick alias__knife
+                    waitfortarget wait__carve_target
+
+                    if targetexists "neutral" and not hidden
+                        # No enemy was remembered when this block started, so a live enemy in lasttarget
+                        # now is a Z pressed during the cursor wait.
+                        @setvar! var__pick_during_carve 0
+                        if find lasttarget ground -1 -1 12 as alias__fresh_target
+                            @setvar! var__fresh_serial alias__fresh_target
+                            if 0x40000000 > var__fresh_serial
+                                if not dead alias__fresh_target
+                                    if noto alias__fresh_target = "hostile" or noto alias__fresh_target = "criminal" or noto alias__fresh_target = "enemy" or noto alias__fresh_target = "murderer"
+                                        @setvar! var__pick_during_carve 1
+                                        @setvar! var__combat_target alias__fresh_target
+                                        settimer "timer__combat_target_grace" 0
+                                    endif
+                                endif
+                            endif
+                        endif
+
+                        if var__pick_during_carve = 1
+                            # Leave lasttarget on the new enemy. The corpse is tried again after the fight.
+                            hotkey "Cancel Current Target"
+                            if config__sysmsg = 1
+                                sysmsg "Carve cancelled: an enemy was picked during the knife cursor." 88
+                            endif
+                            wait wait__short
+                        elseif var__carve_direct = 1
+                            target alias__corpse
+                            if config__sysmsg = 1
+                                sysmsg "Carve request: corpse={{alias__corpse}}." 88
+                            endif
+                            # Read the reply, without break. The criminal lines come first so a later
+                            # match cannot clear them before they are seen. Replies (in-game 2026-10-07):
+                            #   1 "You carve materials from the corpse." or "That corpse has already been carved."
+                            #   2 "That is too far away." or "You must wait to perform another action."
+                            #   3 a criminal act or a criminal action refusal
+                            @setvar! var__carve_reply 0
+                            settimer "timer__carve" 0
+                            while var__carve_reply = 0 and timer "timer__carve" < wait__carve_reply
+                                if insysmsg "corpse carving on"
+                                    @setvar! var__carve_reply 3
+                                    @setvar! var__carve_crime 1
+                                    overhead "[ carve, grey only ]" 254
+                                elseif insysmsg "Criminal actions are not permitted"
+                                    @setvar! var__carve_reply 3
+                                    settimer "timer__grey_only" 0
+                                elseif insysmsg "You carve materials"
+                                    @setvar! var__carve_reply 1
+                                elseif insysmsg "already been carved"
+                                    @setvar! var__carve_reply 1
+                                elseif insysmsg "too far away"
+                                    @setvar! var__carve_reply 2
+                                elseif insysmsg "must wait to perform another action"
+                                    @setvar! var__carve_reply 2
+                                else
+                                    wait wait__poll
+                                endif
+                            endwhile
+
+                            # A miss gets one more request, so a step closer can still carve it.
+                            # Everything else, and a second miss, ignores the corpse.
+                            if var__carve_reply = 2 and var__carve_retry != alias__corpse
+                                @setvar! var__carve_retry alias__corpse
+                            else
+                                @ignore alias__corpse
+                                @setvar! var__carve_retry 0
+                            endif
+
+                            if config__sysmsg = 1
+                                if var__carve_reply = 1
+                                    sysmsg "Carve done: corpse={{alias__corpse}}." 88
+                                elseif var__carve_reply = 2 and var__carve_retry = alias__corpse
+                                    sysmsg "Carve miss: corpse={{alias__corpse}}, too far or busy. One more try." 88
+                                elseif var__carve_reply = 2
+                                    sysmsg "Carve miss again: corpse={{alias__corpse}}. Skipped." 88
+                                elseif var__carve_reply = 3
+                                    sysmsg "Carve refused as criminal: corpse={{alias__corpse}}. Grey corpses only for now." 88
+                                else
+                                    sysmsg "Carve no reply: corpse={{alias__corpse}}. Skipped." 88
+                                endif
+                            endif
+                        else
+                            target self
+                            if config__sysmsg = 1
+                                sysmsg "Carve request: Smart Harvest." 88
+                            endif
+                            # Condition-terminated wait, without break.
+                            @setvar! var__carve_reply 0
+                            settimer "timer__carve" 0
+                            while var__carve_reply = 0 and timer "timer__carve" < wait__carve_reply
+                                if insysmsg "worth carving"
+                                    @setvar! var__carve_reply 2
+                                elseif insysmsg "You carve materials"
+                                    @setvar! var__carve_reply 1
+                                else
+                                    wait wait__poll
+                                endif
+                            endwhile
+
+                            # Nothing grey is left here. Bounded sweep, no break.
+                            if var__carve_reply = 2
+                                for 10
+                                    if findtype 8198 ground -1 -1 2 as alias__carved_corpse
+                                        @ignore alias__carved_corpse
+                                    endif
+                                endfor
+                            endif
+
+                            if config__sysmsg = 1
+                                if var__carve_reply = 1
+                                    sysmsg "Smart Harvest: carved." 88
+                                elseif var__carve_reply = 2
+                                    sysmsg "Smart Harvest: nothing left here. Corpses within 2 tiles skipped." 88
+                                else
+                                    sysmsg "Smart Harvest: no reply." 88
+                                endif
+                            endif
+                        endif
+                    endif
+                elseif timer "timer__overhead_message" >= cooldown__overhead_message
+                    overhead "[ knife, out ]" 254
+                    settimer "timer__overhead_message" 0
+                endif
             endif
         endif
         settimer "timer__carve" 0
@@ -1063,6 +1210,9 @@ while not dead
     if config__use_magery = 1
         if insysmsg "More reagents are needed"
             settimer "timer__reagents" cooldown__reagents
+            if config__sysmsg = 1
+                sysmsg "Reagent shortage reported. Reagents are read again this pass." 88
+            endif
         endif
     endif
 
@@ -1147,6 +1297,9 @@ while not dead
             if not hidden and not queued and not casting and not targetexists
                 settimer "timer__pack_leather" 0
                 if find global__my_looting_pouch backpack
+                    if config__sysmsg = 1
+                        sysmsg "Leather pack BEGIN." 88
+                    endif
                     dclick global__my_looting_pouch
                     wait wait__pack_item
                     settimer "timer__pack_leather" 0
@@ -1160,6 +1313,9 @@ while not dead
                             @ignore alias__leather_stack
                         else
                             # Complete lift/drop together. Do not leave the item held during a wait.
+                            if config__sysmsg = 1
+                                sysmsg "Leather move request: serial={{alias__leather_stack}}." 88
+                            endif
                             lift alias__leather_stack 60000
                             drop global__my_looting_pouch -1 -1
                             wait wait__pack_item
@@ -1169,6 +1325,9 @@ while not dead
                             wait wait__poll
                         endwhile
                     endwhile
+                    if config__sysmsg = 1
+                        sysmsg "Leather pack END." 88
+                    endif
                 elseif timer "timer__overhead_message" >= cooldown__overhead_message
                     overhead "[ loot pouch, out ]" 254
                     settimer "timer__overhead_message" 0

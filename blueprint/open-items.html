@@ -577,7 +577,7 @@ TK 적용·포션 부착·Explosion 방출·EB 시전·각 피해·회복 시각
 </table>
 
 <h2 id="11" data-part="채집">11 skinning-enhanced 인게임 확인</h2>
-<p>2026-10-06 <code>gather/skinning-enhanced.razor</code>를 만들었다. v6은 Two-Handed Axe를 쓰는 Magery 80 덱서용 던전 근접 루프다.
+<p>2026-10-06 <code>gather/skinning-enhanced.razor</code>를 만들었다. v8은 Two-Handed Axe를 쓰는 Magery 80 덱서용 던전 근접 루프다.
 Forensic Evaluation 120, Swordsmanship·Tactics 100, Magery·Resisting Spells·Parrying·Anatomy·Healing 80, STR 100·DEX 80·INT 45 템플릿이다.
 bard-mace에서 바드를 빼고, lumberjack-enhanced의 자기 회복 주문·RA·Reflect와 시체 칼질을 넣었다.
 워모드는 사용자가 Tab으로 직접 켠다. Z → V는 워모드를 바꾸지 않는다. 싸우는 동안 워모드를 켜 두므로 회복·버프·칼질 어느 것도 워모드를 보지 않는다.
@@ -591,6 +591,15 @@ lasttarget이 바뀌어도 지금 치고 있는 대상은 바뀌지 않는다는
 2026-10-07 v3 Journal에서 직접 타겟 칼질의 <code>You carve materials from the corpse.</code>를 확인했다.
 Sanctuary Dungeon의 파란 시체는 <code>Criminal actions are not permitted in the Sanctuary Dungeon.</code>으로 거절됐다.
 사용자는 일반 던전에서는 아이템을 가져가야만 grey가 된다고 보고했다. 인게임 확인됨 2026-10-07.
+다만 플레이어 시체는 다르다. v6이 파란 플레이어 시체 <code>the remains of Leap Day William</code>을 직접 찍자
+<code>You have committed a criminal act! (corpse carving onLeap Day William).</code>로 범죄 판정을 받았다. 인게임 확인됨 2026-10-07.
+몬스터 시체 이름은 <code>aged earth corpse</code>처럼 "…corpse"였다.
+v7은 직접 찍기 전에 라벨을 읽어 "corpse"가 있고 "remains"가 없는 시체만 찍고, 그래도 범죄 판정이 나오면 그 Play 동안 직접 찍기를 끈다.
+공개 스크립트 <a href="https://outlands.uorazorscripts.com/skills/forensics/c8e4e8eb-743d-4a7f-9043-4c17d2cabb6a">forensics</a>도
+<code>"the remains"</code>를 플레이어 시체로 보고 건너뛴다.
+v8은 직접 찍은 뒤의 응답을 읽는다. <code>That corpse has already been carved.</code>는 끝난 시체로,
+<code>That is too far away.</code>와 <code>You must wait to perform another action.</code>은 한 번 더 시도할 시체로 본다. 인게임 확인됨 2026-10-07.
+<code>config__sysmsg</code>는 전투 대상 변화·칼질 요청과 결과·codex 전환·회복과 버프 시전·도끼 장착·골드·가죽 정리를 Journal에 남긴다.
 v3의 <code>setlasttarget</code> 복원은 Set Last Target 커서를 띄워 스크립트를 멈췄다. 인게임 확인됨 2026-10-07
 (<a href="razor.html#03">razor.html</a> 03절).
 v5부터 복원을 빼고 기억한 적이 없을 때만 칼질하며, 거절이 보이면 5분 동안 회색 시체만 깎는다.
@@ -600,7 +609,7 @@ v6은 sword codex 이름에 <code>sword_</code> 접두를 붙이고, 칼질 결�
 스탠스·피니셔·어빌리티는 Arms Lore가 없어 무기 특수 확률이 기본 10%인 점을 반영해 고른다. 근거는 스크립트 CODEX STANCE와 WEAPON ABILITY 주석에 있다.
 현재 본문은 아직 인게임에서 확인되지 않았다.</p>
 <p>Scripts 탭에서 Reload all scripts → Play로 먼저 확인한다. 핫키에 묶었다면 클라이언트를 재시작한다
-(<a href="workflow.html#04.A">workflow.html</a> 04.A절). <code>Skinning enhanced v6 loaded</code>가 Journal에 떠야 한다.</p>
+(<a href="workflow.html#04.A">workflow.html</a> 04.A절). <code>Skinning enhanced v8 loaded</code>가 Journal에 떠야 한다.</p>
 <table>
 <thead><tr><th>남은 항목</th><th>확인할 것</th></tr></thead>
 <tbody>
@@ -609,13 +618,17 @@ v6은 sword codex 이름에 <code>sword_</code> 접두를 붙이고, 칼질 결�
 <code>Target a new 'Last Target'</code> 커서가 뜨거나 V가 시체·나를 치면 실패</td></tr>
 <tr><td>범죄 행위 거절 지역</td><td>Sanctuary Dungeon에서 파란 시체를 한 번 요청한 뒤 프로필의 <code>[ crim, blocked ]</code>와 Journal의 <code>Carve mode: grey corpses only</code>가 뜨고 5분 동안 Smart Harvest만 써야 한다.
 같은 파란 시체를 다시 요청하면 실패. 일반 던전에서는 거절 없이 파란 시체도 깎여야 한다</td></tr>
-<tr><td>칼질 결과 오버헤드</td><td>깎으면 <code>[ carve, done ]</code>, Smart Harvest가 깎을 시체를 못 찾으면 <code>[ corpse, out ]</code>이 프로필에서 떠야 한다.
+<tr><td>칼질 결과 오버헤드</td><td>깎으면 <code>[ carve, done ]</code>, 이미 깎은 시체면 <code>[ corpse, carved ]</code>,
+Smart Harvest가 깎을 시체를 못 찾으면 <code>[ corpse, out ]</code>, 범죄 판정이면 <code>[ crim, on ]</code>이 프로필에서 떠야 한다.
 게임을 끈 상태에서 두 프로필에 넣는다. 스크립트가 같은 문장을 다시 띄우면 실패</td></tr>
 <tr><td>칼 커서 종류와 도착</td><td>스크립트는 칼을 쓴 뒤 2초 안에 온 중립 커서에만 답한다.
 칼 커서가 중립이 아니거나 2초 뒤에 오면 커서가 남아 회복·칼질이 모두 선다. 그 경우 실패이고, 남은 커서는 직접 닫는다</td></tr>
 <tr><td>시체 직접 타겟 (skin_unowned 1)</td><td>시체마다 <code>Carve request: corpse=...</code> 한 줄과 서버 응답을 기록한다.
-회색·파란 시체 모두 깎여야 한다. 이미 깐 시체, 사람 모양 시체 (플레이어·인간 NPC)를 찍었을 때의 문구와 범죄 여부도 기록한다.
-한 시체에는 한 번만 요청하므로, 이동 중 2칸 밖으로 벗어나 거절된 시체는 놓친다. 같은 시체에 요청이 반복되면 실패</td></tr>
+회색·파란 몬스터 시체는 깎이고, 플레이어 시체는 <code>Carve skip: ... label=the remains of ...</code> 뒤 요청 없이 건너뛰어야 한다.
+플레이어 시체를 찍거나 <code>You have committed a criminal act</code>가 다시 뜨면 실패. 인간 NPC 시체의 라벨과 건너뛴 몬스터 시체 라벨도 기록한다.
+라벨을 늦게 받아 비어 있으면 몬스터 시체도 건너뛴다.
+<code>Carve done</code>·<code>Carve miss</code>·<code>Carve refused</code>·<code>Carve no reply</code> 중 하나가 요청마다 남아야 한다.
+너무 멀거나 바쁜 시체는 한 번 더 요청하고 (<code>One more try</code>), 두 번째도 실패하면 <code>Skipped</code>. 같은 시체를 세 번 이상 찍으면 실패</td></tr>
 <tr><td>Smart Harvest (skin_unowned 0)</td><td>회색 시체가 깎인 뒤 <code>worth carving</code>이 든 응답이 오면 2칸 안 시체를 모두 건너뛰어야 한다.
 파란 시체만 있으면 self 한 번 뒤 건너뛴다. 위키는 한 번에 가장 가까운 시체라고도, 2칸 안 회색 시체 전부라고도 적었으니 실제 동작을 기록한다.
 응답 문구가 달라 시체가 있는 동안 2초마다 self가 반복되면 실패</td></tr>

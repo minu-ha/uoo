@@ -105,7 +105,9 @@ Smart Heal/Cure and Greater Heal agents, and Reactive Armor and Magic Reflection
 A cure potion goes first. A light Heal only stands in for bandages. Warmode is toggled by hand (Tab) and no block depends on it.
 Melee and targeting stay manual (Z then V). An empty left hand re-arms the cached Two-Handed Axe (5187) when no cast is running.
 Over max weight, 2000 gold is dropped at your feet per pass. The skinning knife is used from the backpack.
-`config__skin_unowned = 1` targets each corpse within 2 tiles, grey or not. `0` uses Smart Harvest on self, which carves grey corpses only.
+`config__skin_unowned = 1` targets each creature corpse within 2 tiles, grey or not. Its label must read "corpse" without "remains":
+carving a player's remains is a criminal act, and one such act turns direct carving off until the next Play.
+A corpse that is too far or hit while busy gets one more request. Carving results and criminal acts are profile overheads. `0` uses Smart Harvest on self, which carves grey corpses only.
 A criminal action refusal (Sanctuary Dungeon) switches to Smart Harvest for 5 minutes. Handled corpses are ignored.
 Skinning waits while an enemy is remembered, so it runs between fights. A carve moves Razor's last target,
 and `setlasttarget` cannot restore it in this client. A Z pick made during the knife cursor cancels that cursor.
