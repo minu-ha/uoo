@@ -154,26 +154,31 @@ assigns them, with line numbers. Bash and awk only.
 
 ## Shared PvP sustain
 
-Use [combat/pvp.razor](combat/pvp.razor) for every template. Configure independent options in that file.
-Bind PvP hotkeys to `Play Script: combat\pvp`.
+Use [combat/pvp.razor](combat/pvp.razor) for every template, turned on when a PvP fight starts.
+Configure independent options in that file. Bind PvP hotkeys to `Play Script: combat\pvp`.
 `config__use_magery` and `config__use_weapon` each accept 0/1: spells only, weapons only, both or neither.
 `config__use_bandages = 1` enables self bandages when Healing is available. No preset overrides these settings.
-Recovery selects an available potion or self spell before bandages, preparation and equipment.
-Reagents are checked only for needed spells; there is no supplies cache or 30-second scan.
-Preparation shares one five-second timer. Action retry clocks keep their `timer__pvp_*` namespace across Stop.
 
-Weapon slots default to Norse Axe (31128) on `swing 1` and Great Axe (31190) on `swing 4`.
-Slots 2/3 are disabled with graphic ID 0. Ready slots take priority 4 > 3 > 2 > 1, missing weapons fall through,
-and an already held selection stays equipped. With no ready slot, empty hands rearm in order 1 > 2 > 3 > 4.
-Set each enabled bar to `WeaponSwing` and calibrate its duration in the active client. Weapon checks use
-`cooldown__weapon_check = 300` ms. Arm/Dress must remove conflicting equipment for automatic swaps.
+v6 follows the shape of `bard-necro-enhanced` and `lumberjack-enhanced`: each block reads the live state and acts
+on the spot. The order is reagents, paralyze pouch, cure (potion, else the Smart Heal/Cure agent), heal (potion,
+else the Greater Heal/Cure agent at the emergency line), bandage, light Heal when no bandage can run, Refresh,
+stat potions, Reactive Armor and Magic Reflection, then the weapon.
+Stat potions and both buffs are kept up for the whole fight, with no walk guard. Agents and buffs wait out their own
+cast in a `for 60` poll, and our buff cast is cut at the emergency line. The script never cuts a manual cast or cursor.
+
+Potions and the pouch go out while a spell is casting. Potions and bandages wait while any cursor is held, because
+drinking cancels a finished precast. Reagents are read every 10 seconds and right after a "More reagents are needed"
+refusal, so the cast blocks read flags instead of searching. There are no retry timers: the action queue, `bandaging`,
+`findbuff` and the heal potion label already stop repeats.
+
+Weapon slots default to Norse Axe (31128) on `swing 1` and Great Axe (31190) on `swing 4`. Slots 2/3 are off (graphic 0).
+The highest slot whose swing bar is ready is wanted, 4 down to 1. With none ready and both hands empty, the lowest
+enabled slot re-arms. The weapon is searched only when the wanted slot changes, then kept while it is in a hand, and
+requested from the backpack through `dress` otherwise. Set unused slots to 0. Arm/Dress must remove conflicting
+equipment. Set each enabled bar to `WeaponSwing` and calibrate its duration in the active client.
 
 Attack spells, TK, explosion potions, pet attacks, attack targeting and Hamstring stay manual.
-Ordinary casting and cursors pause automatic actions. With `config__interrupt_to_heal = 1`,
-35 missing HP and an available immediate recovery allow the script to interrupt a manual spell and cancel its cursor.
-Neutral item cursors stay manual. Self MA to prepare the next bandage also stays manual.
-The v5 loop removes Siphon and mushroom automation, and checks equipment after recovery.
-Stop the script before starting another spell during an automatic self cast.
+Self MA to prepare the next bandage also stays manual. `config__sysmsg` holds the Journal lines.
 Settings, cursor handling and pending in-game checks are in [the PvP blueprint](../blueprint/pvp.html#05.E).
 
 ## Debug scripts

@@ -851,13 +851,26 @@ Leather는 방어구 재생 페널티가 없다는 뜻이지 추가 재생 보�
 버프의 최대치 증가를 즉시 현재 마나 회복으로 간주하지 않는다. 예산의 적용은 <a href="lumberjack-pvp-handbook.html#04">벌목 핸드북 04절</a>.</p>
 
 <h3 id="05.E">05.E 수동 공격과 공통 자기관리 루프</h3>
-<p>2026-10-06 공통 <a href="../script/combat/pvp.razor">combat/pvp.razor</a> v5는
-회복 선택 → 필요할 때 수동 주문 중단 → 자기관리 실행 → 무기 장착 순서다.
+<p><a href="../script/combat/pvp.razor">combat/pvp.razor</a>는 PvP가 시작될 때 켜는 공통 자기관리 루프다.
 TK·MA/Harm·Explosion/EB·폭발 포션·소환수 공격·Hamstring·상대 지정과 근접 공격 요청은 수동이다.
-상대 serial·색·거리·사망을 조회하지 않는다. 기존 PvP 핫키는 <code>Play Script: combat\pvp</code>로 연결한다.</p>
-<p>자동은 자기 파우치·포션·붕대·Cure/Heal/GH·RA/Reflect와 켜 둔 무기 장착이다.
-Bard Necro의 회복 우선 흐름을 사용하되, PvP에는 공격 대상 캐시나 자동 공격 시전을 넣지 않는다.
-v4의 526줄·상태 9개를 v5에서 약 400줄·상태 7개로 정리했다. 현재 본문은 아직 인게임에서 확인되지 않았다.</p>
+상대 serial·색·거리·사망을 조회하지 않는다. 기존 PvP 핫키는 <code>Play Script: combat\pvp</code>로 연결한다.
+자동은 자기 파우치·포션·붕대·회복 에이전트·RA/Reflect·스탯 포션과 켜 둔 무기 장착이다. 스크립트는 수동 시전이나 커서를 끊지 않는다.</p>
+<p>2026-10-08 v6은 bard-necro-enhanced·lumberjack-enhanced와 같은 모양으로 다시 썼다.
+v5는 위에서 고른 번호를 변수에 담고 아래 실행부가 다시 읽었는데, 그 사이 상태가 바뀔 수 있었다.
+v6의 블록은 각자 지금 상태를 읽고 그 자리에서 행동하며 다음 블록에 결정을 넘기지 않는다.
+v5의 긴급 수동 주문 중단·6초 시전 대기와 <code>[ cast, check ]</code> 정지·준비 동작의 5초 주기·주문의 이동 가드·재시도 타이머 8개를 없앴다.
+현재 본문은 아직 인게임에서 확인되지 않았다.</p>
+
+<h4>입력 규칙</h4>
+<p>05.B절의 Combat Overview 원문을 따른다.</p>
+<ul>
+<li>포션과 파우치는 즉시 사용이라 시전 중에도 나간다. <code>casting</code>을 보지 않는다.</li>
+<li>완료한 프리캐스트 커서를 들고 마시면 그 주문이 취소된다. 그래서 포션은 커서를 든 동안 기다린다.
+붕대도 기다린다. 붕대의 대상 커서가 든 커서를 대신하기 때문이다.</li>
+<li>회복 에이전트·RA·Reflect는 시전과 커서가 없을 때만 시작하고, 제 시전을 <code>for 60</code> 폴링으로 기다린다.</li>
+<li>끊는 것은 우리가 건 RA·Reflect 시전뿐이다. 손실이 긴급 기준에 닿으면 <code>&gt; Interrupt</code>로 끊고 다음 패스에 회복한다.</li>
+<li>Razor 행동 큐가 차 있거나 은신 중이면 행동하지 않는다. 마비 파우치만 예외로 바로 쓴다.</li>
+</ul>
 
 <h4>독립 설정</h4>
 <p>아래 이름은 <code>config__</code> 접두를 생략했다. 템플릿 프리셋 없이 CONFIG의 각 값을 직접 바꾼다.
@@ -866,51 +879,52 @@ v4의 526줄·상태 9개를 v5에서 약 400줄·상태 7개로 정리했다. �
 <thead><tr><th>옵션</th><th>기본값</th><th>효과</th></tr></thead>
 <tbody>
 <tr><td><code>use_magery</code> / <code>use_weapon</code> / <code>use_bandages</code></td><td>각 1</td>
-<td>자기 회복·버프 주문 / 무기 장착 / Healing이 있고 피해·독이 있을 때 붕대</td></tr>
-<tr><td><code>interrupt_to_heal</code></td><td>1</td>
-<td>손실 HP가 emergency_hits 이상이고 즉시 회복 계획이 있으면 수동 시전·주문 커서를 끊는다. 0이면 수동 입력을 기다림</td></tr>
+<td>회복 에이전트·버프·시약 읽기 / 무기 장착 / Healing이 있고 피해·독이 있을 때 붕대</td></tr>
 <tr><td><code>use_potions</code> / <code>use_stat_potions</code> / <code>use_resist_potion</code></td><td>각 1</td>
 <td>회복·Refresh 포션 / Strength·Agility와 선택한 Resist 포션 / Resist 포션의 추가 스위치</td></tr>
 <tr><td><code>use_reactive_armor</code> / <code>use_magic_reflect</code></td><td>각 1</td>
-<td>안전한 상태에서 자기 버프를 유지. Magery OFF면 함께 보류</td></tr>
+<td>빠지면 시전·커서가 없을 때 바로 다시 건다. 이동 가드 없음</td></tr>
 <tr><td><code>heal_hits</code> / <code>emergency_hits</code> / <code>light_hits</code></td><td>35 / 35 / 15</td>
-<td>최대 HP 대비 손실량. 힐 포션 / GH와 긴급 중단 / 붕대가 없거나 비활성일 때 Heal.
-최대 HP 120이면 기본 긴급 기준은 현재 HP 85 이하</td></tr>
+<td>최대 HP 대비 손실량. 힐 포션 / 포션이 나갈 수 없을 때 GH와 버프 중단 / 붕대를 쓸 수 없을 때 Heal.
+<code>emergency_hits</code>는 <code>heal_hits</code>보다 낮게 두지 않는다. 최대 HP 120이면 기본 기준은 현재 HP 85 이하</td></tr>
 <tr><td><code>refresh_stam</code></td><td>15</td><td>현재 STA가 이 값 이하이면 Refresh</td></tr>
 <tr><td><code>mana_cure</code> / <code>mana_greater_heal</code> / <code>mana_heal</code></td><td>6 / 11 / 4</td>
-<td>자기 Cure·GH·Heal을 시작할 최소 현재 마나</td></tr>
+<td>Cure·GH·Heal 에이전트를 시작할 최소 현재 마나</td></tr>
 <tr><td><code>mana_reactive_armor</code> / <code>mana_magic_reflect</code></td><td>4 / 14</td>
-<td>자기 RA·Reflect를 시작할 최소 현재 마나</td></tr>
+<td>RA·Reflect를 시작할 최소 현재 마나</td></tr>
 <tr><td><code>weapon_1_graphic</code>~<code>weapon_4_graphic</code></td><td>아래 표</td>
 <td>각 스윙 바와 연결한 단일 graphic ID. 0은 해당 슬롯 OFF</td></tr>
-<tr><td><code>chatty</code></td><td>1</td><td>시작 버전·긴급 중단·장착 요청 출력</td></tr>
+<tr><td><code>chatty</code> / <code>sysmsg</code></td><td>1 / 1</td><td>선택 오버헤드 / 시작 버전·에이전트와 버프 시전·장착 요청 Journal 출력</td></tr>
 </tbody>
 </table>
-<p>최소 마나는 공격·이동용 예비 마나를 자동 보장하지 않는다. 예비 20을 남기려면 GH의 최소값 11을 31로 올리는 식으로 각 값을 조정한다.
-회복 시작 기준과 마나 비용은 서로 다른 설정이다. GH 시작값은 v4의 손실 45에서 35로 앞당겼다.</p>
+<p>최소 마나는 공격·이동용 예비 마나를 자동 보장하지 않는다. 예비 20을 남기려면 GH의 최소값 11을 31로 올리는 식으로 각 값을 조정한다.</p>
 
 <h4>루프 골격</h4>
 <ol>
-<li>명령 제한은 정지하고 큐·은신은 기다린다. 현재 패스의 아이템·주문 선택을 초기화한다.</li>
-<li>마비 파우치 → Cure 포션 또는 힐 포션 → 회복 주문 → 붕대 → Refresh 순서로 가능한 행동 하나를 고른다.
-주문은 Cure → GH → 붕대 대체 Heal이다. 필요·마나·재시도 조건을 통과한 주문에 필요한 실제 시약만 확인한다.</li>
-<li>긴급 HP에서 선택한 파우치·Cure/힐 포션 또는 회복 주문이 있으면 수동 시전·주문 커서를 정리한다.
-붕대·Refresh만 준비돼 있으면 그 목적으로 수동 주문을 버리지 않는다. 중립 커서는 보존한다.</li>
-<li>시전·타깃·큐·은신이 없으면 선택한 자기관리를 실행한다. 회복할 일이 없을 때만 5초 주기로 스탯 포션 → RA → Reflect를 점검한다.</li>
-<li>아이템·자기 주문을 선택하지 않은 패스에서 300ms 주기로 무기를 점검한다.
-한 패스는 아이템 하나, 자기 주문 하나 또는 장비 점검 하나를 처리하고 다음 패스로 간다. break·continue는 쓰지 않는다.</li>
+<li>명령 제한이면 정지한다.</li>
+<li>REAGENTS: 10초마다, 또는 <code>More reagents are needed</code> 거절 직후 시약 다섯 가지를 읽어 주문별 플래그를 만든다.
+패스 맨 앞이라 아래 시전 블록은 새 플래그를 읽는다.</li>
+<li>PARALYZE: 마비면 트랩 파우치.</li>
+<li>CURE: 독이면 Cure 포션. 포션이 하나라도 있으면 에이전트를 쓰지 않는다. 없거나 꺼져 있으면 Smart Heal/Cure 에이전트.</li>
+<li>HEAL: 손실이 힐 포션 기준 이상이면 포션. 이 패스에 포션이 나가지 않았고 긴급 기준 이상이면 Greater Heal/Cure 에이전트.</li>
+<li>BANDAGE → LIGHT HEAL → REFRESH: 진행 중 붕대는 다시 시작하지 않는다. 가벼운 Heal은 붕대를 쓸 수 없을 때만.</li>
+<li>STAT POTIONS: Strength·Agility·Resist 버프가 빠지면 각각 바로 마신다. 한 포션이 떨어져도 나머지는 계속한다.</li>
+<li>SELF BUFFS: RA → Reflect가 빠지면 긴급 기준 아래에서 바로 건다.</li>
+<li>WEAPON: 시전·커서가 없을 때 원하는 슬롯의 무기가 손에 없으면 장착을 요청한다.</li>
 </ol>
-<p>힐 포션은 <code>heal pot</code> 바와 포션의 <code>next usable</code> 라벨을 함께 확인한다.
-포션이 준비됐으면 GH보다 먼저 사용하고, 포션이 없거나 대기 중이면 가능한 GH를 선택한다.
-진행 중 붕대는 다시 시작하지 않는다. 붕대를 시작한 즉시 HP가 회복되는 것은 아니다.</p>
-<p>일반적인 시전·커서는 기다리지만, 손실 HP가 긴급 기준 이상이고 즉시 사용할 회복이 준비됐으면
-<code>&gt; Interrupt</code>로 진행 중 수동 시전을 끊고 <code>Cancel Current Target</code>으로 남은 주문 커서를 취소한다.
-이 경우 <code>[ cast, cut ]</code> 뒤 회복 요청이 나와야 한다.
-수동 시전이 공격 주문인지 수동 GH인지 판별하지 않으므로 진행 중 수동 GH도 자동 회복으로 교체될 수 있다.</p>
-<p>마나·시약·포션·재시도 준비가 부족하거나 이동 중이라 회복 주문을 시작할 수 없으면, 그 주문을 이유로 수동 입력을 취소하지 않는다.
-이동 중에도 준비된 힐 포션은 사용할 수 있다. 큐가 남아 있으면 기다린다.
-중립 아이템 커서는 긴급 HP에서도 자동 취소하지 않으므로 사용자가 직접 처리한다.
-현재 클라이언트에서 각 포션 커서의 종류와 시전 중단·커서 취소 응답은 인게임 확인이 필요하다.</p>
+<p>힐 포션은 <code>heal pot</code> 바가 돌면 라벨을 읽지 않고, 바가 0일 때 포션의 <code>next usable</code> 라벨로 확인한다.
+포션을 마신 패스에는 GH를 쓰지 않는다. 다음 패스에도 손실이 긴급 기준 이상이면 GH가 나간다. 진행 중 붕대를 시작한 즉시 HP가 회복되는 것은 아니다.</p>
+<p>수동 시전 중에는 포션이 나가고 에이전트·버프·붕대·장착이 기다린다. 수동 커서를 든 동안에는 마비 파우치만 나간다.
+긴급 손실이라도 수동 입력을 끊지 않는다. 플레이어가 시전을 마치거나 커서를 놓으면 다음 패스에 회복이 나간다.
+중립 아이템 커서도 같은 커서로 보고 기다린다.</p>
+
+<h4>비용과 타이머</h4>
+<p><a href="razor.html#06">razor.html</a> 06절대로 <code>findtype</code>이 가장 비싼 명령이다. 시약은 패스마다 찾지 않고 REAGENTS의 플래그를 읽는다.
+포션은 그 포션이 필요한 블록 안에서만 찾고, 스탯 포션은 버프가 빠졌을 때만 찾는다.
+무기는 원하는 슬롯이 바뀔 때만 찾고 평소에는 양손 레이어 두 번만 읽는다. 갖고 있지 않은 무기를 슬롯에 두면 매 패스 한 번 찾게 되므로 쓰지 않는 슬롯은 0으로 둔다.</p>
+<p>재시도 타이머는 두지 않는다. 중복 요청은 행동 큐 (<code>queued</code>), <code>bandaging</code>, <code>findbuff</code>, 포션 라벨·<code>heal pot</code> 바가 막고,
+에이전트는 제 시전이 끝날 때까지 폴링하므로 끝난 뒤 손실이 남아 있으면 바로 다시 나가야 한다.
+남은 타이머는 반복 경고를 막는 <code>timer__message</code> (3초)와 시약 읽기 주기 <code>timer__reagents</code> (10초)뿐이며, Play할 때마다 준비 상태에서 시작한다.</p>
 
 <h4>붕대 선행과 PvM 준비 기능</h4>
 <p>붕대가 끝나 만피가 되면 현재 루프는 다음 붕대를 시작하지 않는다.
@@ -933,64 +947,34 @@ Resist 포션은 던전 몹·펫용 옵션으로 남겨 두며 적 플레이어 
 <tr><td><code>weapon_1_graphic</code></td><td><code>swing 1</code></td><td>Norse Axe / 31128</td></tr>
 </tbody>
 </table>
-<p>스윙이 준비된 가용 무기는 4 → 3 → 2 → 1 순서다. 준비된 무기가 없고 양손이 비었을 때만 1 → 2 → 3 → 4로 재장착한다.
-하나의 <code>for 8</code>에서 앞 네 번은 준비 슬롯, 뒤 네 번은 빈손 재장착을 검사한다.
-선택 후 남은 반복의 조회는 생략하며, 이미 선택한 serial이 손에 있으면 유지한다.
-같은 graphic의 여분보다 마지막 선택 serial을 우선하는 캐시는 실제 손 슬롯과 일치할 때만 재사용한다.</p>
+<p>원하는 슬롯은 스윙이 준비된 가장 높은 슬롯이다 (4 → 1). 준비된 슬롯이 없고 양손이 비었으면 켜진 가장 낮은 슬롯이다.
+바가 없으면 준비로 읽힌다. 원하는 슬롯이 바뀌면 그 graphic을 자기 몸 (장착·백팩)에서 찾아 기억한다.
+기억한 serial이 손에 있으면 그대로 두고, 백팩에 있으면 장착을 요청하며, 둘 다 아니면 다음 패스에 다시 찾는다.
+손에 직접 든 무기는 그 serial을 그대로 기억하므로 바꾸지 않는다. 슬롯의 무기가 없고 양손이 비면 <code>[ weapon, out ]</code>이 뜬다.</p>
 <p>다른 무기를 쓰면 <a href="item-list.html">item-list.html</a>의 단일 graphic ID로 바꾼다.
 슬롯은 서버의 자동 분류가 아닌 사용자 설정이며 개인 serial이나 graphic 목록을 넣지 않는다.
 <a href="https://www.razorce.com/guide/commands/#dress">dress serial</a>로 해당 아이템을 장착 요청한다.
-활성 프로필 Arm/Dress의 충돌 장비 자동 해제가 필요하며 Outlands 포크의 실제 교체는 인게임 확인이 필요하다.
+활성 프로필 Arm/Dress의 충돌 장비 자동 해제가 필요하며, 이 클라이언트에서 <code>dress</code>가 실패한 기록이 있어
+(<a href="razor.html#03">razor.html</a> 03절) 실제 교체는 인게임 확인이 필요하다.
 기존 weapon 핫키는 공격·Unlock 등을 요청하므로 이 루프에서 호출하지 않는다.</p>
 <p>활성 캐릭터의 각 바는 <code>WeaponSwing</code> 타입과 현재 STA에 맞는 시간을 사용한다.
 시간·공유 스윙 기준은 <a href="#09.B">09.B절</a>, 바 구조는 <a href="overheads.html#06.A">overheads.html</a> 06.A절이다.
 바를 시작·초기화하지 않으며 장착 요청은 실제 스윙·명중의 증거가 아니다. 무기를 바꿔도 새 공격 요청은 보내지 않는다.</p>
 
-<h4>자동 자기 시전과 커서</h4>
-<p>시작 4줄의 일괄 초기화는 생략한다. 긴급 회복 선택 전에는 기존 커서를 지우거나 자기에게 보내지 않는다.
-아이템·주문·장착 직전에도 현재 시전·커서·큐·은신을 확인하며 자동 주문에는 이동 가드를 추가한다.</p>
-<p>자기 주문 한 번은 요청부터 최대 6초를 기다린다. 회복 주문의 beneficial 커서에만 <code>Target Self</code>를 요청한다.
-다른 종류의 커서나 RA·Reflect 중의 예상하지 못한 커서는 <code>[ cast, check ]</code> 후 보존하고 정지한다.
-응답이 6초 안에 없을 때도 같은 알림 후 정지하며 지연된 커서를 취소하지 않는다.
-시전 중 RA·Reflect는 긴급 HP에서 끊고 다음 패스의 회복으로 돌아간다. 자동 Cure·Heal·GH는 자체 시전 중 다시 끊지 않는다.</p>
-<p>커서 종류는 소유자를 증명하지 않는다. 자동 자기 시전 중 새 수동 주문을 시작하려면 먼저 Razor Stop을 사용한다.
-beneficial 커서끼리의 경합·지연 응답과 Target Self가 수동 Last Target에 미치는 영향은 아직 인게임에서 확인되지 않았다.</p>
-
-<h4>상태·타이머와 확인</h4>
+<h4>상태</h4>
 <table>
-<thead><tr><th>상태</th><th>뜻과 필요한 이유</th></tr></thead>
+<thead><tr><th>상태</th><th>뜻</th></tr></thead>
 <tbody>
-<tr><td><code>var__selected_item</code></td><td>현재 패스의 아이템 번호.
-0 없음 / 1 파우치 / 2 Cure / 3 힐 / 4 붕대 / 5 Refresh / 6 Strength / 7 Agility / 8 Resist</td></tr>
-<tr><td><code>var__selected_self_spell</code></td><td>현재 패스의 자기 주문 번호. 0 없음 / 1 Cure / 2 GH / 3 Heal / 4 RA / 5 Reflect</td></tr>
-<tr><td><code>var__cast_wait_finished</code></td><td>자기 타겟·끊김·버프 완료로 대기를 마치면 1. 서버 성공의 증거가 아니다</td></tr>
-<tr><td><code>var__selected_weapon_graphic</code>, <code>selected_weapon_serial</code></td>
-<td>검사 중인 종류와 자기 아이템. 손에 있는 것으로 확인한 serial은 0으로 바꿔 재장착을 생략한다</td></tr>
-<tr><td><code>var__cached_weapon_graphic</code>, <code>cached_weapon_serial</code></td>
-<td>마지막 선택·요청한 무기. 현재 손 슬롯과 일치할 때만 여분 검색 대신 재사용한다</td></tr>
+<tr><td><code>var__has_garlic</code>·<code>ginseng</code>·<code>mandrake</code>·<code>ash</code>·<code>silk</code></td><td>REAGENTS가 읽은 시약 보유</td></tr>
+<tr><td><code>var__regs_cure</code>·<code>heal</code>·<code>greater_heal</code>·<code>reactive_armor</code>·<code>magic_reflect</code></td><td>그 주문의 시약이 모두 있으면 1. REAGENTS만 쓴다</td></tr>
+<tr><td><code>var__heal_potion_out</code></td><td>HEAL 블록 안에서만 쓰는 값. 이 패스에 힐 포션이 나갔으면 1</td></tr>
+<tr><td><code>var__weapon_want</code>, <code>weapon_held</code></td><td>WEAPON 블록 안에서만 쓰는 원하는 슬롯 graphic과 손에 있는지</td></tr>
+<tr><td><code>var__weapon_armed_serial</code>, <code>weapon_armed_graphic</code></td><td>스크립트가 마지막으로 기억한 무기. Play를 넘어 남는다</td></tr>
 </tbody>
 </table>
-<p>v5는 아이템 선택 상태를 추가하고 양손 serial 두 개·진단용 무기 슬롯 상태를 제거했다.
-<code>timer__pvp_support</code>를 추가해 기존 buff·stats·mushroom 타이머의 준비 동작을 한 주기로 모았다.
-남아 있는 옛 세션 값은 삭제하지 않으며 본문에서 더 이상 조회하지 않는다.</p>
-<table>
-<thead><tr><th>타이머 / 비교 설정</th><th>기본 주기와 의미</th></tr></thead>
-<tbody>
-<tr><td><code>timer__pvp_pouch</code>·<code>cure_potion</code>·<code>heal_potion</code>·<code>bandage</code>·<code>refresh</code>
-/ <code>cooldown__item_retry</code></td><td>각 1.2초. 아이템 보급 확인과 요청 재시도를 서로 독립적으로 제한</td></tr>
-<tr><td><code>timer__pvp_heal</code> / <code>cooldown__heal_retry</code></td><td>2.5초. 회복 주문의 보급 확인·재시도 제한</td></tr>
-<tr><td><code>timer__pvp_support</code> / <code>cooldown__support_retry</code></td><td>5초. 스탯 포션·RA·Reflect 중 한 가지 준비 동작</td></tr>
-<tr><td><code>timer__pvp_weapon</code> / <code>cooldown__weapon_check</code></td><td>300ms. 장비 점검 주기이며 서버 스윙 쿨이 아니다</td></tr>
-<tr><td><code>timer__pvp_message</code> / <code>cooldown__message</code></td><td>3초. 반복 경고 출력 제한</td></tr>
-<tr><td><code>timer__pvp_cast</code> / <code>wait__cast</code></td><td>6초. 자기 주문 응답 대기 한도. 요청마다 0에서 시작</td></tr>
-</tbody>
-</table>
-<p>행동 재시도 타이머의 <code>timer__pvp_</code> 접두와 Stop·재실행 후 경과 시간을 유지한다.
-시약 보유 캐시나 30초 전체 보급품 조회는 없다. <code>wait__poll=100ms</code>, <code>wait__action=200ms</code>다.
-표의 축약 상태 이름은 <code>var__</code>, 축약 타이머 이름은 <code>timer__pvp_</code>로 시작한다.</p>
-<p>정적 검사와 모의 상태 실행은 Outlands 서버·실제 커서 처리를 입증하지 않는다.
+<p>정적 검사는 Outlands 서버·실제 커서 처리를 입증하지 않는다.
 구조화 PvP·팩션의 명령 제한이면 <code>[ script, blocked ]</code> 후 정지한다.
-반영 방법과 긴급 중단·회복·장착의 인게임 확인은 <a href="open-items.html#10">open-items.html</a> 10절에 있다.</p>
+반영 방법과 인게임 확인은 <a href="open-items.html#10">open-items.html</a> 10절에 있다.</p>
 
 <h2 id="06">06 소환수로 싸울 때</h2>
 
