@@ -29,20 +29,20 @@
 		<trigger triggertype="SysMessage" duration="5" triggertext="fail to pacify" />
 		<trigger triggertype="OverheadMessage" duration="0" triggertext="Your barding skill cooldowns" />
 	</cooldownentry>
-	<cooldownentry name="music" defaultcooldown="0" cooldownbartype="Regular" hue="53" hidewheninactive="False">
+	<cooldownentry name="music" defaultcooldown="0" cooldownbartype="Regular" hue="53" hidewheninactive="True">
 		<trigger triggertype="SysMessage" duration="5" triggertext="play successfully" />
 		<trigger triggertype="SysMessage" duration="5" triggertext="fail to incite anger" />
 		<trigger triggertype="SysMessage" duration="5" triggertext="fail to discord" />
 		<trigger triggertype="SysMessage" duration="5" triggertext="fail to pacify" />
 		<trigger triggertype="OverheadMessage" duration="0" triggertext="Your barding skill cooldowns" />
 	</cooldownentry>
-	<cooldownentry name="disco" defaultcooldown="0" cooldownbartype="Regular" hue="53" hidewheninactive="False">
+	<cooldownentry name="disco" defaultcooldown="0" cooldownbartype="Regular" hue="53" hidewheninactive="True">
 		<trigger triggertype="SysMessage" duration="5" triggertext="successfully, disrupting your opponent" />
 		<trigger triggertype="SysMessage" duration="5" triggertext="fail to discord" />
 		<trigger triggertype="SysMessage" duration="5" triggertext="play successfully, briefly discording" />
 		<trigger triggertype="OverheadMessage" duration="0" triggertext="Your barding skill cooldowns" />
 	</cooldownentry>
-	<cooldownentry name="peace/provo" defaultcooldown="0" cooldownbartype="Regular" hue="53" hidewheninactive="False">
+	<cooldownentry name="peace/provo" defaultcooldown="0" cooldownbartype="Regular" hue="53" hidewheninactive="True">
 		<trigger triggertype="SysMessage" duration="11" triggertext="You play successfully, pacifying your target." />
 		<trigger triggertype="SysMessage" duration="11" triggertext="successfully, briefly pacifying" />
 		<trigger triggertype="SysMessage" duration="11" triggertext="play successfully, provoking" />
@@ -51,7 +51,7 @@
 		<trigger triggertype="SysMessage" duration="5" triggertext="fail to incite anger" />
 		<trigger triggertype="OverheadMessage" duration="0" triggertext="Your barding skill cooldowns" />
 	</cooldownentry>
-	<cooldownentry name="song" defaultcooldown="0" cooldownbartype="Regular" hue="53" hidewheninactive="False">
+	<cooldownentry name="song" defaultcooldown="0" cooldownbartype="Regular" hue="53" hidewheninactive="True">
 		<trigger triggertype="SysMessage" duration="11" triggertext="under the effect of a song" />
 		<trigger triggertype="OverheadMessage" duration="0" triggertext="Your barding skill cooldowns" />
 	</cooldownentry>
