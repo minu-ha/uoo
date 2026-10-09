@@ -73,8 +73,11 @@ endif
 @setvar! config__mana_bless 20
 @setvar! config__mana_arch_protection 22
 
-# Missing hit points, not percent. light_hits starts the Heal agent, emergency_hits the heal
-# potion and Greater Heal. At the emergency line our own casts are cut and new ones wait.
+# Missing hit points, not percent. emergency_hits starts the heal potion and Greater Heal, and at
+# that line our own casts are cut and new ones wait. light_hits starts the light Heal agent,
+# which runs only with use_light_heal 1. It is off by default: it cast too often, and the vet
+# kit already bandages any loss.
+@setvar! config__use_light_heal 0
 @setvar! config__light_hits 15
 @setvar! config__emergency_hits 35
 @setvar! config__refresh_stam 15
@@ -232,7 +235,7 @@ endif
 @setvar! var__tracking_button_answered 0
 
 if config__sysmsg = 1
-    sysmsg "Tamer mage enhanced v4 loaded: flamestrike mana={{config__mana_flamestrike}}, tracking color={{config__tracking_color}}." 88
+    sysmsg "Tamer mage enhanced v5 loaded: flamestrike mana={{config__mana_flamestrike}}, tracking color={{config__tracking_color}}." 88
 endif
 if config__chatty = 1
     overhead "[ tamer, on ]" 290
@@ -525,10 +528,10 @@ while not dead
     # ################################################################################
     # # HEAL
     # ################################################################################
-    # Light damage takes the Heal agent. Heavy damage drinks first, because the potion is
-    # instant, and Greater Heal follows when no potion went out on this pass: none carried, on
-    # its own cooldown, or the bar still running. The bar skips the label read while it runs.
-    # The label stays authoritative when the bar is missing.
+    # Light damage takes the Heal agent while config__use_light_heal is 1. Heavy damage drinks
+    # first, because the potion is instant, and Greater Heal follows when no potion went out on
+    # this pass: none carried, on its own cooldown, or the bar still running. The bar skips the
+    # label read while it runs. The label stays authoritative when the bar is missing.
     if not poisoned and not paralyzed and not hidden and not queued and not targetexists and diffhits >= config__light_hits
         @setvar! var__heal_potion_out 0
         if diffhits >= config__emergency_hits and config__use_potion = 1 and cooldown "heal pot" = 0
@@ -566,7 +569,7 @@ while not dead
                         wait wait__poll
                     endfor
                 endif
-            elseif var__regs_heal = 1 and mana >= config__mana_heal
+            elseif config__use_light_heal = 1 and var__regs_heal = 1 and mana >= config__mana_heal
                 hotkey "> Smart Heal/Cure Self"
                 wait wait__short
 
