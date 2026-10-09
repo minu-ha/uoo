@@ -642,15 +642,18 @@ while not dead
     # # COMBAT POTIONS
     # ################################################################################
     # Strength, Agility and Magic Resist while an enemy is engaged. Each buff is judged on its
-    # own, so running out of one potion does not hold up the others.
+    # own, so running out of one potion does not hold up the others. Bless also shows Strength
+    # and Agility, so those two read their own potion usage cooldown icons instead (findbuff
+    # matches part of a name). The bonus ends together with that cooldown: "You may now use a
+    # strength potion." and the stat drop arrive at the same time.
     if var__engaged = 1 and config__use_potion = 1 and config__use_stat_potions = 1 and not paralyzed and not hidden and not targetexists
-        if not queued and not findbuff "Strength"
+        if not queued and not findbuff "Strength Potion"
             if findtype "White Potion" self
                 hotkey "Drink Strength"
                 wait wait__short
             endif
         endif
-        if not queued and not findbuff "Agility"
+        if not queued and not findbuff "Agility Potion"
             if findtype "Blue Potion" self
                 hotkey "Drink Agility"
                 wait wait__short
