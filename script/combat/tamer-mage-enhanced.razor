@@ -51,10 +51,10 @@ endif
 @setvar! config__dex_potion 45
 
 # Veterinary supplies heal you and every follower within reach after the 5 second bandage time,
-# and cure and resurrect pets at reduced odds (wiki Veterinary). They are the self bandage here.
-# When no one within reach needs healing the server answers "You or your nearby followers do
-# not require healing." and applies nothing (in game 2026-10-09), so they are tried every
-# cooldown__vet_kit with no hit point or distance check.
+# and cure and resurrect pets at reduced odds (wiki Veterinary). They are the self bandage here,
+# and they keep being tried for the pets at full health: when no one within reach needs healing
+# the server answers "You or your nearby followers do not require healing." and applies
+# nothing (in game 2026-10-09). See VET KIT.
 @setvar! config__use_vet_kit 1
 
 # Flamestrike on the engaged enemy, for the aspect proc. 40 to cast plus 11 kept for Greater Heal.
@@ -112,7 +112,11 @@ endif
 @setvar! cooldown__message 3000
 # How long an off screen enemy is kept before it is dropped.
 @setvar! cooldown__target_grace 500
-@setvar! cooldown__vet_kit 5000
+# After the server said no one needs healing, the next try for the pets waits this long.
+@setvar! cooldown__vet_refused 2000
+# A kit that began is taken as finished after this when its finish line was missed. The kit
+# takes the Veterinary bandage time, 5 seconds, on yourself as on the pets (wiki Veterinary).
+@setvar! cooldown__vet_running 7000
 # A Strength or Agility potion is tried once per window. The stat arrives a round trip after the
 # drink, and a Curse, Weaken or Clumsy can hold it under the line while the potion still runs:
 # without the window that refused drink would go out every pass. An empty bag is looked up at
@@ -162,7 +166,7 @@ endif
 # Everything starts ready.
 settimer "timer__message" cooldown__message
 settimer "timer__target_grace" cooldown__target_grace
-settimer "timer__vet_kit" cooldown__vet_kit
+settimer "timer__vet_kit" cooldown__vet_running
 settimer "timer__str_potion" cooldown__stat_potion
 settimer "timer__agi_potion" cooldown__stat_potion
 settimer "timer__reagents" cooldown__reagents
@@ -205,6 +209,13 @@ endif
 @setvar! var__regs_flamestrike 0
 @setvar! var__regs_create_food 0
 
+# Veterinary supplies, kept between passes by VET KIT.
+#   vet_running  1 from a use until its finish line, so the next use cannot cancel it
+#   vet_wait     how long after the last use or answer, on timer__vet_kit, the next try for the
+#                pets goes. 0 after a finish, cooldown__vet_refused after a refusal
+@setvar! var__vet_running 0
+@setvar! var__vet_wait 0
+
 # Scratch values, each set and read inside one block only.
 #   heal_potion_out  HEAL: 1 once a heal potion went out on this pass
 #   fresh_pick       FLAMESTRIKE: 1 when the player picked another enemy during the cast
@@ -221,7 +232,7 @@ endif
 @setvar! var__tracking_button_answered 0
 
 if config__sysmsg = 1
-    sysmsg "Tamer mage enhanced v3 loaded: flamestrike mana={{config__mana_flamestrike}}, tracking color={{config__tracking_color}}." 88
+    sysmsg "Tamer mage enhanced v4 loaded: flamestrike mana={{config__mana_flamestrike}}, tracking color={{config__tracking_color}}." 88
 endif
 if config__chatty = 1
     overhead "[ tamer, on ]" 290
@@ -591,18 +602,59 @@ while not dead
     # ################################################################################
     # # VET KIT
     # ################################################################################
-    # Veterinary supplies (25750), the self bandage that also reaches the followers. Tried every
-    # cooldown__vet_kit while no bandage time is running, since using them cancels a running
-    # bandage. The server refuses when no one within reach needs healing, so nothing is checked
-    # first.
-    if config__use_vet_kit = 1 and not bandaging and not hidden and not queued and not targetexists and timer "timer__vet_kit" >= cooldown__vet_kit
-        settimer "timer__vet_kit" 0
-        if findtype 25750 backpack as alias__vet_kit
-            dclick alias__vet_kit
-            wait wait__short
-        elseif timer "timer__message" >= cooldown__message
-            overhead "[ vet kit, out ]" 254
-            settimer "timer__message" 0
+    # Veterinary supplies (25750), the self bandage that also reaches the followers.
+    #   running  A kit that began is left alone until "You finish using veterinary supplies",
+    #            because using the supplies again cancels it. cooldown__vet_running ends the wait
+    #            when another insysmsg consumed that line first.
+    #   hurt     Any hit point loss sends the kit at once.
+    #   pets     At full health the kit goes once var__vet_wait has passed: at once after a
+    #            finish, and cooldown__vet_refused after "do not require healing". diffhits reads
+    #            only our own hit points, so that answer is the pets' health check.
+    # Bandaging gates it too, since a manual bandage on a pet would be cancelled the same way.
+    # The answer is read on the spot. With no answer the kit is taken as running, so a late
+    # begin line cannot let the next pass cancel it.
+    if config__use_vet_kit = 1
+        if var__vet_running = 1
+            if insysmsg "You finish using veterinary supplies"
+                @setvar! var__vet_running 0
+                @setvar! var__vet_wait 0
+            elseif timer "timer__vet_kit" >= cooldown__vet_running
+                @setvar! var__vet_running 0
+                @setvar! var__vet_wait 0
+            endif
+        endif
+
+        if var__vet_running = 0 and not bandaging and not hidden and not queued and not targetexists
+            if diffhits > 0 or timer "timer__vet_kit" >= var__vet_wait
+                settimer "timer__vet_kit" 0
+                if findtype 25750 backpack as alias__vet_kit
+                    dclick alias__vet_kit
+                    @setvar! var__vet_running 1
+                    for 20
+                        if insysmsg "You begin using veterinary supplies"
+                            break
+                        endif
+                        if insysmsg "do not require healing"
+                            @setvar! var__vet_running 0
+                            break
+                        endif
+                        wait wait__poll
+                    endfor
+
+                    # Nothing was applied. A hurt pass tries again at once, the pets after the wait.
+                    if var__vet_running = 0
+                        @setvar! var__vet_wait cooldown__vet_refused
+                        settimer "timer__vet_kit" 0
+                    endif
+                else
+                    # Out of supplies. Looked up again after the same wait, or at once when hurt.
+                    @setvar! var__vet_wait cooldown__vet_refused
+                    if timer "timer__message" >= cooldown__message
+                        overhead "[ vet kit, out ]" 254
+                        settimer "timer__message" 0
+                    endif
+                endif
+            endif
         endif
     endif
 
