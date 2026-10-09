@@ -703,7 +703,7 @@ Bless만 걸린 상태 (기본 + 11)는 그보다 낮다. 거절된 마시기가
 <tr><td>Bless·Arch Protection</td><td>전투 대상이 없고 워모드가 꺼져 있을 때 <code>Cunning</code>·<code>Protection</code> 아이콘이 없으면 이로운 커서에 자기 자신을 찍고
 <code>Buff: Bless on yourself</code>·<code>Buff: Arch Protection</code>이 남아야 한다. 아이콘이 뜬 뒤 다음 패스에서 같은 주문을 다시 시전하지 않아야 한다.
 2분 뒤 아이콘이 사라지면 다시 시전하는지, 펫도 Arch Protection을 받는지 펫 상태에서 확인한다</td></tr>
-<tr><td>Bless와 스탯 포션</td><td><code>config__str_potion</code>·<code>config__dex_potion</code>을 내 기본 힘·민첩 + 20으로 맞춘다 (기본값 120·100은 기본 100·80 기준).
+<tr><td>Bless와 스탯 포션</td><td><code>config__str_potion</code>·<code>config__dex_potion</code>을 내 기본 힘·민첩 + 20으로 맞춘다 (기본값 120·45는 이 템플릿의 STR 100·DEX 25·INT 100 기준).
 Bless가 걸린 채 전투에 들어가도 힘·민첩 포션이 한 번씩 나가고, 마신 뒤 5초마다 다시 눌리지 않아야 한다. 다시 눌리면 값이 높거나 포션이 +20이 아니다.
 포션 (+20)이 Bless (+11)를 덮어쓰는지 (120) 쌓이는지 (131), 포션이 끝난 뒤 <code>Cunning</code>이 남은 동안 Bless의 힘·민첩이 살아 있는지도 본다.
 사라진다면 그동안은 Bless를 다시 걸지 않는다. 저항 포션은 아직 <code>findbuff "Magic Resist Potion"</code>으로 판정하므로 버프 바에 그 이름이 뜨는지 확인한다</td></tr>

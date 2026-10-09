@@ -1,6 +1,7 @@
 # Tamer mage loop: self recovery, veterinary supplies for the pets, self buffs and Flamestrike for the aspect proc.
 # Needs: veterinary supplies (25750), reagents, potions, Create Food reagents or magic mushrooms.
 # Template: Animal Lore, Animal Taming, Veterinary 120, Magery, Tracking 100, Resisting Spells, Meditation 80.
+#           STR 100, DEX 25, INT 100.
 # Hotkeys: Drink Cure, Drink Heal, Drink Refresh, Drink Strength, Drink Agility, Drink Magic Resist,
 #          Eat Magic Mushroom, > Smart Heal/Cure Self, > Greater Heal/Cure Self, > Interrupt, Cancel Current Target.
 # Optional cooldown bars: heal pot, walk, reflect. A missing bar reads 0.
@@ -45,8 +46,9 @@ endif
 # STR and DEX with the Greater potion on: your base plus 20. Below these the potion is drunk.
 # Bless and the Strength and Agility spells, ours or an ally's, show the same icons as the
 # potions but add less than its 20, so the stat is what tells the potion apart.
+# This template is STR 100 and DEX 25.
 @setvar! config__str_potion 120
-@setvar! config__dex_potion 100
+@setvar! config__dex_potion 45
 
 # Veterinary supplies heal every pet within reach after the 5 second bandage time, and cure
 # and resurrect at reduced odds (wiki Veterinary). Reach is 2 tiles plus 3 from the healing codex.
