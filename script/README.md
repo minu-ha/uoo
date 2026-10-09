@@ -169,8 +169,10 @@ cast in a `for 60` poll, and our buff cast is cut at the emergency line. The scr
 
 Potions and the pouch go out while a spell is casting. Potions and bandages wait while any cursor is held, because
 drinking cancels a finished precast. Reagents are read every 10 seconds and right after a "More reagents are needed"
-refusal, so the cast blocks read flags instead of searching. There are no retry timers: the action queue, `bandaging`,
-`findbuff` and the heal potion label already stop repeats.
+refusal, so the cast blocks read flags instead of searching. Strength and Agility read STR and DEX against
+`config__str_potion` and `config__dex_potion` (base plus 20), because Bless shows the same icons as the potions.
+Their 5 second windows are the only retry timers, since a curse can hold the stat under the line while the potion runs.
+Otherwise the action queue, `bandaging`, `findbuff` and the heal potion label stop repeats.
 
 Weapon slots default to Norse Axe (31128) on `swing 1` and Great Axe (31190) on `swing 4`. Slots 2/3 are off (graphic 0).
 The highest slot whose swing bar is ready is wanted, 4 down to 1. With none ready and both hands empty, the lowest

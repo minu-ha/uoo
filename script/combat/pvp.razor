@@ -48,6 +48,13 @@ endif
 @setvar! config__use_reactive_armor 1
 @setvar! config__use_magic_reflect 1
 
+# STR and DEX with the Greater potion on: your base plus 20. Below these the potion is drunk.
+# Bless and the Strength and Agility spells, ours or an ally's, show the same icons as the
+# potions but add less than its 20, so the stat is what tells the potion apart.
+# The loop is shared, so set these for the character that runs it.
+@setvar! config__str_potion 120
+@setvar! config__dex_potion 100
+
 # Missing hit points, not percent.
 #   heal_hits       heal potion
 #   emergency_hits  Greater Heal when no heal potion can go out, and the buff cut. Not below heal_hits
@@ -84,6 +91,11 @@ endif
 # Reagent read interval. Five lookups each time. A refill in the middle of a fight counts
 # within this, and running out is caught at once by the refusal line.
 @setvar! cooldown__reagents 10000
+# A Strength or Agility potion is tried once per window. The stat arrives a round trip after the
+# drink, and a Curse, Weaken or Clumsy can hold it under the line while the potion still runs:
+# without the window that refused drink would go out every pass. An empty bag is looked up at
+# the same pace.
+@setvar! cooldown__stat_potion 5000
 
 # ####################################################################################
 # # TIMER
@@ -96,9 +108,19 @@ if not timerexists "timer__reagents"
     createtimer "timer__reagents"
 endif
 
+if not timerexists "timer__str_potion"
+    createtimer "timer__str_potion"
+endif
+
+if not timerexists "timer__agi_potion"
+    createtimer "timer__agi_potion"
+endif
+
 settimer "timer__message" cooldown__message
 # Ready on the first pass, so reagents are read before the first cast.
 settimer "timer__reagents" cooldown__reagents
+settimer "timer__str_potion" cooldown__stat_potion
+settimer "timer__agi_potion" cooldown__stat_potion
 
 # ####################################################################################
 # # STATE
@@ -138,7 +160,7 @@ endif
 
 overhead "[ pvp, on ]" 290
 if config__sysmsg = 1
-    sysmsg "PvP sustain v6 loaded. Manual offense, recovery first." 88
+    sysmsg "PvP sustain v7 loaded. Manual offense, recovery first." 88
 endif
 
 # ####################################################################################
@@ -364,18 +386,21 @@ while not dead
     # ################################################################################
     # # STAT POTIONS
     # ################################################################################
-    # Kept up for the whole fight: a missing buff is drunk at once. findbuff matches part of a
-    # name, so "Strength" also sees the Strength Potion Usage Cooldown icon, which is exactly
-    # when the potion could not go out anyway. The potion is looked up only for a missing buff.
-    # Each buff is judged on its own, so running out of one potion does not hold up the others.
+    # Kept up for the whole fight. Strength and Agility read the stat against config__str_potion
+    # and config__dex_potion, because Bless and the Strength and Agility spells show the same
+    # icons as the potions, and each is tried once per cooldown__stat_potion. Magic Resist has an
+    # icon of its own and is drunk once it is missing. Each potion is judged on its own, so
+    # running out of one does not hold up the others.
     if config__use_potions = 1 and config__use_stat_potions = 1 and not paralyzed and not hidden and not targetexists
-        if not queued and not findbuff "Strength"
+        if not queued and str < config__str_potion and timer "timer__str_potion" >= cooldown__stat_potion
+            settimer "timer__str_potion" 0
             if findtype "White Potion" self
                 hotkey "Drink Strength"
                 wait wait__short
             endif
         endif
-        if not queued and not findbuff "Agility"
+        if not queued and dex < config__dex_potion and timer "timer__agi_potion" >= cooldown__stat_potion
+            settimer "timer__agi_potion" 0
             if findtype "Blue Potion" self
                 hotkey "Drink Agility"
                 wait wait__short

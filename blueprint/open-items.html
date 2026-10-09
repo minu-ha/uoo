@@ -147,6 +147,14 @@
 </thead>
 <tbody>
 <tr>
+<td>캐릭터 기본 STR·DEX (스탯 포션 기준선)</td>
+<td>bard-mace·bard-throwing·bard-necro-enhanced·hally-mage·dexxer-basic의 기준선 120·120, pvp의 120·100</td>
+<td>버프 없는 STR·DEX가 얼마인가. 기준선은 그 값 + 20이다 (<a href="pvp.html#09.D">pvp.html</a> 09.D절).
+앞의 다섯은 예전 임계값 100·100에서 기본 100·100으로 짐작했고, pvp는 벌목·skinning 템플릿의 100·80을 따랐다.
+pvp는 summoner 프로필에서도 쓰니 그 캐릭터의 기본값이 다르면 실행 전에 바꾼다.
+선이 높으면 포션이 도는 동안 5초 (bard-necro는 10초)마다 거절될 마시기가 나가고, 낮으면 포션을 아예 마시지 않는다</td>
+</tr>
+<tr>
 <td>Lyric 방어구 무시 42.5%</td>
 <td>handbook 03.F</td>
 <td>출처가 어디인가. Peace 가동률 62%가 이 숫자에서 나왔다</td>
@@ -358,7 +366,8 @@ loadout의 <code>as item</code> (<code>alias__</code> 없음)</td>
 <td>첫 반사로 소진 / 첫 반사 후 유지 / 두 번째로 소진을 나눠 공격자 Journal을 수집. 전용 문구가 없으면 스크립트에서 확정 상태로 만들지 않음</td></tr>
 <tr><td>Bless와 스탯 포션</td><td>공식 계산과 실제 정수·중첩 처리는 구분해야 함</td>
 <td>Magery 80에서 포션만 / Bless만 / 둘 다 순서를 바꿔 STR·DEX·INT·최댓값과 현재 마나 기록.
-Bless 비용 9, 공식 +8.8의 정수 처리, 스크롤 소환에 실제 마나 50이 필요한 조건을 구분</td></tr>
+Bless 비용 9, 공식 +8.8의 정수 처리, 스크롤 소환에 실제 마나 50이 필요한 조건을 구분.
+Magery 100의 Bless는 2026-10-09 <code>changed by 11</code>로 +11이 확인됐다 (12절)</td></tr>
 <tr><td>프리캐스트와 자동 회복</td><td>공식은 완료한 프리캐스트 보유 중 포션 음용이 주문을 취소한다고 설명</td>
 <td>v5는 일반 수동 입력을 기다리며 준비된 긴급 회복이 있으면 수동 주문을 중단한다 (pvp.html 05.E절).
 자체 자기 시전 도중 새 수동 입력이 겹치는 경우는 10절에서 확인</td></tr>
@@ -487,6 +496,7 @@ GH와 긴급 중단 기준을 손실 35로 맞추고, 시폰·버섯 자동화�
 2026-10-08 v6은 각 블록이 지금 상태를 읽고 바로 행동하는 구조로 다시 썼다. 회복 주문은 에이전트, 버프는 빠지면 바로,
 스탯 포션은 켜 둔 동안 유지한다. 수동 입력 중단·주문의 이동 가드·6초 시전 대기와 <code>[ cast, check ]</code> 정지·재시도 타이머를 없앴고,
 시약은 10초마다 또는 시약 거절 직후 읽는다.
+2026-10-09 v7은 Strength·Agility 포션을 버프 대신 STR·DEX 값으로 판정한다. 아군 Bless가 같은 아이콘을 띄워 포션을 막았기 때문이다 (<a href="pvp.html#09.D">pvp.html</a> 09.D절).
 현재 본문은 아직 인게임에서 확인되지 않았다. 설정·변수·타이머와 커서 처리의 정본은 <a href="pvp.html#05.E">pvp.html</a> 05.E절이다.</p>
 <p>Scripts 탭에서 Stop → Reload all scripts → Play로 먼저 확인한다.
 외부 편집 뒤 기존 핫키로 실행할 때는 클라이언트를 재시작한다 (<a href="workflow.html#04.A">workflow.html</a> 04.A절).
@@ -495,7 +505,7 @@ GH와 긴급 중단 기준을 손실 35로 맞추고, 시폰·버섯 자동화�
 <thead><tr><th>상황</th><th>예상 알림·동작과 실패 판정</th></tr></thead>
 <tbody>
 <tr><td>마법·무기 각각 0/1, 붕대 0/1, 핫키 재연결</td>
-<td>CONFIG를 바꿔 재실행한다. <code>[ pvp, on ]</code>·<code>PvP sustain v6 loaded</code>가 떠야 한다.
+<td>CONFIG를 바꿔 재실행한다. <code>[ pvp, on ]</code>·<code>PvP sustain v7 loaded</code>가 떠야 한다.
 F4와 별도 PvP 키는 <code>combat\pvp</code>로 재연결한다.
 이전 프리셋이 설정을 덮어쓰거나 OFF 기능을 요청하면 실패</td></tr>
 <tr><td>Q alt·NPC 선택, Q 변경, Tab ON/OFF</td>
@@ -508,8 +518,10 @@ Cure 포션이 하나라도 있으면 Cure 에이전트를 쓰지 않아야 한�
 부족하면 <code>[ pouch, out ]</code>·<code>[ cure pot, out ]</code>·<code>[ heal pot, out ]</code>·<code>[ bandage, out ]</code>. 진행 중 붕대를 반복 시작하면 실패</td></tr>
 <tr><td>Magery OFF·붕대 OFF, 버프·스탯 포션 옵션</td>
 <td>OFF 기능의 자동 요청이 없어야 한다. RA·Reflect는 자기 버프다.
-시폰·버섯·자기 MA 자동 반복은 없어야 한다. 스탯 포션은 버프가 빠진 다음 패스에, RA·Reflect는 빠지면 빈 창에서 바로 다시 나가야 한다.
+시폰·버섯·자기 MA 자동 반복은 없어야 한다. Resist 포션은 버프가 빠진 다음 패스에, Strength·Agility 포션은 STR·DEX가 기준선 아래로 내려간 다음 패스에, RA·Reflect는 빠지면 빈 창에서 바로 다시 나가야 한다.
 한 스탯 포션이 떨어져도 나머지는 계속 마셔야 한다.
+<code>config__str_potion</code>·<code>config__dex_potion</code>을 실행하는 캐릭터의 기본 + 20으로 맞추고, 아군 Bless가 걸린 채 교전해도 힘·민첩 포션이 한 번씩 나가는지 본다.
+마신 뒤 5초마다 다시 눌리면 선이 높다. 포션이 도는 동안 Curse·Weaken·Clumsy를 맞으면 거절 메시지가 5초에 한 번만 나와야 한다.
 걷는 중에도 버프를 건다. 긴급 손실에서는 버프를 시작하지 않고, 시전 중 그 선에 닿으면 끊는다.
 Resist 포션은 몹·펫용이며 적 플레이어 주문 피해 감소로 해석하지 않는다</td></tr>
 <tr><td>시작 전에 수동 시전·프리캐스트·포션·소환수 커서 보유</td>
@@ -529,7 +541,7 @@ Magery OFF·해당 주문이 불필요·최소 마나 미달이면 시약 조회
 시약이 없는 상태에서 추가한 뒤 다음 회복·버프 점검에 반영되는지 확인한다.
 시약이 떨어지면 <code>More reagents are needed</code> 직후 플래그가 바뀌어 같은 주문을 반복하지 않아야 하고, 보충은 10초 안에 반영되어야 한다.
 붕대 제거·보충 직후에는 진행 중 붕대를 유지하면서 다음 점검의 Heal 대체 조건이 실제 재고를 따라야 한다.
-Strength·Agility·Resist가 모두 있거나 포션이 없으면 스탯 포션 블록에서 행동 대기 없이 무기 단계로 진행해야 한다</td></tr>
+STR·DEX가 기준선 이상이고 Resist가 있거나 포션이 없으면 스탯 포션 블록에서 행동 대기 없이 무기 단계로 진행해야 한다</td></tr>
 <tr><td>자기 주문 선택·마나 임계값</td>
 <td>기존 기본값에서 Cure → 큰 피해 GH → 붕대 대체 Heal 순서를 유지한다.
 회복이 끝난 패스에서 스탯 포션 → RA → Reflect가 차례로 나가야 한다.
@@ -608,9 +620,11 @@ Parry Codex는 랭크가 오를 때까지 Bulwark를 쓰고, 근접 밖에서 �
 v6은 sword codex 이름에 <code>sword_</code> 접두를 붙이고, 칼질 결과와 범죄 행위 거절을 프로필 오버헤드로 넘겼다.
 같은 날 overhead 팔레트의 채도를 낮췄다 (<a href="overheads.html#05">overheads.html</a> 05절).
 스탠스·피니셔·어빌리티는 Arms Lore가 없어 무기 특수 확률이 기본 10%인 점을 반영해 고른다. 근거는 스크립트 CODEX STANCE와 WEAPON ABILITY 주석에 있다.
+2026-10-09 v9는 힘·민첩 포션을 버프 대신 STR·DEX 값으로 판정하고 (<a href="pvp.html#09.D">pvp.html</a> 09.D절), 세 스탯 포션을 따로 판정한다.
+v8은 <code>elseif</code> 사슬이라 힘 포션이 떨어지면 민첩·저항 포션까지 막혔다.
 현재 본문은 아직 인게임에서 확인되지 않았다.</p>
 <p>Scripts 탭에서 Reload all scripts → Play로 먼저 확인한다. 핫키에 묶었다면 클라이언트를 재시작한다
-(<a href="workflow.html#04.A">workflow.html</a> 04.A절). <code>Skinning enhanced v8 loaded</code>가 Journal에 떠야 한다.</p>
+(<a href="workflow.html#04.A">workflow.html</a> 04.A절). <code>Skinning enhanced v9 loaded</code>가 Journal에 떠야 한다.</p>
 <table>
 <thead><tr><th>남은 항목</th><th>확인할 것</th></tr></thead>
 <tbody>
@@ -640,6 +654,8 @@ item-list의 5187이 아닌 다른 graphic의 도끼면 백팩 검색이 실패�
 독이면 Cure 포션이 먼저다. 포션이 없을 때만 Smart Heal/Cure로 푼다. 포션과 주문이 같은 독에 함께 나가면 실패.
 RA와 Reflect는 상시 유지한다. 마나가 RA 24, Reflect 34 이상이면 건다. 손실 35 이상이거나 독이면 시작하지 않고, 시전 중 그렇게 되면 Interrupt로 끊는다.
 버프 시전 동안 근접 타격이 멈추는 시간도 기록한다. 시약이 없으면 30초 안에 다시 확인해야 한다</td></tr>
+<tr><td>스탯 포션</td><td>기억한 적이 있을 때 STR 120·DEX 100 아래면 힘·민첩 포션을 5초에 한 번, 저항 버프가 빠지면 1초 간격으로 마신다.
+아군 Bless가 걸려 있어도 마셔야 하고, 힘 포션이 떨어져 <code>[ str, out ]</code>이 떠도 민첩·저항은 계속 나가야 한다</td></tr>
 <tr><td>골드 버리기</td><td>최대 무게를 넘으면 한 패스에 2000골드를 발밑에 버리고 <code>[ gold, dropped ]</code>가 뜬다. 버리는 사이에도 회복이 돌아야 한다.
 골드가 없으면 <code>[ weight, over ]</code>만 뜬다. 무게를 넘지 않았는데 버리면 실패</td></tr>
 <tr><td>가죽 정리</td><td>칼질로 나온 가죽이 item-list의 <code>cut up leather</code> 4225인지 확인한다. 다른 graphic (hides 등)이면 검색에 더한다.

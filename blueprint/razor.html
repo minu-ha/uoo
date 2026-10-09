@@ -303,6 +303,14 @@ Q 대상 캐시를 죽었다고 자동으로 비울 수 없으므로, 플레이�
 <td><code>findtype</code>이 가장 비싸다 (한 번에 20 ~ 40ms, 06절). 32번이면 패스당 1초 안팎</td>
 <td>천천히 변하는 상태는 타이머로 몇 초에 한 번. <code>elseif</code> 사슬은 통째로 한 틱이라 길어도 싸다</td>
 </tr>
+<tr>
+<td><code>findbuff 'Strength'</code>·<code>'Agility'</code>로 스탯 포션 판정</td>
+<td>위키 <a href="https://wiki.uooutlands.com/Template:BuffIcons">BuffIcons</a>는 같은 아이콘을 <code>Strength Spell / Potion</code>으로 적는다.
+Bless는 버프 바에 <code>Strength</code>·<code>Agility</code>·<code>Cunning</code>으로 뜨고, 포션 버프 이름에는 Potion이 없다 (사용자 확인 2026-10-09).
+그래서 내 Bless든 아군 Bless든 걸려 있으면 포션을 마시지 않는다. 표의 <code>Strength Potion Usage Cooldown</code>도 인게임 이름으로 확인되지 않았다</td>
+<td>스탯을 기준선 (기본 + 20)과 비교하고 포션마다 재시도 간격을 둔다 (<a href="pvp.html#09.D">pvp.html</a> 09.D절).
+Bless는 <code>Cunning</code>, Arch Protection은 <code>Protection</code>으로 본다. <code>Magic Resist Potion</code>은 이 이름 그대로 뜬다 (사용자 확인 2026-10-09)</td>
+</tr>
 </tbody>
 </table>
 

@@ -2,6 +2,13 @@ clearsysmsg
 clearall
 
 @setvar! var_use_potion 0
+# STR and DEX with the Greater potion on: your base plus 20. Below these the potion is drunk.
+# Bless and the Strength and Agility spells show the same icons as the potions, so the stat
+# decides. Each potion is tried once per stat_potion_retry_frequency, so a curse that holds the
+# stat under the line while the potion still runs does not send a drink every pass.
+@setvar! var_str_potion 120
+@setvar! var_dex_potion 120
+@setvar! stat_potion_retry_frequency 5000
 
 setvar! overhead_message_timer_frequency 2700
 setvar! clear_scavenger_timer_frequency 30000
@@ -15,6 +22,16 @@ if not timerexists "clear_scavenger_timer"
     createtimer "clear_scavenger_timer"
     settimer "clear_scavenger_timer" overhead_message_timer_frequency
 endif
+
+if not timerexists "str_potion_timer"
+    createtimer "str_potion_timer"
+endif
+settimer "str_potion_timer" stat_potion_retry_frequency
+
+if not timerexists "agi_potion_timer"
+    createtimer "agi_potion_timer"
+endif
+settimer "agi_potion_timer" stat_potion_retry_frequency
 
 
 @clearignore
@@ -131,7 +148,8 @@ while not dead
         endif
     endif
 
-    if str <= 100 and var_use_potion = 1 and find lasttarget ground -1 -1 12
+    if str < var_str_potion and timer "str_potion_timer" >= stat_potion_retry_frequency and var_use_potion = 1 and find lasttarget ground -1 -1 12
+        settimer "str_potion_timer" 0
         if findtype "White Potion" backpack as found_potion
             dclick found_potion
             wait 200
@@ -143,7 +161,8 @@ while not dead
         endif
     endif
 
-    if dex <= 100 and var_use_potion = 1 and find lasttarget ground -1 -1 12
+    if dex < var_dex_potion and timer "agi_potion_timer" >= stat_potion_retry_frequency and var_use_potion = 1 and find lasttarget ground -1 -1 12
+        settimer "agi_potion_timer" 0
         if findtype "Blue Potion" backpack as found_potion
             dclick found_potion
             wait 200

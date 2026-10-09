@@ -184,6 +184,12 @@ clearignore
 # Potions are consumables. Turn this off when farming somewhere that does not need them.
 @setvar! config__use_potion 1
 
+# STR and DEX with the Greater potion on: your base plus 20. Below these the potion is drunk.
+# Bless and the Strength and Agility spells, ours or an ally's, show the same icons as the
+# potions but add less than its 20, so the stat is what tells the potion apart.
+@setvar! config__str_potion 120
+@setvar! config__dex_potion 120
+
 # 1 narrates what the script is doing, 0 keeps it quiet. Covers every 290 hue line: target
 # changes, gold dropped, and every cast cut short for a heal, named by spell.
 # A cast the server disturbs is not reported here: the profile's "[ cast, disturbed ]"
@@ -1258,11 +1264,15 @@ while not dead
         # Strength, agility and magic resist, drunk in a fight only so an idle walk does not
         # burn them. The buffs last minutes, so they are looked at every ten seconds, on the
         # housekeeping tick, and the clock only restarts once the act window has let it look.
+        # Strength and agility read the stat against config__str_potion and config__dex_potion,
+        # because Bless and the Strength and Agility spells show the same icons as the potions.
+        # The ten seconds are their retry window too: a curse that holds the stat under the line
+        # while the potion still runs costs one refused drink per look.
         if config__use_potion = 1 and var__engaged = 1 and timer "timer__potion_check" >= cooldown__potion_check
             if not targetexists and not casting
                 settimer "timer__potion_check" 0
 
-                if not findbuff 'Strength'
+                if str < config__str_potion
                     if findtype "White Potion" backpack
                         hotkey 'Drink Strength'
                         wait wait__short
@@ -1272,7 +1282,7 @@ while not dead
                     endif
                 endif
 
-                if not findbuff 'Agility'
+                if dex < config__dex_potion
                     if findtype "Blue Potion" backpack
                         hotkey 'Drink Agility'
                         wait wait__short

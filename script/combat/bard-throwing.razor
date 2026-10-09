@@ -97,8 +97,11 @@ cleardragdrop
 @setvar! config__heal_potion_diff 40
 @setvar! config__heal_skill_min 10
 @setvar! config__stam_threshold 80
-@setvar! config__str_threshold 100
-@setvar! config__dex_threshold 100
+# STR and DEX with the Greater potion on: your base plus 20. Below these the potion is drunk.
+# Bless and the Strength and Agility spells, ours or an ally's, show the same icons as the
+# potions but add less than its 20, so the stat is what tells the potion apart.
+@setvar! config__str_potion 120
+@setvar! config__dex_potion 120
 @setvar! config__gold_drop_amount 500
 
 # ####################################################################################
@@ -115,6 +118,11 @@ cleardragdrop
 @setvar! cooldown__overhead_message 2700
 @setvar! cooldown__combat_target_grace 1200
 @setvar! cooldown__heal_potion 10000
+# A Strength or Agility potion is tried once per window. The stat arrives a round trip after the
+# drink, and a Curse, Weaken or Clumsy can hold it under the line while the potion still runs:
+# without the window that refused drink would go out every pass. An empty bag is looked up at
+# the same pace.
+@setvar! cooldown__stat_potion 5000
 # The Clash / Blitz / Hail Mary gauge refills in 24 to 60 seconds, so one minute is the
 # safe spacing. Shorter only wastes chat lines, it cannot fire the ability early.
 @setvar! cooldown__ability 60000
@@ -154,6 +162,18 @@ if not timerexists "timer__stance_resync"
 endif
 
 settimer "timer__stance_resync" 0
+
+if not timerexists "timer__str_potion"
+    createtimer "timer__str_potion"
+endif
+
+settimer "timer__str_potion" cooldown__stat_potion
+
+if not timerexists "timer__agi_potion"
+    createtimer "timer__agi_potion"
+endif
+
+settimer "timer__agi_potion" cooldown__stat_potion
 
 if not timerexists "timer__planted"
     createtimer "timer__planted"
@@ -554,7 +574,10 @@ while not dead
     # ################################################################################
     # # STRENGTH POT
     # ################################################################################
-    if not findbuff 'Strength' and str <= config__str_threshold and config__use_potion = 1 and not targetexists and find var__combat_target ground -1 -1 12
+    # The stat against the potion line, not the buff: Bless and the Strength spell show the same
+    # icon as the potion. Tried once per cooldown__stat_potion.
+    if str < config__str_potion and timer "timer__str_potion" >= cooldown__stat_potion and config__use_potion = 1 and not targetexists and find var__combat_target ground -1 -1 12
+        settimer "timer__str_potion" 0
         if findtype "White Potion" backpack as alias__strength_potion
             dclick alias__strength_potion
             wait wait__short
@@ -569,7 +592,10 @@ while not dead
     # ################################################################################
     # # AGILITY POT
     # ################################################################################
-    if not findbuff 'Agility' and dex <= config__dex_threshold and config__use_potion = 1 and not targetexists and find var__combat_target ground -1 -1 12
+    # The stat against the potion line, not the buff: Bless and the Agility spell show the same
+    # icon as the potion. Tried once per cooldown__stat_potion.
+    if dex < config__dex_potion and timer "timer__agi_potion" >= cooldown__stat_potion and config__use_potion = 1 and not targetexists and find var__combat_target ground -1 -1 12
+        settimer "timer__agi_potion" 0
         if findtype "Blue Potion" backpack as alias__agility_potion
             dclick alias__agility_potion
             wait wait__short

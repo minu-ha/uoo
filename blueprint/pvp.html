@@ -859,6 +859,7 @@ TK·MA/Harm·Explosion/EB·폭발 포션·소환수 공격·Hamstring·상대 �
 v5는 위에서 고른 번호를 변수에 담고 아래 실행부가 다시 읽었는데, 그 사이 상태가 바뀔 수 있었다.
 v6의 블록은 각자 지금 상태를 읽고 그 자리에서 행동하며 다음 블록에 결정을 넘기지 않는다.
 v5의 긴급 수동 주문 중단·6초 시전 대기와 <code>[ cast, check ]</code> 정지·준비 동작의 5초 주기·주문의 이동 가드·재시도 타이머 8개를 없앴다.
+2026-10-09 v7은 Strength·Agility 포션을 버프 대신 STR·DEX 값으로 판정하고 포션마다 5초 재시도 간격을 두었다 (09.D절).
 현재 본문은 아직 인게임에서 확인되지 않았다.</p>
 
 <h4>입력 규칙</h4>
@@ -882,6 +883,9 @@ v5의 긴급 수동 주문 중단·6초 시전 대기와 <code>[ cast, check ]</
 <td>회복 에이전트·버프·시약 읽기 / 무기 장착 / Healing이 있고 피해·독이 있을 때 붕대</td></tr>
 <tr><td><code>use_potions</code> / <code>use_stat_potions</code> / <code>use_resist_potion</code></td><td>각 1</td>
 <td>회복·Refresh 포션 / Strength·Agility와 선택한 Resist 포션 / Resist 포션의 추가 스위치</td></tr>
+<tr><td><code>str_potion</code> / <code>dex_potion</code></td><td>120 / 100</td>
+<td>Greater 포션을 마신 STR·DEX, 곧 기본 + 20. 그보다 낮으면 Strength·Agility 포션을 마신다.
+공유 루프라 실행하는 캐릭터의 기본값에 맞춘다. 기본값은 STR 100·DEX 80 기준이다 (09.D절)</td></tr>
 <tr><td><code>use_reactive_armor</code> / <code>use_magic_reflect</code></td><td>각 1</td>
 <td>빠지면 시전·커서가 없을 때 바로 다시 건다. 이동 가드 없음</td></tr>
 <tr><td><code>heal_hits</code> / <code>emergency_hits</code> / <code>light_hits</code></td><td>35 / 35 / 15</td>
@@ -908,7 +912,7 @@ v5의 긴급 수동 주문 중단·6초 시전 대기와 <code>[ cast, check ]</
 <li>CURE: 독이면 Cure 포션. 포션이 하나라도 있으면 에이전트를 쓰지 않는다. 없거나 꺼져 있으면 Smart Heal/Cure 에이전트.</li>
 <li>HEAL: 손실이 힐 포션 기준 이상이면 포션. 이 패스에 포션이 나가지 않았고 긴급 기준 이상이면 Greater Heal/Cure 에이전트.</li>
 <li>BANDAGE → LIGHT HEAL → REFRESH: 진행 중 붕대는 다시 시작하지 않는다. 가벼운 Heal은 붕대를 쓸 수 없을 때만.</li>
-<li>STAT POTIONS: Strength·Agility·Resist 버프가 빠지면 각각 바로 마신다. 한 포션이 떨어져도 나머지는 계속한다.</li>
+<li>STAT POTIONS: Strength·Agility는 STR·DEX가 기준선 아래면 5초에 한 번, Resist는 버프가 빠지면 바로 마신다. 한 포션이 떨어져도 나머지는 계속한다.</li>
 <li>SELF BUFFS: RA → Reflect가 빠지면 긴급 기준 아래에서 바로 건다.</li>
 <li>WEAPON: 시전·커서가 없을 때 원하는 슬롯의 무기가 손에 없으면 장착을 요청한다.</li>
 </ol>
@@ -920,11 +924,13 @@ v5의 긴급 수동 주문 중단·6초 시전 대기와 <code>[ cast, check ]</
 
 <h4>비용과 타이머</h4>
 <p><a href="razor.html#06">razor.html</a> 06절대로 <code>findtype</code>이 가장 비싼 명령이다. 시약은 패스마다 찾지 않고 REAGENTS의 플래그를 읽는다.
-포션은 그 포션이 필요한 블록 안에서만 찾고, 스탯 포션은 버프가 빠졌을 때만 찾는다.
+포션은 그 포션이 필요한 블록 안에서만 찾는다. Strength·Agility 포션은 스탯이 기준선 아래일 때 5초에 한 번, Resist 포션은 버프가 빠졌을 때만 찾는다.
 무기는 원하는 슬롯이 바뀔 때만 찾고 평소에는 양손 레이어 두 번만 읽는다. 갖고 있지 않은 무기를 슬롯에 두면 매 패스 한 번 찾게 되므로 쓰지 않는 슬롯은 0으로 둔다.</p>
-<p>재시도 타이머는 두지 않는다. 중복 요청은 행동 큐 (<code>queued</code>), <code>bandaging</code>, <code>findbuff</code>, 포션 라벨·<code>heal pot</code> 바가 막고,
+<p>재시도 타이머는 Strength·Agility 포션의 <code>timer__str_potion</code>·<code>timer__agi_potion</code> (5초)뿐이다.
+스탯은 저주가 걸리면 포션이 도는 동안에도 기준선 아래에 머물 수 있어, 다른 신호로는 거절될 마시기를 막지 못한다 (09.D절).
+나머지 중복 요청은 행동 큐 (<code>queued</code>), <code>bandaging</code>, <code>findbuff</code>, 포션 라벨·<code>heal pot</code> 바가 막고,
 에이전트는 제 시전이 끝날 때까지 폴링하므로 끝난 뒤 손실이 남아 있으면 바로 다시 나가야 한다.
-남은 타이머는 반복 경고를 막는 <code>timer__message</code> (3초)와 시약 읽기 주기 <code>timer__reagents</code> (10초)뿐이며, Play할 때마다 준비 상태에서 시작한다.</p>
+그 밖의 타이머는 반복 경고를 막는 <code>timer__message</code> (3초)와 시약 읽기 주기 <code>timer__reagents</code> (10초)이며, 모두 Play할 때마다 준비 상태에서 시작한다.</p>
 
 <h4>붕대 선행과 PvM 준비 기능</h4>
 <p>붕대가 끝나 만피가 되면 현재 루프는 다음 붕대를 시작하지 않는다.
@@ -1441,6 +1447,15 @@ PvP에서 독에 걸린 상태의 붕대는 해독과 HP 회복을 동시에 하
 <p>Greater Strength와 Greater Agility를 기준으로 각각 STR·최대 HP, DEX·최대 스태미나에 +20을 계산한다.
 <a href="https://wiki.uooutlands.com/Template:SpellCircles">Bless</a>의 스탯 보정식은 <code>11 × Magery / 100</code>이므로
 Magery 80의 식 결과는 8.8이다. 실제 정수 처리와 포션 중첩은 확인되지 않았다. 검증 전에는 포션 값에 +11을 다시 더하지 않는다.</p>
+<p>버프 바로는 포션을 가리지 못한다. 위키 <a href="https://wiki.uooutlands.com/Template:BuffIcons">BuffIcons</a>는 같은 아이콘을
+<code>Strength Spell / Potion</code>·<code>Agility Spell / Potion</code>으로 적는다. 사용자는 2026-10-09 Magery 100 Bless가
+<code>Your strength/dexterity/intelligence has changed by 11</code>을 남기고 버프 바에 <code>Strength</code>·<code>Agility</code>·<code>Cunning</code>으로 뜨며,
+스탯 포션 버프 이름에는 Potion이 없다고 확인했다. 그래서 <code>findbuff 'Strength'</code>로 보면 내 Bless든 아군 Bless든 걸려 있는 동안 포션을 마시지 않는다.</p>
+<p>포션을 마시는 루프는 스탯 값으로 판정한다. Greater 포션을 마신 값, 곧 기본 + 20을 <code>config__str_potion</code>·<code>config__dex_potion</code>에 두고 그보다 낮으면 마신다.
+Bless·Strength·Agility 주문은 식으로 Magery 100에서 11, 120에서도 13.2라 그 선 아래에 남는다. Razor 스크립트는 덧셈을 못 하므로 기본값이 아닌 기준선을 적는다
+(<a href="razor.html#05">razor.html</a> 05절).</p>
+<p>포션마다 재시도 간격을 둔다. 스탯은 마신 뒤 한 왕복 늦게 오르고, Curse·Weaken·Clumsy는 포션이 도는 동안에도 스탯을 선 아래로 누를 수 있다.
+간격이 없으면 그동안 거절될 마시기가 패스마다 회복 포션과 같은 아이템 큐로 나간다. 저항 포션은 <code>Magic Resist Potion</code>이라는 제 아이콘으로 본다 (사용자 확인 2026-10-09).</p>
 <p>INT 45 + Bless는 정수 처리 전 최대치 계산상 53.8이지 56이 아니다. Bless 자체는 9마나를 소비한다.
 최대치 증가 때 현재 마나도 얼마나 증가하는지는 따로 실측해야 하므로, 시전 직후 현재 마나 53.8을 사용할 수 있다고 약속하지 않는다.</p>
 

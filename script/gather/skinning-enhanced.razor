@@ -102,8 +102,12 @@ endif
 @setvar! config__heal_skill_min 10
 # DEX 80 gives about 80 stamina. Refresh below 60.
 @setvar! config__refresh_stam 60
-@setvar! config__str_threshold 100
-@setvar! config__dex_threshold 100
+# STR and DEX with the Greater potion on: your base plus 20. Below these the potion is drunk.
+# Bless and the Strength and Agility spells, ours or an ally's, show the same icons as the
+# potions but add less than its 20, so the stat is what tells the potion apart.
+# This template is STR 100 and DEX 80.
+@setvar! config__str_potion 120
+@setvar! config__dex_potion 100
 
 # Minimum current mana to start each self spell.
 @setvar! config__mana_heal 4
@@ -135,6 +139,11 @@ endif
 @setvar! cooldown__combat_target_grace 1200
 @setvar! cooldown__bandage_retry 1200
 @setvar! cooldown__potion_retry 1000
+# A Strength or Agility potion is tried once per window. The stat arrives a round trip after the
+# drink, and a Curse, Weaken or Clumsy can hold it under the line while the potion still runs:
+# without the window that refused drink would go out every pass. An empty bag is looked up at
+# the same pace.
+@setvar! cooldown__stat_potion 5000
 @setvar! cooldown__heal_retry 2500
 # Spacing between buff casts, so a fizzle is retried without spamming.
 @setvar! cooldown__buff_retry 3000
@@ -181,8 +190,16 @@ if not timerexists "timer__refresh"
     createtimer "timer__refresh"
 endif
 
-if not timerexists "timer__stat_potion"
-    createtimer "timer__stat_potion"
+if not timerexists "timer__str_potion"
+    createtimer "timer__str_potion"
+endif
+
+if not timerexists "timer__agi_potion"
+    createtimer "timer__agi_potion"
+endif
+
+if not timerexists "timer__resist_potion"
+    createtimer "timer__resist_potion"
 endif
 
 if not timerexists "timer__heal"
@@ -243,7 +260,9 @@ settimer "timer__bandage" cooldown__bandage_retry
 settimer "timer__cure_potion" cooldown__potion_retry
 settimer "timer__heal_potion" cooldown__potion_retry
 settimer "timer__refresh" cooldown__potion_retry
-settimer "timer__stat_potion" cooldown__potion_retry
+settimer "timer__str_potion" cooldown__stat_potion
+settimer "timer__agi_potion" cooldown__stat_potion
+settimer "timer__resist_potion" cooldown__potion_retry
 settimer "timer__heal" cooldown__heal_retry
 settimer "timer__buff" cooldown__buff_retry
 settimer "timer__reagents" cooldown__reagents
@@ -337,7 +356,7 @@ if config__pack_leather = 1
 endif
 
 if config__sysmsg = 1
-    sysmsg "Skinning enhanced v8 loaded: skin unowned={{config__skin_unowned}}, sword stance={{config__sword_stance_main}}, parry stance={{config__parry_stance_main}}." 88
+    sysmsg "Skinning enhanced v9 loaded: skin unowned={{config__skin_unowned}}, sword stance={{config__sword_stance_main}}, parry stance={{config__parry_stance_main}}." 88
 endif
 if config__chatty = 1
     overhead "[ skinning, on ]" 290
@@ -609,11 +628,15 @@ while not dead
     # # COMBAT POTIONS
     # ################################################################################
     # Strength, Agility and Magic Resist only while an enemy is remembered. The cache already
-    # holds it only within 12 tiles, so no second search is needed here.
-    # One potion per retry window, so a buff has time to show before the next check.
-    if config__use_potion = 1 and timer "timer__stat_potion" >= cooldown__potion_retry and not hidden and not targetexists and var__combat_target != 0
-        if not findbuff 'Strength' and str <= config__str_threshold
-            settimer "timer__stat_potion" 0
+    # holds it only within 12 tiles, so no second search is needed here. Each potion is judged
+    # on its own, so running out of one does not hold up the others.
+    # Strength and Agility read the stat against config__str_potion and config__dex_potion,
+    # because Bless and the Strength and Agility spells show the same icons as the potions, and
+    # each is tried once per cooldown__stat_potion. Magic Resist has an icon of its own and keeps
+    # the short retry, so the icon has time to show before the next check.
+    if config__use_potion = 1 and not hidden and not targetexists and var__combat_target != 0
+        if not queued and str < config__str_potion and timer "timer__str_potion" >= cooldown__stat_potion
+            settimer "timer__str_potion" 0
             if findtype "White Potion" backpack as alias__strength_potion
                 dclick alias__strength_potion
                 wait wait__short
@@ -621,8 +644,9 @@ while not dead
                 overhead "[ str, out ]" 254
                 settimer "timer__overhead_message" 0
             endif
-        elseif not findbuff 'Agility' and dex <= config__dex_threshold
-            settimer "timer__stat_potion" 0
+        endif
+        if not queued and dex < config__dex_potion and timer "timer__agi_potion" >= cooldown__stat_potion
+            settimer "timer__agi_potion" 0
             if findtype "Blue Potion" backpack as alias__agility_potion
                 dclick alias__agility_potion
                 wait wait__short
@@ -630,8 +654,9 @@ while not dead
                 overhead "[ agi, out ]" 254
                 settimer "timer__overhead_message" 0
             endif
-        elseif not findbuff 'Magic Resist Potion'
-            settimer "timer__stat_potion" 0
+        endif
+        if not queued and not findbuff 'Magic Resist Potion' and timer "timer__resist_potion" >= cooldown__potion_retry
+            settimer "timer__resist_potion" 0
             if findtype "Black Potion" backpack as alias__resist_potion
                 dclick alias__resist_potion
                 wait wait__short

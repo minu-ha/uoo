@@ -42,8 +42,9 @@ endif
 @setvar! config__use_potion 1
 # Strength, Agility and Magic Resist potions while an enemy is engaged.
 @setvar! config__use_stat_potions 1
-# STR and DEX with the potion on: your base plus 20. Below these the potion is drunk. Bless
-# (+11) shows the same Strength and Agility icons, so the stat is what tells the potion apart.
+# STR and DEX with the Greater potion on: your base plus 20. Below these the potion is drunk.
+# Bless and the Strength and Agility spells, ours or an ally's, show the same icons as the
+# potions but add less than its 20, so the stat is what tells the potion apart.
 @setvar! config__str_potion 120
 @setvar! config__dex_potion 100
 
@@ -112,8 +113,10 @@ endif
 # How long an off screen enemy is kept before it is dropped.
 @setvar! cooldown__target_grace 500
 @setvar! cooldown__vet_kit 5000
-# A stat potion is not tried again inside this window. The stat arrives a round trip after the
-# drink, and a curse can hold it under the line while the potion still runs.
+# A Strength or Agility potion is tried once per window. The stat arrives a round trip after the
+# drink, and a Curse, Weaken or Clumsy can hold it under the line while the potion still runs:
+# without the window that refused drink would go out every pass. An empty bag is looked up at
+# the same pace.
 @setvar! cooldown__stat_potion 5000
 # Reagent read interval, and right after a "More reagents are needed" refusal.
 @setvar! cooldown__reagents 30000
@@ -659,22 +662,21 @@ while not dead
     # # COMBAT POTIONS
     # ################################################################################
     # Strength, Agility and Magic Resist while an enemy is engaged. Each buff is judged on its
-    # own, so running out of one potion does not hold up the others. Bless shows the same
-    # Strength and Agility icons as the potions, so those two read the stat against
-    # config__str_potion and config__dex_potion. The retry window keeps a refused drink off the
-    # item queue, which the heal and cure potions share.
+    # own, so running out of one potion does not hold up the others. Strength and Agility read
+    # the stat against config__str_potion and config__dex_potion, because Bless shows the same
+    # icons as the potions, and each is tried once per cooldown__stat_potion.
     if var__engaged = 1 and config__use_potion = 1 and config__use_stat_potions = 1 and not paralyzed and not hidden and not targetexists
         if not queued and str < config__str_potion and timer "timer__str_potion" >= cooldown__stat_potion
+            settimer "timer__str_potion" 0
             if findtype "White Potion" self
                 hotkey "Drink Strength"
-                settimer "timer__str_potion" 0
                 wait wait__short
             endif
         endif
         if not queued and dex < config__dex_potion and timer "timer__agi_potion" >= cooldown__stat_potion
+            settimer "timer__agi_potion" 0
             if findtype "Blue Potion" self
                 hotkey "Drink Agility"
-                settimer "timer__agi_potion" 0
                 wait wait__short
             endif
         endif
