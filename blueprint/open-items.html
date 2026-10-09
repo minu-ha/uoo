@@ -667,10 +667,13 @@ Resisting Spells·Meditation 80 템플릿용이다. bard-necro-enhanced의 생�
 쓰면 진행 중 붕대가 취소된다 (<a href="https://wiki.uooutlands.com/Veterinary">Veterinary</a>). 사용자는 힐링 코덱스로 사거리를 3 늘려 5칸으로 쓴다.
 Bless는 9마나·2분, Arch Protection은 11마나·2분으로 나와 6칸 안 아군 전부의 AR을 올리고, Flamestrike는 40마나다
 (<a href="https://wiki.uooutlands.com/Magery">Magery</a>). Razor <code>diffhits</code>는 내 체력만 읽어 펫 체력에 따른 자동 GH는 넣지 않았다.
-주문 이름은 클라이언트 <code>spells.def</code>의 <code>Flamestrike</code>·<code>Bless</code>·<code>Arch Protection</code>·<code>Create Food</code>다.
-현재 본문은 아직 인게임에서 확인되지 않았다.</p>
+주문 이름은 클라이언트 <code>spells.def</code>의 <code>Flamestrike</code>·<code>Bless</code>·<code>Arch Protection</code>·<code>Create Food</code>다.</p>
+<p>같은 날 사용자가 버프 바를 확인했다. Bless는 <code>Strength</code>·<code>Agility</code>·<code>Cunning</code> 세 아이콘으로 뜨고
+(시스템 메시지는 <code>Your strength/dexterity/intelligence has changed by 11</code>), Arch Protection은 <code>Protection</code>으로 뜬다.
+Strength·Agility는 스탯 포션과 겹치므로 v2는 Bless를 <code>Cunning</code>으로, Arch Protection을 <code>Protection</code>으로 판정하고 시전 시각 타이머를 없앴다.
+펫은 셋 (2슬롯 둘, 1슬롯 하나)이라 <code>config__pet_count</code> 기본값을 3으로 했다. 나머지 본문은 아직 인게임에서 확인되지 않았다.</p>
 <p>새 파일이므로 Scripts 탭에서 Reload all scripts → Play로 먼저 확인한다. 핫키에 묶었다면 클라이언트를 재시작한다
-(<a href="workflow.html#04.A">workflow.html</a> 04.A절). <code>Tamer mage enhanced v1 loaded</code>가 Journal에 떠야 한다.</p>
+(<a href="workflow.html#04.A">workflow.html</a> 04.A절). <code>Tamer mage enhanced v2 loaded</code>가 Journal에 떠야 한다.</p>
 <table>
 <thead><tr><th>남은 항목</th><th>확인할 것</th></tr></thead>
 <tbody>
@@ -678,9 +681,9 @@ Bless는 9마나·2분, Arch Protection은 11마나·2분으로 나와 6칸 안 
 펫 수가 다르면 <code>config__pet_count</code>를 1~3으로 바꾼다. ESC로 건너뛴 칸은 키트 조건에서 빠져야 한다</td></tr>
 <tr><td>수의사 키트</td><td>지정한 펫이 5칸 안에 있고 붕대 시간이 돌고 있지 않으면 5초마다 <code>Veterinary supplies used</code>가 남는다.
 펫이 모두 5칸 밖이면 쓰지 않아야 한다. 펫이 만피일 때의 서버 응답과 키트 소모 여부, 죽은 펫 부활 시도도 기록한다. 없으면 <code>[ vet kit, out ]</code></td></tr>
-<tr><td>Bless·Arch Protection</td><td>전투 대상이 없고 워모드가 꺼져 있을 때 이로운 커서에 자기 자신을 찍고 <code>Buff: Bless on yourself</code>·<code>Buff: Arch Protection</code>이 남아야 한다.
-버프 아이콘 이름이 확인되지 않아 스크립트는 시전 시각으로 2분 (115초)을 잰다. 펫도 Arch Protection을 받는지 펫 상태에서 확인한다.
-버프 바의 실제 이름 (외부 mining 스크립트는 <code>Cunning</code>·<code>Protection</code>을 썼다)을 기록하면 findbuff로 바꿀 수 있다</td></tr>
+<tr><td>Bless·Arch Protection</td><td>전투 대상이 없고 워모드가 꺼져 있을 때 <code>Cunning</code>·<code>Protection</code> 아이콘이 없으면 이로운 커서에 자기 자신을 찍고
+<code>Buff: Bless on yourself</code>·<code>Buff: Arch Protection</code>이 남아야 한다. 아이콘이 뜬 뒤 다음 패스에서 같은 주문을 다시 시전하지 않아야 한다.
+2분 뒤 아이콘이 사라지면 다시 시전하는지, 펫도 Arch Protection을 받는지 펫 상태에서 확인한다</td></tr>
 <tr><td>Bless와 스탯 포션</td><td>Bless의 힘·민첩이 버프 바에서 포션과 같은 아이콘을 쓰면 <code>findbuff "Strength"</code>가 Bless로 참이 되어 힘 포션을 마시지 않는다.
 전투 중 힘·민첩 포션이 실제로 나가는지 확인한다</td></tr>
 <tr><td>Flamestrike</td><td>전투 대상이 10칸 안이고 마나 51 이상이며 워모드가 꺼져 있을 때만 시전한다. 시전 중 다른 몹을 V로 고르면 커서가 취소되고 다음 패스에 새 대상으로 나가야 한다.

@@ -113,10 +113,6 @@ endif
 # Tracking Hunting check.
 @setvar! cooldown__housekeeping 5000
 @setvar! cooldown__food 60000
-# Bless and Arch Protection last 2 minutes (wiki SpellCircles, no Inscription). Recast a little
-# before that. Their buff icon names are not confirmed, so the cast itself is the clock.
-@setvar! cooldown__bless 115000
-@setvar! cooldown__arch_protection 115000
 
 # ####################################################################################
 # # TIMER
@@ -145,23 +141,13 @@ if not timerexists "timer__food"
     createtimer "timer__food"
 endif
 
-if not timerexists "timer__bless"
-    createtimer "timer__bless"
-endif
-
-if not timerexists "timer__arch_protection"
-    createtimer "timer__arch_protection"
-endif
-
-# Everything starts ready. Bless and Arch Protection are cast on the first calm pass.
+# Everything starts ready.
 settimer "timer__message" cooldown__message
 settimer "timer__target_grace" cooldown__target_grace
 settimer "timer__vet_kit" cooldown__vet_kit
 settimer "timer__reagents" cooldown__reagents
 settimer "timer__housekeeping" cooldown__housekeeping
 settimer "timer__food" cooldown__food
-settimer "timer__bless" cooldown__bless
-settimer "timer__arch_protection" cooldown__arch_protection
 
 # ####################################################################################
 # # STATE
@@ -241,7 +227,7 @@ if config__use_vet_kit = 1
 endif
 
 if config__sysmsg = 1
-    sysmsg "Tamer mage enhanced v1 loaded: pets={{config__pet_count}}, flamestrike mana={{config__mana_flamestrike}}, tracking color={{config__tracking_color}}." 88
+    sysmsg "Tamer mage enhanced v2 loaded: pets={{config__pet_count}}, flamestrike mana={{config__mana_flamestrike}}, tracking color={{config__tracking_color}}." 88
 endif
 if config__chatty = 1
     overhead "[ tamer, on ]" 290
@@ -684,9 +670,12 @@ while not dead
     # One cast per pass, in this order:
     #   Reactive Armor, Magic Reflection  whenever missing. The reflect bar is the recast lock
     #   Bless, Arch Protection            after a fight (no remembered enemy, warmode off), once
-    #                                     their 2 minutes are nearly up. Both open a beneficial
-    #                                     cursor that is answered with yourself, and the clock
-    #                                     restarts only then, so a disturbed cast is tried again.
+    #                                     their buff icon is gone. Both open a beneficial cursor
+    #                                     that is answered with yourself.
+    # Bless shows Strength, Agility and Cunning. Only Cunning is Bless alone, because the
+    # Strength and Agility potions show the other two. Arch Protection shows Protection.
+    # The icon arrives a round trip after the target, so the block waits for it before the next
+    # pass reads it again.
     # Not started at the emergency line, and cut there mid cast so the next pass can heal.
     if not paralyzed and not hidden and not queued and not casting and not targetexists and cooldown "walk" = 0 and diffhits < config__emergency_hits
         if config__use_reactive_armor = 1 and var__regs_reactive_armor = 1 and mana >= config__mana_reactive_armor and not findbuff "Reactive Armor"
@@ -729,7 +718,7 @@ while not dead
                 endif
                 wait wait__poll
             endfor
-        elseif config__use_bless = 1 and var__combat_target = 0 and not warmode and var__regs_bless = 1 and mana >= config__mana_bless and timer "timer__bless" >= cooldown__bless
+        elseif config__use_bless = 1 and var__combat_target = 0 and not warmode and var__regs_bless = 1 and mana >= config__mana_bless and not findbuff "Cunning"
             cast "Bless"
             wait wait__short
 
@@ -749,13 +738,17 @@ while not dead
 
             if targetexists "beneficial"
                 target self
-                settimer "timer__bless" 0
                 if config__sysmsg = 1
                     sysmsg "Buff: Bless on yourself." 88
                 endif
-                wait wait__short
+                for 10
+                    if findbuff "Cunning"
+                        break
+                    endif
+                    wait wait__poll
+                endfor
             endif
-        elseif config__use_arch_protection = 1 and var__combat_target = 0 and not warmode and var__regs_arch_protection = 1 and mana >= config__mana_arch_protection and timer "timer__arch_protection" >= cooldown__arch_protection
+        elseif config__use_arch_protection = 1 and var__combat_target = 0 and not warmode and var__regs_arch_protection = 1 and mana >= config__mana_arch_protection and not findbuff "Protection"
             cast "Arch Protection"
             wait wait__short
 
@@ -775,11 +768,15 @@ while not dead
 
             if targetexists "beneficial"
                 target self
-                settimer "timer__arch_protection" 0
                 if config__sysmsg = 1
                     sysmsg "Buff: Arch Protection around yourself." 88
                 endif
-                wait wait__short
+                for 10
+                    if findbuff "Protection"
+                        break
+                    endif
+                    wait wait__poll
+                endfor
             endif
         endif
     endif
