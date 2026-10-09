@@ -21,6 +21,7 @@ Combat loops are named after the template (`bard-mace`, `hally-mage`), variants 
 | Script                | Template                                                                                     |
 |-----------------------|----------------------------------------------------------------------------------------------|
 | `bard-necro-enhanced` | Discord / Peace / Provo + Necromancy summons + Spirit Speak, with the Grimoire proc rotation |
+| `tamer-mage-enhanced` | Tamer mage: veterinary supplies for picked pets, RA / Reflect / Bless / Arch Protection, Flamestrike for the aspect proc, Tracking warnings |
 | `pvp`                | Shared field PvP self sustain with Magery, bandage, potion and swing-based weapon settings; all offense stays manual |
 | `bard-mace`           | Bard dexxer with maces                                                                       |
 | `bard-throwing`       | Bard dexxer with throwing weapons: Throwing Codex stances, moving-throw readout              |
