@@ -42,6 +42,10 @@ endif
 @setvar! config__use_potion 1
 # Strength, Agility and Magic Resist potions while an enemy is engaged.
 @setvar! config__use_stat_potions 1
+# STR and DEX with the potion on: your base plus 20. Below these the potion is drunk. Bless
+# (+11) shows the same Strength and Agility icons, so the stat is what tells the potion apart.
+@setvar! config__str_potion 120
+@setvar! config__dex_potion 100
 
 # Veterinary supplies heal every pet within reach after the 5 second bandage time, and cure
 # and resurrect at reduced odds (wiki Veterinary). Reach is 2 tiles plus 3 from the healing codex.
@@ -108,6 +112,9 @@ endif
 # How long an off screen enemy is kept before it is dropped.
 @setvar! cooldown__target_grace 500
 @setvar! cooldown__vet_kit 5000
+# A stat potion is not tried again inside this window. The stat arrives a round trip after the
+# drink, and a curse can hold it under the line while the potion still runs.
+@setvar! cooldown__stat_potion 5000
 # Reagent read interval, and right after a "More reagents are needed" refusal.
 @setvar! cooldown__reagents 30000
 # Tracking Hunting check.
@@ -129,6 +136,14 @@ if not timerexists "timer__vet_kit"
     createtimer "timer__vet_kit"
 endif
 
+if not timerexists "timer__str_potion"
+    createtimer "timer__str_potion"
+endif
+
+if not timerexists "timer__agi_potion"
+    createtimer "timer__agi_potion"
+endif
+
 if not timerexists "timer__reagents"
     createtimer "timer__reagents"
 endif
@@ -145,6 +160,8 @@ endif
 settimer "timer__message" cooldown__message
 settimer "timer__target_grace" cooldown__target_grace
 settimer "timer__vet_kit" cooldown__vet_kit
+settimer "timer__str_potion" cooldown__stat_potion
+settimer "timer__agi_potion" cooldown__stat_potion
 settimer "timer__reagents" cooldown__reagents
 settimer "timer__housekeeping" cooldown__housekeeping
 settimer "timer__food" cooldown__food
@@ -642,20 +659,22 @@ while not dead
     # # COMBAT POTIONS
     # ################################################################################
     # Strength, Agility and Magic Resist while an enemy is engaged. Each buff is judged on its
-    # own, so running out of one potion does not hold up the others. Bless also shows Strength
-    # and Agility, so those two read their own potion usage cooldown icons instead (findbuff
-    # matches part of a name). The bonus ends together with that cooldown: "You may now use a
-    # strength potion." and the stat drop arrive at the same time.
+    # own, so running out of one potion does not hold up the others. Bless shows the same
+    # Strength and Agility icons as the potions, so those two read the stat against
+    # config__str_potion and config__dex_potion. The retry window keeps a refused drink off the
+    # item queue, which the heal and cure potions share.
     if var__engaged = 1 and config__use_potion = 1 and config__use_stat_potions = 1 and not paralyzed and not hidden and not targetexists
-        if not queued and not findbuff "Strength Potion"
+        if not queued and str < config__str_potion and timer "timer__str_potion" >= cooldown__stat_potion
             if findtype "White Potion" self
                 hotkey "Drink Strength"
+                settimer "timer__str_potion" 0
                 wait wait__short
             endif
         endif
-        if not queued and not findbuff "Agility Potion"
+        if not queued and dex < config__dex_potion and timer "timer__agi_potion" >= cooldown__stat_potion
             if findtype "Blue Potion" self
                 hotkey "Drink Agility"
+                settimer "timer__agi_potion" 0
                 wait wait__short
             endif
         endif
