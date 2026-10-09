@@ -1,4 +1,4 @@
-# Tamer mage loop: self recovery, veterinary supplies for the pets, self buffs and Flamestrike for the aspect proc.
+# Tamer mage loop: self recovery, veterinary supplies for you and the pets, self buffs and Flamestrike for the aspect proc.
 # Needs: veterinary supplies (25750), reagents, potions, Create Food reagents or magic mushrooms.
 # Template: Animal Lore, Animal Taming, Veterinary 120, Magery, Tracking 100, Resisting Spells, Meditation 80.
 #           STR 100, DEX 25, INT 100.
@@ -38,7 +38,7 @@ endif
 # ####################################################################################
 # Optional script overheads. Essential warnings remain visible.
 @setvar! config__chatty 1
-# Journal diagnostics: startup, combat target changes, casts, veterinary supplies and gold drops.
+# Journal diagnostics: startup, combat target changes, casts and gold drops.
 @setvar! config__sysmsg 1
 @setvar! config__use_potion 1
 # Strength, Agility and Magic Resist potions while an enemy is engaged.
@@ -50,14 +50,12 @@ endif
 @setvar! config__str_potion 120
 @setvar! config__dex_potion 45
 
-# Veterinary supplies heal every pet within reach after the 5 second bandage time, and cure
-# and resurrect at reduced odds (wiki Veterinary). Reach is 2 tiles plus 3 from the healing codex.
-# The pets are picked once and kept in the profile. A full health pet is not healed, so the
-# supplies are tried every cooldown__vet_kit while a picked pet is in reach.
+# Veterinary supplies heal you and every follower within reach after the 5 second bandage time,
+# and cure and resurrect pets at reduced odds (wiki Veterinary). They are the self bandage here.
+# When no one within reach needs healing the server answers "You or your nearby followers do
+# not require healing." and applies nothing (in game 2026-10-09), so they are tried every
+# cooldown__vet_kit with no hit point or distance check.
 @setvar! config__use_vet_kit 1
-@setvar! config__vet_range 5
-# Pets to pick: 1, 2 or 3. Three by default (two 2 slot pets and one 1 slot pet).
-@setvar! config__pet_count 3
 
 # Flamestrike on the engaged enemy, for the aspect proc. 40 to cast plus 11 kept for Greater Heal.
 @setvar! config__use_flamestrike 1
@@ -209,10 +207,8 @@ endif
 
 # Scratch values, each set and read inside one block only.
 #   heal_potion_out  HEAL: 1 once a heal potion went out on this pass
-#   pet_near         VET KIT: 1 when a picked pet is within config__vet_range
 #   fresh_pick       FLAMESTRIKE: 1 when the player picked another enemy during the cast
 @setvar! var__heal_potion_out 0
-@setvar! var__pet_near 0
 @setvar! var__fresh_pick 0
 
 # Tracking, as in lumberjack-enhanced. The color confirmed in this client session survives
@@ -224,32 +220,8 @@ endif
 @setvar! var__tracking_hunting_active 0
 @setvar! var__tracking_button_answered 0
 
-# ####################################################################################
-# # PETS
-# ####################################################################################
-# Picked once and kept in the profile (conventions 03.C). At Play the pets stand next to you,
-# so a stored pet that is not on screen is asked for again (conventions 03.D).
-if config__use_vet_kit = 1
-    if not varexist global__tamer_pet_1 or not find global__tamer_pet_1 ground -1 -1 18
-        overhead "[ pet 1, pick ]" 255
-        setvar global__tamer_pet_1
-    endif
-    if config__pet_count = 2 or config__pet_count = 3
-        if not varexist global__tamer_pet_2 or not find global__tamer_pet_2 ground -1 -1 18
-            overhead "[ pet 2, pick ]" 255
-            setvar global__tamer_pet_2
-        endif
-    endif
-    if config__pet_count = 3
-        if not varexist global__tamer_pet_3 or not find global__tamer_pet_3 ground -1 -1 18
-            overhead "[ pet 3, pick ]" 255
-            setvar global__tamer_pet_3
-        endif
-    endif
-endif
-
 if config__sysmsg = 1
-    sysmsg "Tamer mage enhanced v2 loaded: pets={{config__pet_count}}, flamestrike mana={{config__mana_flamestrike}}, tracking color={{config__tracking_color}}." 88
+    sysmsg "Tamer mage enhanced v3 loaded: flamestrike mana={{config__mana_flamestrike}}, tracking color={{config__tracking_color}}." 88
 endif
 if config__chatty = 1
     overhead "[ tamer, on ]" 290
@@ -619,44 +591,18 @@ while not dead
     # ################################################################################
     # # VET KIT
     # ################################################################################
-    # Veterinary supplies (25750), every cooldown__vet_kit while a picked pet is in reach and no
-    # bandage time is running. Using them cancels a running bandage, so bandaging gates them.
-    # The clock restarts only on a use, so a pet that walks into reach is treated at once.
+    # Veterinary supplies (25750), the self bandage that also reaches the followers. Tried every
+    # cooldown__vet_kit while no bandage time is running, since using them cancels a running
+    # bandage. The server refuses when no one within reach needs healing, so nothing is checked
+    # first.
     if config__use_vet_kit = 1 and not bandaging and not hidden and not queued and not targetexists and timer "timer__vet_kit" >= cooldown__vet_kit
-        # A pet skipped with ESC at the pick is never looked up.
-        @setvar! var__pet_near 0
-        if varexist global__tamer_pet_1
-            if find global__tamer_pet_1 ground -1 -1 config__vet_range
-                @setvar! var__pet_near 1
-            endif
-        endif
-        if config__pet_count = 2 or config__pet_count = 3
-            if varexist global__tamer_pet_2
-                if find global__tamer_pet_2 ground -1 -1 config__vet_range
-                    @setvar! var__pet_near 1
-                endif
-            endif
-        endif
-        if config__pet_count = 3
-            if varexist global__tamer_pet_3
-                if find global__tamer_pet_3 ground -1 -1 config__vet_range
-                    @setvar! var__pet_near 1
-                endif
-            endif
-        endif
-
-        if var__pet_near = 1
-            settimer "timer__vet_kit" 0
-            if findtype 25750 backpack as alias__vet_kit
-                dclick alias__vet_kit
-                if config__sysmsg = 1
-                    sysmsg "Veterinary supplies used: a pet is within {{config__vet_range}} tiles." 88
-                endif
-                wait wait__short
-            elseif timer "timer__message" >= cooldown__message
-                overhead "[ vet kit, out ]" 254
-                settimer "timer__message" 0
-            endif
+        settimer "timer__vet_kit" 0
+        if findtype 25750 backpack as alias__vet_kit
+            dclick alias__vet_kit
+            wait wait__short
+        elseif timer "timer__message" >= cooldown__message
+            overhead "[ vet kit, out ]" 254
+            settimer "timer__message" 0
         endif
     endif
 

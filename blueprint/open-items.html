@@ -690,16 +690,17 @@ Strength·Agility는 스탯 포션과 겹치므로 v2는 Bless를 <code>Cunning<
 힘·민첩 포션도 버프 이름에 Potion이 없어 (사용자 확인) 버프로는 Bless와 구분되지 않는다. 위키 BuffIcons의 <code>Strength Potion Usage Cooldown</code>은 표의 라벨일 뿐이다.
 그래서 포션은 스탯 값으로 판정한다. 포션을 마신 값 (기본 + 20)을 <code>config__str_potion</code>·<code>config__dex_potion</code>에 두고 그보다 낮으면 마신다.
 Bless만 걸린 상태 (기본 + 11)는 그보다 낮다. 거절된 마시기가 회복 포션과 같은 아이템 큐를 패스마다 차지하지 않도록 5초 재시도 간격을 둔다.
-펫은 셋 (2슬롯 둘, 1슬롯 하나)이라 <code>config__pet_count</code> 기본값을 3으로 했다. 나머지 본문은 아직 인게임에서 확인되지 않았다.</p>
+사용자는 수의사 키트가 나와 주변 팔로워를 함께 치료하고, 아무도 치료가 필요 없거나 팔로워가 멀면
+<code>You or your nearby followers do not require healing.</code>만 남기고 적용되지 않는다고 확인했다.
+그래서 v3은 펫 지정·거리 확인을 없애고, 키트를 셀프 붕대로 보고 붕대 시간이 돌지 않을 때 5초마다 쓴다. 나머지 본문은 아직 인게임에서 확인되지 않았다.</p>
 <p>새 파일이므로 Scripts 탭에서 Reload all scripts → Play로 먼저 확인한다. 핫키에 묶었다면 클라이언트를 재시작한다
-(<a href="workflow.html#04.A">workflow.html</a> 04.A절). <code>Tamer mage enhanced v2 loaded</code>가 Journal에 떠야 한다.</p>
+(<a href="workflow.html#04.A">workflow.html</a> 04.A절). <code>Tamer mage enhanced v3 loaded</code>가 Journal에 떠야 한다.</p>
 <table>
 <thead><tr><th>남은 항목</th><th>확인할 것</th></tr></thead>
 <tbody>
-<tr><td>펫 지정</td><td>처음 Play에서 <code>[ pet 1, pick ]</code>부터 <code>[ pet 3, pick ]</code>까지 뜨고 펫을 찍으면 프로필에 남는다. 다음 Play에서 펫이 화면에 있으면 다시 묻지 않아야 한다.
-펫 수가 다르면 <code>config__pet_count</code>를 1~3으로 바꾼다. ESC로 건너뛴 칸은 키트 조건에서 빠져야 한다</td></tr>
-<tr><td>수의사 키트</td><td>지정한 펫이 5칸 안에 있고 붕대 시간이 돌고 있지 않으면 5초마다 <code>Veterinary supplies used</code>가 남는다.
-펫이 모두 5칸 밖이면 쓰지 않아야 한다. 펫이 만피일 때의 서버 응답과 키트 소모 여부, 죽은 펫 부활 시도도 기록한다. 없으면 <code>[ vet kit, out ]</code></td></tr>
+<tr><td>수의사 키트</td><td>붕대 시간이 돌고 있지 않으면 5초마다 키트를 쓴다. 내 피가 1이라도 빠졌거나 주변 펫이 다쳤으면 치료되고,
+아무도 다치지 않았으면 <code>You or your nearby followers do not require healing.</code>으로 거절돼야 한다.
+거절 때 키트가 줄지 않는지, 치료 중인 키트를 다음 시도가 끊지 않는지, 죽은 펫 부활 시도도 기록한다. 없으면 <code>[ vet kit, out ]</code></td></tr>
 <tr><td>Bless·Arch Protection</td><td>전투 대상이 없고 워모드가 꺼져 있을 때 <code>Cunning</code>·<code>Protection</code> 아이콘이 없으면 이로운 커서에 자기 자신을 찍고
 <code>Buff: Bless on yourself</code>·<code>Buff: Arch Protection</code>이 남아야 한다. 아이콘이 뜬 뒤 다음 패스에서 같은 주문을 다시 시전하지 않아야 한다.
 2분 뒤 아이콘이 사라지면 다시 시전하는지, 펫도 Arch Protection을 받는지 펫 상태에서 확인한다</td></tr>
