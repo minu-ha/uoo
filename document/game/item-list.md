@@ -5,20 +5,22 @@ group: Game reference
 order: 30
 ---
 
-UO Outlands 아이템의 이름과 graphic ID를 모은 목록이다. `findtype` 인자와 hue를 찾을 때 본다. 실행하는 스크립트가 아니다.
-분류 이름과 목록의 줄은 원문 그대로 영어로 둔다.
+UO Outlands 아이템 이름과 graphic ID 목록. `findtype` 인자와 hue 조회용, 실행 스크립트 아님.
+분류 이름과 목록 줄은 원문 영어 그대로.
 
 ## <a id="00"></a>00 한눈에
 
-한 줄에 아이템이 하나다. `#` 뒤는 `getlabel`로 읽히는 이름, 따옴표 안은 `findtype`에 쓰는 이름, 그 뒤는 graphic ID다.
-ID가 여럿이면 `|`로 잇고, 괄호 안에는 hue나 메모를 적는다. 분류 첫 줄의 `all IDs`는 그 분류 전체를 한 번에 찾을 때 쓴다.
+- 한 줄에 아이템 하나
+- `#` 뒤: `getlabel`로 읽히는 이름
+- 따옴표 안: `findtype`에 쓰는 이름. 그 뒤: graphic ID
+- ID 여럿 → `|`로 연결. 괄호 안: hue나 메모
+- 분류 첫 줄의 `all IDs`: 그 분류 전체를 한 번에 찾을 때
 
 ```
 #Greater Heal potion "Yellow Potion" 3852 (Potion hue 0, keg hue 253)
 ```
 
-스크립트 주석에서 이 목록을 가리킬 때는 줄 번호가 아니라 분류 이름을 쓴다(`listed under Shields in document/game/item-list.md`).
-목록을 고치면 줄 번호가 밀리기 때문이다.
+스크립트 주석에서는 줄 번호 대신 분류 이름으로 참조(`listed under Shields in document/game/item-list.md`). 목록 수정 시 줄 번호가 밀림.
 
 ## <a id="01"></a>01 Alchemy Potions, bottles, keg
 
