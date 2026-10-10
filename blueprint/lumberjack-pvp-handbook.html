@@ -634,7 +634,7 @@ var__harvest_retry는 다음 시도에 적용할 간격을 기억한다. 처음�
 <code>var__hold_gathering</code>은 리콜 결정·책 없음·Hunting 없음에서 1이 되어 채집과 목재 정리를 세운다</td></tr>
 <tr><td><code>timer__recall_check</code>, <code>interval__recall_check</code></td>
 <td>5000ms. v18에서 housekeeping 주기 대신 리콜 블록이 쓰는 점검 주기다. 리콜 책과 무게는 명령 전송 전까지 점검한다.
-Hunting 상태는 리콜 필요 여부를 정하기 전까지만 읽는다. Tracking 메시지는 준비 상태일 때 매 패스 확인하며 무게 판정보다 먼저 처리한다</td></tr>
+Hunting 상태는 2026-10-10부터 <code>escape/tracking</code>이 자기 5초 시계 (<code>interval__tracking_check</code>)로 읽고, 리콜 블록은 그 결과만 본다. Tracking 메시지는 준비 상태일 때 매 패스 확인하며 무게 판정보다 먼저 처리한다</td></tr>
 <tr><td><code>interval__pack_lumber</code>, <code>timer__pack_lumber</code>, <code>wait__lumber_item</code></td>
 <td>120000ms 주기로 정리한다. v18부터 housekeeping을 기다리지 않고 매 패스 이 타이머를 본다. 180000ms로 바꾸면 3분이다. 첫 정리도 이 주기 뒤에 한다.
 입력이 비어 있고 회복이 필요하지 않을 때 시작하며, 묶음별 사용·이동 뒤 500ms를 기다린다.

@@ -45,9 +45,10 @@ Smart Harvest, the self buffs, food and lumber packing. Settings, in-game checks
 [blueprint/lumberjack-pvp-handbook.html](../blueprint/lumberjack-pvp-handbook.html#08) part 8.
 
 - Tracking (`escape/tracking`) sets the hunt filter once before the loop, red by default, and reuses a hunt this
-  script already confirmed. After changing the filter by hand, turn Hunting off before Play.
+  script already confirmed. After changing the filter by hand, turn Hunting off before Play. Every 5 seconds it
+  looks whether Hunting is still on and shows `[ track, check ]` while it is off.
 - Recall (`escape/recall`) sends one RecallCharge to Home on a Tracking report within 45 steps or on low spare
-  weight, and checks the book, the Tracking buff and the weight every 5 seconds. Once a Recall is due the buffs
+  weight, and checks the book and the weight every 5 seconds. Once a Recall is due the buffs
   stand down and gathering stops until the script restarts. Only a server refusal gets a notice: sending is not
   arrival. A character without Tracking skips the hunt check.
 - Gathering and lumber packing wait on `var__hold_gathering`: a due Recall, a missing book (`require_runebook`),

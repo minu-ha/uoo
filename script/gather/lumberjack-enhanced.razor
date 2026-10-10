@@ -289,8 +289,12 @@
 #
 #   wait__tracking_gump
 #      How long the Tracking window may take to open.
+#
+#   interval__tracking_check
+#      How often the loop looks whether Hunting is still on.
 # ----------------------------------------------------------------------------------------
 @setvar! wait__tracking_gump 1000
+@setvar! interval__tracking_check 5000
 
 
 # ----------------------------------------------------------------------------------------
@@ -307,7 +311,7 @@
 # module/escape/recall.razor
 #
 #   interval__recall_check
-#      The book, Tracking buff and weight checks run on this clock.
+#      The book and weight checks run on this clock.
 # ----------------------------------------------------------------------------------------
 @setvar! interval__recall_check 5000
 
@@ -388,6 +392,15 @@ if not timerexists "timer__message"
     createtimer "timer__message"
 endif
 settimer "timer__message" interval__message
+
+
+# ----------------------------------------------------------------------------------------
+# module/escape/tracking.razor
+# ----------------------------------------------------------------------------------------
+if not timerexists "timer__tracking_check"
+    createtimer "timer__tracking_check"
+endif
+settimer "timer__tracking_check" interval__tracking_check
 
 
 # ----------------------------------------------------------------------------------------
@@ -809,6 +822,26 @@ while not dead
         endwhile
     endif
 
+    # ------------------------------------------------------------------------------------
+    # TRACKING CHECK                                          module/escape/tracking.razor
+    #
+    # Hunting has to stay on for the profile's Tracking overheads to warn and for
+    # escape/recall to read a report, so the loop looks at it every interval__tracking_check
+    # and asks for it while it is off. A character without Tracking skips it.
+    # ------------------------------------------------------------------------------------
+    if timer "timer__tracking_check" >= interval__tracking_check and skill "Tracking" > 0
+        settimer "timer__tracking_check" 0
+        @setvar! var__tracking_hunting_active 0
+        if var__tracking_filter_confirmed = 1 and findbuff "tracking"
+            @setvar! var__tracking_hunting_active 1
+        endif
+
+        if var__tracking_hunting_active = 0 and timer "timer__message" >= interval__message
+            overhead "[ track, check ]" 255
+            settimer "timer__message" 0
+        endif
+    endif
+
     if paralyzed or poisoned or diffhits > 0
         # --------------------------------------------------------------------------------
         # PARALYZE                                             module/recovery/pouch.razor
@@ -1002,7 +1035,8 @@ while not dead
     # ------------------------------------------------------------------------------------
     # RECALL                                                    module/escape/recall.razor
     #
-    # The slow checks (book, Tracking buff, weight) run every interval__recall_check.
+    # The slow checks (book, weight) run every interval__recall_check. Whether Tracking is
+    # hunting comes from escape/tracking.
     # ------------------------------------------------------------------------------------
     @setvar! var__recall_check_due 0
     if timer "timer__recall_check" >= interval__recall_check
@@ -1012,18 +1046,6 @@ while not dead
 
     if var__recall_sent = 0
         if var__recall_check_due = 1
-            if var__recall_needed = 0 and config__recall_on_detection = 1 and skill "Tracking" > 0
-                @setvar! var__tracking_hunting_active 0
-                if var__tracking_filter_confirmed = 1 and findbuff "tracking"
-                    @setvar! var__tracking_hunting_active 1
-                endif
-
-                if var__tracking_hunting_active = 0 and timer "timer__message" >= interval__message
-                    overhead "[ track, check ]" 255
-                    settimer "timer__message" 0
-                endif
-            endif
-
             @setvar! var__recall_book_available 0
             if findtype "runebook" backpack or findtype "runetome" backpack
                 @setvar! var__recall_book_available 1

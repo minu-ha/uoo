@@ -1,6 +1,7 @@
 # ----------------------------------------------------------------------------------------
-# Before the loop: reuses a confirmed Tracking hunt colour, or sets the filter once.
-# The profile displays the server's Tracking messages. escape/recall reads them.
+# Sets the Tracking hunt filter once before the loop, then warns while Hunting is off.
+# Before the loop it reuses a hunt colour this session confirmed. The profile displays the
+# server's Tracking messages, and escape/recall reads them.
 # ----------------------------------------------------------------------------------------
 
 
@@ -26,8 +27,18 @@
 #
 #   wait__tracking_gump
 #      How long the Tracking window may take to open.
+#
+#   interval__tracking_check
+#      How often the loop looks whether Hunting is still on.
 # ----------------------------------------------------------------------------------------
 @setvar! wait__tracking_gump 1000
+@setvar! interval__tracking_check 5000
+
+
+# ----------------------------------------------------------------------------------------
+# @ timer
+# ----------------------------------------------------------------------------------------
+timer__tracking_check interval__tracking_check
 
 
 # ----------------------------------------------------------------------------------------
@@ -177,3 +188,27 @@ if skill "Tracking" > 0
         endif
     endif
 endif
+
+
+# ----------------------------------------------------------------------------------------
+# @ loop
+# ----------------------------------------------------------------------------------------
+    # ------------------------------------------------------------------------------------
+    # TRACKING CHECK
+    #
+    # Hunting has to stay on for the profile's Tracking overheads to warn and for
+    # escape/recall to read a report, so the loop looks at it every interval__tracking_check
+    # and asks for it while it is off. A character without Tracking skips it.
+    # ------------------------------------------------------------------------------------
+    if timer "timer__tracking_check" >= interval__tracking_check and skill "Tracking" > 0
+        settimer "timer__tracking_check" 0
+        @setvar! var__tracking_hunting_active 0
+        if var__tracking_filter_confirmed = 1 and findbuff "tracking"
+            @setvar! var__tracking_hunting_active 1
+        endif
+
+        if var__tracking_hunting_active = 0 and timer "timer__message" >= interval__message
+            overhead "[ track, check ]" 255
+            settimer "timer__message" 0
+        endif
+    endif

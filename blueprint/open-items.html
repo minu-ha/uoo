@@ -463,7 +463,7 @@ v18 loaded를 확인한 뒤 sysmsg의 Lumber pack BEGIN → convert/skip/move re
 <code>escape/recall</code>을 빼면 루프의 리콜용 감지·책·여유 무게 조회가 없어야 한다.
 가까운 red가 있어도 자기 회복·버프·채집은 계속한다</td></tr>
 <tr><td>감지 리콜과 채집의 설정 조합</td><td>recall_on_detection이 1이고 캐릭터에 Tracking이 있을 때만 Hunting 준비를 채집 조건으로 요구한다.
-0이거나 Tracking이 0이면 Hunting 때문에 채집을 보류하지 않고 <code>[ track, check ]</code>도 뜨지 않아야 한다. 이때도 무게 리콜과 책 필수 조건은 유지된다</td></tr>
+0이면 Hunting 때문에 채집을 보류하지 않는다. <code>[ track, check ]</code>는 2026-10-10부터 <code>escape/tracking</code>이 띄우므로 recall_on_detection과 상관없이 Hunting이 꺼지면 뜨고, Tracking이 0이면 뜨지 않아야 한다. 이때도 무게 리콜과 책 필수 조건은 유지된다</td></tr>
 <tr><td>Tracking 초기 필터·상태</td><td>기본 red, 현재 창의 필터 확인과 세션 색상 캐시 재사용.
 변경이 필요하면 Hunting을 먼저 끄고 최대 10개 필터를 순환하며, 설정 중 곰 같은 추적 문구를 비운 뒤 Hunting을 켠다.
 다른 필터의 활성 Hunting·반복 Play·수동 필터 변경 뒤 Hunting OFF·클라이언트 재시작을 각각 시험한다.
