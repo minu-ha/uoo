@@ -35,72 +35,30 @@ To use one again, move it back to its folder.
 A new combat loop gets a row here. Every loop has the same shape, set out in
 [blueprint/conventions.html](../blueprint/conventions.html#02.B) 02.B: config and state first, then one `while not dead` loop.
 
-## Lumberjacking loops
+## Lumberjacking loop
 
-Use [gather/lumberjack-enhanced.razor](gather/lumberjack-enhanced.razor) for lumberjacking.
-It uses plain `config__*` settings and defaults to red-only Tracking.
-Tracking setup runs whenever the recipe has `escape/tracking` and the character has Tracking.
-An active hunt reuses the color already verified by this script. A first run checks the current window before cycling filters.
-Filter changes stop Hunting first and discard setup reports before resuming. Turn Hunting off before Play after a manual filter change.
-Leaving `escape/recall` out of the recipe drops the loop's Recall detection, book checks and spare-weight decisions.
-The loop runs Survival → automatic Recall → reagents → Smart Harvest → self buffs → food → lumber packing.
-House door and Stockpile code has been removed.
-State comments explain the Recall decision and command-sent flag; harvest guards show each pause condition directly.
-Book, Hunting and spare-weight checks run on Recall's own 5-second clock (v18). Detection messages are read before weight and reagent errors.
-Recall sets `var__hold_gathering` while a Recall is due, a required book is missing or detection is on without Hunting. Harvest equip, harvest and lumber packing wait on it.
-One Recall command is sent per Play. Recovery continues afterwards; harvesting stays paused until restart.
-Only an actual server refusal produces a result notice. There is no response timer or notice state.
-`config__chatty = 1` enables optional script overheads. `config__sysmsg = 1` independently enables Journal diagnostics.
-Both default to 1; essential warnings remain visible with both off. With sysmsg on, the journal identifies Tracking or spare weight as the Recall trigger.
-The v10 equip path follows `bard-mace`: `lhandempty` first, then equip the cached `var__my_hatchet` from the backpack.
-Graphic searches discover a missing backpack tool; they do not prove equipment. The cache survives Stop/Play in this client session.
-An unfamiliar held tool is read once: adopt a Hatchet serial or clear only the different left-hand item.
-Spare weight gates harvesting, not empty-hand equipment. Since v18 `var__hold_gathering` pauses both.
-v12 replaces the four nested positive gates with one `if / elseif / else` chain of blocking conditions.
-Each condition uses only `and` or only `or`, preserving disabled-option bypasses without parentheses or a readiness flag.
-Adjacent `and`-only schedule guards are combined for harvest and lumber maintenance.
-`lift` → `drop self lefthand` waits `wait__equip = 1000`; the next attempt must match the hand slot to the cached serial.
-With sysmsg on, `Hatchet equip requested` records the request. It does not claim successful equipment.
-Right-hand weapon management belongs to manual gear hotkeys.
-Harvest completes `Use item in hand` → `waitfortarget wait__harvest_target` → `target self` in one block.
-The 3-second cursor timeout keeps other automatic actions out of that request; no pending state crosses loop passes.
-A neutral cursor is answered even if the use queue is still pending. New manual casts, hiding, warmode and other cursor types are left alone.
-No self-target is sent after a timeout without a cursor. Existing cursors block another tool use through the ordinary input guard.
-The normal `cooldown__harvest_retry = 4000` retry starts when this block finishes.
-v15 reads `You do not see any harvestable resources nearby` after Tracking/Recall and schedules the next attempt in 2 seconds.
-`cooldown__harvest_out_retry = 2000` sets that interval; `var__harvest_retry` holds the next delay on the existing timer.
-Each attempt restores the normal interval. Recovery continues during the delay, and player input/Recall guards still apply.
-Other refusals keep the normal retry. One tool is enough; only absence is reported.
-`pack/lumber` converts Logs and moves Boards to `global__my_looting_pouch` on its own 2-minute timer.
-It reuses the pouch selected by `loadout`; if unavailable at startup, select a carried pouch once.
-`cooldown__pack_lumber = 120000` means every 2 minutes; use `180000` for 3 minutes.
-v11 removes the scratch list and `foreach`. It searches current Logs, then current Boards, with no hue filter.
-Each phase has a `wait__lumber_batch = 2500` request budget. `for 2` shares one body between Logs and Boards.
-v13 replaces the inner scans and queue polling with condition-terminated `while` loops, without `break` or `continue`.
-A CE-source control-flow replay showed v12 retaining the inner loop scope after `break` inside `if`.
-That restarted the outer loop at Logs and reset the budget before reaching Boards or END.
-The earlier recursive Python replay did not reproduce this scope handling. This remains a CE-source reproduction, not a live-client confirmation.
-The single scratch `var__lumber_graphic` selects 7133 or 7127; it does not persist a batch stage.
-Queue polling ends on queue completion, the time budget or changed recovery/manual-input conditions.
-Work stops when no matching stack remains, the pouch is absent, input is busy or the phase budget expires.
-Queues are allowed to settle within that budget. Lift/drop stay adjacent, with the wait after the drop.
-Unprocessed stacks wait for the next interval. The budget is checked between requests, rather than cancelling an active command.
-2026-10-05 사용자 Journal에서 v13의 `END`와 이후 채집 응답을 확인했다. Boards 이동 완료 전체를 확인한 것은 아니다.
-v14는 파우치 소속을 먼저 검사한 뒤 `ignore`한다. 검색 제외 전에 소속을 판별해야 이미 보관한 Boards를 다시 들어 올리지 않는다.
-`clearignore`는 각 단계 시작·끝에 있어 이전 정리에서 실패한 묶음과 이후 추가된 묶음을 다음 주기에 다시 찾는다.
-`config__sysmsg = 1`이면 `BEGIN` → 가공·`skip: already in pouch`·`move request` → `END`를 기록한다.
-이동 요청 로그는 서버 이동·병합 완료의 증거가 아니다. 파우치 제외와 병합 후 새 묶음 처리는 모의 검사했으며 실제 v14는 재확인이 필요하다.
-Manual actions, recovery needs and a latched Recall decision defer this optional work.
-Tracking-triggered Recall requires `config__recall_on_detection = 1`, the Tracking skill and an active hunt from `escape/tracking`.
-A character without Tracking skips the hunt check, so harvesting does not wait for it.
-With it at 0 harvesting does not wait for Hunting. Weight Recall and the book requirement stay.
-Recall preparation uses no Strength or Agility potions. Fighting requires switching to the PvP script.
-Harvest results, skill reports and refusal overheads are in both Razor profiles. The server enforces the 60-second post-travel harvest delay;
-the loop's 4-second command retry does not replace that rule or start a new 60-second delay from a refusal.
-The legacy version is `archive/lumberjack.razor`. Configuration and in-game checks
-are in [blueprint/lumberjack-pvp-handbook.html](../blueprint/lumberjack-pvp-handbook.html#08) part 8.
-Switch manually to [combat/pvp.razor](combat/pvp.razor) with a separate hotkey, enabling the independent bandage, Magery and weapon options as needed.
-Its settings and in-game checks are in [the handbook](../blueprint/lumberjack-pvp-handbook.html#09) part 9.
+Use [gather/lumberjack-enhanced.razor](gather/lumberjack-enhanced.razor) (v18), built from
+`recipe/lumberjack-enhanced-recipe.razor`. Each pass runs recovery, then the automatic Recall, the reagent read,
+Smart Harvest, the self buffs, food and lumber packing. Settings, in-game checks and the version history are in
+[blueprint/lumberjack-pvp-handbook.html](../blueprint/lumberjack-pvp-handbook.html#08) part 8.
+
+- Tracking (`escape/tracking`) sets the hunt filter once before the loop, red by default, and reuses a hunt this
+  script already confirmed. After changing the filter by hand, turn Hunting off before Play.
+- Recall (`escape/recall`) sends one RecallCharge to Home on a Tracking report within 45 steps or on low spare
+  weight, and checks the book, the Tracking buff and the weight every 5 seconds. Once a Recall is due the buffs
+  stand down and gathering stops until the script restarts. Only a server refusal gets a notice: sending is not
+  arrival. A character without Tracking skips the hunt check.
+- Gathering and lumber packing wait on `var__hold_gathering`: a due Recall, a missing book (`require_runebook`),
+  or detection on without a hunt.
+- Smart Harvest equips the cached Hatchet into an empty left hand, then runs Use item in hand and target self in
+  one block. "No harvestable resources nearby" retries in 2 seconds, anything else in 4. The server's 60-second
+  delay after travel still applies.
+- Every 2 minutes Logs become Boards and Boards go into the loadout looting pouch (`pack/lumber`), with a
+  2.5-second budget per phase. A pouch is asked for at Play when none is set.
+- Warmode and any cursor belong to the player: recovery casts, buffs, food and gathering stand down while either
+  is up. Potions and bandages still go out.
+- To fight a PK, switch to [combat/pvp.razor](combat/pvp.razor) with its own hotkey
+  ([the handbook](../blueprint/lumberjack-pvp-handbook.html#09) part 9).
 
 ## Skinning loop
 
