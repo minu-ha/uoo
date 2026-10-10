@@ -1,15 +1,15 @@
 ---
 name: Razor
 label: Outlands Razor 문법
-group: Reference
-order: 10
+group: Scripting
+order: 20
 ---
 
 이 저장소 스크립트가 쓰는 언어의 정본. 되는 구문, 안 되는 구문, 명령문 비용, PvP에서 막히는 것.
 문법이 애매하면 추측하지 말고 [위키 Razor Scripting](https://wiki.uooutlands.com/Razor_Scripting)을 읽고, 알게 된 것을 여기에 더한다.
 
 - 스크립트를 **어떻게 쓰는가** (헤더, 변수 접두, 타이머 관용구)는 [conventions.md](conventions.md).
-- 고친 스크립트를 **게임에 반영하고 확인하는 법** (캐시, 리로드)은 [workflow.md](workflow.md#04) 04절.
+- 고친 스크립트를 **게임에 반영하고 확인하는 법** (캐시, 리로드)은 [workflow.md](../working/workflow.md#04) 04절.
 
 ## <a id="00"></a>00 한눈에
 
@@ -23,7 +23,7 @@ order: 10
 | [06](#06) | 명령문 하나가 얼마나 드나, 어떻게 줄이나 |
 | [07](#07) | PvP에서 막히는 명령은 무엇인가 |
 
-이 문서에 걸린 질문은 [open-items.md](open-items.md)에 모았다.
+이 문서에 걸린 질문은 [open-items.md](../questions/open-items.md)에 모았다.
 
 ::part[문법]
 
@@ -57,7 +57,7 @@ Razor CE에 없거나 확장된 것. 존재 여부만 적어 두니 인자 형�
 해당 조합의 인게임 검증은 아직 없고, 이름은 고유 serial도 아니다.
 
 메시지의 존재·신선함·현재 타겟만으로 서버 응답을 특정 시전 요청에 결속할 수 있다고 가정하지 않는다.
-TK 수신과 송신이 같은 안내를 만드는 사례는 [pvp.md](pvp.md#04.D) 04.D절에 있다.
+TK 수신과 송신이 같은 안내를 만드는 사례는 [pvp.md](../game/pvp.md#04.D) 04.D절에 있다.
 `clearsysmsg`로 다른 루프의 신호까지 지우는 경쟁도 고려해야 하며, 단순 초기화로 이 모호성이 해결되지는 않는다.
 
 [Razor CE 명령](https://www.razorce.com/guide/commands/)에는 `targetrelloc`가 있지만,
@@ -87,7 +87,7 @@ TK 수신과 송신이 같은 안내를 만드는 사례는 [pvp.md](pvp.md#04.D
 
 | 함정 | 증상과 근거 범위 | 대신 |
 | --- | --- | --- |
-| 중첩 반복에서 `if` 안의 `break` | [CE Script.ExecuteNext의 BREAK](https://github.com/markdwags/Razor/blob/master/Razor/Scripts/Engine/Interpreter.cs)는 반복문 뒤로 이동하지만 현재 범위는 `PopScope` 한 번으로 제거한다. if 범위만 제거되고 안쪽 반복 범위가 남으면 바깥 FOR가 새 진입으로 판단해 index를 0으로 초기화할 수 있다. 2026-10-05 CE 원본의 제어 흐름 재현에서 for 2 안 for 1 → if → break가 바깥 0단계를 반복했다. lumberjack v12 본문도 Logs 단계만 반복하고 END에 도달하지 않았다. 이는 CE 소스 재현이며 Outlands 내부 구현과 동일하다는 인게임 확인은 아니다. 기존 재귀형 모의 검사는 정상 Python 반복 종료로 처리하여 이 차이를 놓쳤다 | 시간·존재·입력 조건으로 끝나는 `while`을 쓰고 이 중첩 블록에서는 break·continue로 if를 건너뛰지 않는다. v13 목재 정리는 이 경로를 제거했다. 다른 기존 루프까지 일괄 변경하거나 모든 break가 실패한다고 일반화하지 않는다. 실제 재확인은 [open-items.md](open-items.md#09) 09절 |
+| 중첩 반복에서 `if` 안의 `break` | [CE Script.ExecuteNext의 BREAK](https://github.com/markdwags/Razor/blob/master/Razor/Scripts/Engine/Interpreter.cs)는 반복문 뒤로 이동하지만 현재 범위는 `PopScope` 한 번으로 제거한다. if 범위만 제거되고 안쪽 반복 범위가 남으면 바깥 FOR가 새 진입으로 판단해 index를 0으로 초기화할 수 있다. 2026-10-05 CE 원본의 제어 흐름 재현에서 for 2 안 for 1 → if → break가 바깥 0단계를 반복했다. lumberjack v12 본문도 Logs 단계만 반복하고 END에 도달하지 않았다. 이는 CE 소스 재현이며 Outlands 내부 구현과 동일하다는 인게임 확인은 아니다. 기존 재귀형 모의 검사는 정상 Python 반복 종료로 처리하여 이 차이를 놓쳤다 | 시간·존재·입력 조건으로 끝나는 `while`을 쓰고 이 중첩 블록에서는 break·continue로 if를 건너뛰지 않는다. v13 목재 정리는 이 경로를 제거했다. 다른 기존 루프까지 일괄 변경하거나 모든 break가 실패한다고 일반화하지 않는다. 실제 재확인은 [open-items.md](../questions/open-items.md#09) 09절 |
 
 #### 조건과 변수
 
@@ -106,23 +106,23 @@ TK 수신과 송신이 같은 안내를 만드는 사례는 [pvp.md](pvp.md#04.D
 
 | 함정 | 증상 | 대신 |
 | --- | --- | --- |
-| 아이템을 ignore한 뒤 `find serial container`로 소속 판별 | [공식 문서](https://wiki.uooutlands.com/Razor_Scripting#ignore)는 ignore가 검색 명령에서 객체를 제외한다고 설명한다. 2026-10-05 v13 목재 정리는 파우치 소속 검사보다 먼저 ignore했다. 검색 제외가 적용되는 모의 재현에서는 기존 파우치 Boards를 다시 들어 올렸다. 앞선 NPC 직접 serial 프로브는 ignore 후에도 TRUE였으므로 현재 포크의 아이템 검색에 같은 동작이 적용되는지는 아직 확인되지 않았다 | 소속을 먼저 판별하고 처리·생략 뒤 ignore한다. v14는 두 검색 동작에서 모두 기존 파우치 Boards를 제외하도록 했다. clearignore는 단계 시작·끝에 두어 다음 정리 주기에 실패한 요청과 새 묶음을 다시 찾는다. 단계 중 매번 비우면 방문한 묶음을 다시 고를 수 있다. 실제 확인은 [open-items.md](open-items.md#09) 09절 |
+| 아이템을 ignore한 뒤 `find serial container`로 소속 판별 | [공식 문서](https://wiki.uooutlands.com/Razor_Scripting#ignore)는 ignore가 검색 명령에서 객체를 제외한다고 설명한다. 2026-10-05 v13 목재 정리는 파우치 소속 검사보다 먼저 ignore했다. 검색 제외가 적용되는 모의 재현에서는 기존 파우치 Boards를 다시 들어 올렸다. 앞선 NPC 직접 serial 프로브는 ignore 후에도 TRUE였으므로 현재 포크의 아이템 검색에 같은 동작이 적용되는지는 아직 확인되지 않았다 | 소속을 먼저 판별하고 처리·생략 뒤 ignore한다. v14는 두 검색 동작에서 모두 기존 파우치 Boards를 제외하도록 했다. clearignore는 단계 시작·끝에 두어 다음 정리 주기에 실패한 요청과 새 묶음을 다시 찾는다. 단계 중 매번 비우면 방문한 묶음을 다시 고를 수 있다. 실제 확인은 [open-items.md](../questions/open-items.md#09) 09절 |
 | 플레이어 serial의 `find`를 대상 존재·거리의 전제조건으로 쓰기 | 인게임 확인됨 2026-10-04. 현재 클라이언트의 파란 alt 테스트에서 Q serial은 유효했지만 `find serial`과 `find serial ground -1 -1 18`이 모두 거짓이었다. 단발 `setvar → cast → target`와 이전 bard-necro-pvp의 Q serial 직접 저장 경로 모두 같은 플레이어에게 TK가 적용됐고, 공격 대상 이름과 30초 부착 안내를 받았다 | 수동 serial 저장과 검색 성공은 별개다. `setvar! … lasttarget`으로 선택한 serial을 보관하고 `target`에 직접 넘긴다. 검색 실패를 serial 무효·거리 초과로 단정하지 않는다. 현재 Outlands 포크의 내부 검색 실패 원인은 확인되지 않았다. 이 관찰을 모든 클라이언트·플레이어의 일반 규칙으로 확대하지 않는다 |
 | `dead serial`로 다른 플레이어의 사망 검사 | 인게임 확인됨 2026-10-04. 전체 루프는 실행되고 TK·Explosion→EB도 상대에게 적용됐지만, 조회할 때마다 `dead - Cannot check death status of other players`가 떴다. 진단의 `dead=0`은 살아 있다는 증거가 아니었다 | 상대 플레이어의 `dead`를 호출하지 않는다. `while not dead`의 자기 사망 확인과 구분한다. Q 대상 캐시를 죽었다고 자동으로 비울 수 없으므로, 플레이어 사망 시 Stop 또는 새 대상 선택이 필요하다 |
 | `pvp=0`이면 다른 플레이어의 모든 정보 조회가 허용된다고 보기 | 대상 `dead`·`findlayer`·`getlabel`는 각각 명시적인 플레이어 조회 제한 경고를 냈다. 같은 serial의 저장·복사·`noto`는 성공했다. 인게임 확인됨 2026-10-04. 검사별 반환값은 [03.A절](#03.A)의 결과 표에 있다 | `pvp`가 가리키는 제한 활성 여부와 명령별 대상 제한을 구분한다. 반환값이 FALSE나 0이어도 경고가 있으면 실제 상태를 읽은 것으로 처리하지 않는다 |
 | `findtype` 한 번으로 여러 모빌 중 하나 고르기 | 부를 때마다 **같은 모빌**이 온다 | `while findtype … as` → 검사 → 아니면 `@ignore` → `endwhile` → `@clearignore` |
 | 모빌을 이름으로 찾기 | 되긴 하지만 이름을 바꾼 뒤 Razor 캐시가 갱신되는지는 확인되지 않았다 | 바디 번호. 인게임 `>info`로 읽는다. 내 소환수의 noto는 2 (friend) |
 | 매 패스 `findtype`으로 상태 세기 | `findtype`이 가장 비싸다 (한 번에 20 \~ 40ms, 06절). 32번이면 패스당 1초 안팎 | 천천히 변하는 상태는 타이머로 몇 초에 한 번. `elseif` 사슬은 통째로 한 틱이라 길어도 싸다 |
-| `findbuff 'Strength'`·`'Agility'`로 스탯 포션 판정 | 위키 [BuffIcons](https://wiki.uooutlands.com/Template:BuffIcons)는 같은 아이콘을 `Strength Spell / Potion`으로 적는다. Bless는 버프 바에 `Strength`·`Agility`·`Cunning`으로 뜨고, 포션 버프 이름에는 Potion이 없다 (사용자 확인 2026-10-09). 그래서 내 Bless든 아군 Bless든 걸려 있으면 포션을 마시지 않는다. 표의 `Strength Potion Usage Cooldown`도 인게임 이름으로 확인되지 않았다 | 스탯을 기준선 (기본 + 20)과 비교하고 포션마다 재시도 간격을 둔다 ([pvp.md](pvp.md#09.D) 09.D절). Bless는 `Cunning`, Arch Protection은 `Protection`으로 본다. `Magic Resist Potion`은 이 이름 그대로 뜬다 (사용자 확인 2026-10-09) |
+| `findbuff 'Strength'`·`'Agility'`로 스탯 포션 판정 | 위키 [BuffIcons](https://wiki.uooutlands.com/Template:BuffIcons)는 같은 아이콘을 `Strength Spell / Potion`으로 적는다. Bless는 버프 바에 `Strength`·`Agility`·`Cunning`으로 뜨고, 포션 버프 이름에는 Potion이 없다 (사용자 확인 2026-10-09). 그래서 내 Bless든 아군 Bless든 걸려 있으면 포션을 마시지 않는다. 표의 `Strength Potion Usage Cooldown`도 인게임 이름으로 확인되지 않았다 | 스탯을 기준선 (기본 + 20)과 비교하고 포션마다 재시도 간격을 둔다 ([pvp.md](../game/pvp.md#09.D) 09.D절). Bless는 `Cunning`, Arch Protection은 `Protection`으로 본다. `Magic Resist Potion`은 이 이름 그대로 뜬다 (사용자 확인 2026-10-09) |
 
 수동 플레이어 대상의 거리 확인을 `find`로 묶을 수 없을 때, 완료한 주문 커서는
 Razor의 `Last Target` 거리 검사로 보유할 수 있다.
 [Razor CE Options](https://www.razorce.com/help/options/#targeting-queues)는 `Range check Last Target`이 켜져 있으면
 범위 밖 대상에 대한 요청을 거부하고 커서를 유지한다고 설명한다. 이는 `target serial`의 거리 검사 보증이 아니다.
 이전 bard-necro-pvp는 이 경로로 Explosion과 후속 EB를 요청했다. 현재 루프는 공격을 수동으로 바꿨다
-([pvp.md](pvp.md#05.E) 05.E절). 커서 종료만으로 주문 명중·거리·취소 여부를 확정하지 않는다.
+([pvp.md](../game/pvp.md#05.E) 05.E절). 커서 종료만으로 주문 명중·거리·취소 여부를 확정하지 않는다.
 현재 Outlands 클라이언트에서의 거리 밖 → 안 전환은 확인되지 않았다.
-확인 항목은 [open-items.md](open-items.md#08.B) 08.B절이다.
+확인 항목은 [open-items.md](../questions/open-items.md#08.B) 08.B절이다.
 
 공통 PvP v5는 아이템·자기 주문·장비 중 하나를 처리하는 조건 사슬로 다음 패스에 돌아간다.
 반복문 안의 break·continue를 쓰지 않는다. 현재 Outlands 클라이언트에서의 새 본문 실행은 아직 확인되지 않았다.
@@ -150,7 +150,7 @@ CE의 [Queued 표현식](https://github.com/markdwags/Razor/blob/master/Razor/Sc
 현재 클라이언트에서 큐가 실제 원인이었는지는 아직 확인되지 않았다.
 v8의 기본 채집은 사용자가 정상 작동을 보고했다. 인게임 확인됨 2026-10-05.
 v10은 오른손 제어를 추가하지 않고 실제 왼손과 캐시 serial을 비교한다.
-이 새 장착·교체 경로의 확인 항목은 [open-items.md](open-items.md#09) 09절에 남긴다.
+이 새 장착·교체 경로의 확인 항목은 [open-items.md](../questions/open-items.md#09) 09절에 남긴다.
 
 `insysmsg`의 소비 범위도 주의한다. CE 원본의
 [SystemMessages.Exists](https://github.com/markdwags/Razor/blob/master/Razor/Core/SystemMessages.cs)는
@@ -192,7 +192,7 @@ v10은 오른손 제어를 추가하지 않고 실제 왼손과 캐시 serial을
    기본 Q 모드는 기존 주문 커서를 취소하지 않으며, 시전 전 조건은 새 타겟 커서를 요구하기 전에 읽는다.
 
 키에 묶어 실행할 때의 캐시 반영과 종료 후 `git status` 확인은
-[workflow.md](workflow.md#04.A) 04.A\~04.B절을 따른다.
+[workflow.md](../working/workflow.md#04.A) 04.A\~04.B절을 따른다.
 
 #### 검색 번호
 
@@ -289,7 +289,7 @@ alt 바디 findtype과 여러 거리에서의 반복 결과는 확인되지 않�
 | `for 60` + `break`로 커서 폴링 | `magery/rotation`. 레퍼런스 `auto-mage.razor:1160`은 저장소에 없다 |
 | `hotkey 'Vampiric Embrace'` + `hotkey 'Target Self'` | `necro/vampiric-embrace`. 위키: 자신을 타겟하면 주변 시체를 자동 탐색 (인게임 확인됨 2026-09-25) |
 | `hotkey 'Drink Heal'` 등 포션 핫키 | `recovery/heal`. 이름은 Razor 핫키 목록 Potions 항목 그대로 |
-| `hotkey "> Interrupt"` | `magery/rotation`과 `magery/flamestrike`의 커서 폴링. 제 시전을 끊고 긴급 힐로 넘어간다. 같은 핫키가 휠 아래에도 물려 있다 ([hotkeys.md](hotkeys.md)) |
+| `hotkey "> Interrupt"` | `magery/rotation`과 `magery/flamestrike`의 커서 폴링. 제 시전을 끊고 긴급 힐로 넘어간다. 같은 핫키가 휠 아래에도 물려 있다 ([hotkeys.md](../game/hotkeys.md)) |
 | `stop` | `bard/instrument` |
 | `targetexists "beneficial"` / `"neutral"` / `"harmful"`로 커서 종류 가리기 | `buff/spells`. Bless는 beneficial, Arch Protection은 **neutral** 커서다 (사용자 확인 2026-10-10. 처음 tamer 스크립트는 beneficial로 잘못 읽어 커서가 남았다). Flamestrike는 harmful (`magery/flamestrike`), 손 도구와 칼은 neutral (`gather/*`). 기대한 종류가 아닌 커서는 취소해서 다른 블록이 막히지 않게 한다 |
 
@@ -357,7 +357,7 @@ Razor CE 원본은 스크립트 엔진이 **타이머 틱마다 명령문 하나
 | `findtype … self` 50번 | 1 \~ 2초 | **20 \~ 40ms** |
 | 20갈래 `elseif` 사슬 10번 | 0.25 \~ 0.5초 | 사슬 하나 25 \~ 50ms |
 
-Bard Necro 루프에 적용한 결과 (시약 플래그를 매 패스 `findtype` 최대 32번 → 30초에 7번)는 [bard-necro-handbook.md](bard-necro-handbook.md#05.H) 05.H절.
+Bard Necro 루프에 적용한 결과 (시약 플래그를 매 패스 `findtype` 최대 32번 → 30초에 7번)는 [bard-necro.md](../templates/bard-necro.md#05.H) 05.H절.
 
 ## <a id="07"></a>07 PvP 제약
 
@@ -369,4 +369,4 @@ Bard Necro 루프에 적용한 결과 (시약 플래그를 매 패스 `findtype`
 | 플레이어 serial이 `0x0` | 상대를 변수에 담을 수 없고, 상대 머리 위 `overhead … <serial>`도 안 된다 |
 | `find` 계열이 자기 아이템만 잡는다 | 상대나 바닥 물건을 찾는 로직이 안 돈다 |
 
-PvP 겸용 스크립트를 쓰는 규칙은 [conventions.md](conventions.md#07) 07절. 게임 쪽 PvP 규칙과 숫자는 [pvp.md](pvp.md).
+PvP 겸용 스크립트를 쓰는 규칙은 [conventions.md](conventions.md#07) 07절. 게임 쪽 PvP 규칙과 숫자는 [pvp.md](../game/pvp.md).

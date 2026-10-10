@@ -1,8 +1,8 @@
 ---
-name: Item List
+name: Item list
 label: 아이템 목록
-group: Reference
-order: 50
+group: Game reference
+order: 30
 ---
 
 UO Outlands 아이템의 이름과 graphic ID다. `findtype` 인자와 hue를 찾을 때 본다. 실행하는 스크립트가 아니다.
@@ -17,7 +17,7 @@ ID가 여럿이면 `|`로 잇고, 괄호에는 hue나 메모가 붙는다. 분�
 #Greater Heal potion "Yellow Potion" 3852 (Potion hue 0, keg hue 253)
 ```
 
-스크립트 주석에서 이 목록을 가리킬 때는 줄 번호가 아니라 분류 이름으로 쓴다 (`listed under Shields in blueprint/item-list.md`). 목록을 고치면 줄 번호가 밀린다.
+스크립트 주석에서 이 목록을 가리킬 때는 줄 번호가 아니라 분류 이름으로 쓴다 (`listed under Shields in document/game/item-list.md`). 목록을 고치면 줄 번호가 밀린다.
 
 ## <a id="01"></a>01 Alchemy Potions, bottles, keg
 

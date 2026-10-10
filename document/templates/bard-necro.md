@@ -1,5 +1,5 @@
 ---
-name: Bard Necro Handbook
+name: Bard Necro
 label: Bard Necro 핸드북
 group: Templates
 order: 10
@@ -7,7 +7,7 @@ order: 10
 
 Bard Necro 템플릿의 메커니즘과 판단. 무엇을 소환하는지, 전투 루프가 왜 이 모양인지, PK를 만나면 어떻게 하는지 답한다.
 **숫자는 추측하지 않는다.** 바드·네크로·소환수 숫자는 여기서 인용하고, 여기 없으면 위키를 읽어 여기에 더한다.
-인용과 확인 표시 규칙은 [workflow.md](workflow.md#01.C) 01.C절.
+인용과 확인 표시 규칙은 [workflow.md](../working/workflow.md#01.C) 01.C절.
 
 - 캐릭터: `nomeehej` (Razor 프로필 `summoner`)
 - 스크립트: `script/combat/bard-necro-enhanced.razor` (F1, 사냥), `script/combat/pvp.razor` (F4 재연결 후, PK)
@@ -15,9 +15,9 @@ Bard Necro 템플릿의 메커니즘과 판단. 무엇을 소환하는지, 전�
 
 여기 없는 것:
 
-- 템플릿과 무관한 PvP 규칙과 숫자는 [pvp.md](pvp.md). 06절은 그 규칙으로 이 캐릭터가 내린 판단만 둔다.
-- Razor 구문, 함정, 명령문 비용은 [razor.md](razor.md).
-- 쿨다운 바와 오버헤드의 이름·색 규칙은 [overheads.md](overheads.md).
+- 템플릿과 무관한 PvP 규칙과 숫자는 [pvp.md](../game/pvp.md). 06절은 그 규칙으로 이 캐릭터가 내린 판단만 둔다.
+- Razor 구문, 함정, 명령문 비용은 [razor.md](../scripting/razor.md).
+- 쿨다운 바와 오버헤드의 이름·색 규칙은 [overheads.md](../scripting/overheads.md).
 
 ## <a id="00"></a>00 한눈에
 
@@ -35,7 +35,7 @@ Bard Necro 템플릿의 메커니즘과 판단. 무엇을 소환하는지, 전�
 
 자주 찾는 곳: 무엇을 소환할지는 [04.B절](#04.B), 루프를 고치려면 [05.A절](#05.A)부터, PK를 만나면 [06절](#06).
 
-이 문서에 걸린 질문은 [open-items.md](open-items.md)에 모았다.
+이 문서에 걸린 질문은 [open-items.md](../questions/open-items.md)에 모았다.
 
 ::part[캐릭터]
 
@@ -171,7 +171,7 @@ Discordance는 자기 슬롯 5초를 따로 쓴다 (전용 차단 메시지는 �
 
 ### <a id="02.D"></a>02.D cooldown은 서버 값이 아니다
 
-`cooldown "..."`이 서버 값이 아니라 `cooldowns.xml`의 내 트리거라는 일반 규칙은 [overheads.md](overheads.md#06.B) 06.B절.
+`cooldown "..."`이 서버 값이 아니라 `cooldowns.xml`의 내 트리거라는 일반 규칙은 [overheads.md](../scripting/overheads.md#06.B) 06.B절.
 바드에서는 이것이 이렇게 문제가 됐다.
 
 예전에는 `music` 항목에 송 트리거 (10초)까지 섞여 있어서 뒤따르는 5초 스킬 트리거와 서로 덮어썼다.
@@ -305,11 +305,11 @@ findbuff "song of peacemaking"
 | Peace에서 `"You play successfully, briefly pacifying ..."` 5초를 **뺐다** | 같은 메시지에 `"successfully, briefly pacifying"` 11초가 이미 걸려 있어 둘이 충돌했다 |
 | Peace와 Provo를 **`peace/provo` 한 항목으로 합쳤다** | 서버가 슬롯을 공유한다 (02.F절) |
 | `skill`에 바드 5초 트리거를 **넣었다** | 서버 스킬 게이트가 하나라 바드가 도는 동안 다른 스킬도 막힌다 (02.J절) |
-| 항목 이름을 **통일했다**. 그때는 PascalCase, 2026-09-26에 전부 소문자로 다시 바꿨다 | 스크립트 11개의 `heal pot`과 XML의 `Heal Pot`이 어긋나 임시 쿨다운으로만 돌고 바는 안 떴다. 규칙은 [overheads.md](overheads.md#06.A) 06.A절 |
+| 항목 이름을 **통일했다**. 그때는 PascalCase, 2026-09-26에 전부 소문자로 다시 바꿨다 | 스크립트 11개의 `heal pot`과 XML의 `Heal Pot`이 어긋나 임시 쿨다운으로만 돌고 바는 안 떴다. 규칙은 [overheads.md](../scripting/overheads.md#06.A) 06.A절 |
 | `fireball`에 발동 트리거 `"fireball activated"`를 **넣었다** | 실측 메시지는 "Wizardry fireball activated."다. 이게 없어 바가 안 채워지고 프록 게이트가 매 패스 통과했다 |
 | 바가 자주 뜨는 순서로 **재정렬했다** | 위 문단의 순서 |
 
-**이 파일은 게임을 끈 상태에서만 고친다** ([workflow.md](workflow.md#04.C) 04.C절).
+**이 파일은 게임을 끈 상태에서만 고친다** ([workflow.md](../working/workflow.md#04.C) 04.C절).
 
 ### <a id="02.J"></a>02.J skill과 music의 관계
 
@@ -486,7 +486,7 @@ Lightning 프록은 `Wizardry lightning activated.`와 `Your lightning spell hin
 
 > "Casting recovery time is **0.2 seconds**" -- 시전 사이 고정 딜레이
 
-소환 주문은 이 표를 따르지 않는다. [item-list.md](item-list.md#19) 19절에서 소환 주문은 서클과 무관하게 전부 6.00초다 (03.C절).
+소환 주문은 이 표를 따르지 않는다. [item-list.md](../game/item-list.md#19) 19절에서 소환 주문은 서클과 무관하게 전부 6.00초다 (03.C절).
 
 **시약과 마나는 대상을 찍을 때 검사하고 쓴다** (인게임 확인됨 2026-09-28). 시약이 없어도 시전은 끝까지 되고 커서도 뜬다.
 대상을 찍는 순간 캐릭터 이름으로 `More reagents are needed for this spell.`이 뜨며 실패하고, 마나는 그때까지 줄지 않는다.
@@ -509,10 +509,10 @@ Lightning 프록은 `Wizardry lightning activated.`와 `Your lightning spell hin
 | Energy Vortex | Jackal Spirit |
 | Summon Creature | 무작위 언데드 |
 
-- 8서클 소환 전부 **마나 50, 시전 6.00초**, 시약에 **Bloodmoss** 포함 ([item-list.md](item-list.md#19) 19절)
+- 8서클 소환 전부 **마나 50, 시전 6.00초**, 시약에 **Bloodmoss** 포함 ([item-list.md](../game/item-list.md#19) 19절)
 - **타이머는 없지만 최대 체력이 10초마다 1%씩 깎여 결국 쓸모가 없어진다.** 0이 되지는 않는다 (04.A절). 재소환은 "죽었을 때"가 아니라 주기적 정비다
 - **`followers`는 컨트롤 슬롯 수다.** 위 소환수는 각 **2**, Summon Creature는 1 (인게임 확인됨).
-  Skeletal Husk는 위키 데이터에서 1이다 ([pvp.md](pvp.md#06.B) 06.B절)
+  Skeletal Husk는 위키 데이터에서 1이다 ([pvp.md](../game/pvp.md#06.B) 06.B절)
 - Vengeful Spirit은 심볼 1, 30초. 소환 둘을 뽑으려면 VS → 소환 → 소환을 30초 안에 한다
 
 ### <a id="03.D"></a>03.D Unholy Symbol 경제
@@ -670,7 +670,7 @@ Peace를 가끔 쓰는 제어 수단으로만 다루면 `Ensemble` + `Virtuoso` 
 ### <a id="04.A"></a>04.A 소환 절차
 
 **`Vengeful Spirit` (심볼 1)을 켠 뒤 30초 안에 소환 주문을 시전한다.** 안 켜면 맨 엘리멘탈이 나온다.
-소환은 8서클이라 **마나 50, 시전 6초**, 둘 뽑으면 마나 100에 12초다. 키는 Alt 숫자줄에 있다 ([hotkeys.md](hotkeys.md#01.B) 01.B절).
+소환은 8서클이라 **마나 50, 시전 6초**, 둘 뽑으면 마나 100에 12초다. 키는 Alt 숫자줄에 있다 ([hotkeys.md](../game/hotkeys.md#01.B) 01.B절).
 나온 언데드는 **10초마다 남은 최대 체력의 1%씩 썩는다.** 복리라 30분 뒤에도 약 16%가 남고 0이 되지는 않는다 (인게임 관찰).
 그래도 결국 쓸모가 없어지므로, 재소환은 사망 대응이 아니라 **주기 정비**로 본다.
 Lich 하나가 슬롯 2라 `followers`는 Lich 2마리에 4다.
@@ -696,7 +696,7 @@ PK를 만나도 바꾸지 않는다. 사냥하던 조합 그대로 싸운다 (06
 | 솔플 | `Rag Witch + Lich`. 탱커 없이 후열만 세울 수 없다. 탱커 자리는 Rag Witch (04.E절) |
 | 솔플, 근접이 세거나 넉백을 쓰는 몹 | `Mummy + Lich`. 방어력이 Rag Witch보다 25 높고 넉백에 안 밀린다 (Rooted, 04.E절) |
 | 고 Magic Resist 맵 | `Mummy + Air`. **물리 딜이 필요한 유일한 경우다** |
-| PK를 만났을 때 | 사냥하던 조합 그대로. 근거는 06.D절, 소환수별 PvP 비교는 [pvp.md](pvp.md#06.B) 06.B절 |
+| PK를 만났을 때 | 사냥하던 조합 그대로. 근거는 06.D절, 소환수별 PvP 비교는 [pvp.md](../game/pvp.md#06.B) 06.B절 |
 
 **Lich, Vampire, Rag Witch는 주문 딜러다.** 위키에 Vampire `Spell Damage: 26 - 32`, Rag Witch `Spell Damage: 24 - 30`으로 명시돼 있다.
 본체의 `Mana Drain` (`-20 Magic Resist`)과 Fire Tome의 `Hex`는 대상의 마법 저항을 깎으므로 **셋 모두 그 덕을 본다.**
@@ -978,7 +978,7 @@ Rag Witch가 건 독이나 질병이 내 Poison Strike에 잡히는지는 확인
 #### 나중에 넣는다면 이 모양
 
 이동 블록 안, `MUSHROOM` 뒤 `BARD SONG` 앞에 둔다. VS를 먼저 켜고, 30초 안에 소환한다.
-소환 종류는 숫자 config로 고른다. 변수는 단어를 못 담으므로 ([razor.md](razor.md#03) 03절) 주문 이름을 변수에 둘 수 없고, 갈래마다 리터럴 `cast`를 쓴다.
+소환 종류는 숫자 config로 고른다. 변수는 단어를 못 담으므로 ([razor.md](../scripting/razor.md#03) 03절) 주문 이름을 변수에 둘 수 없고, 갈래마다 리터럴 `cast`를 쓴다.
 
 | 설정 | 값 | 뜻 |
 | --- | --- | --- |
@@ -1013,12 +1013,12 @@ endif
 
 ## <a id="05"></a>05 전투 루프 설계
 
-대상 파일: **`script/combat/bard-necro-enhanced.razor`**. 2026-10-10부터 `recipe/bard-necro-enhanced-recipe.razor`와 모듈로 조립한다 ([modules.md](modules.md#08.D) 08.D절).
+대상 파일: **`script/combat/bard-necro-enhanced.razor`**. 2026-10-10부터 `recipe/bard-necro-enhanced-recipe.razor`와 모듈로 조립한다 ([modules.md](../scripting/modules.md#08.D) 08.D절).
 아래 블록 이름은 결과물의 배너 제목이고, 그 블록이 든 모듈은 배너 오른쪽에 적혀 있다. PvP 루프는 05.I절.
 
 구식 `bard-necro.razor` / `bard-necro-eval.razor`를 대체했다. 둘은 지웠고 git 이력에만 남아 있다.
 기존 파일을 고친 것이 아니라 **새로 구현했다.** 컨벤션은 `bard-throwing.razor`와 `loadout.razor`를 따른다
-(변수 접두는 [conventions.md](conventions.md#03.A) 03.A절).
+(변수 접두는 [conventions.md](../scripting/conventions.md#03.A) 03.A절).
 
 바드 숫자와 공식은 전부 02절에 있다. 여기서 다시 추론하지 않는다.
 
@@ -1103,7 +1103,7 @@ flowchart TD
 
 | 블록 | 게이트 | 비고 |
 | --- | --- | --- |
-| 자기 버프 | `not findbuff` + `cooldown "reflect"` | 둘 다 시간이 아니라 소모로 끝난다. RA는 25 흡수. Reflect의 PvP 재시전 제한은 [pvp.md](pvp.md#05.A) 05.A절을 따른다. 기존 30초 설명을 PvP 플래그 중에 그대로 적용하지 않는다. 마지막 갈래는 Spell Siphon을 켜는 자기 대상 Magic Arrow다 (`use_spell_siphon` 1). 튕겨서 리플렉트를 태우지 않게 Magic Reflection이 없을 때만 쏜다 |
+| 자기 버프 | `not findbuff` + `cooldown "reflect"` | 둘 다 시간이 아니라 소모로 끝난다. RA는 25 흡수. Reflect의 PvP 재시전 제한은 [pvp.md](../game/pvp.md#05.A) 05.A절을 따른다. 기존 30초 설명을 PvP 플래그 중에 그대로 적용하지 않는다. 마지막 갈래는 Spell Siphon을 켜는 자기 대상 Magic Arrow다 (`use_spell_siphon` 1). 튕겨서 리플렉트를 태우지 않게 Magic Reflection이 없을 때만 쏜다 |
 | 송 | `cooldown "song" = 0 and cooldown "music" = 0` + 그 곡의 슬롯 | 라운드로빈 (05.G절) |
 | Vampiric Embrace | `followers > 0` + 심볼 9 + 8칸 안의 시체 | 시체가 없다는 메시지가 뜨면 5초 쉰다 (`interval__embrace_miss`) |
 
@@ -1135,7 +1135,7 @@ Poison Strike와 필러는 `PROC CORE` 바로 뒤에서 계산하는 `var__procs
 
 Poison Strike는 패스 맨 끝, 필러 다음이다. 프록을 다 쓴 패스에 마나가 있으면 볼트가 먼저 나가 질병이 하나 더 붙은 뒤에 터뜨린다.
 마나가 필러 바닥 아래면 볼트가 안 나가므로 기다리지 않고 프록 네 개분을 터뜨린다. 자기 쿨이 30초라 프록 사이클 (15초) 두 번에 한 번 나간다.
-볼트는 대상 뒤 0.5초에 맞으므로 ([pvp.md](pvp.md#05) 05절) 누르기 전에 `wait__short` (0.2초)를 더 기다린다. 볼트 뒤 `wait__cast` 0.3초와 합쳐 0.5초다.
+볼트는 대상 뒤 0.5초에 맞으므로 ([pvp.md](../game/pvp.md#05) 05절) 누르기 전에 `wait__short` (0.2초)를 더 기다린다. 볼트 뒤 `wait__cast` 0.3초와 합쳐 0.5초다.
 빠른 연결에서 Poison Strike가 볼트 질병보다 먼저 들어가지 않게 하려는 것이고, 30초에 한 번이라 비용은 없다시피 하다.
 
 Poison Strike는 `var__proc_target`도 본다. 프록이 시전될 때마다 그 대상을 적어 두고, 마지막 프록이 간 대상이 지금 대상일 때만 나간다.
@@ -1409,7 +1409,7 @@ endif
 
 ### <a id="05.H"></a>05.H 명령문 비용 적용
 
-측정값과 원칙 (자주 안 변하는 상태는 타이머로 게이트하고, 흔한 경로가 밟는 줄을 줄인다)은 [razor.md](razor.md#06) 06절. 이 루프에는 이렇게 적용했다.
+측정값과 원칙 (자주 안 변하는 상태는 타이머로 게이트하고, 흔한 경로가 밟는 줄을 줄인다)은 [razor.md](../scripting/razor.md#06) 06절. 이 루프에는 이렇게 적용했다.
 
 - 예전 PASS FLAGS는 시약 플래그 13개를 **매 패스** `findtype` 19\~32번으로 다시 읽었다. 패스당 0.4 \~ 1.3초.
   지금은 `magery/reagents`가 `interval__reagents` (10초, 2026-10-10 전에는 30초)마다 시약 일곱 종을 한 번씩만 찾아 `var__has_*`에 두고, 주문 플래그 13개는
@@ -1418,7 +1418,7 @@ endif
   묵은 플래그의 대가는 시전 한 번 거부다. 거부 문장 `More reagents are needed for this spell.` (인게임 확인됨 2026-09-28)이 보이면
   창을 기다리지 않고 다음 패스에 다시 읽는다. 이것이 없던 때는 창이 끝날 때까지 같은 주문을 패스마다 다시 시도했다.
   시약은 대상을 찍을 때 검사하므로 (03.B절) 시도마다 시전 시간을 다 쓰고 실패했다.
-  공통 PvP 자기관리도 시약 캐시를 쓰며, 현재 읽는 시약과 주기는 [pvp.md](pvp.md#05.E) 05.E절에서 관리한다.
+  공통 PvP 자기관리도 시약 캐시를 쓰며, 현재 읽는 시약과 주기는 [pvp.md](../game/pvp.md#05.E) 05.E절에서 관리한다.
 - 소환수 이름 블록 (`necro/summon-names`)은 하우스키핑 틱 (5초)마다 한 번 돈다. 이름 붙은 소환수마다 슬롯 확인 `find`가 하나 (최대 3),
   매치를 훑는 `findtype`이 매치 수 + 1번이다. 매 패스가 아니라서 이 정도는 둔다.
 - **교전·이동 분기** (2026-09-29, 2026-10-10부터 레시피 그룹). 모든 패스가 도는 블록 (생존, 타겟 캐시, 시약, 심볼, 하우스키핑) 뒤에서
@@ -1435,16 +1435,16 @@ endif
 | 악기 (`find var__my_instrument`) | 30초 | 부서지거나 도둑맞을 때만 빠진다. 바드 블록이 없어진 걸 보면 그 자리에서 바로 내린다 |
 | 핫바 (`gumpexists`) | 30초 | 죽거나, 재접속하거나, 잘못 눌렀을 때만 닫힌다. 닫힌 동안 네크로 능력이 선다 |
 | 음식 버프 | 60초 | 버프가 훨씬 오래 간다 |
-| 스탯 포션 버프 | 10초 (교전 중만) | 버프가 몇 분 간다. 힘·민첩은 Bless와 아이콘이 같아 STR·DEX를 기준선과 비교하고, 이 10초가 재시도 간격도 된다 ([pvp.md](pvp.md#09.D) 09.D절) |
+| 스탯 포션 버프 | 10초 (교전 중만) | 버프가 몇 분 간다. 힘·민첩은 Bless와 아이콘이 같아 STR·DEX를 기준선과 비교하고, 이 10초가 재시도 간격도 된다 ([pvp.md](../game/pvp.md#09.D) 09.D절) |
 | 디스코 확인 (`var__disco_seen`) | 30초 | Discordance는 1분 21초 \~ 1분 57초 간다 (01.D절). 한 번 확인한 대상은 30초 동안 `find`와 `getlabel`을 건너뛴다 |
 | 피스 확인 (`timer__peace_seen`) | 2초 (게이트에서) | 진정 12초와 슬롯 10초의 차이. 브레이크 40초 동안은 매 패스 대신 2초에 한 번 읽는다 |
 
 - **생존 게이트** (2026-09-29). 마비, 독, HP 세 블록을 `if paralyzed or poisoned or diffhits > config__light_hits` 한 줄 뒤에 둔다. 멀쩡한 패스는 세 줄 대신 한 줄.
-  2026-10-10부터는 모든 레시피가 회복 블록을 `# @ when paralyzed or poisoned or diffhits > 0`으로 묶는다 ([modules.md](modules.md#03) 03절).
+  2026-10-10부터는 모든 레시피가 회복 블록을 `# @ when paralyzed or poisoned or diffhits > 0`으로 묶는다 ([modules.md](../scripting/modules.md#03) 03절).
 - **게이트 접기** (2026-09-29). 늘 참인 바깥 `if` (수동 모드, 행동 창, 스킬과 악기 준비)를 안쪽 조건 한 줄에 합쳤다. 할 일이 없는 블록은 패스마다 한 줄만 밟는다.
   대상 `find`는 실제로 쏘는 갈래 안으로 옮겨서, 오프닝과 프록 코어는 주문이 나갈 때만 대상을 찾는다. 매 패스 세우던 플래그 둘 (`var__bard_ready`, `var__manual`)은 없애고
   게이트가 `warmode`와 악기 상태를 직접 읽는다. 드레인 둘은 `while queued or casting` 하나로, 시약 부족 문장은 리프레시 게이트의 `or`로 합쳤다.
-- **패스당 대략** ([razor.md](razor.md#06) 06절 측정값, 줄 5 \~ 10ms, 거짓 `if` 10 \~ 20ms, `find` 20 \~ 40ms). 줄은 패스가 실제로 밟는 명령문이고,
+- **패스당 대략** ([razor.md](../scripting/razor.md#06) 06절 측정값, 줄 5 \~ 10ms, 거짓 `if` 10 \~ 20ms, `find` 20 \~ 40ms). 줄은 패스가 실제로 밟는 명령문이고,
   참이었던 `if`의 `endif`도 한 줄로 센다.
 
 | 경우 | 게이트 접기 전 | 게이트 접기 뒤 |
@@ -1460,7 +1460,7 @@ Peace 슬롯이 열렸는데 대상이 진정이나 브레이크 중이면, 전�
 - **심볼 수 읽기.** 네크로 핫바 gump가 심볼을 `"<have>/<max>"`로 보여 주고, 루프는 그 글자를 `ingump`로 읽는다.
   `ingump`는 부분 문자열 매칭이라 큰 수부터 내려오는 사슬로 읽는다 (`10/`부터 `1/`까지). Necromancy 100이면 최대 10이다.
   핫바가 11 이상을 보이면 위에 줄을 더한다. `"11/11"`이 `"1/"`로 읽히기 때문이다. 핫바가 닫혀 있으면 0으로 읽혀 능력이 전부 선다.
-  게이트는 수를 `list 'list__necro_symbols' >= config__symbols_*`로 비교한다. 변수끼리는 크기 비교가 안 되기 때문이다 ([razor.md](razor.md#03) 03절).
+  게이트는 수를 `list 'list__necro_symbols' >= config__symbols_*`로 비교한다. 변수끼리는 크기 비교가 안 되기 때문이다 ([razor.md](../scripting/razor.md#03) 03절).
   그래서 각 갈래 안에서 **읽은 값이 `var__symbols_listed`와 다를 때만** 리스트를
   다시 채운다 (패스당 사슬 + 안쪽 `if` 두 줄). 채우기는 갈래별 리터럴 `for N`이다. `for` 횟수는 변수가 안 되고 (`Invalid for loop syntax`),
   `while not list … >= var`는 파싱이 안 된다 (둘 다 2026-09-28). 읽기 사슬은 20갈래에서 10갈래로 줄였다.
@@ -1468,10 +1468,10 @@ Peace 슬롯이 열렸는데 대상이 진정이나 브레이크 중이면, 전�
 ### <a id="05.I"></a>05.I 공통 pvp의 mage 설정
 
 [combat/pvp.razor](https://github.com/minu-ha/uoo/blob/master/script/combat/pvp.razor)는 `config__use_magery = 1`로
-공통 [PvP 자기관리 루프](pvp.md#05.E)의 자기 마법을 사용한다. 무기 교체가 필요 없으면 [recipe/pvp-recipe.razor](https://github.com/minu-ha/uoo/blob/master/recipe/pvp-recipe.razor)에서
-`fight/weapon-swap` 줄을 빼고 다시 조립한다 ([modules.md](modules.md#07.B) 07.B절). 각 기능은 독립 설정이며 템플릿 프리셋은 없다.
+공통 [PvP 자기관리 루프](../game/pvp.md#05.E)의 자기 마법을 사용한다. 무기 교체가 필요 없으면 [recipe/pvp-recipe.razor](https://github.com/minu-ha/uoo/blob/master/recipe/pvp-recipe.razor)에서
+`fight/weapon-swap` 줄을 빼고 다시 조립한다 ([modules.md](../scripting/modules.md#07.B) 07.B절). 각 기능은 독립 설정이며 템플릿 프리셋은 없다.
 PK를 만나면 F1을 끄고 이것을 켠다. 이전 템플릿별 PvP 파일은 삭제했으므로 F4를 Razor에서
-`Play Script: combat\pvp`로 다시 연결한다 ([hotkeys.md](hotkeys.md#04) 04절).
+`Play Script: combat\pvp`로 다시 연결한다 ([hotkeys.md](../game/hotkeys.md#04) 04절).
 
 2026-10-05 상대 탐색·Q 대상 캐시·자동 TK·Explosion→EB·소환수 공격을 제거했다.
 TK·공격 주문·폭발 포션·소환수 명령은 사용자가 시전하고 타겟한다.
@@ -1483,12 +1483,12 @@ TK·공격 주문·폭발 포션·소환수 명령은 사용자가 시전하고 
 수동 시전·프리캐스트 보유 중에는 자기관리도 기다리며, 자기 자동 시전 중 새 주문을 시작할 때는 먼저 Stop한다.
 
 이전 직접 serial 버전의 alt TK와 Explosion→EB 적용은 인게임 확인됨 2026-10-04.
-그 결과는 [razor.md](razor.md#03) 03절의 진단 근거로 남긴다.
-현재 공통 자기관리 본문은 아직 인게임에서 확인되지 않았다. 반영과 확인은 [open-items.md](open-items.md#10) 10절이다.
+그 결과는 [razor.md](../scripting/razor.md#03) 03절의 진단 근거로 남긴다.
+현재 공통 자기관리 본문은 아직 인게임에서 확인되지 않았다. 반영과 확인은 [open-items.md](../questions/open-items.md#10) 10절이다.
 
 ## <a id="06"></a>06 PvP
 
-서버 규칙과 숫자 (Heat of Battle, 명중률, TK 폭탄, 소환수 PvP 규칙)는 [pvp.md](pvp.md). 여기는 이 캐릭터가 그 규칙으로 내린 판단이다.
+서버 규칙과 숫자 (Heat of Battle, 명중률, TK 폭탄, 소환수 PvP 규칙)는 [pvp.md](../game/pvp.md). 여기는 이 캐릭터가 그 규칙으로 내린 판단이다.
 
 **이 캐릭터는 PK를 만나면 싸운다.** 그래서 Herding 대신 Resisting Spells 80을 찍었고 (06.C절), F1을 끄고 F4 PvP 루프를 켠다 (05.I절).
 소환수는 사냥하던 그대로 쓴다 (06.D절).
@@ -1499,7 +1499,7 @@ flowchart TD
   pk -- 아니요 --> tk("자기 TK를 먼저 건다<br>해로운 주문 없이 힐과 큐어만") --> db("Defensive Barding 100이 남는다<br>리콜할 곳까지 뛴다")
 ```
 
-이 캐릭터는 예 쪽이 기본이다. 어디서 리콜되는지는 [pvp.md](pvp.md#01.C) 01.C절.
+이 캐릭터는 예 쪽이 기본이다. 어디서 리콜되는지는 [pvp.md](../game/pvp.md#01.C) 01.C절.
 
 **바드의 PvP 방어와 도주는 한 조건에 묶여 있다. 다른 플레이어에게 공격적 행동을 하지 않는 것이다.**
 먼저 손을 쓰면 Defensive Barding과 리콜을 같이 잃는다. 이 절의 숫자는 전부 이 조건에서 갈린다.
@@ -1552,7 +1552,7 @@ flowchart TD
 **printed Resisting Spells는 도주 플랜에서는 0, 반격 플랜에서는 유일한 마법 방어다.**
 PK를 어떻게 상대할지가 템플릿에 Resist를 넣을지를 정한다.
 
-던전에서는 리콜이 Golden Moongate 8타일 안에서만 되므로 ([pvp.md](pvp.md#01.C) 01.C절), 도주는 문게이트까지 맞으면서 뛰는 것이다.
+던전에서는 리콜이 Golden Moongate 8타일 안에서만 되므로 ([pvp.md](../game/pvp.md#01.C) 01.C절), 도주는 문게이트까지 맞으면서 뛰는 것이다.
 그동안 공격적 행동을 하지 않으면 Defensive Barding이 방어를 채운다.
 
 ### <a id="06.C"></a>06.C Herding을 Resist로 바꿀 것인가
@@ -1579,7 +1579,7 @@ PK를 어떻게 상대할지가 템플릿에 Resist를 넣을지를 정한다.
 | PK 메이지 덤프 (Eval 100) | Resist 0 | Resist 80 (주문 -10\~30%, 평균 -20%) |
 | --- | --- | --- |
 | Explosion 31\~40 + Energy Bolt 31\~40 | 62\~80 | 50\~64 |
-| + 붙은 폭발 포션 21\~35 (Alchemy 80, 저항 안 됨, [pvp.md](pvp.md#05) 05절) | **83\~115** | **71\~99** |
+| + 붙은 폭발 포션 21\~35 (Alchemy 80, 저항 안 됨, [pvp.md](../game/pvp.md#05) 05절) | **83\~115** | **71\~99** |
 
 체력 100 언저리면 Resist 0은 덤프 한 번에 죽고, 80은 남아서 힐 포션과 Greater Heal이 들어간다.
 잃는 것은 PvE 전체 딜 약 9.5%다. **PK를 만나면 싸우는 것이 기본인 캐릭터는 Resist 80이 맞다.**
@@ -1587,16 +1587,16 @@ PK를 어떻게 상대할지가 템플릿에 Resist를 넣을지를 정한다.
 ### <a id="06.D"></a>06.D PK 앞의 소환수
 
 **PK 앞에서도 사냥하던 소환수를 그대로 쓴다.** 다시 부를 수 없다고 보고, PvP에서 소환수 사이의 차이가 사냥 조합을 바꿀 만큼은 아니라고 판단했다.
-PvP에서 소환수가 무엇을 잃고 어느 소환수가 더 버티는지는 [pvp.md](pvp.md#06.A) 06.A절과 [pvp.md](pvp.md#06.B) 06.B절.
+PvP에서 소환수가 무엇을 잃고 어느 소환수가 더 버티는지는 [pvp.md](../game/pvp.md#06.A) 06.A절과 [pvp.md](../game/pvp.md#06.B) 06.B절.
 
 ### <a id="06.E"></a>06.E 레슬링과 반격 수단
 
-- **바드 메이지의 레슬링은 도주할 때만 Defensive Barding이 채운다.** 첫 공격 주문을 쏘는 순간 Heat of Battle이 켜지고 printed 값이 된다. printed 0이 치르는 값은 [pvp.md](pvp.md#05) 05절.
+- **바드 메이지의 레슬링은 도주할 때만 Defensive Barding이 채운다.** 첫 공격 주문을 쏘는 순간 Heat of Battle이 켜지고 printed 값이 된다. printed 0이 치르는 값은 [pvp.md](../game/pvp.md#05) 05절.
 - 위키 Discordance / Peacemaking / Provocation 문서는 크리처 대상 효과만 적는다. 바드 스킬로 PK를 누르는 수단은 문서에 없다.
 
 ### <a id="06.F"></a>06.F Tracking과 바드
 
-Tracking 자체의 규칙은 [pvp.md](pvp.md#10) 10절, Hunting 판정이 5초 스킬 쿨을 쓰는 것은 [pvp.md](pvp.md#10.A) 10.A절.
+Tracking 자체의 규칙은 [pvp.md](../game/pvp.md#10) 10절, Hunting 판정이 5초 스킬 쿨을 쓰는 것은 [pvp.md](../game/pvp.md#10.A) 10.A절.
 
 - Tracking의 Effective Barding 보너스는 Musicianship (또는 Self Taught 대체값) 상한 안에서만 붙는다 (02.M절).
 - 서버 스킬 게이트가 하나라 (02.J절) 사냥 중 Hunting 판정이 바드 스킬을 "use another skill"로 막을 수 있다. 확인되지 않았다.
@@ -1631,7 +1631,7 @@ Tracking 자체의 규칙은 [pvp.md](pvp.md#10) 10절, Hunting 판정이 5초 �
 | --- | --- | --- | --- |
 | 1 | 송이 바드 스킬 슬롯까지 잠그는가 | 02.E절 근거 표의 시퀀스를 **Lyric 방어구 벗고** 한 번 돌린다. probe 스크립트는 git 이력에 있다. 실행 중 수동 조작을 하지 않는다 (지난 로그가 그것 때문에 오염됐다) | 송 게이트의 모양 |
 | 2 | 송 쿨의 정확한 길이 | 같은 probe의 4단계 (약 11초 후 시도) | `song` 바 길이 |
-| 3 | Energy Bolt의 15마나 회수 (5초 안 마무리 때만)가 환급 확률과 중첩되는지 | 방법 미정. 후보: 한 시전에 `[ mana, refund ]`와 `[ eb, refund ]`가 둘 다 뜨는지 본다 ([overheads.md](overheads.md#07) 07절) | 마나 예산이 2.7/초냐 훨씬 낮냐 (05.D절) |
+| 3 | Energy Bolt의 15마나 회수 (5초 안 마무리 때만)가 환급 확률과 중첩되는지 | 방법 미정. 후보: 한 시전에 `[ mana, refund ]`와 `[ eb, refund ]`가 둘 다 뜨는지 본다 ([overheads.md](../scripting/overheads.md#07) 07절) | 마나 예산이 2.7/초냐 훨씬 낮냐 (05.D절) |
 | 4 | Ensemble / Reverb / Virtuoso가 정말 본체 전용인가 | 포인트 변경 전후로 데미지 트래커의 **소환수 딜 절대값**을 비교한다 | 코덱스 배분 (03.F절) |
 | 5 | Skeletal Fiend, skeletal marksman, rotting flesh의 바디 번호 | 나오면 `>info`로 읽는다 | `SUMMON NAMES`의 `findtype` 줄 (04.H절) |
 | 6 | Corpse Skin 질병 하나가 틱 몇 개로 도는가 | 방법 미정. 후보: 프록 한 방 뒤와 프록 네 방 + 볼트 뒤 Poison Strike 피해를 데미지 트래커로 비교한다 | Poison Strike 시점 (03.D절) |
@@ -1653,7 +1653,7 @@ Tracking 자체의 규칙은 [pvp.md](pvp.md#10) 10절, Hunting 판정이 5초 �
 
 ## <a id="08"></a>08 자주 틀렸던 것
 
-PvP 쪽 (명중률, TK 폭탄, 패링, 던전 리콜)은 [pvp.md](pvp.md#11) 11절.
+PvP 쪽 (명중률, TK 폭탄, 패링, 던전 리콜)은 [pvp.md](../game/pvp.md#11) 11절.
 
 | 틀린 생각 | 사실 |
 | --- | --- |
@@ -1679,7 +1679,7 @@ PvP 쪽 (명중률, TK 폭탄, 패링, 던전 리콜)은 [pvp.md](pvp.md#11) 11�
 | Energy Bolt는 시전마다 15마나가 돌아온다 | **5초 안에 대상이 죽을 때만.** 잡몹에서만 실질 5다 |
 | 브레이크 중엔 Provo로 Ensemble을 살린다 | **못 한다.** 브레이크 대상엔 Peace도 Provo도 안 걸린다 |
 | Spirit Speak만 있으면 언데드 소환이 나온다 | **Vengeful Spirit을 먼저 켜야 한다.** 어느 주문이 어느 언데드가 되는지는 03.C절 표 |
-| 네크로 능력 Razor 핫키는 이 빌드에서 안 먹는다 | **먹는다.** 능력이 안 나가던 원인은 심볼 수를 읽는 `ingump` 비교가 잘못돼 있던 것이다. Vengeful Spirit 핫키가 안 나간 건 macOS에서 게임에 안 들어오는 `` Alt+` ``에 걸었기 때문이다 ([hotkeys.md](hotkeys.md#02.B) 02.B절) |
+| 네크로 능력 Razor 핫키는 이 빌드에서 안 먹는다 | **먹는다.** 능력이 안 나가던 원인은 심볼 수를 읽는 `ingump` 비교가 잘못돼 있던 것이다. Vengeful Spirit 핫키가 안 나간 건 macOS에서 게임에 안 들어오는 `` Alt+` ``에 걸었기 때문이다 ([hotkeys.md](../game/hotkeys.md#02.B) 02.B절) |
 | `followers`는 소환수 마릿수다 | **컨트롤 슬롯 수다.** Lich 2마리 = 4 |
 | 소환수는 안 맞으면 그대로 간다 | **10초마다 최대 체력이 1%씩 썩는다.** 0이 되지는 않지만 쓸모가 없어지므로 재소환은 주기적이다 (04.A절) |
 | 바드에게 printed Resist는 PvP에서 쓸모없다 | **도주할 때만 맞다.** 반격하면 Heat of Battle이 Defensive Barding을 끈다 |
@@ -1687,7 +1687,7 @@ PvP 쪽 (명중률, TK 폭탄, 패링, 던전 리콜)은 [pvp.md](pvp.md#11) 11�
 
 ## <a id="09"></a>09 참고 링크
 
-PvP 출처는 [pvp.md](pvp.md#12) 12절.
+PvP 출처는 [pvp.md](../game/pvp.md#12) 12절.
 
 - [Musicianship](https://wiki.uooutlands.com/Musicianship) -- Barding Song, barding break 공식, Defensive Barding
 - [Discordance](https://wiki.uooutlands.com/Discordance) -- 디버프 공식, Effective Barding 정의

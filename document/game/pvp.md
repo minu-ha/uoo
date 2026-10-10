@@ -1,16 +1,16 @@
 ---
 name: PvP
 label: PvP 규칙
-group: Reference
-order: 20
+group: Game reference
+order: 10
 ---
 
 템플릿과 무관한 PvP 서버 규칙과 숫자. 위키와 패치노트 원문을 인용하고, 해석은 인용문 아래에 적는다.
 인게임에서 확인된 것은 그렇게 적었고, 확인되지 않은 것은 "확인되지 않았다"로 남겼다.
 
-- Bard Necro가 이 규칙으로 내린 판단 (Defensive Barding, 도주냐 반격이냐, Herding 대신 Resist)은 [bard-necro-handbook.md](bard-necro-handbook.md#06) 06절.
-- 벌목 겸 PvP의 스킬·스탯·도끼 선택과 교전 분기는 [lumberjack-pvp-handbook.md](lumberjack-pvp-handbook.md).
-- PvP에서 막히는 스크립트 명령은 [razor.md](razor.md#07) 07절.
+- Bard Necro가 이 규칙으로 내린 판단 (Defensive Barding, 도주냐 반격이냐, Herding 대신 Resist)은 [bard-necro.md](../templates/bard-necro.md#06) 06절.
+- 벌목 겸 PvP의 스킬·스탯·도끼 선택과 교전 분기는 [lumberjack-pvp.md](../templates/lumberjack-pvp.md).
+- PvP에서 막히는 스크립트 명령은 [razor.md](../scripting/razor.md#07) 07절.
 
 ## <a id="00"></a>00 한눈에
 
@@ -29,14 +29,14 @@ order: 20
 | [11](#11) | 자주 틀렸던 생각 |
 | [12](#12) | 출처 |
 
-이 문서에 걸린 질문은 [open-items.md](open-items.md)에 모았다.
+이 문서에 걸린 질문은 [open-items.md](../questions/open-items.md)에 모았다.
 
 ::part[서버 규칙]
 
 ## <a id="01"></a>01 공격적 행동과 Heat of Battle
 
 **다른 플레이어에게 공격적 행동을 하면 Heat of Battle이 켜지고, 그동안 리콜·게이트·문게이트를 못 쓴다.** 여관 방에도 못 들어간다.
-바드는 여기에 Defensive Barding까지 잃는다 ([bard-necro-handbook.md](bard-necro-handbook.md#06.A) 06.A절). 그래서 바드의 방어 숫자 (02.C절, 08절)는 이 조건에서 갈린다.
+바드는 여기에 Defensive Barding까지 잃는다 ([bard-necro.md](../templates/bard-necro.md#06.A) 06.A절). 그래서 바드의 방어 숫자 (02.C절, 08절)는 이 조건에서 갈린다.
 
 ### <a id="01.A"></a>01.A 무엇이 켜는가
 
@@ -310,7 +310,7 @@ Razor의 `[ teleki, me ]`·`[ teleki, target ]`는 서버의 대상 확인 메�
 상대 TK도 같은 안내를 만들 수 있다는 후속 관찰과 자동화 한계는 04.D절에 보완했다.
 
 스크린샷만으로는 상대 Inscription·양측 버프·실제 포션 부착 결과까지 모두 알 수 없다.
-필요한 추가 확인은 [open-items.md](open-items.md#08.A) 08.A절에 둔다.
+필요한 추가 확인은 [open-items.md](../questions/open-items.md#08.A) 08.A절에 둔다.
 **반사 발생과 Reflect 소진은 별개**이며, 소진 판단은 05.A절을 따른다.
 
 ### <a id="04.D"></a>04.D 들어온 TK와 내가 건 TK를 구분하는 한계
@@ -332,7 +332,7 @@ Explosion 주문에도 포션의 15초 쿨을 그대로 적용하지 않는다.
 
 고정 이름의 `insysmsg "xuezhonglian has applied telekinesis to you."`는 문자열 변수가 없어도 검사할 수 있다.
 다만 화면 주인이 xuezhonglian이면 자기 TK, 다른 캐릭터이면 그 이름의 상대에게 받은 TK라는 문맥이 필요하다.
-Razor 문법과 제한은 [razor.md](razor.md#02.A) 02.A절.
+Razor 문법과 제한은 [razor.md](../scripting/razor.md#02.A) 02.A절.
 
 - 공격 TK가 이미 별도로 확인된 상태와 응답 대기 중 수신 TK가 겹친 상태를 구분한다.
 - 이미 확인된 공격 TK를 `teleki, me` 발생만으로 취소하지 않는다. 서로 상대에게 TK를 걸 수 있다는 경우를 배제하지 않는다.
@@ -341,7 +341,7 @@ Razor 문법과 제한은 [razor.md](razor.md#02.A) 02.A절.
 - 오래된 안내·다른 핫키·다른 스크립트가 섞이지 않게 직렬화해도 수신 TK 혼동은 남는다. 독립 확인 없이 자동 점화가 안전하다고 주장하지 않는다.
 
 카운트다운 5·4·3·2가 보였다는 사실과 점화 시점부터 정확한 실시간 퓨즈 길이를 잰 것은 다르다.
-실패한 포션의 지면 투척·커서 소유권 검증은 [open-items.md](open-items.md#08.C) 08.C절에 남겼다.
+실패한 포션의 지면 투척·커서 소유권 검증은 [open-items.md](../questions/open-items.md#08.C) 08.C절에 남겼다.
 
 ::part[싸우는 법]
 
@@ -393,12 +393,12 @@ Razor 문법과 제한은 [razor.md](razor.md#02.A) 02.A절.
 #### 레슬링
 
 - 메이지는 근접 한 대에 시전이 끊긴다 (02.E절).
-- 바드는 도주할 때만 Defensive Barding이 레슬링을 채운다 ([bard-necro-handbook.md](bard-necro-handbook.md#06.E) 06.E절).
+- 바드는 도주할 때만 Defensive Barding이 레슬링을 채운다 ([bard-necro.md](../templates/bard-necro.md#06.E) 06.E절).
 - printed 0이면 무기 100 PK의 근접은 **100%** 맞고, 한 대마다 시전이 끊긴다.
 
 > "Wrestling will provide a (15% \* (Wrestling Skill / 100)) Mana Refund chance when casting spells" -- Wrestling (PvM)
 
-- PvM 몫이다. Defensive Barding이 채운 레슬링에는 붙지 않는다 ([bard-necro-handbook.md](bard-necro-handbook.md#06.A) 06.A절).
+- PvM 몫이다. Defensive Barding이 채운 레슬링에는 붙지 않는다 ([bard-necro.md](../templates/bard-necro.md#06.A) 06.A절).
 
 #### Magic Reflection과 Inscription
 
@@ -530,7 +530,7 @@ Leather는 방어구 재생 페널티가 없다는 뜻이지 추가 재생 보�
 만마나에서 지나간 재생은 저장되지 않으며, 시전 비용·시점·장비 변경에 따라 실제 잔량은 달라진다.
 
 기본 최대 마나와 현재 마나도 구분한다. INT 45에서 Earth Elemental의 50마나 비용은 스크롤 성공률 보정만으로 해결되지 않는다.
-버프의 최대치 증가를 즉시 현재 마나 회복으로 간주하지 않는다. 예산의 적용은 [벌목 핸드북 04절](lumberjack-pvp-handbook.md#04).
+버프의 최대치 증가를 즉시 현재 마나 회복으로 간주하지 않는다. 예산의 적용은 [벌목 핸드북 04절](../templates/lumberjack-pvp.md#04).
 
 ### <a id="05.E"></a>05.E 수동 공격과 공통 자기관리 루프
 
@@ -545,7 +545,7 @@ v6의 블록은 각자 지금 상태를 읽고 그 자리에서 행동하며 다
 v5의 긴급 수동 주문 중단·6초 시전 대기와 `[ cast, check ]` 정지·준비 동작의 5초 주기·주문의 이동 가드·재시도 타이머 8개를 없앴다.
 2026-10-09 v7은 Strength·Agility 포션을 버프 대신 STR·DEX 값으로 판정하고 포션마다 5초 재시도 간격을 두었다 (09.D절).
 2026-10-10 v8은 가벼운 Heal을 붕대 옵션과 따로 `use_light_heal`로 정한다. 붕대를 쓸 수 없으면 옵션과 상관없이 대타로 나간다.
-같은 날 v9는 `recipe/pvp-recipe.razor`로 조립한다. 동작은 v8과 같다 ([modules.md](modules.md#08) 08절). 본문을 고칠 때는 모듈과 레시피를 고친다.
+같은 날 v9는 `recipe/pvp-recipe.razor`로 조립한다. 동작은 v8과 같다 ([modules.md](../scripting/modules.md#08) 08절). 본문을 고칠 때는 모듈과 레시피를 고친다.
 현재 본문은 아직 인게임에서 확인되지 않았다.
 
 #### 입력 규칙
@@ -562,17 +562,17 @@ v5의 긴급 수동 주문 중단·6초 시전 대기와 `[ cast, check ]` 정�
 #### 독립 설정
 
 아래 이름은 `config__` 접두를 생략했다. 템플릿 프리셋 없이 `recipe/pvp-recipe.razor`에서 그 설정을 가진 블록의 `#@ use` 줄 밑에 바꿀 값을 쓰고 다시 조립한다
-([modules.md](modules.md#07.A) 07.A절). 한 옵션으로 다른 옵션을 덮어쓰지 않으며 Magery·붕대는 각각 끌 수 있다.
+([modules.md](../scripting/modules.md#07.A) 07.A절). 한 옵션으로 다른 옵션을 덮어쓰지 않으며 Magery·붕대는 각각 끌 수 있다.
 무기 교체는 레시피의 `fight/weapon-swap` 블록이라, 끄려면 그 줄을 뺀다.
 
 | 옵션 | 기본값 | 효과 |
 | --- | --- | --- |
-| `clear_at_start` | 0 | Play 때 시작 4줄을 돌리지 않아, 들고 있던 수동 커서와 시전이 남는다 ([conventions.md](conventions.md#02.D) 02.D절) |
+| `clear_at_start` | 0 | Play 때 시작 4줄을 돌리지 않아, 들고 있던 수동 커서와 시전이 남는다 ([conventions.md](../scripting/conventions.md#02.D) 02.D절) |
 | `use_magery` / `use_bandages` | 각 1 | 회복 에이전트·버프·시약 읽기 / Healing이 있고 피해·독이 있을 때 붕대 |
 | `use_light_heal` | 0 | 붕대 옆에서도 `light_hits`부터 가벼운 Heal을 쓴다. 붕대를 쓸 수 없으면 (`use_bandages` 0, Healing 없음, 붕대 없음) 이 값과 상관없이 대타로 쓴다. `use_magery`가 1이어야 한다 |
 | `use_potions` / `use_resist_potion` | 각 1 | 회복·Refresh·스탯 포션 / Magic Resist 포션 |
 | `str_potion` / `dex_potion` | 120 / 100 | Greater 포션을 마신 STR·DEX, 곧 기본 + 20. 그보다 낮으면 Strength·Agility 포션을 마신다. 공유 루프라 실행하는 캐릭터의 기본값에 맞춘다. 기본값은 STR 100·DEX 80 기준이다 (09.D절). 0이면 그 포션을 끈다 |
-| `walk_guard` / `warmode_is_manual` | 0 / 0 | base의 공용 설정. pvp는 걷는 중에도 시전하고 워모드를 보지 않는다 ([modules.md](modules.md#06) 06절) |
+| `walk_guard` / `warmode_is_manual` | 0 / 0 | base의 공용 설정. pvp는 걷는 중에도 시전하고 워모드를 보지 않는다 ([modules.md](../scripting/modules.md#06) 06절) |
 | `buff_max_loss` / `buff_when_poisoned` | 35 / 1 | 잃은 HP가 이 값 이상이면 버프를 시작하지 않고 시전 중이면 끊는다 / 독일 때도 버프를 건다. `emergency_hits`를 바꾸면 이 값도 맞춘다 |
 | `use_reactive_armor` / `use_magic_reflect` | 각 1 | 빠지면 시전·커서가 없을 때 바로 다시 건다. 이동 가드 없음 |
 | `heal_hits` / `emergency_hits` / `light_hits` | 35 / 35 / 15 | 최대 HP 대비 손실량. 힐 포션 / 포션이 나갈 수 없을 때 GH와 버프 중단 / 가벼운 Heal (`use_light_heal`). `emergency_hits`는 `heal_hits`보다 낮게 두지 않는다. 최대 HP 120이면 기본 기준은 현재 HP 85 이하 |
@@ -606,7 +606,7 @@ v5의 긴급 수동 주문 중단·6초 시전 대기와 `[ cast, check ]` 정�
 
 #### 비용과 타이머
 
-[razor.md](razor.md#06) 06절대로 `findtype`이 가장 비싼 명령이다. 시약은 패스마다 찾지 않고 REAGENTS의 플래그를 읽는다.
+[razor.md](../scripting/razor.md#06) 06절대로 `findtype`이 가장 비싼 명령이다. 시약은 패스마다 찾지 않고 REAGENTS의 플래그를 읽는다.
 포션은 그 포션이 필요한 블록 안에서만 찾는다. Strength·Agility 포션은 스탯이 기준선 아래일 때 5초에 한 번, Resist 포션은 버프가 빠졌을 때만 찾는다.
 무기는 원하는 슬롯이 바뀔 때만 찾고 평소에는 양손 레이어 두 번만 읽는다. 갖고 있지 않은 무기를 슬롯에 두면 매 패스 한 번 찾게 되므로 쓰지 않는 슬롯은 0으로 둔다.
 
@@ -647,11 +647,11 @@ Resist 포션은 던전 몹·펫용 옵션으로 남겨 두며 적 플레이어 
 슬롯은 서버의 자동 분류가 아닌 사용자 설정이며 개인 serial이나 graphic 목록을 넣지 않는다.
 [dress serial](https://www.razorce.com/guide/commands/#dress)로 해당 아이템을 장착 요청한다.
 활성 프로필 Arm/Dress의 충돌 장비 자동 해제가 필요하며, 이 클라이언트에서 `dress`가 실패한 기록이 있어
-([razor.md](razor.md#03) 03절) 실제 교체는 인게임 확인이 필요하다.
+([razor.md](../scripting/razor.md#03) 03절) 실제 교체는 인게임 확인이 필요하다.
 기존 weapon 핫키는 공격·Unlock 등을 요청하므로 이 루프에서 호출하지 않는다.
 
 활성 캐릭터의 각 바는 `WeaponSwing` 타입과 현재 STA에 맞는 시간을 사용한다.
-시간·공유 스윙 기준은 [09.B절](#09.B), 바 구조는 [overheads.md](overheads.md#06.A) 06.A절이다.
+시간·공유 스윙 기준은 [09.B절](#09.B), 바 구조는 [overheads.md](../scripting/overheads.md#06.A) 06.A절이다.
 바를 시작·초기화하지 않으며 장착 요청은 실제 스윙·명중의 증거가 아니다. 무기를 바꿔도 새 공격 요청은 보내지 않는다.
 
 #### 상태
@@ -666,7 +666,7 @@ Resist 포션은 던전 몹·펫용 옵션으로 남겨 두며 적 플레이어 
 
 정적 검사는 Outlands 서버·실제 커서 처리를 입증하지 않는다.
 구조화 PvP·팩션의 명령 제한이면 `[ script, blocked ]` 후 정지한다.
-반영 방법과 인게임 확인은 [open-items.md](open-items.md#10) 10절에 있다.
+반영 방법과 인게임 확인은 [open-items.md](../questions/open-items.md#10) 10절에 있다.
 
 ## <a id="06"></a>06 소환수로 싸울 때
 
@@ -814,7 +814,7 @@ PvP 근접 데미지 기대 감소 = 막을 확률 x 감소율.
 - 서클 (위키 Magery 주문표): Weaken 1, **Poison · Telekinesis 3**, Curse 4, Paralyze 5, **Energy Bolt · Explosion 6**, Mana Vampire 7.
 - 위키 표는 3서클을 N/A로 적는데 본문은 3서클인 Poison을 예로 든다. 서로 맞지 않는다. 확인되지 않았다.
 - Disco/Peace/Provo 80/80/80인 바드는 **Defensive Barding이 켜져 있으면 100 행, Heat of Battle 중이면 printed 행이다**.
-  2020 패치의 `/ 3` 공식이면 켜져 있어도 80 행이다 ([bard-necro-handbook.md](bard-necro-handbook.md#06.A) 06.A절).
+  2020 패치의 `/ 3` 공식이면 켜져 있어도 80 행이다 ([bard-necro.md](../templates/bard-necro.md#06.A) 06.A절).
 
 ## <a id="09"></a>09 근접 반격력
 
@@ -912,7 +912,7 @@ Magery 80의 식 결과는 8.8이다. 실제 정수 처리와 포션 중첩은 �
 
 포션을 마시는 루프는 스탯 값으로 판정한다. Greater 포션을 마신 값, 곧 기본 + 20을 `config__str_potion`·`config__dex_potion`에 두고 그보다 낮으면 마신다.
 Bless·Strength·Agility 주문은 식으로 Magery 100에서 11, 120에서도 13.2라 그 선 아래에 남는다. Razor 스크립트는 덧셈을 못 하므로 기본값이 아닌 기준선을 적는다
-([razor.md](razor.md#05) 05절).
+([razor.md](../scripting/razor.md#05) 05절).
 
 포션마다 재시도 간격을 둔다. 스탯은 마신 뒤 한 왕복 늦게 오르고, Curse·Weaken·Clumsy는 포션이 도는 동안에도 스탯을 선 아래로 누를 수 있다.
 간격이 없으면 그동안 거절될 마시기가 패스마다 회복 포션과 같은 아이템 큐로 나간다. 저항 포션은 `Magic Resist Potion`이라는 제 아이콘으로 본다 (사용자 확인 2026-10-09).
@@ -951,7 +951,7 @@ Parry·Reactive Armor·무기 품질·마법 옵션·추가 효과·정수 처�
 | 80 | 84 / 42타일 | +8 | +20% / +8% |
 | 100 | 100 / 50타일 | +10 | +25% / +10% |
 
-- 바드에게 주는 Effective Barding 보너스와 Hunting이 바드 스킬 쿨에 끼치는 영향은 [bard-necro-handbook.md](bard-necro-handbook.md#06.F) 06.F절.
+- 바드에게 주는 Effective Barding 보너스와 Hunting이 바드 스킬 쿨에 끼치는 영향은 [bard-necro.md](../templates/bard-necro.md#06.F) 06.F절.
 - Tracking은 주문 데미지 보조 스킬이기도 하다. 위키 예시는 Tracking 100을 +10%로 센다 (05절).
 - Hamstring 두 번째 줄 목록에 들어 있다 (03절).
 - Hunting 모드를 켜는 코드가 이미 있다. `script/archive/mining.razor:195`와 `script/archive/lumberjack.razor:183`의 Tracking 블록이다.
@@ -967,7 +967,7 @@ Parry·Reactive Armor·무기 품질·마법 옵션·추가 효과·정수 처�
 > "Tracking success chance is (100% \* (Tracking Skill / 100))"
 
 - 판정 한 번의 성공률은 Tracking 80이면 80%다.
-- **Hunting의 자동 판정도 5초 스킬 쿨을 쓴다.** 서버 스킬 게이트가 하나라 ([bard-necro-handbook.md](bard-necro-handbook.md#02.J) 02.J절) 다른 스킬과 부딪칠 수 있다.
+- **Hunting의 자동 판정도 5초 스킬 쿨을 쓴다.** 서버 스킬 게이트가 하나라 ([bard-necro.md](../templates/bard-necro.md#02.J) 02.J절) 다른 스킬과 부딪칠 수 있다.
 - 판정 빈도는 Hunt Frequency로 고른다. "New When No Arrow"와 "New When No Target"은 화살표가 없을 때만 판정한다.
   주변에 Murderer가 없으면 화살표가 없으므로 계속 판정한다.
 

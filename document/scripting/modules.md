@@ -1,7 +1,7 @@
 ---
 name: Modules
 label: 모듈과 조립
-group: Rules
+group: Scripting
 order: 30
 ---
 
@@ -22,7 +22,7 @@ order: 30
 | [08](#08) | 2026-10-10 옮기고 다시 짜면서 바뀐 것 |
 | [09](#09) | 아직 옮기지 않은 것 |
 
-인게임 확인 항목은 [open-items.md](open-items.md) 09절 (lumberjack-enhanced), 10절 (pvp), 11절 (skinning-enhanced), 12절 (tamer-mage-enhanced), 14절 (bard-necro-enhanced)에 있다.
+인게임 확인 항목은 [open-items.md](../questions/open-items.md) 09절 (lumberjack-enhanced), 10절 (pvp), 11절 (skinning-enhanced), 12절 (tamer-mage-enhanced), 14절 (bard-necro-enhanced)에 있다.
 
 ::part[설계]
 
@@ -362,7 +362,7 @@ lumberjack-enhanced는 Tracking 줄을 먼저 읽도록 `magery/reagents`를 `es
 2. 레시피에서 그 설정을 가진 블록의 상자 밑에 `@setvar! config__이름 값` 한 줄을 쓰고, 바로 위 `#` 줄에 이유를 쓴다.
    다른 상자 밑에 적어도 조립기가 주인 블록으로 옮긴다.
 3. `node util/build-scripts.mjs`를 돌린다. 설정이 주인 블록 밑으로 가고, 설명이 다시 쓰이고, 결과물이 다시 만들어진다.
-   `util/check.sh`를 돌리고, 게임에서는 Reload all scripts 뒤 Play한다 ([workflow.md](workflow.md#04) 04절).
+   `util/check.sh`를 돌리고, 게임에서는 Reload all scripts 뒤 Play한다 ([workflow.md](../working/workflow.md#04) 04절).
 
 기본으로 돌리려면 레시피에서 그 줄과 이유를 지운다. 모든 루프의 기본을 바꾸려면 모듈의 `# @ config` 값을 고친다.
 
@@ -441,7 +441,7 @@ pvp 결과물에는 시작 4줄이 `if config__clear_at_start = 1` 안에 들어
 | 채집이 기다리는 것 | 리콜 결정은 장착과 채집을 모두, 책 없음·Hunting 아님은 채집만 막았다 | 셋 다 `var__hold_gathering` 하나로 장착과 채집을 함께 막는다 |
 | 시작 메시지 | `v17 loaded: auto recall=…, tracking color=…` | `v18 loaded: tracking color=…` |
 
-인게임 확인 항목은 [open-items.md](open-items.md#09) 09절에 더했다.
+인게임 확인 항목은 [open-items.md](../questions/open-items.md#09) 09절에 더했다.
 
 ### <a id="08.C"></a>08.C dexxer-basic
 
@@ -492,7 +492,7 @@ pvp 결과물에는 시작 4줄이 `if config__clear_at_start = 1` 안에 들어
 | 패스 | 시작에 queued·시전 대기 | 같다 (`settle_first` 1). 끝에 `wait wait__poll` 0.1초가 붙고, 구조적 PvP에서 멈춘다 (base) |
 | Journal | 쓰지 않았다 | 다른 루프처럼 `config__sysmsg` 1로 진단 줄을 쓴다 |
 
-인게임 확인 항목은 [open-items.md](open-items.md#14) 14절에 더했다.
+인게임 확인 항목은 [open-items.md](../questions/open-items.md#14) 14절에 더했다.
 
 ### <a id="08.E"></a>08.E tamer-mage-enhanced
 
@@ -516,7 +516,7 @@ pvp 결과물에는 시작 4줄이 `if config__clear_at_start = 1` 안에 들어
 | 골드 | 떨군 뒤 0.2초 | 1초 (`wait__gold_drop`), `[ gold, dropped ]` |
 | 전투 대상 | lasttarget이 무엇이든 받았다 | 모바일 serial만 받는다 (`fight/target`) |
 
-인게임 확인 항목은 [open-items.md](open-items.md#12) 12절에 있다.
+인게임 확인 항목은 [open-items.md](../questions/open-items.md#12) 12절에 있다.
 
 ### <a id="08.F"></a>08.F 마무리 점검에서 합친 모듈
 

@@ -1,8 +1,8 @@
 ---
 name: Conventions
 label: 저장소와 스크립트 규칙
-group: Rules
-order: 20
+group: Scripting
+order: 10
 ---
 
 파일을 어디에 두고 어떻게 이름 짓는가, 스크립트를 어떤 모양으로 쓰는가.
@@ -20,7 +20,7 @@ order: 20
 | [06](#06) | `overhead`는 어떻게 쓰나 |
 | [07](#07) | PvP 겸용 스크립트는 무엇이 다른가 |
 
-이 문서에 걸린 질문은 [open-items.md](open-items.md)에 모았다.
+이 문서에 걸린 질문은 [open-items.md](../questions/open-items.md)에 모았다.
 
 ::part[저장소]
 
@@ -33,13 +33,13 @@ order: 20
 | `script/` | Razor 스크립트. 모두가 공유한다 |
 | `module/`, `recipe/` | 한 벌만 둔 루프 블록과 루프마다의 레시피. `util/build-scripts.mjs`가 `script/combat/*`·`script/gather/*`로 조립한다 ([modules.md](modules.md)) |
 | `config/` | 사람마다 클라이언트 설정 원본 하나 (`config/<이름>/`). 링크 방식과 파일별 설명은 [config/README.md](https://github.com/minu-ha/uoo/blob/master/config/README.md) |
-| `blueprint/` | 설계 문서. for-humanity로 사이트를 만들어 읽는다 (`pnpm docs:dev`). 무엇이 있는지는 [AGENTS.md](https://github.com/minu-ha/uoo/blob/master/AGENTS.md)의 문서 지도, 쓰는 법은 [writing.md](writing.md) |
-| `language/` | README 번역본. 규칙은 [workflow.md](workflow.md#05.A) 05.A절 |
+| `document/` | 설계 문서. for-humanity로 사이트를 만들어 읽는다 (`pnpm docs:dev`). 무엇이 있는지는 [AGENTS.md](https://github.com/minu-ha/uoo/blob/master/AGENTS.md)의 문서 지도, 쓰는 법은 [writing.md](../working/writing.md) |
+| `language/` | README 번역본. 규칙은 [workflow.md](../working/workflow.md#05.A) 05.A절 |
 | `util/` | `setup.sh` (게임을 저장소에 링크), `build-scripts.mjs` (모듈로 루프 조립), `check.sh` (스크립트 블록 짝과 선언 없이 쓴 접두 변수 검사, 인자 없이 돌리면 조립 결과물 검사도), `check-docs.mjs` (만든 문서 사이트의 끊긴 링크와 앵커, 번호 제목의 앵커 검사) |
 
 웹/서버 프로젝트가 아니다. Razor의 자동 검사는 `util/`의 두 검사기이고, 동작 검증은 인게임에서만 된다.
 조건부 전투 모형 `util/pvp-sim.mjs`와 수치 검사 `util/pvp-sim.test.mjs`는 Node 표준 라이브러리로 별도 실행한다.
-입력·정책·실측 한계는 [벌목 핸드북 05.D절](lumberjack-pvp-handbook.md#05.D)에 적었다.
+입력·정책·실측 한계는 [벌목 핸드북 05.D절](../templates/lumberjack-pvp.md#05.D)에 적었다.
 
 ### <a id="01.B"></a>01.B script 분류와 파일명
 
@@ -61,7 +61,7 @@ order: 20
 
 `combat/pvp`는 여러 템플릿이 공유하는 자기관리 루프다.
 Magery·무기·붕대 등 독립 기능 옵션을 본문에서 선택하며, 별도 템플릿별 PvP 진입 파일은 두지 않는다
-([pvp.md](pvp.md#05.E) 05.E절).
+([pvp.md](../game/pvp.md#05.E) 05.E절).
 
 ### <a id="01.C"></a>01.C 파일 규칙
 
@@ -78,7 +78,7 @@ Magery·무기·붕대 등 독립 기능 옵션을 본문에서 선택하며, �
 
 - 스크립트는 모두가 공유하고 설정은 사람마다 분리된다. **다른 사람의 `config/`는 건드리지 않는다.**
 - `settings.json`은 계정 비밀번호가 들어 있으므로 **절대 커밋하지 않는다.**
-- `config/` 아래 파일은 게임을 끈 상태에서만 고친다. 이유는 [workflow.md](workflow.md#04.C) 04.C절.
+- `config/` 아래 파일은 게임을 끈 상태에서만 고친다. 이유는 [workflow.md](../working/workflow.md#04.C) 04.C절.
 
 ::part[모양]
 
@@ -165,7 +165,7 @@ clearignore
 
 수동 입력과 함께 도는 공통 `combat/pvp`는 시작 4줄을 생략한다 (레시피의 `config__clear_at_start 0`, [modules.md](modules.md#06) 06절).
 실행 전에 보유한 주문·아이템 커서와 시전·장착 큐를 초기화하지 않기 위한 예외다.
-대신 자동 행동 직전에 수동 시전·타깃·큐를 검사한다 ([pvp.md](pvp.md#05.E) 05.E절).
+대신 자동 행동 직전에 수동 시전·타깃·큐를 검사한다 ([pvp.md](../game/pvp.md#05.E) 05.E절).
 
 ### <a id="02.E"></a>02.E 주석
 
@@ -307,4 +307,4 @@ endif
 ## <a id="07"></a>07 PvP 겸용 스크립트
 
 - `if pvp` 분기를 먼저 두고, PvE 로직을 그대로 옮기지 않는다.
-- 구조화 PvP나 팩션 상태에서 막히는 명령은 [razor.md](razor.md#07) 07절. 게임 쪽 PvP 규칙은 [pvp.md](pvp.md).
+- 구조화 PvP나 팩션 상태에서 막히는 명령은 [razor.md](razor.md#07) 07절. 게임 쪽 PvP 규칙은 [pvp.md](../game/pvp.md).

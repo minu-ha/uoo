@@ -11,9 +11,9 @@
         "build": "node util/build-scripts.mjs",
         "check": "util/check.sh && pnpm docs:build && node util/check-docs.mjs",
         "test": "node --test util/*.test.mjs",
-        "docs:dev": "for-humanity dev blueprint",
-        "docs:build": "for-humanity build blueprint",
-        "docs:preview": "for-humanity preview blueprint"
+        "docs:dev": "for-humanity dev document",
+        "docs:build": "for-humanity build document",
+        "docs:preview": "for-humanity preview document"
     },
     "devDependencies": {
         "for-humanity": "0.7.1",

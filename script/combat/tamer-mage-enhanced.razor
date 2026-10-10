@@ -10,7 +10,7 @@
 # Food stand down. Survival, Reactive Armor, Magic Reflection, veterinary supplies and
 # potions ignore it.
 # Tracking only warns, through the profile overheads. Meet a PK with combat/pvp (F4).
-# Design and in-game checks: blueprint/open-items.md part 12.
+# Design and in-game checks: document/questions/open-items.md part 12.
 # Hotkeys: Drink Cure, > Smart Heal/Cure Self, Drink Heal, > Greater Heal/Cure Self,
 #          Cancel Current Target, Drink Refresh, Drink Strength, Drink Agility, Drink Magic Resist,
 #          > Interrupt, Target Self, Eat Magic Mushroom.
@@ -474,7 +474,7 @@ endif
 # recipe/tamer-mage-enhanced-recipe.razor
 # ----------------------------------------------------------------------------------------
 # loot/recycle runs the hotkey named in this list when it finishes or gives up. A list, because
-# a variable cannot hold a word (blueprint/razor.md part 3). It lasts until the client closes.
+# a variable cannot hold a word (document/scripting/razor.md part 3). It lasts until the client closes.
 if not listexists 'list__resume_script'
     createlist 'list__resume_script'
 endif

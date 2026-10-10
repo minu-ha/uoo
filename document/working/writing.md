@@ -1,8 +1,8 @@
 ---
 name: Writing
 label: 문서 쓰는 법
-group: Rules
-order: 40
+group: How we work
+order: 20
 ---
 
 이 저장소의 설계 문서를 쓰고 고치는 법. 문서는 [for-humanity](https://for-humanity.fyi) Markdown이고, `pnpm docs:dev`로 사이트를 띄워 읽는다.
@@ -13,7 +13,7 @@ Markdown 기능 자체 (frontmatter, Note·Details, 표, 흐름도)는 for-human
 
 | 절 | 무엇을 답하나 |
 | --- | --- |
-| [01](#01) | `blueprint/`에 무엇이 있고, 사이트는 어떻게 만드나 |
+| [01](#01) | `document/`에 무엇이 있고, 사이트는 어떻게 만드나 |
 | [02](#02) | 새 문서는 어떻게 더하나 |
 | [03](#03) | 새 문서는 어떤 틀에서 시작하나 |
 | [04](#04) | 문서는 어떻게 짜나. 번호, 앵커, 가름 |
@@ -38,7 +38,7 @@ Markdown 기능 자체 (frontmatter, Note·Details, 표, 흐름도)는 for-human
 | 명령 | 하는 일 |
 | --- | --- |
 | `pnpm docs:dev` | 고치는 대로 다시 그리는 사이트를 [localhost:4321](http://localhost:4321)에 띄운다 |
-| `pnpm docs:build` | `blueprint/dist/`에 사이트를 만든다. frontmatter, 깨진 `.md` 링크, 부품 문법을 검사한다 |
+| `pnpm docs:build` | `document/dist/`에 사이트를 만든다. frontmatter, 깨진 `.md` 링크, 부품 문법을 검사한다 |
 | `pnpm docs:preview` | 만든 사이트를 띄운다 |
 | `node util/check-docs.mjs` | 만든 사이트의 끊긴 링크와 앵커, 번호 제목의 앵커를 검사한다 |
 
@@ -46,7 +46,7 @@ Markdown 기능 자체 (frontmatter, Note·Details, 표, 흐름도)는 for-human
 
 ## <a id="02"></a>02 새 문서
 
-1. `blueprint/`에 kebab-case `.md`로 만든다. 템플릿 전용이면 `<템플릿>-handbook.md`다.
+1. `document/`에 kebab-case `.md`로 만든다. 템플릿 전용이면 `<템플릿>-handbook.md`다.
 2. 03절의 빈 틀에서 시작한다.
 3. frontmatter를 채운다.
    - `name`은 영어 이름이다. 문서의 제목과 사이드바 문서 목록이 이 이름을 쓴다.
@@ -54,8 +54,8 @@ Markdown 기능 자체 (frontmatter, Note·Details, 표, 흐름도)는 for-human
    - `group`은 사이드바 묶음이다. 지금은 `Rules`, `Reference`, `Templates`, `Records` 넷이다.
      새 묶음을 만들면 `for-humanity.config.mjs`의 `navigation`에 순서를 더한다.
    - `order`는 묶음 안의 순서다. 10 단위로 매겨 사이에 끼울 자리를 둔다.
-4. 홈 [README.md](README.md)의 문서 표, [AGENTS.md](https://github.com/minu-ha/uoo/blob/master/AGENTS.md)의 문서 지도,
-   루트 [README.md](https://github.com/minu-ha/uoo/blob/master/README.md)의 `blueprint/` 칸에 한 줄씩 더한다.
+4. 홈 [README.md](../README.md)의 문서 표, [AGENTS.md](https://github.com/minu-ha/uoo/blob/master/AGENTS.md)의 문서 지도,
+   루트 [README.md](https://github.com/minu-ha/uoo/blob/master/README.md)의 `document/` 칸에 한 줄씩 더한다.
    루트 README를 고치면 번역본도 같이 고친다 ([workflow.md](workflow.md#05.A) 05.A절).
 
 ## <a id="03"></a>03 빈 틀
@@ -97,11 +97,11 @@ order: {묶음 안 순서}
   그래서 제목 안에 번호와 같은 `<a id>`를 두고, 다른 곳은 언제나 번호로 가리킨다 (`razor.md#03`).
   앵커를 제목 위에 따로 한 줄로 두면 빈 문단이 되어 앞 절 끝에 붙는다. 그래서 제목 줄 안에 둔다.
 - `####` 이하에는 번호도 앵커도 달지 않는다. 목차에 들지 않는 작은 제목이다.
-- `00`은 한눈에 자리다. "절 | 무엇을 답하나" 표로 문서를 처음 여는 사람이 길을 찾게 하고, 이 문서에 걸린 질문은 [open-items.md](open-items.md)로 보낸다.
+- `00`은 한눈에 자리다. "절 | 무엇을 답하나" 표로 문서를 처음 여는 사람이 길을 찾게 하고, 이 문서에 걸린 질문은 [open-items.md](../questions/open-items.md)로 보낸다.
 - 절이 많으면 몇 절씩 가름으로 묶는다. 가름을 여는 첫 절의 제목 바로 위에 `::part[이름]` 한 줄을 둔다.
   사이트가 그 앞에 가름 머리를 달고, On this page 목차도 가름마다 끊는다.
 - 00 한눈에는 가름 밖에 두고, 끝의 확인 안 된 것 · 자주 틀렸던 것 · 참고 링크는 `기록` 가름으로 묶는다.
-- 글 안에서는 제목에 보이는 번호 그대로 "03절", "05.D절"로 가리킨다. 다른 문서는 상대 경로 링크에 절을 붙인다 (`[razor.md](razor.md#03) 03절`).
+- 글 안에서는 제목에 보이는 번호 그대로 "03절", "05.D절"로 가리킨다. 다른 문서는 상대 경로 링크에 절을 붙인다 (`[razor.md](../scripting/razor.md#03) 03절`).
 - 절을 넣거나 빼면 번호와 앵커를 같이 고치고, 그 번호를 가리킨 곳도 저장소 전체에서 찾아 고친다.
   AGENTS.md와 스크립트 주석 (`part 5`)도 절 번호를 쓴다: `git grep -n -e '05.H' -e 'part 5'`.
 
@@ -120,7 +120,7 @@ order: {묶음 안 순서}
   뒤에 날짜가 붙으면 날짜까지 알약이 되고 (`인게임 확인됨 2026-09-28`), 괄호로 감싸면 괄호 없이 보인다. 코드, 링크, 제목 안에서는 바뀌지 않는다.
   문구는 `for-humanity.config.mjs`의 `status`에 있다.
 - `#e80030`처럼 색 값만 든 인라인 코드에는 색 칩이 붙는다.
-- 다른 문서는 상대 경로 `.md`로 건다. `blueprint/` 밖의 파일 (AGENTS.md, `script/`, `util/` 등)은 GitHub 주소로 건다
+- 다른 문서는 상대 경로 `.md`로 건다. `document/` 밖의 파일 (AGENTS.md, `script/`, `util/` 등)은 GitHub 주소로 건다
   (`https://github.com/minu-ha/uoo/blob/master/<경로>`). for-humanity는 문서 폴더 밖을 가리키는 상대 링크를 사이트 주소로 바꾸지 못해 그 링크가 끊긴다.
 
 ## <a id="06"></a>06 한 사실은 한 곳에
@@ -139,7 +139,7 @@ order: {묶음 안 순서}
 - 라벨에 괄호를 넣지 않는다. 렌더러가 괄호에서 글을 잘라 낸다. 긴 라벨은 `<br>`로 줄을 나눈다.
 - 선 라벨은 한 낱말로 쓴다 (`-- 예 -->`). 띄어 쓰면 격자가 빈칸을 선으로 채워 라벨이 둘로 갈린다.
 - 되돌아가는 선과 라벨 달린 합류선은 엉킨다. 그림이 크거나 엉키면 여러 장으로 쪼갠다
-  ([bard-necro-handbook.md](bard-necro-handbook.md#05.A) 05.A절).
+  ([bard-necro.md](../templates/bard-necro.md#05.A) 05.A절).
 - 폭은 140칸 안쪽으로 둔다. 넘치면 `LR`을 `TD`로 바꾸거나 둘로 나눈다.
 
 ::part[확인]

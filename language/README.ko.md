@@ -8,7 +8,7 @@
 
 사냥, 채집, 스킬 훈련, 집 정리. 루프는 공용 블록으로 조립하고, 이유는 문서로 남긴다.
 
-[Outlands](https://uooutlands.com/) · [Razor Scripting](https://wiki.uooutlands.com/Razor_Scripting) · [문서](../blueprint/README.md)
+[Outlands](https://uooutlands.com/) · [Razor Scripting](https://wiki.uooutlands.com/Razor_Scripting) · [문서](../document/README.md)
 
 [![MIT](https://img.shields.io/badge/license-MIT-1111aa?style=flat-square)](../LICENSE)
 ![UO Outlands](https://img.shields.io/badge/UO-Outlands-8b1a1a?style=flat-square)
@@ -16,7 +16,7 @@
 ![Node 22+](https://img.shields.io/badge/node-22%2B-444444?style=flat-square)
 ![Docs](https://img.shields.io/badge/docs-for%20humanity-444444?style=flat-square)
 
-[Quick start](#quick-start) · [스크립트](../script/README.md) · [문서](../blueprint/README.md) · [설정](config.ko.md) · [English](../README.md)
+[Quick start](#quick-start) · [스크립트](../script/README.md) · [문서](../document/README.md) · [설정](config.ko.md) · [English](../README.md)
 
 </div>
 
@@ -55,7 +55,7 @@ pnpm docs:dev    # localhost:4321에서 문서 읽기
 |----------------------------------------|------------------------------------------------------------------------------------------------------------------------------|
 | [`script/`](../script/README.md)       | 스크립트. 하는 일별로 묶음                                                                                                   |
 | `module/`, `recipe/`                   | 한 벌만 둔 루프 블록과, `util/build-scripts.mjs`가 `script/combat/`·`script/gather/`의 모든 루프로 조립하는 레시피           |
-| [`blueprint/`](../blueprint/README.md) | Markdown 설계 문서. [for humanity](https://for-humanity.fyi)로 읽는다: 작업 방식, 규칙, 모듈, Razor, 오버헤드, PvP, Bard Necro, 벌목·PvP, 키 배치, 아이템 ID, 확인할 것. 지도는 [AGENTS.md](../AGENTS.md) |
+| [`document/`](../document/README.md) | Markdown 설계 문서. [for humanity](https://for-humanity.fyi)로 읽는다: 작업 방식, 규칙, 모듈, Razor, 오버헤드, PvP, Bard Necro, 벌목·PvP, 키 배치, 아이템 ID, 확인할 것. 지도는 [AGENTS.md](../AGENTS.md) |
 | [`config/`](config.ko.md)              | Razor · ClassicUO 설정, 사람마다 폴더 하나. 게임을 저장소에 연결하는 방법                                                    |
 | `util/`                                | `setup.sh`는 게임을 저장소에 링크, `build-scripts.mjs`는 루프 조립, `check.sh`는 스크립트 검사, `check-docs.mjs`는 문서 링크 검사, `pvp-sim.mjs`는 필드 결투 모델, `razor-syntax/`는 WebStorm·VS Code용 `.razor` 하이라이팅 |
 | `language/`                            | README 번역본 (이 파일)                                                                                                      |

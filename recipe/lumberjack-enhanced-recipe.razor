@@ -12,7 +12,7 @@
 # Tracking reuses a confirmed, active hunt color. Gathering waits for it, for a carried book and for a due Recall.
 # Every 2 minutes Logs of all wood colors become Boards and go into the loadout looting pouch.
 # For Tracking-triggered Recall, set Hunt Frequency to Always Get Closest in the Tracking window.
-# Design and in-game checks: blueprint/lumberjack-pvp-handbook.md part 8.
+# Design and in-game checks: document/templates/lumberjack-pvp.md part 8.
 # Optional cooldown bars: heal pot, walk, reflect. A missing walk or reflect bar cannot
 # protect a cast from movement or reject an early Reflect retry. Check the active character.
 # Warmode and an existing cursor belong to the player. Gathering and self buffs stand down.
@@ -170,7 +170,7 @@ if not varexist global__my_looting_pouch or not find global__my_looting_pouch ba
 endif
 
 # loot/recycle runs the hotkey named in this list when it finishes or gives up. A list, because
-# a variable cannot hold a word (blueprint/razor.md part 3). It lasts until the client closes.
+# a variable cannot hold a word (document/scripting/razor.md part 3). It lasts until the client closes.
 if not listexists 'list__resume_script'
     createlist 'list__resume_script'
 endif

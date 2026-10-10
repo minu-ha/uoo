@@ -8,7 +8,7 @@
 
 Hunt, gather, train and keep house. Every loop built from shared blocks, every reason written down.
 
-[Outlands](https://uooutlands.com/) · [Razor Scripting](https://wiki.uooutlands.com/Razor_Scripting) · [Docs](blueprint/README.md)
+[Outlands](https://uooutlands.com/) · [Razor Scripting](https://wiki.uooutlands.com/Razor_Scripting) · [Docs](document/README.md)
 
 [![MIT](https://img.shields.io/badge/license-MIT-1111aa?style=flat-square)](LICENSE)
 ![UO Outlands](https://img.shields.io/badge/UO-Outlands-8b1a1a?style=flat-square)
@@ -16,7 +16,7 @@ Hunt, gather, train and keep house. Every loop built from shared blocks, every r
 ![Node 22+](https://img.shields.io/badge/node-22%2B-444444?style=flat-square)
 ![Docs](https://img.shields.io/badge/docs-for%20humanity-444444?style=flat-square)
 
-[Quick start](#quick-start) · [Scripts](script/README.md) · [Docs](blueprint/README.md) · [Config](config/README.md) · [한국어](language/README.ko.md)
+[Quick start](#quick-start) · [Scripts](script/README.md) · [Docs](document/README.md) · [Config](config/README.md) · [한국어](language/README.ko.md)
 
 </div>
 
@@ -55,7 +55,7 @@ Generated loops are never edited by hand: edit `module/` and `recipe/`, then run
 |-------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------|
 | [`script/`](script/README.md) | the scripts, grouped by what they do                                                                                                      |
 | `module/`, `recipe/`          | loop blocks written once, and the recipes `util/build-scripts.mjs` assembles into every loop in `script/combat/` and `script/gather/`      |
-| [`blueprint/`](blueprint/README.md) | design docs in Markdown, read with [for humanity](https://for-humanity.fyi): workflow, conventions, modules, Razor, overheads, PvP, Bard Necro, Lumberjack PvP, hotkeys, item IDs, open questions. [AGENTS.md](AGENTS.md) maps them |
+| [`document/`](document/README.md) | design docs in Markdown, read with [for humanity](https://for-humanity.fyi): workflow, conventions, modules, Razor, overheads, PvP, Bard Necro, Lumberjack PvP, hotkeys, item IDs, open questions. [AGENTS.md](AGENTS.md) maps them |
 | [`config/`](config/README.md) | Razor and ClassicUO settings, one folder per player, and how the game gets linked to this repo                                           |
 | `util/`                       | `setup.sh` links the game to the repo, `build-scripts.mjs` assembles loops, `check.sh` checks scripts, `check-docs.mjs` checks docs links, `pvp-sim.mjs` models field duels, `razor-syntax/` highlights `.razor` in WebStorm and VS Code |
 | `language/`                   | translations of these READMEs                                                                                                             |

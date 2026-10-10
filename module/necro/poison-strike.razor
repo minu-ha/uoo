@@ -51,7 +51,7 @@ timer__poison_strike interval__necro_action
     if timer "timer__poison_strike" >= interval__necro_action and var__procs_done = 1 and var__opener_done = 1 and var__proc_target = var__combat_target and var__symbols_spent = 0 and timer "timer__corpse_skin" < interval__necro_action and not warmode and list 'list__necro_symbols' >= config__symbols_poison_strike and not targetexists and not casting
         if find var__combat_target ground -1 -1 config__target_range as alias__strike_target
             # A bolt from the filler hits 0.5 seconds after its target and brings
-            # its disease then (blueprint/pvp.md part 5). wait__cast covered 0.3 of
+            # its disease then (document/game/pvp.md part 5). wait__cast covered 0.3 of
             # that and this covers the rest, so on a quick connection the strike
             # does not land ahead of the bolt.
             wait wait__short

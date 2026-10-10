@@ -1,8 +1,8 @@
 ---
 name: Hotkeys
 label: 핫키 배치
-group: Reference
-order: 40
+group: Game reference
+order: 20
 ---
 
 모든 캐릭터가 **같은 자리에 같은 역할**을 둔다. 배치는 두 유형이고 Razor 프로필 하나가 유형 하나다.
@@ -27,7 +27,7 @@ order: 40
 | [06](#06) | 주문 데미지는 얼마인가 |
 | [07](#07) | 확인하지 못한 것 |
 
-이 문서에 걸린 질문은 [open-items.md](open-items.md)에 모았다.
+이 문서에 걸린 질문은 [open-items.md](../questions/open-items.md)에 모았다.
 
 ::part[배치]
 
@@ -56,7 +56,7 @@ Mac에서는 Wine이 `Cmd → Ctrl`, `Option → Alt`로 넘긴다 (`prefix/user
 | Ctrl | **Greater Heal** (커서 → 펫·동료) | 힐 포션 | 큐어 포션 | 리프 포션 | 힘 포션 | 민 포션 | 레지 포션 | — |
 | Alt | — | **Vengeful Spirit** | Fire El → Lich | Water El → Rag Witch | Earth El → Mummy | Daemon → Vampire | Summon Creature | dress |
 
-Alt 줄의 → 뒤는 Vengeful Spirit (`Alt+1`)을 켜고 부르면 나오는 언데드다 ([bard-necro-handbook.md](bard-necro-handbook.md#03.C) 03.C절).
+Alt 줄의 → 뒤는 Vengeful Spirit (`Alt+1`)을 켜고 부르면 나오는 언데드다 ([bard-necro.md](../templates/bard-necro.md#03.C) 03.C절).
 Alt 줄은 템플릿이 쓰는 소환만 건다 (03절). `Alt+0` dress는 소환이 아니지만 자주 누르지 않는 자리라 Alt 줄 끝에 두었다.
 비어 있는 `7`\~`9`는 표에서 뺐다.
 
@@ -102,7 +102,7 @@ Alt 줄은 템플릿이 쓰는 소환만 건다 (03절). `Alt+0` dress는 소환
 - summoner는 Follow를 `X`, Guard를 `C`에 둔다. `C`는 가장 자주 누르는 `V` 바로 옆이라 잘못 누르기 쉽다.
   Guard는 잘못 눌러도 펫이 싸움을 이어 가지만 Follow를 누르면 펫이 싸움을 멈춘다.
 - 햄스트링·디스암은 평소 켜 둔다. basic의 `Shift+Z` / `Shift+X`는 상황에 따라 끄고 켜는 자리다 (예정, 07절).
-  켜고 끄면 프로필 오버헤드 `[ hams mode, on/off ]` `[ disarm mode, on/off ]`가 뜬다 ([overheads.md](overheads.md#07) 07절).
+  켜고 끄면 프로필 오버헤드 `[ hams mode, on/off ]` `[ disarm mode, on/off ]`가 뜬다 ([overheads.md](../scripting/overheads.md#07) 07절).
 - 무기 스왑 (`hotkey/weapon-*`)은 스크립트라 누르면 돌던 전투 루프가 멈춘다. 이 줄에 넣지 않는다.
 
 ### <a id="01.F"></a>01.F 마우스·기타
@@ -160,7 +160,7 @@ Ctrl은 Cmd로, Alt는 Option으로 누르므로 (01절) macOS가 먼저 가져�
 2026-10-05 템플릿별 PvP 스크립트를 삭제하고 `combat/pvp` 하나로 통합했다.
 저장소의 default·summoner 프로필 F4는 `Play Script: combat\pvp`에 연결돼 있다.
 진단 파일은 `debug\...` 경로로 연결한다. 프로필 원본을 편집할 때는 게임을 먼저 종료한다
-([workflow.md](workflow.md#04.C) 04.C절).
+([workflow.md](../working/workflow.md#04.C) 04.C절).
 
 2026-10-05 `xuezhonglian`을 `nomeehui`로 변경했다.
 ClassicUO 설정 정본은 `config/indian/classicuo/nomeehui/`이며, 게임의 새 이름 폴더를 여기에 연결했다.
@@ -171,7 +171,7 @@ default의 현재 연결은 `F1=skinning-enhanced`, `F4=pvp`, `T=Telekinesis`다
 
 | 상황 | 키 | 메모 |
 | --- | --- | --- |
-| 소환 | `Alt+1` → `Alt+2` → `Alt+2`, 솔플은 `Alt+1` → `Alt+3` → `Alt+2` | Vengeful Spirit을 켜고 듀오는 Lich 둘, 솔플은 Rag Witch + Lich ([bard-necro-handbook.md](bard-necro-handbook.md#04.B) 04.B절) |
+| 소환 | `Alt+1` → `Alt+2` → `Alt+2`, 솔플은 `Alt+1` → `Alt+3` → `Alt+2` | Vengeful Spirit을 켜고 듀오는 Lich 둘, 솔플은 Rag Witch + Lich ([bard-necro.md](../templates/bard-necro.md#04.B) 04.B절) |
 | PvE 공격 | `Z` → `V` | summoner는 펫이, basic은 내가 가장 가까운 몹을 친다 (01.E절) |
 | PvE 주문 | `V` (summoner)로 라타 → `1 E` `2 E` → `4 E` `5 E` | `1` `2`는 시그니처 칸이다 (03절) |
 | PvP 시작 | `F4` | 전투 루프가 멈추고 PvP 루프가 돈다. 펫 공격은 루프가 15초마다 `all kill`로 한다. `F1`로 돌아온다 |

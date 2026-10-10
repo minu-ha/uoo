@@ -1,15 +1,15 @@
 ---
 name: Overheads
 label: 머리 위 메시지와 쿨다운 바
-group: Reference
-order: 30
+group: Scripting
+order: 40
 ---
 
 게임 화면에 뜨는 알림 전부의 정본이다. 어느 경로로 띄우는가, 어떤 단어와 색을 쓰는가, 지금 무엇이 걸려 있는가.
 같은 사건은 쿨다운 바 하나와 오버헤드 한 줄이 짝이고, 둘은 **같은 단어**를 쓴다. 바가 뜨면 어느 오버헤드의 짝인지 바로 안다.
 스크립트 모양은 [conventions.md](conventions.md), 명령 문법은 [razor.md](razor.md)에 있다.
 
-- 설정 파일은 게임을 끈 상태에서만 고친다 ([workflow.md](workflow.md#04.C) 04.C절).
+- 설정 파일은 게임을 끈 상태에서만 고친다 ([workflow.md](../working/workflow.md#04.C) 04.C절).
 - 외부 출처 스크립트 (`loot/bank-pouch` `train/barding` `train/carto` `train/magery` `train/steal` `archive/mining`
   `archive/lumberjack` `shelf/*`)는 이 형식을 따르지 않고 그대로 둔다.
 
@@ -29,7 +29,7 @@ order: 30
 | [10](#10) | 확인하지 못한 것 |
 | [11](#11) | 출처 |
 
-이 문서에 걸린 질문은 [open-items.md](open-items.md)에 모았다.
+이 문서에 걸린 질문은 [open-items.md](../questions/open-items.md)에 모았다.
 
 ::part[규칙]
 
@@ -204,7 +204,7 @@ flowchart TD
   `Criminal`과 `PvP`는 **클라이언트가 서버 타이머로 직접 채우는 특수 바**라 트리거를 달지 않는다 (Bapeths XML이 근거이고 인게임 확인은 10절).
   Heat of Battle은 `pvp` 바가 그 자리다.
 - 항목 순서는 **바가 자주 뜨는 순서**다. 바드 바 다섯 개가 맨 앞이고 그 뒤가 매저리 프록 바다. 순서와 트리거 문장의 근거는
-  [bard-necro-handbook.md](bard-necro-handbook.md#02.I) 02.I절.
+  [bard-necro.md](../templates/bard-necro.md#02.I) 02.I절.
 
 ### <a id="06.B"></a>06.B cooldown은 서버 값이 아니다
 
@@ -213,7 +213,7 @@ flowchart TD
 
 그래도 스크립트는 자체 `timer__` 대신 이것을 읽는다. 게임이 예고 없이 쿨을 초기화해도
 (Lyric Aspect의 "Your barding skill cooldowns reset.") 리셋 문장에 트리거를 걸어 두면 바가 같이 0이 되기 때문이다.
-예전에 `music`에 송 트리거가 섞여 서로 덮어쓰던 사고와 그 수정은 [bard-necro-handbook.md](bard-necro-handbook.md#02.I) 02.I절.
+예전에 `music`에 송 트리거가 섞여 서로 덮어쓰던 사고와 그 수정은 [bard-necro.md](../templates/bard-necro.md#02.I) 02.I절.
 
 ### <a id="06.C"></a>06.C 바 목록
 
@@ -239,13 +239,13 @@ flowchart TD
 
 | 바 | 메모 |
 | --- | --- |
-| `magic arrow` … `lightning`, `chain` `meteor` | 매저리 프록 15초. 발동 문장에 시작하고 "cast a wizardry … spell again"에 리셋한다. 앞의 넷은 [bard-necro-handbook.md](bard-necro-handbook.md#03.A) 03.A절 |
+| `magic arrow` … `lightning`, `chain` `meteor` | 매저리 프록 15초. 발동 문장에 시작하고 "cast a wizardry … spell again"에 리셋한다. 앞의 넷은 [bard-necro.md](../templates/bard-necro.md#03.A) 03.A절 |
 | `pain spike` `necrosis` `noble sacrifice` `holy light` `poison strike` `curse` `mass curse` `spyglass` `divine fury` `consecrate weapon` `spam` `crew heal` `quest` | 트리거가 없고 세우는 스크립트도 없다 |
 | `corpse skin` `ability` | 트리거 없음. 스크립트가 직접 세운다 (archive의 backstab-mugging은 `cooldown "corpse skin" 1000`, bard-mace와 bard-throwing은 `cooldown "ability" cooldown__ability`) |
 | `drain` | 트리거는 머리 위 메시지 "MV ON" 하나다. 지금 이 메시지를 띄우는 스크립트는 없다 |
-| `teleki, target` `teleki, me` | 자기 TK뿐 아니라 적 TK 수신에도 둘 다 켜질 수 있다는 사용자 보고가 있다. 서로 독립적인 성공 증거가 아니므로 target 바만으로 내 공격 TK 적용을 확정하지 않는다 ([pvp.md](pvp.md#04.D) 04.D절) |
-| `reflect` | 설정상 "Magic reflect removed."면 30초 (몹), "Magic reflect removed (PvP)"면 60초 (플레이어) 바를 세운다. 실제 서버 제한과 시작 시점의 검증 범위는 [pvp.md](pvp.md#05.A) 05.A절을 따른다. 자기 주문으로 없애면 "You remove your magic reflect spell."이 한 줄 더 오지만 트리거가 아니다 |
-| `walk` | `Walk` 타입, 0.3초, 트리거 없음. 스크립트는 걷는 중이라는 신호로 읽고 시전을 미룬다 ([bard-necro-handbook.md](bard-necro-handbook.md#05.A) 05.A절의 행동 창 가드) |
+| `teleki, target` `teleki, me` | 자기 TK뿐 아니라 적 TK 수신에도 둘 다 켜질 수 있다는 사용자 보고가 있다. 서로 독립적인 성공 증거가 아니므로 target 바만으로 내 공격 TK 적용을 확정하지 않는다 ([pvp.md](../game/pvp.md#04.D) 04.D절) |
+| `reflect` | 설정상 "Magic reflect removed."면 30초 (몹), "Magic reflect removed (PvP)"면 60초 (플레이어) 바를 세운다. 실제 서버 제한과 시작 시점의 검증 범위는 [pvp.md](../game/pvp.md#05.A) 05.A절을 따른다. 자기 주문으로 없애면 "You remove your magic reflect spell."이 한 줄 더 오지만 트리거가 아니다 |
+| `walk` | `Walk` 타입, 0.3초, 트리거 없음. 스크립트는 걷는 중이라는 신호로 읽고 시전을 미룬다 ([bard-necro.md](../templates/bard-necro.md#05.A) 05.A절의 행동 창 가드) |
 | `pvp` `crim` | 특수 바 타입. 트리거 없음 (06.A) |
 | `bomb, me` | 5초. "An explosion potion has stuck to you"로 시작한다 |
 | `siphon` | 3600초. "Spell siphon active."로 시작하고 만료 문장에 리셋한다 |
@@ -417,9 +417,9 @@ Razor 프로필 `summoner.xml`과 `default.xml`의 `<overheadmessages>`다. 정�
 | generates mana | `[ mana, refund ] (290)` |   |
 | progress on the lock | `[ lock, {8} ] (290)` |   |
 | clearing it of traps | `[ trap, {10} ] (290)` |   |
-| thrown at that player within 30 | `[ teleki, target ] (244)` | 자기·수신 TK와 혼동 가능. 공격 대상 성공 인증이 아님 ([pvp.md](pvp.md#04.D) 04.D절) |
+| thrown at that player within 30 | `[ teleki, target ] (244)` | 자기·수신 TK와 혼동 가능. 공격 대상 성공 인증이 아님 ([pvp.md](../game/pvp.md#04.D) 04.D절) |
 | has applied telekinesis to you | `[ teleki, me ] (234)` | 원문은 "nomeehej has applied telekinesis to you." 건 사람 이름은 저널에 남는다 |
-| An explosion potion has stuck to you | `[ bomb, me ] (234)` | 5초 표시의 바 `bomb, me`와 짝. 실제 점화부터의 퓨즈 측정과는 구분 ([open-items.md](open-items.md#08.C) 08.C절) |
+| An explosion potion has stuck to you | `[ bomb, me ] (234)` | 5초 표시의 바 `bomb, me`와 짝. 실제 점화부터의 퓨즈 측정과는 구분 ([open-items.md](../questions/open-items.md#08.C) 08.C절) |
 | Your explosion potion sticks to your target | `[ bomb, target ] (244)` |   |
 | free hand to drink | `[ hands, full ] (254)` |   |
 | You drink a healing potion | `[ heal pot, on ] (290)` | 스크립트의 같은 줄은 뺐다 |
@@ -484,7 +484,7 @@ Razor 프로필 `summoner.xml`과 `default.xml`의 `<overheadmessages>`다. 정�
 | You mana drain your target. / You curse your target. | `[ drain, target ]` / `[ curse, target ] (244)` | 스크립트의 `[ drain ]` `[ curse ]` 시전 알림은 뺐다 |
 | Your reactive armor spell has been nullified. | `[ reactive, off ] (254)` | 25를 흡수하고 빠진다. 다음에 서 있을 때 다시 건다 |
 | You generate mana for your spell. | `[ mana, refund ] (290)` | 기존 `generates mana`는 이 문장을 못 잡았다 |
-| recovered from energy bolt kill | `[ eb, refund ] (290)` | 회수량은 티어마다 달라 숫자는 띄우지 않는다 ([bard-necro-handbook.md](bard-necro-handbook.md#03.A) 03.A절) |
+| recovered from energy bolt kill | `[ eb, refund ] (290)` | 회수량은 티어마다 달라 숫자는 띄우지 않는다 ([bard-necro.md](../templates/bard-necro.md#03.A) 03.A절) |
 | That is too far away. | `[ range, out ] (254)` |   |
 
 ## <a id="08"></a>08 스크립트 오버헤드
