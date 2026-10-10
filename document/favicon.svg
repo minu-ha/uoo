@@ -1,48 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
-  <title>uoo</title>
-  <defs>
-    <radialGradient id="tile" cx="50%" cy="38%" r="70%">
-      <stop offset="0" stop-color="#2c2f36"/>
-      <stop offset="1" stop-color="#0b0c0f"/>
-    </radialGradient>
-    <linearGradient id="silver" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#ffffff"/>
-      <stop offset=".35" stop-color="#c7ccd4"/>
-      <stop offset=".7" stop-color="#7b838e"/>
-      <stop offset="1" stop-color="#dfe3e8"/>
-    </linearGradient>
-    <linearGradient id="silver-side" x1="0" y1="0" x2="1" y2="0">
-      <stop offset="0" stop-color="#8d949e"/>
-      <stop offset=".5" stop-color="#f4f6f8"/>
-      <stop offset="1" stop-color="#8d949e"/>
-    </linearGradient>
-    <linearGradient id="gold" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#fff2b8"/>
-      <stop offset=".45" stop-color="#e2b440"/>
-      <stop offset="1" stop-color="#8a6214"/>
-    </linearGradient>
-  </defs>
-
-  <rect width="64" height="64" rx="14" fill="url(#tile)"/>
-
-  <g transform="translate(32 33) scale(.8) translate(-32 -33)">
-  <!-- Horns: one crescent, its tips cut at a slant like the client logo -->
-  <path d="M7.8 3.6 A24.6 24.6 0 0 0 56.2 3.6 L47.2 6.4 A15.8 15.8 0 0 1 16.8 6.4 Z"
-        fill="url(#silver-side)" stroke="#16181c" stroke-width=".7" stroke-linejoin="round"/>
-  <path d="M12.4 6.6 A20 20 0 0 0 51.6 6.6" fill="none" stroke="#2b2f36" stroke-opacity=".35" stroke-width=".7" stroke-dasharray="2.2 1.4"/>
-
-  <!-- Ring: a silver band, an engraved line along it, and a gold inner ring -->
-  <circle cx="32" cy="41" r="13" fill="none" stroke="#16181c" stroke-width="6.4"/>
-  <circle cx="32" cy="41" r="13" fill="none" stroke="url(#silver)" stroke-width="5"/>
-  <circle cx="32" cy="41" r="13" fill="none" stroke="#2b2f36" stroke-opacity=".35" stroke-width=".7" stroke-dasharray="2.2 1.4"/>
-  <circle cx="32" cy="41" r="10" fill="none" stroke="url(#gold)" stroke-width="1.6"/>
-
-  <!-- Gold points: the joint under the horns, and the left, right and bottom spikes -->
-  <g fill="url(#gold)" stroke="#3d2b06" stroke-width=".6" stroke-linejoin="round">
-    <path d="M32 20.6 L35.2 25 L32 29.4 L28.8 25 Z"/>
-    <path d="M9.5 41 L18.6 38.4 L18.6 43.6 Z"/>
-    <path d="M54.5 41 L45.4 38.4 L45.4 43.6 Z"/>
-    <path d="M32 62 L29.4 54.4 L34.6 54.4 Z"/>
-  </g>
-  </g>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-2 0 23 23" width="64" height="64" shape-rendering="crispEdges">
+    <title>uoo</title>
+    <!-- The Ultima Online glyph as pixels: silver horns and ring, gold joint, inner ring and spikes -->
+    <path d="M0 0h2v1h-2ZM17 0h2v1h-2ZM0 1h3v1h-3ZM16 1h3v1h-3ZM1 2h3v1h-3ZM15 2h3v1h-3ZM1 3h4v1h-4ZM14 3h4v1h-4ZM2 4h4v1h-4ZM13 4h4v1h-4ZM3 5h5v1h-5ZM11 5h5v1h-5ZM4 6h11v1h-11ZM6 7h3v1h-3ZM10 7h3v1h-3ZM7 10h5v1h-5ZM5 11h9v1h-9ZM5 12h3v1h-3ZM11 12h3v1h-3ZM4 13h3v1h-3ZM12 13h3v1h-3ZM4 14h2v1h-2ZM13 14h2v1h-2ZM4 15h2v1h-2ZM13 15h2v1h-2ZM4 16h2v1h-2ZM13 16h2v1h-2ZM4 17h3v1h-3ZM12 17h3v1h-3ZM5 18h3v1h-3ZM11 18h3v1h-3ZM5 19h9v1h-9ZM7 20h5v1h-5Z" fill="#b9c1cb"/>
+    <path d="M9 7h1v1h-1ZM8 8h3v1h-3ZM9 9h1v1h-1ZM8 12h3v1h-3ZM7 13h1v1h-1ZM11 13h1v1h-1ZM2 14h2v1h-2ZM6 14h1v1h-1ZM12 14h1v1h-1ZM15 14h2v1h-2ZM0 15h4v1h-4ZM6 15h1v1h-1ZM12 15h1v1h-1ZM15 15h4v1h-4ZM2 16h2v1h-2ZM6 16h1v1h-1ZM12 16h1v1h-1ZM15 16h2v1h-2ZM7 17h1v1h-1ZM11 17h1v1h-1ZM8 18h3v1h-3ZM8 21h3v1h-3ZM9 22h1v1h-1Z" fill="#e0a52b"/>
 </svg>
