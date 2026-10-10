@@ -356,12 +356,16 @@ TIMER는 timer마다 <code>createtimer</code>와 첫 <code>settimer</code>를 �
 <tbody>
 <tr><td><code># @ config</code></td><td><code>chatty</code>, <code>sysmsg</code>: 출력 스위치</td><td></td></tr>
 <tr><td></td><td><code>clear_at_start</code>: Play 때 시작 4줄 (<a href="conventions.html#02.D">conventions.html</a> 02.D절)</td><td>pvp 0. 플레이어가 들고 있던 커서와 시전을 지키려고</td></tr>
-<tr><td></td><td><code>use_magery</code>, <code>use_potions</code>: 회복과 버프 블록 여럿이 같이 보는 스위치</td><td></td></tr>
+<tr><td></td><td><code>use_magery</code>, <code>use_potions</code>: 회복과 버프 블록 여럿이 같이 보는 스위치</td><td>dexxer-basic은 마법 0</td></tr>
 <tr><td></td><td><code>walk_guard</code>: 1이면 우리 시전이 <code>walk</code> 바가 도는 동안 기다린다</td><td>pvp 0. 싸움 중에는 기다릴 더 나은 때가 없다</td></tr>
-<tr><td></td><td><code>warmode_is_manual</code>: 1이면 워모드가 플레이어의 조작 창이라 우리 시전과 음식이 선다. 포션과 붕대는 나간다</td><td>lumberjack-enhanced 1</td></tr>
-<tr><td><code># @ wait</code>, <code># @ timer</code></td><td><code>wait__poll</code>, <code>wait__short</code>, 경고 간격 <code>interval__message</code>와 <code>timer__message</code></td><td></td></tr>
+<tr><td></td><td><code>warmode_is_manual</code>: 1이면 워모드가 플레이어의 조작 창이라 우리 시전과 음식이 선다. 포션과 붕대는 나간다.
+<code>recover_in_warmode</code>: 그때 회복 시전도 설지</td><td>lumberjack-enhanced 1, bard-necro-enhanced 1과 회복은 계속 (1)</td></tr>
+<tr><td></td><td><code>use_bandages</code>, <code>heal_skill_min</code>: 붕대를 쓸지. 못 쓰면 <code>recovery/light-heal</code>이 대신한다</td><td>dexxer-basic·skinning-enhanced는 Healing 10 초과에서만, bard-necro-enhanced는 붕대 없음</td></tr>
+<tr><td></td><td><code>settle_first</code>: 1이면 패스 첫머리에서 아이템 큐와 시전이 끝나기를 기다린다</td><td>bard-necro-enhanced 1</td></tr>
+<tr><td><code># @ wait</code>, <code># @ timer</code></td><td><code>wait__poll</code>, <code>wait__short</code>, 경고 간격 <code>interval__message</code>와 <code>timer__message</code>,
+레시피 그룹 <code># @ every</code>가 쓰는 <code>interval__housekeeping</code></td><td></td></tr>
 <tr><td><code># @ state</code></td><td>블록끼리의 신호 세 개 (아래 표)</td><td>pvp는 <code>var__fighting</code>을 1로</td></tr>
-<tr><td><code># @ setup</code>, <code># @ loop</code>, <code># @ end</code></td><td>구조적 PvP 정지 (루프 앞과 패스 첫머리), 시작 4줄, 패스 끝 <code>wait wait__poll</code></td><td></td></tr>
+<tr><td><code># @ setup</code>, <code># @ loop</code>, <code># @ end</code></td><td>구조적 PvP 정지 (루프 앞과 패스 첫머리), 시작 4줄, <code>settle_first</code>, 패스 끝 <code>wait wait__poll</code></td><td></td></tr>
 </tbody>
 </table>
 <p><strong>신호는 쓰는 블록이 없어도 읽는 블록이 돌아야 하는 값이다.</strong> 그래서 base가 중립값으로 선언하고, 쓰는 블록이 있는 루프에서만 값이 바뀐다.
@@ -375,7 +379,8 @@ TIMER는 timer마다 <code>createtimer</code>와 첫 <code>settimer</code>를 �
 </tr>
 </thead>
 <tbody>
-<tr><td><code>var__fighting</code></td><td><code>fight/target</code> (기억한 적이 있으면 1), pvp 레시피 (늘 1)</td><td><code>buff/potions</code></td></tr>
+<tr><td><code>var__fighting</code></td><td><code>fight/target</code> (기억한 적이 <code>target_range</code> 안에 있으면 1), pvp 레시피 (늘 1)</td>
+<td><code>buff/potions</code>, <code>buff/spells</code>의 Bless·Arch Protection, <code>buff/mushroom</code>의 Create Food, <code>magery/flamestrike</code>, bard-necro-enhanced의 교전 그룹</td></tr>
 <tr><td><code>var__hold_casts</code></td><td><code>escape/recall</code> (리콜을 정하면 1)</td><td><code>buff/spells</code></td></tr>
 <tr><td><code>var__hold_gathering</code></td><td><code>escape/recall</code> (리콜을 정했거나, 필요한 책이 없거나, 감지 리콜인데 Tracking이 사냥 중이 아니면 1)</td>
 <td><code>gather/lumberjacking</code>, <code>pack/lumber</code></td></tr>
@@ -383,13 +388,17 @@ TIMER는 timer마다 <code>createtimer</code>와 첫 <code>settimer</code>를 �
 </table>
 <p>신호가 아닌 이름은 주인 모듈이 있어야 쓸 수 있다. 그래서 아래 블록은 주인 모듈과 함께 들어간다. 조립기가 코드에서 읽어 확인하는 관계다.</p>
 <ul>
-<li><code>recovery/reagents</code>의 <code>var__regs_*</code>: cure, heal, light-heal, <code>buff/spells</code>.</li>
+<li><code>magery/reagents</code>의 <code>var__regs_*</code>, 서클별 마나, <code>interrupt_to_heal</code>, <code>wait__cast</code>: 회복 시전, <code>buff/spells</code>, <code>buff/mushroom</code>, 공격 주문 (<code>magery/*</code>).</li>
 <li><code>recovery/heal</code>의 <code>config__heal_hits</code>: 다쳤을 때 쉬는 블록 (<code>gather/*</code>, <code>pack/leather</code>, <code>escape/tracking</code>).
-<code>recovery/light-heal</code>의 <code>light_hits</code>: <code>pack/lumber</code>.</li>
-<li><code>recovery/bandage</code>의 <code>use_bandages</code>, <code>heal_skill_min</code>: <code>recovery/light-heal</code>.</li>
-<li><code>fight/target</code>의 <code>var__combat_target</code>: <code>fight/parry-codex</code>, <code>fight/weapon-ability</code>, <code>pack/leather</code>.
+<code>emergency_hits</code>: 시전 중에 끊는 공격 주문 (<code>magery/*</code>). <code>recovery/light-heal</code>의 <code>light_hits</code>: <code>pack/lumber</code>.</li>
+<li><code>fight/target</code>의 <code>var__combat_target</code>과 사거리: <code>fight/parry-codex</code>, <code>fight/weapon-ability</code>, <code>pack/leather</code>, 바드·네크로·공격 주문 블록.
+<code>var__keep_lasttarget</code>: 자기나 백팩을 찍기 전에 lasttarget을 한 번 더 읽는 블록 (<code>bard/song</code>, <code>magery/spell-siphon</code>, <code>magery/flamestrike</code>, <code>necro/vampiric-embrace</code>).
 <code>gather/skinning</code>은 칼 커서 중에 고른 적을 여기에 적는다.</li>
 <li><code>escape/tracking</code>의 <code>var__tracking_*</code>, <code>tracking_color</code>: <code>escape/recall</code>.</li>
+<li><code>bard/instrument</code>의 <code>var__my_instrument</code>, <code>var__instrument_ok</code>, <code>wait__bard_target</code>: <code>bard/disco</code>, <code>bard/peace</code>, <code>bard/song</code>.</li>
+<li><code>necro/symbols</code>의 <code>list__necro_symbols</code>, <code>var__symbols_spent</code>, <code>interval__necro_action</code>, <code>wait__message</code>, <code>wait__ability_target</code>: 네크로 능력 블록.</li>
+<li>공격 주문의 순서 플래그: <code>magery/opener</code>의 <code>var__opener_done</code>, <code>magery/proc-core</code>의 <code>var__procs_done</code>·<code>var__proc_target</code> → <code>magery/filler</code>, <code>necro/poison-strike</code>.
+<code>buff/spells</code>의 <code>var__buff_cast</code> → <code>magery/spell-siphon</code>.</li>
 </ul>
 
 <h2 id="07" data-part="쓰는 법">07 작업 순서</h2>
