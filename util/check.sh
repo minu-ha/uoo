@@ -13,10 +13,10 @@
 # timer__ names are skipped: they live inside quoted strings, where timerexists guards them.
 #
 #   util/check.sh                    # every file under script/, except script/archive/,
-#                                    # then util/build-scripts.py --check on the generated loops
+#                                    # then node util/build-scripts.mjs --check on the generated loops
 #   util/check.sh path/a.razor ...   # just these
 #
-# Exit 1 if anything is wrong. Needs only bash and awk.
+# Exit 1 if anything is wrong. Needs bash and awk, and Node for the loop check.
 set -uo pipefail
 REPO="$(cd "$(dirname "$0")/.." && pwd)"
 checked_all=0
@@ -111,6 +111,6 @@ for f in "$@"; do
 done
 [ $status -eq 0 ] && echo "ok: $# files"
 if [ "${checked_all:-0}" = 1 ]; then
-	python3 "$REPO/util/build-scripts.py" --check || status=1
+	node "$REPO/util/build-scripts.mjs" --check || status=1
 fi
 exit $status
