@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="../document/favicon.svg" width="96" height="96" alt="울티마 온라인 문양">
+<img src="../document/favicon.svg" width="96" height="96" alt="UO Outlands 로고를 본뜬 불타는 O">
 
 # uoo
 

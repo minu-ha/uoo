@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="document/favicon.svg" width="96" height="96" alt="The Ultima Online glyph">
+<img src="document/favicon.svg" width="96" height="96" alt="A flaming O, after the UO Outlands logo">
 
 # uoo
 
