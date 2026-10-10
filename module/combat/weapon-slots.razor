@@ -1,0 +1,96 @@
+# Four weapon slots, each on its own swing bar. Arms the slot whose swing is ready.
+#@ needs core/message
+#@ config
+@setvar! config__use_weapon 1
+# Weapon slots. Slot N reads the "swing N" bar. Graphic 0 turns the slot off.
+# A slot whose swing is ready wins, 4 down to 1. With none ready and both hands empty, the
+# lowest enabled slot re-arms.
+@setvar! config__weapon_1_graphic 31128
+@setvar! config__weapon_2_graphic 0
+@setvar! config__weapon_3_graphic 0
+@setvar! config__weapon_4_graphic 31190
+#@ state
+# The weapon this script armed last, kept across Plays. Only own items. See WEAPON.
+if not varexist var__weapon_armed_serial
+    @setvar! var__weapon_armed_serial 0
+endif
+if not varexist var__weapon_armed_graphic
+    @setvar! var__weapon_armed_graphic 0
+endif
+
+# Scratch values, set and read inside WEAPON only.
+#   weapon_want  slot graphic wanted on this pass, 0 for none
+#   weapon_held  1 when the armed serial is in a hand
+@setvar! var__weapon_want 0
+@setvar! var__weapon_held 0
+#@ loop
+    # ################################################################################
+    # # WEAPON
+    # ################################################################################
+    # Wanted slot: the highest enabled slot whose swing bar is ready, 4 down to 1. With none
+    # ready and both hands empty, the lowest enabled slot. A missing bar reads ready.
+    # The armed serial is searched only when the wanted slot changes, so a steady pass costs two
+    # hand reads. A weapon already in hand is adopted without a request. Arming during a cast
+    # would interrupt it (wiki Combat Overview), so this waits for a free window.
+    # The equip request is not proof of a swing.
+    if config__use_weapon = 1 and not paralyzed and not hidden and not queued and not casting and not targetexists
+        @setvar! var__weapon_want 0
+        if config__weapon_4_graphic != 0 and cooldown "swing 4" = 0
+            @setvar! var__weapon_want config__weapon_4_graphic
+        elseif config__weapon_3_graphic != 0 and cooldown "swing 3" = 0
+            @setvar! var__weapon_want config__weapon_3_graphic
+        elseif config__weapon_2_graphic != 0 and cooldown "swing 2" = 0
+            @setvar! var__weapon_want config__weapon_2_graphic
+        elseif config__weapon_1_graphic != 0 and cooldown "swing 1" = 0
+            @setvar! var__weapon_want config__weapon_1_graphic
+        elseif lhandempty and rhandempty
+            if config__weapon_1_graphic != 0
+                @setvar! var__weapon_want config__weapon_1_graphic
+            elseif config__weapon_2_graphic != 0
+                @setvar! var__weapon_want config__weapon_2_graphic
+            elseif config__weapon_3_graphic != 0
+                @setvar! var__weapon_want config__weapon_3_graphic
+            elseif config__weapon_4_graphic != 0
+                @setvar! var__weapon_want config__weapon_4_graphic
+            endif
+        endif
+
+        if var__weapon_want != 0
+            if var__weapon_armed_graphic != var__weapon_want
+                @setvar! var__weapon_armed_graphic var__weapon_want
+                @setvar! var__weapon_armed_serial 0
+                if findtype var__weapon_want self as alias__own_weapon
+                    @setvar! var__weapon_armed_serial alias__own_weapon
+                endif
+            endif
+
+            @setvar! var__weapon_held 0
+            if findlayer self lefthand as alias__held_left
+                if alias__held_left = var__weapon_armed_serial
+                    @setvar! var__weapon_held 1
+                endif
+            endif
+            if findlayer self righthand as alias__held_right
+                if alias__held_right = var__weapon_armed_serial
+                    @setvar! var__weapon_held 1
+                endif
+            endif
+
+            if var__weapon_held = 0
+                if find var__weapon_armed_serial backpack
+                    dress var__weapon_armed_serial
+                    if config__sysmsg = 1
+                        sysmsg "PvP weapon: equip requested, graphic={{var__weapon_want}}, serial={{var__weapon_armed_serial}}." 88
+                    endif
+                    wait wait__short
+                else
+                    # Gone from hand and pack: search again next pass.
+                    @setvar! var__weapon_armed_graphic 0
+                    if lhandempty and rhandempty and timer "timer__message" >= cooldown__message
+                        overhead "[ weapon, out ]" 254
+                        settimer "timer__message" 0
+                    endif
+                endif
+            endif
+        endif
+    endif

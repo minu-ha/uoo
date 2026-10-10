@@ -2,13 +2,16 @@
 # Needs: a Two-Handed Axe, a skinning knife, codices of swords and parrying, bandages, potions and reagents.
 # Optional: the loadout looting pouch.
 # Template: Forensic Evaluation 120, Swordsmanship 100, Tactics 100, Magery, Resisting Spells, Parrying, Anatomy, Healing 80.
-# Hotkeys: Bandage Self, > Smart Heal/Cure Self, > Greater Heal/Cure Self, > Interrupt, Cancel Current Target.
-# Optional cooldown bars: walk, reflect. A missing bar reads 0 and cannot hold a cast back.
+# Optional cooldown bars: heal pot, walk, reflect. A missing bar reads 0 and cannot hold a cast back.
 # Melee stays manual (Z then V). The script never attacks and never picks a target.
 # Magery is for recovery and PK readiness: Smart Heal/Cure, Greater Heal, Reactive Armor and Magic Reflection.
 # Warmode is toggled by hand (Tab). Recovery, buffs and skinning ignore it. Meet a PK with combat/pvp (F4).
 # The knife is used from the backpack, so the axe stays equipped. Leather is looted by hand from the opened corpse.
 # Design notes and in-game checks: blueprint/open-items.html part 11.
+# Hotkeys: Drink Cure, > Smart Heal/Cure Self, Drink Heal, > Greater Heal/Cure Self,
+#          Cancel Current Target, Bandage Self, Drink Refresh, Drink Strength, Drink Agility,
+#          Drink Magic Resist, > Interrupt.
+# Generated from recipe/skinning-enhanced.recipe by util/build-scripts.py. Edit module/ and recipe/, not this file.
 
 clearall
 clearsysmsg
@@ -25,11 +28,43 @@ endif
 # ####################################################################################
 # Optional script overheads. Essential warnings remain visible.
 @setvar! config__chatty 1
-# Journal diagnostics: startup, combat target changes, carve requests and results, carve mode,
-# codex switches, heal and buff casts, axe equip, gold drops and leather packing.
+# Journal diagnostics. Each block that writes one says so in its own comments.
 @setvar! config__sysmsg 1
-@setvar! config__use_potion 1
+
+# Independent features. No option overrides another.
 @setvar! config__use_magery 1
+@setvar! config__use_potions 1
+@setvar! config__use_bandages 1
+# 1 makes our own casts wait while the walk bar runs, so a step does not break them.
+# 0 casts while walking, for a fight where there is no better moment to wait for.
+@setvar! config__walk_guard 1
+# 1 when warmode is the player's manual control window: our own casts stand down while it is on.
+@setvar! config__warmode_is_manual 0
+
+# Minimum current mana for the Cure agent.
+@setvar! config__mana_cure 6
+
+# Missing hit points, not percent.
+#   heal_hits       heal potion
+#   emergency_hits  Greater Heal when no heal potion can go out. Not below heal_hits
+@setvar! config__heal_hits 35
+@setvar! config__emergency_hits 45
+# Minimum current mana for Greater Heal. It keeps no reserve: raise it to 31 to always leave
+# 20 mana for an attack or Teleport.
+@setvar! config__mana_greater_heal 11
+
+# Healing must be above this to bandage. 0 means any Healing at all.
+@setvar! config__heal_skill_min 10
+
+# Light Heal beside the bandages. With no bandage able to run (use_bandages 0, no Healing, or
+# none left) it goes anyway, as the bandage stand-in. Needs use_magery.
+@setvar! config__use_light_heal 0
+# Missing hit points that start the light Heal, and its minimum current mana.
+@setvar! config__light_hits 15
+@setvar! config__mana_heal 4
+
+# Current stamina at or below this drinks a Refresh.
+@setvar! config__refresh_stam 60
 
 # Re-arm the axe when the left hand is empty. 5187 is the two handed axe in blueprint/item-list.html.
 @setvar! config__use_weapon 1
@@ -39,14 +74,13 @@ endif
 @setvar! config__use_gold_drop 1
 @setvar! config__gold_drop_amount 2000
 
-# Skinning. 1 carves every creature corpse within 2 tiles, grey or not, by targeting each corpse.
-# Player remains are never targeted. 0 carves grey corpses only, through Smart Harvest on self.
-# Where the server refuses the first as a criminal action, grey corpses only for 5 minutes.
-@setvar! config__use_skinning 1
-@setvar! config__skin_unowned 1
-
-# Move carried leather into the looting pouch selected by loadout.
-@setvar! config__pack_leather 1
+@setvar! config__use_stat_potions 1
+@setvar! config__use_resist_potion 1
+# STR and DEX with the Greater potion on: your base plus 20. Below these the potion is drunk.
+# Bless and the Strength and Agility spells, ours or an ally's, show the same icons as the
+# potions but add less than its 20, so the stat is what tells the potion apart.
+@setvar! config__str_potion 120
+@setvar! config__dex_potion 100
 
 # Codex of swords. The slot numbers follow the codex list order on the wiki.
 @setvar! config__use_sword_codex 1
@@ -63,11 +97,10 @@ endif
 @setvar! config__sword_finisher_execute 2
 @setvar! config__sword_finisher_main config__sword_finisher_execute
 
-@setvar! config__use_weapon_ability 1
-@setvar! config__ability_spinslash 1
-@setvar! config__ability_rend 2
-@setvar! config__ability_chop 3
-@setvar! config__ability_main config__ability_chop
+# Defensive latches on above the enter line and only releases below the leave line, so the
+# stance cannot flap while bandages tick. Both are hit deficit, not percent.
+@setvar! config__defensive_enter_diff 60
+@setvar! config__defensive_leave_diff 48
 
 # Codex of parrying, see PARRY CODEX. Slot numbers follow the wiki list order.
 # A stance only helps with ranks in it. Pick ranked ones.
@@ -88,108 +121,96 @@ endif
 @setvar! config__parry_finisher_barrier 2
 @setvar! config__parry_finisher_main config__parry_finisher_last_stand
 
-# Defensive latches on above the enter line and only releases below the leave line, so the
-# stance cannot flap while bandages tick. Both are hit deficit, not percent.
-@setvar! config__defensive_enter_diff 60
-@setvar! config__defensive_leave_diff 48
+@setvar! config__use_weapon_ability 1
+@setvar! config__ability_spinslash 1
+@setvar! config__ability_rend 2
+@setvar! config__ability_chop 3
+@setvar! config__ability_main config__ability_chop
 
-# Missing hit points, as in lumberjack-enhanced. Bandages handle ordinary damage.
-# heal_hits drinks a heal potion and also holds skinning, buffs and packing back.
-# light_hits is the light Heal line. It stands in for a bandage that cannot run, and with
-# use_light_heal 1 it also goes beside the bandages.
-@setvar! config__use_light_heal 0
-@setvar! config__heal_hits 35
-@setvar! config__emergency_hits 45
-@setvar! config__light_hits 15
-@setvar! config__heal_skill_min 10
-# DEX 80 gives about 80 stamina. Refresh below 60.
-@setvar! config__refresh_stam 60
-# STR and DEX with the Greater potion on: your base plus 20. Below these the potion is drunk.
-# Bless and the Strength and Agility spells, ours or an ally's, show the same icons as the
-# potions but add less than its 20, so the stat is what tells the potion apart.
-# This template is STR 100 and DEX 80.
-@setvar! config__str_potion 120
-@setvar! config__dex_potion 100
-
-# Minimum current mana to start each self spell.
-@setvar! config__mana_heal 4
-@setvar! config__mana_cure 6
-@setvar! config__mana_greater_heal 11
-
-# Buffs keep the lumberjack handbook's 20 mana GH + Teleport budget for a PK.
 @setvar! config__use_reactive_armor 1
 @setvar! config__use_magic_reflect 1
+# Minimum current mana to start each buff.
 @setvar! config__mana_reactive_armor 24
 @setvar! config__mana_magic_reflect 34
+# Missing hit points at which buffs are not started, and cut mid cast.
+@setvar! config__buff_max_loss 35
+# 0 keeps buffs back while poisoned and cuts one that is casting.
+@setvar! config__buff_when_poisoned 0
+
+# Skinning. 1 carves every creature corpse within 2 tiles, grey or not, by targeting each corpse.
+# Player remains are never targeted. 0 carves grey corpses only, through Smart Harvest on self.
+# Where the server refuses the first as a criminal action, grey corpses only for 5 minutes.
+@setvar! config__use_skinning 1
+@setvar! config__skin_unowned 1
+
+# Move carried leather into the looting pouch selected by loadout.
+@setvar! config__pack_leather 1
 
 # ####################################################################################
 # # WAIT AND COOLDOWN
 # ####################################################################################
-@setvar! wait__short 200
 @setvar! wait__poll 100
-@setvar! wait__long 1000
-# The knife cursor must arrive inside this block. A late cursor would block every input guard.
-@setvar! wait__carve_target 2000
-# How long Smart Harvest waits for the server reply after target self.
-@setvar! wait__carve_reply 1500
-# Allow inventory updates after opening the pouch and each drag/drop.
-@setvar! wait__pack_item 500
-# Request budget for one packing pass. Leftover leather waits for the next interval.
-@setvar! wait__pack_batch 2500
+@setvar! wait__short 200
 
-@setvar! cooldown__overhead_message 2700
+# Debounce for repeated warnings. Without it an empty potion bag shouts every pass.
+@setvar! cooldown__message 2700
+
 @setvar! cooldown__combat_target_grace 1200
-@setvar! cooldown__bandage_retry 1200
-@setvar! cooldown__potion_retry 1000
+
+# A refused equip, after a disarm for example, waits this long before the next try.
+@setvar! cooldown__equip_retry 2000
+
+@setvar! wait__long 1000
+
 # A Strength or Agility potion is tried once per window. The stat arrives a round trip after the
 # drink, and a Curse, Weaken or Clumsy can hold it under the line while the potion still runs:
 # without the window that refused drink would go out every pass. An empty bag is looked up at
 # the same pace.
 @setvar! cooldown__stat_potion 5000
-@setvar! cooldown__heal_retry 2500
-# Spacing between buff casts, so a fizzle is retried without spamming.
-@setvar! cooldown__buff_retry 3000
-@setvar! cooldown__reagents 30000
-@setvar! cooldown__food 60000
-# A refused equip, after a disarm for example, waits this long before the next try.
-@setvar! cooldown__equip_retry 2000
+
+# Codex label reads: a failed switch is tried again after stance_retry, and the cache is dropped
+# every stance_resync so a stance changed by hand is picked up. The parry codex uses them too.
+@setvar! cooldown__stance_retry 3000
+@setvar! cooldown__stance_resync 30000
+
+# Without Arms Lore the ability meter takes 60 seconds to fill.
+@setvar! cooldown__ability 60000
+
+# The knife cursor must arrive inside this block. A late cursor would block every input guard.
+@setvar! wait__carve_target 2000
+# How long Smart Harvest waits for the server reply after target self.
+@setvar! wait__carve_reply 1500
 # Forensic Evaluation has its own 0.5 second cooldown. This spaces the corpse search as well.
 @setvar! cooldown__carve 700
 # After a criminal action refusal, carve grey corpses only for 5 minutes.
 @setvar! cooldown__grey_only 300000
-# Without Arms Lore the ability meter takes 60 seconds to fill.
-@setvar! cooldown__ability 60000
-@setvar! cooldown__stance_retry 3000
-@setvar! cooldown__stance_resync 30000
+
+# Reagent read interval. Five lookups each time. A refill counts within this, and running out
+# is caught at once by the refusal line.
+@setvar! cooldown__reagents 30000
+
+@setvar! cooldown__food 60000
+
+# Allow inventory updates after opening the pouch and each drag/drop.
+@setvar! wait__pack_item 500
+# Request budget for one packing pass. Leftover leather waits for the next interval.
+@setvar! wait__pack_batch 2500
 # 120000 = 2 minutes. Use 180000 for 3 minutes.
 @setvar! cooldown__pack_leather 120000
 
 # ####################################################################################
 # # TIMER
 # ####################################################################################
-# Retry clocks start ready. Packing waits one full interval.
-if not timerexists "timer__overhead_message"
-    createtimer "timer__overhead_message"
+if not timerexists "timer__message"
+    createtimer "timer__message"
 endif
 
 if not timerexists "timer__combat_target_grace"
     createtimer "timer__combat_target_grace"
 endif
 
-if not timerexists "timer__bandage"
-    createtimer "timer__bandage"
-endif
-
-if not timerexists "timer__cure_potion"
-    createtimer "timer__cure_potion"
-endif
-
-if not timerexists "timer__heal_potion"
-    createtimer "timer__heal_potion"
-endif
-
-if not timerexists "timer__refresh"
-    createtimer "timer__refresh"
+if not timerexists "timer__equip"
+    createtimer "timer__equip"
 endif
 
 if not timerexists "timer__str_potion"
@@ -200,52 +221,12 @@ if not timerexists "timer__agi_potion"
     createtimer "timer__agi_potion"
 endif
 
-if not timerexists "timer__resist_potion"
-    createtimer "timer__resist_potion"
-endif
-
-if not timerexists "timer__heal"
-    createtimer "timer__heal"
-endif
-
-if not timerexists "timer__buff"
-    createtimer "timer__buff"
-endif
-
-if not timerexists "timer__reagents"
-    createtimer "timer__reagents"
-endif
-
-if not timerexists "timer__food"
-    createtimer "timer__food"
-endif
-
-if not timerexists "timer__equip"
-    createtimer "timer__equip"
-endif
-
-if not timerexists "timer__carve"
-    createtimer "timer__carve"
-endif
-
-if not timerexists "timer__ability"
-    createtimer "timer__ability"
-endif
-
 if not timerexists "timer__sword_retry"
     createtimer "timer__sword_retry"
 endif
 
 if not timerexists "timer__sword_resync"
     createtimer "timer__sword_resync"
-endif
-
-if not timerexists "timer__pack_leather"
-    createtimer "timer__pack_leather"
-endif
-
-if not timerexists "timer__grey_only"
-    createtimer "timer__grey_only"
 endif
 
 if not timerexists "timer__parry_retry"
@@ -256,28 +237,47 @@ if not timerexists "timer__parry_resync"
     createtimer "timer__parry_resync"
 endif
 
-settimer "timer__overhead_message" cooldown__overhead_message
+if not timerexists "timer__ability"
+    createtimer "timer__ability"
+endif
+
+if not timerexists "timer__carve"
+    createtimer "timer__carve"
+endif
+
+if not timerexists "timer__grey_only"
+    createtimer "timer__grey_only"
+endif
+
+if not timerexists "timer__reagents"
+    createtimer "timer__reagents"
+endif
+
+if not timerexists "timer__food"
+    createtimer "timer__food"
+endif
+
+if not timerexists "timer__pack_leather"
+    createtimer "timer__pack_leather"
+endif
+
+settimer "timer__message" cooldown__message
 settimer "timer__combat_target_grace" cooldown__combat_target_grace
-settimer "timer__bandage" cooldown__bandage_retry
-settimer "timer__cure_potion" cooldown__potion_retry
-settimer "timer__heal_potion" cooldown__potion_retry
-settimer "timer__refresh" cooldown__potion_retry
+settimer "timer__equip" cooldown__equip_retry
 settimer "timer__str_potion" cooldown__stat_potion
 settimer "timer__agi_potion" cooldown__stat_potion
-settimer "timer__resist_potion" cooldown__potion_retry
-settimer "timer__heal" cooldown__heal_retry
-settimer "timer__buff" cooldown__buff_retry
-settimer "timer__reagents" cooldown__reagents
-settimer "timer__food" cooldown__food
-settimer "timer__equip" cooldown__equip_retry
-settimer "timer__carve" cooldown__carve
-settimer "timer__ability" cooldown__ability
 settimer "timer__sword_retry" cooldown__stance_retry
 settimer "timer__sword_resync" 0
-settimer "timer__pack_leather" 0
-settimer "timer__grey_only" cooldown__grey_only
 settimer "timer__parry_retry" cooldown__stance_retry
 settimer "timer__parry_resync" 0
+settimer "timer__ability" cooldown__ability
+settimer "timer__carve" cooldown__carve
+settimer "timer__grey_only" cooldown__grey_only
+# Ready on the first pass, so reagents are read before the first cast.
+settimer "timer__reagents" cooldown__reagents
+settimer "timer__food" cooldown__food
+# Packing waits one full interval.
+settimer "timer__pack_leather" 0
 
 # ####################################################################################
 # # STATE
@@ -287,9 +287,42 @@ settimer "timer__parry_resync" 0
 if not varexist var__combat_target
     @setvar! var__combat_target 0
 endif
-
 # Scratch copy of the lasttarget serial for the mobile range check.
 @setvar! var__fresh_serial 0
+# 1 while an enemy is remembered. Recomputed every pass from var__combat_target.
+@setvar! var__fighting 0
+
+# Scratch: 1 once a heal potion went out on this pass. HEAL only.
+@setvar! var__heal_potion_out 0
+
+# Scratch: 1 when the light Heal goes on this pass. LIGHT HEAL only.
+@setvar! var__light_heal_due 0
+
+# Selected axe serial, reused across Stop and Play. 0 means rediscover from the backpack.
+if not varexist var__my_weapon
+    @setvar! var__my_weapon 0
+endif
+
+# Sword stance cache. 0 means unknown, which forces a codex label read on the first pass.
+@setvar! var__sword_want config__sword_stance_main
+@setvar! var__sword_active 0
+# 1 when the codex label names no stance. Switching blind could toggle the stance off.
+@setvar! var__sword_disabled 0
+# The finisher is checked once per Play, on the first codex label read.
+@setvar! var__sword_finisher_checked 0
+# Scratch: 0 neither finisher named, 1 wanted finisher active, 2 the other one active.
+@setvar! var__sword_finisher_state 0
+
+# Parry stance cache, as for the sword codex. 0 means unknown and forces a label read.
+@setvar! var__parry_want config__parry_stance_main
+@setvar! var__parry_active 0
+@setvar! var__parry_disabled 0
+@setvar! var__parry_finisher_checked 0
+@setvar! var__parry_finisher_state 0
+
+# 1 while another block holds our buff casts back. Nothing sets it unless the loop has such a block.
+@setvar! var__hold_casts 0
+
 # Scratch: 1 when a Z pick arrived while the knife cursor was up.
 @setvar! var__pick_during_carve 0
 # Scratch: 1 targets the corpse, 0 uses Smart Harvest. Chosen for each carve.
@@ -301,54 +334,29 @@ endif
 @setvar! var__carve_crime 0
 # Corpse that missed once (too far or busy). It gets one more request, then it is ignored.
 @setvar! var__carve_retry 0
-
-# Selected axe and knife serials, reused across Stop and Play. 0 means rediscover from the backpack.
-if not varexist var__my_weapon
-    @setvar! var__my_weapon 0
-endif
-
+# Scratch Smart Harvest reply: 0 none yet, 1 carved, 2 nothing left to carve here.
+@setvar! var__carve_reply 0
+# Selected knife serial, reused across Stop and Play. 0 means rediscover from the backpack.
 if not varexist var__my_knife
     @setvar! var__my_knife 0
 endif
 
-# 1 if the most recent bandage search found a bandage. 0 permits the light Heal fallback.
-@setvar! var__bandage_available 0
-# This pass's healing choice: 0 none, 1 Smart Heal/Cure Self, 2 Greater Heal/Cure Self.
-@setvar! var__heal_spell 0
-# 1 when this pass issued a self buff cast.
-@setvar! var__buff_cast 0
-
-# Own reagent presence: 0 missing, 1 found. Refreshed every 30 seconds.
-@setvar! var__garlic 0
-@setvar! var__ginseng 0
-@setvar! var__mandrake 0
-@setvar! var__ash 0
-@setvar! var__silk 0
-
-# Spell recipe availability: 1 only when all required reagents were found in the same refresh.
-@setvar! var__regs_heal 0
+# Reagent flags, written only by REAGENTS. 1 when every reagent of that spell was found.
+#   Cure            garlic 3972, ginseng 3973
+#   Heal            garlic, ginseng, silk 3981
+#   Greater Heal    garlic, ginseng, silk, mandrake 3974
+#   Reactive Armor  garlic, silk, ash 3980
+#   Reflection      garlic, silk, mandrake
 @setvar! var__regs_cure 0
+@setvar! var__regs_heal 0
 @setvar! var__regs_greater_heal 0
 @setvar! var__regs_reactive_armor 0
-@setvar! var__regs_reflect 0
-
-# Sword stance cache. 0 means unknown, which forces a codex label read on the first pass.
-@setvar! var__sword_want config__sword_stance_main
-@setvar! var__sword_active 0
-# 1 when the codex label names no stance. Switching blind could toggle the stance off.
-@setvar! var__sword_disabled 0
-# The finisher is checked once per Play, on the first codex label read.
-@setvar! var__sword_finisher_checked 0
-# Scratch: 0 neither finisher named, 1 wanted finisher active, 2 the other one active.
-@setvar! var__sword_finisher_state 0
-# Scratch Smart Harvest reply: 0 none yet, 1 carved, 2 nothing left to carve here.
-@setvar! var__carve_reply 0
-# Parry stance cache, as for the sword codex. 0 means unknown and forces a label read.
-@setvar! var__parry_want config__parry_stance_main
-@setvar! var__parry_active 0
-@setvar! var__parry_disabled 0
-@setvar! var__parry_finisher_checked 0
-@setvar! var__parry_finisher_state 0
+@setvar! var__regs_magic_reflect 0
+@setvar! var__has_garlic 0
+@setvar! var__has_ginseng 0
+@setvar! var__has_mandrake 0
+@setvar! var__has_ash 0
+@setvar! var__has_silk 0
 
 if config__pack_leather = 1
     if not varexist global__my_looting_pouch or not find global__my_looting_pouch backpack
@@ -366,7 +374,7 @@ clearlist 'list__resume_script'
 pushlist 'list__resume_script' 'Play Script: gather\skinning-enhanced'
 
 if config__sysmsg = 1
-    sysmsg "Skinning enhanced v10 loaded: skin unowned={{config__skin_unowned}}, sword stance={{config__sword_stance_main}}, parry stance={{config__parry_stance_main}}." 88
+    sysmsg "Skinning enhanced v11 loaded: skin unowned={{config__skin_unowned}}, sword stance={{config__sword_stance_main}}, parry stance={{config__parry_stance_main}}." 88
 endif
 if config__chatty = 1
     overhead "[ skinning, on ]" 290
@@ -376,6 +384,7 @@ endif
 # # MAIN LOOP
 # ####################################################################################
 while not dead
+    # The pvp expression means structured-PvP restrictions, not a field PK encounter.
     if pvp
         overhead "[ script, blocked ]" 254
         stop
@@ -423,141 +432,187 @@ while not dead
         endif
     endif
 
+    # Fight-only blocks such as the stat potions read this.
+    @setvar! var__fighting 0
+    if var__combat_target != 0
+        @setvar! var__fighting 1
+    endif
+
     # ################################################################################
-    # # SURVIVAL
+    # # PARALYZE
     # ################################################################################
-    # Same order as lumberjack-enhanced, without its warmode gate. Warmode stays on while fighting.
-    # PARALYSIS: use a trapped pouch before other recovery.
+    # Nothing else can act while held, so the pouch goes out at once, as in bard-necro-enhanced.
     if paralyzed
         if findtype 3705 backpack 38
             yell "[Pouch"
             wait wait__short
-        elseif timer "timer__overhead_message" >= cooldown__overhead_message
+        elseif timer "timer__message" >= cooldown__message
             overhead "[ pouch, out ]" 254
-            settimer "timer__overhead_message" 0
+            settimer "timer__message" 0
         endif
     endif
 
-    # CURE: potions first, then select the self agent if reagents permit.
-    @setvar! var__heal_spell 0
-    if poisoned and config__use_potion = 1 and timer "timer__cure_potion" >= cooldown__potion_retry
-        if not hidden and not queued and not casting and not targetexists
-            if findtype "Orange Potion" self as alias__cure_potion
-                dclick alias__cure_potion
-                settimer "timer__cure_potion" 0
-                wait wait__short
-            elseif timer "timer__overhead_message" >= cooldown__overhead_message
+    # ################################################################################
+    # # CURE
+    # ################################################################################
+    # Potion first, it is instant and has no cooldown, and it goes out during a cast. While any
+    # cure potion is carried the agent is not used, so mana stays for Greater Heal. The agent
+    # waits for the walk bar and for warmode as config__walk_guard and config__warmode_is_manual say.
+    if poisoned and not paralyzed and not hidden and not queued and not targetexists
+        if config__use_potions = 1 and findtype "Orange Potion" self
+            hotkey "Drink Cure"
+            wait wait__short
+        else
+            if config__use_potions = 1 and timer "timer__message" >= cooldown__message
                 overhead "[ cure pot, out ]" 254
-                settimer "timer__overhead_message" 0
+                settimer "timer__message" 0
             endif
-        endif
-    endif
 
-    # A cure potion drunk this pass resets its timer, so the spell only cures without one.
-    # With 45 mana, the potion saves the spell for Greater Heal and the buffs.
-    if poisoned and config__use_magery = 1 and timer "timer__cure_potion" >= cooldown__potion_retry and var__regs_cure = 1 and mana >= config__mana_cure
-        @setvar! var__heal_spell 1
-    endif
+            if config__use_magery = 1 and var__regs_cure = 1 and mana >= config__mana_cure and not casting
+                if config__warmode_is_manual = 0 or not warmode
+                    if config__walk_guard = 0 or cooldown "walk" = 0
+                        hotkey "> Smart Heal/Cure Self"
+                        if config__sysmsg = 1
+                            sysmsg "Agent: Smart Heal/Cure Self for poison." 88
+                        endif
+                        wait wait__short
 
-    # BANDAGE: ordinary recovery, with no restart while a bandage is running.
-    if diffhits > 0 or poisoned
-        if not bandaging and skill "Healing" > config__heal_skill_min and timer "timer__bandage" >= cooldown__bandage_retry
-            if not hidden and not queued and not casting and not targetexists
-                @setvar! var__bandage_available 0
-                if findtype 3617 self
-                    @setvar! var__bandage_available 1
-                    hotkey "Bandage Self"
-                    settimer "timer__bandage" 0
-                    wait wait__short
-                elseif timer "timer__overhead_message" >= cooldown__overhead_message
-                    overhead "[ bandage, out ]" 254
-                    settimer "timer__overhead_message" 0
+                        for 60
+                            if not casting
+                                break
+                            endif
+                            if insysmsg "Your concentration is disturbed, thus ruining thy spell."
+                                break
+                            endif
+                            wait wait__poll
+                        endfor
+                    endif
                 endif
             endif
         endif
     endif
 
-    # HEAL POT: check both the bar and the potion label, as in lumberjack-enhanced.
-    # The bar skips label reads while it runs. The label stays authoritative when the bar is missing.
-    if diffhits >= config__heal_hits and not poisoned and config__use_potion = 1 and cooldown "heal pot" = 0 and timer "timer__heal_potion" >= cooldown__potion_retry
-        if not hidden and not queued and not casting and not targetexists
-            settimer "timer__heal_potion" 0
+    # ################################################################################
+    # # HEAL
+    # ################################################################################
+    # Heavy damage drinks first, because the potion is instant and goes out during a cast.
+    # Greater Heal follows when no potion went out on this pass and the loss is at the
+    # emergency line: none carried, on its own cooldown, or the bar still running.
+    # The bar skips the label read while it runs. The label stays authoritative when the bar
+    # is missing. Greater Heal waits for the walk bar and for warmode as the switches say.
+    if not poisoned and not paralyzed and not hidden and not queued and not targetexists and diffhits >= config__heal_hits
+        @setvar! var__heal_potion_out 0
+        if config__use_potions = 1 and cooldown "heal pot" = 0
             if findtype "Yellow Potion" self as alias__heal_potion
                 getlabel alias__heal_potion label__heal_potion
                 if "next usable" in label__heal_potion
-                    if timer "timer__overhead_message" >= cooldown__overhead_message
-                        overhead "[ heal pot, {{label__heal_potion}} ]" 290
-                        settimer "timer__overhead_message" 0
-                    endif
+                    # Still on its own cooldown.
                 else
-                    dclick alias__heal_potion
+                    hotkey "Drink Heal"
+                    @setvar! var__heal_potion_out 1
                     wait wait__short
                 endif
-            elseif timer "timer__overhead_message" >= cooldown__overhead_message
+            elseif timer "timer__message" >= cooldown__message
                 overhead "[ heal pot, out ]" 254
-                settimer "timer__overhead_message" 0
+                settimer "timer__message" 0
+            endif
+        endif
+
+        if var__heal_potion_out = 0 and diffhits >= config__emergency_hits and config__use_magery = 1 and var__regs_greater_heal = 1 and mana >= config__mana_greater_heal and not casting
+            if config__warmode_is_manual = 0 or not warmode
+                if config__walk_guard = 0 or cooldown "walk" = 0
+                    hotkey "> Greater Heal/Cure Self"
+                    if config__sysmsg = 1
+                        sysmsg "Agent: Greater Heal/Cure Self." 88
+                    endif
+                    wait wait__short
+
+                    for 60
+                        if not casting
+                            break
+                        endif
+                        if insysmsg "Your concentration is disturbed, thus ruining thy spell."
+                            break
+                        endif
+                        wait wait__poll
+                    endfor
+
+                    # The agent leaves its beneficial cursor up when there is nothing left to heal.
+                    if targetexists "beneficial" and diffhits = 0
+                        hotkey "Cancel Current Target"
+                        wait wait__short
+                    endif
+                endif
             endif
         endif
     endif
 
-    # HEALING SPELL: Greater Heal for heavy damage, whether or not a bandage is running.
-    # A light Heal stands in for a bandage that cannot run, so loss under 45 costs no mana while
-    # bandaging. config__use_light_heal 1 lets it go beside the bandages as well.
-    if config__use_magery = 1 and not poisoned
-        if diffhits >= config__emergency_hits and var__regs_greater_heal = 1 and mana >= config__mana_greater_heal
-            @setvar! var__heal_spell 2
-        elseif diffhits >= config__light_hits and var__regs_heal = 1 and mana >= config__mana_heal
-            if config__use_light_heal = 1
-                @setvar! var__heal_spell 1
-            elseif not bandaging
-                if skill "Healing" = 0 or var__bandage_available = 0
-                    @setvar! var__heal_spell 1
+    # ################################################################################
+    # # BANDAGE
+    # ################################################################################
+    # Never restarts a running bandage, and full health does not start one. Its target cursor
+    # would replace a held precast, so it waits while any cursor is up.
+    if config__use_bandages = 1 and not bandaging and not paralyzed and not hidden and not queued and not targetexists and skill "Healing" > config__heal_skill_min
+        if diffhits > 0 or poisoned
+            if findtype 3617 self
+                hotkey "Bandage Self"
+                wait wait__short
+            elseif timer "timer__message" >= cooldown__message
+                overhead "[ bandage, out ]" 254
+                settimer "timer__message" 0
+            endif
+        endif
+    endif
+
+    # ################################################################################
+    # # LIGHT HEAL
+    # ################################################################################
+    # The bandage stand-in whenever no bandage can run: bandages off, no Healing, or none left
+    # and none running. Beside the bandages only with config__use_light_heal 1. The agent waits
+    # for the walk bar and for warmode as the switches say.
+    if not poisoned and not paralyzed and not hidden and not queued and not casting and not targetexists and config__use_magery = 1 and var__regs_heal = 1 and diffhits >= config__light_hits and mana >= config__mana_heal
+        @setvar! var__light_heal_due 0
+        if config__use_light_heal = 1 or config__use_bandages = 0 or skill "Healing" <= config__heal_skill_min
+            @setvar! var__light_heal_due 1
+        elseif not bandaging and not findtype 3617 self
+            @setvar! var__light_heal_due 1
+        endif
+
+        if var__light_heal_due = 1
+            if config__warmode_is_manual = 0 or not warmode
+                if config__walk_guard = 0 or cooldown "walk" = 0
+                    hotkey "> Smart Heal/Cure Self"
+                    if config__sysmsg = 1
+                        sysmsg "Agent: Smart Heal/Cure Self, light Heal." 88
+                    endif
+                    wait wait__short
+
+                    for 60
+                        if not casting
+                            break
+                        endif
+                        if insysmsg "Your concentration is disturbed, thus ruining thy spell."
+                            break
+                        endif
+                        wait wait__poll
+                    endfor
+
+                    if targetexists "beneficial" and diffhits = 0
+                        hotkey "Cancel Current Target"
+                        wait wait__short
+                    endif
                 endif
             endif
         endif
     endif
 
-    # SELF AGENT: bound the cast wait and leave existing manual casts alone.
-    if var__heal_spell != 0 and timer "timer__heal" >= cooldown__heal_retry
-        if not hidden and not queued and not casting and not targetexists and cooldown "walk" = 0
-            if var__heal_spell = 2
-                hotkey "> Greater Heal/Cure Self"
-                if config__sysmsg = 1
-                    sysmsg "Heal agent: Greater Heal/Cure Self." 88
-                endif
-            else
-                hotkey "> Smart Heal/Cure Self"
-                if config__sysmsg = 1
-                    sysmsg "Heal agent: Smart Heal/Cure Self." 88
-                endif
-            endif
-            settimer "timer__heal" 0
+    # ################################################################################
+    # # REFRESH
+    # ################################################################################
+    if stam <= config__refresh_stam and config__use_potions = 1 and not paralyzed and not hidden and not queued and not targetexists
+        if findtype "Red Potion" self
+            hotkey "Drink Refresh"
             wait wait__short
-            for 60
-                if not casting
-                    break
-                endif
-                wait wait__poll
-            endfor
-            # The agent leaves its cursor up when there is nothing to heal.
-            if targetexists and diffhits = 0 and not poisoned
-                hotkey "Cancel Current Target"
-                wait wait__short
-            endif
-        endif
-    endif
-
-    # STAMINA POT: Total Refresh has no cooldown, so keep drinking below the threshold.
-    if stam < config__refresh_stam and config__use_potion = 1 and timer "timer__refresh" >= cooldown__potion_retry
-        if not hidden and not queued and not casting and not targetexists
-            if findtype "Red Potion" backpack as alias__refresh_potion
-                dclick alias__refresh_potion
-                settimer "timer__refresh" 0
-                wait wait__short
-            elseif timer "timer__overhead_message" >= cooldown__overhead_message
-                overhead "[ refresh, out ]" 254
-                settimer "timer__overhead_message" 0
-            endif
         endif
     endif
 
@@ -588,9 +643,9 @@ while not dead
                         sysmsg "Axe equip requested: serial={{alias__weapon_to_equip}}. The next check reads the hand." 88
                     endif
                     wait wait__short
-                elseif timer "timer__overhead_message" >= cooldown__overhead_message
+                elseif timer "timer__message" >= cooldown__message
                     overhead "[ axe, out ]" 254
-                    settimer "timer__overhead_message" 0
+                    settimer "timer__message" 0
                 endif
             endif
         elseif findlayer self lefthand as alias__equipped_weapon
@@ -630,52 +685,40 @@ while not dead
                 if config__chatty = 1
                     overhead "[ gold, dropped ]" 290
                 endif
-            elseif timer "timer__overhead_message" >= cooldown__overhead_message
+            elseif timer "timer__message" >= cooldown__message
                 overhead "[ weight, over ]" 254
-                settimer "timer__overhead_message" 0
+                settimer "timer__message" 0
             endif
         endif
     endif
 
     # ################################################################################
-    # # COMBAT POTIONS
+    # # STAT POTIONS
     # ################################################################################
-    # Strength, Agility and Magic Resist only while an enemy is remembered. The cache already
-    # holds it only within 12 tiles, so no second search is needed here. Each potion is judged
-    # on its own, so running out of one does not hold up the others.
-    # Strength and Agility read the stat against config__str_potion and config__dex_potion,
-    # because Bless and the Strength and Agility spells show the same icons as the potions, and
-    # each is tried once per cooldown__stat_potion. Magic Resist has an icon of its own and keeps
-    # the short retry, so the icon has time to show before the next check.
-    if config__use_potion = 1 and not hidden and not targetexists and var__combat_target != 0
+    # Kept up while var__fighting is 1. Strength and Agility read the stat against config__str_potion
+    # and config__dex_potion, because Bless and the Strength and Agility spells show the same
+    # icons as the potions, and each is tried once per cooldown__stat_potion. Magic Resist has an
+    # icon of its own and is drunk once it is missing. Each potion is judged on its own, so
+    # running out of one does not hold up the others.
+    if var__fighting = 1 and config__use_potions = 1 and config__use_stat_potions = 1 and not paralyzed and not hidden and not targetexists
         if not queued and str < config__str_potion and timer "timer__str_potion" >= cooldown__stat_potion
             settimer "timer__str_potion" 0
-            if findtype "White Potion" backpack as alias__strength_potion
-                dclick alias__strength_potion
+            if findtype "White Potion" self
+                hotkey "Drink Strength"
                 wait wait__short
-            elseif timer "timer__overhead_message" >= cooldown__overhead_message
-                overhead "[ str, out ]" 254
-                settimer "timer__overhead_message" 0
             endif
         endif
         if not queued and dex < config__dex_potion and timer "timer__agi_potion" >= cooldown__stat_potion
             settimer "timer__agi_potion" 0
-            if findtype "Blue Potion" backpack as alias__agility_potion
-                dclick alias__agility_potion
+            if findtype "Blue Potion" self
+                hotkey "Drink Agility"
                 wait wait__short
-            elseif timer "timer__overhead_message" >= cooldown__overhead_message
-                overhead "[ agi, out ]" 254
-                settimer "timer__overhead_message" 0
             endif
         endif
-        if not queued and not findbuff 'Magic Resist Potion' and timer "timer__resist_potion" >= cooldown__potion_retry
-            settimer "timer__resist_potion" 0
-            if findtype "Black Potion" backpack as alias__resist_potion
-                dclick alias__resist_potion
+        if config__use_resist_potion = 1 and not queued and not findbuff "Magic Resist Potion"
+            if findtype "Black Potion" self
+                hotkey "Drink Magic Resist"
                 wait wait__short
-            elseif timer "timer__overhead_message" >= cooldown__overhead_message
-                overhead "[ resist, out ]" 254
-                settimer "timer__overhead_message" 0
             endif
         endif
     endif
@@ -819,9 +862,9 @@ while not dead
                         endif
                     endif
                 endif
-            elseif timer "timer__overhead_message" >= cooldown__overhead_message
+            elseif timer "timer__message" >= cooldown__message
                 overhead "[ sword codex, out ]" 254
-                settimer "timer__overhead_message" 0
+                settimer "timer__message" 0
             endif
         endif
     endif
@@ -962,9 +1005,9 @@ while not dead
                         endif
                     endif
                 endif
-            elseif timer "timer__overhead_message" >= cooldown__overhead_message
+            elseif timer "timer__message" >= cooldown__message
                 overhead "[ shield codex, out ]" 254
-                settimer "timer__overhead_message" 0
+                settimer "timer__message" 0
             endif
         endif
     endif
@@ -1004,42 +1047,66 @@ while not dead
     # ################################################################################
     # # SELF BUFFS
     # ################################################################################
-    # PK readiness. Kept up at all times. Only the mana budget holds them back: each buff leaves
-    # 20 mana for GH + Teleport. The heal potion line and poison are skipped because the cast
-    # below would be interrupted at once.
-    if config__use_magery = 1 and diffhits < config__heal_hits and not poisoned and timer "timer__buff" >= cooldown__buff_retry
-        if not hidden and not queued and not casting and not targetexists and cooldown "walk" = 0
-            @setvar! var__buff_cast 0
-            if config__use_reactive_armor = 1 and not findbuff "Reactive Armor" and var__regs_reactive_armor = 1 and mana >= config__mana_reactive_armor
-                cast "Reactive Armor"
-                @setvar! var__buff_cast 1
-                if config__sysmsg = 1
-                    sysmsg "Buff cast: Reactive Armor." 88
-                endif
-            elseif config__use_magic_reflect = 1 and not findbuff "Magic Reflection" and cooldown "reflect" = 0 and var__regs_reflect = 1 and mana >= config__mana_magic_reflect
-                cast "Magic Reflection"
-                @setvar! var__buff_cast 1
-                if config__sysmsg = 1
-                    sysmsg "Buff cast: Magic Reflection." 88
-                endif
-            endif
-
-            if var__buff_cast = 1
-                settimer "timer__buff" 0
-                wait wait__short
-                for 60
-                    if not casting
-                        break
-                    endif
-                    if diffhits >= config__heal_hits or poisoned
-                        hotkey "> Interrupt"
+    # Reactive Armor, then Magic Reflection, whenever one is missing and the window is free.
+    # Not started at config__buff_max_loss, and cut there mid cast so the next pass can heal.
+    # With config__buff_when_poisoned 0 poison holds them back and cuts them too, so the cure
+    # goes first. var__hold_casts lets another block keep the cast window (a latched Recall).
+    # The walk and warmode switches apply as for the heal agents. The reflect bar is the
+    # server's recast lock after Reflect is used up.
+    if config__use_magery = 1 and var__hold_casts = 0 and not paralyzed and not hidden and not queued and not casting and not targetexists and diffhits < config__buff_max_loss
+        if config__buff_when_poisoned = 1 or not poisoned
+            if config__warmode_is_manual = 0 or not warmode
+                if config__walk_guard = 0 or cooldown "walk" = 0
+                    if config__use_reactive_armor = 1 and var__regs_reactive_armor = 1 and mana >= config__mana_reactive_armor and not findbuff "Reactive Armor"
+                        cast "Reactive Armor"
                         if config__sysmsg = 1
-                            sysmsg "Buff cast interrupted for recovery." 88
+                            sysmsg "Buff: Reactive Armor." 88
                         endif
-                        break
+                        wait wait__short
+
+                        for 60
+                            if not casting
+                                break
+                            endif
+                            if insysmsg "Your concentration is disturbed, thus ruining thy spell."
+                                break
+                            endif
+                            if diffhits >= config__buff_max_loss
+                                hotkey "> Interrupt"
+                                break
+                            endif
+                            if config__buff_when_poisoned = 0 and poisoned
+                                hotkey "> Interrupt"
+                                break
+                            endif
+                            wait wait__poll
+                        endfor
+                    elseif config__use_magic_reflect = 1 and var__regs_magic_reflect = 1 and mana >= config__mana_magic_reflect and cooldown "reflect" = 0 and not findbuff "Magic Reflection"
+                        cast "Magic Reflection"
+                        if config__sysmsg = 1
+                            sysmsg "Buff: Magic Reflection." 88
+                        endif
+                        wait wait__short
+
+                        for 60
+                            if not casting
+                                break
+                            endif
+                            if insysmsg "Your concentration is disturbed, thus ruining thy spell."
+                                break
+                            endif
+                            if diffhits >= config__buff_max_loss
+                                hotkey "> Interrupt"
+                                break
+                            endif
+                            if config__buff_when_poisoned = 0 and poisoned
+                                hotkey "> Interrupt"
+                                break
+                            endif
+                            wait wait__poll
+                        endfor
                     endif
-                    wait wait__poll
-                endfor
+                endif
             endif
         endif
     endif
@@ -1232,9 +1299,9 @@ while not dead
                             endif
                         endif
                     endif
-                elseif timer "timer__overhead_message" >= cooldown__overhead_message
+                elseif timer "timer__message" >= cooldown__message
                     overhead "[ knife, out ]" 254
-                    settimer "timer__overhead_message" 0
+                    settimer "timer__message" 0
                 endif
             endif
         endif
@@ -1242,76 +1309,64 @@ while not dead
     endif
 
     # ################################################################################
-    # # HOUSEKEEPING
+    # # REAGENTS
     # ################################################################################
-    # A shortage message schedules an early reagent refresh.
+    # First in the pass, so every cast block below reads fresh flags. On the interval, or at once
+    # after a refusal for reagents, so a stale flag cannot send the same doomed cast every pass.
     if config__use_magery = 1
-        if insysmsg "More reagents are needed"
-            settimer "timer__reagents" cooldown__reagents
-            if config__sysmsg = 1
-                sysmsg "Reagent shortage reported. Reagents are read again this pass." 88
+        if timer "timer__reagents" >= cooldown__reagents or insysmsg "More reagents are needed"
+            settimer "timer__reagents" 0
+
+            @setvar! var__has_garlic 0
+            @setvar! var__has_ginseng 0
+            @setvar! var__has_mandrake 0
+            @setvar! var__has_ash 0
+            @setvar! var__has_silk 0
+
+            if findtype 3972 self
+                @setvar! var__has_garlic 1
+            endif
+            if findtype 3973 self
+                @setvar! var__has_ginseng 1
+            endif
+            if findtype 3974 self
+                @setvar! var__has_mandrake 1
+            endif
+            if findtype 3980 self
+                @setvar! var__has_ash 1
+            endif
+            if findtype 3981 self
+                @setvar! var__has_silk 1
+            endif
+
+            @setvar! var__regs_cure 0
+            @setvar! var__regs_heal 0
+            @setvar! var__regs_greater_heal 0
+            @setvar! var__regs_reactive_armor 0
+            @setvar! var__regs_magic_reflect 0
+
+            if var__has_garlic = 1 and var__has_ginseng = 1
+                @setvar! var__regs_cure 1
+            endif
+            if var__has_garlic = 1 and var__has_ginseng = 1 and var__has_silk = 1
+                @setvar! var__regs_heal 1
+            endif
+            if var__has_garlic = 1 and var__has_ginseng = 1 and var__has_silk = 1 and var__has_mandrake = 1
+                @setvar! var__regs_greater_heal 1
+            endif
+            if var__has_garlic = 1 and var__has_silk = 1 and var__has_ash = 1
+                @setvar! var__regs_reactive_armor 1
+            endif
+            if var__has_garlic = 1 and var__has_silk = 1 and var__has_mandrake = 1
+                @setvar! var__regs_magic_reflect 1
             endif
         endif
     endif
 
-    # REAGENTS: refresh presence once, then derive each spell recipe.
-    if config__use_magery = 1 and timer "timer__reagents" >= cooldown__reagents
-        settimer "timer__reagents" 0
-
-        @setvar! var__garlic 0
-        @setvar! var__ginseng 0
-        @setvar! var__mandrake 0
-        @setvar! var__ash 0
-        @setvar! var__silk 0
-
-        if findtype 3972 self
-            @setvar! var__garlic 1
-        endif
-
-        if findtype 3973 self
-            @setvar! var__ginseng 1
-        endif
-
-        if findtype 3974 self
-            @setvar! var__mandrake 1
-        endif
-
-        if findtype 3980 self
-            @setvar! var__ash 1
-        endif
-
-        if findtype 3981 self
-            @setvar! var__silk 1
-        endif
-
-        @setvar! var__regs_heal 0
-        @setvar! var__regs_cure 0
-        @setvar! var__regs_greater_heal 0
-        @setvar! var__regs_reactive_armor 0
-        @setvar! var__regs_reflect 0
-
-        if var__garlic = 1 and var__ginseng = 1
-            @setvar! var__regs_cure 1
-        endif
-
-        if var__garlic = 1 and var__ginseng = 1 and var__silk = 1
-            @setvar! var__regs_heal 1
-        endif
-
-        if var__garlic = 1 and var__ginseng = 1 and var__silk = 1 and var__mandrake = 1
-            @setvar! var__regs_greater_heal 1
-        endif
-
-        if var__garlic = 1 and var__silk = 1 and var__ash = 1
-            @setvar! var__regs_reactive_armor 1
-        endif
-
-        if var__garlic = 1 and var__silk = 1 and var__mandrake = 1
-            @setvar! var__regs_reflect 1
-        endif
-    endif
-
-    # FOOD
+    # ################################################################################
+    # # FOOD
+    # ################################################################################
+    # Looked at once a minute. The buff lasts far longer.
     if timer "timer__food" >= cooldown__food and not findbuff "Food Satisfaction"
         if not hidden and not queued and not casting and not targetexists
             settimer "timer__food" 0
@@ -1366,9 +1421,9 @@ while not dead
                     if config__sysmsg = 1
                         sysmsg "Leather pack END." 88
                     endif
-                elseif timer "timer__overhead_message" >= cooldown__overhead_message
+                elseif timer "timer__message" >= cooldown__message
                     overhead "[ loot pouch, out ]" 254
-                    settimer "timer__overhead_message" 0
+                    settimer "timer__message" 0
                 endif
                 # The next interval starts after this pass, including a missing-pouch attempt.
                 settimer "timer__pack_leather" 0

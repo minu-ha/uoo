@@ -1,0 +1,49 @@
+# The weapon ability on the remembered enemy within 2 tiles, once per meter fill.
+#@ needs gather/combat-target
+#@ config
+@setvar! config__use_weapon_ability 1
+@setvar! config__ability_spinslash 1
+@setvar! config__ability_rend 2
+@setvar! config__ability_chop 3
+@setvar! config__ability_main config__ability_chop
+#@ wait
+# Without Arms Lore the ability meter takes 60 seconds to fill.
+@setvar! cooldown__ability 60000
+#@ timer
+if not timerexists "timer__ability"
+    createtimer "timer__ability"
+endif
+#@ ready
+settimer "timer__ability" cooldown__ability
+#@ loop
+    # ################################################################################
+    # # WEAPON ABILITY
+    # ################################################################################
+    # Chop is the default: one hit at +250%, independent of weapon specials. Spinslash spreads
+    # +15% over 15 seconds, about two hits' worth. Rend needs bleeds already on the target.
+    # All three share one meter, and the ability fires on the next melee hit. Chop is further
+    # scaled by weapon speed, and that formula is not documented.
+    # A timer spaces the request, as in bard-mace. A wrong interval only shifts the timing.
+    if config__use_weapon_ability = 1 and timer "timer__ability" >= cooldown__ability and find var__combat_target ground -1 -1 2
+        if config__ability_main = 1
+            say "[WeaponAbility1"
+        elseif config__ability_main = 2
+            say "[WeaponAbility2"
+        elseif config__ability_main = 3
+            say "[WeaponAbility3"
+        endif
+        settimer "timer__ability" 0
+        if config__sysmsg = 1
+            sysmsg "Weapon ability request: slot {{config__ability_main}}. Fires on the next melee hit." 88
+        endif
+
+        if config__chatty = 1
+            if config__ability_main = config__ability_chop
+                overhead "[ chop ]" 219
+            elseif config__ability_main = config__ability_spinslash
+                overhead "[ spinslash ]" 219
+            elseif config__ability_main = config__ability_rend
+                overhead "[ rend ]" 219
+            endif
+        endif
+    endif

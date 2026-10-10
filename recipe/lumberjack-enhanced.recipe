@@ -1,0 +1,50 @@
+# Lumberjack gathering with self recovery, independent Tracking setup and one automatic Recall attempt.
+# Needs: One Hatchet, bandages, reagents, recovery and harvest hotkeys. Automatic Recall needs a charged book with a Home rune.
+# Tracking reuses a confirmed, active hunt color. Setup is independent of auto_recall.
+# Housekeeping converts all wood colors to Boards and packs them in the loadout looting pouch every 2 minutes.
+# For Tracking-triggered Recall, set Hunt Frequency to Always Get Closest in the Tracking window.
+# Design and in-game checks: blueprint/lumberjack-pvp-handbook.html part 8.
+# Optional cooldown bars: heal pot, walk, reflect. A missing walk or reflect bar cannot
+# protect a cast from movement or reject an early Reflect retry. Check the active character.
+# Warmode and an existing cursor belong to the player. Gathering and self buffs stand down.
+# No attack, TK, summons, Meditation or automatic PvP-script switch belongs to this loop.
+# A Recall decision stops gathering until this script is restarted. Sending Recall is not arrival.
+# This script casts RecallCharge to Home. It does not walk to or enter a moongate.
+# Server-event overheads and manual Tracking displays stay in the profile.
+# The server blocks harvest for 60 seconds after Recall, Moongate, Hike, Teleport or Rope.
+# The profile displays recent-travel refusals. The script does not read that message or restart the delay.
+# The harvest retry only spaces attempts. It cannot shorten the server travel restriction.
+#@ output script/gather/lumberjack-enhanced.razor
+#@ modules core/start core/pvp-stop core/output core/switches core/wait core/message gather/housekeeping-pass
+#@ modules core/paralyze core/cure core/heal core/bandage core/light-heal core/refresh
+#@ modules . gather/tracking-setup gather/auto-recall core/reagents gather/harvest core/self-buffs
+#@ modules gather/lumber-housekeeping core/pass-wait
+#@ set config__warmode_is_manual 1
+#@ set cooldown__reagents 30000
+#@ set config__emergency_hits 45
+#@ set config__mana_reactive_armor 24
+#@ set config__mana_magic_reflect 34
+#@ set config__buff_max_loss 15
+#@ set config__buff_when_poisoned 0
+#@ setup
+if config__pack_lumber = 1
+    if not varexist global__my_looting_pouch or not find global__my_looting_pouch backpack
+        overhead "[ loot pouch, pick ]" 255
+        setvar global__my_looting_pouch
+    endif
+endif
+
+# loot/recycle runs the hotkey named in this list when it finishes or gives up. A list, because
+# a variable cannot hold a word (blueprint/razor.html part 3). It lasts until the client closes.
+if not listexists 'list__resume_script'
+    createlist 'list__resume_script'
+endif
+clearlist 'list__resume_script'
+pushlist 'list__resume_script' 'Play Script: gather\lumberjack-enhanced'
+
+if config__sysmsg = 1
+    sysmsg "Lumberjack enhanced v17 loaded: auto recall={{config__auto_recall}}, tracking color={{config__tracking_color}}." 88
+endif
+if config__chatty = 1
+    overhead "[ lumberjack, on ]" 290
+endif

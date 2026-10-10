@@ -1,0 +1,67 @@
+# Re-arms the cached Two-Handed Axe when the left hand is empty.
+#@ needs core/message
+#@ config
+# Re-arm the axe when the left hand is empty. 5187 is the two handed axe in blueprint/item-list.html.
+@setvar! config__use_weapon 1
+@setvar! config__weapon_graphic 5187
+#@ wait
+# A refused equip, after a disarm for example, waits this long before the next try.
+@setvar! cooldown__equip_retry 2000
+#@ timer
+if not timerexists "timer__equip"
+    createtimer "timer__equip"
+endif
+#@ ready
+settimer "timer__equip" cooldown__equip_retry
+#@ state
+# Selected axe serial, reused across Stop and Play. 0 means rediscover from the backpack.
+if not varexist var__my_weapon
+    @setvar! var__my_weapon 0
+endif
+#@ loop
+    # ################################################################################
+    # # WEAPON
+    # ################################################################################
+    # The Two-Handed Axe takes the lefthand layer, so an empty left hand means it is gone.
+    # Arming before a cast completes interrupts the cast (wiki Combat Overview), so casting blocks this.
+    # An axe already in hand is adopted once by label, including a replacement with a new serial.
+    # Any other left hand item is left alone.
+    if config__use_weapon = 1 and timer "timer__equip" >= cooldown__equip_retry
+        if lhandempty
+            if not hidden and not queued and not casting and not targetexists
+                settimer "timer__equip" 0
+                if not find var__my_weapon backpack
+                    @setvar! var__my_weapon 0
+                    if findtype config__weapon_graphic backpack as alias__packed_weapon
+                        @setvar! var__my_weapon alias__packed_weapon
+                    endif
+                endif
+
+                if find var__my_weapon backpack as alias__weapon_to_equip
+                    # lift waits for the held item. The retry timer spaces the next hand check,
+                    # so a refused equip after a disarm does not stall recovery.
+                    lift alias__weapon_to_equip
+                    drop self lefthand
+                    if config__sysmsg = 1
+                        sysmsg "Axe equip requested: serial={{alias__weapon_to_equip}}. The next check reads the hand." 88
+                    endif
+                    wait wait__short
+                elseif timer "timer__message" >= cooldown__message
+                    overhead "[ axe, out ]" 254
+                    settimer "timer__message" 0
+                endif
+            endif
+        elseif findlayer self lefthand as alias__equipped_weapon
+            if var__my_weapon != alias__equipped_weapon
+                settimer "timer__equip" 0
+                getlabel alias__equipped_weapon label__hand_weapon
+                # item-list names the type "two handed axe" and hally-mage reads "two-handed axe".
+                if "two-handed axe" in label__hand_weapon or "two handed axe" in label__hand_weapon or "Two-Handed Axe" in label__hand_weapon or "Two Handed Axe" in label__hand_weapon
+                    @setvar! var__my_weapon alias__equipped_weapon
+                    if config__sysmsg = 1
+                        sysmsg "Axe adopted from the left hand: serial={{alias__equipped_weapon}}." 88
+                    endif
+                endif
+            endif
+        endif
+    endif

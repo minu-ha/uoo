@@ -2,6 +2,9 @@
 
 Grouped by what a script does. Folders say *what*, file names say *which*.
 
+`combat/pvp.razor` and every `gather/` loop are generated: edit `module/` and `recipe/` at the repo root and run
+`python3 util/build-scripts.py`. The design is [blueprint/modules.html](../blueprint/modules.html).
+
 ```
 combat/    hunting loops per template, shared PvP self sustain
 hotkey/    one-shot macros bound to a key: weapon swaps, dress, cancel target, bard buffs, moongate

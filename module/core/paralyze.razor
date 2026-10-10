@@ -1,0 +1,16 @@
+# The trapped pouch, the one thing that acts while held.
+#@ needs core/wait core/message
+#@ loop
+    # ################################################################################
+    # # PARALYZE
+    # ################################################################################
+    # Nothing else can act while held, so the pouch goes out at once, as in bard-necro-enhanced.
+    if paralyzed
+        if findtype 3705 backpack 38
+            yell "[Pouch"
+            wait wait__short
+        elseif timer "timer__message" >= cooldown__message
+            overhead "[ pouch, out ]" 254
+            settimer "timer__message" 0
+        endif
+    endif

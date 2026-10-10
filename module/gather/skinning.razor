@@ -1,0 +1,244 @@
+# Forensic Evaluation carving of corpses within 2 tiles, between fights.
+#@ needs core/message core/heal gather/combat-target
+#@ hotkeys Cancel Current Target
+#@ config
+# Skinning. 1 carves every creature corpse within 2 tiles, grey or not, by targeting each corpse.
+# Player remains are never targeted. 0 carves grey corpses only, through Smart Harvest on self.
+# Where the server refuses the first as a criminal action, grey corpses only for 5 minutes.
+@setvar! config__use_skinning 1
+@setvar! config__skin_unowned 1
+#@ wait
+# The knife cursor must arrive inside this block. A late cursor would block every input guard.
+@setvar! wait__carve_target 2000
+# How long Smart Harvest waits for the server reply after target self.
+@setvar! wait__carve_reply 1500
+# Forensic Evaluation has its own 0.5 second cooldown. This spaces the corpse search as well.
+@setvar! cooldown__carve 700
+# After a criminal action refusal, carve grey corpses only for 5 minutes.
+@setvar! cooldown__grey_only 300000
+#@ timer
+if not timerexists "timer__carve"
+    createtimer "timer__carve"
+endif
+
+if not timerexists "timer__grey_only"
+    createtimer "timer__grey_only"
+endif
+#@ ready
+settimer "timer__carve" cooldown__carve
+settimer "timer__grey_only" cooldown__grey_only
+#@ state
+# Scratch: 1 when a Z pick arrived while the knife cursor was up.
+@setvar! var__pick_during_carve 0
+# Scratch: 1 targets the corpse, 0 uses Smart Harvest. Chosen for each carve.
+@setvar! var__carve_direct 0
+# Scratch: 1 when the corpse found this pass may be carved.
+@setvar! var__corpse_ok 0
+# 1 after a corpse carving criminal act, read from the carve reply. The label check should keep
+# player remains out, so this is only a safety net. Direct carving then stays off until the next Play.
+@setvar! var__carve_crime 0
+# Corpse that missed once (too far or busy). It gets one more request, then it is ignored.
+@setvar! var__carve_retry 0
+# Scratch Smart Harvest reply: 0 none yet, 1 carved, 2 nothing left to carve here.
+@setvar! var__carve_reply 0
+# Selected knife serial, reused across Stop and Play. 0 means rediscover from the backpack.
+if not varexist var__my_knife
+    @setvar! var__my_knife 0
+endif
+#@ loop
+    # ################################################################################
+    # # SKINNING
+    # ################################################################################
+    # Smart Harvest (target self) carves grey corpses within 2 tiles. Corpses without looting
+    # rights need the corpse itself as the target. Wiki: Forensic_Evaluation.
+    # Some areas refuse that as a criminal action: "Criminal actions are not permitted in the
+    # Sanctuary Dungeon." A refusal switches this block to Smart Harvest for cooldown__grey_only,
+    # and each later refusal starts that window again.
+    #
+    # Handled corpses are ignored so findtype returns the next one. Only the startup clearignore
+    # empties the list. Leather packing ignores pouch leather without clearing it.
+    #   direct: creature corpses only. A finished or refused corpse is ignored. A miss (too far,
+    #           busy) gets one more request, and a second miss ignores it.
+    #           A creature corpse label reads "<creature> corpse". A player corpse reads
+    #           "the remains of <name>", and carving one without looting rights is a criminal
+    #           act (in-game 2026-10-07). Any label without "corpse", or with "remains", is
+    #           ignored without a request.
+    #   Smart Harvest: until the server finds nothing worth carving here, then ignore every
+    #                  corpse within 2 tiles until a new one drops.
+    #
+    # Carving waits while an enemy is remembered, so it runs between fights. A carve moves Razor's
+    # lasttarget to the corpse or to yourself, and the V after a Z can come any time later.
+    # setlasttarget cannot put it back in this client: it opened a Set Last Target cursor and held
+    # the script on that line (blueprint/razor.html part 3). A Z pick made while the knife cursor is
+    # up cancels that cursor rather than overwriting lasttarget.
+    # The profile shows the refusal itself. The script only records the mode change.
+    if insysmsg "Criminal actions are not permitted"
+        settimer "timer__grey_only" 0
+        if config__sysmsg = 1
+            sysmsg "Carve mode: grey corpses only for 5 minutes after a criminal action refusal." 88
+        endif
+    endif
+
+    if config__use_skinning = 1 and timer "timer__carve" >= cooldown__carve and var__combat_target = 0
+        settimer "timer__carve" 0
+        @setvar! var__carve_direct 0
+        if config__skin_unowned = 1 and var__carve_crime = 0 and timer "timer__grey_only" >= cooldown__grey_only
+            @setvar! var__carve_direct 1
+        endif
+
+        if diffhits < config__heal_hits and not poisoned and not paralyzed and not hidden and not queued and not casting and not targetexists and findtype 8198 ground -1 -1 2 as alias__corpse
+            @setvar! var__corpse_ok 1
+            if var__carve_direct = 1
+                getlabel alias__corpse label__corpse
+                @setvar! var__corpse_ok 0
+                if "corpse" in label__corpse or "Corpse" in label__corpse
+                    @setvar! var__corpse_ok 1
+                endif
+                if "remains" in label__corpse or "Remains" in label__corpse
+                    @setvar! var__corpse_ok 0
+                endif
+                if var__corpse_ok = 0
+                    @ignore alias__corpse
+                    if config__sysmsg = 1
+                        sysmsg "Carve skip: corpse={{alias__corpse}}, label={{label__corpse}}." 88
+                    endif
+                endif
+            endif
+
+            if var__corpse_ok = 1
+                if not find var__my_knife backpack
+                    @setvar! var__my_knife 0
+                    if findtype 11552|11564 backpack as alias__packed_knife
+                        @setvar! var__my_knife alias__packed_knife
+                    endif
+                endif
+
+                if find var__my_knife backpack as alias__knife
+                    dclick alias__knife
+                    waitfortarget wait__carve_target
+
+                    if targetexists "neutral" and not hidden
+                        # No enemy was remembered when this block started, so a live enemy in lasttarget
+                        # now is a Z pressed during the cursor wait.
+                        @setvar! var__pick_during_carve 0
+                        if find lasttarget ground -1 -1 12 as alias__fresh_target
+                            @setvar! var__fresh_serial alias__fresh_target
+                            if 0x40000000 > var__fresh_serial
+                                if not dead alias__fresh_target
+                                    if noto alias__fresh_target = "hostile" or noto alias__fresh_target = "criminal" or noto alias__fresh_target = "enemy" or noto alias__fresh_target = "murderer"
+                                        @setvar! var__pick_during_carve 1
+                                        @setvar! var__combat_target alias__fresh_target
+                                        settimer "timer__combat_target_grace" 0
+                                    endif
+                                endif
+                            endif
+                        endif
+
+                        if var__pick_during_carve = 1
+                            # Leave lasttarget on the new enemy. The corpse is tried again after the fight.
+                            hotkey "Cancel Current Target"
+                            if config__sysmsg = 1
+                                sysmsg "Carve cancelled: an enemy was picked during the knife cursor." 88
+                            endif
+                            wait wait__short
+                        elseif var__carve_direct = 1
+                            target alias__corpse
+                            if config__sysmsg = 1
+                                sysmsg "Carve request: corpse={{alias__corpse}}." 88
+                            endif
+                            # Read the reply, without break. The criminal lines come first so a later
+                            # match cannot clear them before they are seen. Replies (in-game 2026-10-07):
+                            #   1 "You carve materials from the corpse." or "That corpse has already been carved."
+                            #   2 "That is too far away." or "You must wait to perform another action."
+                            #   3 a criminal act or a criminal action refusal
+                            @setvar! var__carve_reply 0
+                            settimer "timer__carve" 0
+                            while var__carve_reply = 0 and timer "timer__carve" < wait__carve_reply
+                                if insysmsg "corpse carving on"
+                                    @setvar! var__carve_reply 3
+                                    @setvar! var__carve_crime 1
+                                    overhead "[ carve, grey only ]" 254
+                                elseif insysmsg "Criminal actions are not permitted"
+                                    @setvar! var__carve_reply 3
+                                    settimer "timer__grey_only" 0
+                                elseif insysmsg "You carve materials"
+                                    @setvar! var__carve_reply 1
+                                elseif insysmsg "already been carved"
+                                    @setvar! var__carve_reply 1
+                                elseif insysmsg "too far away"
+                                    @setvar! var__carve_reply 2
+                                elseif insysmsg "must wait to perform another action"
+                                    @setvar! var__carve_reply 2
+                                else
+                                    wait wait__poll
+                                endif
+                            endwhile
+
+                            # A miss gets one more request, so a step closer can still carve it.
+                            # Everything else, and a second miss, ignores the corpse.
+                            if var__carve_reply = 2 and var__carve_retry != alias__corpse
+                                @setvar! var__carve_retry alias__corpse
+                            else
+                                @ignore alias__corpse
+                                @setvar! var__carve_retry 0
+                            endif
+
+                            if config__sysmsg = 1
+                                if var__carve_reply = 1
+                                    sysmsg "Carve done: corpse={{alias__corpse}}." 88
+                                elseif var__carve_reply = 2 and var__carve_retry = alias__corpse
+                                    sysmsg "Carve miss: corpse={{alias__corpse}}, too far or busy. One more try." 88
+                                elseif var__carve_reply = 2
+                                    sysmsg "Carve miss again: corpse={{alias__corpse}}. Skipped." 88
+                                elseif var__carve_reply = 3
+                                    sysmsg "Carve refused as criminal: corpse={{alias__corpse}}. Grey corpses only for now." 88
+                                else
+                                    sysmsg "Carve no reply: corpse={{alias__corpse}}. Skipped." 88
+                                endif
+                            endif
+                        else
+                            target self
+                            if config__sysmsg = 1
+                                sysmsg "Carve request: Smart Harvest." 88
+                            endif
+                            # Condition-terminated wait, without break.
+                            @setvar! var__carve_reply 0
+                            settimer "timer__carve" 0
+                            while var__carve_reply = 0 and timer "timer__carve" < wait__carve_reply
+                                if insysmsg "worth carving"
+                                    @setvar! var__carve_reply 2
+                                elseif insysmsg "You carve materials"
+                                    @setvar! var__carve_reply 1
+                                else
+                                    wait wait__poll
+                                endif
+                            endwhile
+
+                            # Nothing grey is left here. Bounded sweep, no break.
+                            if var__carve_reply = 2
+                                for 10
+                                    if findtype 8198 ground -1 -1 2 as alias__carved_corpse
+                                        @ignore alias__carved_corpse
+                                    endif
+                                endfor
+                            endif
+
+                            if config__sysmsg = 1
+                                if var__carve_reply = 1
+                                    sysmsg "Smart Harvest: carved." 88
+                                elseif var__carve_reply = 2
+                                    sysmsg "Smart Harvest: nothing left here. Corpses within 2 tiles skipped." 88
+                                else
+                                    sysmsg "Smart Harvest: no reply." 88
+                                endif
+                            endif
+                        endif
+                    endif
+                elseif timer "timer__message" >= cooldown__message
+                    overhead "[ knife, out ]" 254
+                    settimer "timer__message" 0
+                endif
+            endif
+        endif
+        settimer "timer__carve" 0
+    endif

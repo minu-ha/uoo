@@ -1,0 +1,16 @@
+# Total Refresh at or below refresh_stam.
+#@ needs core/switches
+#@ hotkeys Drink Refresh
+#@ config
+# Current stamina at or below this drinks a Refresh.
+@setvar! config__refresh_stam 15
+#@ loop
+    # ################################################################################
+    # # REFRESH
+    # ################################################################################
+    if stam <= config__refresh_stam and config__use_potions = 1 and not paralyzed and not hidden and not queued and not targetexists
+        if findtype "Red Potion" self
+            hotkey "Drink Refresh"
+            wait wait__short
+        endif
+    endif

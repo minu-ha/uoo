@@ -1,0 +1,11 @@
+# Switches more than one core block reads. Each loop's recipe sets the ones it needs.
+#@ config
+# Independent features. No option overrides another.
+@setvar! config__use_magery 1
+@setvar! config__use_potions 1
+@setvar! config__use_bandages 1
+# 1 makes our own casts wait while the walk bar runs, so a step does not break them.
+# 0 casts while walking, for a fight where there is no better moment to wait for.
+@setvar! config__walk_guard 1
+# 1 when warmode is the player's manual control window: our own casts stand down while it is on.
+@setvar! config__warmode_is_manual 0

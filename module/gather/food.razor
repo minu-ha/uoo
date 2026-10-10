@@ -1,0 +1,23 @@
+# Eats from a tray once a minute while Food Satisfaction is missing.
+#@ wait
+@setvar! cooldown__food 60000
+#@ timer
+if not timerexists "timer__food"
+    createtimer "timer__food"
+endif
+#@ ready
+settimer "timer__food" cooldown__food
+#@ loop
+    # ################################################################################
+    # # FOOD
+    # ################################################################################
+    # Looked at once a minute. The buff lasts far longer.
+    if timer "timer__food" >= cooldown__food and not findbuff "Food Satisfaction"
+        if not hidden and not queued and not casting and not targetexists
+            settimer "timer__food" 0
+            if findtype tray backpack as alias__food
+                dclick alias__food
+                wait wait__short
+            endif
+        endif
+    endif

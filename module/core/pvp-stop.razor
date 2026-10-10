@@ -1,0 +1,12 @@
+# Stops at once inside the structured PvP restrictions, where these loops may not run.
+#@ prelude
+if pvp
+    overhead "[ script, blocked ]" 254
+    stop
+endif
+#@ loop
+    # The pvp expression means structured-PvP restrictions, not a field PK encounter.
+    if pvp
+        overhead "[ script, blocked ]" 254
+        stop
+    endif

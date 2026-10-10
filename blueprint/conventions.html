@@ -70,6 +70,10 @@
 <td>Razor 스크립트. 모두가 공유한다</td>
 </tr>
 <tr>
+<td><code>module/</code>, <code>recipe/</code></td>
+<td>한 벌만 둔 루프 블록과 루프마다의 레시피. <code>util/build-scripts.py</code>가 <code>script/combat/pvp</code>·<code>script/gather/*</code>로 조립한다 (<a href="modules.html">modules.html</a>)</td>
+</tr>
+<tr>
 <td><code>config/</code></td>
 <td>사람마다 클라이언트 설정 원본 하나 (<code>config/&lt;이름&gt;/</code>). 링크 방식과 파일별 설명은 <a href="../config/README.md">config/README.md</a></td>
 </tr>
@@ -83,7 +87,8 @@
 </tr>
 <tr>
 <td><code>util/</code></td>
-<td><code>setup.sh</code> (게임을 저장소에 링크), <code>check.sh</code> (스크립트 블록 짝과 선언 없이 쓴 접두 변수 검사),
+<td><code>setup.sh</code> (게임을 저장소에 링크), <code>build-scripts.py</code> (모듈로 루프 조립),
+<code>check.sh</code> (스크립트 블록 짝과 선언 없이 쓴 접두 변수 검사, 인자 없이 돌리면 조립 결과물 검사도),
 <code>check-blueprint.sh</code> (설계 문서의 첫 줄 doctype, 링크, 문서 목록, 꺾쇠 검사)</td>
 </tr>
 </tbody>
@@ -188,7 +193,8 @@ Magery·무기·붕대 등 독립 기능 옵션을 본문에서 선택하며, �
 <h2 id="02" data-part="모양">02 스크립트 모양</h2>
 
 <h3 id="02.A">02.A 기준 파일</h3>
-<p>기준 파일은 <code>script/gather/skinning-enhanced.razor</code>와 <code>script/restock/loadout.razor</code>다. 새 코드는 이 문서의 규칙을 따르고,
+<p>사냥·채집 루프는 <code>module/</code>과 <code>recipe/</code>로 조립한다 (<a href="modules.html">modules.html</a>). 결과물을 직접 고치지 않고 모듈과 레시피를 고친다.
+기준 파일은 <code>script/gather/skinning-enhanced.razor</code>와 <code>script/restock/loadout.razor</code>다. 새 코드는 이 문서의 규칙을 따르고,
 아직 옮기지 못한 파일을 고칠 때는 그 파일의 스타일을 유지한다.</p>
 
 <h3 id="02.B">02.B 구조와 섹션 배너</h3>
@@ -233,7 +239,8 @@ Magery·무기·붕대 등 독립 기능 옵션을 본문에서 선택하며, �
 # ####################################################################################</code></pre>
 
 <h3 id="02.C">02.C 헤더</h3>
-<p>직접 만든 스크립트는 첫 줄에 한 줄 설명, 둘째 줄에 <code>Needs:</code>로 전제조건을 쓴다 (<code>script/loot/claim-loot.razor</code>).</p>
+<p>직접 만든 스크립트는 첫 줄에 한 줄 설명, 둘째 줄에 <code>Needs:</code>로 전제조건을 쓴다 (<code>script/loot/claim-loot.razor</code>).
+조립한 루프는 레시피의 헤더 뒤에 조립기가 <code>Hotkeys:</code> 줄과 "Generated from …" 줄을 붙인다 (<a href="modules.html#05">modules.html</a> 05절).</p>
 <pre><code># Put your share from the distribution chest into your own loot container.
 # Needs: global__my_loot_container (asked for on first run), container within 2 tiles</code></pre>
 

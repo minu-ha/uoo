@@ -1,0 +1,70 @@
+# Heal potion at heal_hits, Greater Heal at emergency_hits when no potion went out.
+#@ needs core/switches core/message core/reagents
+#@ hotkeys Drink Heal, > Greater Heal/Cure Self, Cancel Current Target
+#@ config
+# Missing hit points, not percent.
+#   heal_hits       heal potion
+#   emergency_hits  Greater Heal when no heal potion can go out. Not below heal_hits
+@setvar! config__heal_hits 35
+@setvar! config__emergency_hits 35
+# Minimum current mana for Greater Heal. It keeps no reserve: raise it to 31 to always leave
+# 20 mana for an attack or Teleport.
+@setvar! config__mana_greater_heal 11
+#@ state
+# Scratch: 1 once a heal potion went out on this pass. HEAL only.
+@setvar! var__heal_potion_out 0
+#@ loop
+    # ################################################################################
+    # # HEAL
+    # ################################################################################
+    # Heavy damage drinks first, because the potion is instant and goes out during a cast.
+    # Greater Heal follows when no potion went out on this pass and the loss is at the
+    # emergency line: none carried, on its own cooldown, or the bar still running.
+    # The bar skips the label read while it runs. The label stays authoritative when the bar
+    # is missing. Greater Heal waits for the walk bar and for warmode as the switches say.
+    if not poisoned and not paralyzed and not hidden and not queued and not targetexists and diffhits >= config__heal_hits
+        @setvar! var__heal_potion_out 0
+        if config__use_potions = 1 and cooldown "heal pot" = 0
+            if findtype "Yellow Potion" self as alias__heal_potion
+                getlabel alias__heal_potion label__heal_potion
+                if "next usable" in label__heal_potion
+                    # Still on its own cooldown.
+                else
+                    hotkey "Drink Heal"
+                    @setvar! var__heal_potion_out 1
+                    wait wait__short
+                endif
+            elseif timer "timer__message" >= cooldown__message
+                overhead "[ heal pot, out ]" 254
+                settimer "timer__message" 0
+            endif
+        endif
+
+        if var__heal_potion_out = 0 and diffhits >= config__emergency_hits and config__use_magery = 1 and var__regs_greater_heal = 1 and mana >= config__mana_greater_heal and not casting
+            if config__warmode_is_manual = 0 or not warmode
+                if config__walk_guard = 0 or cooldown "walk" = 0
+                    hotkey "> Greater Heal/Cure Self"
+                    if config__sysmsg = 1
+                        sysmsg "Agent: Greater Heal/Cure Self." 88
+                    endif
+                    wait wait__short
+
+                    for 60
+                        if not casting
+                            break
+                        endif
+                        if insysmsg "Your concentration is disturbed, thus ruining thy spell."
+                            break
+                        endif
+                        wait wait__poll
+                    endfor
+
+                    # The agent leaves its beneficial cursor up when there is nothing left to heal.
+                    if targetexists "beneficial" and diffhits = 0
+                        hotkey "Cancel Current Target"
+                        wait wait__short
+                    endif
+                endif
+            endif
+        endif
+    endif

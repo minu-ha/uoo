@@ -25,6 +25,7 @@ const blueprint_docs = [
   { file: '_index.html', name: 'Overview', label: '한눈에' },
   { file: 'workflow.html', name: 'Workflow', label: '작업 방식', group: '규칙' },
   { file: 'conventions.html', name: 'Conventions', label: '저장소와 스크립트 규칙', group: '규칙' },
+  { file: 'modules.html', name: 'Modules', label: '모듈과 조립', group: '규칙' },
   { file: 'razor.html', name: 'Razor', label: 'Outlands Razor 문법', group: '문법 · 규정' },
   { file: 'pvp.html', name: 'PvP', label: 'PvP 규칙', group: '문법 · 규정' },
   { file: 'overheads.html', name: 'Overheads', label: '머리 위 메시지와 쿨다운 바', group: '사양' },

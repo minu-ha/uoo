@@ -1,0 +1,102 @@
+# Smart Harvest with the Hatchet in the left hand, equipping it first when the hand is empty.
+#@ needs core/message core/heal gather/auto-recall gather/tracking-setup
+#@ hotkeys Use item in hand
+#@ wait
+# Wait for the hand tool cursor in the same block before any other automatic action.
+@setvar! wait__harvest_target 3000
+# Let the equip request settle before the next hand verification.
+@setvar! wait__equip 1000
+# Normal tool retry. Resource exhaustion uses the shorter interval below.
+@setvar! cooldown__harvest_retry 4000
+@setvar! cooldown__harvest_out_retry 2000
+#@ timer
+if not timerexists "timer__harvest"
+    createtimer "timer__harvest"
+endif
+#@ ready
+settimer "timer__harvest" cooldown__harvest_retry
+#@ state
+# Delay for the next tool attempt, in ms. Resource exhaustion selects the shorter retry.
+# Each attempt restores the normal interval. Reuse timer__harvest without another timer.
+@setvar! var__harvest_retry cooldown__harvest_retry
+
+# Selected Hatchet serial, reused across Stop and Play in this client session.
+# 0 means no tool selected yet. Backpack discovery is used only when this cached tool is missing.
+if not varexist var__my_hatchet
+    @setvar! var__my_hatchet 0
+endif
+#@ loop
+    # ####################################################################################
+    # # SMART HARVEST
+    # ####################################################################################
+    # Tracking/Recall reads take priority over this lower-priority result message.
+    # The profile displays harvest,out. Start the next retry from this response, without blocking recovery.
+    if insysmsg "You do not see any harvestable resources nearby"
+        @setvar! var__harvest_retry cooldown__harvest_out_retry
+        settimer "timer__harvest" 0
+    endif
+
+    # Equip independently of book, Hunting and weight readiness. Only a Recall decision pauses both.
+    if var__recall_needed = 0 and diffhits < config__heal_hits and not poisoned and not paralyzed and not warmode and timer "timer__harvest" >= var__harvest_retry
+        if not hidden and not queued and not casting and not targetexists and cooldown "walk" = 0
+            settimer "timer__harvest" 0
+            @setvar! var__harvest_retry cooldown__harvest_retry
+
+            # Follow bard-mace: an empty left hand needs equipment, regardless of type-search results.
+            if lhandempty
+                if not find var__my_hatchet backpack
+                    @setvar! var__my_hatchet 0
+                    if findtype 3907|3908 backpack as alias__packed_hatchet
+                        @setvar! var__my_hatchet alias__packed_hatchet
+                    endif
+                endif
+
+                if find var__my_hatchet backpack as alias__hatchet_to_equip
+                    # lift waits for the held item. Do not infer equipped state from this request.
+                    lift alias__hatchet_to_equip
+                    drop self lefthand
+                    if config__sysmsg = 1
+                        sysmsg "Hatchet equip requested: stored serial={{var__my_hatchet}}. Next attempt checks lefthand." 88
+                    endif
+                    wait wait__equip
+                elseif timer "timer__message" >= cooldown__message
+                    overhead "[ hatchet, out ]" 254
+                    settimer "timer__message" 0
+                endif
+            elseif findlayer self lefthand as alias__equipped_hatchet
+                # Adopt an already held Hatchet once, including replacement tools with a new serial.
+                if var__my_hatchet != alias__equipped_hatchet
+                    getlabel alias__equipped_hatchet label__hand_tool
+                    if "hatchet" in label__hand_tool or "Hatchet" in label__hand_tool
+                        @setvar! var__my_hatchet alias__equipped_hatchet
+                    elseif not hidden and not queued and not casting and not targetexists and not warmode
+                        # Clear only a different left-hand tool. The next attempt equips our Hatchet.
+                        lift alias__equipped_hatchet
+                        drop backpack
+                        wait wait__short
+                    endif
+                endif
+
+                # A slot-to-serial match proves this selected tool is actually in lefthand.
+                # One guard chain preserves book/Hunting bypasses without mixing and/or.
+                # Recheck input after tool discovery. Do not add a separate ready state.
+                if var__my_hatchet != alias__equipped_hatchet or diffweight <= 0 or hidden or queued or casting or targetexists or warmode
+                    # The hand, spare weight or player input is not ready for harvesting.
+                elseif config__auto_recall != 0 and config__require_runebook != 0 and var__recall_book_available != 1
+                    # Automatic Recall requires a carried book only when require_runebook is on.
+                elseif config__auto_recall != 0 and config__recall_on_detection != 0 and config__use_tracking != 0 and var__tracking_hunting_active != 1
+                    # Hunting is required only when all three detection switches are on.
+                else
+                    hotkey "Use item in hand"
+                    waitfortarget wait__harvest_target
+
+                    # The tool queue can still be pending. A neutral cursor is ready to answer.
+                    if targetexists "neutral" and not hidden and not casting and not warmode
+                        target self
+                        wait wait__short
+                    endif
+                    settimer "timer__harvest" 0
+                endif
+            endif
+        endif
+    endif

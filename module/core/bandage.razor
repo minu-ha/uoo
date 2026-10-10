@@ -1,0 +1,23 @@
+# Self bandage while hurt or poisoned, never over a running one.
+#@ needs core/switches core/message
+#@ hotkeys Bandage Self
+#@ config
+# Healing must be above this to bandage. 0 means any Healing at all.
+@setvar! config__heal_skill_min 0
+#@ loop
+    # ################################################################################
+    # # BANDAGE
+    # ################################################################################
+    # Never restarts a running bandage, and full health does not start one. Its target cursor
+    # would replace a held precast, so it waits while any cursor is up.
+    if config__use_bandages = 1 and not bandaging and not paralyzed and not hidden and not queued and not targetexists and skill "Healing" > config__heal_skill_min
+        if diffhits > 0 or poisoned
+            if findtype 3617 self
+                hotkey "Bandage Self"
+                wait wait__short
+            elseif timer "timer__message" >= cooldown__message
+                overhead "[ bandage, out ]" 254
+                settimer "timer__message" 0
+            endif
+        endif
+    endif

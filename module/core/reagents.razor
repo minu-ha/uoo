@@ -1,0 +1,86 @@
+# Reagent flags for the Magery recovery spells and the two self buffs, read on a clock and
+# right after a refusal. Each loop sets its own interval.
+#@ needs core/switches
+#@ wait
+# Reagent read interval. Five lookups each time. A refill counts within this, and running out
+# is caught at once by the refusal line.
+@setvar! cooldown__reagents 10000
+#@ timer
+if not timerexists "timer__reagents"
+    createtimer "timer__reagents"
+endif
+#@ ready
+# Ready on the first pass, so reagents are read before the first cast.
+settimer "timer__reagents" cooldown__reagents
+#@ state
+# Reagent flags, written only by REAGENTS. 1 when every reagent of that spell was found.
+#   Cure            garlic 3972, ginseng 3973
+#   Heal            garlic, ginseng, silk 3981
+#   Greater Heal    garlic, ginseng, silk, mandrake 3974
+#   Reactive Armor  garlic, silk, ash 3980
+#   Reflection      garlic, silk, mandrake
+@setvar! var__regs_cure 0
+@setvar! var__regs_heal 0
+@setvar! var__regs_greater_heal 0
+@setvar! var__regs_reactive_armor 0
+@setvar! var__regs_magic_reflect 0
+@setvar! var__has_garlic 0
+@setvar! var__has_ginseng 0
+@setvar! var__has_mandrake 0
+@setvar! var__has_ash 0
+@setvar! var__has_silk 0
+#@ loop
+    # ################################################################################
+    # # REAGENTS
+    # ################################################################################
+    # First in the pass, so every cast block below reads fresh flags. On the interval, or at once
+    # after a refusal for reagents, so a stale flag cannot send the same doomed cast every pass.
+    if config__use_magery = 1
+        if timer "timer__reagents" >= cooldown__reagents or insysmsg "More reagents are needed"
+            settimer "timer__reagents" 0
+
+            @setvar! var__has_garlic 0
+            @setvar! var__has_ginseng 0
+            @setvar! var__has_mandrake 0
+            @setvar! var__has_ash 0
+            @setvar! var__has_silk 0
+
+            if findtype 3972 self
+                @setvar! var__has_garlic 1
+            endif
+            if findtype 3973 self
+                @setvar! var__has_ginseng 1
+            endif
+            if findtype 3974 self
+                @setvar! var__has_mandrake 1
+            endif
+            if findtype 3980 self
+                @setvar! var__has_ash 1
+            endif
+            if findtype 3981 self
+                @setvar! var__has_silk 1
+            endif
+
+            @setvar! var__regs_cure 0
+            @setvar! var__regs_heal 0
+            @setvar! var__regs_greater_heal 0
+            @setvar! var__regs_reactive_armor 0
+            @setvar! var__regs_magic_reflect 0
+
+            if var__has_garlic = 1 and var__has_ginseng = 1
+                @setvar! var__regs_cure 1
+            endif
+            if var__has_garlic = 1 and var__has_ginseng = 1 and var__has_silk = 1
+                @setvar! var__regs_heal 1
+            endif
+            if var__has_garlic = 1 and var__has_ginseng = 1 and var__has_silk = 1 and var__has_mandrake = 1
+                @setvar! var__regs_greater_heal 1
+            endif
+            if var__has_garlic = 1 and var__has_silk = 1 and var__has_ash = 1
+                @setvar! var__regs_reactive_armor 1
+            endif
+            if var__has_garlic = 1 and var__has_silk = 1 and var__has_mandrake = 1
+                @setvar! var__regs_magic_reflect 1
+            endif
+        endif
+    endif

@@ -1,0 +1,135 @@
+# Food and lumber packing on the housekeeping clock: Logs become Boards and go to the loot pouch.
+#@ needs core/message core/light-heal gather/housekeeping-pass gather/auto-recall
+#@ config
+# Convert Logs and pack Boards together. Reuse the looting pouch selected by loadout.
+@setvar! config__pack_lumber 1
+#@ wait
+# Allow inventory updates after conversion, opening the pouch and drag/drop.
+@setvar! wait__lumber_item 500
+# Per-phase request budget: Logs and Boards each yield after 2.5 seconds, between item requests.
+@setvar! wait__lumber_batch 2500
+@setvar! cooldown__food 60000
+# 120000 = 2 minutes. Use 180000 for 3 minutes.
+@setvar! cooldown__pack_lumber 120000
+#@ timer
+if not timerexists "timer__food"
+    createtimer "timer__food"
+endif
+
+if not timerexists "timer__pack_lumber"
+    createtimer "timer__pack_lumber"
+endif
+#@ ready
+settimer "timer__food" cooldown__food
+settimer "timer__pack_lumber" 0
+#@ state
+# Scratch graphic for the two lumber passes: 7133 Logs, then 7127 Boards. No persistent batch stage.
+@setvar! var__lumber_graphic 0
+#@ loop
+    # ####################################################################################
+    # # HOUSEKEEPING
+    # ####################################################################################
+    # Slow inventory reads share the housekeeping clock. Food and lumber skip optional work once a
+    # Recall decision is latched.
+    if var__housekeeping_pass = 1
+        settimer "timer__housekeeping" 0
+
+        # FOOD: skip optional work once a Recall decision is latched.
+        if var__recall_needed = 0 and diffhits < config__light_hits
+            if timer "timer__food" >= cooldown__food
+                if not poisoned and not warmode and not findbuff "Food Satisfaction"
+                    if not hidden and not queued and not casting and not targetexists
+                        settimer "timer__food" 0
+                        if findtype tray backpack as alias__food
+                            dclick alias__food
+                            wait wait__short
+                        endif
+                    endif
+                endif
+            endif
+        endif
+
+        # LUMBER: try each selected stack once, with no snapshots or foreach iterator.
+        # Bound scans by the existing timer. A failed conversion/drop waits for the next interval.
+        if config__pack_lumber = 1 and var__recall_needed = 0 and timer "timer__pack_lumber" >= cooldown__pack_lumber
+            if diffhits < config__light_hits and not poisoned and not paralyzed and not warmode
+                if not hidden and not queued and not casting and not targetexists
+                    settimer "timer__pack_lumber" 0
+                    if find global__my_looting_pouch backpack
+                        if config__sysmsg = 1
+                            sysmsg "Lumber pack BEGIN: convert Logs, then move Boards." 88
+                        endif
+                        dclick global__my_looting_pouch
+                        wait wait__lumber_item
+
+                        # Two phases share one body: Logs first, then current Boards.
+                        # Both scans end by their conditions. Each phase has its own time budget.
+                        # Do not reuse pre-conversion serials after conversion or stack merging.
+                        for 2
+                            if index = 0
+                                @setvar! var__lumber_graphic 7133
+                            else
+                                @setvar! var__lumber_graphic 7127
+                            endif
+                            settimer "timer__pack_lumber" 0
+                            @clearignore
+
+                            # End loops by their conditions. No break skips an if scope or resets the outer for.
+                            # Settle the pouch/previous-phase queue within this phase's existing budget.
+                            while queued and timer "timer__pack_lumber" < wait__lumber_batch and not dead and not pvp and diffhits < config__light_hits and not poisoned and not paralyzed and not warmode and not hidden and not casting and not targetexists
+                                wait wait__poll
+                            endwhile
+
+                            # No hue filter. Search current inventory after each conversion or move.
+                            # The timer advances even when ignore cannot advance a failed/packed stack.
+                            while timer "timer__pack_lumber" < wait__lumber_batch and not queued and not dead and not pvp and diffhits < config__light_hits and not poisoned and not paralyzed and not warmode and not hidden and not casting and not targetexists and find global__my_looting_pouch backpack and findtype var__lumber_graphic backpack as alias__lumber_stack
+                                if var__lumber_graphic = 7133
+                                    if config__sysmsg = 1
+                                        sysmsg "Lumber convert: serial={{alias__lumber_stack}}." 88
+                                    endif
+                                    dclick alias__lumber_stack
+                                    wait wait__lumber_item
+                                elseif find alias__lumber_stack global__my_looting_pouch
+                                    # Recursive backpack searches can return Boards already in the pouch.
+                                    if config__sysmsg = 1
+                                        sysmsg "Lumber skip: serial={{alias__lumber_stack}}, already in pouch." 88
+                                    endif
+                                elseif find global__my_looting_pouch backpack
+                                    if config__sysmsg = 1
+                                        sysmsg "Lumber move request: serial={{alias__lumber_stack}}, pouch={{global__my_looting_pouch}}." 88
+                                    endif
+                                    # Complete lift/drop together. Do not leave the item held during a wait.
+                                    lift alias__lumber_stack 60000
+                                    drop global__my_looting_pouch -1 -1
+                                    wait wait__lumber_item
+                                endif
+                                # Check container membership before ignore, which can hide it from find.
+                                # Skip this selected serial only for this phase, including failed requests.
+                                @ignore alias__lumber_stack
+
+                                # A pending item queue pauses the next search, without leaving its loop scope.
+                                while queued and timer "timer__pack_lumber" < wait__lumber_batch and not dead and not pvp and diffhits < config__light_hits and not poisoned and not paralyzed and not warmode and not hidden and not casting and not targetexists
+                                    wait wait__poll
+                                endwhile
+                            endwhile
+                            @clearignore
+                        endfor
+                        if config__sysmsg = 1
+                            sysmsg "Lumber pack END: returning to recovery and harvest checks." 88
+                            if queued
+                                sysmsg "Lumber pack: item queue still active. Harvest waits for queued=0." 88
+                            endif
+                            if targetexists
+                                sysmsg "Lumber pack: target cursor active. Harvest leaves it to the player." 88
+                            endif
+                        endif
+                    elseif timer "timer__message" >= cooldown__message
+                        overhead "[ loot pouch, out ]" 254
+                        settimer "timer__message" 0
+                    endif
+                    # The next interval starts after this batch, including a missing-pouch attempt.
+                    settimer "timer__pack_lumber" 0
+                endif
+            endif
+        endif
+    endif

@@ -21,6 +21,7 @@ Ultima Online Outlands용 Razor 스크립트 (`script/`), 클라이언트 설정
 - `config/` 아래는 게임을 끈 상태에서만 고친다 → [workflow.html](blueprint/workflow.html#04.C) 04.C절
 - 다른 사람의 `config/`는 건드리지 않고, `settings.json`은 절대 커밋하지 않는다 → [conventions.html](blueprint/conventions.html#01.D) 01.D절
 - 스크립트에 serial 리터럴을 쓰지 않는다 → [conventions.html](blueprint/conventions.html#03.C) 03.C절
+- 생성된 루프 (`script/combat/pvp`, `script/gather/*`)는 직접 고치지 않는다. `module/`·`recipe/`를 고치고 `util/build-scripts.py`로 만든다 → [modules.html](blueprint/modules.html#07) 07절
 - 커밋은 사용자가 하라고 할 때만, push는 따로 요청이 있을 때만 → [workflow.html](blueprint/workflow.html#06) 06절
 
 ## 2. 언제 무엇을 읽나
@@ -29,6 +30,7 @@ Ultima Online Outlands용 Razor 스크립트 (`script/`), 클라이언트 설정
 |-----------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------|
 | 무엇이든 시작할 때                      | [workflow.html](blueprint/workflow.html)                                                                                                     |
 | `.razor`를 고치거나 새로 쓸 때          | [conventions.html](blueprint/conventions.html), [razor.html](blueprint/razor.html), 알림을 띄우면 [overheads.html](blueprint/overheads.html) |
+| 모듈·레시피를 고치거나 루프를 조립할 때 | [modules.html](blueprint/modules.html)                                                                                                       |
 | 파일을 새로 만들거나 이름을 지을 때     | [conventions.html](blueprint/conventions.html#01) 01절                                                                                       |
 | 고친 것을 게임에서 확인할 때            | [workflow.html](blueprint/workflow.html#04) 04절                                                                                             |
 | `config/`를 고칠 때                     | [workflow.html](blueprint/workflow.html#04.C) 04.C절, [config/README.md](config/README.md)                                                   |
@@ -49,6 +51,7 @@ Ultima Online Outlands용 Razor 스크립트 (`script/`), 클라이언트 설정
 | [blueprint/README.md](blueprint/README.md)                                       | 설계 문서를 쓰는 법: 새 문서, 빈 틀, 짜임, 번호와 가름, 본문, 흐름도, 끝낼 때 확인                   |
 | [blueprint/_index.html](blueprint/_index.html)                                   | 브라우저로 여는 첫 화면. 문서 목록은 `_index.js`의 `blueprint_docs`, 모든 문서의 모양은 `_index.css` |
 | [blueprint/workflow.html](blueprint/workflow.html)                               | 근거 우선순위와 참고 사이트, 작업 순서, 변경 보고, 게임 반영·검증, 글의 언어와 번역본, 커밋          |
+| [blueprint/modules.html](blueprint/modules.html)                                 | 모듈과 레시피 형식, 조립 규칙, core 모듈의 스위치와 공용 이름, 옮긴 기록                             |
 | [blueprint/conventions.html](blueprint/conventions.html)                         | 폴더와 파일 이름, 스크립트 모양, 변수 접두, serial, 타이머 관용구                                    |
 | [blueprint/razor.html](blueprint/razor.html)                                     | Outlands Razor 확장 문법, 확인된 함정, 되는 구문의 선례, 명령문 비용, PvP 명령 제약                  |
 | [blueprint/overheads.html](blueprint/overheads.html)                             | 알림 세 경로, `[ 대상, 상태 ]` 형식, 어휘, hue, 쿨다운 바, 프로필 오버헤드 표                        |

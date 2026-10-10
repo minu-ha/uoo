@@ -1,0 +1,83 @@
+# Reactive Armor, then Magic Reflection, whenever one is missing.
+#@ needs core/switches core/reagents
+#@ hotkeys > Interrupt
+#@ config
+@setvar! config__use_reactive_armor 1
+@setvar! config__use_magic_reflect 1
+# Minimum current mana to start each buff.
+@setvar! config__mana_reactive_armor 4
+@setvar! config__mana_magic_reflect 14
+# Missing hit points at which buffs are not started, and cut mid cast.
+@setvar! config__buff_max_loss 35
+# 0 keeps buffs back while poisoned and cuts one that is casting.
+@setvar! config__buff_when_poisoned 1
+#@ state
+# 1 while another block holds our buff casts back. Nothing sets it unless the loop has such a block.
+@setvar! var__hold_casts 0
+#@ loop
+    # ################################################################################
+    # # SELF BUFFS
+    # ################################################################################
+    # Reactive Armor, then Magic Reflection, whenever one is missing and the window is free.
+    # Not started at config__buff_max_loss, and cut there mid cast so the next pass can heal.
+    # With config__buff_when_poisoned 0 poison holds them back and cuts them too, so the cure
+    # goes first. var__hold_casts lets another block keep the cast window (a latched Recall).
+    # The walk and warmode switches apply as for the heal agents. The reflect bar is the
+    # server's recast lock after Reflect is used up.
+    if config__use_magery = 1 and var__hold_casts = 0 and not paralyzed and not hidden and not queued and not casting and not targetexists and diffhits < config__buff_max_loss
+        if config__buff_when_poisoned = 1 or not poisoned
+            if config__warmode_is_manual = 0 or not warmode
+                if config__walk_guard = 0 or cooldown "walk" = 0
+                    if config__use_reactive_armor = 1 and var__regs_reactive_armor = 1 and mana >= config__mana_reactive_armor and not findbuff "Reactive Armor"
+                        cast "Reactive Armor"
+                        if config__sysmsg = 1
+                            sysmsg "Buff: Reactive Armor." 88
+                        endif
+                        wait wait__short
+
+                        for 60
+                            if not casting
+                                break
+                            endif
+                            if insysmsg "Your concentration is disturbed, thus ruining thy spell."
+                                break
+                            endif
+                            if diffhits >= config__buff_max_loss
+                                hotkey "> Interrupt"
+                                break
+                            endif
+                            if config__buff_when_poisoned = 0 and poisoned
+                                hotkey "> Interrupt"
+                                break
+                            endif
+                            wait wait__poll
+                        endfor
+                    elseif config__use_magic_reflect = 1 and var__regs_magic_reflect = 1 and mana >= config__mana_magic_reflect and cooldown "reflect" = 0 and not findbuff "Magic Reflection"
+                        cast "Magic Reflection"
+                        if config__sysmsg = 1
+                            sysmsg "Buff: Magic Reflection." 88
+                        endif
+                        wait wait__short
+
+                        for 60
+                            if not casting
+                                break
+                            endif
+                            if insysmsg "Your concentration is disturbed, thus ruining thy spell."
+                                break
+                            endif
+                            if diffhits >= config__buff_max_loss
+                                hotkey "> Interrupt"
+                                break
+                            endif
+                            if config__buff_when_poisoned = 0 and poisoned
+                                hotkey "> Interrupt"
+                                break
+                            endif
+                            wait wait__poll
+                        endfor
+                    endif
+                endif
+            endif
+        endif
+    endif

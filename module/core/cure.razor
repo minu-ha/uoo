@@ -1,0 +1,46 @@
+# Cure potion first, then the Smart Heal/Cure agent when none is carried.
+#@ needs core/switches core/message core/reagents
+#@ hotkeys Drink Cure, > Smart Heal/Cure Self
+#@ config
+# Minimum current mana for the Cure agent.
+@setvar! config__mana_cure 6
+#@ loop
+    # ################################################################################
+    # # CURE
+    # ################################################################################
+    # Potion first, it is instant and has no cooldown, and it goes out during a cast. While any
+    # cure potion is carried the agent is not used, so mana stays for Greater Heal. The agent
+    # waits for the walk bar and for warmode as config__walk_guard and config__warmode_is_manual say.
+    if poisoned and not paralyzed and not hidden and not queued and not targetexists
+        if config__use_potions = 1 and findtype "Orange Potion" self
+            hotkey "Drink Cure"
+            wait wait__short
+        else
+            if config__use_potions = 1 and timer "timer__message" >= cooldown__message
+                overhead "[ cure pot, out ]" 254
+                settimer "timer__message" 0
+            endif
+
+            if config__use_magery = 1 and var__regs_cure = 1 and mana >= config__mana_cure and not casting
+                if config__warmode_is_manual = 0 or not warmode
+                    if config__walk_guard = 0 or cooldown "walk" = 0
+                        hotkey "> Smart Heal/Cure Self"
+                        if config__sysmsg = 1
+                            sysmsg "Agent: Smart Heal/Cure Self for poison." 88
+                        endif
+                        wait wait__short
+
+                        for 60
+                            if not casting
+                                break
+                            endif
+                            if insysmsg "Your concentration is disturbed, thus ruining thy spell."
+                                break
+                            endif
+                            wait wait__poll
+                        endfor
+                    endif
+                endif
+            endif
+        endif
+    endif

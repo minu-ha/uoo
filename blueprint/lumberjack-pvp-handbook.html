@@ -543,7 +543,8 @@ v14는 파우치 소속 검사 전에 ignore하던 순서를 바로잡는다.
 <tr><td><code>config__heal_hits</code>, <code>emergency_hits</code>, <code>light_hits</code>, <code>use_light_heal</code></td>
 <td>잃은 HP 35, 45, 15와 0. 평소 붕대, 35부터 힐 포션, 45부터 Greater Heal을 보조로 쓴다.
 붕대를 쓸 수 없으면 15부터 Smart Heal/Cure를 대타로 시도한다. v16부터 <code>use_light_heal</code>이 1이면 붕대 옆에서도 쓴다.
-독이면 Cure 포션과 해독 주문을 먼저 쓴다</td></tr>
+독이면 Cure 포션과 해독 주문을 먼저 쓴다. v17부터 이 회복은 pvp와 같은 core 블록이다 (<a href="modules.html#06">modules.html</a> 06절).
+워모드에서 회복 주문이 서는 규칙은 <code>warmode_is_manual</code> 1로 남겼다</td></tr>
 <tr><td><code>config__use_reactive_armor</code>, <code>use_magic_reflect</code></td>
 <td>각 1. 리콜이 필요하지 않고 안전할 때 마나 24, 34부터 각각 시전한다.
 준비 버프 뒤 GH + Teleport 마나 예산 20을 남기기 위한 시작 조건이다.
@@ -606,8 +607,8 @@ grey는 범죄자 필터의 이름이며 모든 회색 대상을 따로 검색�
 시간 초과 뒤 커서가 없으면 자기 타깃을 보내지 않으며, 다음 시도 간격은 이 블록이 끝난 뒤부터 센다</td></tr>
 <tr><td><code>var__housekeeping_pass</code>, <code>regs_*</code>, 시약별 보유 변수</td>
 <td>이번 패스의 housekeeping 예정 여부와 주문별 시약 조합이다. 루프 시작에서 5초 주기의 도래만 기록한다.
-리콜의 책·Hunting·무게 점검은 이 예정값으로 채집 전에 처리하고, 시약·음식·목재 정리는 루프 끝에서 실행한다.
-시약은 첫 housekeeping과 이후 30초마다 갱신한다. 부족 안내는 housekeeping을 수행한 패스의 끝에서 확인하고 다음 재검색을 예약한다</td></tr>
+리콜의 책·Hunting·무게 점검은 이 예정값으로 채집 전에 처리하고, 음식·목재 정리는 루프 끝에서 실행한다.
+v17부터 시약은 core 블록이 30초마다, 그리고 부족 안내를 읽은 즉시 갱신한다. 그 블록은 자동 리콜 뒤에 있어 Tracking 줄을 먼저 읽는다</td></tr>
 <tr><td><code>cooldown__harvest_retry</code>, <code>cooldown__harvest_out_retry</code>, <code>var__harvest_retry</code></td>
 <td>기본 재시도 4000ms와 주변 자원 없음 응답 뒤 재시도 2000ms다.
 var__harvest_retry는 다음 시도에 적용할 간격을 기억한다. 처음과 각 시도 직후는 기본값, 자원 없음 응답을 읽으면 짧은 값이다.
@@ -619,10 +620,9 @@ var__harvest_retry는 다음 시도에 적용할 간격을 기억한다. 처음�
 이미 든 도끼가 캐시와 다르면 라벨을 한 번 읽고 도끼 serial을 저장한다. 다른 왼손 도구면 비워 다음 시도에서 도끼를 장착한다.
 새 타이머는 만들지 않고 기존 <code>timer__harvest</code>로 장착 재시도와 채집을 함께 조절한다.
 장착 뒤에는 손 슬롯 serial을 다시 확인하며, 캐시나 요청만으로 성공했다고 표시하지 않는다</td></tr>
-<tr><td><code>var__bandage_available</code>, <code>heal_spell</code>, <code>buff_cast</code></td>
-<td>최근 붕대 검색 결과, 이번 패스의 회복 주문 선택, 자기 버프 명령 호출 여부다.
-<code>heal_spell</code>은 0 없음 / 1 Smart Heal·Cure / 2 Greater Heal·Cure다.
-각 선언 위 주석에 값과 사용 이유를 적었다. 명령 호출을 실제 장착·치유·시전 성공으로 취급하지 않는다</td></tr>
+<tr><td><code>var__hold_casts</code></td>
+<td>v17에서 <code>var__bandage_available</code>·<code>heal_spell</code>·<code>buff_cast</code>를 없앴다. 회복 블록이 각자 지금 상태를 읽고 바로 시전한다.
+리콜이 정해지면 자동 리콜 블록이 <code>var__hold_casts</code>를 1로 두어 자기 버프를 세운다</td></tr>
 <tr><td><code>timer__housekeeping</code>, <code>cooldown__housekeeping</code></td>
 <td>기존 5초 주기를 재사용하며 리콜 전용 scan 타이머는 없다. 리콜 책과 무게는 명령 전송 전까지 점검한다.
 Hunting 상태는 리콜 필요 여부를 정하기 전까지만 읽는다. Tracking 메시지는 준비 상태일 때 매 패스 확인하며 무게 판정보다 먼저 처리한다</td></tr>
@@ -695,7 +695,7 @@ END 뒤에도 채집이 보류되면 큐·커서 안내와 리콜·책·Hunting 
 <thead><tr><th>상황</th><th>예상과 실패 판정</th></tr></thead>
 <tbody>
 <tr><td>안전한 나무 옆에서 시작, 기존 필터가 몬스터 또는 우호 플레이어</td>
-<td>sysmsg ON의 <code>Lumberjack enhanced v16 loaded</code>와 chatty ON의 <code>[ lumberjack, on ]</code> 뒤 기본 red 필터를 확인하고 Hunting을 유지한다.
+<td>sysmsg ON의 <code>Lumberjack enhanced v17 loaded</code>와 chatty ON의 <code>[ lumberjack, on ]</code> 뒤 기본 red 필터를 확인하고 Hunting을 유지한다.
 재실행에서 확인한 색상의 Hunting이 켜져 있으면 창·버튼 조작이 없어야 한다.
 자동 리콜 OFF에서도 <code>use_tracking = 1</code>이면 설정해야 한다. 기존 Hunting을 꺼 버리면 실패.
 감지 리콜 ON에서 필터 확인이 안 되면 <code>[ track, miss ]</code> 또는 <code>[ track, check ]</code> 후 채집을 보류한다</td></tr>
@@ -819,7 +819,7 @@ Scripts 탭의 Reload all scripts 뒤 Play로 반복 확인하고, 외부 파일
 
 <h3 id="09.C">09.C 인게임 반영과 확인</h3>
 <p>본문 CONFIG를 바꾼 뒤 Stop → Reload all scripts → <code>pvp</code> Play로
-<code>PvP sustain v7 loaded</code>가 뜨는지 확인한다.
+<code>PvP sustain v9 loaded</code>가 뜨는지 확인한다.
 Q로 alt를 선택해도 자동 공격이나 자동 TK가 나가지 않아야 한다. 피해·독에는 자기 회복이 동작해야 한다.</p>
 <p>새 v5 본문은 아직 인게임에서 확인되지 않았다.
 수동 프리캐스트·회복·무기 교체·옵션·정지 조건별 예상 알림과 실패 판정은 <a href="open-items.html#10">open-items.html</a> 10절에 모았다.
