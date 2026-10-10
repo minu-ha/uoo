@@ -626,14 +626,13 @@ if config__use_herding = 1
     endif
 endif
 
-# loot/recycle runs the hotkey named here when it finishes or gives up, through the list its
-# author reads, jaseowns_PreviousScript. A list, because a variable cannot hold a word
-# (blueprint/razor.html part 3). It lasts until the client closes.
-if not listexists 'jaseowns_PreviousScript'
-    createlist 'jaseowns_PreviousScript'
+# loot/recycle runs the hotkey named in this list when it finishes or gives up. A list, because
+# a variable cannot hold a word (blueprint/razor.html part 3). It lasts until the client closes.
+if not listexists 'list__resume_script'
+    createlist 'list__resume_script'
 endif
-clearlist 'jaseowns_PreviousScript'
-pushlist 'jaseowns_PreviousScript' 'Play Script: combat\bard-necro-enhanced'
+clearlist 'list__resume_script'
+pushlist 'list__resume_script' 'Play Script: combat\bard-necro-enhanced'
 
 overhead "[ bard necro, on ]" 290
 

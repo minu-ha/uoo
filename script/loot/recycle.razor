@@ -104,9 +104,9 @@ elseif findtype 20495 backpack as idWandHopefully
     overhead "Jase says: Need single item wand" 77
     sysmsg "Jase says: WRONG WAND" 34
     sysmsg "Jase says: Need single item wand" 77
-    if listexists jaseowns_PreviousScript
-        foreach myScript in jaseowns_PreviousScript
-            hotkey myScript
+    if listexists 'list__resume_script'
+        foreach resume_hotkey in list__resume_script
+            hotkey resume_hotkey
         endfor
     endif
     stop
@@ -118,9 +118,9 @@ else
     sysmsg "Jase says: Not able to ID items.." 34
     sysmsg "Jase says: Need skill or wand" 77
 
-    if listexists jaseowns_PreviousScript
-        foreach myScript in jaseowns_PreviousScript
-            hotkey myScript
+    if listexists 'list__resume_script'
+        foreach resume_hotkey in list__resume_script
+            hotkey resume_hotkey
         endfor
     endif
     stop
@@ -1851,8 +1851,8 @@ if jase_AutoDropScrolls = 1 and findtype 3827 backpack 0 as jaseowns_DropItem
 endif
 
 # Return to the loop that registered itself, the same way the item ID checks above give up.
-if listexists jaseowns_PreviousScript
-    foreach myScript in jaseowns_PreviousScript
-        hotkey myScript
+if listexists 'list__resume_script'
+    foreach resume_hotkey in list__resume_script
+        hotkey resume_hotkey
     endfor
 endif

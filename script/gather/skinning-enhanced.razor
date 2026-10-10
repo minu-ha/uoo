@@ -357,14 +357,13 @@ if config__pack_leather = 1
     endif
 endif
 
-# loot/recycle runs the hotkey named here when it finishes or gives up, through the list its
-# author reads, jaseowns_PreviousScript. A list, because a variable cannot hold a word
-# (blueprint/razor.html part 3). It lasts until the client closes.
-if not listexists 'jaseowns_PreviousScript'
-    createlist 'jaseowns_PreviousScript'
+# loot/recycle runs the hotkey named in this list when it finishes or gives up. A list, because
+# a variable cannot hold a word (blueprint/razor.html part 3). It lasts until the client closes.
+if not listexists 'list__resume_script'
+    createlist 'list__resume_script'
 endif
-clearlist 'jaseowns_PreviousScript'
-pushlist 'jaseowns_PreviousScript' 'Play Script: gather\skinning-enhanced'
+clearlist 'list__resume_script'
+pushlist 'list__resume_script' 'Play Script: gather\skinning-enhanced'
 
 if config__sysmsg = 1
     sysmsg "Skinning enhanced v10 loaded: skin unowned={{config__skin_unowned}}, sword stance={{config__sword_stance_main}}, parry stance={{config__parry_stance_main}}." 88

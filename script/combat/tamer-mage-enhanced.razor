@@ -234,14 +234,13 @@ endif
 @setvar! var__tracking_hunting_active 0
 @setvar! var__tracking_button_answered 0
 
-# loot/recycle runs the hotkey named here when it finishes or gives up, through the list its
-# author reads, jaseowns_PreviousScript. A list, because a variable cannot hold a word
-# (blueprint/razor.html part 3). It lasts until the client closes.
-if not listexists 'jaseowns_PreviousScript'
-    createlist 'jaseowns_PreviousScript'
+# loot/recycle runs the hotkey named in this list when it finishes or gives up. A list, because
+# a variable cannot hold a word (blueprint/razor.html part 3). It lasts until the client closes.
+if not listexists 'list__resume_script'
+    createlist 'list__resume_script'
 endif
-clearlist 'jaseowns_PreviousScript'
-pushlist 'jaseowns_PreviousScript' 'Play Script: combat\tamer-mage-enhanced'
+clearlist 'list__resume_script'
+pushlist 'list__resume_script' 'Play Script: combat\tamer-mage-enhanced'
 
 if config__sysmsg = 1
     sysmsg "Tamer mage enhanced v5 loaded: flamestrike mana={{config__mana_flamestrike}}, tracking color={{config__tracking_color}}." 88
