@@ -376,7 +376,7 @@ Razor CE 원본의 스크립트 엔진은 **타이머가 한 번 틱할 때마�
 | `findtype … self` 50번 | 1 \~ 2초 | **20 \~ 40ms** |
 | 20갈래 `elseif` 사슬 10번 | 0.25 \~ 0.5초 | 사슬 하나 25 \~ 50ms |
 
-Bard Necro 루프에 적용한 결과는 [Bard Necro](../templates/bard-necro.md#05.H) 05.H절에 있다. 패스마다 `findtype`을 최대 32번 쓰던 시약 플래그 읽기를 30초에 7번으로 줄였다.
+Bard Necro 루프에 적용한 결과는 [Bard Necro](../templates/bard-necro.md#05.H) 05.H절에 있다. 패스마다 `findtype`을 최대 32번 쓰던 시약 플래그 읽기를 10초에 7번으로 줄였다(처음에는 30초였다).
 
 ## <a id="07"></a>07 PvP 제약
 
