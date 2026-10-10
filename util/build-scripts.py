@@ -20,7 +20,7 @@ says what it looks after. module/base.razor is the frame of every loop.
     # @ config box         "#   name" and "#      what it does" for each config__ setting, then
                            under the box the @setvar! lines with the defaults, joined up
     # @ wait box           wait__, interval__ and cooldown__ values, the same in every loop
-    # @ timer box          one "timer__x <start>" line per timer, the start an interval__ name or 0.
+    # @ timer box          one "timer__x <start>" line per timer, the start an interval__ or config__ name, or 0.
                            Describing them is optional
     # @ state box          var__ state, written the same way. Guards (if not varexist) may wrap them
     # @ setup, loop, end   code under a box with only the "# @" line. end is base only. A loop or
@@ -65,13 +65,14 @@ BLOCK_RULE = re.compile(r'^\s+#\s*-{8,}\s*$')
 NAME = re.compile(r'\b(?:config|wait|interval|cooldown|timer|var)__[A-Za-z0-9_]+')
 FULL_NAME = re.compile(r'^(?:config|wait|interval|cooldown|timer|var)__[A-Za-z0-9_]+$')
 SETVAR = re.compile(r'^\s*@?setvar!?\s+(\S+)\s*(.*)$')
-TIMER = re.compile(r'^(timer__[A-Za-z0-9_]+)\s+(0|(?:interval|cooldown|wait)__[A-Za-z0-9_]+)$')
+TIMER = re.compile(r'^(timer__[A-Za-z0-9_]+)\s+(0|(?:interval|cooldown|wait|config)__[A-Za-z0-9_]+)$')
 GUARD = re.compile(r'^\s*(if not varexist var__[A-Za-z0-9_]+|endif)\s*$')
 DESC_NAMES = re.compile(r'^#   (\S.*)$')
 DESC_TEXT = re.compile(r'^#      (.*)$')
 BOX_SETTING = re.compile(r'^#\s+([a-z0-9_]+) \(default ')
 TEXT = '#      '
 INDENT = '    '
+GROUPS = ('when', 'otherwise', 'end', 'every')
 BLOCKS_GUIDE = [
     '#   One box per block, in the order the blocks run, base first. The builder writes the box.',
     '#   Yours are the "> " lines in it (a note on the block, or under a setting the reason for',
@@ -130,11 +131,18 @@ def banner(name):
     return [PART, '# ' + name, PART]
 
 
-def block_banner(lines, source):
-    """A block in the loop starts with its "-" banner. The file it came from goes on the right
-    of the banner's title line."""
+def block_banner(lines, source, depth=0):
+    """A block in the loop starts with its "-" banner. Inside a group it moves in by four
+    spaces a level, its rules shortened to keep the width, and the file it came from goes on
+    the right of the title line."""
+    lines = [(' ' * 4 * depth + l) if l.strip() else l for l in lines]
+    indent = lines[0][:len(lines[0]) - len(lines[0].lstrip())]
+    rule = indent + '# ' + '-' * (WIDTH - len(indent) - 2)
+    closing = next(i for i in range(2, len(lines)) if BLOCK_RULE.match(lines[i]))
     title = lines[1].rstrip()
-    return [lines[0], title + ' ' * max(2, WIDTH - len(title) - len(source)) + source] + lines[2:]
+    lines[1] = title + ' ' * max(2, WIDTH - len(title) - len(source)) + source
+    lines[0] = lines[closing] = rule
+    return lines
 
 
 def parse(path, kind):
@@ -161,6 +169,8 @@ def parse(path, kind):
                 unit['output'] = ' '.join(words[1:])
             elif word == 'use' and kind == 'recipe' and current == 'blocks' and len(words) > 1:
                 unit['blocks'].append(('use', number, words[1], ' '.join(words[2:]).strip(' -=')))
+            elif word in GROUPS and kind == 'recipe' and current == 'blocks':
+                unit['blocks'].append(('group', number, word, directive.group(2).strip(' -=')))
             elif word == 'config' and kind == 'recipe':
                 raise BuildError('%s: a recipe has no # @ config. A setting goes under the # @ use line of its block' % where)
             else:
@@ -315,7 +325,7 @@ def read_blocks(recipe, name):
     lines, line number. Each block is a box: a rule, the # @ use line, the builder's lines, a rule,
     then the @setvar! lines. In the box only the "> " lines are the reader's: a note on the block,
     or under a setting the reason for its value. A comment right above an @setvar! line is a reason too."""
-    entries, over, reasons, pending, loose = [], {}, {}, [], []
+    entries, over, reasons, pending, loose, layout, open_groups = [], {}, {}, [], [], [], []
     box, setting = False, None
 
     def settle():
@@ -326,11 +336,34 @@ def read_blocks(recipe, name):
     for item in recipe['blocks']:
         if item[0] == 'line' and not entries:
             continue  # the guide under # @ blocks is the builder's
+        if item[0] == 'group':
+            settle()
+            del loose[:]
+            box, setting = False, None
+            _, number, word, rest = item
+            if word in ('when', 'every') and not rest:
+                raise BuildError('%s:%d: # @ %s needs %s' % (name, number, word,
+                                 'a condition' if word == 'when' else 'an interval__ name'))
+            if word == 'otherwise' and (not open_groups or open_groups[-1][0] != 'when'):
+                raise BuildError('%s:%d: # @ otherwise goes inside a # @ when' % (name, number))
+            if word == 'end' and not open_groups:
+                raise BuildError('%s:%d: # @ end has no group to close' % (name, number))
+            if not entries:
+                raise BuildError('%s:%d: groups come after # @ use base' % (name, number))
+            if word in ('when', 'every'):
+                open_groups.append((word, number))
+            elif word == 'otherwise':
+                open_groups[-1] = ('otherwise', open_groups[-1][1])
+            else:
+                open_groups.pop()
+            layout.append({'kind': word, 'rest': rest, 'number': number})
+            continue
         if item[0] == 'use':
             settle()
             del loose[:]
             entries.append({'ident': item[2], 'number': item[1], 'old': [],
-                            'notes': [item[3]] if item[3] else []})
+                            'notes': [item[3]] if item[3] else [], 'kind': 'use'})
+            layout.append(entries[-1])
             box, setting = True, None
             continue
         _, number, line = item
@@ -381,9 +414,11 @@ def read_blocks(recipe, name):
                                 'notes': [t for t, _ in pending]}
         del pending[:], loose[:]
     settle()
+    if open_groups:
+        raise BuildError('%s:%d: this # @ %s has no # @ end' % (name, open_groups[-1][1], open_groups[-1][0]))
     for setting, value in over.items():
         value['notes'] = reasons.get(setting, []) + value['notes']
-    return entries, over
+    return entries, over, layout
 
 
 def prepare(path, modules, owner):
@@ -394,7 +429,7 @@ def prepare(path, modules, owner):
         raise BuildError('%s: no # @ output' % name)
     if 'blocks' not in recipe['sections']:
         raise BuildError('%s: no # @ blocks' % name)
-    entries, over = read_blocks(recipe, name)
+    entries, over, layout = read_blocks(recipe, name)
     if not entries or entries[0]['ident'] != BASE:
         raise BuildError('%s: the first block is always "# @ use base"' % name)
 
@@ -430,6 +465,24 @@ def prepare(path, modules, owner):
         check(module_path(ident), modules[ident]['used'])
     check(name, recipe_refs - own)
 
+    # A group reads names like any block, and an every group gets a timer of its own.
+    clocks = []
+    for item in layout:
+        where = '%s:%d' % (name, item['number'])
+        if item['kind'] == 'when':
+            check(where, set(NAME.findall(item['rest'])))
+        elif item['kind'] == 'every':
+            interval = item['rest']
+            if not re.match(r'^interval__\w+$', interval):
+                raise BuildError('%s: # @ every takes one interval__ name' % where)
+            check(where, {interval})
+            timer = 'timer__' + interval[len('interval__'):]
+            if timer in owner:
+                raise BuildError('%s: %s belongs to %s. Pick an interval whose timer no module declares'
+                                 % (where, timer, module_path(owner[timer])))
+            item['timer'] = timer
+            clocks.append((timer, interval))
+
     for setting, value in over.items():
         where = '%s:%d' % (name, value['number'])
         if setting not in owner:
@@ -444,8 +497,8 @@ def prepare(path, modules, owner):
             readers.setdefault(used, []).append(ident)
     for used in recipe_refs:
         readers.setdefault(used, []).append('this recipe')
-    return {'recipe': recipe, 'name': name, 'order': order, 'entries': entries,
-            'over': over, 'readers': readers, 'owner': owner}
+    return {'recipe': recipe, 'name': name, 'order': order, 'entries': entries, 'layout': layout,
+            'clocks': clocks, 'over': over, 'readers': readers, 'owner': owner}
 
 
 def read_by(loop, setting):
@@ -490,6 +543,12 @@ def recipe_text(loop, modules):
     recipe = loop['recipe']
     out = trim(recipe['notes']) + ['# @ output ' + recipe['output']]
     blocks = [block_lines(loop, modules, e) for e in loop['entries']]
+    parts = []
+    for item in loop['layout']:
+        if item['kind'] == 'use':
+            parts.append(blocks[loop['entries'].index(item)])
+        else:
+            parts.append([PART, ('# @ %s %s' % (item['kind'], item['rest'])).rstrip(), PART])
     for entry, lines in zip(loop['entries'], blocks):
         kept = set(lines)
         for number, line in entry['old']:
@@ -501,7 +560,7 @@ def recipe_text(loop, modules):
         if section not in recipe['sections']:
             continue
         if section == 'blocks':
-            out += ['', '', PART, '# @ blocks', '#'] + BLOCKS_GUIDE + [PART, ''] + join(blocks)
+            out += ['', '', PART, '# @ blocks', '#'] + BLOCKS_GUIDE + [PART, ''] + join(parts)
         else:
             out += ['', '', PART, '# @ ' + section, PART, ''] + trim(lines_of(recipe, section))
     return text_of(out)
@@ -576,7 +635,38 @@ def build(path, modules, owner):
                 found.append(source_box(source, entry_lines(unit['entries'][section])) + code)
         if with_recipe and trim(lines_of(recipe, section)):
             found.append(source_box(name) + trim(lines_of(recipe, section)))
+        if section == 'timer' and loop['clocks']:
+            found.append(source_box(name, ['#   ' + ', '.join(t for t, _ in loop['clocks']),
+                                           TEXT + 'The clocks of the # @ every groups.'])
+                         + timer_lines({'code': {'timer': ['%s %s' % c for c in loop['clocks']]}}))
         return found
+
+    def loop_lines():
+        """The pass: each block's loop part in recipe order, groups wrapped in if and else."""
+        out, depth, gap = [], 0, False
+        for item in loop['layout']:
+            pad = INDENT + '    ' * depth
+            if item['kind'] == 'use':
+                lines = trim(lines_of(modules[item['ident']], 'loop'))
+                if lines:
+                    out += ([''] if gap else []) + block_banner(lines, module_path(item['ident']), depth)
+                    gap = True
+                continue
+            if item['kind'] == 'when':
+                out += ([''] if gap else []) + [pad + 'if ' + item['rest']]
+                depth += 1
+            elif item['kind'] == 'every':
+                out += ([''] if gap else []) + [pad + 'if timer "%s" >= %s' % (item['timer'], item['rest']),
+                                                pad + '    settimer "%s" 0' % item['timer']]
+                depth += 1
+            elif item['kind'] == 'otherwise':
+                out.append(INDENT + '    ' * (depth - 1) + 'else')
+            else:
+                depth -= 1
+                out.append(INDENT + '    ' * depth + 'endif')
+            gap = item['kind'] == 'end'
+        end = trim(lines_of(modules[BASE], 'end'))
+        return out + ([''] + block_banner(end, module_path(BASE)) if end else [])
 
     def code_parts(section, indent=''):
         found = []
@@ -614,7 +704,7 @@ def build(path, modules, owner):
     if code_parts('setup'):
         out += ['', ''] + join(code_parts('setup'), 2)
     out += ['', ''] + banner('MAIN LOOP') + ['while not dead']
-    out += join(code_parts('loop', INDENT) + code_parts('end', INDENT)) + ['endwhile']
+    out += loop_lines() + ['endwhile']
 
     for line in out:
         if line.strip().startswith('#') and ';' in line:
