@@ -1,7 +1,7 @@
 # Codex of parrying: the main stance, Warding against damage over time, and the finisher.
 
 
-#@ config --------------------------------------------------------------------------------
+#@ config ------------------------------------------------------------------------------------------
 
 # Main stance, by codex slot in wiki order. A stance only helps with ranks in it.
 #   1  Shield Bash
@@ -26,7 +26,7 @@
 @setvar! config__parry_finisher_main 1
 
 
-#@ wait ----------------------------------------------------------------------------------
+#@ wait --------------------------------------------------------------------------------------------
 
 # A failed stance switch is tried again after this.
 @setvar! cooldown__parry_retry 3000
@@ -35,13 +35,13 @@
 @setvar! cooldown__parry_resync 30000
 
 
-#@ timer ---------------------------------------------------------------------------------
+#@ timer -------------------------------------------------------------------------------------------
 
 timer__parry_retry cooldown__parry_retry
 timer__parry_resync 0
 
 
-#@ state ---------------------------------------------------------------------------------
+#@ state -------------------------------------------------------------------------------------------
 
 # Parry stance cache. 0 means unknown, which forces a codex label read on the first pass.
 @setvar! var__parry_want config__parry_stance_main
@@ -57,7 +57,7 @@ timer__parry_resync 0
 @setvar! var__parry_finisher_state 0
 
 
-#@ loop ----------------------------------------------------------------------------------
+#@ loop --------------------------------------------------------------------------------------------
     # ################################################################################
     # # PARRY CODEX
     # ################################################################################

@@ -1,7 +1,7 @@
 # Four weapon slots, each on its own swing bar. Arms the slot whose swing is ready.
 
 
-#@ config --------------------------------------------------------------------------------
+#@ config ------------------------------------------------------------------------------------------
 
 # Weapon graphic for each slot. Slot N reads the "swing N" bar, and 0 turns the slot off.
 # A slot whose swing is ready wins, 4 down to 1. With none ready and both hands empty, the
@@ -12,7 +12,7 @@
 @setvar! config__weapon_4_graphic 31190
 
 
-#@ state ---------------------------------------------------------------------------------
+#@ state -------------------------------------------------------------------------------------------
 
 # The weapon this script armed last, kept across Plays. Only own items. See WEAPON.
 if not varexist var__weapon_armed_serial
@@ -29,7 +29,7 @@ endif
 @setvar! var__weapon_held 0
 
 
-#@ loop ----------------------------------------------------------------------------------
+#@ loop --------------------------------------------------------------------------------------------
     # ################################################################################
     # # WEAPON
     # ################################################################################

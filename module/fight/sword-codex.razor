@@ -1,7 +1,7 @@
 # Codex of swords: Warrior, Defensive while hurt, and the finisher, read from the codex label.
 
 
-#@ config --------------------------------------------------------------------------------
+#@ config ------------------------------------------------------------------------------------------
 
 # Stance held outside the Defensive window, by codex slot in wiki order.
 #   1  Aggressive
@@ -25,7 +25,7 @@
 @setvar! config__defensive_leave_diff 48
 
 
-#@ wait ----------------------------------------------------------------------------------
+#@ wait --------------------------------------------------------------------------------------------
 
 # A failed stance switch is tried again after this.
 @setvar! cooldown__sword_retry 3000
@@ -34,13 +34,13 @@
 @setvar! cooldown__sword_resync 30000
 
 
-#@ timer ---------------------------------------------------------------------------------
+#@ timer -------------------------------------------------------------------------------------------
 
 timer__sword_retry cooldown__sword_retry
 timer__sword_resync 0
 
 
-#@ state ---------------------------------------------------------------------------------
+#@ state -------------------------------------------------------------------------------------------
 
 # Sword stance cache. 0 means unknown, which forces a codex label read on the first pass.
 @setvar! var__sword_want config__sword_stance_main
@@ -56,7 +56,7 @@ timer__sword_resync 0
 @setvar! var__sword_finisher_state 0
 
 
-#@ loop ----------------------------------------------------------------------------------
+#@ loop --------------------------------------------------------------------------------------------
     # ################################################################################
     # # SWORD CODEX
     # ################################################################################

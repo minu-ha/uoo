@@ -4,7 +4,7 @@
 # end of every pass.
 
 
-#@ config --------------------------------------------------------------------------------
+#@ config ------------------------------------------------------------------------------------------
 
 # 1 shows the optional overheads. Warnings show either way.
 @setvar! config__chatty 1
@@ -36,7 +36,7 @@
 @setvar! config__warmode_is_manual 0
 
 
-#@ wait ----------------------------------------------------------------------------------
+#@ wait --------------------------------------------------------------------------------------------
 
 # The poll inside a wait.
 @setvar! wait__poll 100
@@ -48,13 +48,13 @@
 @setvar! cooldown__message 3000
 
 
-#@ timer ---------------------------------------------------------------------------------
+#@ timer -------------------------------------------------------------------------------------------
 
 # Ready on the first pass, so the first warning shows at once.
 timer__message cooldown__message
 
 
-#@ state ---------------------------------------------------------------------------------
+#@ state -------------------------------------------------------------------------------------------
 
 # Signals between blocks. Each keeps the value here unless the loop has a block that sets it.
 
@@ -70,7 +70,7 @@ timer__message cooldown__message
 @setvar! var__hold_gathering 0
 
 
-#@ setup ---------------------------------------------------------------------------------
+#@ setup -------------------------------------------------------------------------------------------
 
 # The pvp expression means the structured-PvP restrictions, where these loops may not run.
 if pvp
@@ -86,7 +86,7 @@ if config__clear_at_start = 1
 endif
 
 
-#@ loop ----------------------------------------------------------------------------------
+#@ loop --------------------------------------------------------------------------------------------
     # The pvp expression means structured-PvP restrictions, not a field PK encounter.
     if pvp
         overhead "[ script, blocked ]" 254
@@ -94,5 +94,5 @@ endif
     endif
 
 
-#@ end -----------------------------------------------------------------------------------
+#@ end ---------------------------------------------------------------------------------------------
     wait wait__poll

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Assemble Razor loops from module/ and recipe/ (design: blueprint/modules.html).
 
-    util/build-scripts.py                         build every recipe and tidy its #@ blocks
+    util/build-scripts.py                         build every recipe and rewrite its block boxes
     util/build-scripts.py recipe/x-recipe.razor   just that one
     util/build-scripts.py --check                 fail if a loop or a recipe is out of date
     util/build-scripts.py --settings recipe/x-recipe.razor
@@ -28,10 +28,12 @@ the names of any module the loop has. The builder works out which those are.
 Recipe: recipe/<loop>-recipe.razor, one loop.
     #@ output            the loop file it builds
     #@ header ---        the comment block at the top of the loop
-    #@ blocks ---        "#@ use <module>  note" lines in the order they run, base first. A setting
-                         this loop changes sits indented under its block, with its reason in "#"
-                         lines right above it. The builder writes the "#|" lines (what the setting
-                         does, its default, the other blocks that read it) and tidies the section
+    #@ blocks ---        one box per block, in the order they run, base first: a "=" rule, the
+                         "#@ use <module>  note" line, the settings it changes (what each does, its
+                         default, the other blocks that read it, "> " reason lines), a "=" rule.
+                         Under the box, the @setvar! lines of those settings. The builder writes
+                         the box. Only the "#@ use" line, the "> " lines and the @setvar! lines are
+                         the reader's, and a "#" line right above an @setvar! line is its reason
     #@ state ---         loop-only state, or another start value for a module's state (optional)
     #@ setup ---         loop-only setup: loot pouch, resume list, loaded message (optional)
 
@@ -43,6 +45,7 @@ Needs only the Python standard library.
 import pathlib
 import re
 import sys
+import textwrap
 
 REPO = pathlib.Path(__file__).resolve().parent.parent
 MODULE_DIR = REPO / 'module'
@@ -54,8 +57,10 @@ SECTION = re.compile(r'^#@\s*([a-z]+)\s*-*\s*$')
 NAME = re.compile(r'\b(?:config|wait|cooldown|timer|var)__[A-Za-z0-9_]+')
 SETVAR = re.compile(r'^\s*@?setvar!?\s+(\S+)\s*(.*)$')
 TIMER = re.compile(r'^(timer__[A-Za-z0-9_]+)\s+(0|(?:cooldown|wait)__[A-Za-z0-9_]+)$')
+BOX_RULE = re.compile(r'^#\s*={8,}\s*$')
+BOX_SETTING = re.compile(r'^#\s+([a-z0-9_]+) \(default ')
 GUARD = re.compile(r'^\s*(if not varexist var__[A-Za-z0-9_]+|endif)\s*$')
-WIDTH = 90
+WIDTH = 100
 INDENT = '    '
 
 
@@ -259,50 +264,64 @@ def load_modules():
 
 
 def read_blocks(recipe, name):
-    """#@ blocks as entries (the comments above the #@ use line, the line, its note) and the
-    settings written under them: config__ name -> value, reason lines, line number."""
-    entries, notes, pending, over = [], [], [], {}
+    """#@ blocks as entries (the #@ use line and its note) and the settings written under them:
+    config__ name -> value, reason lines, line number. Each block is a box: a rule line of "=",
+    the #@ use line, what the builder writes about the settings, a rule line, then the
+    @setvar! lines. In the box only the "> " lines are the reader's: the reasons. A comment
+    right above an @setvar! line is a reason too, and moves into the box."""
+    entries, over, reasons, pending = [], {}, {}, []
+    box, setting = False, None
 
-    def settle():
-        # Comments with no setting under them: a flush-left one notes the next #@ use line.
-        for indented, text, number in pending:
-            if indented:
-                raise BuildError('%s:%d: a reason goes right above its setting, with no blank line between'
-                                 % (name, number))
-            notes.append(text)
-        del pending[:]
+    def settle(number):
+        if pending:
+            raise BuildError('%s:%d: a reason goes right above its @setvar! line, or as a "> " line in the box'
+                             % (name, pending[0][1]))
 
     for item in recipe['blocks']:
         if item[0] == 'use':
-            _, number, ident, note = item
-            settle()
-            entries.append({'ident': ident, 'note': note, 'number': number, 'notes': notes})
-            notes = []
+            settle(item[1])
+            entries.append({'ident': item[2], 'note': item[3], 'number': item[1]})
+            box, setting = True, None
             continue
         _, number, line = item
         text = line.strip()
-        if text.startswith('#|'):
-            continue
         if not text:
-            settle()
+            settle(number)
+            continue
+        if BOX_RULE.match(text):
+            settle(number)
+            box = False
             continue
         if text.startswith('#'):
             if ';' in text:
                 raise BuildError('%s:%d: no ";" in a comment (blueprint/razor.html part 3)' % (name, number))
-            pending.append((line[0].isspace(), comment_text(line), number))
+            body = comment_text(line).strip()
+            reason = body[1:].strip() if body.startswith('>') else None
+            if not box:
+                pending.append((reason if reason is not None else body, number))
+            elif BOX_SETTING.match(text):
+                setting = 'config__' + BOX_SETTING.match(text).group(1)
+            elif reason is not None:
+                if not setting:
+                    raise BuildError('%s:%d: a "> " reason goes under the setting it explains' % (name, number))
+                reasons.setdefault(setting, []).append(reason)
             continue
         match = SETVAR.match(line)
         if not match or not match.group(1).startswith('config__') or not match.group(2).strip():
-            raise BuildError('%s:%d: under #@ blocks go "#@ use" lines and, indented under them, '
-                             '"@setvar! config__<name> <value>" lines with their reasons' % (name, number))
+            raise BuildError('%s:%d: under #@ blocks go the block boxes and, under each box, '
+                             '"@setvar! config__<name> <value>" lines' % (name, number))
         if not entries:
-            raise BuildError('%s:%d: a setting goes under the #@ use line of its block' % (name, number))
+            raise BuildError('%s:%d: a setting goes under the box of its block' % (name, number))
         if match.group(1) in over:
             raise BuildError('%s:%d: %s is set twice' % (name, number, match.group(1)))
-        over[match.group(1)] = {'value': match.group(2).strip(), 'notes': [t for _, t, _ in pending], 'number': number}
+        box = False
+        over[match.group(1)] = {'value': match.group(2).strip(), 'number': number,
+                                'notes': [t for t, _ in pending]}
         del pending[:]
-    settle()
-    return entries, notes, over
+    settle(None)
+    for setting, value in over.items():
+        value['notes'] = reasons.get(setting, []) + value['notes']
+    return entries, over
 
 
 def prepare(path, modules, owner):
@@ -313,7 +332,7 @@ def prepare(path, modules, owner):
         raise BuildError('%s: no #@ output' % name)
     if 'blocks' not in recipe['sections']:
         raise BuildError('%s: no #@ blocks' % name)
-    entries, tail, over = read_blocks(recipe, name)
+    entries, over = read_blocks(recipe, name)
     if not entries or entries[0]['ident'] != BASE:
         raise BuildError('%s: the first block is always "#@ use base"' % name)
 
@@ -363,7 +382,7 @@ def prepare(path, modules, owner):
             readers.setdefault(used, []).append(ident)
     for used in recipe_refs:
         readers.setdefault(used, []).append('this recipe')
-    return {'recipe': recipe, 'name': name, 'order': order, 'entries': entries, 'tail': tail,
+    return {'recipe': recipe, 'name': name, 'order': order, 'entries': entries,
             'over': over, 'readers': readers, 'owner': owner}
 
 
@@ -378,40 +397,33 @@ def read_by(loop, setting):
     return ('Also read by ' if len(others) < len(found) else 'Read by ') + ', '.join(others) + '.'
 
 
-def default_line(loop, setting, value):
-    same = ', the same value' if value == setting['value'] else ''
-    return ('Default %s%s. %s' % (setting['value'], same, read_by(loop, setting['name']))).rstrip()
+def box_lines(loop, modules, entry, width):
+    """One block of #@ blocks: its box, then the @setvar! lines of the settings it changes."""
+    module, over = modules[entry['ident']], loop['over']
+    changed = [s for s in module['settings'] if s['name'] in over]
+    edge = '# ' + '=' * (WIDTH - 2)
+    out = [edge, ('#@ use %-*s  %s' % (width, entry['ident'], entry['note'])).rstrip()]
+    if 'setup' in module['sections'] and 'loop' not in module['sections']:
+        out.append('#   Runs once, before the loop.')
+    for setting in changed:
+        value = over[setting['name']]
+        same = ', the same value' if value['value'] == setting['value'] else ''
+        out += ['#', '#   %s (default %s%s)' % (setting['name'][len('config__'):], setting['value'], same)]
+        out += [('#      ' + d).rstrip() for d in setting['description']]
+        if read_by(loop, setting['name']):
+            out += textwrap.wrap(read_by(loop, setting['name']), WIDTH, initial_indent='#      ',
+                                 subsequent_indent='#         ')
+        out += ['#      > ' + n for n in value['notes']]
+    out.append(edge)
+    out += ['@setvar! %s %s' % (s['name'], over[s['name']]['value']) for s in changed]
+    return out
 
 
 def tidy_blocks(loop, modules):
-    """The #@ blocks section as the builder writes it back: each change indented under its
-    block, with the #| lines, the notes aligned."""
-    over, out = loop['over'], []
+    """The #@ blocks section as the builder writes it back: one box per block, a blank line
+    between them, each change under the box of the module that has it."""
     width = max(len(e['ident']) for e in loop['entries'])
-
-    def gap():
-        if out and out[-1]:
-            out.append('')
-
-    for entry in loop['entries']:
-        changed = [s for s in modules[entry['ident']]['settings'] if s['name'] in over]
-        if entry['notes'] or changed:
-            gap()
-        out += ['# ' + n if n else '#' for n in entry['notes']]
-        out.append(('#@ use %-*s  %s' % (width, entry['ident'], entry['note'])).rstrip())
-        for setting in changed:
-            value = over[setting['name']]
-            out.append('')
-            out += [(INDENT + '#| ' + d).rstrip() for d in setting['description']]
-            out.append(INDENT + '#| ' + default_line(loop, setting, value['value']))
-            out += [INDENT + '# ' + n for n in value['notes']]
-            out.append(INDENT + '@setvar! %s %s' % (setting['name'], value['value']))
-        if changed:
-            out.append('')
-    if loop['tail']:
-        gap()
-        out += ['# ' + n for n in loop['tail']]
-    return trim(out)
+    return join([box_lines(loop, modules, entry, width) for entry in loop['entries']])
 
 
 def recipe_lines(path, blocks):
@@ -512,7 +524,7 @@ def build(path, modules, owner):
 def settings_text(path, modules, owner):
     """Every setting of a loop, by module, with its value, meaning, readers, file and line."""
     loop = prepare(path, modules, owner)
-    out = ['Settings of %s. "*" marks the ones it changes under a #@ use line.' % loop['name']]
+    out = ['Settings of %s. "*" marks the ones it changes.' % loop['name']]
     for ident in loop['order']:
         module = modules[ident]
         if not module['settings']:

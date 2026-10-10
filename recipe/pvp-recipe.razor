@@ -1,11 +1,12 @@
 # Recipe for script/combat/pvp.razor. Build it with: python3 util/build-scripts.py
-# The blocks run in the order listed, base first. A setting this loop changes sits indented
-# under its block, with the reason in "#" lines right above it. The "#|" lines are the builder's.
+# Each block is a box, in the order the blocks run, base first. A setting this loop changes goes
+# under the box as an @setvar! line, with its reason as a "#" line right above it. The builder
+# moves the reason into the box as a "> " line and writes the rest of the box itself.
 # Every setting of this loop: python3 util/build-scripts.py --settings recipe/pvp-recipe.razor
 #@ output script/combat/pvp.razor
 
 
-#@ header --------------------------------------------------------------------------------
+#@ header ------------------------------------------------------------------------------------------
 
 # Shared field PvP self-sustain: instant items first, healing agents, PvP buffs kept up, swing based weapon swap.
 # Needs: the heal pot and reflect bars, and a swing N bar (WeaponSwing type) for each enabled weapon slot.
@@ -34,59 +35,87 @@
 #   blocks read the flags. Potions are looked up only inside a block that already needs one.
 
 
-#@ blocks --------------------------------------------------------------------------------
+#@ blocks ------------------------------------------------------------------------------------------
 
+# ==================================================================================================
 #@ use base                 the frame every loop has
+#
+#   clear_at_start (default 1)
+#      What Play does first (conventions 02.D).
+#        0  nothing: a cursor or a cast the player holds at Play is kept
+#        1  clear the client queues, the journal and the ignore list
+#      > A manual cursor or cast held at Play is kept (conventions 02.D).
+#
+#   walk_guard (default 1)
+#      Our casts and the walk bar.
+#        0  cast while walking, for a fight where there is no better moment to wait for
+#        1  wait while the walk bar runs, so a step does not break the cast
+#      Read by recovery/cure, recovery/heal, recovery/light-heal, buff/spells.
+#      > pvp casts while walking: in a fight there is no better moment to wait for.
+# ==================================================================================================
+@setvar! config__clear_at_start 0
+@setvar! config__walk_guard 0
 
-    #| What Play does first (conventions 02.D).
-    #|   0  nothing: a cursor or a cast the player holds at Play is kept
-    #|   1  clear the client queues, the journal and the ignore list
-    #| Default 1.
-    # A manual cursor or cast held at Play is kept (conventions 02.D).
-    @setvar! config__clear_at_start 0
-
-    #| Our casts and the walk bar.
-    #|   0  cast while walking, for a fight where there is no better moment to wait for
-    #|   1  wait while the walk bar runs, so a step does not break the cast
-    #| Default 1. Read by recovery/cure, recovery/heal, recovery/light-heal, buff/spells.
-    # pvp casts while walking: in a fight there is no better moment to wait for.
-    @setvar! config__walk_guard 0
-
-# Every pass, in this order.
+# ==================================================================================================
 #@ use recovery/reagents    reagent flags for the recovery spells and the buffs
+# ==================================================================================================
+
+# ==================================================================================================
 #@ use recovery/pouch       trapped pouch while held
+# ==================================================================================================
+
+# ==================================================================================================
 #@ use recovery/cure        cure potion, else the Cure agent
+# ==================================================================================================
+
+# ==================================================================================================
 #@ use recovery/heal        heal potion, else Greater Heal at the emergency line
+# ==================================================================================================
+
+# ==================================================================================================
 #@ use recovery/bandage     self bandage
+# ==================================================================================================
+
+# ==================================================================================================
 #@ use recovery/light-heal  light Heal, the bandage stand-in
+# ==================================================================================================
+
+# ==================================================================================================
 #@ use recovery/refresh     Refresh at low stamina
+# ==================================================================================================
 
+# ==================================================================================================
 #@ use buff/potions         Strength, Agility and Magic Resist
+#
+#   str_potion (default 120, the same value)
+#      STR with the Greater Strength potion on: your base plus 20. Below it the potion is drunk,
+#      and 0 turns it off. Bless and the Strength spell, ours or an ally's, show the same icon as
+#      the potion but add less than its 20, so the stat tells them apart.
+#      > The loop is shared, so set this for the character that runs it.
+# ==================================================================================================
+@setvar! config__str_potion 120
 
-    #| STR with the Greater Strength potion on: your base plus 20. Below it the potion is drunk,
-    #| and 0 turns it off. Bless and the Strength spell, ours or an ally's, show the same icon as
-    #| the potion but add less than its 20, so the stat tells them apart.
-    #| Default 120, the same value.
-    # The loop is shared, so set this for the character that runs it.
-    @setvar! config__str_potion 120
-
+# ==================================================================================================
 #@ use buff/spells          Reactive Armor, then Magic Reflection
+#
+#   buff_max_loss (default 35, the same value)
+#      Missing hit points at which buffs are not started, and cut mid cast.
+#      > Keep this equal to config__emergency_hits.
+# ==================================================================================================
+@setvar! config__buff_max_loss 35
 
-    #| Missing hit points at which buffs are not started, and cut mid cast.
-    #| Default 35, the same value.
-    # Keep this equal to config__emergency_hits.
-    @setvar! config__buff_max_loss 35
-
+# ==================================================================================================
 #@ use fight/weapon-swap    arms the slot whose swing is ready
+# ==================================================================================================
 
 
-#@ state ---------------------------------------------------------------------------------
+#@ state -------------------------------------------------------------------------------------------
 
 # pvp is always in a fight, so the stat potions are kept up the whole time.
 @setvar! var__fighting 1
 
 
-#@ setup ---------------------------------------------------------------------------------
+#@ setup -------------------------------------------------------------------------------------------
 
 overhead "[ pvp, on ]" 290
 if config__sysmsg = 1

@@ -2,7 +2,7 @@
 # The profile displays the server's Tracking messages. escape/recall reads them.
 
 
-#@ config --------------------------------------------------------------------------------
+#@ config ------------------------------------------------------------------------------------------
 
 # Hunt filter.
 #   1  red: murderers
@@ -15,13 +15,13 @@
 @setvar! config__show_tracking 0
 
 
-#@ wait ----------------------------------------------------------------------------------
+#@ wait --------------------------------------------------------------------------------------------
 
 # How long the Tracking window may take to open.
 @setvar! wait__tracking_gump 1000
 
 
-#@ state ---------------------------------------------------------------------------------
+#@ state -------------------------------------------------------------------------------------------
 
 # Last color confirmed in this client session. It survives Stop and Play only while Hunting
 # stays active. After a manual filter change, turn Hunting off before Play so it is checked again.
@@ -39,7 +39,7 @@ endif
 @setvar! var__tracking_button_answered 0
 
 
-#@ setup ---------------------------------------------------------------------------------
+#@ setup -------------------------------------------------------------------------------------------
 
 # ####################################################################################
 # # TRACKING SETUP

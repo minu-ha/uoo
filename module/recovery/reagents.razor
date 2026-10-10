@@ -3,20 +3,20 @@
 # lines too, so the recipe puts this block after any other block that reads the journal.
 
 
-#@ wait ----------------------------------------------------------------------------------
+#@ wait --------------------------------------------------------------------------------------------
 
 # Reagent read interval. Five lookups each time. A refill counts within this, and running out
 # is caught at once by the refusal line.
 @setvar! cooldown__reagents 10000
 
 
-#@ timer ---------------------------------------------------------------------------------
+#@ timer -------------------------------------------------------------------------------------------
 
 # Ready on the first pass, so reagents are read before the first cast.
 timer__reagents cooldown__reagents
 
 
-#@ state ---------------------------------------------------------------------------------
+#@ state -------------------------------------------------------------------------------------------
 
 # Reagent flags, written only by REAGENTS. 1 when every reagent of that spell was found.
 #   Cure            garlic 3972, ginseng 3973
@@ -38,7 +38,7 @@ timer__reagents cooldown__reagents
 @setvar! var__has_silk 0
 
 
-#@ loop ----------------------------------------------------------------------------------
+#@ loop --------------------------------------------------------------------------------------------
     # ################################################################################
     # # REAGENTS
     # ################################################################################

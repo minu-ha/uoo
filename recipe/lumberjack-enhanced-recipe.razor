@@ -1,11 +1,12 @@
 # Recipe for script/gather/lumberjack-enhanced.razor. Build it with: python3 util/build-scripts.py
-# The blocks run in the order listed, base first. A setting this loop changes sits indented
-# under its block, with the reason in "#" lines right above it. The "#|" lines are the builder's.
+# Each block is a box, in the order the blocks run, base first. A setting this loop changes goes
+# under the box as an @setvar! line, with its reason as a "#" line right above it. The builder
+# moves the reason into the box as a "> " line and writes the rest of the box itself.
 # Every setting of this loop: python3 util/build-scripts.py --settings recipe/lumberjack-enhanced-recipe.razor
 #@ output script/gather/lumberjack-enhanced.razor
 
 
-#@ header --------------------------------------------------------------------------------
+#@ header ------------------------------------------------------------------------------------------
 
 # Lumberjack gathering with self recovery, independent Tracking setup and one automatic Recall attempt.
 # Needs: One Hatchet, bandages, reagents, recovery and harvest hotkeys. Automatic Recall needs a charged book with a Home rune.
@@ -25,69 +26,104 @@
 # The harvest retry only spaces attempts. It cannot shorten the server travel restriction.
 
 
-#@ blocks --------------------------------------------------------------------------------
+#@ blocks ------------------------------------------------------------------------------------------
 
+# ==================================================================================================
 #@ use base                  the frame every loop has
+#
+#   warmode_is_manual (default 0)
+#      Whose warmode it is.
+#        0  ours: our casts ignore it
+#        1  the player's manual control window: our casts and the food stand down while it
+#           is on. Potions and bandages still go out
+#      Read by recovery/cure, recovery/heal, recovery/light-heal, buff/spells, buff/food.
+#      > Warmode is the player's: recovery casts and buffs stand down, potions still go out.
+# ==================================================================================================
+@setvar! config__warmode_is_manual 1
 
-    #| Whose warmode it is.
-    #|   0  ours: our casts ignore it
-    #|   1  the player's manual control window: our casts and the food stand down while it
-    #|      is on. Potions and bandages still go out
-    #| Default 0. Read by recovery/cure, recovery/heal, recovery/light-heal, buff/spells, buff/food.
-    # Warmode is the player's: recovery casts and buffs stand down, potions still go out.
-    @setvar! config__warmode_is_manual 1
-
-# Before the loop.
+# ==================================================================================================
 #@ use escape/tracking       sets the Tracking hunt filter once
+#   Runs once, before the loop.
+# ==================================================================================================
 
-# Every pass, in this order.
+# ==================================================================================================
 #@ use recovery/pouch        trapped pouch while held
+# ==================================================================================================
+
+# ==================================================================================================
 #@ use recovery/cure         cure potion, else the Cure agent
+# ==================================================================================================
 
+# ==================================================================================================
 #@ use recovery/heal         heal potion, else Greater Heal at the emergency line
+#
+#   emergency_hits (default 35)
+#      Missing hit points that cast Greater Heal when no heal potion went out on this pass.
+#      Not below heal_hits.
+#      > Bandages handle ordinary damage, so Greater Heal waits for 45.
+# ==================================================================================================
+@setvar! config__emergency_hits 45
 
-    #| Missing hit points that cast Greater Heal when no heal potion went out on this pass.
-    #| Not below heal_hits.
-    #| Default 35.
-    # Bandages handle ordinary damage, so Greater Heal waits for 45.
-    @setvar! config__emergency_hits 45
-
+# ==================================================================================================
 #@ use recovery/bandage      self bandage
+# ==================================================================================================
+
+# ==================================================================================================
 #@ use recovery/light-heal   light Heal, the bandage stand-in
+# ==================================================================================================
+
+# ==================================================================================================
 #@ use recovery/refresh      Refresh at low stamina
+# ==================================================================================================
+
+# ==================================================================================================
 #@ use escape/recall         one Recall on a Tracking report or low spare weight
+# ==================================================================================================
+
+# ==================================================================================================
 #@ use recovery/reagents     reagent flags, read after the Tracking reports so it cannot consume one
+# ==================================================================================================
+
+# ==================================================================================================
 #@ use gather/lumberjacking  Smart Harvest with the Hatchet
+# ==================================================================================================
 
+# ==================================================================================================
 #@ use buff/spells           Reactive Armor, then Magic Reflection
+#
+#   mana_reactive_armor (default 4)
+#      Minimum current mana to start Reactive Armor.
+#      > Buffs keep the handbook's 20 mana for Greater Heal and Teleport against a PK.
+#
+#   mana_magic_reflect (default 14)
+#      Minimum current mana to start Magic Reflection.
+#      > Same reserve: the base 14 plus the handbook's 20.
+#
+#   buff_max_loss (default 35)
+#      Missing hit points at which buffs are not started, and cut mid cast.
+#      > Buffs only while nearly full, so gathering never trades a heal for one.
+#
+#   buff_when_poisoned (default 1)
+#      Buffs while poisoned.
+#        0  no: hold them back and cut one that is casting, so the cure goes first
+#        1  yes
+#      > The cure goes first: no buffs while poisoned.
+# ==================================================================================================
+@setvar! config__mana_reactive_armor 24
+@setvar! config__mana_magic_reflect 34
+@setvar! config__buff_max_loss 15
+@setvar! config__buff_when_poisoned 0
 
-    #| Minimum current mana to start Reactive Armor.
-    #| Default 4.
-    # Buffs keep the handbook's 20 mana for Greater Heal and Teleport against a PK.
-    @setvar! config__mana_reactive_armor 24
-
-    #| Minimum current mana to start Magic Reflection.
-    #| Default 14.
-    # Same reserve: the base 14 plus the handbook's 20.
-    @setvar! config__mana_magic_reflect 34
-
-    #| Missing hit points at which buffs are not started, and cut mid cast.
-    #| Default 35.
-    # Buffs only while nearly full, so gathering never trades a heal for one.
-    @setvar! config__buff_max_loss 15
-
-    #| Buffs while poisoned.
-    #|   0  no: hold them back and cut one that is casting, so the cure goes first
-    #|   1  yes
-    #| Default 1.
-    # The cure goes first: no buffs while poisoned.
-    @setvar! config__buff_when_poisoned 0
-
+# ==================================================================================================
 #@ use buff/food             eats from a tray
+# ==================================================================================================
+
+# ==================================================================================================
 #@ use pack/lumber           Logs into Boards, Boards into the loot pouch
+# ==================================================================================================
 
 
-#@ setup ---------------------------------------------------------------------------------
+#@ setup -------------------------------------------------------------------------------------------
 
 # pack/lumber moves Boards into this pouch. restock/loadout picks it, this asks when it is missing.
 if not varexist global__my_looting_pouch or not find global__my_looting_pouch backpack
