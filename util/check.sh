@@ -8,7 +8,7 @@
 # just stops working. loadout.razor lost an afternoon to a single undeclared wait__long.
 #
 # Only prefixed names are checked, since those are the ones this repo controls:
-#   config__ wait__ cooldown__ var__   must be assigned by setvar / @setvar! somewhere
+#   config__ wait__ interval__ cooldown__ var__   must be assigned by setvar / @setvar! somewhere
 #   alias__  label__                   must be bound by an "as" binding or by getlabel
 # timer__ names are skipped: they live inside quoted strings, where timerexists guards them.
 #
@@ -92,7 +92,7 @@ for f in "$@"; do
 
 		# every prefixed name this line mentions, remembered with its first line number
 		rest = line
-		while (match(rest, /(config|wait|cooldown|var|alias|label)__[A-Za-z0-9_]+/)) {
+		while (match(rest, /(config|wait|interval|cooldown|var|alias|label)__[A-Za-z0-9_]+/)) {
 			name = substr(rest, RSTART, RLENGTH)
 			if (!(name in seen)) { seen[name] = NR }
 			rest = substr(rest, RSTART + RLENGTH)

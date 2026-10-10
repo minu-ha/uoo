@@ -188,8 +188,8 @@ lumberjack-enhanced는 Tracking 줄을 먼저 읽도록 <code>recovery/reagents<
 <tbody>
 <tr><td>맨 위</td><td>블록이 하는 일. 첫 줄은 86자 안의 한 줄 요약이고 레시피와 <code>--settings</code>에 보인다. <code># @ hotkeys A, B</code></td><td></td><td>헤더의 <code>Hotkeys:</code> 줄</td></tr>
 <tr><td><code># @ config</code></td><td>설정마다 <code>#   이름</code>과 그 밑 <code>#      하는 일</code></td><td><code>config__</code> 기본값을 이어 붙인다</td><td>CONFIG</td></tr>
-<tr><td><code># @ wait</code></td><td>같은 모양</td><td><code>wait__</code>와 <code>cooldown__</code>. 모든 루프가 같은 값을 쓰는 내부 값</td><td>WAIT AND COOLDOWN</td></tr>
-<tr><td><code># @ timer</code></td><td>같은 모양. 없어도 된다</td><td>한 줄에 <code>timer__이름 시작값</code>. 시작값이 <code>cooldown__</code> 이름이면 첫 패스에 준비돼 있고, <code>0</code>이면 한 주기를 기다린다</td>
+<tr><td><code># @ wait</code></td><td>같은 모양</td><td><code>wait__</code>, <code>interval__</code>, <code>cooldown__</code>. 모든 루프가 같은 값을 쓰는 내부 값</td><td>WAIT AND COOLDOWN</td></tr>
+<tr><td><code># @ timer</code></td><td>같은 모양. 없어도 된다</td><td>한 줄에 <code>timer__이름 시작값</code>. 시작값이 <code>interval__</code> 이름이면 첫 패스에 준비돼 있고, <code>0</code>이면 한 주기를 기다린다</td>
 <td>TIMER. <code>createtimer</code>와 첫 <code>settimer</code>는 조립기가 쓴다 (<a href="conventions.html#04">conventions.html</a> 04절)</td></tr>
 <tr><td><code># @ state</code></td><td>같은 모양</td><td><code>var__</code> 선언. Play를 넘어 남길 것은 <code>if not varexist</code>로 감싼다</td><td>STATE</td></tr>
 <tr><td><code># @ setup</code>, <code># @ loop</code>, <code># @ end</code></td><td><code># @</code> 줄만</td>
@@ -258,7 +258,7 @@ lumberjack-enhanced는 Tracking 줄을 먼저 읽도록 <code>recovery/reagents<
 블록은 루프에 든 다른 모듈의 이름을 써도 되고, 그 관계를 따로 적지 않는다. 조립기가 코드에서 이름을 읽어 주인을 찾고,
 주인 모듈이 레시피에 없으면 어느 모듈을 넣으라고 알려 준다 (05절).</p>
 <p>블록 코드는 <code>config__</code>에 값을 넣지 않는다. 설정은 모듈의 <code># @ config</code>가 기본값을 정하고 레시피가 바꾼다.
-<code>wait__</code>와 <code>cooldown__</code>은 모든 루프가 같은 값을 쓴다. 루프마다 달라야 하는 값이 생기면 <code>config__</code> 설정으로 옮긴다.</p>
+<code>wait__</code>, <code>interval__</code>, <code>cooldown__</code>은 모든 루프가 같은 값을 쓴다. 루프마다 달라야 하는 값이 생기면 <code>config__</code> 설정으로 옮긴다.</p>
 <p>블록 하나를 켜고 끄는 설정은 두지 않는다. 그 블록을 레시피에 넣거나 빼면 된다. 설정은 블록 안의 선택에만 둔다
 (<code>use_resist_potion</code>, <code>skin_unowned</code>처럼). 예외는 <code>use_bandages</code>다. <code>recovery/light-heal</code>이 이 값을 보고 붕대 대신 나간다.</p>
 
@@ -301,7 +301,7 @@ TIMER는 timer마다 <code>createtimer</code>와 첫 <code>settimer</code>를 �
 <tr><td></td><td><code>use_magery</code>, <code>use_potions</code>: 회복과 버프 블록 여럿이 같이 보는 스위치</td><td></td></tr>
 <tr><td></td><td><code>walk_guard</code>: 1이면 우리 시전이 <code>walk</code> 바가 도는 동안 기다린다</td><td>pvp 0. 싸움 중에는 기다릴 더 나은 때가 없다</td></tr>
 <tr><td></td><td><code>warmode_is_manual</code>: 1이면 워모드가 플레이어의 조작 창이라 우리 시전과 음식이 선다. 포션과 붕대는 나간다</td><td>lumberjack-enhanced 1</td></tr>
-<tr><td><code># @ wait</code>, <code># @ timer</code></td><td><code>wait__poll</code>, <code>wait__short</code>, 경고 간격 <code>cooldown__message</code>와 <code>timer__message</code></td><td></td></tr>
+<tr><td><code># @ wait</code>, <code># @ timer</code></td><td><code>wait__poll</code>, <code>wait__short</code>, 경고 간격 <code>interval__message</code>와 <code>timer__message</code></td><td></td></tr>
 <tr><td><code># @ state</code></td><td>블록끼리의 신호 세 개 (아래 표)</td><td>pvp는 <code>var__fighting</code>을 1로</td></tr>
 <tr><td><code># @ setup</code>, <code># @ loop</code>, <code># @ end</code></td><td>구조적 PvP 정지 (루프 앞과 패스 첫머리), 시작 4줄, 패스 끝 <code>wait wait__poll</code></td><td></td></tr>
 </tbody>
@@ -421,7 +421,7 @@ skinning-enhanced의 경고 간격은 2.7초에서 3초로, 두 채집 루프의
 <code>pack_leather</code>, <code>pack_lumber</code>, <code>use_tracking</code>, <code>auto_recall</code>, <code>use_stat_potions</code></td><td>없앴다. 레시피에 넣으면 켜지고 빼면 꺼진다</td></tr>
 <tr><td>codex·무기 능력의 슬롯 번호</td><td><code>sword_stance_warrior 4</code>처럼 바꿀 일이 없는 설정 18개</td><td>위키 순서의 숫자를 코드에 쓰고, 고르는 설정 (<code>sword_stance_main</code> 등)의 설명에 번호표를 둔다</td></tr>
 <tr><td>이름</td><td><code>config__weapon_graphic</code> (도끼), <code>wait__long</code>, <code>wait__target</code>, 두 codex가 같이 쓰던 <code>cooldown__stance_*</code></td>
-<td><code>config__axe_graphic</code>, <code>wait__gold_drop</code>, <code>wait__tracking_gump</code>, <code>cooldown__sword_*</code>와 <code>cooldown__parry_*</code></td></tr>
+<td><code>config__axe_graphic</code>, <code>wait__gold_drop</code>, <code>wait__tracking_gump</code>, <code>interval__sword_*</code>와 <code>interval__parry_*</code></td></tr>
 </tbody>
 </table>
 <p><strong>pvp (v9)와 skinning-enhanced (v11)는 동작이 같다.</strong> 루프 문장의 차이는 늘 1이던 켜고 끄기 조건이 빠진 것, 슬롯 상수가 숫자가 된 것, 이름이 바뀐 것뿐이다.
@@ -436,7 +436,7 @@ pvp 결과물에는 시작 4줄이 <code>if config__clear_at_start = 1</code> �
 </tr>
 </thead>
 <tbody>
-<tr><td>책·Tracking·무게 점검</td><td>housekeeping 시계 (5초)</td><td><code>escape/recall</code>의 자기 시계 <code>cooldown__recall_check</code> (5초)</td></tr>
+<tr><td>책·Tracking·무게 점검</td><td>housekeeping 시계 (5초)</td><td><code>escape/recall</code>의 자기 시계 <code>interval__recall_check</code> (5초)</td></tr>
 <tr><td>음식</td><td>housekeeping 패스에서, 손실 <code>light_hits</code> 미만이고 독·워모드·리콜 결정이 없을 때</td>
 <td>skinning과 같은 <code>buff/food</code>. 패스마다 60초 타이머와 Food Satisfaction을 보고, 워모드에서는 쉰다 (<code>warmode_is_manual</code> 1).
 손실·독·리콜 결정은 보지 않는다</td></tr>

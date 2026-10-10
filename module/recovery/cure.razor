@@ -30,7 +30,7 @@
             hotkey "Drink Cure"
             wait wait__short
         else
-            if config__use_potions = 1 and timer "timer__message" >= cooldown__message
+            if config__use_potions = 1 and timer "timer__message" >= interval__message
                 overhead "[ cure pot, out ]" 254
                 settimer "timer__message" 0
             endif

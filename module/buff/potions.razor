@@ -29,20 +29,20 @@
 # ----------------------------------------------------------------------------------------
 # @ wait
 #
-#   cooldown__stat_potion
+#   interval__stat_potion
 #      A Strength or Agility potion is tried once per window. The stat arrives a round
 #      trip after the drink, and a Curse, Weaken or Clumsy can hold it under the line
 #      while the potion still runs: without the window that refused drink would go out
 #      every pass. An empty bag is looked up at the same pace.
 # ----------------------------------------------------------------------------------------
-@setvar! cooldown__stat_potion 5000
+@setvar! interval__stat_potion 5000
 
 
 # ----------------------------------------------------------------------------------------
 # @ timer
 # ----------------------------------------------------------------------------------------
-timer__str_potion cooldown__stat_potion
-timer__agi_potion cooldown__stat_potion
+timer__str_potion interval__stat_potion
+timer__agi_potion interval__stat_potion
 
 
 # ----------------------------------------------------------------------------------------
@@ -54,19 +54,19 @@ timer__agi_potion cooldown__stat_potion
     # Kept up while var__fighting is 1. Strength and Agility read the stat against
     # config__str_potion and config__dex_potion, because Bless and the Strength and
     # Agility spells show the same icons as the potions, and each is tried once per
-    # cooldown__stat_potion. Magic Resist has an icon of its own and is drunk once it is
+    # interval__stat_potion. Magic Resist has an icon of its own and is drunk once it is
     # missing. Each potion is judged on its own, so running out of one does not hold up
     # the others.
     # ------------------------------------------------------------------------------------
     if var__fighting = 1 and config__use_potions = 1 and not paralyzed and not hidden and not targetexists
-        if not queued and str < config__str_potion and timer "timer__str_potion" >= cooldown__stat_potion
+        if not queued and str < config__str_potion and timer "timer__str_potion" >= interval__stat_potion
             settimer "timer__str_potion" 0
             if findtype "White Potion" self
                 hotkey "Drink Strength"
                 wait wait__short
             endif
         endif
-        if not queued and dex < config__dex_potion and timer "timer__agi_potion" >= cooldown__stat_potion
+        if not queued and dex < config__dex_potion and timer "timer__agi_potion" >= interval__stat_potion
             settimer "timer__agi_potion" 0
             if findtype "Blue Potion" self
                 hotkey "Drink Agility"

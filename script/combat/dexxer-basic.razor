@@ -133,22 +133,22 @@
 #   wait__short
 #      The pause after an action.
 #
-#   cooldown__message
+#   interval__message
 #      Spacing for repeated warnings. Without it an empty potion bag shouts every pass.
 # ----------------------------------------------------------------------------------------
 @setvar! wait__poll 100
 @setvar! wait__short 200
-@setvar! cooldown__message 3000
+@setvar! interval__message 3000
 
 
 # ----------------------------------------------------------------------------------------
 # module/recovery/reagents.razor
 #
-#   cooldown__reagents
+#   interval__reagents
 #      Reagent read interval. Five lookups each time. A refill counts within this, and
 #      running out is caught at once by the refusal line.
 # ----------------------------------------------------------------------------------------
-@setvar! cooldown__reagents 10000
+@setvar! interval__reagents 10000
 
 
 # ----------------------------------------------------------------------------------------
@@ -163,19 +163,19 @@
 # ----------------------------------------------------------------------------------------
 # module/buff/food.razor
 #
-#   cooldown__food
+#   interval__food
 #      The buff lasts far longer than this.
 # ----------------------------------------------------------------------------------------
-@setvar! cooldown__food 60000
+@setvar! interval__food 60000
 
 
 # ----------------------------------------------------------------------------------------
 # module/pack/scavenger.razor
 #
-#   cooldown__scavenger_clear
+#   interval__scavenger_clear
 #      How often the cache is cleared.
 # ----------------------------------------------------------------------------------------
-@setvar! cooldown__scavenger_clear 30000
+@setvar! interval__scavenger_clear 30000
 
 
 # ========================================================================================
@@ -191,7 +191,7 @@
 if not timerexists "timer__message"
     createtimer "timer__message"
 endif
-settimer "timer__message" cooldown__message
+settimer "timer__message" interval__message
 
 
 # ----------------------------------------------------------------------------------------
@@ -203,7 +203,7 @@ settimer "timer__message" cooldown__message
 if not timerexists "timer__reagents"
     createtimer "timer__reagents"
 endif
-settimer "timer__reagents" cooldown__reagents
+settimer "timer__reagents" interval__reagents
 
 
 # ----------------------------------------------------------------------------------------
@@ -212,7 +212,7 @@ settimer "timer__reagents" cooldown__reagents
 if not timerexists "timer__food"
     createtimer "timer__food"
 endif
-settimer "timer__food" cooldown__food
+settimer "timer__food" interval__food
 
 
 # ----------------------------------------------------------------------------------------
@@ -334,7 +334,7 @@ while not dead
     # send the same doomed cast every pass.
     # ------------------------------------------------------------------------------------
     if config__use_magery = 1
-        if timer "timer__reagents" >= cooldown__reagents or insysmsg "More reagents are needed"
+        if timer "timer__reagents" >= interval__reagents or insysmsg "More reagents are needed"
             settimer "timer__reagents" 0
 
             @setvar! var__has_garlic 0
@@ -393,7 +393,7 @@ while not dead
         if findtype 3705 backpack 38
             yell "[Pouch"
             wait wait__short
-        elseif timer "timer__message" >= cooldown__message
+        elseif timer "timer__message" >= interval__message
             overhead "[ pouch, out ]" 254
             settimer "timer__message" 0
         endif
@@ -412,7 +412,7 @@ while not dead
             hotkey "Drink Cure"
             wait wait__short
         else
-            if config__use_potions = 1 and timer "timer__message" >= cooldown__message
+            if config__use_potions = 1 and timer "timer__message" >= interval__message
                 overhead "[ cure pot, out ]" 254
                 settimer "timer__message" 0
             endif
@@ -463,7 +463,7 @@ while not dead
                     @setvar! var__heal_potion_out 1
                     wait wait__short
                 endif
-            elseif timer "timer__message" >= cooldown__message
+            elseif timer "timer__message" >= interval__message
                 overhead "[ heal pot, out ]" 254
                 settimer "timer__message" 0
             endif
@@ -509,7 +509,7 @@ while not dead
             if findtype 3617 self
                 hotkey "Bandage Self"
                 wait wait__short
-            elseif timer "timer__message" >= cooldown__message
+            elseif timer "timer__message" >= interval__message
                 overhead "[ bandage, out ]" 254
                 settimer "timer__message" 0
             endif
@@ -550,7 +550,7 @@ while not dead
                 if config__chatty = 1
                     overhead "[ gold, dropped ]" 290
                 endif
-            elseif timer "timer__message" >= cooldown__message
+            elseif timer "timer__message" >= interval__message
                 overhead "[ weight, over ]" 254
                 settimer "timer__message" 0
             endif
@@ -563,7 +563,7 @@ while not dead
     # Looked at once a minute. The buff lasts far longer. With config__warmode_is_manual 1
     # it stands down in warmode, as our casts do.
     # ------------------------------------------------------------------------------------
-    if timer "timer__food" >= cooldown__food and not findbuff "Food Satisfaction"
+    if timer "timer__food" >= interval__food and not findbuff "Food Satisfaction"
         if config__warmode_is_manual = 0 or not warmode
             if not hidden and not queued and not casting and not targetexists
                 settimer "timer__food" 0
@@ -581,7 +581,7 @@ while not dead
     # The scavenger passes over an item it already handled until its cache is cleared, so a
     # clear every 30 seconds gives those items another try.
     # ------------------------------------------------------------------------------------
-    if timer "timer__scavenger_clear" >= cooldown__scavenger_clear
+    if timer "timer__scavenger_clear" >= interval__scavenger_clear
         settimer "timer__scavenger_clear" 0
         hotkey "Clear Scavenger Cache"
         if config__sysmsg = 1

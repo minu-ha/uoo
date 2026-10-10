@@ -48,7 +48,7 @@
                 if config__chatty = 1
                     overhead "[ gold, dropped ]" 290
                 endif
-            elseif timer "timer__message" >= cooldown__message
+            elseif timer "timer__message" >= interval__message
                 overhead "[ weight, over ]" 254
                 settimer "timer__message" 0
             endif

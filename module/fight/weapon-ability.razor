@@ -18,16 +18,16 @@
 # ----------------------------------------------------------------------------------------
 # @ wait
 #
-#   cooldown__ability
+#   interval__ability
 #      Without Arms Lore the ability meter takes 60 seconds to fill.
 # ----------------------------------------------------------------------------------------
-@setvar! cooldown__ability 60000
+@setvar! interval__ability 60000
 
 
 # ----------------------------------------------------------------------------------------
 # @ timer
 # ----------------------------------------------------------------------------------------
-timer__ability cooldown__ability
+timer__ability interval__ability
 
 
 # ----------------------------------------------------------------------------------------
@@ -43,7 +43,7 @@ timer__ability cooldown__ability
     # spaces the request, as in archive/bard-mace. A wrong interval only shifts the
     # timing.
     # ------------------------------------------------------------------------------------
-    if timer "timer__ability" >= cooldown__ability and find var__combat_target ground -1 -1 2
+    if timer "timer__ability" >= interval__ability and find var__combat_target ground -1 -1 2
         if config__ability_main = 1
             say "[WeaponAbility1"
         elseif config__ability_main = 2

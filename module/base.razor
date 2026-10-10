@@ -57,12 +57,12 @@
 #   wait__short
 #      The pause after an action.
 #
-#   cooldown__message
+#   interval__message
 #      Spacing for repeated warnings. Without it an empty potion bag shouts every pass.
 # ----------------------------------------------------------------------------------------
 @setvar! wait__poll 100
 @setvar! wait__short 200
-@setvar! cooldown__message 3000
+@setvar! interval__message 3000
 
 
 # ----------------------------------------------------------------------------------------
@@ -71,7 +71,7 @@
 #   timer__message
 #      Ready on the first pass, so the first warning shows at once.
 # ----------------------------------------------------------------------------------------
-timer__message cooldown__message
+timer__message interval__message
 
 
 # ----------------------------------------------------------------------------------------

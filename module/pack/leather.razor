@@ -14,12 +14,12 @@
 #   wait__pack_batch
 #      Request budget for one packing pass. Leftover leather waits for the next interval.
 #
-#   cooldown__pack_leather
+#   interval__pack_leather
 #      120000 = 2 minutes. Use 180000 for 3 minutes.
 # ----------------------------------------------------------------------------------------
 @setvar! wait__pack_item 500
 @setvar! wait__pack_batch 2500
-@setvar! cooldown__pack_leather 120000
+@setvar! interval__pack_leather 120000
 
 
 # ----------------------------------------------------------------------------------------
@@ -44,7 +44,7 @@ timer__pack_leather 0
     # move is found again and retried until the pass budget runs out, then on the next
     # interval.
     # ------------------------------------------------------------------------------------
-    if timer "timer__pack_leather" >= cooldown__pack_leather and var__combat_target = 0
+    if timer "timer__pack_leather" >= interval__pack_leather and var__combat_target = 0
         if diffhits < config__heal_hits and not poisoned and not paralyzed
             if not hidden and not queued and not casting and not targetexists
                 settimer "timer__pack_leather" 0
@@ -80,7 +80,7 @@ timer__pack_leather 0
                     if config__sysmsg = 1
                         sysmsg "Leather pack END." 88
                     endif
-                elseif timer "timer__message" >= cooldown__message
+                elseif timer "timer__message" >= interval__message
                     overhead "[ loot pouch, out ]" 254
                     settimer "timer__message" 0
                 endif

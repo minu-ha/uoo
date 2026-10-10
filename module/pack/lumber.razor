@@ -15,12 +15,12 @@
 #      Per-phase request budget: Logs and Boards each yield after 2.5 seconds, between
 #      item requests.
 #
-#   cooldown__pack_lumber
+#   interval__pack_lumber
 #      120000 = 2 minutes. Use 180000 for 3 minutes.
 # ----------------------------------------------------------------------------------------
 @setvar! wait__lumber_item 500
 @setvar! wait__lumber_batch 2500
-@setvar! cooldown__pack_lumber 120000
+@setvar! interval__pack_lumber 120000
 
 
 # ----------------------------------------------------------------------------------------
@@ -51,7 +51,7 @@ timer__pack_lumber 0
     # Try each selected stack once, with no snapshots or foreach iterator. Bound scans by
     # the existing timer. A failed conversion/drop waits for the next interval.
     # ------------------------------------------------------------------------------------
-    if var__hold_gathering = 0 and timer "timer__pack_lumber" >= cooldown__pack_lumber
+    if var__hold_gathering = 0 and timer "timer__pack_lumber" >= interval__pack_lumber
         if diffhits < config__light_hits and not poisoned and not paralyzed and not warmode
             if not hidden and not queued and not casting and not targetexists
                 settimer "timer__pack_lumber" 0
@@ -123,7 +123,7 @@ timer__pack_lumber 0
                             sysmsg "Lumber pack: target cursor active. Harvest leaves it to the player." 88
                         endif
                     endif
-                elseif timer "timer__message" >= cooldown__message
+                elseif timer "timer__message" >= interval__message
                     overhead "[ loot pouch, out ]" 254
                     settimer "timer__message" 0
                 endif

@@ -106,7 +106,7 @@ endif
                 else
                     # Gone from hand and pack: search again next pass.
                     @setvar! var__weapon_armed_graphic 0
-                    if lhandempty and rhandempty and timer "timer__message" >= cooldown__message
+                    if lhandempty and rhandempty and timer "timer__message" >= interval__message
                         overhead "[ weapon, out ]" 254
                         settimer "timer__message" 0
                     endif

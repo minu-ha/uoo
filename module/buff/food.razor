@@ -6,16 +6,16 @@
 # ----------------------------------------------------------------------------------------
 # @ wait
 #
-#   cooldown__food
+#   interval__food
 #      The buff lasts far longer than this.
 # ----------------------------------------------------------------------------------------
-@setvar! cooldown__food 60000
+@setvar! interval__food 60000
 
 
 # ----------------------------------------------------------------------------------------
 # @ timer
 # ----------------------------------------------------------------------------------------
-timer__food cooldown__food
+timer__food interval__food
 
 
 # ----------------------------------------------------------------------------------------
@@ -27,7 +27,7 @@ timer__food cooldown__food
     # Looked at once a minute. The buff lasts far longer. With config__warmode_is_manual 1
     # it stands down in warmode, as our casts do.
     # ------------------------------------------------------------------------------------
-    if timer "timer__food" >= cooldown__food and not findbuff "Food Satisfaction"
+    if timer "timer__food" >= interval__food and not findbuff "Food Satisfaction"
         if config__warmode_is_manual = 0 or not warmode
             if not hidden and not queued and not casting and not targetexists
                 settimer "timer__food" 0

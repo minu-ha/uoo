@@ -19,8 +19,8 @@ says what it looks after. module/base.razor is the frame of every loop.
     head box               what the block does (the first line is the summary), "# @ hotkeys A, B"
     # @ config box         "#   name" and "#      what it does" for each config__ setting, then
                            under the box the @setvar! lines with the defaults, joined up
-    # @ wait box           wait__ and cooldown__ values, the same in every loop, written the same way
-    # @ timer box          one "timer__x <start>" line per timer, the start a cooldown__ name or 0.
+    # @ wait box           wait__, interval__ and cooldown__ values, the same in every loop
+    # @ timer box          one "timer__x <start>" line per timer, the start an interval__ name or 0.
                            Describing them is optional
     # @ state box          var__ state, written the same way. Guards (if not varexist) may wrap them
     # @ setup, loop, end   code under a box with only the "# @" line. end is base only. A loop or
@@ -54,7 +54,7 @@ MODULE_DIR = REPO / 'module'
 BASE = 'base'
 MODULE_SECTIONS = ['config', 'wait', 'timer', 'state', 'setup', 'loop', 'end']
 RECIPE_SECTIONS = ['header', 'blocks', 'state', 'setup']
-DECLARES = {'config': ('config__',), 'wait': ('wait__', 'cooldown__'), 'timer': ('timer__',), 'state': ('var__',)}
+DECLARES = {'config': ('config__',), 'wait': ('wait__', 'interval__', 'cooldown__'), 'timer': ('timer__',), 'state': ('var__',)}
 WIDTH = 90
 BOX = '# ' + '-' * (WIDTH - 2)
 PART = '# ' + '=' * (WIDTH - 2)
@@ -62,10 +62,10 @@ SECTION = re.compile(r'^#\s?@\s*([a-z]+)\s*[-=]*\s*$')
 DIRECTIVE = re.compile(r'^#\s?@\s*([a-z]+)\b\s*(.*)$')
 RULE_LINE = re.compile(r'^#\s*[-=#]{8,}\s*$')
 BLOCK_RULE = re.compile(r'^\s+#\s*-{8,}\s*$')
-NAME = re.compile(r'\b(?:config|wait|cooldown|timer|var)__[A-Za-z0-9_]+')
-FULL_NAME = re.compile(r'^(?:config|wait|cooldown|timer|var)__[A-Za-z0-9_]+$')
+NAME = re.compile(r'\b(?:config|wait|interval|cooldown|timer|var)__[A-Za-z0-9_]+')
+FULL_NAME = re.compile(r'^(?:config|wait|interval|cooldown|timer|var)__[A-Za-z0-9_]+$')
 SETVAR = re.compile(r'^\s*@?setvar!?\s+(\S+)\s*(.*)$')
-TIMER = re.compile(r'^(timer__[A-Za-z0-9_]+)\s+(0|(?:cooldown|wait)__[A-Za-z0-9_]+)$')
+TIMER = re.compile(r'^(timer__[A-Za-z0-9_]+)\s+(0|(?:interval|cooldown|wait)__[A-Za-z0-9_]+)$')
 GUARD = re.compile(r'^\s*(if not varexist var__[A-Za-z0-9_]+|endif)\s*$')
 DESC_NAMES = re.compile(r'^#   (\S.*)$')
 DESC_TEXT = re.compile(r'^#      (.*)$')
@@ -228,7 +228,7 @@ def load_module(path):
             if section == 'timer':
                 match = TIMER.match(line.strip())
                 if not match:
-                    raise BuildError('%s: write a timer as "timer__<name> <cooldown__ name or 0>"' % where)
+                    raise BuildError('%s: write a timer as "timer__<name> <interval__ name or 0>"' % where)
             else:
                 match = SETVAR.match(line)
                 if not match:

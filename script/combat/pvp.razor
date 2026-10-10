@@ -233,34 +233,34 @@
 #   wait__short
 #      The pause after an action.
 #
-#   cooldown__message
+#   interval__message
 #      Spacing for repeated warnings. Without it an empty potion bag shouts every pass.
 # ----------------------------------------------------------------------------------------
 @setvar! wait__poll 100
 @setvar! wait__short 200
-@setvar! cooldown__message 3000
+@setvar! interval__message 3000
 
 
 # ----------------------------------------------------------------------------------------
 # module/recovery/reagents.razor
 #
-#   cooldown__reagents
+#   interval__reagents
 #      Reagent read interval. Five lookups each time. A refill counts within this, and
 #      running out is caught at once by the refusal line.
 # ----------------------------------------------------------------------------------------
-@setvar! cooldown__reagents 10000
+@setvar! interval__reagents 10000
 
 
 # ----------------------------------------------------------------------------------------
 # module/buff/potions.razor
 #
-#   cooldown__stat_potion
+#   interval__stat_potion
 #      A Strength or Agility potion is tried once per window. The stat arrives a round
 #      trip after the drink, and a Curse, Weaken or Clumsy can hold it under the line
 #      while the potion still runs: without the window that refused drink would go out
 #      every pass. An empty bag is looked up at the same pace.
 # ----------------------------------------------------------------------------------------
-@setvar! cooldown__stat_potion 5000
+@setvar! interval__stat_potion 5000
 
 
 # ========================================================================================
@@ -276,7 +276,7 @@
 if not timerexists "timer__message"
     createtimer "timer__message"
 endif
-settimer "timer__message" cooldown__message
+settimer "timer__message" interval__message
 
 
 # ----------------------------------------------------------------------------------------
@@ -288,7 +288,7 @@ settimer "timer__message" cooldown__message
 if not timerexists "timer__reagents"
     createtimer "timer__reagents"
 endif
-settimer "timer__reagents" cooldown__reagents
+settimer "timer__reagents" interval__reagents
 
 
 # ----------------------------------------------------------------------------------------
@@ -297,12 +297,12 @@ settimer "timer__reagents" cooldown__reagents
 if not timerexists "timer__str_potion"
     createtimer "timer__str_potion"
 endif
-settimer "timer__str_potion" cooldown__stat_potion
+settimer "timer__str_potion" interval__stat_potion
 
 if not timerexists "timer__agi_potion"
     createtimer "timer__agi_potion"
 endif
-settimer "timer__agi_potion" cooldown__stat_potion
+settimer "timer__agi_potion" interval__stat_potion
 
 
 # ========================================================================================
@@ -450,7 +450,7 @@ while not dead
     # send the same doomed cast every pass.
     # ------------------------------------------------------------------------------------
     if config__use_magery = 1
-        if timer "timer__reagents" >= cooldown__reagents or insysmsg "More reagents are needed"
+        if timer "timer__reagents" >= interval__reagents or insysmsg "More reagents are needed"
             settimer "timer__reagents" 0
 
             @setvar! var__has_garlic 0
@@ -509,7 +509,7 @@ while not dead
         if findtype 3705 backpack 38
             yell "[Pouch"
             wait wait__short
-        elseif timer "timer__message" >= cooldown__message
+        elseif timer "timer__message" >= interval__message
             overhead "[ pouch, out ]" 254
             settimer "timer__message" 0
         endif
@@ -528,7 +528,7 @@ while not dead
             hotkey "Drink Cure"
             wait wait__short
         else
-            if config__use_potions = 1 and timer "timer__message" >= cooldown__message
+            if config__use_potions = 1 and timer "timer__message" >= interval__message
                 overhead "[ cure pot, out ]" 254
                 settimer "timer__message" 0
             endif
@@ -579,7 +579,7 @@ while not dead
                     @setvar! var__heal_potion_out 1
                     wait wait__short
                 endif
-            elseif timer "timer__message" >= cooldown__message
+            elseif timer "timer__message" >= interval__message
                 overhead "[ heal pot, out ]" 254
                 settimer "timer__message" 0
             endif
@@ -625,7 +625,7 @@ while not dead
             if findtype 3617 self
                 hotkey "Bandage Self"
                 wait wait__short
-            elseif timer "timer__message" >= cooldown__message
+            elseif timer "timer__message" >= interval__message
                 overhead "[ bandage, out ]" 254
                 settimer "timer__message" 0
             endif
@@ -692,19 +692,19 @@ while not dead
     # Kept up while var__fighting is 1. Strength and Agility read the stat against
     # config__str_potion and config__dex_potion, because Bless and the Strength and
     # Agility spells show the same icons as the potions, and each is tried once per
-    # cooldown__stat_potion. Magic Resist has an icon of its own and is drunk once it is
+    # interval__stat_potion. Magic Resist has an icon of its own and is drunk once it is
     # missing. Each potion is judged on its own, so running out of one does not hold up
     # the others.
     # ------------------------------------------------------------------------------------
     if var__fighting = 1 and config__use_potions = 1 and not paralyzed and not hidden and not targetexists
-        if not queued and str < config__str_potion and timer "timer__str_potion" >= cooldown__stat_potion
+        if not queued and str < config__str_potion and timer "timer__str_potion" >= interval__stat_potion
             settimer "timer__str_potion" 0
             if findtype "White Potion" self
                 hotkey "Drink Strength"
                 wait wait__short
             endif
         endif
-        if not queued and dex < config__dex_potion and timer "timer__agi_potion" >= cooldown__stat_potion
+        if not queued and dex < config__dex_potion and timer "timer__agi_potion" >= interval__stat_potion
             settimer "timer__agi_potion" 0
             if findtype "Blue Potion" self
                 hotkey "Drink Agility"
@@ -851,7 +851,7 @@ while not dead
                 else
                     # Gone from hand and pack: search again next pass.
                     @setvar! var__weapon_armed_graphic 0
-                    if lhandempty and rhandempty and timer "timer__message" >= cooldown__message
+                    if lhandempty and rhandempty and timer "timer__message" >= interval__message
                         overhead "[ weapon, out ]" 254
                         settimer "timer__message" 0
                     endif

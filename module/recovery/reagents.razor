@@ -9,11 +9,11 @@
 # ----------------------------------------------------------------------------------------
 # @ wait
 #
-#   cooldown__reagents
+#   interval__reagents
 #      Reagent read interval. Five lookups each time. A refill counts within this, and
 #      running out is caught at once by the refusal line.
 # ----------------------------------------------------------------------------------------
-@setvar! cooldown__reagents 10000
+@setvar! interval__reagents 10000
 
 
 # ----------------------------------------------------------------------------------------
@@ -22,7 +22,7 @@
 #   timer__reagents
 #      Ready on the first pass, so reagents are read before the first cast.
 # ----------------------------------------------------------------------------------------
-timer__reagents cooldown__reagents
+timer__reagents interval__reagents
 
 
 # ----------------------------------------------------------------------------------------
@@ -63,7 +63,7 @@ timer__reagents cooldown__reagents
     # send the same doomed cast every pass.
     # ------------------------------------------------------------------------------------
     if config__use_magery = 1
-        if timer "timer__reagents" >= cooldown__reagents or insysmsg "More reagents are needed"
+        if timer "timer__reagents" >= interval__reagents or insysmsg "More reagents are needed"
             settimer "timer__reagents" 0
 
             @setvar! var__has_garlic 0

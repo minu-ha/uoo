@@ -313,30 +313,30 @@
 #   wait__short
 #      The pause after an action.
 #
-#   cooldown__message
+#   interval__message
 #      Spacing for repeated warnings. Without it an empty potion bag shouts every pass.
 # ----------------------------------------------------------------------------------------
 @setvar! wait__poll 100
 @setvar! wait__short 200
-@setvar! cooldown__message 3000
+@setvar! interval__message 3000
 
 
 # ----------------------------------------------------------------------------------------
 # module/fight/target.razor
 #
-#   cooldown__combat_target_grace
+#   interval__combat_target_grace
 #      A remembered enemy out of range this long is dropped.
 # ----------------------------------------------------------------------------------------
-@setvar! cooldown__combat_target_grace 1200
+@setvar! interval__combat_target_grace 1200
 
 
 # ----------------------------------------------------------------------------------------
 # module/fight/axe.razor
 #
-#   cooldown__equip_retry
+#   interval__equip_retry
 #      A refused equip, after a disarm for example, waits this long before the next try.
 # ----------------------------------------------------------------------------------------
-@setvar! cooldown__equip_retry 2000
+@setvar! interval__equip_retry 2000
 
 
 # ----------------------------------------------------------------------------------------
@@ -351,48 +351,48 @@
 # ----------------------------------------------------------------------------------------
 # module/buff/potions.razor
 #
-#   cooldown__stat_potion
+#   interval__stat_potion
 #      A Strength or Agility potion is tried once per window. The stat arrives a round
 #      trip after the drink, and a Curse, Weaken or Clumsy can hold it under the line
 #      while the potion still runs: without the window that refused drink would go out
 #      every pass. An empty bag is looked up at the same pace.
 # ----------------------------------------------------------------------------------------
-@setvar! cooldown__stat_potion 5000
+@setvar! interval__stat_potion 5000
 
 
 # ----------------------------------------------------------------------------------------
 # module/fight/sword-codex.razor
 #
-#   cooldown__sword_retry
+#   interval__sword_retry
 #      A failed stance switch is tried again after this.
 #
-#   cooldown__sword_resync
+#   interval__sword_resync
 #      The stance cache is dropped this often, so a stance changed by hand is picked up.
 # ----------------------------------------------------------------------------------------
-@setvar! cooldown__sword_retry 3000
-@setvar! cooldown__sword_resync 30000
+@setvar! interval__sword_retry 3000
+@setvar! interval__sword_resync 30000
 
 
 # ----------------------------------------------------------------------------------------
 # module/fight/parry-codex.razor
 #
-#   cooldown__parry_retry
+#   interval__parry_retry
 #      A failed stance switch is tried again after this.
 #
-#   cooldown__parry_resync
+#   interval__parry_resync
 #      The stance cache is dropped this often, so a stance changed by hand is picked up.
 # ----------------------------------------------------------------------------------------
-@setvar! cooldown__parry_retry 3000
-@setvar! cooldown__parry_resync 30000
+@setvar! interval__parry_retry 3000
+@setvar! interval__parry_resync 30000
 
 
 # ----------------------------------------------------------------------------------------
 # module/fight/weapon-ability.razor
 #
-#   cooldown__ability
+#   interval__ability
 #      Without Arms Lore the ability meter takes 60 seconds to fill.
 # ----------------------------------------------------------------------------------------
-@setvar! cooldown__ability 60000
+@setvar! interval__ability 60000
 
 
 # ----------------------------------------------------------------------------------------
@@ -405,36 +405,36 @@
 #   wait__carve_reply
 #      How long Smart Harvest waits for the server reply after target self.
 #
-#   cooldown__carve
+#   interval__carve
 #      Forensic Evaluation has its own 0.5 second cooldown. This spaces the corpse search
 #      as well.
 #
-#   cooldown__grey_only
+#   interval__grey_only
 #      After a criminal action refusal, carve grey corpses only for 5 minutes.
 # ----------------------------------------------------------------------------------------
 @setvar! wait__carve_target 2000
 @setvar! wait__carve_reply 1500
-@setvar! cooldown__carve 700
-@setvar! cooldown__grey_only 300000
+@setvar! interval__carve 700
+@setvar! interval__grey_only 300000
 
 
 # ----------------------------------------------------------------------------------------
 # module/recovery/reagents.razor
 #
-#   cooldown__reagents
+#   interval__reagents
 #      Reagent read interval. Five lookups each time. A refill counts within this, and
 #      running out is caught at once by the refusal line.
 # ----------------------------------------------------------------------------------------
-@setvar! cooldown__reagents 10000
+@setvar! interval__reagents 10000
 
 
 # ----------------------------------------------------------------------------------------
 # module/buff/food.razor
 #
-#   cooldown__food
+#   interval__food
 #      The buff lasts far longer than this.
 # ----------------------------------------------------------------------------------------
-@setvar! cooldown__food 60000
+@setvar! interval__food 60000
 
 
 # ----------------------------------------------------------------------------------------
@@ -446,12 +446,12 @@
 #   wait__pack_batch
 #      Request budget for one packing pass. Leftover leather waits for the next interval.
 #
-#   cooldown__pack_leather
+#   interval__pack_leather
 #      120000 = 2 minutes. Use 180000 for 3 minutes.
 # ----------------------------------------------------------------------------------------
 @setvar! wait__pack_item 500
 @setvar! wait__pack_batch 2500
-@setvar! cooldown__pack_leather 120000
+@setvar! interval__pack_leather 120000
 
 
 # ========================================================================================
@@ -467,7 +467,7 @@
 if not timerexists "timer__message"
     createtimer "timer__message"
 endif
-settimer "timer__message" cooldown__message
+settimer "timer__message" interval__message
 
 
 # ----------------------------------------------------------------------------------------
@@ -476,7 +476,7 @@ settimer "timer__message" cooldown__message
 if not timerexists "timer__combat_target_grace"
     createtimer "timer__combat_target_grace"
 endif
-settimer "timer__combat_target_grace" cooldown__combat_target_grace
+settimer "timer__combat_target_grace" interval__combat_target_grace
 
 
 # ----------------------------------------------------------------------------------------
@@ -485,7 +485,7 @@ settimer "timer__combat_target_grace" cooldown__combat_target_grace
 if not timerexists "timer__equip"
     createtimer "timer__equip"
 endif
-settimer "timer__equip" cooldown__equip_retry
+settimer "timer__equip" interval__equip_retry
 
 
 # ----------------------------------------------------------------------------------------
@@ -494,12 +494,12 @@ settimer "timer__equip" cooldown__equip_retry
 if not timerexists "timer__str_potion"
     createtimer "timer__str_potion"
 endif
-settimer "timer__str_potion" cooldown__stat_potion
+settimer "timer__str_potion" interval__stat_potion
 
 if not timerexists "timer__agi_potion"
     createtimer "timer__agi_potion"
 endif
-settimer "timer__agi_potion" cooldown__stat_potion
+settimer "timer__agi_potion" interval__stat_potion
 
 
 # ----------------------------------------------------------------------------------------
@@ -508,7 +508,7 @@ settimer "timer__agi_potion" cooldown__stat_potion
 if not timerexists "timer__sword_retry"
     createtimer "timer__sword_retry"
 endif
-settimer "timer__sword_retry" cooldown__sword_retry
+settimer "timer__sword_retry" interval__sword_retry
 
 if not timerexists "timer__sword_resync"
     createtimer "timer__sword_resync"
@@ -522,7 +522,7 @@ settimer "timer__sword_resync" 0
 if not timerexists "timer__parry_retry"
     createtimer "timer__parry_retry"
 endif
-settimer "timer__parry_retry" cooldown__parry_retry
+settimer "timer__parry_retry" interval__parry_retry
 
 if not timerexists "timer__parry_resync"
     createtimer "timer__parry_resync"
@@ -536,7 +536,7 @@ settimer "timer__parry_resync" 0
 if not timerexists "timer__ability"
     createtimer "timer__ability"
 endif
-settimer "timer__ability" cooldown__ability
+settimer "timer__ability" interval__ability
 
 
 # ----------------------------------------------------------------------------------------
@@ -545,12 +545,12 @@ settimer "timer__ability" cooldown__ability
 if not timerexists "timer__carve"
     createtimer "timer__carve"
 endif
-settimer "timer__carve" cooldown__carve
+settimer "timer__carve" interval__carve
 
 if not timerexists "timer__grey_only"
     createtimer "timer__grey_only"
 endif
-settimer "timer__grey_only" cooldown__grey_only
+settimer "timer__grey_only" interval__grey_only
 
 
 # ----------------------------------------------------------------------------------------
@@ -562,7 +562,7 @@ settimer "timer__grey_only" cooldown__grey_only
 if not timerexists "timer__reagents"
     createtimer "timer__reagents"
 endif
-settimer "timer__reagents" cooldown__reagents
+settimer "timer__reagents" interval__reagents
 
 
 # ----------------------------------------------------------------------------------------
@@ -571,7 +571,7 @@ settimer "timer__reagents" cooldown__reagents
 if not timerexists "timer__food"
     createtimer "timer__food"
 endif
-settimer "timer__food" cooldown__food
+settimer "timer__food" interval__food
 
 
 # ----------------------------------------------------------------------------------------
@@ -865,7 +865,7 @@ while not dead
         else
             settimer "timer__combat_target_grace" 0
         endif
-    elseif var__combat_target != 0 and timer "timer__combat_target_grace" >= cooldown__combat_target_grace
+    elseif var__combat_target != 0 and timer "timer__combat_target_grace" >= interval__combat_target_grace
         @setvar! var__combat_target 0
         if config__sysmsg = 1
             sysmsg "Combat target cleared: gone from 12 tiles." 88
@@ -888,7 +888,7 @@ while not dead
         if findtype 3705 backpack 38
             yell "[Pouch"
             wait wait__short
-        elseif timer "timer__message" >= cooldown__message
+        elseif timer "timer__message" >= interval__message
             overhead "[ pouch, out ]" 254
             settimer "timer__message" 0
         endif
@@ -907,7 +907,7 @@ while not dead
             hotkey "Drink Cure"
             wait wait__short
         else
-            if config__use_potions = 1 and timer "timer__message" >= cooldown__message
+            if config__use_potions = 1 and timer "timer__message" >= interval__message
                 overhead "[ cure pot, out ]" 254
                 settimer "timer__message" 0
             endif
@@ -958,7 +958,7 @@ while not dead
                     @setvar! var__heal_potion_out 1
                     wait wait__short
                 endif
-            elseif timer "timer__message" >= cooldown__message
+            elseif timer "timer__message" >= interval__message
                 overhead "[ heal pot, out ]" 254
                 settimer "timer__message" 0
             endif
@@ -1004,7 +1004,7 @@ while not dead
             if findtype 3617 self
                 hotkey "Bandage Self"
                 wait wait__short
-            elseif timer "timer__message" >= cooldown__message
+            elseif timer "timer__message" >= interval__message
                 overhead "[ bandage, out ]" 254
                 settimer "timer__message" 0
             endif
@@ -1073,7 +1073,7 @@ while not dead
     # casting blocks this. An axe already in hand is adopted once by label, including a
     # replacement with a new serial. Any other left hand item is left alone.
     # ------------------------------------------------------------------------------------
-    if timer "timer__equip" >= cooldown__equip_retry
+    if timer "timer__equip" >= interval__equip_retry
         if lhandempty
             if not hidden and not queued and not casting and not targetexists
                 settimer "timer__equip" 0
@@ -1093,7 +1093,7 @@ while not dead
                         sysmsg "Axe equip requested: serial={{alias__weapon_to_equip}}. The next check reads the hand." 88
                     endif
                     wait wait__short
-                elseif timer "timer__message" >= cooldown__message
+                elseif timer "timer__message" >= interval__message
                     overhead "[ axe, out ]" 254
                     settimer "timer__message" 0
                 endif
@@ -1137,7 +1137,7 @@ while not dead
                 if config__chatty = 1
                     overhead "[ gold, dropped ]" 290
                 endif
-            elseif timer "timer__message" >= cooldown__message
+            elseif timer "timer__message" >= interval__message
                 overhead "[ weight, over ]" 254
                 settimer "timer__message" 0
             endif
@@ -1150,19 +1150,19 @@ while not dead
     # Kept up while var__fighting is 1. Strength and Agility read the stat against
     # config__str_potion and config__dex_potion, because Bless and the Strength and
     # Agility spells show the same icons as the potions, and each is tried once per
-    # cooldown__stat_potion. Magic Resist has an icon of its own and is drunk once it is
+    # interval__stat_potion. Magic Resist has an icon of its own and is drunk once it is
     # missing. Each potion is judged on its own, so running out of one does not hold up
     # the others.
     # ------------------------------------------------------------------------------------
     if var__fighting = 1 and config__use_potions = 1 and not paralyzed and not hidden and not targetexists
-        if not queued and str < config__str_potion and timer "timer__str_potion" >= cooldown__stat_potion
+        if not queued and str < config__str_potion and timer "timer__str_potion" >= interval__stat_potion
             settimer "timer__str_potion" 0
             if findtype "White Potion" self
                 hotkey "Drink Strength"
                 wait wait__short
             endif
         endif
-        if not queued and dex < config__dex_potion and timer "timer__agi_potion" >= cooldown__stat_potion
+        if not queued and dex < config__dex_potion and timer "timer__agi_potion" >= interval__stat_potion
             settimer "timer__agi_potion" 0
             if findtype "Blue Potion" self
                 hotkey "Drink Agility"
@@ -1194,7 +1194,7 @@ while not dead
     # potion.
     # ------------------------------------------------------------------------------------
     if var__sword_disabled = 0
-        if timer "timer__sword_resync" > cooldown__sword_resync
+        if timer "timer__sword_resync" > interval__sword_resync
             @setvar! var__sword_active 0
             settimer "timer__sword_resync" 0
         endif
@@ -1205,7 +1205,7 @@ while not dead
             @setvar! var__sword_want config__sword_stance_main
         endif
 
-        if var__sword_want != var__sword_active and timer "timer__sword_retry" > cooldown__sword_retry
+        if var__sword_want != var__sword_active and timer "timer__sword_retry" > interval__sword_retry
             settimer "timer__sword_retry" 0
 
             if findtype 11890 backpack as alias__sword_codex
@@ -1318,7 +1318,7 @@ while not dead
                         endif
                     endif
                 endif
-            elseif timer "timer__message" >= cooldown__message
+            elseif timer "timer__message" >= interval__message
                 overhead "[ sword codex, out ]" 254
                 settimer "timer__message" 0
             endif
@@ -1349,7 +1349,7 @@ while not dead
     # the block warns once and stands down for this Play.
     # ------------------------------------------------------------------------------------
     if var__parry_disabled = 0
-        if timer "timer__parry_resync" > cooldown__parry_resync
+        if timer "timer__parry_resync" > interval__parry_resync
             @setvar! var__parry_active 0
             settimer "timer__parry_resync" 0
         endif
@@ -1361,7 +1361,7 @@ while not dead
             endif
         endif
 
-        if var__parry_want != var__parry_active and timer "timer__parry_retry" > cooldown__parry_retry
+        if var__parry_want != var__parry_active and timer "timer__parry_retry" > interval__parry_retry
             settimer "timer__parry_retry" 0
 
             if findtype 11889 backpack as alias__parry_codex
@@ -1463,7 +1463,7 @@ while not dead
                         endif
                     endif
                 endif
-            elseif timer "timer__message" >= cooldown__message
+            elseif timer "timer__message" >= interval__message
                 overhead "[ shield codex, out ]" 254
                 settimer "timer__message" 0
             endif
@@ -1480,7 +1480,7 @@ while not dead
     # spaces the request, as in archive/bard-mace. A wrong interval only shifts the
     # timing.
     # ------------------------------------------------------------------------------------
-    if timer "timer__ability" >= cooldown__ability and find var__combat_target ground -1 -1 2
+    if timer "timer__ability" >= interval__ability and find var__combat_target ground -1 -1 2
         if config__ability_main = 1
             say "[WeaponAbility1"
         elseif config__ability_main = 2
@@ -1580,7 +1580,7 @@ while not dead
     # looting rights need the corpse itself as the target. Wiki: Forensic_Evaluation. Some
     # areas refuse that as a criminal action: "Criminal actions are not permitted in the
     # Sanctuary Dungeon." A refusal switches this block to Smart Harvest for
-    # cooldown__grey_only, and each later refusal starts that window again.
+    # interval__grey_only, and each later refusal starts that window again.
     #
     # Handled corpses are ignored so findtype returns the next one. Only the startup
     # clearignore empties the list. Leather packing ignores pouch leather without clearing
@@ -1609,10 +1609,10 @@ while not dead
         endif
     endif
 
-    if timer "timer__carve" >= cooldown__carve and var__combat_target = 0
+    if timer "timer__carve" >= interval__carve and var__combat_target = 0
         settimer "timer__carve" 0
         @setvar! var__carve_direct 0
-        if config__skin_unowned = 1 and var__carve_crime = 0 and timer "timer__grey_only" >= cooldown__grey_only
+        if config__skin_unowned = 1 and var__carve_crime = 0 and timer "timer__grey_only" >= interval__grey_only
             @setvar! var__carve_direct 1
         endif
 
@@ -1764,7 +1764,7 @@ while not dead
                             endif
                         endif
                     endif
-                elseif timer "timer__message" >= cooldown__message
+                elseif timer "timer__message" >= interval__message
                     overhead "[ knife, out ]" 254
                     settimer "timer__message" 0
                 endif
@@ -1780,7 +1780,7 @@ while not dead
     # send the same doomed cast every pass.
     # ------------------------------------------------------------------------------------
     if config__use_magery = 1
-        if timer "timer__reagents" >= cooldown__reagents or insysmsg "More reagents are needed"
+        if timer "timer__reagents" >= interval__reagents or insysmsg "More reagents are needed"
             settimer "timer__reagents" 0
 
             @setvar! var__has_garlic 0
@@ -1835,7 +1835,7 @@ while not dead
     # Looked at once a minute. The buff lasts far longer. With config__warmode_is_manual 1
     # it stands down in warmode, as our casts do.
     # ------------------------------------------------------------------------------------
-    if timer "timer__food" >= cooldown__food and not findbuff "Food Satisfaction"
+    if timer "timer__food" >= interval__food and not findbuff "Food Satisfaction"
         if config__warmode_is_manual = 0 or not warmode
             if not hidden and not queued and not casting and not targetexists
                 settimer "timer__food" 0
@@ -1857,7 +1857,7 @@ while not dead
     # move is found again and retried until the pass budget runs out, then on the next
     # interval.
     # ------------------------------------------------------------------------------------
-    if timer "timer__pack_leather" >= cooldown__pack_leather and var__combat_target = 0
+    if timer "timer__pack_leather" >= interval__pack_leather and var__combat_target = 0
         if diffhits < config__heal_hits and not poisoned and not paralyzed
             if not hidden and not queued and not casting and not targetexists
                 settimer "timer__pack_leather" 0
@@ -1893,7 +1893,7 @@ while not dead
                     if config__sysmsg = 1
                         sysmsg "Leather pack END." 88
                     endif
-                elseif timer "timer__message" >= cooldown__message
+                elseif timer "timer__message" >= interval__message
                     overhead "[ loot pouch, out ]" 254
                     settimer "timer__message" 0
                 endif

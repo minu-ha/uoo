@@ -116,7 +116,7 @@
         },
         {
           "comment": "#   config__x, var__y: the names a module box describes",
-          "match": "^\\s*(#)   ((?:config|wait|cooldown|timer|var)__\\w+(?:,\\s*(?:config|wait|cooldown|timer|var)__\\w+)*,?)\\s*$",
+          "match": "^\\s*(#)   ((?:config|wait|interval|cooldown|timer|var)__\\w+(?:,\\s*(?:config|wait|interval|cooldown|timer|var)__\\w+)*,?)\\s*$",
           "captures": {
             "1": {
               "name": "comment.line.razor"
@@ -212,7 +212,7 @@
           "name": "variable.parameter.config.razor"
         },
         {
-          "match": "\\b(?:var|wait|cooldown|timer|alias|label|list|global)__\\w+",
+          "match": "\\b(?:var|wait|interval|cooldown|timer|alias|label|list|global)__\\w+",
           "name": "variable.other.razor"
         },
         {
@@ -240,7 +240,7 @@
           "name": "constant.character.escape.razor"
         },
         {
-          "match": "\\b(?:config|var|wait|cooldown|timer|list)__\\w+",
+          "match": "\\b(?:config|var|wait|interval|cooldown|timer|list)__\\w+",
           "name": "variable.other.razor"
         }
       ]

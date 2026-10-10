@@ -7,16 +7,16 @@
 # ----------------------------------------------------------------------------------------
 # @ wait
 #
-#   cooldown__combat_target_grace
+#   interval__combat_target_grace
 #      A remembered enemy out of range this long is dropped.
 # ----------------------------------------------------------------------------------------
-@setvar! cooldown__combat_target_grace 1200
+@setvar! interval__combat_target_grace 1200
 
 
 # ----------------------------------------------------------------------------------------
 # @ timer
 # ----------------------------------------------------------------------------------------
-timer__combat_target_grace cooldown__combat_target_grace
+timer__combat_target_grace interval__combat_target_grace
 
 
 # ----------------------------------------------------------------------------------------
@@ -75,7 +75,7 @@ endif
         else
             settimer "timer__combat_target_grace" 0
         endif
-    elseif var__combat_target != 0 and timer "timer__combat_target_grace" >= cooldown__combat_target_grace
+    elseif var__combat_target != 0 and timer "timer__combat_target_grace" >= interval__combat_target_grace
         @setvar! var__combat_target 0
         if config__sysmsg = 1
             sysmsg "Combat target cleared: gone from 12 tiles." 88

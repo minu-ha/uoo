@@ -39,16 +39,16 @@
 # ----------------------------------------------------------------------------------------
 # @ wait
 #
-#   cooldown__recall_check
+#   interval__recall_check
 #      The book, Tracking buff and weight checks run on this clock.
 # ----------------------------------------------------------------------------------------
-@setvar! cooldown__recall_check 5000
+@setvar! interval__recall_check 5000
 
 
 # ----------------------------------------------------------------------------------------
 # @ timer
 # ----------------------------------------------------------------------------------------
-timer__recall_check cooldown__recall_check
+timer__recall_check interval__recall_check
 
 
 # ----------------------------------------------------------------------------------------
@@ -84,10 +84,10 @@ timer__recall_check cooldown__recall_check
     # ------------------------------------------------------------------------------------
     # RECALL
     #
-    # The slow checks (book, Tracking buff, weight) run every cooldown__recall_check.
+    # The slow checks (book, Tracking buff, weight) run every interval__recall_check.
     # ------------------------------------------------------------------------------------
     @setvar! var__recall_check_due 0
-    if timer "timer__recall_check" >= cooldown__recall_check
+    if timer "timer__recall_check" >= interval__recall_check
         @setvar! var__recall_check_due 1
         settimer "timer__recall_check" 0
     endif
@@ -100,7 +100,7 @@ timer__recall_check cooldown__recall_check
                     @setvar! var__tracking_hunting_active 1
                 endif
 
-                if var__tracking_hunting_active = 0 and timer "timer__message" >= cooldown__message
+                if var__tracking_hunting_active = 0 and timer "timer__message" >= interval__message
                     overhead "[ track, check ]" 255
                     settimer "timer__message" 0
                 endif
@@ -109,7 +109,7 @@ timer__recall_check cooldown__recall_check
             @setvar! var__recall_book_available 0
             if findtype "runebook" backpack or findtype "runetome" backpack
                 @setvar! var__recall_book_available 1
-            elseif config__require_runebook = 1 and timer "timer__message" >= cooldown__message
+            elseif config__require_runebook = 1 and timer "timer__message" >= interval__message
                 overhead "[ runebook, out ]" 254
                 settimer "timer__message" 0
             endif
@@ -230,7 +230,7 @@ timer__recall_check cooldown__recall_check
                     if config__sysmsg = 1
                         sysmsg "Recall trigger: spare weight at or below {{config__weight_remaining}}." 88
                     endif
-                    if timer "timer__message" >= cooldown__message
+                    if timer "timer__message" >= interval__message
                         overhead "[ weight, low ]" 254
                         settimer "timer__message" 0
                     endif
@@ -261,12 +261,12 @@ timer__recall_check cooldown__recall_check
                         endif
                     endif
 
-                    if var__recall_book_available = 0 and timer "timer__message" >= cooldown__message
+                    if var__recall_book_available = 0 and timer "timer__message" >= interval__message
                         overhead "[ runebook, out ]" 254
                         settimer "timer__message" 0
                     endif
                 endif
-            elseif mana < config__mana_recall and timer "timer__message" >= cooldown__message
+            elseif mana < config__mana_recall and timer "timer__message" >= interval__message
                 overhead "[ mana, low ]" 254
                 settimer "timer__message" 0
             endif

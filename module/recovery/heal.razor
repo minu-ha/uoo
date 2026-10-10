@@ -58,7 +58,7 @@
                     @setvar! var__heal_potion_out 1
                     wait wait__short
                 endif
-            elseif timer "timer__message" >= cooldown__message
+            elseif timer "timer__message" >= interval__message
                 overhead "[ heal pot, out ]" 254
                 settimer "timer__message" 0
             endif

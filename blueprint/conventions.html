@@ -214,7 +214,7 @@ Magery·무기·붕대 등 독립 기능 옵션을 본문에서 선택하며, �
 </tr>
 <tr>
 <td><code>WAIT AND COOLDOWN</code></td>
-<td><code>wait__</code>와 <code>cooldown__</code> 값. 전부 ms</td>
+<td><code>wait__</code>, <code>interval__</code>, <code>cooldown__</code> 값. 전부 ms</td>
 </tr>
 <tr>
 <td><code>TIMER</code></td>
@@ -344,8 +344,13 @@ clearignore</code></pre>
 <td>세션</td>
 </tr>
 <tr>
+<td><code>interval__</code></td>
+<td><code>timer__</code>와 비교하는 간격. 그 타이머가 다시 돌기까지의 ms (<code>timer "timer__food" &gt;= interval__food</code>)</td>
+<td>세션</td>
+</tr>
+<tr>
 <td><code>cooldown__</code></td>
-<td><code>timer__</code>나 <code>cooldown</code>과 비교하는 임계값</td>
+<td>Razor 쿨다운 바에 주는 길이 (<code>cooldown "heal pot" cooldown__heal_potion</code>). 쿨다운 바에만 쓴다</td>
 <td>세션</td>
 </tr>
 <tr>
@@ -416,14 +421,14 @@ endif</code></pre>
 <li>시간 제어는 타이머 기본. <code>cooldown</code> 명령은 기존 파일이 이미 그 스타일일 때만.</li>
 <li>서버가 메시지로 알려 주는 쿨 (바드 스킬, 매저리 프록)은 자체 타이머로 흉내 내지 않고 <code>cooldown "이름"</code>을 읽는다. 이유는 <a href="overheads.html#06.B">overheads.html</a> 06.B절.</li>
 </ul>
-<p><code>skinning-enhanced.razor</code>의 TIMER 섹션이 이 모양이다. 첫 값을 임계값으로 주면 첫 패스부터 통과한다.</p>
+<p><code>skinning-enhanced.razor</code>의 TIMER 섹션이 이 모양이다. 첫 값을 간격 (<code>interval__</code>)으로 주면 첫 패스부터 통과한다.</p>
 <pre><code>if not timerexists &quot;timer__overhead_message&quot;
     createtimer &quot;timer__overhead_message&quot;
 endif
 
-settimer &quot;timer__overhead_message&quot; cooldown__overhead_message</code></pre>
+settimer &quot;timer__overhead_message&quot; interval__overhead_message</code></pre>
 <p>루프 안에서는 <code>timer</code>로 지난 시간을 읽고, 할 일을 한 뒤 <code>settimer</code>로 0부터 다시 잰다.</p>
-<pre><code>if timer &quot;timer__overhead_message&quot; &gt; cooldown__overhead_message
+<pre><code>if timer &quot;timer__overhead_message&quot; &gt; interval__overhead_message
     overhead &quot;[ heal pot, out ]&quot; 254
     settimer &quot;timer__overhead_message&quot; 0
 endif</code></pre>

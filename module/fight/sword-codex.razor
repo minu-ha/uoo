@@ -36,20 +36,20 @@
 # ----------------------------------------------------------------------------------------
 # @ wait
 #
-#   cooldown__sword_retry
+#   interval__sword_retry
 #      A failed stance switch is tried again after this.
 #
-#   cooldown__sword_resync
+#   interval__sword_resync
 #      The stance cache is dropped this often, so a stance changed by hand is picked up.
 # ----------------------------------------------------------------------------------------
-@setvar! cooldown__sword_retry 3000
-@setvar! cooldown__sword_resync 30000
+@setvar! interval__sword_retry 3000
+@setvar! interval__sword_resync 30000
 
 
 # ----------------------------------------------------------------------------------------
 # @ timer
 # ----------------------------------------------------------------------------------------
-timer__sword_retry cooldown__sword_retry
+timer__sword_retry interval__sword_retry
 timer__sword_resync 0
 
 
@@ -98,7 +98,7 @@ timer__sword_resync 0
     # potion.
     # ------------------------------------------------------------------------------------
     if var__sword_disabled = 0
-        if timer "timer__sword_resync" > cooldown__sword_resync
+        if timer "timer__sword_resync" > interval__sword_resync
             @setvar! var__sword_active 0
             settimer "timer__sword_resync" 0
         endif
@@ -109,7 +109,7 @@ timer__sword_resync 0
             @setvar! var__sword_want config__sword_stance_main
         endif
 
-        if var__sword_want != var__sword_active and timer "timer__sword_retry" > cooldown__sword_retry
+        if var__sword_want != var__sword_active and timer "timer__sword_retry" > interval__sword_retry
             settimer "timer__sword_retry" 0
 
             if findtype 11890 backpack as alias__sword_codex
@@ -222,7 +222,7 @@ timer__sword_resync 0
                         endif
                     endif
                 endif
-            elseif timer "timer__message" >= cooldown__message
+            elseif timer "timer__message" >= interval__message
                 overhead "[ sword codex, out ]" 254
                 settimer "timer__message" 0
             endif

@@ -8,10 +8,10 @@
 # ----------------------------------------------------------------------------------------
 # @ wait
 #
-#   cooldown__scavenger_clear
+#   interval__scavenger_clear
 #      How often the cache is cleared.
 # ----------------------------------------------------------------------------------------
-@setvar! cooldown__scavenger_clear 30000
+@setvar! interval__scavenger_clear 30000
 
 
 # ----------------------------------------------------------------------------------------
@@ -32,7 +32,7 @@ timer__scavenger_clear 0
     # The scavenger passes over an item it already handled until its cache is cleared, so a
     # clear every 30 seconds gives those items another try.
     # ------------------------------------------------------------------------------------
-    if timer "timer__scavenger_clear" >= cooldown__scavenger_clear
+    if timer "timer__scavenger_clear" >= interval__scavenger_clear
         settimer "timer__scavenger_clear" 0
         hotkey "Clear Scavenger Cache"
         if config__sysmsg = 1

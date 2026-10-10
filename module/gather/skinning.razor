@@ -27,24 +27,24 @@
 #   wait__carve_reply
 #      How long Smart Harvest waits for the server reply after target self.
 #
-#   cooldown__carve
+#   interval__carve
 #      Forensic Evaluation has its own 0.5 second cooldown. This spaces the corpse search
 #      as well.
 #
-#   cooldown__grey_only
+#   interval__grey_only
 #      After a criminal action refusal, carve grey corpses only for 5 minutes.
 # ----------------------------------------------------------------------------------------
 @setvar! wait__carve_target 2000
 @setvar! wait__carve_reply 1500
-@setvar! cooldown__carve 700
-@setvar! cooldown__grey_only 300000
+@setvar! interval__carve 700
+@setvar! interval__grey_only 300000
 
 
 # ----------------------------------------------------------------------------------------
 # @ timer
 # ----------------------------------------------------------------------------------------
-timer__carve cooldown__carve
-timer__grey_only cooldown__grey_only
+timer__carve interval__carve
+timer__grey_only interval__grey_only
 
 
 # ----------------------------------------------------------------------------------------
@@ -96,7 +96,7 @@ endif
     # looting rights need the corpse itself as the target. Wiki: Forensic_Evaluation. Some
     # areas refuse that as a criminal action: "Criminal actions are not permitted in the
     # Sanctuary Dungeon." A refusal switches this block to Smart Harvest for
-    # cooldown__grey_only, and each later refusal starts that window again.
+    # interval__grey_only, and each later refusal starts that window again.
     #
     # Handled corpses are ignored so findtype returns the next one. Only the startup
     # clearignore empties the list. Leather packing ignores pouch leather without clearing
@@ -125,10 +125,10 @@ endif
         endif
     endif
 
-    if timer "timer__carve" >= cooldown__carve and var__combat_target = 0
+    if timer "timer__carve" >= interval__carve and var__combat_target = 0
         settimer "timer__carve" 0
         @setvar! var__carve_direct 0
-        if config__skin_unowned = 1 and var__carve_crime = 0 and timer "timer__grey_only" >= cooldown__grey_only
+        if config__skin_unowned = 1 and var__carve_crime = 0 and timer "timer__grey_only" >= interval__grey_only
             @setvar! var__carve_direct 1
         endif
 
@@ -280,7 +280,7 @@ endif
                             endif
                         endif
                     endif
-                elseif timer "timer__message" >= cooldown__message
+                elseif timer "timer__message" >= interval__message
                     overhead "[ knife, out ]" 254
                     settimer "timer__message" 0
                 endif

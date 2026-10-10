@@ -37,20 +37,20 @@
 # ----------------------------------------------------------------------------------------
 # @ wait
 #
-#   cooldown__parry_retry
+#   interval__parry_retry
 #      A failed stance switch is tried again after this.
 #
-#   cooldown__parry_resync
+#   interval__parry_resync
 #      The stance cache is dropped this often, so a stance changed by hand is picked up.
 # ----------------------------------------------------------------------------------------
-@setvar! cooldown__parry_retry 3000
-@setvar! cooldown__parry_resync 30000
+@setvar! interval__parry_retry 3000
+@setvar! interval__parry_resync 30000
 
 
 # ----------------------------------------------------------------------------------------
 # @ timer
 # ----------------------------------------------------------------------------------------
-timer__parry_retry cooldown__parry_retry
+timer__parry_retry interval__parry_retry
 timer__parry_resync 0
 
 
@@ -106,7 +106,7 @@ timer__parry_resync 0
     # the block warns once and stands down for this Play.
     # ------------------------------------------------------------------------------------
     if var__parry_disabled = 0
-        if timer "timer__parry_resync" > cooldown__parry_resync
+        if timer "timer__parry_resync" > interval__parry_resync
             @setvar! var__parry_active 0
             settimer "timer__parry_resync" 0
         endif
@@ -118,7 +118,7 @@ timer__parry_resync 0
             endif
         endif
 
-        if var__parry_want != var__parry_active and timer "timer__parry_retry" > cooldown__parry_retry
+        if var__parry_want != var__parry_active and timer "timer__parry_retry" > interval__parry_retry
             settimer "timer__parry_retry" 0
 
             if findtype 11889 backpack as alias__parry_codex
@@ -220,7 +220,7 @@ timer__parry_resync 0
                         endif
                     endif
                 endif
-            elseif timer "timer__message" >= cooldown__message
+            elseif timer "timer__message" >= interval__message
                 overhead "[ shield codex, out ]" 254
                 settimer "timer__message" 0
             endif

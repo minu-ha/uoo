@@ -16,22 +16,22 @@
 #   wait__equip
 #      Let the equip request settle before the next hand verification.
 #
-#   cooldown__harvest_retry
+#   interval__harvest_retry
 #      Normal tool retry.
 #
-#   cooldown__harvest_out_retry
+#   interval__harvest_out_retry
 #      Retry after "You do not see any harvestable resources nearby".
 # ----------------------------------------------------------------------------------------
 @setvar! wait__harvest_target 3000
 @setvar! wait__equip 1000
-@setvar! cooldown__harvest_retry 4000
-@setvar! cooldown__harvest_out_retry 2000
+@setvar! interval__harvest_retry 4000
+@setvar! interval__harvest_out_retry 2000
 
 
 # ----------------------------------------------------------------------------------------
 # @ timer
 # ----------------------------------------------------------------------------------------
-timer__harvest cooldown__harvest_retry
+timer__harvest interval__harvest_retry
 
 
 # ----------------------------------------------------------------------------------------
@@ -47,7 +47,7 @@ timer__harvest cooldown__harvest_retry
 #      means no tool selected yet. Backpack discovery is used only when this cached tool
 #      is missing.
 # ----------------------------------------------------------------------------------------
-@setvar! var__harvest_retry cooldown__harvest_retry
+@setvar! var__harvest_retry interval__harvest_retry
 if not varexist var__my_hatchet
     @setvar! var__my_hatchet 0
 endif
@@ -64,7 +64,7 @@ endif
     # blocking recovery.
     # ------------------------------------------------------------------------------------
     if insysmsg "You do not see any harvestable resources nearby"
-        @setvar! var__harvest_retry cooldown__harvest_out_retry
+        @setvar! var__harvest_retry interval__harvest_out_retry
         settimer "timer__harvest" 0
     endif
 
@@ -72,7 +72,7 @@ endif
     if var__hold_gathering = 0 and diffhits < config__heal_hits and not poisoned and not paralyzed and not warmode and timer "timer__harvest" >= var__harvest_retry
         if not hidden and not queued and not casting and not targetexists and cooldown "walk" = 0
             settimer "timer__harvest" 0
-            @setvar! var__harvest_retry cooldown__harvest_retry
+            @setvar! var__harvest_retry interval__harvest_retry
 
             # Follow archive/bard-mace: an empty left hand needs equipment, regardless of type-search results.
             if lhandempty
@@ -91,7 +91,7 @@ endif
                         sysmsg "Hatchet equip requested: stored serial={{var__my_hatchet}}. Next attempt checks lefthand." 88
                     endif
                     wait wait__equip
-                elseif timer "timer__message" >= cooldown__message
+                elseif timer "timer__message" >= interval__message
                     overhead "[ hatchet, out ]" 254
                     settimer "timer__message" 0
                 endif

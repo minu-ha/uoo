@@ -166,11 +166,11 @@ if skill "Tracking" > 0
                     if config__show_tracking = 0
                         gumpclose 4267467659
                     endif
-                elseif timer "timer__message" >= cooldown__message
+                elseif timer "timer__message" >= interval__message
                     overhead "[ track, miss ]" 254
                     settimer "timer__message" 0
                 endif
-            elseif timer "timer__message" >= cooldown__message
+            elseif timer "timer__message" >= interval__message
                 overhead "[ track, miss ]" 254
                 settimer "timer__message" 0
             endif

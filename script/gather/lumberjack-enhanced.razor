@@ -238,12 +238,12 @@
 #   wait__short
 #      The pause after an action.
 #
-#   cooldown__message
+#   interval__message
 #      Spacing for repeated warnings. Without it an empty potion bag shouts every pass.
 # ----------------------------------------------------------------------------------------
 @setvar! wait__poll 100
 @setvar! wait__short 200
-@setvar! cooldown__message 3000
+@setvar! interval__message 3000
 
 
 # ----------------------------------------------------------------------------------------
@@ -258,20 +258,20 @@
 # ----------------------------------------------------------------------------------------
 # module/escape/recall.razor
 #
-#   cooldown__recall_check
+#   interval__recall_check
 #      The book, Tracking buff and weight checks run on this clock.
 # ----------------------------------------------------------------------------------------
-@setvar! cooldown__recall_check 5000
+@setvar! interval__recall_check 5000
 
 
 # ----------------------------------------------------------------------------------------
 # module/recovery/reagents.razor
 #
-#   cooldown__reagents
+#   interval__reagents
 #      Reagent read interval. Five lookups each time. A refill counts within this, and
 #      running out is caught at once by the refusal line.
 # ----------------------------------------------------------------------------------------
-@setvar! cooldown__reagents 10000
+@setvar! interval__reagents 10000
 
 
 # ----------------------------------------------------------------------------------------
@@ -283,25 +283,25 @@
 #   wait__equip
 #      Let the equip request settle before the next hand verification.
 #
-#   cooldown__harvest_retry
+#   interval__harvest_retry
 #      Normal tool retry.
 #
-#   cooldown__harvest_out_retry
+#   interval__harvest_out_retry
 #      Retry after "You do not see any harvestable resources nearby".
 # ----------------------------------------------------------------------------------------
 @setvar! wait__harvest_target 3000
 @setvar! wait__equip 1000
-@setvar! cooldown__harvest_retry 4000
-@setvar! cooldown__harvest_out_retry 2000
+@setvar! interval__harvest_retry 4000
+@setvar! interval__harvest_out_retry 2000
 
 
 # ----------------------------------------------------------------------------------------
 # module/buff/food.razor
 #
-#   cooldown__food
+#   interval__food
 #      The buff lasts far longer than this.
 # ----------------------------------------------------------------------------------------
-@setvar! cooldown__food 60000
+@setvar! interval__food 60000
 
 
 # ----------------------------------------------------------------------------------------
@@ -314,12 +314,12 @@
 #      Per-phase request budget: Logs and Boards each yield after 2.5 seconds, between
 #      item requests.
 #
-#   cooldown__pack_lumber
+#   interval__pack_lumber
 #      120000 = 2 minutes. Use 180000 for 3 minutes.
 # ----------------------------------------------------------------------------------------
 @setvar! wait__lumber_item 500
 @setvar! wait__lumber_batch 2500
-@setvar! cooldown__pack_lumber 120000
+@setvar! interval__pack_lumber 120000
 
 
 # ========================================================================================
@@ -335,7 +335,7 @@
 if not timerexists "timer__message"
     createtimer "timer__message"
 endif
-settimer "timer__message" cooldown__message
+settimer "timer__message" interval__message
 
 
 # ----------------------------------------------------------------------------------------
@@ -344,7 +344,7 @@ settimer "timer__message" cooldown__message
 if not timerexists "timer__recall_check"
     createtimer "timer__recall_check"
 endif
-settimer "timer__recall_check" cooldown__recall_check
+settimer "timer__recall_check" interval__recall_check
 
 
 # ----------------------------------------------------------------------------------------
@@ -356,7 +356,7 @@ settimer "timer__recall_check" cooldown__recall_check
 if not timerexists "timer__reagents"
     createtimer "timer__reagents"
 endif
-settimer "timer__reagents" cooldown__reagents
+settimer "timer__reagents" interval__reagents
 
 
 # ----------------------------------------------------------------------------------------
@@ -365,7 +365,7 @@ settimer "timer__reagents" cooldown__reagents
 if not timerexists "timer__harvest"
     createtimer "timer__harvest"
 endif
-settimer "timer__harvest" cooldown__harvest_retry
+settimer "timer__harvest" interval__harvest_retry
 
 
 # ----------------------------------------------------------------------------------------
@@ -374,7 +374,7 @@ settimer "timer__harvest" cooldown__harvest_retry
 if not timerexists "timer__food"
     createtimer "timer__food"
 endif
-settimer "timer__food" cooldown__food
+settimer "timer__food" interval__food
 
 
 # ----------------------------------------------------------------------------------------
@@ -525,7 +525,7 @@ endif
 #      means no tool selected yet. Backpack discovery is used only when this cached tool
 #      is missing.
 # ----------------------------------------------------------------------------------------
-@setvar! var__harvest_retry cooldown__harvest_retry
+@setvar! var__harvest_retry interval__harvest_retry
 if not varexist var__my_hatchet
     @setvar! var__my_hatchet 0
 endif
@@ -667,11 +667,11 @@ if skill "Tracking" > 0
                     if config__show_tracking = 0
                         gumpclose 4267467659
                     endif
-                elseif timer "timer__message" >= cooldown__message
+                elseif timer "timer__message" >= interval__message
                     overhead "[ track, miss ]" 254
                     settimer "timer__message" 0
                 endif
-            elseif timer "timer__message" >= cooldown__message
+            elseif timer "timer__message" >= interval__message
                 overhead "[ track, miss ]" 254
                 settimer "timer__message" 0
             endif
@@ -729,7 +729,7 @@ while not dead
         if findtype 3705 backpack 38
             yell "[Pouch"
             wait wait__short
-        elseif timer "timer__message" >= cooldown__message
+        elseif timer "timer__message" >= interval__message
             overhead "[ pouch, out ]" 254
             settimer "timer__message" 0
         endif
@@ -748,7 +748,7 @@ while not dead
             hotkey "Drink Cure"
             wait wait__short
         else
-            if config__use_potions = 1 and timer "timer__message" >= cooldown__message
+            if config__use_potions = 1 and timer "timer__message" >= interval__message
                 overhead "[ cure pot, out ]" 254
                 settimer "timer__message" 0
             endif
@@ -799,7 +799,7 @@ while not dead
                     @setvar! var__heal_potion_out 1
                     wait wait__short
                 endif
-            elseif timer "timer__message" >= cooldown__message
+            elseif timer "timer__message" >= interval__message
                 overhead "[ heal pot, out ]" 254
                 settimer "timer__message" 0
             endif
@@ -845,7 +845,7 @@ while not dead
             if findtype 3617 self
                 hotkey "Bandage Self"
                 wait wait__short
-            elseif timer "timer__message" >= cooldown__message
+            elseif timer "timer__message" >= interval__message
                 overhead "[ bandage, out ]" 254
                 settimer "timer__message" 0
             endif
@@ -909,10 +909,10 @@ while not dead
     # ------------------------------------------------------------------------------------
     # RECALL                                                    module/escape/recall.razor
     #
-    # The slow checks (book, Tracking buff, weight) run every cooldown__recall_check.
+    # The slow checks (book, Tracking buff, weight) run every interval__recall_check.
     # ------------------------------------------------------------------------------------
     @setvar! var__recall_check_due 0
-    if timer "timer__recall_check" >= cooldown__recall_check
+    if timer "timer__recall_check" >= interval__recall_check
         @setvar! var__recall_check_due 1
         settimer "timer__recall_check" 0
     endif
@@ -925,7 +925,7 @@ while not dead
                     @setvar! var__tracking_hunting_active 1
                 endif
 
-                if var__tracking_hunting_active = 0 and timer "timer__message" >= cooldown__message
+                if var__tracking_hunting_active = 0 and timer "timer__message" >= interval__message
                     overhead "[ track, check ]" 255
                     settimer "timer__message" 0
                 endif
@@ -934,7 +934,7 @@ while not dead
             @setvar! var__recall_book_available 0
             if findtype "runebook" backpack or findtype "runetome" backpack
                 @setvar! var__recall_book_available 1
-            elseif config__require_runebook = 1 and timer "timer__message" >= cooldown__message
+            elseif config__require_runebook = 1 and timer "timer__message" >= interval__message
                 overhead "[ runebook, out ]" 254
                 settimer "timer__message" 0
             endif
@@ -1055,7 +1055,7 @@ while not dead
                     if config__sysmsg = 1
                         sysmsg "Recall trigger: spare weight at or below {{config__weight_remaining}}." 88
                     endif
-                    if timer "timer__message" >= cooldown__message
+                    if timer "timer__message" >= interval__message
                         overhead "[ weight, low ]" 254
                         settimer "timer__message" 0
                     endif
@@ -1086,12 +1086,12 @@ while not dead
                         endif
                     endif
 
-                    if var__recall_book_available = 0 and timer "timer__message" >= cooldown__message
+                    if var__recall_book_available = 0 and timer "timer__message" >= interval__message
                         overhead "[ runebook, out ]" 254
                         settimer "timer__message" 0
                     endif
                 endif
-            elseif mana < config__mana_recall and timer "timer__message" >= cooldown__message
+            elseif mana < config__mana_recall and timer "timer__message" >= interval__message
                 overhead "[ mana, low ]" 254
                 settimer "timer__message" 0
             endif
@@ -1124,7 +1124,7 @@ while not dead
     # send the same doomed cast every pass.
     # ------------------------------------------------------------------------------------
     if config__use_magery = 1
-        if timer "timer__reagents" >= cooldown__reagents or insysmsg "More reagents are needed"
+        if timer "timer__reagents" >= interval__reagents or insysmsg "More reagents are needed"
             settimer "timer__reagents" 0
 
             @setvar! var__has_garlic 0
@@ -1181,7 +1181,7 @@ while not dead
     # blocking recovery.
     # ------------------------------------------------------------------------------------
     if insysmsg "You do not see any harvestable resources nearby"
-        @setvar! var__harvest_retry cooldown__harvest_out_retry
+        @setvar! var__harvest_retry interval__harvest_out_retry
         settimer "timer__harvest" 0
     endif
 
@@ -1189,7 +1189,7 @@ while not dead
     if var__hold_gathering = 0 and diffhits < config__heal_hits and not poisoned and not paralyzed and not warmode and timer "timer__harvest" >= var__harvest_retry
         if not hidden and not queued and not casting and not targetexists and cooldown "walk" = 0
             settimer "timer__harvest" 0
-            @setvar! var__harvest_retry cooldown__harvest_retry
+            @setvar! var__harvest_retry interval__harvest_retry
 
             # Follow archive/bard-mace: an empty left hand needs equipment, regardless of type-search results.
             if lhandempty
@@ -1208,7 +1208,7 @@ while not dead
                         sysmsg "Hatchet equip requested: stored serial={{var__my_hatchet}}. Next attempt checks lefthand." 88
                     endif
                     wait wait__equip
-                elseif timer "timer__message" >= cooldown__message
+                elseif timer "timer__message" >= interval__message
                     overhead "[ hatchet, out ]" 254
                     settimer "timer__message" 0
                 endif
@@ -1320,7 +1320,7 @@ while not dead
     # Looked at once a minute. The buff lasts far longer. With config__warmode_is_manual 1
     # it stands down in warmode, as our casts do.
     # ------------------------------------------------------------------------------------
-    if timer "timer__food" >= cooldown__food and not findbuff "Food Satisfaction"
+    if timer "timer__food" >= interval__food and not findbuff "Food Satisfaction"
         if config__warmode_is_manual = 0 or not warmode
             if not hidden and not queued and not casting and not targetexists
                 settimer "timer__food" 0
@@ -1338,7 +1338,7 @@ while not dead
     # Try each selected stack once, with no snapshots or foreach iterator. Bound scans by
     # the existing timer. A failed conversion/drop waits for the next interval.
     # ------------------------------------------------------------------------------------
-    if var__hold_gathering = 0 and timer "timer__pack_lumber" >= cooldown__pack_lumber
+    if var__hold_gathering = 0 and timer "timer__pack_lumber" >= interval__pack_lumber
         if diffhits < config__light_hits and not poisoned and not paralyzed and not warmode
             if not hidden and not queued and not casting and not targetexists
                 settimer "timer__pack_lumber" 0
@@ -1410,7 +1410,7 @@ while not dead
                             sysmsg "Lumber pack: target cursor active. Harvest leaves it to the player." 88
                         endif
                     endif
-                elseif timer "timer__message" >= cooldown__message
+                elseif timer "timer__message" >= interval__message
                     overhead "[ loot pouch, out ]" 254
                     settimer "timer__message" 0
                 endif
