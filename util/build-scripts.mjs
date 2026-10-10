@@ -846,7 +846,7 @@ const settingsText = (path, modules, owner) => {
 };
 
 const template = ({box, rule, snake, title}) => `${box}
-# One line on what this block does. It shows in --settings and in the recipes that use it.
+# One line on what this block does, shown in --settings and in the recipes that use it.
 # More lines when the block needs them: what it waits for, why it works this way.
 # @ hotkeys
 ${box}
