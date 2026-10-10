@@ -4,7 +4,8 @@
 
 
 # ----------------------------------------------------------------------------------------
-#@ config
+# @ config
+#
 #   config__sword_stance_main
 #      Stance held outside the Defensive window, by codex slot in wiki order.
 #        1  Aggressive
@@ -33,7 +34,8 @@
 
 
 # ----------------------------------------------------------------------------------------
-#@ wait
+# @ wait
+#
 #   cooldown__sword_retry
 #      A failed stance switch is tried again after this.
 #
@@ -45,14 +47,15 @@
 
 
 # ----------------------------------------------------------------------------------------
-#@ timer
+# @ timer
 # ----------------------------------------------------------------------------------------
 timer__sword_retry cooldown__sword_retry
 timer__sword_resync 0
 
 
 # ----------------------------------------------------------------------------------------
-#@ state
+# @ state
+#
 #   var__sword_want, var__sword_active
 #      Sword stance cache. 0 means unknown, which forces a codex label read on the first
 #      pass.
@@ -76,22 +79,24 @@ timer__sword_resync 0
 
 
 # ----------------------------------------------------------------------------------------
-#@ loop
+# @ loop
 # ----------------------------------------------------------------------------------------
-    # ################################################################################
-    # # SWORD CODEX
-    # ################################################################################
-    # This template has no Arms Lore, so weapon specials (Lacerate and Bleed) stay at their 10%
-    # base chance. Every choice below avoids depending on them.
-    # Warrior is the default: accuracy, defense and damage at 2% per rank, with no condition
-    # attached. Aggressive gives less per rank, Cleave needs a second enemy within 2 tiles and
-    # Flaying only grows the special bleed. Defensive has the same damage bonus as Warrior and
-    # trades accuracy and defense for 4% damage resistance per rank, so it takes over while hurt.
-    # Stance numbers and effects are on the wiki, Weapon_and_Parry_Codex.
+    # ------------------------------------------------------------------------------------
+    # SWORD CODEX
     #
-    # The codex label is the only source of truth, as in archive/bard-mace. The cache is refreshed from
-    # the label on a timer, which also catches a stance changed by hand. getlabel runs after
-    # recovery so a server round trip never delays a bandage or a heal potion.
+    # This template has no Arms Lore, so weapon specials (Lacerate and Bleed) stay at
+    # their 10% base chance. Every choice below avoids depending on them. Warrior is the
+    # default: accuracy, defense and damage at 2% per rank, with no condition attached.
+    # Aggressive gives less per rank, Cleave needs a second enemy within 2 tiles and
+    # Flaying only grows the special bleed. Defensive has the same damage bonus as Warrior
+    # and trades accuracy and defense for 4% damage resistance per rank, so it takes over
+    # while hurt. Stance numbers and effects are on the wiki, Weapon_and_Parry_Codex.
+    #
+    # The codex label is the only source of truth, as in archive/bard-mace. The cache is
+    # refreshed from the label on a timer, which also catches a stance changed by hand.
+    # getlabel runs after recovery so a server round trip never delays a bandage or a heal
+    # potion.
+    # ------------------------------------------------------------------------------------
     if var__sword_disabled = 0
         if timer "timer__sword_resync" > cooldown__sword_resync
             @setvar! var__sword_active 0

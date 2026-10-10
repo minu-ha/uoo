@@ -5,7 +5,8 @@
 
 
 # ----------------------------------------------------------------------------------------
-#@ config
+# @ config
+#
 #   config__tracking_color
 #      Hunt filter.
 #        1  red: murderers
@@ -21,7 +22,8 @@
 
 
 # ----------------------------------------------------------------------------------------
-#@ wait
+# @ wait
+#
 #   wait__tracking_gump
 #      How long the Tracking window may take to open.
 # ----------------------------------------------------------------------------------------
@@ -29,7 +31,8 @@
 
 
 # ----------------------------------------------------------------------------------------
-#@ state
+# @ state
+#
 #   var__tracking_setup_color
 #      Last color confirmed in this client session. It survives Stop and Play only while
 #      Hunting stays active. After a manual filter change, turn Hunting off before Play so
@@ -55,10 +58,9 @@ endif
 
 
 # ----------------------------------------------------------------------------------------
-#@ setup
+# @ setup
 # ----------------------------------------------------------------------------------------
-# # TRACKING SETUP
-# Reuse the color verified by this script while Hunting remains active.
+# # Reuse the color verified by this script while Hunting remains active.
 # A buff alone does not identify the filter. A first run checks the current window instead.
 if skill "Tracking" > 0
     if findbuff "tracking" and var__tracking_setup_color = config__tracking_color

@@ -1,11 +1,13 @@
 # ----------------------------------------------------------------------------------------
 # Self bandage while hurt or poisoned, never over a running one.
-#@ hotkeys Bandage Self
+#
+# @ hotkeys Bandage Self
 # ----------------------------------------------------------------------------------------
 
 
 # ----------------------------------------------------------------------------------------
-#@ config
+# @ config
+#
 #   config__use_bandages
 #      1 uses bandages. At 0 recovery/light-heal stands in.
 #
@@ -18,13 +20,14 @@
 
 
 # ----------------------------------------------------------------------------------------
-#@ loop
+# @ loop
 # ----------------------------------------------------------------------------------------
-    # ################################################################################
-    # # BANDAGE
-    # ################################################################################
-    # Never restarts a running bandage, and full health does not start one. Its target cursor
-    # would replace a held precast, so it waits while any cursor is up.
+    # ------------------------------------------------------------------------------------
+    # BANDAGE
+    #
+    # Never restarts a running bandage, and full health does not start one. Its target
+    # cursor would replace a held precast, so it waits while any cursor is up.
+    # ------------------------------------------------------------------------------------
     if config__use_bandages = 1 and not bandaging and not paralyzed and not hidden and not queued and not targetexists and skill "Healing" > config__heal_skill_min
         if diffhits > 0 or poisoned
             if findtype 3617 self

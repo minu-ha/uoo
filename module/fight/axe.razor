@@ -4,7 +4,8 @@
 
 
 # ----------------------------------------------------------------------------------------
-#@ config
+# @ config
+#
 #   config__axe_graphic
 #      Graphic of the axe to re-arm. 5187 is the two handed axe in blueprint/item-
 #      list.html.
@@ -13,7 +14,8 @@
 
 
 # ----------------------------------------------------------------------------------------
-#@ wait
+# @ wait
+#
 #   cooldown__equip_retry
 #      A refused equip, after a disarm for example, waits this long before the next try.
 # ----------------------------------------------------------------------------------------
@@ -21,13 +23,14 @@
 
 
 # ----------------------------------------------------------------------------------------
-#@ timer
+# @ timer
 # ----------------------------------------------------------------------------------------
 timer__equip cooldown__equip_retry
 
 
 # ----------------------------------------------------------------------------------------
-#@ state
+# @ state
+#
 #   var__my_weapon
 #      Selected axe serial, reused across Stop and Play. 0 means rediscover from the
 #      backpack.
@@ -38,15 +41,16 @@ endif
 
 
 # ----------------------------------------------------------------------------------------
-#@ loop
+# @ loop
 # ----------------------------------------------------------------------------------------
-    # ################################################################################
-    # # AXE
-    # ################################################################################
+    # ------------------------------------------------------------------------------------
+    # AXE
+    #
     # The Two-Handed Axe takes the lefthand layer, so an empty left hand means it is gone.
-    # Arming before a cast completes interrupts the cast (wiki Combat Overview), so casting blocks this.
-    # An axe already in hand is adopted once by label, including a replacement with a new serial.
-    # Any other left hand item is left alone.
+    # Arming before a cast completes interrupts the cast (wiki Combat Overview), so
+    # casting blocks this. An axe already in hand is adopted once by label, including a
+    # replacement with a new serial. Any other left hand item is left alone.
+    # ------------------------------------------------------------------------------------
     if timer "timer__equip" >= cooldown__equip_retry
         if lhandempty
             if not hidden and not queued and not casting and not targetexists

@@ -4,7 +4,8 @@
 
 
 # ----------------------------------------------------------------------------------------
-#@ config
+# @ config
+#
 #   config__parry_stance_main
 #      Main stance, by codex slot in wiki order. A stance only helps with ranks in it.
 #        1  Shield Bash
@@ -34,7 +35,8 @@
 
 
 # ----------------------------------------------------------------------------------------
-#@ wait
+# @ wait
+#
 #   cooldown__parry_retry
 #      A failed stance switch is tried again after this.
 #
@@ -46,14 +48,15 @@
 
 
 # ----------------------------------------------------------------------------------------
-#@ timer
+# @ timer
 # ----------------------------------------------------------------------------------------
 timer__parry_retry cooldown__parry_retry
 timer__parry_resync 0
 
 
 # ----------------------------------------------------------------------------------------
-#@ state
+# @ state
+#
 #   var__parry_want, var__parry_active
 #      Parry stance cache. 0 means unknown, which forces a codex label read on the first
 #      pass.
@@ -77,30 +80,31 @@ timer__parry_resync 0
 
 
 # ----------------------------------------------------------------------------------------
-#@ loop
+# @ loop
 # ----------------------------------------------------------------------------------------
-    # ################################################################################
-    # # PARRY CODEX
-    # ################################################################################
-    # Parrying works with a two handed weapon and the codex needs Parrying 80 and Tactics 80
-    # (wiki Parrying). Per rank, from Weapon_and_Parry_Codex:
+    # ------------------------------------------------------------------------------------
+    # PARRY CODEX
+    #
+    # Parrying works with a two handed weapon and the codex needs Parrying 80 and Tactics
+    # 80 (wiki Parrying). Per rank, from Weapon_and_Parry_Codex:
     #   Testudo  damage resistance 3%, 6% while you are in the front arc of the target
     #   Warding  damage resistance 2%, and poison, bleed and disease ticks 6% lower
     #   Bulwark  5% after 3 seconds standing still. Mirror 2% and spell damage 6% lower.
-    # Testudo is the stance to hold once ranked. A creature meleeing you nearly always has you in
-    # its front arc.
-    # Warding takes over while poisoned, bleeding or diseased, but only away from melee. Next to
-    # the remembered enemy Testudo still blocks 4% per rank more of every hit, which outweighs
-    # the tick reduction unless the ticks deal most of the damage. config__parry_dot_in_melee 1
-    # switches anyway. Bleed and Disease are buff bar icons on the wiki, Template:BuffIcons.
+    # Testudo is the stance to hold once ranked. A creature meleeing you nearly always has
+    # you in its front arc. Warding takes over while poisoned, bleeding or diseased, but
+    # only away from melee. Next to the remembered enemy Testudo still blocks 4% per rank
+    # more of every hit, which outweighs the tick reduction unless the ticks deal most of
+    # the damage. config__parry_dot_in_melee 1 switches anyway. Bleed and Disease are buff
+    # bar icons on the wiki, Template:BuffIcons.
     #
-    # Last Stand is the default finisher: below the parry threshold it has a 5% chance per rank to
-    # turn a hit into 1 damage. Barrier takes a flat 0.6 per rank off each hit, which is less
-    # against the big hits that matter there.
+    # Last Stand is the default finisher: below the parry threshold it has a 5% chance per
+    # rank to turn a hit into 1 damage. Barrier takes a flat 0.6 per rank off each hit,
+    # which is less against the big hits that matter there.
     #
-    # Same label machinery as SWORD CODEX. No stance name in the label means none is selected or
-    # the label does not show it, and a blind command could toggle it off, so the block warns once
-    # and stands down for this Play.
+    # Same label machinery as SWORD CODEX. No stance name in the label means none is
+    # selected or the label does not show it, and a blind command could toggle it off, so
+    # the block warns once and stands down for this Play.
+    # ------------------------------------------------------------------------------------
     if var__parry_disabled = 0
         if timer "timer__parry_resync" > cooldown__parry_resync
             @setvar! var__parry_active 0

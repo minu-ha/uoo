@@ -7,7 +7,8 @@
 
 
 # ----------------------------------------------------------------------------------------
-#@ config
+# @ config
+#
 #   config__recall_on_detection
 #      1 recalls on a Tracking report within 1 through 45 steps. Needs escape/tracking
 #      hunting.
@@ -36,7 +37,8 @@
 
 
 # ----------------------------------------------------------------------------------------
-#@ wait
+# @ wait
+#
 #   cooldown__recall_check
 #      The book, Tracking buff and weight checks run on this clock.
 # ----------------------------------------------------------------------------------------
@@ -44,13 +46,14 @@
 
 
 # ----------------------------------------------------------------------------------------
-#@ timer
+# @ timer
 # ----------------------------------------------------------------------------------------
 timer__recall_check cooldown__recall_check
 
 
 # ----------------------------------------------------------------------------------------
-#@ state
+# @ state
+#
 #   var__recall_needed
 #      Recall decision: 0 keep gathering, 1 stop optional work and attempt Recall when
 #      input is free. Detection or low spare weight sets this to 1. Only restarting the
@@ -76,12 +79,13 @@ timer__recall_check cooldown__recall_check
 
 
 # ----------------------------------------------------------------------------------------
-#@ loop
+# @ loop
 # ----------------------------------------------------------------------------------------
-    # ####################################################################################
-    # # RECALL
-    # ####################################################################################
+    # ------------------------------------------------------------------------------------
+    # RECALL
+    #
     # The slow checks (book, Tracking buff, weight) run every cooldown__recall_check.
+    # ------------------------------------------------------------------------------------
     @setvar! var__recall_check_due 0
     if timer "timer__recall_check" >= cooldown__recall_check
         @setvar! var__recall_check_due 1

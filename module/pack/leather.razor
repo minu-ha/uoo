@@ -6,7 +6,8 @@
 
 
 # ----------------------------------------------------------------------------------------
-#@ wait
+# @ wait
+#
 #   wait__pack_item
 #      Allow inventory updates after opening the pouch and each drag/drop.
 #
@@ -22,7 +23,8 @@
 
 
 # ----------------------------------------------------------------------------------------
-#@ timer
+# @ timer
+#
 #   timer__pack_leather
 #      Packing waits one full interval.
 # ----------------------------------------------------------------------------------------
@@ -30,16 +32,18 @@ timer__pack_leather 0
 
 
 # ----------------------------------------------------------------------------------------
-#@ loop
+# @ loop
 # ----------------------------------------------------------------------------------------
-    # ################################################################################
-    # # LEATHER
-    # ################################################################################
-    # Same shape as the Boards pass in pack/lumber. No hue filter, so colored leather moves too.
-    # Only between fights. Recursive backpack searches can return leather already in the pouch,
-    # so membership is checked before ignore, and only pouch stacks are ignored.
-    # No clearignore here: the list also holds the carved corpses. A refused move is found
-    # again and retried until the pass budget runs out, then on the next interval.
+    # ------------------------------------------------------------------------------------
+    # LEATHER
+    #
+    # Same shape as the Boards pass in pack/lumber. No hue filter, so colored leather
+    # moves too. Only between fights. Recursive backpack searches can return leather
+    # already in the pouch, so membership is checked before ignore, and only pouch stacks
+    # are ignored. No clearignore here: the list also holds the carved corpses. A refused
+    # move is found again and retried until the pass budget runs out, then on the next
+    # interval.
+    # ------------------------------------------------------------------------------------
     if timer "timer__pack_leather" >= cooldown__pack_leather and var__combat_target = 0
         if diffhits < config__heal_hits and not poisoned and not paralyzed
             if not hidden and not queued and not casting and not targetexists

@@ -7,7 +7,8 @@
 
 
 # ----------------------------------------------------------------------------------------
-#@ wait
+# @ wait
+#
 #   cooldown__reagents
 #      Reagent read interval. Five lookups each time. A refill counts within this, and
 #      running out is caught at once by the refusal line.
@@ -16,7 +17,8 @@
 
 
 # ----------------------------------------------------------------------------------------
-#@ timer
+# @ timer
+#
 #   timer__reagents
 #      Ready on the first pass, so reagents are read before the first cast.
 # ----------------------------------------------------------------------------------------
@@ -24,7 +26,8 @@ timer__reagents cooldown__reagents
 
 
 # ----------------------------------------------------------------------------------------
-#@ state
+# @ state
+#
 #   var__regs_cure, var__regs_heal, var__regs_greater_heal, var__regs_reactive_armor,
 #   var__regs_magic_reflect
 #      Reagent flags, written only by REAGENTS. 1 when every reagent of that spell was
@@ -51,13 +54,14 @@ timer__reagents cooldown__reagents
 
 
 # ----------------------------------------------------------------------------------------
-#@ loop
+# @ loop
 # ----------------------------------------------------------------------------------------
-    # ################################################################################
-    # # REAGENTS
-    # ################################################################################
-    # On the interval, or at once after a refusal for reagents, so a stale flag cannot send the
-    # same doomed cast every pass.
+    # ------------------------------------------------------------------------------------
+    # REAGENTS
+    #
+    # On the interval, or at once after a refusal for reagents, so a stale flag cannot
+    # send the same doomed cast every pass.
+    # ------------------------------------------------------------------------------------
     if config__use_magery = 1
         if timer "timer__reagents" >= cooldown__reagents or insysmsg "More reagents are needed"
             settimer "timer__reagents" 0

@@ -1,10 +1,10 @@
 # Recipe for script/combat/pvp.razor. Build it with: python3 util/build-scripts.py
 # Every setting of this loop: python3 util/build-scripts.py --settings recipe/pvp-recipe.razor
-#@ output script/combat/pvp.razor
+# @ output script/combat/pvp.razor
 
 
 # ========================================================================================
-#@ header
+# @ header
 # ========================================================================================
 
 # Shared field PvP self-sustain: instant items first, healing agents, PvP buffs kept up, swing based weapon swap.
@@ -35,7 +35,8 @@
 
 
 # ========================================================================================
-#@ blocks
+# @ blocks
+#
 #   One box per block, in the order the blocks run, base first. The builder writes the box.
 #   Yours are the "> " lines in it (a note on the block, or under a setting the reason for
 #   its value) and the @setvar! lines under it. Write a new @setvar! line under any box, its
@@ -43,7 +44,8 @@
 # ========================================================================================
 
 # ----------------------------------------------------------------------------------------
-#@ use base
+# @ use base
+#
 #   The frame of every loop. Every recipe lists it first.
 #
 #   clear_at_start (default 1)
@@ -63,42 +65,50 @@
 @setvar! config__walk_guard 0
 
 # ----------------------------------------------------------------------------------------
-#@ use recovery/reagents
+# @ use recovery/reagents
+#
 #   Reagent flags for the Magery casts, read on a clock and right after a refusal.
 # ----------------------------------------------------------------------------------------
 
 # ----------------------------------------------------------------------------------------
-#@ use recovery/pouch
+# @ use recovery/pouch
+#
 #   The trapped pouch while paralyzed, the one thing that can act then.
 # ----------------------------------------------------------------------------------------
 
 # ----------------------------------------------------------------------------------------
-#@ use recovery/cure
+# @ use recovery/cure
+#
 #   Cure potion first, then the Smart Heal/Cure agent when none is carried.
 # ----------------------------------------------------------------------------------------
 
 # ----------------------------------------------------------------------------------------
-#@ use recovery/heal
+# @ use recovery/heal
+#
 #   Heal potion at heal_hits, else Greater Heal at emergency_hits.
 # ----------------------------------------------------------------------------------------
 
 # ----------------------------------------------------------------------------------------
-#@ use recovery/bandage
+# @ use recovery/bandage
+#
 #   Self bandage while hurt or poisoned, never over a running one.
 # ----------------------------------------------------------------------------------------
 
 # ----------------------------------------------------------------------------------------
-#@ use recovery/light-heal
+# @ use recovery/light-heal
+#
 #   The light Heal agent: the bandage stand-in, or beside them with use_light_heal 1.
 # ----------------------------------------------------------------------------------------
 
 # ----------------------------------------------------------------------------------------
-#@ use recovery/refresh
+# @ use recovery/refresh
+#
 #   Total Refresh at or below refresh_stam.
 # ----------------------------------------------------------------------------------------
 
 # ----------------------------------------------------------------------------------------
-#@ use buff/potions
+# @ use buff/potions
+#
 #   Strength and Agility by stat value, Magic Resist by its icon, while fighting.
 #
 #   str_potion (default 120, the same value)
@@ -110,7 +120,8 @@
 @setvar! config__str_potion 120
 
 # ----------------------------------------------------------------------------------------
-#@ use buff/spells
+# @ use buff/spells
+#
 #   Reactive Armor, then Magic Reflection, whenever one is missing.
 #
 #   buff_max_loss (default 35, the same value)
@@ -120,13 +131,14 @@
 @setvar! config__buff_max_loss 35
 
 # ----------------------------------------------------------------------------------------
-#@ use fight/weapon-swap
+# @ use fight/weapon-swap
+#
 #   Four weapon slots, each on its own swing bar. Arms the slot whose swing is ready.
 # ----------------------------------------------------------------------------------------
 
 
 # ========================================================================================
-#@ state
+# @ state
 # ========================================================================================
 
 # pvp is always in a fight, so the stat potions are kept up the whole time.
@@ -134,7 +146,7 @@
 
 
 # ========================================================================================
-#@ setup
+# @ setup
 # ========================================================================================
 
 overhead "[ pvp, on ]" 290

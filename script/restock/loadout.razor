@@ -15,9 +15,9 @@ clearignore
 # falls through to the else, which then waits on a "Repaired" that is never coming.
 @setvar! wait__repair 2000
 
-# ####################################################################################
-# # CONFIG
-# ####################################################################################
+# ========================================================================================
+# CONFIG
+# ========================================================================================
 # 1 when the stockpile, safe, bench, shelf and recycler are stored inside one furniture
 # container. 0 when they stand on the floor. Either way they must be within reach.
 @setvar! config__use_furniture_container 1
@@ -42,9 +42,9 @@ clearignore
 # Everything a hand can touch is 2 tiles away at most, so that is the range every check uses.
 @setvar! config__reach 2
 
-# ####################################################################################
-# # CONTAINERS YOU WALK UP TO
-# ####################################################################################
+# ========================================================================================
+# CONTAINERS YOU WALK UP TO
+# ========================================================================================
 # Personal containers, kept in your Razor profile so no serial sits in this shared file.
 #
 # varexist only reports that a name was declared, not that the serial still resolves, so a
@@ -92,9 +92,9 @@ dclick global__my_supply_box
 wait wait__short
 
 
-# ####################################################################################
-# # CONTAINERS INSIDE THE FURNITURE
-# ####################################################################################
+# ========================================================================================
+# CONTAINERS INSIDE THE FURNITURE
+# ========================================================================================
 # Asked for only now, because with config__use_furniture_container on they cannot be
 # targeted until the furniture above has been opened.
 #
@@ -221,9 +221,9 @@ else
     endif
 endif
 
-# ####################################################################################
-# # Bank Deposit safe
-# ####################################################################################
+# ========================================================================================
+# Bank Deposit safe
+# ========================================================================================
 # Every one of these blocks waits with waitfortarget, never with a plain wait. A fixed sleep
 # is not long enough for the server to answer: the cursor turns up after the block has moved
 # on, and then the next block's waitfortarget picks up that stale cursor instead of its own.
@@ -248,9 +248,9 @@ if var__has_bank_deposit_safe = 1 and findtype 3821 backpack
     wait wait__short
 endif
 
-# ####################################################################################
-# # Resource stockpile
-# ####################################################################################
+# ========================================================================================
+# Resource stockpile
+# ========================================================================================
 # This is the block that was leaking a cursor. Its prompt,
 #   "Where do you wish to restock this from? You may target yourself, a container, ..."
 # was still up when the storage shelf asked its own question, so the shelf's answer went to
@@ -272,9 +272,9 @@ if var__has_resource_stockpile = 1
     wait wait__short
 endif
 
-# ####################################################################################
-# # Repair bench
-# ####################################################################################
+# ========================================================================================
+# Repair bench
+# ========================================================================================
 if var__has_repair_bench = 1
     dclick global__my_repair_bench
     wait wait__repair
@@ -287,9 +287,9 @@ if var__has_repair_bench = 1
     endif
 endif
 
-# ####################################################################################
-# # Magic item recycler
-# ####################################################################################
+# ========================================================================================
+# Magic item recycler
+# ========================================================================================
 # The recycler takes no target. It acts on the backpack straight away.
 #
 #   0  everything in the backpack
@@ -316,9 +316,9 @@ if var__has_magic_item_recycler = 1
     wait wait__short
 endif
 
-# ####################################################################################
-# # Storage shelf restock
-# ####################################################################################
+# ========================================================================================
+# Storage shelf restock
+# ========================================================================================
 # Restock puts things in, Resupply takes things out. Two menu entries, 0 and 1, and both are
 # needed: crafted gear and anything looted goes into the shelf before the loadout comes back
 # out. Restock belongs here with the deposits, Resupply runs later with the withdrawals.
@@ -348,9 +348,9 @@ if var__has_storage_shelf = 1
     gumpclose
 endif
 
-# ####################################################################################
-# # Storage shelf resupply
-# ####################################################################################
+# ========================================================================================
+# Storage shelf resupply
+# ========================================================================================
 # The withdrawal half, and the short one: resupply raises no cursor and answers at once.
 # It used to wait on a target anyway, on the theory that the wait kept the restock above from
 # colliding with it. That was wrong. The run was dying on an undeclared wait__long, and the
@@ -362,9 +362,9 @@ if var__has_storage_shelf = 1
     gumpclose
 endif
 
-# ####################################################################################
-# # TOOLS
-# ####################################################################################
+# ========================================================================================
+# TOOLS
+# ========================================================================================
 # 3997 sewing kit, 20496 item identification wand. Both live in the supply box.
 #
 # Exactly one of each is carried. The backpack is walked first: the first one found stays,
@@ -448,9 +448,9 @@ if config__use_sewing_kit_and_id_wand = 1 and find global__my_supply_box ground 
     endif
 endif
 
-# ####################################################################################
-# # INSTRUMENT
-# ####################################################################################
+# ========================================================================================
+# INSTRUMENT
+# ========================================================================================
 #   #instruments   3740|3742|3762|3763|10245|20006|20008|20010|20012|20014|20016
 #   #bamboo flute 10245   #drums 3740       #gemshorn 20006   #harp 3762
 #   #hurdy-gurdy 20008    #lute 3763        #psaltery 20010   #sackbut 20012
@@ -515,9 +515,9 @@ if config__use_magic_instrument = 1
     endif
 endif
 
-# ####################################################################################
-# # Looting bag
-# ####################################################################################
+# ========================================================================================
+# Looting bag
+# ========================================================================================
 if not varexist global__my_looting_pouch
     overhead "[ loot pouch, set ]" 290
     wait wait__short
@@ -540,9 +540,9 @@ else
     endif
 endif
 
-# ####################################################################################
-# # Sorting items
-# ####################################################################################
+# ========================================================================================
+# Sorting items
+# ========================================================================================
 # Everything the backpack should hold, and where it goes. Format matches blueprint/item-list.html.
 #
 #   #bandage                 "clean bandage%s%"      3617
@@ -731,9 +731,9 @@ foreach alias__sorting_item in sorting_item_list
     wait wait__short
 endfor
 
-# ####################################################################################
-# # Dress setting
-# ####################################################################################
+# ========================================================================================
+# Dress setting
+# ========================================================================================
 # Records what is worn, nothing else. Putting it back on is script/hotkey/dress.razor's job.
 #
 # One block per layer findlayer accepts, so nothing is addressed by item graphic any more.
@@ -971,9 +971,9 @@ endif
 
 overhead "[ dress, set ]" 290
 
-# ####################################################################################
-# # Refill runebook
-# ####################################################################################
+# ========================================================================================
+# Refill runebook
+# ========================================================================================
 clearsysmsg
 cleardragdrop
 clearignore

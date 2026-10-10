@@ -1,11 +1,13 @@
 # ----------------------------------------------------------------------------------------
 # Reactive Armor, then Magic Reflection, whenever one is missing.
-#@ hotkeys > Interrupt
+#
+# @ hotkeys > Interrupt
 # ----------------------------------------------------------------------------------------
 
 
 # ----------------------------------------------------------------------------------------
-#@ config
+# @ config
+#
 #   config__use_reactive_armor
 #      1 keeps Reactive Armor up.
 #
@@ -35,17 +37,19 @@
 
 
 # ----------------------------------------------------------------------------------------
-#@ loop
+# @ loop
 # ----------------------------------------------------------------------------------------
-    # ################################################################################
-    # # SELF BUFFS
-    # ################################################################################
-    # Reactive Armor, then Magic Reflection, whenever one is missing and the window is free.
-    # Not started at config__buff_max_loss, and cut there mid cast so the next pass can heal.
-    # With config__buff_when_poisoned 0 poison holds them back and cuts them too, so the cure
-    # goes first. var__hold_casts lets another block keep the cast window (a latched Recall).
-    # config__walk_guard and config__warmode_is_manual apply as for the heal agents. The reflect
-    # bar is the server's recast lock after Reflect is used up.
+    # ------------------------------------------------------------------------------------
+    # SELF BUFFS
+    #
+    # Reactive Armor, then Magic Reflection, whenever one is missing and the window is
+    # free. Not started at config__buff_max_loss, and cut there mid cast so the next pass
+    # can heal. With config__buff_when_poisoned 0 poison holds them back and cuts them
+    # too, so the cure goes first. var__hold_casts lets another block keep the cast window
+    # (a latched Recall). config__walk_guard and config__warmode_is_manual apply as for
+    # the heal agents. The reflect bar is the server's recast lock after Reflect is used
+    # up.
+    # ------------------------------------------------------------------------------------
     if config__use_magery = 1 and var__hold_casts = 0 and not paralyzed and not hidden and not queued and not casting and not targetexists and diffhits < config__buff_max_loss
         if config__buff_when_poisoned = 1 or not poisoned
             if config__warmode_is_manual = 0 or not warmode

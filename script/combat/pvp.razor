@@ -29,9 +29,9 @@
 # Generated from recipe/pvp-recipe.razor by util/build-scripts.py. Edit module/ and recipe/, not this file.
 
 
-# ####################################################################################
-# # CONFIG
-# ####################################################################################
+# ========================================================================================
+# CONFIG
+# ========================================================================================
 
 # ----------------------------------------------------------------------------------------
 # module/base.razor
@@ -220,9 +220,9 @@
 @setvar! config__weapon_4_graphic 31190
 
 
-# ####################################################################################
-# # WAIT AND COOLDOWN
-# ####################################################################################
+# ========================================================================================
+# WAIT AND COOLDOWN
+# ========================================================================================
 
 # ----------------------------------------------------------------------------------------
 # module/base.razor
@@ -263,9 +263,9 @@
 @setvar! cooldown__stat_potion 5000
 
 
-# ####################################################################################
-# # TIMER
-# ####################################################################################
+# ========================================================================================
+# TIMER
+# ========================================================================================
 
 # ----------------------------------------------------------------------------------------
 # module/base.razor
@@ -305,9 +305,9 @@ endif
 settimer "timer__agi_potion" cooldown__stat_potion
 
 
-# ####################################################################################
-# # STATE
-# ####################################################################################
+# ========================================================================================
+# STATE
+# ========================================================================================
 
 # ----------------------------------------------------------------------------------------
 # module/base.razor
@@ -429,23 +429,26 @@ if config__sysmsg = 1
 endif
 
 
-# ####################################################################################
-# # MAIN LOOP
-# ####################################################################################
+# ========================================================================================
+# MAIN LOOP
+# ========================================================================================
 while not dead
-    # module/base.razor
+    # ------------------------------------------------------------------------------------
+    # STRUCTURED PVP STOP                                                module/base.razor
+    #
     # The pvp expression means structured-PvP restrictions, not a field PK encounter.
+    # ------------------------------------------------------------------------------------
     if pvp
         overhead "[ script, blocked ]" 254
         stop
     endif
 
-    # module/recovery/reagents.razor
-    # ################################################################################
-    # # REAGENTS
-    # ################################################################################
-    # On the interval, or at once after a refusal for reagents, so a stale flag cannot send the
-    # same doomed cast every pass.
+    # ------------------------------------------------------------------------------------
+    # REAGENTS                                              module/recovery/reagents.razor
+    #
+    # On the interval, or at once after a refusal for reagents, so a stale flag cannot
+    # send the same doomed cast every pass.
+    # ------------------------------------------------------------------------------------
     if config__use_magery = 1
         if timer "timer__reagents" >= cooldown__reagents or insysmsg "More reagents are needed"
             settimer "timer__reagents" 0
@@ -496,11 +499,12 @@ while not dead
         endif
     endif
 
-    # module/recovery/pouch.razor
-    # ################################################################################
-    # # PARALYZE
-    # ################################################################################
-    # Nothing else can act while held, so the pouch goes out at once, as in bard-necro-enhanced.
+    # ------------------------------------------------------------------------------------
+    # PARALYZE                                                 module/recovery/pouch.razor
+    #
+    # Nothing else can act while held, so the pouch goes out at once, as in
+    # bard-necro-enhanced.
+    # ------------------------------------------------------------------------------------
     if paralyzed
         if findtype 3705 backpack 38
             yell "[Pouch"
@@ -511,13 +515,14 @@ while not dead
         endif
     endif
 
-    # module/recovery/cure.razor
-    # ################################################################################
-    # # CURE
-    # ################################################################################
-    # Potion first, it is instant and has no cooldown, and it goes out during a cast. While any
-    # cure potion is carried the agent is not used, so mana stays for Greater Heal. The agent
-    # waits for the walk bar and for warmode as config__walk_guard and config__warmode_is_manual say.
+    # ------------------------------------------------------------------------------------
+    # CURE                                                      module/recovery/cure.razor
+    #
+    # Potion first, it is instant and has no cooldown, and it goes out during a cast.
+    # While any cure potion is carried the agent is not used, so mana stays for Greater
+    # Heal. The agent waits for the walk bar and for warmode as config__walk_guard and
+    # config__warmode_is_manual say.
+    # ------------------------------------------------------------------------------------
     if poisoned and not paralyzed and not hidden and not queued and not targetexists
         if config__use_potions = 1 and findtype "Orange Potion" self
             hotkey "Drink Cure"
@@ -552,16 +557,16 @@ while not dead
         endif
     endif
 
-    # module/recovery/heal.razor
-    # ################################################################################
-    # # HEAL
-    # ################################################################################
+    # ------------------------------------------------------------------------------------
+    # HEAL                                                      module/recovery/heal.razor
+    #
     # Heavy damage drinks first, because the potion is instant and goes out during a cast.
     # Greater Heal follows when no potion went out on this pass and the loss is at the
-    # emergency line: none carried, on its own cooldown, or the bar still running.
-    # The bar skips the label read while it runs. The label stays authoritative when the bar
-    # is missing. Greater Heal waits for the walk bar and for warmode as config__walk_guard and
-    # config__warmode_is_manual say.
+    # emergency line: none carried, on its own cooldown, or the bar still running. The bar
+    # skips the label read while it runs. The label stays authoritative when the bar is
+    # missing. Greater Heal waits for the walk bar and for warmode as config__walk_guard
+    # and config__warmode_is_manual say.
+    # ------------------------------------------------------------------------------------
     if not poisoned and not paralyzed and not hidden and not queued and not targetexists and diffhits >= config__heal_hits
         @setvar! var__heal_potion_out 0
         if config__use_potions = 1 and cooldown "heal pot" = 0
@@ -609,12 +614,12 @@ while not dead
         endif
     endif
 
-    # module/recovery/bandage.razor
-    # ################################################################################
-    # # BANDAGE
-    # ################################################################################
-    # Never restarts a running bandage, and full health does not start one. Its target cursor
-    # would replace a held precast, so it waits while any cursor is up.
+    # ------------------------------------------------------------------------------------
+    # BANDAGE                                                module/recovery/bandage.razor
+    #
+    # Never restarts a running bandage, and full health does not start one. Its target
+    # cursor would replace a held precast, so it waits while any cursor is up.
+    # ------------------------------------------------------------------------------------
     if config__use_bandages = 1 and not bandaging and not paralyzed and not hidden and not queued and not targetexists and skill "Healing" > config__heal_skill_min
         if diffhits > 0 or poisoned
             if findtype 3617 self
@@ -627,13 +632,14 @@ while not dead
         endif
     endif
 
-    # module/recovery/light-heal.razor
-    # ################################################################################
-    # # LIGHT HEAL
-    # ################################################################################
-    # The bandage stand-in whenever no bandage can run: bandages off, no Healing, or none left
-    # and none running. Beside the bandages only with config__use_light_heal 1. The agent waits
-    # for the walk bar and for warmode as config__walk_guard and config__warmode_is_manual say.
+    # ------------------------------------------------------------------------------------
+    # LIGHT HEAL                                          module/recovery/light-heal.razor
+    #
+    # The bandage stand-in whenever no bandage can run: bandages off, no Healing, or none
+    # left and none running. Beside the bandages only with config__use_light_heal 1. The
+    # agent waits for the walk bar and for warmode as config__walk_guard and
+    # config__warmode_is_manual say.
+    # ------------------------------------------------------------------------------------
     if not poisoned and not paralyzed and not hidden and not queued and not casting and not targetexists and config__use_magery = 1 and var__regs_heal = 1 and diffhits >= config__light_hits and mana >= config__mana_heal
         @setvar! var__light_heal_due 0
         if config__use_light_heal = 1 or config__use_bandages = 0 or skill "Healing" <= config__heal_skill_min
@@ -670,10 +676,9 @@ while not dead
         endif
     endif
 
-    # module/recovery/refresh.razor
-    # ################################################################################
-    # # REFRESH
-    # ################################################################################
+    # ------------------------------------------------------------------------------------
+    # REFRESH                                                module/recovery/refresh.razor
+    # ------------------------------------------------------------------------------------
     if stam <= config__refresh_stam and config__use_potions = 1 and not paralyzed and not hidden and not queued and not targetexists
         if findtype "Red Potion" self
             hotkey "Drink Refresh"
@@ -681,15 +686,16 @@ while not dead
         endif
     endif
 
-    # module/buff/potions.razor
-    # ################################################################################
-    # # STAT POTIONS
-    # ################################################################################
-    # Kept up while var__fighting is 1. Strength and Agility read the stat against config__str_potion
-    # and config__dex_potion, because Bless and the Strength and Agility spells show the same
-    # icons as the potions, and each is tried once per cooldown__stat_potion. Magic Resist has an
-    # icon of its own and is drunk once it is missing. Each potion is judged on its own, so
-    # running out of one does not hold up the others.
+    # ------------------------------------------------------------------------------------
+    # STAT POTIONS                                               module/buff/potions.razor
+    #
+    # Kept up while var__fighting is 1. Strength and Agility read the stat against
+    # config__str_potion and config__dex_potion, because Bless and the Strength and
+    # Agility spells show the same icons as the potions, and each is tried once per
+    # cooldown__stat_potion. Magic Resist has an icon of its own and is drunk once it is
+    # missing. Each potion is judged on its own, so running out of one does not hold up
+    # the others.
+    # ------------------------------------------------------------------------------------
     if var__fighting = 1 and config__use_potions = 1 and not paralyzed and not hidden and not targetexists
         if not queued and str < config__str_potion and timer "timer__str_potion" >= cooldown__stat_potion
             settimer "timer__str_potion" 0
@@ -713,16 +719,17 @@ while not dead
         endif
     endif
 
-    # module/buff/spells.razor
-    # ################################################################################
-    # # SELF BUFFS
-    # ################################################################################
-    # Reactive Armor, then Magic Reflection, whenever one is missing and the window is free.
-    # Not started at config__buff_max_loss, and cut there mid cast so the next pass can heal.
-    # With config__buff_when_poisoned 0 poison holds them back and cuts them too, so the cure
-    # goes first. var__hold_casts lets another block keep the cast window (a latched Recall).
-    # config__walk_guard and config__warmode_is_manual apply as for the heal agents. The reflect
-    # bar is the server's recast lock after Reflect is used up.
+    # ------------------------------------------------------------------------------------
+    # SELF BUFFS                                                  module/buff/spells.razor
+    #
+    # Reactive Armor, then Magic Reflection, whenever one is missing and the window is
+    # free. Not started at config__buff_max_loss, and cut there mid cast so the next pass
+    # can heal. With config__buff_when_poisoned 0 poison holds them back and cuts them
+    # too, so the cure goes first. var__hold_casts lets another block keep the cast window
+    # (a latched Recall). config__walk_guard and config__warmode_is_manual apply as for
+    # the heal agents. The reflect bar is the server's recast lock after Reflect is used
+    # up.
+    # ------------------------------------------------------------------------------------
     if config__use_magery = 1 and var__hold_casts = 0 and not paralyzed and not hidden and not queued and not casting and not targetexists and diffhits < config__buff_max_loss
         if config__buff_when_poisoned = 1 or not poisoned
             if config__warmode_is_manual = 0 or not warmode
@@ -781,16 +788,16 @@ while not dead
         endif
     endif
 
-    # module/fight/weapon-swap.razor
-    # ################################################################################
-    # # WEAPON
-    # ################################################################################
-    # Wanted slot: the highest enabled slot whose swing bar is ready, 4 down to 1. With none
-    # ready and both hands empty, the lowest enabled slot. A missing bar reads ready.
-    # The armed serial is searched only when the wanted slot changes, so a steady pass costs two
-    # hand reads. A weapon already in hand is adopted without a request. Arming during a cast
-    # would interrupt it (wiki Combat Overview), so this waits for a free window.
-    # The equip request is not proof of a swing.
+    # ------------------------------------------------------------------------------------
+    # WEAPON                                                module/fight/weapon-swap.razor
+    #
+    # Wanted slot: the highest enabled slot whose swing bar is ready, 4 down to 1. With
+    # none ready and both hands empty, the lowest enabled slot. A missing bar reads ready.
+    # The armed serial is searched only when the wanted slot changes, so a steady pass
+    # costs two hand reads. A weapon already in hand is adopted without a request. Arming
+    # during a cast would interrupt it (wiki Combat Overview), so this waits for a free
+    # window. The equip request is not proof of a swing.
+    # ------------------------------------------------------------------------------------
     if not paralyzed and not hidden and not queued and not casting and not targetexists
         @setvar! var__weapon_want 0
         if config__weapon_4_graphic != 0 and cooldown "swing 4" = 0
@@ -853,6 +860,8 @@ while not dead
         endif
     endif
 
-    # module/base.razor
+    # ------------------------------------------------------------------------------------
+    # END OF PASS                                                        module/base.razor
+    # ------------------------------------------------------------------------------------
     wait wait__poll
 endwhile

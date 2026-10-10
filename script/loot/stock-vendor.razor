@@ -1,6 +1,6 @@
-# ####################################################################################
+# ========================================================================================
 # VENDOR RESTOCK
-# ####################################################################################
+# ========================================================================================
 # Moves sellable items from a source container onto the vendor, one stack per item
 # type, prints the price you should charge, and waits while you type it.
 #
@@ -52,16 +52,16 @@ clearall
 clearignore
 cleardragdrop
 
-# ####################################################################################
+# ========================================================================================
 # CONFIG - CONTAINERS
-# ####################################################################################
+#
 #   var__vendor_container   the vendor you are stocking
 #   var__source_container   the box your sellable items are sitting in
-# Both are opened with dclick first so the client knows their contents.
-# Each is asked for once and kept in your Razor profile, so no serial sits in this
-# shared file. To point the script at something else, run  unsetvar var__vendor_container
-# from another script and rerun this one.
-# ####################################################################################
+# Both are opened with dclick first so the client knows their contents. Each is asked for
+# once and kept in your Razor profile, so no serial sits in this shared file. To point the
+# script at something else, run  unsetvar var__vendor_container from another script and
+# rerun this one.
+# ========================================================================================
 if not varexist var__vendor_container
     overhead "[ vendor, pick ]" 255
     setvar var__vendor_container
@@ -72,14 +72,14 @@ if not varexist var__source_container
     setvar var__source_container
 endif
 
-# ####################################################################################
+# ========================================================================================
 # CONFIG - BEHAVIOUR
-# ####################################################################################
+#
 #   var__auto_place         0 stops on each gump so you can type the price
 #                           1 presses Place Item for Sale, everything lands at 99,999
 #   var__lift_amount        60000 is the UO stack cap, so this takes a whole stack
 #   var__delay_gump_settle  raise it if the script jumps ahead while you are typing
-# ####################################################################################
+# ========================================================================================
 @setvar! var__auto_place 0
 @setvar! var__lift_amount 60000
 @setvar! var__delay_open 700
@@ -90,7 +90,7 @@ endif
 # How often the item name and price is repeated over your head while you type.
 @setvar! var__delay_hint_repeat 2000
 
-# ####################################################################################
+# ========================================================================================
 # PRICE - TREASURE MAP
 #
 #   var__price_treasure_lv1  "plainly drawn treasure map"    5356
@@ -99,7 +99,7 @@ endif
 #   var__price_treasure_lv4  "cleverly drawn treasure map"   5356
 #   var__price_treasure_lv5  "deviously drawn treasure map"  5356
 #   var__price_treasure_lv6  "ingeniously drawn treasure map"  5356
-# ####################################################################################
+# ========================================================================================
 @setvar! var__price_treasure_lv1 '5000'
 @setvar! var__price_treasure_lv2 '10000'
 @setvar! var__price_treasure_lv3 '20000'
@@ -107,7 +107,7 @@ endif
 @setvar! var__price_treasure_lv5 '50000'
 @setvar! var__price_treasure_lv6 '75000'
 
-# ####################################################################################
+# ========================================================================================
 # PRICE - ORE MAP
 #
 #   Ordered so a longer material name is tested before a shorter one it contains, for
@@ -124,7 +124,7 @@ endif
 #   var__price_ore_valorite     "valorite ore map"           70154  hue 2219
 #   var__price_ore_avarite      "avarite ore map"            70154  hue 1763
 #   var__price_ore_iron         "iron ore map, the base tier"  70154  hue 0
-# ####################################################################################
+# ========================================================================================
 @setvar! var__price_ore_dull_copper '5000'
 @setvar! var__price_ore_shadow_iron '5000'
 @setvar! var__price_ore_copper      '6000'
@@ -136,7 +136,7 @@ endif
 @setvar! var__price_ore_avarite     '100000'
 @setvar! var__price_ore_iron        '0'
 
-# ####################################################################################
+# ========================================================================================
 # PRICE - LUMBER MAP
 #
 #   The last entry is a catch all for a base tier map whose label carries no material word.
@@ -151,7 +151,7 @@ endif
 #   var__price_lumber_valewood    "valewood lumber map"            70151  hue 2219
 #   var__price_lumber_avarwood    "avarwood lumber map"            70151  hue 1763
 #   var__price_lumber_board       "plain lumber map, the base tier"  70151  hue 0
-# ####################################################################################
+# ========================================================================================
 @setvar! var__price_lumber_dullwood   '1000'
 @setvar! var__price_lumber_shadowwood '1000'
 @setvar! var__price_lumber_copperwood '2000'
@@ -163,7 +163,7 @@ endif
 @setvar! var__price_lumber_avarwood   '50000'
 @setvar! var__price_lumber_board      '0'
 
-# ####################################################################################
+# ========================================================================================
 # PRICE - SKINNING MAP
 #
 #   The last entry is a catch all for a base tier map whose label carries no material word.
@@ -178,7 +178,7 @@ endif
 #   var__price_hide_valehide    "valehide skinning map"            70157  hue 2219
 #   var__price_hide_avarhide    "avarhide skinning map"            70157  hue 1763
 #   var__price_hide_leather     "plain skinning map, the base tier"  70157  hue 0
-# ####################################################################################
+# ========================================================================================
 @setvar! var__price_hide_dullhide   '100'
 @setvar! var__price_hide_shadowhide '100'
 @setvar! var__price_hide_copperhide '100'
@@ -190,23 +190,23 @@ endif
 @setvar! var__price_hide_avarhide   '0'
 @setvar! var__price_hide_leather    '0'
 
-# ####################################################################################
+# ========================================================================================
 # PRICE - FISHING MAP
 #
 #   var__price_fishing_map  "fishing map"  70148
-# ####################################################################################
+# ========================================================================================
 @setvar! var__price_fishing_map '100'
 
-# ####################################################################################
+# ========================================================================================
 # PRICE - CHROMATIC
 #
 #   var__price_chromatic_core          "a chromatic core"        4025
 #   var__price_chromatic_distillation  "chromatic distillation"  4026
-# ####################################################################################
+# ========================================================================================
 @setvar! var__price_chromatic_core         '35000'
 @setvar! var__price_chromatic_distillation '2000'
 
-# ####################################################################################
+# ========================================================================================
 # PRICE - CORE
 #
 #   var__price_core_agorawave   "Agorawave Core"   3985  hue 4221
@@ -234,7 +234,7 @@ endif
 #   var__price_core_void        "Void Core"        3985  hue 2582
 #   var__price_core_water       "Water Core"       3985  hue 2592
 #   var__price_core_war         "War Core"         3985  hue 2503
-# ####################################################################################
+# ========================================================================================
 @setvar! var__price_core_agorawave  '18000'
 @setvar! var__price_core_air        '15000'
 @setvar! var__price_core_arcane     '15000'
@@ -261,7 +261,7 @@ endif
 @setvar! var__price_core_water      '3000'
 @setvar! var__price_core_war        '11000'
 
-# ####################################################################################
+# ========================================================================================
 # PRICE - DISTILLATION
 #
 #   var__price_distillation_agorawave   "Agorawave Distillation"   17686  hue 4221
@@ -289,7 +289,7 @@ endif
 #   var__price_distillation_void        "Void Distillation"        17686  hue 2599
 #   var__price_distillation_water       "Water Distillation"       17686  hue 1788
 #   var__price_distillation_war         "War Distillation"         17686  hue 2503
-# ####################################################################################
+# ========================================================================================
 @setvar! var__price_distillation_agorawave  '2000'
 @setvar! var__price_distillation_air        '2000'
 @setvar! var__price_distillation_arcane     '3000'
@@ -316,7 +316,7 @@ endif
 @setvar! var__price_distillation_water      '3500'
 @setvar! var__price_distillation_war        '1500'
 
-# ####################################################################################
+# ========================================================================================
 # PRICE - EXTRACT
 #
 #   var__price_extract_agorawave   "Agorawave Extract"   3836  hue 4221
@@ -344,7 +344,7 @@ endif
 #   var__price_extract_void        "Void Extract"        3836  hue 2599
 #   var__price_extract_water       "Water Extract"       3836  hue 1788
 #   var__price_extract_war         "War Extract"         3836  hue 2503
-# ####################################################################################
+# ========================================================================================
 @setvar! var__price_extract_agorawave  '0'
 @setvar! var__price_extract_air        '0'
 @setvar! var__price_extract_arcane     '0'
@@ -371,7 +371,7 @@ endif
 @setvar! var__price_extract_water      '0'
 @setvar! var__price_extract_war        '0'
 
-# ####################################################################################
+# ========================================================================================
 # PRICE - PHYLACTERY
 #
 #   var__price_phylactery_agorawave   "Agorawave Phylactery"   576  hue 4221
@@ -399,7 +399,7 @@ endif
 #   var__price_phylactery_void        "Void Phylactery"        576  hue 2582
 #   var__price_phylactery_water       "Water Phylactery"       576  hue 1788
 #   var__price_phylactery_war         "War Phylactery"         576  hue 2503
-# ####################################################################################
+# ========================================================================================
 @setvar! var__price_phylactery_agorawave  '4000'
 @setvar! var__price_phylactery_air        '4000'
 @setvar! var__price_phylactery_arcane     '4000'
@@ -426,7 +426,7 @@ endif
 @setvar! var__price_phylactery_water      '4000'
 @setvar! var__price_phylactery_war        '4000'
 
-# ####################################################################################
+# ========================================================================================
 # PRICE - VALUABLE AND RARE
 #
 #   var__price_rare_cloth              "rare cloth, price varies by hue"  5981
@@ -443,7 +443,7 @@ endif
 #   var__price_survival_gear           "survival gear"                    37181
 #   var__price_plant_chemicals         "plant chemicals"                  29030
 #   var__price_lantern                 "lantern"                          2594 lit 2597 unlit
-# ####################################################################################
+# ========================================================================================
 @setvar! var__price_rare_cloth             '5000'
 @setvar! var__price_spell_hue_deed         '5000'
 @setvar! var__price_mastercrafting_diagram '8000'
@@ -459,16 +459,16 @@ endif
 @setvar! var__price_plant_chemicals        '1900'
 @setvar! var__price_lantern                '0'
 
-# ####################################################################################
+# ========================================================================================
 # PRICE - CARPET AND RUG
 #
 #   var__price_carpet_tile  "carpet tile, many rotations share one price"  2750 2760 2771 2778 2799 19717 22244 43166 43179 48405 48407
 #   var__price_rug_tile     "rug tile"                                     2744 4248
-# ####################################################################################
+# ========================================================================================
 @setvar! var__price_carpet_tile '0'
 @setvar! var__price_rug_tile    '0'
 
-# ####################################################################################
+# ========================================================================================
 # PRICE - SKILL MASTERY SCROLL
 #
 #   All of these share graphic 8826, named  scroll of calling  in tiledata. That id is
@@ -515,7 +515,7 @@ endif
 #   var__price_mastery_tinkering      "Tinkering Skill Mastery Scroll"           8826
 #   var__price_mastery_tracking       "Tracking Skill Mastery Scroll"            8826
 #   var__price_mastery_veterinary     "Veterinary Skill Mastery Scroll"          8826
-# ####################################################################################
+# ========================================================================================
 @setvar! var__price_mastery_alchemy       '30000'
 @setvar! var__price_mastery_animal_lore   '13000'
 @setvar! var__price_mastery_animal_taming '10000'
@@ -552,23 +552,23 @@ endif
 @setvar! var__price_mastery_tracking      '5000'
 @setvar! var__price_mastery_veterinary    '5000'
 
-# ####################################################################################
+# ========================================================================================
 # PRICE - SKILL MASTERY ORB
 #
 #   var__price_skill_mastery_orb  "a skill mastery orb"  22336
-# ####################################################################################
+# ========================================================================================
 @setvar! var__price_skill_mastery_orb '8000'
 
-# ####################################################################################
+# ========================================================================================
 # TIMER
-# ####################################################################################
+# ========================================================================================
 if not timerexists "timer__hint_repeat"
     createtimer "timer__hint_repeat"
 endif
 
-# ####################################################################################
+# ========================================================================================
 # OPEN CONTAINERS
-# ####################################################################################
+# ========================================================================================
 if warmode
     hotkey "Toggle War/Peace"
     wait 500
@@ -579,9 +579,9 @@ wait var__delay_open
 dclick var__vendor_container
 wait var__delay_open
 
-# ####################################################################################
+# ========================================================================================
 # PHASE 1 - COLLECT
-# ####################################################################################
+# ========================================================================================
 removelist list__vendor_items
 createlist list__vendor_items
 
@@ -685,9 +685,9 @@ endwhile
 
 @clearignore
 
-# ####################################################################################
+# ========================================================================================
 # PHASE 2 - PLACE
-# ####################################################################################
+# ========================================================================================
 foreach alias__place_item in list__vendor_items
     getlabel alias__place_item label__item
 

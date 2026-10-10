@@ -1,11 +1,13 @@
 # ----------------------------------------------------------------------------------------
 # Strength and Agility by stat value, Magic Resist by its icon, while fighting.
-#@ hotkeys Drink Strength, Drink Agility, Drink Magic Resist
+#
+# @ hotkeys Drink Strength, Drink Agility, Drink Magic Resist
 # ----------------------------------------------------------------------------------------
 
 
 # ----------------------------------------------------------------------------------------
-#@ config
+# @ config
+#
 #   config__use_resist_potion
 #      1 keeps the Magic Resist potion up.
 #
@@ -25,7 +27,8 @@
 
 
 # ----------------------------------------------------------------------------------------
-#@ wait
+# @ wait
+#
 #   cooldown__stat_potion
 #      A Strength or Agility potion is tried once per window. The stat arrives a round
 #      trip after the drink, and a Curse, Weaken or Clumsy can hold it under the line
@@ -36,23 +39,25 @@
 
 
 # ----------------------------------------------------------------------------------------
-#@ timer
+# @ timer
 # ----------------------------------------------------------------------------------------
 timer__str_potion cooldown__stat_potion
 timer__agi_potion cooldown__stat_potion
 
 
 # ----------------------------------------------------------------------------------------
-#@ loop
+# @ loop
 # ----------------------------------------------------------------------------------------
-    # ################################################################################
-    # # STAT POTIONS
-    # ################################################################################
-    # Kept up while var__fighting is 1. Strength and Agility read the stat against config__str_potion
-    # and config__dex_potion, because Bless and the Strength and Agility spells show the same
-    # icons as the potions, and each is tried once per cooldown__stat_potion. Magic Resist has an
-    # icon of its own and is drunk once it is missing. Each potion is judged on its own, so
-    # running out of one does not hold up the others.
+    # ------------------------------------------------------------------------------------
+    # STAT POTIONS
+    #
+    # Kept up while var__fighting is 1. Strength and Agility read the stat against
+    # config__str_potion and config__dex_potion, because Bless and the Strength and
+    # Agility spells show the same icons as the potions, and each is tried once per
+    # cooldown__stat_potion. Magic Resist has an icon of its own and is drunk once it is
+    # missing. Each potion is judged on its own, so running out of one does not hold up
+    # the others.
+    # ------------------------------------------------------------------------------------
     if var__fighting = 1 and config__use_potions = 1 and not paralyzed and not hidden and not targetexists
         if not queued and str < config__str_potion and timer "timer__str_potion" >= cooldown__stat_potion
             settimer "timer__str_potion" 0

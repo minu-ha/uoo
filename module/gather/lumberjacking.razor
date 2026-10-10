@@ -2,12 +2,14 @@
 # Smart Harvest with the Hatchet, equipping it first when the left hand is empty.
 # Waits while var__hold_gathering is 1 (escape/recall: a Recall due, no book, Tracking not
 # hunting).
-#@ hotkeys Use item in hand
+#
+# @ hotkeys Use item in hand
 # ----------------------------------------------------------------------------------------
 
 
 # ----------------------------------------------------------------------------------------
-#@ wait
+# @ wait
+#
 #   wait__harvest_target
 #      Wait for the hand tool cursor in the same block before any other automatic action.
 #
@@ -27,13 +29,14 @@
 
 
 # ----------------------------------------------------------------------------------------
-#@ timer
+# @ timer
 # ----------------------------------------------------------------------------------------
 timer__harvest cooldown__harvest_retry
 
 
 # ----------------------------------------------------------------------------------------
-#@ state
+# @ state
+#
 #   var__harvest_retry
 #      Delay for the next tool attempt, in ms. Resource exhaustion selects the shorter
 #      retry. Each attempt restores the normal interval. Reuse timer__harvest without
@@ -51,13 +54,15 @@ endif
 
 
 # ----------------------------------------------------------------------------------------
-#@ loop
+# @ loop
 # ----------------------------------------------------------------------------------------
-    # ####################################################################################
-    # # SMART HARVEST
-    # ####################################################################################
-    # Tracking/Recall reads take priority over this lower-priority result message.
-    # The profile displays harvest,out. Start the next retry from this response, without blocking recovery.
+    # ------------------------------------------------------------------------------------
+    # SMART HARVEST
+    #
+    # Tracking/Recall reads take priority over this lower-priority result message. The
+    # profile displays harvest,out. Start the next retry from this response, without
+    # blocking recovery.
+    # ------------------------------------------------------------------------------------
     if insysmsg "You do not see any harvestable resources nearby"
         @setvar! var__harvest_retry cooldown__harvest_out_retry
         settimer "timer__harvest" 0

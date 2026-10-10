@@ -1,10 +1,10 @@
 # Recipe for script/gather/skinning-enhanced.razor. Build it with: python3 util/build-scripts.py
 # Every setting of this loop: python3 util/build-scripts.py --settings recipe/skinning-enhanced-recipe.razor
-#@ output script/gather/skinning-enhanced.razor
+# @ output script/gather/skinning-enhanced.razor
 
 
 # ========================================================================================
-#@ header
+# @ header
 # ========================================================================================
 
 # Dungeon Two-Handed Axe melee with Magery self support, combat potions, sword codex control and corpse skinning.
@@ -20,7 +20,8 @@
 
 
 # ========================================================================================
-#@ blocks
+# @ blocks
+#
 #   One box per block, in the order the blocks run, base first. The builder writes the box.
 #   Yours are the "> " lines in it (a note on the block, or under a setting the reason for
 #   its value) and the @setvar! lines under it. Write a new @setvar! line under any box, its
@@ -28,27 +29,32 @@
 # ========================================================================================
 
 # ----------------------------------------------------------------------------------------
-#@ use base
+# @ use base
+#
 #   The frame of every loop. Every recipe lists it first.
 # ----------------------------------------------------------------------------------------
 
 # ----------------------------------------------------------------------------------------
-#@ use fight/target
+# @ use fight/target
+#
 #   Remembers the enemy picked with lasttarget while it stays within 12 tiles.
 # ----------------------------------------------------------------------------------------
 
 # ----------------------------------------------------------------------------------------
-#@ use recovery/pouch
+# @ use recovery/pouch
+#
 #   The trapped pouch while paralyzed, the one thing that can act then.
 # ----------------------------------------------------------------------------------------
 
 # ----------------------------------------------------------------------------------------
-#@ use recovery/cure
+# @ use recovery/cure
+#
 #   Cure potion first, then the Smart Heal/Cure agent when none is carried.
 # ----------------------------------------------------------------------------------------
 
 # ----------------------------------------------------------------------------------------
-#@ use recovery/heal
+# @ use recovery/heal
+#
 #   Heal potion at heal_hits, else Greater Heal at emergency_hits.
 #
 #   emergency_hits (default 35)
@@ -59,7 +65,8 @@
 @setvar! config__emergency_hits 45
 
 # ----------------------------------------------------------------------------------------
-#@ use recovery/bandage
+# @ use recovery/bandage
+#
 #   Self bandage while hurt or poisoned, never over a running one.
 #
 #   heal_skill_min (default 0)
@@ -71,12 +78,14 @@
 @setvar! config__heal_skill_min 10
 
 # ----------------------------------------------------------------------------------------
-#@ use recovery/light-heal
+# @ use recovery/light-heal
+#
 #   The light Heal agent: the bandage stand-in, or beside them with use_light_heal 1.
 # ----------------------------------------------------------------------------------------
 
 # ----------------------------------------------------------------------------------------
-#@ use recovery/refresh
+# @ use recovery/refresh
+#
 #   Total Refresh at or below refresh_stam.
 #
 #   refresh_stam (default 15)
@@ -86,17 +95,20 @@
 @setvar! config__refresh_stam 60
 
 # ----------------------------------------------------------------------------------------
-#@ use fight/axe
+# @ use fight/axe
+#
 #   Re-arms the cached Two-Handed Axe when the left hand is empty.
 # ----------------------------------------------------------------------------------------
 
 # ----------------------------------------------------------------------------------------
-#@ use pack/gold-drop
+# @ use pack/gold-drop
+#
 #   Drops gold at your feet while over max weight, one drop per pass.
 # ----------------------------------------------------------------------------------------
 
 # ----------------------------------------------------------------------------------------
-#@ use buff/potions
+# @ use buff/potions
+#
 #   Strength and Agility by stat value, Magic Resist by its icon, while fighting.
 #
 #   str_potion (default 120, the same value)
@@ -108,22 +120,26 @@
 @setvar! config__str_potion 120
 
 # ----------------------------------------------------------------------------------------
-#@ use fight/sword-codex
+# @ use fight/sword-codex
+#
 #   Codex of swords: Warrior, Defensive while hurt, and the finisher.
 # ----------------------------------------------------------------------------------------
 
 # ----------------------------------------------------------------------------------------
-#@ use fight/parry-codex
+# @ use fight/parry-codex
+#
 #   Codex of parrying: the main stance, Warding against damage over time, the finisher.
 # ----------------------------------------------------------------------------------------
 
 # ----------------------------------------------------------------------------------------
-#@ use fight/weapon-ability
+# @ use fight/weapon-ability
+#
 #   The weapon ability on the remembered enemy within 2 tiles, once per meter fill.
 # ----------------------------------------------------------------------------------------
 
 # ----------------------------------------------------------------------------------------
-#@ use buff/spells
+# @ use buff/spells
+#
 #   Reactive Armor, then Magic Reflection, whenever one is missing.
 #
 #   mana_reactive_armor (default 4)
@@ -145,29 +161,33 @@
 @setvar! config__buff_when_poisoned 0
 
 # ----------------------------------------------------------------------------------------
-#@ use gather/skinning
+# @ use gather/skinning
+#
 #   Forensic Evaluation carving of corpses within 2 tiles, between fights.
 # ----------------------------------------------------------------------------------------
 
 # ----------------------------------------------------------------------------------------
-#@ use recovery/reagents
+# @ use recovery/reagents
+#
 #   Reagent flags for the Magery casts, read on a clock and right after a refusal.
 #   > Read after gather/skinning, so it cannot consume the carve replies.
 # ----------------------------------------------------------------------------------------
 
 # ----------------------------------------------------------------------------------------
-#@ use buff/food
+# @ use buff/food
+#
 #   Eats from a tray while Food Satisfaction is missing, looked at once a minute.
 # ----------------------------------------------------------------------------------------
 
 # ----------------------------------------------------------------------------------------
-#@ use pack/leather
+# @ use pack/leather
+#
 #   Moves carried leather into the loot pouch every 2 minutes, between fights.
 # ----------------------------------------------------------------------------------------
 
 
 # ========================================================================================
-#@ setup
+# @ setup
 # ========================================================================================
 
 # pack/leather moves leather into this pouch. restock/loadout picks it, this asks when it is missing.

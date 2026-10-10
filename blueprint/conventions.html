@@ -28,7 +28,7 @@
 </tr>
 <tr>
 <td><a href="#02">02</a></td>
-<td>스크립트를 어떤 순서와 모양으로 쓰나. 헤더, 시작 4줄, 섹션 배너, 주석</td>
+<td>스크립트를 어떤 순서와 모양으로 쓰나. 헤더, 시작 4줄, 섹션과 블록 배너, 주석</td>
 </tr>
 <tr>
 <td><a href="#03">03</a></td>
@@ -230,14 +230,34 @@ Magery·무기·붕대 등 독립 기능 옵션을 본문에서 선택하며, �
 </tr>
 <tr>
 <td><code>MAIN LOOP</code></td>
-<td><code>while not dead</code> 하나 → <code>endwhile</code>. 루프 안의 블록도 같은 배너로 나눈다</td>
+<td><code>while not dead</code> 하나 → <code>endwhile</code>. 루프 안의 블록은 <code>-</code> 배너로 나눈다</td>
 </tr>
 </tbody>
 </table>
-<p>배너는 이 모양이다.</p>
-<pre><code># ####################################################################################
-# # SECTION NAME
-# ####################################################################################</code></pre>
+<p><strong>배너는 두 가지다.</strong> 모두 90칸이고, 제목은 대문자로 <code># 제목</code> 한 줄에 쓴다.</p>
+<ul>
+<li><strong>섹션</strong> (줄 맨 앞): <code>=</code> 줄 두 개 사이에 제목. 위 표의 섹션이 이것이다.</li>
+<li><strong>블록</strong> (들여 쓴 자리, 루프 안): <code>-</code> 줄 두 개 사이에 제목, 빈 <code>#</code> 줄, 그 블록이 하는 일. 설명은 배너 안에 담고, 배너 밑은 바로 코드다.
+설명이 없으면 제목만 둔다.</li>
+</ul>
+<pre><code># ========================================================================================
+# CONFIG
+# ========================================================================================
+@setvar! config__chatty 1
+
+while not dead
+    # ------------------------------------------------------------------------------------
+    # BANDAGE
+    #
+    # Never restarts a running bandage, and full health does not start one. Its target
+    # cursor would replace a held precast, so it waits while any cursor is up.
+    # ------------------------------------------------------------------------------------
+    if not bandaging and not paralyzed
+        ...
+    endif
+endwhile</code></pre>
+<p>모듈과 레시피의 상자 (<code># @ config</code>, <code># @ use</code>)도 같은 <code>-</code>와 <code>=</code> 줄을 쓴다 (<a href="modules.html#03">modules.html</a> 03절).
+조립한 루프에서는 블록 배너 제목 줄 오른쪽에 그 블록이 온 모듈 파일이 붙는다.</p>
 
 <h3 id="02.C">02.C 헤더</h3>
 <p>직접 만든 스크립트는 첫 줄에 한 줄 설명, 둘째 줄에 <code>Needs:</code>로 전제조건을 쓴다 (<code>script/loot/claim-loot.razor</code>).
@@ -262,6 +282,7 @@ clearignore</code></pre>
 <li><strong>주석에 <code>;</code>을 쓰지 않는다.</strong> Razor는 주석을 걷어내기 전에 <code>;</code>을 구문 구분자로 보기 때문에,
 주석 안의 세미콜론도 그 뒤를 명령으로 파싱해서 그 줄에서 에러가 난다 (<a href="razor.html#03">razor.html</a> 03절). 마침표로 문장을 끊는다.</li>
 </ul>
+
 
 <h2 id="03">03 변수</h2>
 

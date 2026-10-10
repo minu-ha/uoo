@@ -5,7 +5,8 @@
 
 
 # ----------------------------------------------------------------------------------------
-#@ wait
+# @ wait
+#
 #   cooldown__combat_target_grace
 #      A remembered enemy out of range this long is dropped.
 # ----------------------------------------------------------------------------------------
@@ -13,13 +14,14 @@
 
 
 # ----------------------------------------------------------------------------------------
-#@ timer
+# @ timer
 # ----------------------------------------------------------------------------------------
 timer__combat_target_grace cooldown__combat_target_grace
 
 
 # ----------------------------------------------------------------------------------------
-#@ state
+# @ state
+#
 #   var__combat_target
 #      The enemy picked with lasttarget. Carving overwrites lasttarget, so combat potions
 #      and the weapon ability read this copy instead.
@@ -34,15 +36,17 @@ endif
 
 
 # ----------------------------------------------------------------------------------------
-#@ loop
+# @ loop
 # ----------------------------------------------------------------------------------------
-    # ################################################################################
-    # # COMBAT TARGET CACHE
-    # ################################################################################
-    # Same cache as archive/bard-mace. A carve targets the corpse or yourself, which moves lasttarget.
-    # A targeted corpse is an item on the ground, so find matches it. dead and noto only take
-    # mobiles, so the serial range is checked first. Mobile serials are below 0x40000000, and the
-    # number has to be on the left (blueprint/razor.html part 3, debug-target-state S06).
+    # ------------------------------------------------------------------------------------
+    # COMBAT TARGET CACHE
+    #
+    # Same cache as archive/bard-mace. A carve targets the corpse or yourself, which moves
+    # lasttarget. A targeted corpse is an item on the ground, so find matches it. dead and
+    # noto only take mobiles, so the serial range is checked first. Mobile serials are
+    # below 0x40000000, and the number has to be on the left (blueprint/razor.html part 3,
+    # debug-target-state S06).
+    # ------------------------------------------------------------------------------------
     if find lasttarget ground -1 -1 12 as alias__fresh_target
         if var__combat_target != alias__fresh_target
             @setvar! var__fresh_serial alias__fresh_target

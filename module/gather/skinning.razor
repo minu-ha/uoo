@@ -1,11 +1,13 @@
 # ----------------------------------------------------------------------------------------
 # Forensic Evaluation carving of corpses within 2 tiles, between fights.
-#@ hotkeys Cancel Current Target
+#
+# @ hotkeys Cancel Current Target
 # ----------------------------------------------------------------------------------------
 
 
 # ----------------------------------------------------------------------------------------
-#@ config
+# @ config
+#
 #   config__skin_unowned
 #      Which corpses within 2 tiles get carved.
 #        0  grey corpses only, through Smart Harvest on self
@@ -16,7 +18,8 @@
 
 
 # ----------------------------------------------------------------------------------------
-#@ wait
+# @ wait
+#
 #   wait__carve_target
 #      The knife cursor must arrive inside this block. A late cursor would block every
 #      input guard.
@@ -38,14 +41,15 @@
 
 
 # ----------------------------------------------------------------------------------------
-#@ timer
+# @ timer
 # ----------------------------------------------------------------------------------------
 timer__carve cooldown__carve
 timer__grey_only cooldown__grey_only
 
 
 # ----------------------------------------------------------------------------------------
-#@ state
+# @ state
+#
 #   var__pick_during_carve
 #      Scratch: 1 when a Z pick arrived while the knife cursor was up.
 #
@@ -83,19 +87,20 @@ endif
 
 
 # ----------------------------------------------------------------------------------------
-#@ loop
+# @ loop
 # ----------------------------------------------------------------------------------------
-    # ################################################################################
-    # # SKINNING
-    # ################################################################################
-    # Smart Harvest (target self) carves grey corpses within 2 tiles. Corpses without looting
-    # rights need the corpse itself as the target. Wiki: Forensic_Evaluation.
-    # Some areas refuse that as a criminal action: "Criminal actions are not permitted in the
-    # Sanctuary Dungeon." A refusal switches this block to Smart Harvest for cooldown__grey_only,
-    # and each later refusal starts that window again.
+    # ------------------------------------------------------------------------------------
+    # SKINNING
     #
-    # Handled corpses are ignored so findtype returns the next one. Only the startup clearignore
-    # empties the list. Leather packing ignores pouch leather without clearing it.
+    # Smart Harvest (target self) carves grey corpses within 2 tiles. Corpses without
+    # looting rights need the corpse itself as the target. Wiki: Forensic_Evaluation. Some
+    # areas refuse that as a criminal action: "Criminal actions are not permitted in the
+    # Sanctuary Dungeon." A refusal switches this block to Smart Harvest for
+    # cooldown__grey_only, and each later refusal starts that window again.
+    #
+    # Handled corpses are ignored so findtype returns the next one. Only the startup
+    # clearignore empties the list. Leather packing ignores pouch leather without clearing
+    # it.
     #   direct: creature corpses only. A finished or refused corpse is ignored. A miss (too far,
     #           busy) gets one more request, and a second miss ignores it.
     #           A creature corpse label reads "<creature> corpse". A player corpse reads
@@ -105,12 +110,14 @@ endif
     #   Smart Harvest: until the server finds nothing worth carving here, then ignore every
     #                  corpse within 2 tiles until a new one drops.
     #
-    # Carving waits while an enemy is remembered, so it runs between fights. A carve moves Razor's
-    # lasttarget to the corpse or to yourself, and the V after a Z can come any time later.
-    # setlasttarget cannot put it back in this client: it opened a Set Last Target cursor and held
-    # the script on that line (blueprint/razor.html part 3). A Z pick made while the knife cursor is
-    # up cancels that cursor rather than overwriting lasttarget.
-    # The profile shows the refusal itself. The script only records the mode change.
+    # Carving waits while an enemy is remembered, so it runs between fights. A carve moves
+    # Razor's lasttarget to the corpse or to yourself, and the V after a Z can come any
+    # time later. setlasttarget cannot put it back in this client: it opened a Set Last
+    # Target cursor and held the script on that line (blueprint/razor.html part 3). A Z
+    # pick made while the knife cursor is up cancels that cursor rather than overwriting
+    # lasttarget. The profile shows the refusal itself. The script only records the mode
+    # change.
+    # ------------------------------------------------------------------------------------
     if insysmsg "Criminal actions are not permitted"
         settimer "timer__grey_only" 0
         if config__sysmsg = 1

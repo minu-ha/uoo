@@ -4,7 +4,8 @@
 
 
 # ----------------------------------------------------------------------------------------
-#@ config
+# @ config
+#
 #   config__gold_drop_amount
 #      Gold dropped per pass while over max weight. Gold is cheaper than the leather.
 # ----------------------------------------------------------------------------------------
@@ -12,7 +13,8 @@
 
 
 # ----------------------------------------------------------------------------------------
-#@ wait
+# @ wait
+#
 #   wait__gold_drop
 #      Pause after a drop, so the weight settles before the next pass.
 # ----------------------------------------------------------------------------------------
@@ -20,12 +22,14 @@
 
 
 # ----------------------------------------------------------------------------------------
-#@ loop
+# @ loop
 # ----------------------------------------------------------------------------------------
-    # ################################################################################
-    # # GOLD
-    # ################################################################################
-    # One drop per pass, so recovery still runs between drops. A refused drop goes back to the pack.
+    # ------------------------------------------------------------------------------------
+    # GOLD
+    #
+    # One drop per pass, so recovery still runs between drops. A refused drop goes back to
+    # the pack.
+    # ------------------------------------------------------------------------------------
     if weight > maxweight
         if not hidden and not queued and not casting and not targetexists
             if findtype "gold coin" backpack as alias__found_gold

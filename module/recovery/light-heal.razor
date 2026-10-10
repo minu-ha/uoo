@@ -1,11 +1,13 @@
 # ----------------------------------------------------------------------------------------
 # The light Heal agent: the bandage stand-in, or beside them with use_light_heal 1.
-#@ hotkeys > Smart Heal/Cure Self, Cancel Current Target
+#
+# @ hotkeys > Smart Heal/Cure Self, Cancel Current Target
 # ----------------------------------------------------------------------------------------
 
 
 # ----------------------------------------------------------------------------------------
-#@ config
+# @ config
+#
 #   config__use_light_heal
 #      When the light Heal goes.
 #        0  only while no bandage can run: use_bandages 0, Healing at or below heal_skill_min,
@@ -24,7 +26,8 @@
 
 
 # ----------------------------------------------------------------------------------------
-#@ state
+# @ state
+#
 #   var__light_heal_due
 #      Scratch: 1 when the light Heal goes on this pass.
 # ----------------------------------------------------------------------------------------
@@ -32,14 +35,16 @@
 
 
 # ----------------------------------------------------------------------------------------
-#@ loop
+# @ loop
 # ----------------------------------------------------------------------------------------
-    # ################################################################################
-    # # LIGHT HEAL
-    # ################################################################################
-    # The bandage stand-in whenever no bandage can run: bandages off, no Healing, or none left
-    # and none running. Beside the bandages only with config__use_light_heal 1. The agent waits
-    # for the walk bar and for warmode as config__walk_guard and config__warmode_is_manual say.
+    # ------------------------------------------------------------------------------------
+    # LIGHT HEAL
+    #
+    # The bandage stand-in whenever no bandage can run: bandages off, no Healing, or none
+    # left and none running. Beside the bandages only with config__use_light_heal 1. The
+    # agent waits for the walk bar and for warmode as config__walk_guard and
+    # config__warmode_is_manual say.
+    # ------------------------------------------------------------------------------------
     if not poisoned and not paralyzed and not hidden and not queued and not casting and not targetexists and config__use_magery = 1 and var__regs_heal = 1 and diffhits >= config__light_hits and mana >= config__mana_heal
         @setvar! var__light_heal_due 0
         if config__use_light_heal = 1 or config__use_bandages = 0 or skill "Healing" <= config__heal_skill_min

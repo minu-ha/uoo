@@ -1,11 +1,13 @@
 # ----------------------------------------------------------------------------------------
 # Cure potion first, then the Smart Heal/Cure agent when none is carried.
-#@ hotkeys Drink Cure, > Smart Heal/Cure Self
+#
+# @ hotkeys Drink Cure, > Smart Heal/Cure Self
 # ----------------------------------------------------------------------------------------
 
 
 # ----------------------------------------------------------------------------------------
-#@ config
+# @ config
+#
 #   config__mana_cure
 #      Minimum current mana for the Cure agent.
 # ----------------------------------------------------------------------------------------
@@ -13,14 +15,16 @@
 
 
 # ----------------------------------------------------------------------------------------
-#@ loop
+# @ loop
 # ----------------------------------------------------------------------------------------
-    # ################################################################################
-    # # CURE
-    # ################################################################################
-    # Potion first, it is instant and has no cooldown, and it goes out during a cast. While any
-    # cure potion is carried the agent is not used, so mana stays for Greater Heal. The agent
-    # waits for the walk bar and for warmode as config__walk_guard and config__warmode_is_manual say.
+    # ------------------------------------------------------------------------------------
+    # CURE
+    #
+    # Potion first, it is instant and has no cooldown, and it goes out during a cast.
+    # While any cure potion is carried the agent is not used, so mana stays for Greater
+    # Heal. The agent waits for the walk bar and for warmode as config__walk_guard and
+    # config__warmode_is_manual say.
+    # ------------------------------------------------------------------------------------
     if poisoned and not paralyzed and not hidden and not queued and not targetexists
         if config__use_potions = 1 and findtype "Orange Potion" self
             hotkey "Drink Cure"

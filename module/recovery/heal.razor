@@ -1,11 +1,13 @@
 # ----------------------------------------------------------------------------------------
 # Heal potion at heal_hits, else Greater Heal at emergency_hits.
-#@ hotkeys Drink Heal, > Greater Heal/Cure Self, Cancel Current Target
+#
+# @ hotkeys Drink Heal, > Greater Heal/Cure Self, Cancel Current Target
 # ----------------------------------------------------------------------------------------
 
 
 # ----------------------------------------------------------------------------------------
-#@ config
+# @ config
+#
 #   config__heal_hits
 #      Missing hit points (not percent) that drink a heal potion.
 #
@@ -23,7 +25,8 @@
 
 
 # ----------------------------------------------------------------------------------------
-#@ state
+# @ state
+#
 #   var__heal_potion_out
 #      Scratch: 1 once a heal potion went out on this pass.
 # ----------------------------------------------------------------------------------------
@@ -31,17 +34,18 @@
 
 
 # ----------------------------------------------------------------------------------------
-#@ loop
+# @ loop
 # ----------------------------------------------------------------------------------------
-    # ################################################################################
-    # # HEAL
-    # ################################################################################
+    # ------------------------------------------------------------------------------------
+    # HEAL
+    #
     # Heavy damage drinks first, because the potion is instant and goes out during a cast.
     # Greater Heal follows when no potion went out on this pass and the loss is at the
-    # emergency line: none carried, on its own cooldown, or the bar still running.
-    # The bar skips the label read while it runs. The label stays authoritative when the bar
-    # is missing. Greater Heal waits for the walk bar and for warmode as config__walk_guard and
-    # config__warmode_is_manual say.
+    # emergency line: none carried, on its own cooldown, or the bar still running. The bar
+    # skips the label read while it runs. The label stays authoritative when the bar is
+    # missing. Greater Heal waits for the walk bar and for warmode as config__walk_guard
+    # and config__warmode_is_manual say.
+    # ------------------------------------------------------------------------------------
     if not poisoned and not paralyzed and not hidden and not queued and not targetexists and diffhits >= config__heal_hits
         @setvar! var__heal_potion_out 0
         if config__use_potions = 1 and cooldown "heal pot" = 0

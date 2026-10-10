@@ -6,7 +6,8 @@
 
 
 # ----------------------------------------------------------------------------------------
-#@ wait
+# @ wait
+#
 #   wait__lumber_item
 #      Allow inventory updates after conversion, opening the pouch and drag/drop.
 #
@@ -23,7 +24,8 @@
 
 
 # ----------------------------------------------------------------------------------------
-#@ timer
+# @ timer
+#
 #   timer__pack_lumber
 #      Packing waits one full interval.
 # ----------------------------------------------------------------------------------------
@@ -31,7 +33,8 @@ timer__pack_lumber 0
 
 
 # ----------------------------------------------------------------------------------------
-#@ state
+# @ state
+#
 #   var__lumber_graphic
 #      Scratch graphic for the two lumber passes: 7133 Logs, then 7127 Boards. No
 #      persistent batch stage.
@@ -40,13 +43,14 @@ timer__pack_lumber 0
 
 
 # ----------------------------------------------------------------------------------------
-#@ loop
+# @ loop
 # ----------------------------------------------------------------------------------------
-    # ####################################################################################
-    # # LUMBER
-    # ####################################################################################
-    # Try each selected stack once, with no snapshots or foreach iterator.
-    # Bound scans by the existing timer. A failed conversion/drop waits for the next interval.
+    # ------------------------------------------------------------------------------------
+    # LUMBER
+    #
+    # Try each selected stack once, with no snapshots or foreach iterator. Bound scans by
+    # the existing timer. A failed conversion/drop waits for the next interval.
+    # ------------------------------------------------------------------------------------
     if var__hold_gathering = 0 and timer "timer__pack_lumber" >= cooldown__pack_lumber
         if diffhits < config__light_hits and not poisoned and not paralyzed and not warmode
             if not hidden and not queued and not casting and not targetexists

@@ -1,6 +1,6 @@
-# ####################################################################################
-# # BARD NECRO ENHANCED
-# ####################################################################################
+# ========================================================================================
+# BARD NECRO ENHANCED
+# ========================================================================================
 # Replaces bard-necro and bard-necro-eval. Design, cooldown model and every barding
 # number: blueprint/bard-necro-handbook.html (design in part 5, mechanics in part 2).
 #
@@ -178,9 +178,9 @@ clearsysmsg
 cleardragdrop
 clearignore
 
-# ####################################################################################
-# # CONFIG
-# ####################################################################################
+# ========================================================================================
+# CONFIG
+# ========================================================================================
 # Potions are consumables. Turn this off when farming somewhere that does not need them.
 @setvar! config__use_potion 1
 
@@ -312,9 +312,9 @@ pushlist 'list__summon_names' 'nomeeheh'
 @setvar! config__mushroom_create_mana 70
 @setvar! config__mushroom_eat_mana 55
 
-# ####################################################################################
-# # WAIT AND COOLDOWN
-# ####################################################################################
+# ========================================================================================
+# WAIT AND COOLDOWN
+# ========================================================================================
 # Roughly a round trip each. wait__short paces a dclick, wait__long lets a dropped stack
 # settle, wait__target is how long a skill cursor gets before the block gives up on it.
 # A skill cursor is instant, so that one is only ever spent in full on a failure.
@@ -392,9 +392,9 @@ pushlist 'list__summon_names' 'nomeeheh'
 # How long the cache keeps a target that has gone off screen before dropping it.
 @setvar! cooldown__target_grace 500
 
-# ####################################################################################
-# # STATE
-# ####################################################################################
+# ========================================================================================
+# STATE
+# ========================================================================================
 if not varexist var__my_instrument
     @setvar! var__my_instrument 0
 endif
@@ -561,9 +561,9 @@ endif
 # reagents before any block asks for a flag.
 settimer "timer__regs_refresh" cooldown__regs_refresh
 
-# ####################################################################################
-# # INSTRUMENT
-# ####################################################################################
+# ========================================================================================
+# INSTRUMENT
+# ========================================================================================
 # Only auto detect when the cached instrument is no longer in the backpack, so a pass
 # that already holds a good serial costs one find and nothing else.
 if not find var__my_instrument backpack
@@ -611,9 +611,9 @@ if not find var__my_instrument backpack
     endif
 endif
 
-# ####################################################################################
-# # HERDING
-# ####################################################################################
+# ========================================================================================
+# HERDING
+# ========================================================================================
 # A double click sets the crook as the active one, and it only has to be in the backpack.
 # The wiki gives it no duration, so this runs once here and never in the loop. Setting an
 # already active crook again is harmless, which is why there is no "is it already" check.
@@ -643,18 +643,21 @@ while not dead
         wait wait__short
     endwhile
 
-    # ####################################################################################
-    # # SURVIVAL
-    # ####################################################################################
-    # Paralysis, poison and damage share one test, so a healthy pass pays one statement for
-    # the three blocks below instead of three.
+    # ------------------------------------------------------------------------------------
+    # SURVIVAL
+    #
+    # Paralysis, poison and damage share one test, so a healthy pass pays one statement
+    # for the three blocks below instead of three.
+    # ------------------------------------------------------------------------------------
     if paralyzed or poisoned or diffhits > config__light_hits
-        # ####################################################################################
-        # # PARALYZE
-        # ####################################################################################
-        # First thing in the pass, ahead of every lookup, because it is the one state in which
-        # nothing below can act at all. No act window on purpose: paralysed means nothing else is
-        # going out anyway, and the pouch is worth spending the pass on the moment it is needed.
+        # --------------------------------------------------------------------------------
+        # PARALYZE
+        #
+        # First thing in the pass, ahead of every lookup, because it is the one state in
+        # which nothing below can act at all. No act window on purpose: paralysed means
+        # nothing else is going out anyway, and the pouch is worth spending the pass on
+        # the moment it is needed.
+        # --------------------------------------------------------------------------------
         if paralyzed
             if findtype 3705 backpack 38
                 yell "[Pouch"
@@ -665,12 +668,14 @@ while not dead
             endif
         endif
 
-        # ####################################################################################
-        # # CURE
-        # ####################################################################################
-        # Ahead of the heal on purpose: a cure is instant and stops the damage that is still
-        # coming, a heal spent under poison is partly spent on ticks that have not landed yet.
-        # Cure potions have no cooldown, so the spell is only ever the fallback.
+        # --------------------------------------------------------------------------------
+        # CURE
+        #
+        # Ahead of the heal on purpose: a cure is instant and stops the damage that is
+        # still coming, a heal spent under poison is partly spent on ticks that have not
+        # landed yet. Cure potions have no cooldown, so the spell is only ever the
+        # fallback.
+        # --------------------------------------------------------------------------------
         if poisoned
             if not targetexists and not casting
                 if findtype "Orange Potion" self
@@ -708,21 +713,23 @@ while not dead
             endif
         endif
 
-        # ####################################################################################
-        # # HEAL
-        # ####################################################################################
-        # Light damage takes the cheap agent. Heavy damage drinks first, because the potion is
-        # instant, and only falls back to the spell when the potion is on cooldown or gone.
+        # --------------------------------------------------------------------------------
+        # HEAL
         #
-        # The walk guard sits on the two casting lines rather than on the block, because the
-        # middle path drinks and drinking while walking is fine.
+        # Light damage takes the cheap agent. Heavy damage drinks first, because the
+        # potion is instant, and only falls back to the spell when the potion is on
+        # cooldown or gone.
         #
-        # Both agents cast without a cursor, so each waits out casting where it stands and then
-        # reads the disturb line itself. That is what keeps a disturbed heal from leaving a stale
-        # line for a later cast poll to trip on. The wait is a bounded poll, not a bare while:
-        # a disturb drops casting and the poll leaves at once, and if Razor ever left casting
-        # stuck the poll still leaves after its 60 rounds (Cast polling, above) instead of
-        # hanging the loop.
+        # The walk guard sits on the two casting lines rather than on the block, because
+        # the middle path drinks and drinking while walking is fine.
+        #
+        # Both agents cast without a cursor, so each waits out casting where it stands and
+        # then reads the disturb line itself. That is what keeps a disturbed heal from
+        # leaving a stale line for a later cast poll to trip on. The wait is a bounded
+        # poll, not a bare while: a disturb drops casting and the poll leaves at once, and
+        # if Razor ever left casting stuck the poll still leaves after its 60 rounds (Cast
+        # polling, above) instead of hanging the loop.
+        # --------------------------------------------------------------------------------
         if diffhits > config__light_hits and diffhits < config__emergency_hits and var__regs_heal = 1
             if timer "timer__heal_action" >= cooldown__heal_action
                 if not targetexists and not casting and cooldown "walk" = 0
@@ -808,21 +815,22 @@ while not dead
         endif
     endif
 
-    # ####################################################################################
-    # # COMBAT TARGET CACHE
-    # ####################################################################################
+    # ------------------------------------------------------------------------------------
+    # COMBAT TARGET CACHE
+    #
     # Songs target the backpack every few seconds, so lasttarget is never safe to act on.
     # This block reads it once a pass, and var__engaged is the answer everything else asks
-    # for afterwards. Every targeted cast reads it once more just before delivering, because
-    # the script's own target calls overwrite it: a Q pressed between this read and that
-    # delivery would otherwise be lost, and the loop would stay on the old mob.
+    # for afterwards. Every targeted cast reads it once more just before delivering,
+    # because the script's own target calls overwrite it: a Q pressed between this read
+    # and that delivery would otherwise be lost, and the loop would stay on the old mob.
     #
-    # The player's pick is taken up anywhere on screen, config__acquire_range, and kept while
-    # it stays there, but the loop only engages inside config__target_range. Taking it up only
-    # inside that range lost every target the pets opened on from further out: the next song
-    # put lasttarget on the backpack and the mob was never seen again (2026-09-29). The range
-    # check runs first, so a pass in combat pays the one find it always did, and a pass with
-    # no target at all pays none.
+    # The player's pick is taken up anywhere on screen, config__acquire_range, and kept
+    # while it stays there, but the loop only engages inside config__target_range. Taking
+    # it up only inside that range lost every target the pets opened on from further out:
+    # the next song put lasttarget on the backpack and the mob was never seen again
+    # (2026-09-29). The range check runs first, so a pass in combat pays the one find it
+    # always did, and a pass with no target at all pays none.
+    # ------------------------------------------------------------------------------------
     if find lasttarget ground -1 -1 config__acquire_range as alias__fresh_target
         if not dead alias__fresh_target and var__combat_target != alias__fresh_target
             if noto alias__fresh_target = "hostile" or noto alias__fresh_target = "criminal" or noto alias__fresh_target = "enemy" or noto alias__fresh_target = "murderer"
@@ -860,9 +868,9 @@ while not dead
         @setvar! var__combat_target 0
     endif
 
-    # ####################################################################################
-    # # PASS FLAGS
-    # ####################################################################################
+    # ------------------------------------------------------------------------------------
+    # PASS FLAGS
+    #
     # Derived state, read once so the blocks below compare a flag instead of repeating a
     # lookup. Nothing here acts, so it needs no guard.
     #
@@ -891,11 +899,12 @@ while not dead
     # refreshes the flags simply keep their last value.
     #
     # A cast refused for reagents means a flag is already stale, so that line opens the
-    # refresh on its own. Outlands runs the whole cast and refuses only at
-    # the target, with no mana spent, so left alone the proc core would spend a full cast on
-    # the same spell every pass, and while the stale flag says it is ready Poison Strike and
-    # the filler wait as well. The line comes up under the character's own name, seen in
-    # game on 2026-09-28.
+    # refresh on its own. Outlands runs the whole cast and refuses only at the target,
+    # with no mana spent, so left alone the proc core would spend a full cast on the same
+    # spell every pass, and while the stale flag says it is ready Poison Strike and the
+    # filler wait as well. The line comes up under the character's own name, seen in game
+    # on 2026-09-28.
+    # ------------------------------------------------------------------------------------
     if timer "timer__regs_refresh" >= cooldown__regs_refresh or insysmsg "More reagents are needed"
         settimer "timer__regs_refresh" 0
 
@@ -1126,22 +1135,24 @@ while not dead
 
 
 
-    # ####################################################################################
-    # # HOUSEKEEPING
-    # ####################################################################################
+    # ------------------------------------------------------------------------------------
+    # HOUSEKEEPING
+    #
     # Checks that do not need every pass share one five second tick, so a pass pays one
     # statement for all of them. Each keeps its own longer clock inside where it has one.
     #
     #   instrument recovery, weight, refresh potion, summon names   every tick
     #   instrument check 30 s, hotbar 30 s, food 60 s, stat potions 10 s (in a fight)
+    # ------------------------------------------------------------------------------------
     if timer "timer__housekeeping" >= cooldown__housekeeping
         settimer "timer__housekeeping" 0
 
-        # ####################################################################################
-        # # INSTRUMENT RECOVERY
-        # ####################################################################################
-        # Mid run recovery is auto detect only. A manual pick would block the loop on a cursor
-        # the player is not looking at, in the middle of a fight.
+        # --------------------------------------------------------------------------------
+        # INSTRUMENT RECOVERY
+        #
+        # Mid run recovery is auto detect only. A manual pick would block the loop on a
+        # cursor the player is not looking at, in the middle of a fight.
+        # --------------------------------------------------------------------------------
         if var__my_instrument = 0
             if not targetexists and not casting
                 if findtype 3740|3742|3762|3763|10245|20006|20008|20010|20012|20014|20016 backpack as alias__spare_instrument
@@ -1158,13 +1169,15 @@ while not dead
             endif
         endif
 
-        # ####################################################################################
-        # # INSTRUMENT CHECK
-        # ####################################################################################
+        # --------------------------------------------------------------------------------
+        # INSTRUMENT CHECK
+        #
         # Whether the instrument is still in the backpack is looked at every thirty
-        # seconds, not every pass. The bard blocks test not warmode, var__instrument_ok and
-        # var__my_instrument themselves. A bard block that finds the instrument gone clears
-        # var__my_instrument on the spot, which stands them down at once, clock or no clock.
+        # seconds, not every pass. The bard blocks test not warmode, var__instrument_ok
+        # and var__my_instrument themselves. A bard block that finds the instrument gone
+        # clears var__my_instrument on the spot, which stands them down at once, clock or
+        # no clock.
+        # --------------------------------------------------------------------------------
         if timer "timer__instrument_check" >= cooldown__instrument_check
             settimer "timer__instrument_check" 0
             @setvar! var__instrument_ok 0
@@ -1174,10 +1187,11 @@ while not dead
             endif
         endif
 
-        # ####################################################################################
-        # # OVERWEIGHT
-        # ####################################################################################
+        # --------------------------------------------------------------------------------
+        # OVERWEIGHT
+        #
         # Weight only changes on a pickup, so the housekeeping tick is often enough.
+        # --------------------------------------------------------------------------------
         if not targetexists and not casting
             while weight > maxweight
                 if findtype "gold coin" backpack as alias__found_gold
@@ -1205,11 +1219,12 @@ while not dead
             endwhile
         endif
 
-        # ####################################################################################
-        # # REFRESH POTION
-        # ####################################################################################
-        # Worth drinking in a fight or out of one, so it stays ahead of the split. The stat
-        # potions live under the engaged branch, in STAT POTIONS.
+        # --------------------------------------------------------------------------------
+        # REFRESH POTION
+        #
+        # Worth drinking in a fight or out of one, so it stays ahead of the split. The
+        # stat potions live under the engaged branch, in STAT POTIONS.
+        # --------------------------------------------------------------------------------
         if stam < 5
             if not targetexists and not casting
                 if findtype "Red Potion" backpack
@@ -1222,11 +1237,12 @@ while not dead
             endif
         endif
 
-        # ####################################################################################
-        # # FOOD
-        # ####################################################################################
-        # Looked at once a minute, the buff lasts far longer. The clock leads, ahead of the
-        # findbuff, because skipping that lookup is the point.
+        # --------------------------------------------------------------------------------
+        # FOOD
+        #
+        # Looked at once a minute, the buff lasts far longer. The clock leads, ahead of
+        # the findbuff, because skipping that lookup is the point.
+        # --------------------------------------------------------------------------------
         if timer "timer__food_check" >= cooldown__food_check
             settimer "timer__food_check" 0
 
@@ -1240,14 +1256,16 @@ while not dead
             endif
         endif
 
-        # ####################################################################################
-        # # NECRO HOTBAR
-        # ####################################################################################
-        # The hotbar gump is the source of truth for the Unholy Symbol count the necro stage
-        # reads. One block covers both the first open and any later loss, because the timer
-        # starts expired. It is looked for every thirty seconds, the clock leading because
-        # skipping the gump lookup is the point. The clock only restarts once it has looked,
-        # so a missing hotbar behind an open cursor is tried again on the next pass.
+        # --------------------------------------------------------------------------------
+        # NECRO HOTBAR
+        #
+        # The hotbar gump is the source of truth for the Unholy Symbol count the necro
+        # stage reads. One block covers both the first open and any later loss, because
+        # the timer starts expired. It is looked for every thirty seconds, the clock
+        # leading because skipping the gump lookup is the point. The clock only restarts
+        # once it has looked, so a missing hotbar behind an open cursor is tried again on
+        # the next pass.
+        # --------------------------------------------------------------------------------
         if timer "timer__hotbar_check" >= cooldown__hotbar_check
             if skill "Necromancy" > 0 and not gumpexists 622436516
                 if not targetexists and not casting
@@ -1266,16 +1284,18 @@ while not dead
             endif
         endif
 
-        # ####################################################################################
-        # # STAT POTIONS
-        # ####################################################################################
-        # Strength, agility and magic resist, drunk in a fight only so an idle walk does not
-        # burn them. The buffs last minutes, so they are looked at every ten seconds, on the
-        # housekeeping tick, and the clock only restarts once the act window has let it look.
-        # Strength and agility read the stat against config__str_potion and config__dex_potion,
-        # because Bless and the Strength and Agility spells show the same icons as the potions.
-        # The ten seconds are their retry window too: a curse that holds the stat under the line
-        # while the potion still runs costs one refused drink per look.
+        # --------------------------------------------------------------------------------
+        # STAT POTIONS
+        #
+        # Strength, agility and magic resist, drunk in a fight only so an idle walk does
+        # not burn them. The buffs last minutes, so they are looked at every ten seconds,
+        # on the housekeeping tick, and the clock only restarts once the act window has
+        # let it look. Strength and agility read the stat against config__str_potion and
+        # config__dex_potion, because Bless and the Strength and Agility spells show the
+        # same icons as the potions. The ten seconds are their retry window too: a curse
+        # that holds the stat under the line while the potion still runs costs one refused
+        # drink per look.
+        # --------------------------------------------------------------------------------
         if config__use_potion = 1 and var__engaged = 1 and timer "timer__potion_check" >= cooldown__potion_check
             if not targetexists and not casting
                 settimer "timer__potion_check" 0
@@ -1312,29 +1332,31 @@ while not dead
             endif
         endif
 
-        # ####################################################################################
-        # # SUMMON NAMES
-        # ####################################################################################
-        # A fresh summon still wears its stock name, "a lich" and so on, and gets the first free
-        # lookalike of the character's name. Nothing here casts or opens a cursor, so it runs
-        # engaged or not, once per housekeeping tick, one rename per tick: a pair summoned back
-        # to back gets its names in the order they appeared.
+        # --------------------------------------------------------------------------------
+        # SUMMON NAMES
         #
-        # How the pieces hold together. Summons are found by body id. A stock name would find
-        # them too, but Razor may keep the old name cached after the rename, and the body never
-        # changes. The as alias lives only inside the block that bound it, like every other
-        # alias in this file, so the serial is copied into var__fresh_summon before anything
-        # reads it: read outside, the alias came back as mobile 4294967295. The client asks the
-        # server for every new mobile's status, and that reply is what gives Razor the "this is
-        # your pet" flag rename checks, so a summon is known the moment it appears. The noto
-        # test started as the old bard-necro follower filter: an own summon reads notoriety 2,
-        # friend, in >info, and a wild lich never passes. It also turns away innocent, which is
-        # how another player's summon reads unless that player is guild or allied: another
-        # player's earth elemental took the third name on 2026-09-29. A renamed summon
-        # still matches its body, so the three slot variables carry the serials, a match already
-        # sitting in a slot is skipped, and a slot frees itself when find no longer sees its
-        # summon alive. The name comes out of the list__summon_names list by slot index: foreach
+        # A fresh summon still wears its stock name, "a lich" and so on, and gets the
+        # first free lookalike of the character's name. Nothing here casts or opens a
+        # cursor, so it runs engaged or not, once per housekeeping tick, one rename per
+        # tick: a pair summoned back to back gets its names in the order they appeared.
+        #
+        # How the pieces hold together. Summons are found by body id. A stock name would
+        # find them too, but Razor may keep the old name cached after the rename, and the
+        # body never changes. The as alias lives only inside the block that bound it, like
+        # every other alias in this file, so the serial is copied into var__fresh_summon
+        # before anything reads it: read outside, the alias came back as mobile
+        # 4294967295. The client asks the server for every new mobile's status, and that
+        # reply is what gives Razor the "this is your pet" flag rename checks, so a summon
+        # is known the moment it appears. The noto test started as the old bard-necro
+        # follower filter: an own summon reads notoriety 2, friend, in >info, and a wild
+        # lich never passes. It also turns away innocent, which is how another player's
+        # summon reads unless that player is guild or allied: another player's earth
+        # elemental took the third name on 2026-09-29. A renamed summon still matches its
+        # body, so the three slot variables carry the serials, a match already sitting in
+        # a slot is skipped, and a slot frees itself when find no longer sees its summon
+        # alive. The name comes out of the list__summon_names list by slot index: foreach
         # carries a list entry as text, which a variable cannot.
+        # --------------------------------------------------------------------------------
         if config__name_summons = 1 and followers > 0
             if var__summon_named_1 != 0
                 if find var__summon_named_1 ground -1 -1 config__summon_range as alias__named_summon
@@ -1423,26 +1445,27 @@ while not dead
             endif
         endif
 
-        # ####################################################################################
-        # # DISCO SEEN
-        # ####################################################################################
+        # --------------------------------------------------------------------------------
+        # DISCO SEEN
+        #
         # Discordance runs about two minutes. Once a target's label has shown it, DISCO
         # leaves that target alone until this forgets it, so a fight does not pay a find
         # and a getlabel on every pass just to learn it is still discorded.
+        # --------------------------------------------------------------------------------
         if timer "timer__disco_seen" >= cooldown__disco_seen
             @setvar! var__disco_seen 0
         endif
     endif
 
-    # ####################################################################################
-    # # COMBAT OR WALK
-    # ####################################################################################
-    # Everything above runs on every pass: the drains, the target cache, the flags and what
-    # keeps the character alive, fed and under its weight. Here one test splits the pass. A
-    # pass in a fight never looks at the walk blocks and a pass on the walk never looks at the
-    # fight blocks, so each pays only for its own gates. Before the split every block asked
-    # var__engaged for itself, and a walk pass still stepped through Discordance and
-    # Peacemaking down to a failed find each (2026-09-29).
+    # ------------------------------------------------------------------------------------
+    # COMBAT OR WALK
+    #
+    # Everything above runs on every pass: the drains, the target cache, the flags and
+    # what keeps the character alive, fed and under its weight. Here one test splits the
+    # pass. A pass in a fight never looks at the walk blocks and a pass on the walk never
+    # looks at the fight blocks, so each pays only for its own gates. Before the split
+    # every block asked var__engaged for itself, and a walk pass still stepped through
+    # Discordance and Peacemaking down to a failed find each (2026-09-29).
     #
     #   engaged   disco, peace, necro burst, opener, proc core, filler, poison strike
     #   walk      mushroom, self buffs, bard song, vampiric embrace
@@ -1450,12 +1473,14 @@ while not dead
     # The blocks keep their other conditions, most of them folded onto one line so a pass
     # with nothing to do there pays one statement per block. var__engaged is gone from
     # them, the branch has already answered it.
+    # ------------------------------------------------------------------------------------
     if var__engaged = 1
-        # ####################################################################################
-        # # COMBAT FLAGS
-        # ####################################################################################
-        # Set by the necro block when an ability lands. Poison Strike checks this and sits out
-        # any pass that spent, since the list is only rebuilt on the next pass.
+        # --------------------------------------------------------------------------------
+        # COMBAT FLAGS
+        #
+        # Set by the necro block when an ability lands. Poison Strike checks this and sits
+        # out any pass that spent, since the list is only rebuilt on the next pass.
+        # --------------------------------------------------------------------------------
         @setvar! var__symbols_spent 0
 
         # The Grimoire riders on Curse and Mana Drain run 60 seconds while the debuff icon runs
@@ -1468,23 +1493,26 @@ while not dead
             settimer "timer__magic_window" 0
         endif
 
-        # ####################################################################################
-        # # DISCO
-        # ####################################################################################
+        # --------------------------------------------------------------------------------
+        # DISCO
+        #
         # Discordance runs about two minutes and does not break, so it is applied once per
-        # target and then left alone. It goes before Peace because Ensemble wants Discord AND
-        # Peace on the same creature, and the one that does not break is worth landing first.
-        # bard-mace leads with Peace instead, and for a dexxer that is right: Peace is what stops
-        # the mob hitting the player in melee. Here the followers hold the mob and the player is
-        # ten tiles back, so the debuff outranks the pacify. Skill is 80 on both, so the odds are
-        # the same either way and the order is only about which effect is worth more.
+        # target and then left alone. It goes before Peace because Ensemble wants Discord
+        # AND Peace on the same creature, and the one that does not break is worth landing
+        # first. bard-mace leads with Peace instead, and for a dexxer that is right: Peace
+        # is what stops the mob hitting the player in melee. Here the followers hold the
+        # mob and the player is ten tiles back, so the debuff outranks the pacify. Skill
+        # is 80 on both, so the odds are the same either way and the order is only about
+        # which effect is worth more.
         #
-        # Music is shared, so whichever of these two blocks fires first stands the other down
-        # until the next pass. That is the arbitration, no extra state needed.
+        # Music is shared, so whichever of these two blocks fires first stands the other
+        # down until the next pass. That is the arbitration, no extra state needed.
         #
-        # warmode is the manual control window, tested on the gate line with the instrument. A
-        # target whose label already shows discord is remembered in var__disco_seen and skipped
-        # until DISCO SEEN forgets it (housekeeping), instead of a find and a getlabel a pass.
+        # warmode is the manual control window, tested on the gate line with the
+        # instrument. A target whose label already shows discord is remembered in
+        # var__disco_seen and skipped until DISCO SEEN forgets it (housekeeping), instead
+        # of a find and a getlabel a pass.
+        # --------------------------------------------------------------------------------
         if var__combat_target != var__disco_seen and cooldown "disco" = 0 and cooldown "music" = 0 and skill "Discordance" > 0 and not warmode and var__instrument_ok = 1 and var__my_instrument != 0 and not targetexists and not casting
             if find var__combat_target ground -1 -1 config__target_range as alias__disco_target
                 getlabel alias__disco_target label__disco_target
@@ -1540,21 +1568,25 @@ while not dead
             endif
         endif
 
-        # ####################################################################################
-        # # PEACE
-        # ####################################################################################
+        # --------------------------------------------------------------------------------
+        # PEACE
+        #
         # The other half of the Ensemble condition, and unlike Discordance it is short. At
-        # difficulty 300 and up the duration formula floors at 15 x Musicianship / 100, which is
-        # 12 seconds here, against a 10 second slot cooldown. So it is re-applied continuously
-        # rather than once per target: let it lapse and Ensemble and Virtuoso go dark with it.
+        # difficulty 300 and up the duration formula floors at 15 x Musicianship / 100,
+        # which is 12 seconds here, against a 10 second slot cooldown. So it is re-applied
+        # continuously rather than once per target: let it lapse and Ensemble and Virtuoso
+        # go dark with it.
         #
-        # A pacified creature does not attack, and taking damage does NOT break that. Only a
-        # barding break does, and while one is running neither Peace nor Provocation can land on
-        # that creature, which is why a broken target is left alone until it clears.
+        # A pacified creature does not attack, and taking damage does NOT break that. Only
+        # a barding break does, and while one is running neither Peace nor Provocation can
+        # land on that creature, which is why a broken target is left alone until it
+        # clears.
         #
-        # Either label is then waited out on timer__peace_seen instead of a find and a getlabel
-        # on every pass. A barding break runs 40 seconds, so it is read every two seconds
-        # rather than on every pass, and Peace lands at most two seconds after it clears.
+        # Either label is then waited out on timer__peace_seen instead of a find and a
+        # getlabel on every pass. A barding break runs 40 seconds, so it is read every two
+        # seconds rather than on every pass, and Peace lands at most two seconds after it
+        # clears.
+        # --------------------------------------------------------------------------------
         if timer "timer__peace_seen" >= cooldown__peace_seen and cooldown "peace/provo" = 0 and cooldown "music" = 0 and skill "Peacemaking" > 0 and not warmode and var__instrument_ok = 1 and var__my_instrument != 0 and not targetexists and not casting
             if find var__combat_target ground -1 -1 config__target_range as alias__peace_target
                 getlabel alias__peace_target label__peace_target
@@ -1610,13 +1642,14 @@ while not dead
             endif
         endif
 
-        # ####################################################################################
-        # # NECRO BURST
-        # ####################################################################################
-        # Each ability goes out through its Razor hotkey, resolves without a cursor, and answers
-        # with either "unholy symbols remaining" or the cooldown line, so success is read rather
-        # than assumed. The combat three run as one chain in value order, one per pass, so the
-        # bank is re-read between them and a lower one never spends what a higher one was saving.
+        # --------------------------------------------------------------------------------
+        # NECRO BURST
+        #
+        # Each ability goes out through its Razor hotkey, resolves without a cursor, and
+        # answers with either "unholy symbols remaining" or the cooldown line, so success
+        # is read rather than assumed. The combat three run as one chain in value order,
+        # one per pass, so the bank is re-read between them and a lower one never spends
+        # what a higher one was saving.
         #
         #   blood oath     +30% follower damage, 5 self damage. The followers are 63% of the
         #                  damage, so this outweighs everything else in this block
@@ -1624,17 +1657,19 @@ while not dead
         #   evil omen      +20% spell damage, and a 25% chance per spell of half its mana in
         #                  self damage. Below Corpse Skin: smaller bonus with a cost attached
         #
-        # Of the rest, Strangle (4) competes with Blood Oath for symbols and delays every hit by
-        # five seconds, Wither (5) buys mana only for spells that do no damage, and Pain Spike
-        # (5) wants a corpse next to the next mob. None earn a place here.
+        # Of the rest, Strangle (4) competes with Blood Oath for symbols and delays every
+        # hit by five seconds, Wither (5) buys mana only for spells that do no damage, and
+        # Pain Spike (5) wants a corpse next to the next mob. None earn a place here.
         #
-        # Corpse Skin and Evil Omen only pay off through the loop's own spells, and the loop casts
-        # no damage spell while the player is walking or has taken over in warmode. So both wait
-        # for a standing player in automatic mode: the first stop after a move opens them together
-        # with the procs instead of burning their duration on the walk. Blood Oath feeds the
-        # followers, who fight on either way, so it takes neither guard, and the two guards sit on
-        # the Corpse Skin and Evil Omen lines instead of on the block. Vampiric Embrace below has
-        # no walk guard either: it is walk only, so one would have parked it for good.
+        # Corpse Skin and Evil Omen only pay off through the loop's own spells, and the
+        # loop casts no damage spell while the player is walking or has taken over in
+        # warmode. So both wait for a standing player in automatic mode: the first stop
+        # after a move opens them together with the procs instead of burning their
+        # duration on the walk. Blood Oath feeds the followers, who fight on either way,
+        # so it takes neither guard, and the two guards sit on the Corpse Skin and Evil
+        # Omen lines instead of on the block. Vampiric Embrace below has no walk guard
+        # either: it is walk only, so one would have parked it for good.
+        # --------------------------------------------------------------------------------
         if list 'list__necro_symbols' >= config__symbols_blood_oath and followers > 0 and timer "timer__blood_oath" >= cooldown__necro_action and not targetexists and not casting
             hotkey 'Blood Oath'
             wait wait__message
@@ -1679,21 +1714,23 @@ while not dead
             endif
         endif
 
-        # ####################################################################################
-        # # OPENER
-        # ####################################################################################
+        # --------------------------------------------------------------------------------
+        # OPENER
+        #
         # Mana Drain then Curse, once per target.
         #
-        # Both spells carry a Grimoire rider that is scoped to the creature they were cast on:
-        # Curse gives every spell of ours +30% against that target for 60 seconds, Mana Drain
-        # gives a 30% refund chance on hostile spells against it. Neither follows to the next
-        # mob, which is why membership is tracked per target and not as a global stage.
+        # Both spells carry a Grimoire rider that is scoped to the creature they were cast
+        # on: Curse gives every spell of ours +30% against that target for 60 seconds,
+        # Mana Drain gives a 30% refund chance on hostile spells against it. Neither
+        # follows to the next mob, which is why membership is tracked per target and not
+        # as a global stage.
         #
-        # Two lists, so the branch itself is the state. A target that was retargeted mid fight
-        # answers correctly with no extra bookkeeping.
+        # Two lists, so the branch itself is the state. A target that was retargeted mid
+        # fight answers correctly with no extra bookkeeping.
         #
-        # First, any disturb line nobody read is read off here, so the cursor polls from here to
-        # the filler only ever see their own. See Targeted casts at the top.
+        # First, any disturb line nobody read is read off here, so the cursor polls from
+        # here to the filler only ever see their own. See Targeted casts at the top.
+        # --------------------------------------------------------------------------------
         if insysmsg "Your concentration is disturbed, thus ruining thy spell."
             # consumed, nothing else to do
         endif
@@ -1831,25 +1868,26 @@ while not dead
             @setvar! var__opener_done 0
         endif
 
-        # ####################################################################################
-        # # PROC CORE
-        # ####################################################################################
-        # The four Grimoire proc spells. Each carries a large first cast bonus on its own timer,
-        # and the game announces when that timer is back, so cooldowns.xml already tracks them
-        # and this block simply reads the bars. No timer of our own, which also means the script
-        # inherits any cooldown reset the game hands out.
+        # --------------------------------------------------------------------------------
+        # PROC CORE
+        #
+        # The four Grimoire proc spells. Each carries a large first cast bonus on its own
+        # timer, and the game announces when that timer is back, so cooldowns.xml already
+        # tracks them and this block simply reads the bars. No timer of our own, which
+        # also means the script inherits any cooldown reset the game hands out.
         #
         #   magic arrow  +250% on the first cast in the window
         #   harm         +250%
         #   fireball     +250% as a burn over 15 seconds
         #   lightning    +200% and a hinder
         #
-        # Ordered cheapest first. They rarely compete, because a spell whose bar is up is the
-        # only one asking, but when two are ready together the cheap one going first keeps more
-        # mana available for the opener on the next mob.
+        # Ordered cheapest first. They rarely compete, because a spell whose bar is up is
+        # the only one asking, but when two are ready together the cheap one going first
+        # keeps more mana available for the opener on the next mob.
         #
-        # Each delivery records its mob in var__proc_target, and the flag after this block tells
-        # Poison Strike and the filler whether the core is spent. Both wait for it.
+        # Each delivery records its mob in var__proc_target, and the flag after this block
+        # tells Poison Strike and the filler whether the core is spent. Both wait for it.
+        # --------------------------------------------------------------------------------
         if cooldown "magic arrow" = 0 and var__regs_magic_arrow = 1 and mana >= config__mana_1st and var__opener_done = 1 and not warmode and not targetexists and not casting and cooldown "walk" = 0
             if find var__combat_target ground -1 -1 config__target_range as alias__proc_target
                 cast 'Magic Arrow'
@@ -2081,22 +2119,24 @@ while not dead
             @setvar! var__procs_done 1
         endif
 
-        # ####################################################################################
-        # # FILLER
-        # ####################################################################################
-        # The four proc spells spend about 4.3 seconds of a 15 second window and then wait, so
-        # roughly two thirds of the window used to go unused. Energy Bolt has no proc timer of
-        # its own, and its Grimoire upgrade adds 30% damage and hands back 15 of its 20 mana when
-        # the target dies within five seconds, so it is the one spell worth firing purely to fill
-        # that gap.
+        # --------------------------------------------------------------------------------
+        # FILLER
         #
-        # Only that gap: var__procs_done keeps it out while any proc is ready, so a bar coming
-        # back hands the next cast to the proc core. A bar that returns mid bolt waits out the
-        # rest of the cast, 1.95 seconds at most. Poison Strike comes after this block, so a bolt
-        # in the same pass adds its disease before the strike pops them.
+        # The four proc spells spend about 4.3 seconds of a 15 second window and then
+        # wait, so roughly two thirds of the window used to go unused. Energy Bolt has no
+        # proc timer of its own, and its Grimoire upgrade adds 30% damage and hands back
+        # 15 of its 20 mana when the target dies within five seconds, so it is the one
+        # spell worth firing purely to fill that gap.
+        #
+        # Only that gap: var__procs_done keeps it out while any proc is ready, so a bar
+        # coming back hands the next cast to the proc core. A bar that returns mid bolt
+        # waits out the rest of the cast, 1.95 seconds at most. Poison Strike comes after
+        # this block, so a bolt in the same pass adds its disease before the strike pops
+        # them.
         #
         # It is also the first thing to stand down when mana runs short, which is what
         # config__filler_floor is for: the opener and one full proc cycle come first.
+        # --------------------------------------------------------------------------------
         if var__procs_done = 1 and mana > config__filler_floor and var__regs_energy_bolt = 1 and var__opener_done = 1 and not warmode and not targetexists and not casting and cooldown "walk" = 0
             if find var__combat_target ground -1 -1 config__target_range as alias__filler_target
                 cast 'Energy Bolt'
@@ -2149,27 +2189,28 @@ while not dead
             endif
         endif
 
-        # ####################################################################################
-        # # POISON STRIKE
-        # ####################################################################################
-        # One symbol to resolve the disease Corpse Skin has been layering on the target: up to
-        # eight ticks land at once instead of over the next thirty seconds. On a mob about to die
-        # that is damage that would otherwise have gone with it. It sits at the bottom of the
-        # symbol ladder and only fires while Corpse Skin is actually up.
+        # --------------------------------------------------------------------------------
+        # POISON STRIKE
         #
-        # It goes once the proc core is spent, var__procs_done, and last in the pass, behind the
-        # filler. Every damaging spell leaves one disease, so when the pass that spends the core
-        # also has the mana for a bolt, the strike pops four procs and a bolt instead of four.
-        # Below the filler floor there is no bolt coming, and it pops the four rather than wait.
-        # var__proc_target holds it off a mob picked up while the bars are still running from the
-        # last one: no proc has reached that mob yet, so the strike waits until the next cycle
-        # has gone out there.
+        # One symbol to resolve the disease Corpse Skin has been layering on the target:
+        # up to eight ticks land at once instead of over the next thirty seconds. On a mob
+        # about to die that is damage that would otherwise have gone with it. It sits at
+        # the bottom of the symbol ladder and only fires while Corpse Skin is actually up.
+        #
+        # It goes once the proc core is spent, var__procs_done, and last in the pass,
+        # behind the filler. Every damaging spell leaves one disease, so when the pass
+        # that spends the core also has the mana for a bolt, the strike pops four procs
+        # and a bolt instead of four. Below the filler floor there is no bolt coming, and
+        # it pops the four rather than wait. var__proc_target holds it off a mob picked up
+        # while the bars are still running from the last one: no proc has reached that mob
+        # yet, so the strike waits until the next cycle has gone out there.
         #
         # A target with nothing on it refuses the strike without spending it. Clearing
-        # var__proc_target then makes it wait for the next proc to reach that mob, rather than
-        # pressing again every pass or sitting out the full window. A cooldown refusal restarts
-        # the window, read on both sides of the cursor wait in case it comes back instead of the
-        # cursor.
+        # var__proc_target then makes it wait for the next proc to reach that mob, rather
+        # than pressing again every pass or sitting out the full window. A cooldown
+        # refusal restarts the window, read on both sides of the cursor wait in case it
+        # comes back instead of the cursor.
+        # --------------------------------------------------------------------------------
         if timer "timer__poison_strike" >= cooldown__necro_action and var__procs_done = 1 and var__opener_done = 1 and var__proc_target = var__combat_target and var__symbols_spent = 0 and timer "timer__corpse_skin" < cooldown__necro_action and not warmode and list 'list__necro_symbols' >= config__symbols_poison_strike and not targetexists and not casting
             if find var__combat_target ground -1 -1 config__target_range as alias__strike_target
                 # A bolt from the filler hits 0.5 seconds after its target and brings
@@ -2221,12 +2262,13 @@ while not dead
             endif
         endif
     else
-        # ####################################################################################
-        # # MUSHROOM
-        # ####################################################################################
-        # Out of combat only, so the 60 second cooldown burns during the walk rather than during
-        # a fight where the cast would compete with the spell rotation. The whole block either
-        # eats or casts, so the walk guard rides on the act window line.
+        # --------------------------------------------------------------------------------
+        # MUSHROOM
+        #
+        # Out of combat only, so the 60 second cooldown burns during the walk rather than
+        # during a fight where the cast would compete with the spell rotation. The whole
+        # block either eats or casts, so the walk guard rides on the act window line.
+        # --------------------------------------------------------------------------------
         if mana <= config__mushroom_eat_mana and not targetexists and not casting and cooldown "walk" = 0 and not findbuff 'Magic Mushroom Cooldown' and findtype "mushroom" backpack
             hotkey 'Eat Magic Mushroom'
             wait wait__short
@@ -2247,17 +2289,19 @@ while not dead
             endfor
         endif
 
-        # ####################################################################################
-        # # SELF BUFFS
-        # ####################################################################################
-        # Reactive Armor and Magic Reflection stay up until they are used up, so each needs a
-        # cast only when findbuff no longer sees it. On the walk only: in a fight the cast would
-        # take a slot from the rotation, and what matters is that both are up when the next
-        # pull, or a red, arrives. Reactive Armor is 1st circle and goes first, Magic Reflection
-        # waits its turn on the next pass. Both are self-only, so no cursor: the same no-cursor
-        # shape as Create Food above.
-        # The reflect bar is the server's recast lock, 30 seconds after a creature's spell and 60
-        # after a player's. It starts on the "Magic reflect removed" line, so the bar is the clock.
+        # --------------------------------------------------------------------------------
+        # SELF BUFFS
+        #
+        # Reactive Armor and Magic Reflection stay up until they are used up, so each
+        # needs a cast only when findbuff no longer sees it. On the walk only: in a fight
+        # the cast would take a slot from the rotation, and what matters is that both are
+        # up when the next pull, or a red, arrives. Reactive Armor is 1st circle and goes
+        # first, Magic Reflection waits its turn on the next pass. Both are self-only, so
+        # no cursor: the same no-cursor shape as Create Food above. The reflect bar is the
+        # server's recast lock, 30 seconds after a creature's spell and 60 after a
+        # player's. It starts on the "Magic reflect removed" line, so the bar is the
+        # clock.
+        # --------------------------------------------------------------------------------
         if config__use_reactive_armor = 1 and not findbuff 'Reactive Armor' and var__regs_reactive_armor = 1 and mana >= config__mana_1st and not warmode and not targetexists and not casting and cooldown "walk" = 0
             cast 'Reactive Armor'
             wait wait__short
@@ -2333,28 +2377,33 @@ while not dead
             endif
         endif
 
-        # ####################################################################################
-        # # BARD SONG
-        # ####################################################################################
-        # Three 15 minute AoE buffs, each worth 8.5% at this Effective Barding, landing on the
-        # player and every follower in range. Sung on the walk between pulls, never in a fight:
-        # while engaged, Discordance and Peacemaking keep Music busy so a song rarely gets a
-        # window, and playing an instrument interrupts a spell already in flight.
+        # --------------------------------------------------------------------------------
+        # BARD SONG
         #
-        # Singing on the walk is what removes follower tracking from this script. A resummoned
-        # creature picks the songs up on the next walk, so nothing has to notice that it died.
+        # Three 15 minute AoE buffs, each worth 8.5% at this Effective Barding, landing on
+        # the player and every follower in range. Sung on the walk between pulls, never in
+        # a fight: while engaged, Discordance and Peacemaking keep Music busy so a song
+        # rarely gets a window, and playing an instrument interrupts a spell already in
+        # flight.
         #
-        # findbuff is deliberately NOT the gate. The buffs run 15 minutes, so a findbuff test
-        # would be true almost always and the refresh would never fire. The gate is the song
-        # cooldown plus the slot each song borrows.
+        # Singing on the walk is what removes follower tracking from this script. A
+        # resummoned creature picks the songs up on the next walk, so nothing has to
+        # notice that it died.
         #
-        # A branch only advances var__song_next once the cursor was actually delivered, so a song
-        # that could not go out, for any reason, is retried next pass instead of being skipped.
+        # findbuff is deliberately NOT the gate. The buffs run 15 minutes, so a findbuff
+        # test would be true almost always and the refresh would never fire. The gate is
+        # the song cooldown plus the slot each song borrows.
         #
-        # The chain only picks the skill and the song after it, the three share the rest. Right
-        # before the backpack is targeted, lasttarget is read once more: a hostile the player has
-        # just picked would be lost to the backpack, the way a green capper was on 2026-09-29.
-        # Then the song stands down, cancels its cursor and leaves lasttarget for the next pass.
+        # A branch only advances var__song_next once the cursor was actually delivered, so
+        # a song that could not go out, for any reason, is retried next pass instead of
+        # being skipped.
+        #
+        # The chain only picks the skill and the song after it, the three share the rest.
+        # Right before the backpack is targeted, lasttarget is read once more: a hostile
+        # the player has just picked would be lost to the backpack, the way a green capper
+        # was on 2026-09-29. Then the song stands down, cancels its cursor and leaves
+        # lasttarget for the next pass.
+        # --------------------------------------------------------------------------------
         if cooldown "song" = 0 and cooldown "music" = 0 and not warmode and var__instrument_ok = 1 and var__my_instrument != 0 and not targetexists and not casting
             @setvar! var__song_after 0
 
@@ -2403,21 +2452,24 @@ while not dead
             endif
         endif
 
-        # ####################################################################################
-        # # VAMPIRIC EMBRACE
-        # ####################################################################################
-        # Vampiric Embrace heals the undead followers off a corpse. Target an enemy or yourself
-        # and it searches the surrounding area for one, so the cursor is answered with self. Walk
-        # only, when a corpse is what is left of the last pull, and the corpse check keeps it from
-        # pressing for nothing. The wiki gives no radius for that search, so a corpse inside the
-        # eight tiles looked at here can still be out of reach. That refusal spends nothing, so
-        # it only sits out cooldown__embrace_miss.
+        # --------------------------------------------------------------------------------
+        # VAMPIRIC EMBRACE
         #
-        # A cooldown refusal restarts the window instead: the script cannot read the game's own
-        # cooldown, and the refusal nearly always answers a use whose success line came in late,
-        # so a full window from there is about right. It is read on both sides of the cursor
-        # wait, in case it comes back instead of the cursor. Before self is targeted, lasttarget
-        # is read once more, the way BARD SONG does, so a hostile just picked is not lost.
+        # Vampiric Embrace heals the undead followers off a corpse. Target an enemy or
+        # yourself and it searches the surrounding area for one, so the cursor is answered
+        # with self. Walk only, when a corpse is what is left of the last pull, and the
+        # corpse check keeps it from pressing for nothing. The wiki gives no radius for
+        # that search, so a corpse inside the eight tiles looked at here can still be out
+        # of reach. That refusal spends nothing, so it only sits out
+        # cooldown__embrace_miss.
+        #
+        # A cooldown refusal restarts the window instead: the script cannot read the
+        # game's own cooldown, and the refusal nearly always answers a use whose success
+        # line came in late, so a full window from there is about right. It is read on
+        # both sides of the cursor wait, in case it comes back instead of the cursor.
+        # Before self is targeted, lasttarget is read once more, the way BARD SONG does,
+        # so a hostile just picked is not lost.
+        # --------------------------------------------------------------------------------
         if timer "timer__vampiric_embrace" >= cooldown__necro_action and timer "timer__embrace_miss" >= cooldown__embrace_miss and followers > 0 and not warmode and list 'list__necro_symbols' >= config__symbols_vampiric_embrace and not targetexists and not casting
             if findtype 8198 ground -1 -1 8
                 hotkey 'Vampiric Embrace'

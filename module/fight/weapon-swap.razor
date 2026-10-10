@@ -4,7 +4,8 @@
 
 
 # ----------------------------------------------------------------------------------------
-#@ config
+# @ config
+#
 #   config__weapon_1_graphic, config__weapon_2_graphic, config__weapon_3_graphic,
 #   config__weapon_4_graphic
 #      Weapon graphic for each slot. Slot N reads the "swing N" bar, and 0 turns the slot
@@ -18,7 +19,8 @@
 
 
 # ----------------------------------------------------------------------------------------
-#@ state
+# @ state
+#
 #   var__weapon_armed_serial, var__weapon_armed_graphic
 #      The weapon this script armed last, kept across Plays. Only own items. See WEAPON.
 #
@@ -39,17 +41,18 @@ endif
 
 
 # ----------------------------------------------------------------------------------------
-#@ loop
+# @ loop
 # ----------------------------------------------------------------------------------------
-    # ################################################################################
-    # # WEAPON
-    # ################################################################################
-    # Wanted slot: the highest enabled slot whose swing bar is ready, 4 down to 1. With none
-    # ready and both hands empty, the lowest enabled slot. A missing bar reads ready.
-    # The armed serial is searched only when the wanted slot changes, so a steady pass costs two
-    # hand reads. A weapon already in hand is adopted without a request. Arming during a cast
-    # would interrupt it (wiki Combat Overview), so this waits for a free window.
-    # The equip request is not proof of a swing.
+    # ------------------------------------------------------------------------------------
+    # WEAPON
+    #
+    # Wanted slot: the highest enabled slot whose swing bar is ready, 4 down to 1. With
+    # none ready and both hands empty, the lowest enabled slot. A missing bar reads ready.
+    # The armed serial is searched only when the wanted slot changes, so a steady pass
+    # costs two hand reads. A weapon already in hand is adopted without a request. Arming
+    # during a cast would interrupt it (wiki Combat Overview), so this waits for a free
+    # window. The equip request is not proof of a swing.
+    # ------------------------------------------------------------------------------------
     if not paralyzed and not hidden and not queued and not casting and not targetexists
         @setvar! var__weapon_want 0
         if config__weapon_4_graphic != 0 and cooldown "swing 4" = 0
