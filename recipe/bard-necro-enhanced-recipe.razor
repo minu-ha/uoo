@@ -19,7 +19,8 @@
 # and the glossary is blueprint/overheads.html.
 # A fight is a hostile inside target_range. In a fight: Discordance, Peacemaking, the
 # necro burst, the opener, the proc core, the filler and Poison Strike. On the walk: the
-# mushroom, the self buffs, Spell Siphon, the bard song and Vampiric Embrace.
+# self buffs, Spell Siphon, the bard song and Vampiric Embrace. Mushrooms are eaten in
+# either, and Create Food makes more on the walk.
 # Warmode is the player's manual window: our casts, the bard skills, the self buffs,
 # Create Food, Corpse Skin and Evil Omen stand down. Cures, heals, potions, the mushroom
 # and Blood Oath keep running.
@@ -213,6 +214,12 @@
 # @ end
 # ========================================================================================
 
+# ----------------------------------------------------------------------------------------
+# @ use buff/mushroom
+#
+#   Eats a Magic Mushroom at low mana, and makes more with Create Food at high mana.
+# ----------------------------------------------------------------------------------------
+
 # ========================================================================================
 # @ when var__fighting = 1
 # ========================================================================================
@@ -262,12 +269,6 @@
 # ========================================================================================
 # @ otherwise
 # ========================================================================================
-
-# ----------------------------------------------------------------------------------------
-# @ use buff/mushroom
-#
-#   Eats a Magic Mushroom at low mana, and makes more with Create Food at high mana.
-# ----------------------------------------------------------------------------------------
 
 # ----------------------------------------------------------------------------------------
 # @ use buff/spells

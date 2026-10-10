@@ -1,5 +1,6 @@
 # ----------------------------------------------------------------------------------------
 # Eats a Magic Mushroom at low mana, and makes more with Create Food at high mana.
+# Create Food goes out of a fight only (var__fighting 0).
 #
 # @ hotkeys Eat Magic Mushroom
 # ----------------------------------------------------------------------------------------
@@ -29,14 +30,15 @@
     # ------------------------------------------------------------------------------------
     # MUSHROOM
     #
-    # Meant for the walk, outside the fight group, so the 60 second cooldown burns then
-    # rather than during a fight where the cast would compete with the spell rotation. The
-    # whole block either eats or casts, so the walk guard rides on the act window line.
+    # Eating is an item use, so like a potion it goes out during a cast and on the move,
+    # and waits only for a held cursor. Create Food is a cast and waits for a fight to end,
+    # so its 60 second cooldown burns on the walk rather than taking a cast from the
+    # rotation. It also stands down in warmode and for the walk bar.
     # ------------------------------------------------------------------------------------
-    if mana <= config__mushroom_eat_mana and not targetexists and not casting and cooldown "walk" = 0 and not findbuff 'Magic Mushroom Cooldown' and findtype "mushroom" backpack
+    if mana <= config__mushroom_eat_mana and not findbuff 'Magic Mushroom Cooldown' and not hidden and not queued and not targetexists and findtype "mushroom" backpack
         hotkey 'Eat Magic Mushroom'
         wait wait__short
-    elseif mana >= config__mushroom_create_mana and var__regs_create_food = 1 and not warmode and not targetexists and not casting and cooldown "walk" = 0 and counttype "mushroom" backpack < config__mushroom_min_count
+    elseif var__fighting = 0 and mana >= config__mushroom_create_mana and var__regs_create_food = 1 and not warmode and not targetexists and not casting and cooldown "walk" = 0 and counttype "mushroom" backpack < config__mushroom_min_count
         cast 'Create Food'
         wait wait__short
 
