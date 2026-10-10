@@ -91,7 +91,8 @@ v14는 파우치 소속을 먼저 검사한 뒤 `ignore`한다. 검색 제외 �
 `config__sysmsg = 1`이면 `BEGIN` → 가공·`skip: already in pouch`·`move request` → `END`를 기록한다.
 이동 요청 로그는 서버 이동·병합 완료의 증거가 아니다. 파우치 제외와 병합 후 새 묶음 처리는 모의 검사했으며 실제 v14는 재확인이 필요하다.
 Manual actions, recovery needs and a latched Recall decision defer this optional work.
-Tracking-triggered Recall requires `config__recall_on_detection = 1` and an active hunt from `escape/tracking`.
+Tracking-triggered Recall requires `config__recall_on_detection = 1`, the Tracking skill and an active hunt from `escape/tracking`.
+A character without Tracking skips the hunt check, so harvesting does not wait for it.
 With it at 0 harvesting does not wait for Hunting. Weight Recall and the book requirement stay.
 Recall preparation uses no Strength or Agility potions. Fighting requires switching to the PvP script.
 Harvest results, skill reports and refusal overheads are in both Razor profiles. The server enforces the 60-second post-travel harvest delay;

@@ -161,7 +161,7 @@
 #
 #   config__recall_on_detection
 #      1 recalls on a Tracking report within 1 through 45 steps. Needs escape/tracking
-#      hunting.
+#      hunting. A character without Tracking skips it, and gathering does not wait for it.
 #
 #   config__recall_at_any_distance
 #      1 recalls on a Tracking report at any distance.
@@ -919,7 +919,7 @@ while not dead
 
     if var__recall_sent = 0
         if var__recall_check_due = 1
-            if var__recall_needed = 0 and config__recall_on_detection = 1
+            if var__recall_needed = 0 and config__recall_on_detection = 1 and skill "Tracking" > 0
                 @setvar! var__tracking_hunting_active 0
                 if var__tracking_filter_confirmed = 1 and findbuff "tracking"
                     @setvar! var__tracking_hunting_active 1
@@ -1105,14 +1105,15 @@ while not dead
     endif
 
     # A latched Recall keeps the cast window and stops gathering until the script restarts.
-    # Gathering also waits for a required book, and for Tracking to hunt when detection is on.
+    # Gathering also waits for a required book and, when detection is on and the character has
+    # Tracking, for the hunt.
     @setvar! var__hold_gathering 0
     if var__recall_needed = 1
         @setvar! var__hold_casts 1
         @setvar! var__hold_gathering 1
     elseif config__require_runebook = 1 and var__recall_book_available = 0
         @setvar! var__hold_gathering 1
-    elseif config__recall_on_detection = 1 and var__tracking_hunting_active = 0
+    elseif config__recall_on_detection = 1 and var__tracking_hunting_active = 0 and skill "Tracking" > 0
         @setvar! var__hold_gathering 1
     endif
 

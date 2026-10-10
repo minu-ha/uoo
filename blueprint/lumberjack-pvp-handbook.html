@@ -576,7 +576,7 @@ Logs 7133·Boards 7127은 <a href="item-list.html#15">item-list.html</a> 15절�
 손의 도끼·남은 무게·수동 입력 중 하나라도 준비되지 않았으면 보류한다.
 책·Hunting 조건은 v18부터 이 사슬에 없다. 리콜 블록이 패스마다 리콜 결정과 함께 <code>var__hold_gathering</code> 하나로 합치고,
 채집 블록은 맨 앞 조건에서 그 값만 읽는다. 모든 차단 조건을 통과하면 도구 사용 → 커서 대기 → 자기 타깃을 같은 블록에서 처리한다.
-<code>require_runebook</code>이 0이면 책 조건, <code>recall_on_detection</code>이 0이면 Hunting 조건을 건너뛴다. 리콜 블록을 빼면 둘 다 없다.
+<code>require_runebook</code>이 0이면 책 조건, <code>recall_on_detection</code>이 0이거나 Tracking 스킬이 0이면 Hunting 조건을 건너뛴다. 리콜 블록을 빼면 둘 다 없다.
 건강·남은 무게·수동 입력 조건은 그와 별도로 통과해야 한다.
 <code>and</code>만 이어진 조건은 합칠 수 있지만 <code>or</code> 예외까지 한 줄로 섞지는 않는다.
 괄호는 이 포크의 확인된 선례가 없으며, CE 원본은 혼합 논리 연산을 왼쪽부터 평가한다.
@@ -712,7 +712,7 @@ END 뒤에도 채집이 보류되면 큐·커서 안내와 리콜·책·Hunting 
 <td>채집 중 Tracking 창이나 필터 버튼을 다시 조작하면 실패. 다른 색상으로 바꾸기 전 Hunting을 먼저 끄고,
 설정 중 곰 같은 중간 필터의 추적 문구로 리콜하지 않아야 한다.
 Hunting 해제는 감지 리콜 ON일 때 다음 채집 전 상태 점검에서 채집 보류로 반영한다.
-리콜 블록이 없거나 <code>recall_on_detection</code>이 0이면 Hunting 때문에 채집을 보류하지 않는다.
+리콜 블록이 없거나 <code>recall_on_detection</code>이 0이거나 Tracking 스킬이 0이면 Hunting 때문에 채집을 보류하지 않는다.
 초기 설정을 못 마친 경우 회복은 계속하며, 안전해진 뒤 재실행해 필터와 Hunting을 다시 확인한다</td></tr>
 <tr><td>grey·orange·전체 필터 선택</td>
 <td>2·3·4로 각각 재실행해 범죄자·적대 길드·전체 필터 확인 문장이 맞는지 기록한다.
