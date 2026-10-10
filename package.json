@@ -12,7 +12,7 @@
         "check": "util/check.sh && pnpm docs:build && node util/check-docs.mjs",
         "test": "node --test util/*.test.mjs",
         "docs:dev": "for-humanity dev document",
-        "docs:build": "for-humanity build document",
+        "docs:build": "for-humanity build document && cp document/favicon.svg document/dist/favicon.svg",
         "docs:preview": "for-humanity preview document"
     },
     "devDependencies": {

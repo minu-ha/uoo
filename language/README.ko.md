@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="../.github/ankh.svg" width="96" height="96" alt="uoo 앵크">
+<img src="../document/favicon.svg" width="96" height="96" alt="울티마 온라인 문양">
 
 # uoo
 
@@ -24,7 +24,7 @@
 
 - **바로 돌린다.** Outlands 클라이언트에 딸린 Razor용 사냥 루프, 핫키 매크로, 스킬 트레이너, 집 정리 스크립트.
   그 Razor의 확장 문법을 쓰므로 일반 Razor CE나 UOSteam에서는 그대로 돌아가지 않습니다.
-- **한 번만 쓴다.** 전투·채집 루프는 `recipe/`의 레시피가 `module/`의 공용 블록을 모아 조립합니다.
+- **한 번만 쓴다.** 전투 루프와 채집 루프는 `recipe/`의 레시피가 `module/`의 공용 블록을 모아 조립합니다.
   블록 하나를 고치면 그 블록을 쓰는 모든 루프가 함께 고쳐집니다.
 - **이유를 남긴다.** 메커니즘, 숫자, 인게임 확인은 문서에 두고, 확인된 것과 아직 확인되지 않은 것을 표시합니다.
 - **설정도 git으로.** Razor와 ClassicUO 프로필은 `config/`에 두고, 스크립트 하나로 게임에 연결합니다.
@@ -54,10 +54,10 @@ pnpm docs:dev    # localhost:4321에서 문서 읽기
 | 폴더                                   | 무엇                                                                                                                         |
 |----------------------------------------|------------------------------------------------------------------------------------------------------------------------------|
 | [`script/`](../script/README.md)       | 스크립트. 하는 일별로 묶음                                                                                                   |
-| `module/`, `recipe/`                   | 한 벌만 둔 루프 블록과, `util/build-scripts.mjs`가 `script/combat/`·`script/gather/`의 모든 루프로 조립하는 레시피           |
-| [`document/`](../document/README.md) | Markdown 설계 문서. [for humanity](https://for-humanity.fyi)로 읽는다: 작업 방식, 규칙, 모듈, Razor, 오버헤드, PvP, Bard Necro, 벌목·PvP, 키 배치, 아이템 ID, 확인할 것. 지도는 [AGENTS.md](../AGENTS.md) |
-| [`config/`](config.ko.md)              | Razor · ClassicUO 설정, 사람마다 폴더 하나. 게임을 저장소에 연결하는 방법                                                    |
-| `util/`                                | `setup.sh`는 게임을 저장소에 링크, `build-scripts.mjs`는 루프 조립, `check.sh`는 스크립트 검사, `check-docs.mjs`는 문서 링크 검사, `pvp-sim.mjs`는 필드 결투 모델, `razor-syntax/`는 WebStorm·VS Code용 `.razor` 하이라이팅 |
+| `module/`, `recipe/`                   | 한 벌만 둔 루프 블록과, `util/build-scripts.mjs`가 `script/combat/`과 `script/gather/`의 모든 루프로 조립하는 레시피           |
+| [`document/`](../document/README.md) | Markdown 설계 문서. [for humanity](https://for-humanity.fyi)로 읽고, 묶음마다 폴더 하나다. 작업 방식, 스크립트 규칙, 게임 자료, 템플릿, 확인할 것. 지도는 [문서 홈](../document/README.md) |
+| [`config/`](config.ko.md)              | Razor와 ClassicUO 설정. 사람마다 폴더 하나를 쓴다. 게임을 저장소에 연결하는 방법도 있다                                                    |
+| `util/`                                | `setup.sh`는 게임을 저장소에 링크, `build-scripts.mjs`는 루프 조립, `check.sh`는 스크립트 검사, `check-docs.mjs`는 문서 링크 검사, `pvp-sim.mjs`는 필드 결투 모델, `razor-syntax/`는 WebStorm과 VS Code용 `.razor` 하이라이팅 |
 | `language/`                            | README 번역본 (이 파일)                                                                                                      |
 
 ## 크레딧
