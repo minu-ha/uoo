@@ -4,7 +4,7 @@
 # pets, targeting and melee requests. The script never cuts a manual cast or cursor.
 # No start 4 lines (conventions 02.D, config__clear_at_start 0): a manual cursor or cast held at Play is kept.
 # Arm/Dress must remove conflicting equipment.
-# Design and in-game checks: blueprint/pvp.html part 5.E, blueprint/open-items.html part 10.
+# Design and in-game checks: blueprint/pvp.md part 5.E, blueprint/open-items.md part 10.
 #
 # Shape
 #   Each block reads the live state and acts on the spot, the way bard-necro-enhanced and
@@ -12,14 +12,14 @@
 #   Razor's object delay queue, and every block waits while that queue is busy. A cast block
 #   waits out its own cast in a for 60 poll, so the next block sees casting end.
 #
-# Input rules (wiki Combat Overview, blueprint/pvp.html part 5.B)
+# Input rules (wiki Combat Overview, blueprint/pvp.md part 5.B)
 #   Potions and the pouch are instant and go out while a spell is casting.
 #   Drinking with a finished precast cursor in hand cancels that spell, so a potion or a
 #   bandage waits while any cursor is held. Agents and buffs need no cast and no cursor.
 #   Only our own buff cast is cut, at config__buff_max_loss, so the next pass can heal.
 #   No walk guard (config__walk_guard 0): in a fight there is no better moment to wait for.
 #
-# Cost (blueprint/razor.html part 6)
+# Cost (blueprint/razor.md part 6)
 #   findtype is the most expensive statement. Reagents are read in REAGENTS every
 #   cooldown__reagents and right after a "More reagents are needed" refusal, and the cast
 #   blocks read the flags. Potions are looked up only inside a block that already needs one.

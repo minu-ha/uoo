@@ -1,5 +1,5 @@
 # Bard Necro Enhanced: sustain, bard control, necro burst, opener and damage rotation.
-# Design, cooldown model and every barding number: blueprint/bard-necro-handbook.html
+# Design, cooldown model and every barding number: blueprint/bard-necro-handbook.md
 # (design in part 5, mechanics in part 2).
 # Needs: Discordance, Peacemaking and Provocation trained (the song round robin parks on a
 # missing one), an instrument in the backpack, a necromancer book, and reagents.
@@ -7,7 +7,7 @@
 # the same symbols, cheapest first.
 # cooldowns.xml carries every bar this loop reads: music, song, disco, peace/provo, magic
 # arrow, harm, fireball, lightning, heal pot, reflect and walk. The names are lowercase
-# and the glossary is blueprint/overheads.html.
+# and the glossary is blueprint/overheads.md.
 # A fight is a hostile inside target_range. In a fight: Discordance, Peacemaking, the
 # necro burst, the opener, the proc core, the filler and Poison Strike. On the walk: the
 # self buffs, Spell Siphon, the bard song and Vampiric Embrace. Mushrooms are eaten in
@@ -637,7 +637,7 @@ endif
 # recipe/bard-necro-enhanced-recipe.razor
 # ----------------------------------------------------------------------------------------
 # loot/recycle runs the hotkey named in this list when it finishes or gives up. A list, because
-# a variable cannot hold a word (blueprint/razor.html part 3). It lasts until the client closes.
+# a variable cannot hold a word (blueprint/razor.md part 3). It lasts until the client closes.
 if not listexists 'list__resume_script'
     createlist 'list__resume_script'
 endif
@@ -1950,7 +1950,7 @@ while not dead
         if timer "timer__poison_strike" >= interval__necro_action and var__procs_done = 1 and var__opener_done = 1 and var__proc_target = var__combat_target and var__symbols_spent = 0 and timer "timer__corpse_skin" < interval__necro_action and not warmode and list 'list__necro_symbols' >= config__symbols_poison_strike and not targetexists and not casting
             if find var__combat_target ground -1 -1 config__target_range as alias__strike_target
                 # A bolt from the filler hits 0.5 seconds after its target and brings
-                # its disease then (blueprint/pvp.html part 5). wait__cast covered 0.3 of
+                # its disease then (blueprint/pvp.md part 5). wait__cast covered 0.3 of
                 # that and this covers the rest, so on a quick connection the strike
                 # does not land ahead of the bolt.
                 wait wait__short
