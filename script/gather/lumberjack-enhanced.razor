@@ -604,6 +604,16 @@ endif
 
 
 # ----------------------------------------------------------------------------------------
+# module/buff/spells.razor
+#
+#   var__buff_cast
+#      1 once Reactive Armor or Magic Reflection was cast. magery/spell-siphon waits for a
+#      pass without one, and clears it.
+# ----------------------------------------------------------------------------------------
+@setvar! var__buff_cast 0
+
+
+# ----------------------------------------------------------------------------------------
 # module/pack/lumber.razor
 #
 #   var__lumber_graphic
@@ -1384,6 +1394,7 @@ while not dead
                 if config__walk_guard = 0 or cooldown "walk" = 0
                     if config__use_reactive_armor = 1 and var__regs_reactive_armor = 1 and mana >= config__mana_reactive_armor and not findbuff "Reactive Armor"
                         cast "Reactive Armor"
+                        @setvar! var__buff_cast 1
                         if config__sysmsg = 1
                             sysmsg "Buff: Reactive Armor." 88
                         endif
@@ -1408,6 +1419,7 @@ while not dead
                         endfor
                     elseif config__use_magic_reflect = 1 and var__regs_magic_reflect = 1 and mana >= config__mana_magic_reflect and cooldown "reflect" = 0 and not findbuff "Magic Reflection"
                         cast "Magic Reflection"
+                        @setvar! var__buff_cast 1
                         if config__sysmsg = 1
                             sysmsg "Buff: Magic Reflection." 88
                         endif
