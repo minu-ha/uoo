@@ -315,7 +315,7 @@ def read_blocks(recipe, name):
     lines, line number. Each block is a box: a rule, the # @ use line, the builder's lines, a rule,
     then the @setvar! lines. In the box only the "> " lines are the reader's: a note on the block,
     or under a setting the reason for its value. A comment right above an @setvar! line is a reason too."""
-    entries, over, reasons, pending = [], {}, {}, []
+    entries, over, reasons, pending, loose = [], {}, {}, [], []
     box, setting = False, None
 
     def settle():
@@ -328,6 +328,7 @@ def read_blocks(recipe, name):
             continue  # the guide under # @ blocks is the builder's
         if item[0] == 'use':
             settle()
+            del loose[:]
             entries.append({'ident': item[2], 'number': item[1], 'old': [],
                             'notes': [item[3]] if item[3] else []})
             box, setting = True, None
@@ -337,6 +338,7 @@ def read_blocks(recipe, name):
         if not text or RULE_LINE.match(text):
             settle()
             box = False
+            del loose[:]
             continue
         if text.startswith('#'):
             if ';' in text:
@@ -347,14 +349,20 @@ def read_blocks(recipe, name):
                 continue
             if not box:
                 pending.append((reason if reason is not None else body, number))
-            elif BOX_SETTING.match(text):
+                continue
+            if reason is None and not line.startswith('#   '):
+                # Not a shape the builder writes. Right above an @setvar! line it is that setting's
+                # reason (a box not yet closed by its rule), otherwise it is dropped with a warning.
+                entries[-1]['old'].append((number, line.rstrip()))
+                loose.append((body, number))
+                continue
+            del loose[:]
+            if BOX_SETTING.match(text):
                 setting = 'config__' + BOX_SETTING.match(text).group(1)
             elif reason is not None and setting:
                 reasons.setdefault(setting, []).append(reason)
             elif reason is not None:
                 entries[-1]['notes'].append(reason)
-            elif not line.startswith('#   '):
-                entries[-1]['old'].append((number, line.rstrip()))  # not in a shape the builder writes
             continue
         match = SETVAR.match(line)
         if not match or not match.group(1).startswith('config__') or not match.group(2).strip():
@@ -364,10 +372,14 @@ def read_blocks(recipe, name):
             raise BuildError('%s:%d: a setting goes under the # @ use line of its block' % (name, number))
         if match.group(1) in over:
             raise BuildError('%s:%d: %s is set twice' % (name, number, match.group(1)))
+        if box and loose:
+            taken = {n for _, n in loose}
+            entries[-1]['old'] = [o for o in entries[-1]['old'] if o[0] not in taken]
+            pending += loose
         box = False
         over[match.group(1)] = {'value': match.group(2).strip(), 'number': number,
                                 'notes': [t for t, _ in pending]}
-        del pending[:]
+        del pending[:], loose[:]
     settle()
     for setting, value in over.items():
         value['notes'] = reasons.get(setting, []) + value['notes']

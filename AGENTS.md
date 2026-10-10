@@ -21,7 +21,7 @@ Ultima Online Outlands용 Razor 스크립트 (`script/`), 클라이언트 설정
 - `config/` 아래는 게임을 끈 상태에서만 고친다 → [workflow.html](blueprint/workflow.html#04.C) 04.C절
 - 다른 사람의 `config/`는 건드리지 않고, `settings.json`은 절대 커밋하지 않는다 → [conventions.html](blueprint/conventions.html#01.D) 01.D절
 - 스크립트에 serial 리터럴을 쓰지 않는다 → [conventions.html](blueprint/conventions.html#03.C) 03.C절
-- 생성된 루프 (`script/combat/pvp`, `script/gather/*`)는 직접 고치지 않는다. `module/`·`recipe/`를 고치고 `util/build-scripts.py`로 만든다 → [modules.html](blueprint/modules.html#07) 07절
+- 생성된 루프 (`recipe/`가 있는 `script/combat/pvp`·`dexxer-basic`, `script/gather/*`)는 직접 고치지 않는다. `module/`·`recipe/`를 고치고 `util/build-scripts.py`로 만든다 → [modules.html](blueprint/modules.html#07) 07절
 - 커밋은 사용자가 하라고 할 때만, push는 따로 요청이 있을 때만 → [workflow.html](blueprint/workflow.html#06) 06절
 
 ## 2. 언제 무엇을 읽나

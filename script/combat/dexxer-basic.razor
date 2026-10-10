@@ -1,195 +1,596 @@
-clearsysmsg
-clearall
+# Minimal dexxer sustain: bandages, heal, cure and Refresh potions, the trapped pouch, gold drop and food.
+# Needs: bandages, potions and their Drink hotkeys, Bandage Self, Clear Scavenger Cache.
+# Melee and targeting stay manual. No Magery: the spell parts of the cure and heal blocks are off.
+# Stat potions are not in this loop. Add buff/potions and fight/target to drink them in a fight.
+# Hotkeys: Drink Cure, > Smart Heal/Cure Self, Drink Heal, > Greater Heal/Cure Self,
+#          Cancel Current Target, Bandage Self, Drink Refresh, Clear Scavenger Cache.
+# Generated from recipe/dexxer-basic-recipe.razor by util/build-scripts.py. Edit module/ and recipe/, not this file.
 
-@setvar! var_use_potion 0
-# STR and DEX with the Greater potion on: your base plus 20. Below these the potion is drunk.
-# Bless and the Strength and Agility spells show the same icons as the potions, so the stat
-# decides. Each potion is tried once per stat_potion_retry_frequency, so a curse that holds the
-# stat under the line while the potion still runs does not send a drink every pass.
-@setvar! var_str_potion 120
-@setvar! var_dex_potion 120
-@setvar! stat_potion_retry_frequency 5000
 
-setvar! overhead_message_timer_frequency 2700
-setvar! clear_scavenger_timer_frequency 30000
+# ========================================================================================
+# CONFIG
+# ========================================================================================
 
-if not timerexists "overhead_message_timer"
-    createtimer "overhead_message_timer"
-    settimer "overhead_message_timer" overhead_message_timer_frequency
+# ----------------------------------------------------------------------------------------
+# module/base.razor
+#
+#   config__chatty
+#      1 shows the optional overheads. Warnings show either way.
+#
+#   config__sysmsg
+#      1 writes Journal diagnostics. A block that writes one says so in its comments.
+#
+#   config__clear_at_start
+#      What Play does first (conventions 02.D).
+#        0  nothing: a cursor or a cast the player holds at Play is kept
+#        1  clear the client queues, the journal and the ignore list
+#
+#   config__use_magery
+#      1 uses Magery: the Cure and heal agents, the reagent reads and the buffs. At 0
+#      potions and bandages still go out.
+#      > This loop: config__use_magery 0 (default 1).
+#      > No Magery in this template.
+#
+#   config__use_potions
+#      1 uses potions: cure, heal, Refresh and the stat potions.
+#
+#   config__walk_guard
+#      Our casts and the walk bar.
+#        0  cast while walking, for a fight where there is no better moment to wait for
+#        1  wait while the walk bar runs, so a step does not break the cast
+#
+#   config__warmode_is_manual
+#      Whose warmode it is.
+#        0  ours: our casts ignore it
+#        1  the player's manual control window: our casts and the food stand down while it
+#           is on. Potions and bandages still go out
+# ----------------------------------------------------------------------------------------
+@setvar! config__chatty 1
+@setvar! config__sysmsg 1
+@setvar! config__clear_at_start 1
+@setvar! config__use_magery 0
+@setvar! config__use_potions 1
+@setvar! config__walk_guard 1
+@setvar! config__warmode_is_manual 0
+
+
+# ----------------------------------------------------------------------------------------
+# module/recovery/cure.razor
+#
+#   config__mana_cure
+#      Minimum current mana for the Cure agent.
+# ----------------------------------------------------------------------------------------
+@setvar! config__mana_cure 6
+
+
+# ----------------------------------------------------------------------------------------
+# module/recovery/heal.razor
+#
+#   config__heal_hits
+#      Missing hit points (not percent) that drink a heal potion.
+#
+#   config__emergency_hits
+#      Missing hit points that cast Greater Heal when no heal potion went out on this
+#      pass. Not below heal_hits.
+#
+#   config__mana_greater_heal
+#      Minimum current mana for Greater Heal. It keeps no reserve: 31 always leaves 20
+#      mana for an attack or Teleport.
+# ----------------------------------------------------------------------------------------
+@setvar! config__heal_hits 35
+@setvar! config__emergency_hits 35
+@setvar! config__mana_greater_heal 11
+
+
+# ----------------------------------------------------------------------------------------
+# module/recovery/bandage.razor
+#
+#   config__use_bandages
+#      1 uses bandages. At 0 recovery/light-heal stands in.
+#
+#   config__heal_skill_min
+#      Healing must be above this to bandage. At or below it recovery/light-heal stands
+#      in.
+#      > This loop: config__heal_skill_min 10 (default 0).
+#      > Healing must be above 10, as before the module build.
+# ----------------------------------------------------------------------------------------
+@setvar! config__use_bandages 1
+@setvar! config__heal_skill_min 10
+
+
+# ----------------------------------------------------------------------------------------
+# module/recovery/refresh.razor
+#
+#   config__refresh_stam
+#      Current stamina at or below this drinks a Refresh.
+#      > This loop: config__refresh_stam 4 (default 15).
+#      > Refresh only when nearly out of stamina, below 5 as before.
+# ----------------------------------------------------------------------------------------
+@setvar! config__refresh_stam 4
+
+
+# ----------------------------------------------------------------------------------------
+# module/pack/gold-drop.razor
+#
+#   config__gold_drop_amount
+#      Gold dropped per pass while over max weight. Gold is cheaper than the leather.
+#      > This loop: config__gold_drop_amount 500 (default 2000).
+#      > 500 per drop, as before.
+# ----------------------------------------------------------------------------------------
+@setvar! config__gold_drop_amount 500
+
+
+# ========================================================================================
+# WAIT AND COOLDOWN
+# ========================================================================================
+
+# ----------------------------------------------------------------------------------------
+# module/base.razor
+#
+#   wait__poll
+#      The poll inside a wait.
+#
+#   wait__short
+#      The pause after an action.
+#
+#   cooldown__message
+#      Spacing for repeated warnings. Without it an empty potion bag shouts every pass.
+# ----------------------------------------------------------------------------------------
+@setvar! wait__poll 100
+@setvar! wait__short 200
+@setvar! cooldown__message 3000
+
+
+# ----------------------------------------------------------------------------------------
+# module/recovery/reagents.razor
+#
+#   cooldown__reagents
+#      Reagent read interval. Five lookups each time. A refill counts within this, and
+#      running out is caught at once by the refusal line.
+# ----------------------------------------------------------------------------------------
+@setvar! cooldown__reagents 10000
+
+
+# ----------------------------------------------------------------------------------------
+# module/pack/gold-drop.razor
+#
+#   wait__gold_drop
+#      Pause after a drop, so the weight settles before the next pass.
+# ----------------------------------------------------------------------------------------
+@setvar! wait__gold_drop 1000
+
+
+# ----------------------------------------------------------------------------------------
+# module/buff/food.razor
+#
+#   cooldown__food
+#      The buff lasts far longer than this.
+# ----------------------------------------------------------------------------------------
+@setvar! cooldown__food 60000
+
+
+# ----------------------------------------------------------------------------------------
+# module/pack/scavenger.razor
+#
+#   cooldown__scavenger_clear
+#      How often the cache is cleared.
+# ----------------------------------------------------------------------------------------
+@setvar! cooldown__scavenger_clear 30000
+
+
+# ========================================================================================
+# TIMER
+# ========================================================================================
+
+# ----------------------------------------------------------------------------------------
+# module/base.razor
+#
+#   timer__message
+#      Ready on the first pass, so the first warning shows at once.
+# ----------------------------------------------------------------------------------------
+if not timerexists "timer__message"
+    createtimer "timer__message"
+endif
+settimer "timer__message" cooldown__message
+
+
+# ----------------------------------------------------------------------------------------
+# module/recovery/reagents.razor
+#
+#   timer__reagents
+#      Ready on the first pass, so reagents are read before the first cast.
+# ----------------------------------------------------------------------------------------
+if not timerexists "timer__reagents"
+    createtimer "timer__reagents"
+endif
+settimer "timer__reagents" cooldown__reagents
+
+
+# ----------------------------------------------------------------------------------------
+# module/buff/food.razor
+# ----------------------------------------------------------------------------------------
+if not timerexists "timer__food"
+    createtimer "timer__food"
+endif
+settimer "timer__food" cooldown__food
+
+
+# ----------------------------------------------------------------------------------------
+# module/pack/scavenger.razor
+#
+#   timer__scavenger_clear
+#      The first clear comes one full interval after Play.
+# ----------------------------------------------------------------------------------------
+if not timerexists "timer__scavenger_clear"
+    createtimer "timer__scavenger_clear"
+endif
+settimer "timer__scavenger_clear" 0
+
+
+# ========================================================================================
+# STATE
+# ========================================================================================
+
+# ----------------------------------------------------------------------------------------
+# module/base.razor
+#
+#   var__fighting
+#      1 while an enemy is engaged. buff/potions drinks only then. fight/target sets it
+#      every pass, and the pvp recipe keeps it at 1.
+#
+#   var__hold_casts
+#      1 while a block keeps the cast window for itself. buff/spells stands down.
+#      escape/recall sets it once a Recall is due.
+#
+#   var__hold_gathering
+#      1 while gathering and its packing wait. escape/recall sets it.
+# ----------------------------------------------------------------------------------------
+@setvar! var__fighting 0
+@setvar! var__hold_casts 0
+@setvar! var__hold_gathering 0
+
+
+# ----------------------------------------------------------------------------------------
+# module/recovery/reagents.razor
+#
+#   var__regs_cure, var__regs_heal, var__regs_greater_heal, var__regs_reactive_armor,
+#   var__regs_magic_reflect
+#      Reagent flags, written only by REAGENTS. 1 when every reagent of that spell was
+#      found.
+#        Cure            garlic 3972, ginseng 3973
+#        Heal            garlic, ginseng, silk 3981
+#        Greater Heal    garlic, ginseng, silk, mandrake 3974
+#        Reactive Armor  garlic, silk, ash 3980
+#        Reflection      garlic, silk, mandrake
+#
+#   var__has_garlic, var__has_ginseng, var__has_mandrake, var__has_ash, var__has_silk
+#      Scratch: 1 when that reagent was found on the last read.
+# ----------------------------------------------------------------------------------------
+@setvar! var__regs_cure 0
+@setvar! var__regs_heal 0
+@setvar! var__regs_greater_heal 0
+@setvar! var__regs_reactive_armor 0
+@setvar! var__regs_magic_reflect 0
+@setvar! var__has_garlic 0
+@setvar! var__has_ginseng 0
+@setvar! var__has_mandrake 0
+@setvar! var__has_ash 0
+@setvar! var__has_silk 0
+
+
+# ----------------------------------------------------------------------------------------
+# module/recovery/heal.razor
+#
+#   var__heal_potion_out
+#      Scratch: 1 once a heal potion went out on this pass.
+# ----------------------------------------------------------------------------------------
+@setvar! var__heal_potion_out 0
+
+
+# ----------------------------------------------------------------------------------------
+# module/base.razor
+# ----------------------------------------------------------------------------------------
+# The pvp expression means the structured-PvP restrictions, where these loops may not run.
+if pvp
+    overhead "[ script, blocked ]" 254
+    stop
 endif
 
-if not timerexists "clear_scavenger_timer"
-    createtimer "clear_scavenger_timer"
-    settimer "clear_scavenger_timer" overhead_message_timer_frequency
+if config__clear_at_start = 1
+    clearall
+    clearsysmsg
+    cleardragdrop
+    clearignore
 endif
 
-if not timerexists "str_potion_timer"
-    createtimer "str_potion_timer"
-endif
-settimer "str_potion_timer" stat_potion_retry_frequency
 
-if not timerexists "agi_potion_timer"
-    createtimer "agi_potion_timer"
-endif
-settimer "agi_potion_timer" stat_potion_retry_frequency
-
-
-@clearignore
-
+# ----------------------------------------------------------------------------------------
+# recipe/dexxer-basic-recipe.razor
+# ----------------------------------------------------------------------------------------
+# The codex hotbar, opened once when it is not up.
 if not gumpexists 2016719803
     say "[codexhotbar"
 endif
 
+
+# ========================================================================================
+# MAIN LOOP
+# ========================================================================================
 while not dead
-    while queued
-        wait 100
-    endwhile
+    # ------------------------------------------------------------------------------------
+    # STRUCTURED PVP STOP                                                module/base.razor
+    #
+    # The pvp expression means structured-PvP restrictions, not a field PK encounter.
+    # ------------------------------------------------------------------------------------
+    if pvp
+        overhead "[ script, blocked ]" 254
+        stop
+    endif
 
-    while casting
-        wait 100
-    endwhile
+    # ------------------------------------------------------------------------------------
+    # REAGENTS                                              module/recovery/reagents.razor
+    #
+    # On the interval, or at once after a refusal for reagents, so a stale flag cannot
+    # send the same doomed cast every pass.
+    # ------------------------------------------------------------------------------------
+    if config__use_magery = 1
+        if timer "timer__reagents" >= cooldown__reagents or insysmsg "More reagents are needed"
+            settimer "timer__reagents" 0
 
-    while weight > maxweight
-        if findtype "gold coin" backpack as found_gold
-            lift found_gold 500
-            droprelloc 0 0
-            getlabel backpack backpack_description
+            @setvar! var__has_garlic 0
+            @setvar! var__has_ginseng 0
+            @setvar! var__has_mandrake 0
+            @setvar! var__has_ash 0
+            @setvar! var__has_silk 0
 
-            if insysmsg "cannot drop anything"
-                drop backpack -1 -1 -1
+            if findtype 3972 self
+                @setvar! var__has_garlic 1
+            endif
+            if findtype 3973 self
+                @setvar! var__has_ginseng 1
+            endif
+            if findtype 3974 self
+                @setvar! var__has_mandrake 1
+            endif
+            if findtype 3980 self
+                @setvar! var__has_ash 1
+            endif
+            if findtype 3981 self
+                @setvar! var__has_silk 1
             endif
 
-            wait 1000
-            overhead "[ gold, dropped ]" 290
-        endif
-    endwhile
+            @setvar! var__regs_cure 0
+            @setvar! var__regs_heal 0
+            @setvar! var__regs_greater_heal 0
+            @setvar! var__regs_reactive_armor 0
+            @setvar! var__regs_magic_reflect 0
 
-    if not findbuff 'Food Satisfaction'
-        if findtype tray backpack as food
-            dclick food
-            wait 350
+            if var__has_garlic = 1 and var__has_ginseng = 1
+                @setvar! var__regs_cure 1
+            endif
+            if var__has_garlic = 1 and var__has_ginseng = 1 and var__has_silk = 1
+                @setvar! var__regs_heal 1
+            endif
+            if var__has_garlic = 1 and var__has_ginseng = 1 and var__has_silk = 1 and var__has_mandrake = 1
+                @setvar! var__regs_greater_heal 1
+            endif
+            if var__has_garlic = 1 and var__has_silk = 1 and var__has_ash = 1
+                @setvar! var__regs_reactive_armor 1
+            endif
+            if var__has_garlic = 1 and var__has_silk = 1 and var__has_mandrake = 1
+                @setvar! var__regs_magic_reflect 1
+            endif
         endif
     endif
 
-    if diffhits > 0 or poisoned
-        if not bandaging and skill "Healing" > 10
-            if findtype "clean bandage%s%" self
-                hotkey "Bandage Self"
-                wait 200
-            else
-                if timer "overhead_message_timer" > overhead_message_timer_frequency
-                    overhead "[ bandage, out ]" 254
-                    settimer "overhead_message_timer" 0
-                endif
-            endif
-        endif
-    endif
-
+    # ------------------------------------------------------------------------------------
+    # PARALYZE                                                 module/recovery/pouch.razor
+    #
+    # Nothing else can act while held, so the pouch goes out at once, as in
+    # bard-necro-enhanced.
+    # ------------------------------------------------------------------------------------
     if paralyzed
         if findtype 3705 backpack 38
             yell "[Pouch"
-            getlabel backpack ping
-        else
+            wait wait__short
+        elseif timer "timer__message" >= cooldown__message
             overhead "[ pouch, out ]" 254
+            settimer "timer__message" 0
         endif
     endif
 
-    if hp <= 65
-        if findtype "Yellow Potion" self as found_potion
-                getlabel found_potion found_potion_description
-
-            if "next usable" in found_potion_description
-                if timer "overhead_message_timer" > overhead_message_timer_frequency
-                    overhead "[ heal pot, {{found_potion_description}} ]" 290
-                    settimer "overhead_message_timer" 0
-                endif
-            else
-                if hidden
-                    break
-                endif
-
-                dclick found_potion
-                getlabel backpack ping
-                cooldown "heal pot" 10000
-            endif
+    # ------------------------------------------------------------------------------------
+    # CURE                                                      module/recovery/cure.razor
+    #
+    # Potion first, it is instant and has no cooldown, and it goes out during a cast.
+    # While any cure potion is carried the agent is not used, so mana stays for Greater
+    # Heal. The agent waits for the walk bar and for warmode as config__walk_guard and
+    # config__warmode_is_manual say.
+    # ------------------------------------------------------------------------------------
+    if poisoned and not paralyzed and not hidden and not queued and not targetexists
+        if config__use_potions = 1 and findtype "Orange Potion" self
+            hotkey "Drink Cure"
+            wait wait__short
         else
-            if timer "overhead_message_timer" > overhead_message_timer_frequency
-                overhead "[ heal pot, out ]" 254
-                settimer "overhead_message_timer" 0
-            endif
-        endif
-    endif
-
-    if poisoned
-        if findtype "Orange Potion" self as found_potion
-            if hidden
-                break
-            endif
-
-            dclick found_potion
-            getlabel backpack ping
-        else
-            if timer "overhead_message_timer" > overhead_message_timer_frequency
+            if config__use_potions = 1 and timer "timer__message" >= cooldown__message
                 overhead "[ cure pot, out ]" 254
-                settimer "overhead_message_timer" 0
+                settimer "timer__message" 0
+            endif
+
+            if config__use_magery = 1 and var__regs_cure = 1 and mana >= config__mana_cure and not casting
+                if config__warmode_is_manual = 0 or not warmode
+                    if config__walk_guard = 0 or cooldown "walk" = 0
+                        hotkey "> Smart Heal/Cure Self"
+                        if config__sysmsg = 1
+                            sysmsg "Agent: Smart Heal/Cure Self for poison." 88
+                        endif
+                        wait wait__short
+
+                        for 60
+                            if not casting
+                                break
+                            endif
+                            if insysmsg "Your concentration is disturbed, thus ruining thy spell."
+                                break
+                            endif
+                            wait wait__poll
+                        endfor
+                    endif
+                endif
             endif
         endif
     endif
 
-    if stam < 5
-        if findtype "Red Potion" backpack as found_potion
-            dclick found_potion
-            wait 200
-        else
-            if timer "overhead_message_timer" > overhead_message_timer_frequency
-                overhead "[ refresh, out ]" 254
-                settimer "overhead_message_timer" 0
+    # ------------------------------------------------------------------------------------
+    # HEAL                                                      module/recovery/heal.razor
+    #
+    # Heavy damage drinks first, because the potion is instant and goes out during a cast.
+    # Greater Heal follows when no potion went out on this pass and the loss is at the
+    # emergency line: none carried, on its own cooldown, or the bar still running. The bar
+    # skips the label read while it runs. The label stays authoritative when the bar is
+    # missing. Greater Heal waits for the walk bar and for warmode as config__walk_guard
+    # and config__warmode_is_manual say.
+    # ------------------------------------------------------------------------------------
+    if not poisoned and not paralyzed and not hidden and not queued and not targetexists and diffhits >= config__heal_hits
+        @setvar! var__heal_potion_out 0
+        if config__use_potions = 1 and cooldown "heal pot" = 0
+            if findtype "Yellow Potion" self as alias__heal_potion
+                getlabel alias__heal_potion label__heal_potion
+                if "next usable" in label__heal_potion
+                    # Still on its own cooldown.
+                else
+                    hotkey "Drink Heal"
+                    @setvar! var__heal_potion_out 1
+                    wait wait__short
+                endif
+            elseif timer "timer__message" >= cooldown__message
+                overhead "[ heal pot, out ]" 254
+                settimer "timer__message" 0
+            endif
+        endif
+
+        if var__heal_potion_out = 0 and diffhits >= config__emergency_hits and config__use_magery = 1 and var__regs_greater_heal = 1 and mana >= config__mana_greater_heal and not casting
+            if config__warmode_is_manual = 0 or not warmode
+                if config__walk_guard = 0 or cooldown "walk" = 0
+                    hotkey "> Greater Heal/Cure Self"
+                    if config__sysmsg = 1
+                        sysmsg "Agent: Greater Heal/Cure Self." 88
+                    endif
+                    wait wait__short
+
+                    for 60
+                        if not casting
+                            break
+                        endif
+                        if insysmsg "Your concentration is disturbed, thus ruining thy spell."
+                            break
+                        endif
+                        wait wait__poll
+                    endfor
+
+                    # The agent leaves its beneficial cursor up when there is nothing left to heal.
+                    if targetexists "beneficial" and diffhits = 0
+                        hotkey "Cancel Current Target"
+                        wait wait__short
+                    endif
+                endif
             endif
         endif
     endif
 
-    if str < var_str_potion and timer "str_potion_timer" >= stat_potion_retry_frequency and var_use_potion = 1 and find lasttarget ground -1 -1 12
-        settimer "str_potion_timer" 0
-        if findtype "White Potion" backpack as found_potion
-            dclick found_potion
-            wait 200
-        else
-            if timer "overhead_message_timer" > overhead_message_timer_frequency
-                overhead "[ str, out ]" 254
-                settimer "overhead_message_timer" 0
+    # ------------------------------------------------------------------------------------
+    # BANDAGE                                                module/recovery/bandage.razor
+    #
+    # Never restarts a running bandage, and full health does not start one. Its target
+    # cursor would replace a held precast, so it waits while any cursor is up.
+    # ------------------------------------------------------------------------------------
+    if config__use_bandages = 1 and not bandaging and not paralyzed and not hidden and not queued and not targetexists and skill "Healing" > config__heal_skill_min
+        if diffhits > 0 or poisoned
+            if findtype 3617 self
+                hotkey "Bandage Self"
+                wait wait__short
+            elseif timer "timer__message" >= cooldown__message
+                overhead "[ bandage, out ]" 254
+                settimer "timer__message" 0
             endif
         endif
     endif
 
-    if dex < var_dex_potion and timer "agi_potion_timer" >= stat_potion_retry_frequency and var_use_potion = 1 and find lasttarget ground -1 -1 12
-        settimer "agi_potion_timer" 0
-        if findtype "Blue Potion" backpack as found_potion
-            dclick found_potion
-            wait 200
-        else
-            if timer "overhead_message_timer" > overhead_message_timer_frequency
-                overhead "[ agi, out ]" 254
-                settimer "overhead_message_timer" 0
+    # ------------------------------------------------------------------------------------
+    # REFRESH                                                module/recovery/refresh.razor
+    # ------------------------------------------------------------------------------------
+    if stam <= config__refresh_stam and config__use_potions = 1 and not paralyzed and not hidden and not queued and not targetexists
+        if findtype "Red Potion" self
+            hotkey "Drink Refresh"
+            wait wait__short
+        endif
+    endif
+
+    # ------------------------------------------------------------------------------------
+    # GOLD                                                     module/pack/gold-drop.razor
+    #
+    # One drop per pass, so recovery still runs between drops. A refused drop goes back to
+    # the pack.
+    # ------------------------------------------------------------------------------------
+    if weight > maxweight
+        if not hidden and not queued and not casting and not targetexists
+            if findtype "gold coin" backpack as alias__found_gold
+                lift alias__found_gold config__gold_drop_amount
+                droprelloc 0 0
+                if config__sysmsg = 1
+                    sysmsg "Gold drop: up to {{config__gold_drop_amount}} at your feet, weight over max." 88
+                endif
+                wait wait__short
+
+                if insysmsg "cannot drop anything"
+                    drop backpack -1 -1 -1
+                endif
+
+                wait wait__gold_drop
+                if config__chatty = 1
+                    overhead "[ gold, dropped ]" 290
+                endif
+            elseif timer "timer__message" >= cooldown__message
+                overhead "[ weight, over ]" 254
+                settimer "timer__message" 0
             endif
         endif
     endif
 
-    if not findbuff 'Magic Resist Potion' and var_use_potion = 1 and find lasttarget ground -1 -1 12
-        if findtype "Black Potion" backpack as found_potion
-            dclick found_potion
-            wait 200
-        else
-            if timer "overhead_message_timer" > overhead_message_timer_frequency
-                overhead "[ resist, out ]" 254
-                settimer "overhead_message_timer" 0
+    # ------------------------------------------------------------------------------------
+    # FOOD                                                          module/buff/food.razor
+    #
+    # Looked at once a minute. The buff lasts far longer. With config__warmode_is_manual 1
+    # it stands down in warmode, as our casts do.
+    # ------------------------------------------------------------------------------------
+    if timer "timer__food" >= cooldown__food and not findbuff "Food Satisfaction"
+        if config__warmode_is_manual = 0 or not warmode
+            if not hidden and not queued and not casting and not targetexists
+                settimer "timer__food" 0
+                if findtype tray backpack as alias__food
+                    dclick alias__food
+                    wait wait__short
+                endif
             endif
         endif
     endif
 
-
-    if timer "clear_scavenger_timer" > clear_scavenger_timer_frequency
-        sysmsg "Clear Scavenger Cache"
+    # ------------------------------------------------------------------------------------
+    # SCAVENGER CACHE                                          module/pack/scavenger.razor
+    #
+    # The scavenger passes over an item it already handled until its cache is cleared, so a
+    # clear every 30 seconds gives those items another try.
+    # ------------------------------------------------------------------------------------
+    if timer "timer__scavenger_clear" >= cooldown__scavenger_clear
+        settimer "timer__scavenger_clear" 0
         hotkey "Clear Scavenger Cache"
-        settimer "clear_scavenger_timer" 0
+        if config__sysmsg = 1
+            sysmsg "Scavenger cache cleared." 88
+        endif
     endif
+
+    # ------------------------------------------------------------------------------------
+    # END OF PASS                                                        module/base.razor
+    # ------------------------------------------------------------------------------------
+    wait wait__poll
 endwhile

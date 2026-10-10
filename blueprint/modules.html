@@ -76,11 +76,11 @@
 <tr><td><code>module/fight/</code></td><td>근접 전투 보조</td>
 <td><code>target</code> (기억한 적), <code>weapon-swap</code> (pvp 무기 슬롯), <code>axe</code>, <code>sword-codex</code>, <code>parry-codex</code>, <code>weapon-ability</code></td></tr>
 <tr><td><code>module/gather/</code></td><td>채집</td><td><code>lumberjacking</code> (Smart Harvest), <code>skinning</code> (칼질)</td></tr>
-<tr><td><code>module/pack/</code></td><td>무게와 루트 파우치</td><td><code>gold-drop</code>, <code>leather</code>, <code>lumber</code> (Logs → Boards → 파우치)</td></tr>
+<tr><td><code>module/pack/</code></td><td>무게와 루트 파우치</td><td><code>gold-drop</code>, <code>leather</code>, <code>lumber</code> (Logs → Boards → 파우치), <code>scavenger</code> (스캐빈저 캐시 비우기)</td></tr>
 <tr><td><code>module/escape/</code></td><td>PK 피하기</td><td><code>tracking</code> (헌트 필터 설정), <code>recall</code> (자동 리콜 한 번)</td></tr>
 <tr><td><code>recipe/&lt;루프&gt;-recipe.razor</code></td><td>루프 하나</td><td>헤더, 도는 순서대로 적은 블록과 그 밑에 붙인 설정 변경, 이 루프만의 준비 (03절)</td></tr>
 <tr><td><code>util/build-scripts.py</code></td><td>조립기</td><td>결과물을 만들고 레시피의 블록 칸을 정리한다. <code>--settings</code>, <code>--new-module</code>, <code>--check</code> (05절)</td></tr>
-<tr><td><code>script/combat/pvp.razor</code>, <code>script/gather/*.razor</code></td><td>결과물</td><td>직접 고치지 않는다</td></tr>
+<tr><td><code>script/combat/pvp.razor</code>, <code>script/combat/dexxer-basic.razor</code>, <code>script/gather/*.razor</code></td><td>결과물</td><td>직접 고치지 않는다</td></tr>
 </tbody>
 </table>
 <p>레시피 이름에 <code>-recipe</code>를 붙이는 것은 편집기 탭에서 결과물과 헷갈리지 않게 하려는 것이고, <code>.razor</code>는 하이라이팅을 받으려는 것이다.
@@ -447,11 +447,32 @@ pvp 결과물에는 시작 4줄이 <code>if config__clear_at_start = 1</code> �
 </table>
 <p>인게임 확인 항목은 <a href="open-items.html#09">open-items.html</a> 09절에 더했다.</p>
 
+<h3 id="08.C">08.C dexxer-basic</h3>
+<p>같은 날 <code>combat/dexxer-basic</code>을 <code>recipe/dexxer-basic-recipe.razor</code>로 옮겼다. 블록은 모두 있던 모듈이고,
+30초마다 <code>Clear Scavenger Cache</code>를 누르는 부분만 <code>pack/scavenger</code>로 새로 만들었다. 옛 값은 레시피 설정으로 옮겼다
+(Healing 10 초과에서 붕대, 스태미나 5 미만에서 Refresh, 골드 500씩, 마법 끔).</p>
+<table>
+<thead>
+<tr>
+<th>무엇</th>
+<th>전</th>
+<th>지금</th>
+</tr>
+</thead>
+<tbody>
+<tr><td>힐 포션</td><td>HP 65 이하</td><td>잃은 HP 35 이상 (<code>heal_hits</code>). 최대 HP 100이면 같다</td></tr>
+<tr><td>음식</td><td>패스마다 Food Satisfaction을 보고 먹었다</td><td>60초마다 본다 (<code>buff/food</code>)</td></tr>
+<tr><td>포션 쓰기</td><td><code>findtype</code> 뒤 <code>dclick</code></td><td><code>Drink Cure</code> 같은 Razor 핫키</td></tr>
+<tr><td>경고</td><td>Refresh·스탯 포션이 없을 때도 띄웠다</td><td>큐어·힐 포션·붕대·주머니가 없을 때만</td></tr>
+<tr><td>스탯 포션</td><td>코드는 있었지만 꺼져 있었다 (<code>var_use_potion 0</code>)</td><td>넣지 않았다. 쓰려면 <code>buff/potions</code>와 <code>fight/target</code>을 더한다</td></tr>
+<tr><td>패스 첫머리</td><td><code>queued</code>와 시전이 끝날 때까지 기다렸다</td><td>블록마다 <code>queued</code>와 시전을 보고 비켜 간다</td></tr>
+</tbody>
+</table>
+
 <h2 id="09">09 아직 옮기지 않은 것</h2>
 <ul>
 <li><code>combat/bard-necro-enhanced</code>: 하우스키핑 틱, 교전과 이동으로 패스를 나누는 구조, 조건 순서 규칙이 다른 루프와 달라 손으로 쓴 그대로 둔다.
 모듈을 쓰게 하려면 그 구조부터 바꿔야 해서 따로 정한다.</li>
-<li><code>combat/dexxer-basic</code>: 예전 스타일 파일이라 그대로 둔다.</li>
 <li><code>script/archive/</code>: 쓰지 않는 스크립트라 옮기지 않는다.</li>
 </ul>
 </main>

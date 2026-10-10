@@ -1,0 +1,117 @@
+# Recipe for script/combat/dexxer-basic.razor. Build it with: python3 util/build-scripts.py
+# Every setting of this loop: python3 util/build-scripts.py --settings recipe/dexxer-basic-recipe.razor
+# @ output script/combat/dexxer-basic.razor
+
+
+# ========================================================================================
+# @ header
+# ========================================================================================
+
+# Minimal dexxer sustain: bandages, heal, cure and Refresh potions, the trapped pouch, gold drop and food.
+# Needs: bandages, potions and their Drink hotkeys, Bandage Self, Clear Scavenger Cache.
+# Melee and targeting stay manual. No Magery: the spell parts of the cure and heal blocks are off.
+# Stat potions are not in this loop. Add buff/potions and fight/target to drink them in a fight.
+
+
+# ========================================================================================
+# @ blocks
+#
+#   One box per block, in the order the blocks run, base first. The builder writes the box.
+#   Yours are the "> " lines in it (a note on the block, or under a setting the reason for
+#   its value) and the @setvar! lines under it. Write a new @setvar! line under any box, its
+#   reason as a "#" line right above it: the builder moves both to the box it belongs to.
+# ========================================================================================
+
+# ----------------------------------------------------------------------------------------
+# @ use base
+#
+#   The frame of every loop. Every recipe lists it first.
+#
+#   use_magery (default 1)
+#      1 uses Magery: the Cure and heal agents, the reagent reads and the buffs. At 0
+#      potions and bandages still go out.
+#      Read by recovery/reagents, recovery/cure, recovery/heal.
+#      > No Magery in this template.
+# ----------------------------------------------------------------------------------------
+@setvar! config__use_magery 0
+
+# ----------------------------------------------------------------------------------------
+# @ use recovery/reagents
+#
+#   Reagent flags for the Magery casts, read on a clock and right after a refusal.
+#   > The cure and heal blocks read its flags. With Magery off it reads nothing.
+# ----------------------------------------------------------------------------------------
+
+# ----------------------------------------------------------------------------------------
+# @ use recovery/pouch
+#
+#   The trapped pouch while paralyzed, the one thing that can act then.
+# ----------------------------------------------------------------------------------------
+
+# ----------------------------------------------------------------------------------------
+# @ use recovery/cure
+#
+#   Cure potion first, then the Smart Heal/Cure agent when none is carried.
+# ----------------------------------------------------------------------------------------
+
+# ----------------------------------------------------------------------------------------
+# @ use recovery/heal
+#
+#   Heal potion at heal_hits, else Greater Heal at emergency_hits.
+# ----------------------------------------------------------------------------------------
+
+# ----------------------------------------------------------------------------------------
+# @ use recovery/bandage
+#
+#   Self bandage while hurt or poisoned, never over a running one.
+#
+#   heal_skill_min (default 0)
+#      Healing must be above this to bandage. At or below it recovery/light-heal stands
+#      in.
+#      > Healing must be above 10, as before the module build.
+# ----------------------------------------------------------------------------------------
+@setvar! config__heal_skill_min 10
+
+# ----------------------------------------------------------------------------------------
+# @ use recovery/refresh
+#
+#   Total Refresh at or below refresh_stam.
+#
+#   refresh_stam (default 15)
+#      Current stamina at or below this drinks a Refresh.
+#      > Refresh only when nearly out of stamina, below 5 as before.
+# ----------------------------------------------------------------------------------------
+@setvar! config__refresh_stam 4
+
+# ----------------------------------------------------------------------------------------
+# @ use pack/gold-drop
+#
+#   Drops gold at your feet while over max weight, one drop per pass.
+#
+#   gold_drop_amount (default 2000)
+#      Gold dropped per pass while over max weight. Gold is cheaper than the leather.
+#      > 500 per drop, as before.
+# ----------------------------------------------------------------------------------------
+@setvar! config__gold_drop_amount 500
+
+# ----------------------------------------------------------------------------------------
+# @ use buff/food
+#
+#   Eats from a tray while Food Satisfaction is missing, looked at once a minute.
+# ----------------------------------------------------------------------------------------
+
+# ----------------------------------------------------------------------------------------
+# @ use pack/scavenger
+#
+#   Clears the Razor scavenger cache every 30 seconds.
+# ----------------------------------------------------------------------------------------
+
+
+# ========================================================================================
+# @ setup
+# ========================================================================================
+
+# The codex hotbar, opened once when it is not up.
+if not gumpexists 2016719803
+    say "[codexhotbar"
+endif
