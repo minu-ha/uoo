@@ -2062,7 +2062,7 @@ warmode를 켜면 수동 모드라 이 블록들이 서고, 큐어, 힐, 포션,
 <pre class="mermaid">flowchart TD
   drain("드레인&lt;br&gt;큐와 시전이 빌 때까지") --> survive("생존&lt;br&gt;마비 · 독 · HP") --> cache("타겟 캐시") --> flags("패스 플래그") --> house("하우스키핑&lt;br&gt;5초마다") --> mush("버섯") --> engaged{"교전 중인가"}
   engaged -- 예 --> combat("교전 블록 일곱")
-  engaged -- 아니요 --> walk("이동 블록 넷")</pre>
+  engaged -- 아니요 --> walk("이동 블록 셋")</pre>
 <p>위의 여섯 블록은 모든 패스가 지나고, 교전인지는 그 뒤에 한 번만 묻는다. 교전 패스는 이동 블록을, 이동 패스는 교전 블록을 보지 않는다.</p>
 <table>
 <thead>
