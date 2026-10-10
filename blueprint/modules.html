@@ -28,7 +28,7 @@
 <tr><td><a href="#04">04</a></td><td>모듈은 어떻게 쓰나</td></tr>
 <tr><td><a href="#05">05</a></td><td>조립기는 무엇을 하고 무엇을 막나</td></tr>
 <tr><td><a href="#06">06</a></td><td>core 모듈과 스위치, 모듈끼리 주고받는 이름</td></tr>
-<tr><td><a href="#07">07</a></td><td>값을 바꾸거나 블록을 고치거나 루프를 새로 만들 때의 순서</td></tr>
+<tr><td><a href="#07">07</a></td><td>값을 바꿀 때, 블록을 더하거나 모듈에 없는 동작을 넣을 때의 순서</td></tr>
 <tr><td><a href="#08">08</a></td><td>2026-10-10 옮기면서 바뀐 것</td></tr>
 <tr><td><a href="#09">09</a></td><td>아직 옮기지 않은 것</td></tr>
 </tbody>
@@ -38,7 +38,7 @@
 <h2 id="01" data-part="설계">01 왜 모듈인가</h2>
 <p><strong>같은 블록이 루프마다 복사돼 있었다.</strong> 2026-10-09 스탯 포션 판정을 바꾸는 데 스크립트 8개를 고쳤고,
 그중 skinning-enhanced에는 다른 루프에서 이미 고친 <code>elseif</code> 사슬 버그가 그대로 남아 있었다.
-회복·포션·버프·시약 블록은 모듈로 한 벌만 두고, 루프마다의 레시피에는 어떤 블록을 어떤 순서로 쓰는지와 그 루프의 설정 전부를 적는다.</p>
+회복·포션·버프·시약 블록은 모듈로 한 벌만 두고, 루프마다의 레시피에는 어떤 블록을 어떤 순서로 쓰는지와 그 루프가 기본과 다르게 쓰는 설정만 적는다.</p>
 <p><strong>조립은 저장소에서 한다.</strong> Razor는 한 번에 스크립트 하나만 돌리고, 다른 스크립트를 켜면 지금 것이 멈춘다. 함수 호출이나 include도 없다.
 게임 안에서 모듈 스크립트를 차례로 켜는 방식은 쓰지 않는다.</p>
 <ul>
@@ -49,7 +49,8 @@
 <p>조립기가 만든 결과물은 지금까지와 같은 단일 <code>.razor</code> 파일이다. 게임과 핫키는 달라지지 않는다.</p>
 
 <h2 id="02">02 폴더와 역할</h2>
-<p><strong>설정 (<code>config__</code>)은 레시피에만, 동작은 모듈에만 둔다.</strong> 루프 하나의 설정을 고치려면 그 레시피 하나만 열면 된다.</p>
+<p><strong>동작과 설정의 기본값은 모듈에, 루프마다 바꾸는 값은 레시피에 둔다.</strong> 레시피에 적지 않은 설정은 모듈 기본값을 쓴다.
+루프 하나의 값을 고치려면 그 레시피 하나만 열면 되고, 그 루프가 쓰는 설정 전체는 <code>--settings</code>로 본다 (07절).</p>
 <table>
 <thead>
 <tr>
@@ -59,12 +60,12 @@
 </tr>
 </thead>
 <tbody>
-<tr><td><code>recipe/&lt;루프&gt;-recipe.razor</code></td><td>루프 하나가 무엇인지</td><td>헤더, 도는 순서대로 적은 블록 목록, 그 루프의 설정 전부, 그 루프만의 준비 (시작 메시지, 루트 파우치, 복귀 등록)</td></tr>
+<tr><td><code>recipe/&lt;루프&gt;-recipe.razor</code></td><td>루프 하나가 무엇인지</td><td>헤더, 도는 순서대로 적은 블록 목록, 그 루프가 기본과 다르게 쓰는 설정과 그 이유, 그 루프만의 준비 (시작 메시지, 루트 파우치, 복귀 등록)</td></tr>
 <tr><td><code>module/core/</code></td><td>여러 루프가 같이 쓰는 블록</td><td>시작 줄, PvP 정지, 시약, 마비, 큐어, 힐, 붕대, 가벼운 Heal, Refresh, 스탯 포션, 자기 버프, 패스 끝.
 그리고 블록이 아닌 공용 모듈: 출력 스위치 (<code>core/output</code>), 회복 스위치 (<code>core/switches</code>), 대기 값 (<code>core/wait</code>), 경고 간격 (<code>core/message</code>)</td></tr>
 <tr><td><code>module/combat/</code></td><td>전투 루프만 쓰는 블록</td><td>pvp의 무기 슬롯</td></tr>
 <tr><td><code>module/gather/</code></td><td>채집 루프만 쓰는 블록</td><td>전투 대상, 도끼, 골드, 소드·패리 codex, 무기 능력, 칼질, 음식, 가죽, housekeeping, Tracking 설정, 자동 리콜, 벌목</td></tr>
-<tr><td><code>util/build-scripts.py</code></td><td>조립기</td><td>레시피를 읽어 결과물을 만들고, 빠진 설정과 안 쓰는 설정을 막는다</td></tr>
+<tr><td><code>util/build-scripts.py</code></td><td>조립기</td><td>레시피를 읽어 결과물을 만든다. 그 루프의 설정 전체를 보여 주고 (<code>--settings</code>), 새 모듈의 빈 틀을 만든다 (<code>--new-module</code>)</td></tr>
 <tr><td><code>script/combat/pvp.razor</code>, <code>script/gather/*.razor</code></td><td>결과물</td><td>직접 고치지 않는다</td></tr>
 </tbody>
 </table>
@@ -85,8 +86,8 @@
 <tr><td><code>#@ output script/&lt;폴더&gt;/&lt;루프&gt;.razor</code></td><td>결과물 경로</td></tr>
 <tr><td><code>#@ header</code></td><td>결과물 맨 위 주석 (<a href="conventions.html#02.C">conventions.html</a> 02.C절). 핫키 줄은 조립기가 붙인다</td></tr>
 <tr><td><code>#@ blocks</code></td><td>한 줄에 <code>#@ use &lt;모듈&gt;  설명</code> 하나. 루프 안에서 도는 순서다. <code>#</code> 주석은 읽는 사람을 위한 구분이다</td></tr>
-<tr><td><code>#@ config</code></td><td>블록들이 읽는 설정 전부. 묶음마다 <code># ---- core/heal ----</code>처럼 그 설정을 읽는 모듈을 적는다.
-그 루프만 기본과 다른 값이면 위에 <code># This loop: 이유</code>를 쓴다. 결과물의 CONFIG가 된다</td></tr>
+<tr><td><code>#@ config</code></td><td>이 루프가 기본과 다르게 쓰는 설정만. 바로 위 주석이 이유가 되고, 결과물에는 <code># This loop: 이유</code>로 붙는다.
+어느 모듈의 설정인지는 조립기가 안다. 블록 어디에도 없는 설정을 적으면 멈춘다</td></tr>
 <tr><td><code>#@ state</code>, <code>#@ setup</code></td><td>그 루프만의 상태와 루프 전 준비 (없어도 된다)</td></tr>
 </tbody>
 </table>
@@ -99,7 +100,11 @@
 #@ use core/reagents           reagent flags, read after Tracking so it cannot consume a report
 
 #@ config
-# ---- core/heal -----------------------------------------------------------------
+# Bandages handle ordinary damage, so Greater Heal waits for 45.
+@setvar! config__emergency_hits 45</code></pre>
+<p>결과물의 CONFIG에는 모든 설정이 모듈별로 나오고, 레시피에서 바꾼 줄에만 이유가 붙는다.</p>
+<pre><code># ---- core/heal ---------------------------------------------------------------------
+# Missing hit points, not percent.
 @setvar! config__heal_hits 35
 # This loop: Bandages handle ordinary damage, so Greater Heal waits for 45.
 @setvar! config__emergency_hits 45</code></pre>
@@ -121,7 +126,7 @@ Razor 파일은 섹션 순서가 정해져 있어서, 모듈은 부분별 조각
 <tr><td><code>#@ needs &lt;모듈&gt; …</code></td><td>이 모듈이 읽는 값을 선언하는 모듈. 블록인 것은 레시피에 있어야 하고, 블록이 아닌 공용 모듈 (<code>core/wait</code> 등)은 조립기가 알아서 넣는다</td></tr>
 <tr><td><code>#@ after &lt;모듈&gt; …</code></td><td>둘 다 있을 때 패스에서 이 모듈보다 앞서야 하는 모듈</td></tr>
 <tr><td><code>#@ hotkeys A, B</code></td><td>이 모듈이 부르는 Razor 핫키. 결과물 헤더의 <code>Hotkeys:</code> 줄에 모인다</td></tr>
-<tr><td><code>#@ settings</code></td><td>이 모듈이 읽는 설정의 설명서. 주석과 제안 값이 든 <code>@setvar! config__</code> 줄이다. 결과물에 나가지 않고, <code>--settings</code>가 이것을 레시피용으로 뽑아 준다</td></tr>
+<tr><td><code>#@ settings</code></td><td>이 모듈이 읽는 설정과 주석, 기본값. 결과물 CONFIG에 모듈별로 나가고, 레시피가 바꾼 값만 그 값으로 바뀐다</td></tr>
 <tr><td><code>#@ prelude</code></td><td>헤더 바로 뒤. 시작 4줄, PvP 정지</td></tr>
 <tr><td><code>#@ wait</code> / <code>#@ state</code></td><td>WAIT AND COOLDOWN, STATE에 들어갈 내부 값 (<code>wait__</code>, <code>cooldown__</code>, <code>var__</code>)</td></tr>
 <tr><td><code>#@ timer</code> / <code>#@ ready</code></td><td>TIMER의 <code>createtimer</code> 묶음과 그 뒤의 첫 <code>settimer</code> (<a href="conventions.html#04">conventions.html</a> 04절)</td></tr>
@@ -129,18 +134,17 @@ Razor 파일은 섹션 순서가 정해져 있어서, 모듈은 부분별 조각
 <tr><td><code>#@ loop</code></td><td><code>while not dead</code> 안의 블록. 배너와 주석까지 그대로 나간다</td></tr>
 </tbody>
 </table>
-<p>모듈은 <code>config__</code>에 값을 넣지 않는다. 내부 값 (<code>wait__</code>, <code>cooldown__</code>)은 모듈이 정하고 모든 루프가 같은 값을 쓴다.
-루프마다 달라야 하는 값이 생기면 <code>config__</code> 설정으로 바꿔 레시피로 올린다.</p>
+<p>모듈의 코드 부분은 <code>config__</code>에 값을 넣지 않는다. 기본값은 <code>#@ settings</code>에만 쓴다.
+내부 값 (<code>wait__</code>, <code>cooldown__</code>)은 모듈이 정하고 모든 루프가 같은 값을 쓴다. 루프마다 달라야 하는 값이 생기면 <code>config__</code> 설정으로 바꾼다.</p>
 
 <h2 id="05">05 조립 규칙</h2>
 <ol>
 <li>헤더: 레시피 헤더 → 블록들이 선언한 핫키를 모은 <code>Hotkeys:</code> 줄 → "Generated from recipe/… by util/build-scripts.py" 줄.</li>
-<li>prelude → CONFIG (레시피의 <code>#@ config</code> 그대로) → WAIT AND COOLDOWN → TIMER (<code>timer</code> 조각, 빈 줄, <code>ready</code> 조각) → STATE (레시피 먼저) → setup (레시피 먼저) →
+<li>prelude → CONFIG (모든 모듈의 설정을 공용 스위치부터 블록 순서로, 레시피가 바꾼 값과 이유를 넣어서) → WAIT AND COOLDOWN → TIMER (<code>timer</code> 조각, 빈 줄, <code>ready</code> 조각) → STATE (레시피 먼저) → setup (레시피 먼저) →
 MAIN LOOP (<code>while not dead</code>, 블록 순서대로 <code>loop</code> 조각, <code>endwhile</code>). 조각 사이는 빈 줄 하나, <code>ready</code>만 빈 줄 없이 붙인다.</li>
 <li>조립기는 아래에서 멈춘다.
 <ul>
-<li>블록이 읽는 설정이 레시피 <code>#@ config</code>에 없다. 오류에 설정 이름과 읽는 모듈이 나온다.</li>
-<li>레시피 <code>#@ config</code>에 아무 블록도 읽지 않는 설정이 있다.</li>
+<li>레시피 <code>#@ config</code>에 아무 블록도 읽지 않는 설정이 있다. 오타이거나, 그 설정을 읽던 블록이 빠졌다.</li>
 <li>모듈 코드가 읽는 <code>config__</code>를 그 모듈이나 그 모듈의 <code>needs</code>가 <code>#@ settings</code>에 설명하지 않았다.</li>
 <li>모듈이 <code>config__</code>에 값을 넣는다.</li>
 <li>두 곳이 같은 변수나 타이머를 선언한다.</li>
@@ -158,8 +162,8 @@ MAIN LOOP (<code>while not dead</code>, 블록 순서대로 <code>loop</code> �
 <thead>
 <tr>
 <th>설정</th>
-<th>설명하는 모듈</th>
-<th>제안 값</th>
+<th>기본값을 가진 모듈</th>
+<th>기본</th>
 <th>뜻</th>
 </tr>
 </thead>
@@ -193,17 +197,23 @@ MAIN LOOP (<code>while not dead</code>, 블록 순서대로 <code>loop</code> �
 </table>
 
 <h2 id="07" data-part="쓰는 법">07 작업 순서</h2>
+<h3 id="07.A">07.A 값을 바꿀 때</h3>
 <ol>
-<li>루프 하나의 값을 바꾸려면 그 레시피의 <code>#@ config</code>만 고친다. 기본과 다르게 둔 이유는 <code># This loop:</code>로 남긴다.</li>
-<li>블록의 동작을 바꾸려면 그 모듈을 고친다. 그 모듈을 쓰는 루프가 모두 바뀐다.</li>
-<li><code>python3 util/build-scripts.py</code>로 다시 만들고 <code>util/check.sh</code>를 돌린다.</li>
-<li>결과물을 게임에서 확인할 때는 지금처럼 Reload all scripts 뒤 Play한다 (<a href="workflow.html#04">workflow.html</a> 04절).</li>
-<li>결과물, 모듈, 레시피를 한 커밋에 넣는다.</li>
+<li><code>python3 util/build-scripts.py --settings recipe/&lt;루프&gt;-recipe.razor</code>로 그 루프가 쓰는 설정 전체를 본다. 모듈을 열 필요가 없다.</li>
+<li>바꿀 설정 줄만 레시피 <code>#@ config</code>에 옮겨 적고 값을 고친다. 바로 위 주석에 이유를 쓴다.</li>
+<li><code>python3 util/build-scripts.py</code>로 다시 만들고 <code>util/check.sh</code>를 돌린다. 게임에서는 Reload all scripts 뒤 Play한다 (<a href="workflow.html#04">workflow.html</a> 04절).</li>
 </ol>
+<p>기본으로 돌리려면 레시피에서 그 줄을 지운다. 모든 루프의 기본을 바꾸려면 모듈의 <code>#@ settings</code> 값을 고친다.</p>
+
+<h3 id="07.B">07.B 블록을 더하거나 고칠 때</h3>
 <ul>
-<li>새 루프: 레시피에 <code>#@ output</code>, <code>#@ header</code>, <code>#@ blocks</code>를 쓰고 <code>python3 util/build-scripts.py --settings recipe/&lt;루프&gt;-recipe.razor</code>를 돌린다.
-필요한 설정 묶음이 주석과 제안 값까지 나오니 <code>#@ config</code> 아래에 붙이고 값을 고친다. 모듈을 열어 맞출 필요가 없다.</li>
-<li>블록에 설정을 새로 더하면 모듈의 <code>#@ settings</code>에 설명을 쓰고, 그 모듈을 쓰는 레시피마다 값을 넣는다. 빠뜨리면 조립기가 멈춘다.</li>
+<li>있는 블록을 쓰려면 레시피 <code>#@ blocks</code>의 도는 순서 자리에 <code>#@ use &lt;모듈&gt;</code> 한 줄을 넣는다. 설정은 기본값으로 돌고, 다른 값이 필요할 때만 07.A절대로 적는다.</li>
+<li><strong>모듈에 없는 동작이 필요하면 결과물에 손으로 넣지 않는다.</strong> 다음 조립이 덮어쓴다.
+<code>python3 util/build-scripts.py --new-module gather/&lt;루프&gt;-&lt;무엇&gt;</code>으로 빈 틀을 만들어 채우고, 레시피에 <code>#@ use</code>로 넣는다.
+한 루프만 쓰는 블록이면 이름 앞에 루프 이름을 붙인다.</li>
+<li>시작 메시지처럼 루프 앞에서 한 번 하는 짧은 준비는 레시피의 <code>#@ setup</code>에 써도 된다.</li>
+<li>core 블록을 한 루프에서만 다르게 돌게 하려면 복사하지 말고 그 모듈에 설정을 하나 더한다. 기본값은 지금 동작으로 두면 다른 루프는 그대로다.</li>
+<li>블록의 동작을 고치면 그 모듈을 쓰는 루프가 모두 바뀐다. 결과물, 모듈, 레시피를 한 커밋에 넣는다.</li>
 <li>두 루프가 같은 블록을 따로 들고 있게 되면 core로 올린다. 다른 점은 설정으로 남긴다.</li>
 <li>Razor 편집기에서 결과물을 저장해 버렸으면 <code>--check</code>가 잡는다. 바뀐 줄을 모듈이나 레시피로 옮기고 다시 만든다.</li>
 </ul>
@@ -236,7 +246,7 @@ pvp 설정값 (<code>walk_guard</code> 0, <code>warmode_is_manual</code> 0, <cod
 <tr><td>Journal 문구 (skinning)</td><td><code>Heal agent: …</code>, <code>Buff cast: …</code></td><td><code>Agent: …</code>, <code>Buff: …</code>. lumberjack은 이 줄이 새로 생긴다</td></tr>
 </tbody>
 </table>
-<p>같은 날 레시피를 <code>-recipe.razor</code>로 바꾸고 설정을 레시피로 모았다. 그때 루프마다 다르던 내부 값 두 개를 모듈 값으로 맞췄다.
+<p>같은 날 레시피를 <code>-recipe.razor</code>로 바꾸고, 레시피에는 기본과 다른 설정만 이유와 함께 적게 했다. 그때 루프마다 다르던 내부 값 두 개를 모듈 값으로 맞췄다.
 skinning-enhanced의 경고 간격은 2.7초에서 3초로, 두 채집 루프의 시약 확인은 30초에서 10초로 바뀌었다.</p>
 <p>lumberjack-enhanced의 워모드 규칙 (회복 주문과 버프가 선다)과 리콜 중 버프 중단은 <code>warmode_is_manual</code>과 <code>var__hold_casts</code>로 그대로 남겼다.
 인게임 확인 항목은 <a href="open-items.html#09">open-items.html</a> 09절과 11절에 더했다.</p>

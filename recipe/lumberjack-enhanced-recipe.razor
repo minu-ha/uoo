@@ -42,97 +42,26 @@
 #@ use core/pass-wait                end of the pass
 
 #@ config
-# ---- core/output -------------------------------------------------------------------
-# Optional script overheads. Essential warnings remain visible.
-@setvar! config__chatty 1
-# Journal diagnostics. Each block that writes one says so in its own comments.
-@setvar! config__sysmsg 1
+# Only the settings this loop changes. Every other setting keeps its module default.
+# A comment right above a setting says why, and shows up in the loop as "# This loop: ...".
+# See every setting with the value this loop uses: python3 util/build-scripts.py --settings recipe/lumberjack-enhanced-recipe.razor
 
-# ---- core/switches -----------------------------------------------------------------
-# Independent features. No option overrides another.
-@setvar! config__use_magery 1
-@setvar! config__use_potions 1
-@setvar! config__use_bandages 1
-# 1 makes our own casts wait while the walk bar runs, so a step does not break them.
-# 0 casts while walking, for a fight where there is no better moment to wait for.
-@setvar! config__walk_guard 1
-# 1 when warmode is the player's manual control window: our own casts stand down while it is on.
-# This loop: Warmode is the player's: recovery casts and buffs stand down, potions still go out.
+# Warmode is the player's: recovery casts and buffs stand down, potions still go out.
 @setvar! config__warmode_is_manual 1
 
-# ---- gather/tracking-setup ---------------------------------------------------------
-# Reuse an active, confirmed hunt color. Otherwise check the window and set the color before the loop.
-@setvar! config__use_tracking 1
-# Tracking color: 1 red (murderer), 2 grey (criminal), 3 orange (enemy), 4 all three.
-# Grey here means Criminal Players. The profile displays server Tracking messages.
-@setvar! config__tracking_color 1
-@setvar! config__show_tracking 0
-
-# ---- core/cure ---------------------------------------------------------------------
-# Minimum current mana for the Cure agent.
-@setvar! config__mana_cure 6
-
-# ---- core/heal ---------------------------------------------------------------------
-# Missing hit points, not percent.
-#   heal_hits       heal potion
-#   emergency_hits  Greater Heal when no heal potion can go out. Not below heal_hits
-@setvar! config__heal_hits 35
-# This loop: Bandages handle ordinary damage, so Greater Heal waits for 45.
+# Bandages handle ordinary damage, so Greater Heal waits for 45.
 # heal_hits also holds harvest back, light_hits the food, buffs and lumber packing.
 @setvar! config__emergency_hits 45
-# Minimum current mana for Greater Heal. It keeps no reserve: raise it to 31 to always leave
-# 20 mana for an attack or Teleport.
-@setvar! config__mana_greater_heal 11
 
-# ---- core/bandage ------------------------------------------------------------------
-# Healing must be above this to bandage. 0 means any Healing at all.
-@setvar! config__heal_skill_min 0
-
-# ---- core/light-heal ---------------------------------------------------------------
-# Light Heal beside the bandages. With no bandage able to run (use_bandages 0, no Healing, or
-# none left) it goes anyway, as the bandage stand-in. Needs use_magery.
-@setvar! config__use_light_heal 0
-# Missing hit points that start the light Heal, and its minimum current mana.
-@setvar! config__light_hits 15
-@setvar! config__mana_heal 4
-
-# ---- core/refresh ------------------------------------------------------------------
-# Current stamina at or below this drinks a Refresh.
-@setvar! config__refresh_stam 15
-
-# ---- gather/auto-recall ------------------------------------------------------------
-# Automatic Recall only. 0 skips its detection reads, book checks and weight decisions.
-# use_tracking controls startup setup. The profile displays any server Tracking messages.
-@setvar! config__auto_recall 1
-
-# Recall on a Tracking report within 1 through 45 steps. Requires auto_recall and use_tracking.
-@setvar! config__recall_on_detection 1
-
-@setvar! config__recall_at_any_distance 0
-@setvar! config__recall_on_weight 1
-@setvar! config__weight_remaining 10
-# When automatic Recall is on, pause harvest if no Recall book is available.
-@setvar! config__require_runebook 1
-# Minimum mana to send RecallCharge.
-@setvar! config__mana_recall 11
-
-# ---- core/self-buffs ---------------------------------------------------------------
-@setvar! config__use_reactive_armor 1
-@setvar! config__use_magic_reflect 1
-# Minimum current mana to start each buff.
-# This loop: Buffs keep the handbook's 20 mana for Greater Heal and Teleport against a PK.
+# Buffs keep the handbook's 20 mana for Greater Heal and Teleport against a PK.
 @setvar! config__mana_reactive_armor 24
 @setvar! config__mana_magic_reflect 34
-# Missing hit points at which buffs are not started, and cut mid cast.
-# This loop: Buffs only while nearly full, so gathering never trades a heal for one.
-@setvar! config__buff_max_loss 15
-# 0 keeps buffs back while poisoned and cuts one that is casting.
-# This loop: The cure goes first: no buffs while poisoned.
-@setvar! config__buff_when_poisoned 0
 
-# ---- gather/lumber-housekeeping ----------------------------------------------------
-# Convert Logs and pack Boards together. Reuse the looting pouch selected by loadout.
-@setvar! config__pack_lumber 1
+# Buffs only while nearly full, so gathering never trades a heal for one.
+@setvar! config__buff_max_loss 15
+
+# The cure goes first: no buffs while poisoned.
+@setvar! config__buff_when_poisoned 0
 
 #@ setup
 if config__pack_lumber = 1

@@ -47,85 +47,18 @@
 #@ use core/pass-wait                                           end of the pass
 
 #@ config
-# ---- core/switches -----------------------------------------------------------------
-# Independent features. No option overrides another.
-@setvar! config__use_magery 1
-@setvar! config__use_potions 1
-@setvar! config__use_bandages 1
-# 1 makes our own casts wait while the walk bar runs, so a step does not break them.
-# 0 casts while walking, for a fight where there is no better moment to wait for.
-# This loop: pvp casts while walking: in a fight there is no better moment to wait for.
+# Only the settings this loop changes. Every other setting keeps its module default.
+# A comment right above a setting says why, and shows up in the loop as "# This loop: ...".
+# See every setting with the value this loop uses: python3 util/build-scripts.py --settings recipe/pvp-recipe.razor
+
+# pvp casts while walking: in a fight there is no better moment to wait for.
 @setvar! config__walk_guard 0
-# 1 when warmode is the player's manual control window: our own casts stand down while it is on.
-@setvar! config__warmode_is_manual 0
 
-# ---- core/output -------------------------------------------------------------------
-# Optional script overheads. Essential warnings remain visible.
-@setvar! config__chatty 1
-# Journal diagnostics. Each block that writes one says so in its own comments.
-@setvar! config__sysmsg 1
-
-# ---- core/cure ---------------------------------------------------------------------
-# Minimum current mana for the Cure agent.
-@setvar! config__mana_cure 6
-
-# ---- core/heal ---------------------------------------------------------------------
-# Missing hit points, not percent.
-#   heal_hits       heal potion
-#   emergency_hits  Greater Heal when no heal potion can go out. Not below heal_hits
-@setvar! config__heal_hits 35
-@setvar! config__emergency_hits 35
-# Minimum current mana for Greater Heal. It keeps no reserve: raise it to 31 to always leave
-# 20 mana for an attack or Teleport.
-@setvar! config__mana_greater_heal 11
-
-# ---- core/bandage ------------------------------------------------------------------
-# Healing must be above this to bandage. 0 means any Healing at all.
-@setvar! config__heal_skill_min 0
-
-# ---- core/light-heal ---------------------------------------------------------------
-# Light Heal beside the bandages. With no bandage able to run (use_bandages 0, no Healing, or
-# none left) it goes anyway, as the bandage stand-in. Needs use_magery.
-@setvar! config__use_light_heal 0
-# Missing hit points that start the light Heal, and its minimum current mana.
-@setvar! config__light_hits 15
-@setvar! config__mana_heal 4
-
-# ---- core/refresh ------------------------------------------------------------------
-# Current stamina at or below this drinks a Refresh.
-@setvar! config__refresh_stam 15
-
-# ---- core/stat-potions -------------------------------------------------------------
-@setvar! config__use_stat_potions 1
-@setvar! config__use_resist_potion 1
-# STR and DEX with the Greater potion on: your base plus 20. Below these the potion is drunk.
-# Bless and the Strength and Agility spells, ours or an ally's, show the same icons as the
-# potions but add less than its 20, so the stat is what tells the potion apart.
-# This loop: The loop is shared, so set these two for the character that runs it.
+# The loop is shared, so set these two for the character that runs it.
 @setvar! config__str_potion 120
-@setvar! config__dex_potion 100
 
-# ---- core/self-buffs ---------------------------------------------------------------
-@setvar! config__use_reactive_armor 1
-@setvar! config__use_magic_reflect 1
-# Minimum current mana to start each buff.
-@setvar! config__mana_reactive_armor 4
-@setvar! config__mana_magic_reflect 14
-# Missing hit points at which buffs are not started, and cut mid cast.
-# This loop: Keep this equal to config__emergency_hits.
+# Keep this equal to config__emergency_hits.
 @setvar! config__buff_max_loss 35
-# 0 keeps buffs back while poisoned and cuts one that is casting.
-@setvar! config__buff_when_poisoned 1
-
-# ---- combat/weapon-slots -----------------------------------------------------------
-@setvar! config__use_weapon 1
-# Weapon slots. Slot N reads the "swing N" bar. Graphic 0 turns the slot off.
-# A slot whose swing is ready wins, 4 down to 1. With none ready and both hands empty, the
-# lowest enabled slot re-arms.
-@setvar! config__weapon_1_graphic 31128
-@setvar! config__weapon_2_graphic 0
-@setvar! config__weapon_3_graphic 0
-@setvar! config__weapon_4_graphic 31190
 
 #@ state
 # pvp is always in a fight, so the stat potions are kept up the whole time.
