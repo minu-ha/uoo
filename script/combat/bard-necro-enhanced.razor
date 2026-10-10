@@ -294,7 +294,7 @@
 
 
 # ----------------------------------------------------------------------------------------
-# module/magery/filler.razor
+# module/magery/rotation.razor
 #
 #   config__filler_floor
 #      Mana below which the filler stops, so the next opener and proc cycle keep what they
@@ -529,7 +529,7 @@
 
 
 # ----------------------------------------------------------------------------------------
-# module/magery/opener.razor
+# module/magery/rotation.razor
 #
 #   interval__magic_window
 #      How long the two target scoped Grimoire riders last. The debuff icon runs two
@@ -674,7 +674,7 @@ settimer "timer__evil_omen" interval__necro_action
 
 
 # ----------------------------------------------------------------------------------------
-# module/magery/opener.razor
+# module/magery/rotation.razor
 #
 #   timer__magic_window
 #      Ready on the first pass.
@@ -901,17 +901,11 @@ endif
 
 
 # ----------------------------------------------------------------------------------------
-# module/magery/opener.razor
+# module/magery/rotation.razor
 #
 #   var__opener_done
 #      1 once the target carries Curse, or no Curse reagents are left. The proc core and
 #      the filler wait for it.
-# ----------------------------------------------------------------------------------------
-@setvar! var__opener_done 0
-
-
-# ----------------------------------------------------------------------------------------
-# module/magery/proc-core.razor
 #
 #   var__proc_target
 #      The mob the last proc spell went at. Poison Strike waits until it is the current
@@ -921,6 +915,7 @@ endif
 #      1 once no proc is ready, each on its bar or out of reagents. Poison Strike and the
 #      filler wait for it.
 # ----------------------------------------------------------------------------------------
+@setvar! var__opener_done 0
 if not varexist var__proc_target
     @setvar! var__proc_target 0
 endif
@@ -1048,7 +1043,7 @@ pushlist 'list__summon_kinds' 'corpse'
 
 
 # ----------------------------------------------------------------------------------------
-# module/magery/opener.razor
+# module/magery/rotation.razor
 # ----------------------------------------------------------------------------------------
 if not listexists 'list__magic_drained_targets'
     createlist 'list__magic_drained_targets'
@@ -2042,7 +2037,7 @@ while not dead
         endif
 
         # --------------------------------------------------------------------------------
-        # OPENER                                                module/magery/opener.razor
+        # OPENER                                              module/magery/rotation.razor
         #
         # Mana Drain then Curse, once per target.
         #
@@ -2056,7 +2051,7 @@ while not dead
         # fight answers correctly with no extra bookkeeping.
         #
         # First, any disturb line nobody read is read off here, so the cursor polls from
-        # here to magery/filler only ever see their own.
+        # here to the filler only ever see their own.
         # --------------------------------------------------------------------------------
         # The Grimoire riders on Curse and Mana Drain run 60 seconds while the debuff icon runs
         # two minutes, so the lists have to expire on a clock rather than on the icon. Sweeping
@@ -2206,7 +2201,7 @@ while not dead
         endif
 
         # --------------------------------------------------------------------------------
-        # PROC CORE                                          module/magery/proc-core.razor
+        # PROC CORE
         #
         # The four Grimoire proc spells. Each carries a large first cast bonus on its own
         # timer, and the game announces when that timer is back, so cooldowns.xml already
@@ -2457,7 +2452,7 @@ while not dead
         endif
 
         # --------------------------------------------------------------------------------
-        # FILLER                                                module/magery/filler.razor
+        # FILLER
         #
         # The four proc spells spend about 4.3 seconds of a 15 second window and then
         # wait, so roughly two thirds of the window used to go unused. Energy Bolt has no

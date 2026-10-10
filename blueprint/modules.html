@@ -71,8 +71,8 @@
 <tr><td><code>module/base.razor</code></td><td>모든 루프의 뼈대</td><td>공용 설정, 표준 대기, 경고 간격, 블록끼리의 신호, 구조적 PvP 정지, 시작 4줄, 패스 끝 대기 (06절)</td></tr>
 <tr><td><code>module/recovery/</code></td><td>살아남기</td><td><code>cure</code> (마비면 파우치, 독이면 포션이나 에이전트), <code>heal</code>, <code>bandage</code>, <code>light-heal</code>, <code>refresh</code></td></tr>
 <tr><td><code>module/magery/</code></td><td>공격 주문과 시약</td>
-<td><code>reagents</code> (모든 마법 블록이 읽는 시약 표시와 서클별 마나), <code>opener</code> (Mana Drain, Curse), <code>proc-core</code> (Grimoire 프록 넷),
-<code>filler</code> (Energy Bolt), <code>flamestrike</code> (aspect 발동용)</td></tr>
+<td><code>reagents</code> (모든 마법 블록이 읽는 시약 표시와 서클별 마나), <code>rotation</code> (Mana Drain·Curse, Grimoire 프록 넷, 그 사이 Energy Bolt),
+<code>flamestrike</code> (aspect 발동용)</td></tr>
 <tr><td><code>module/buff/</code></td><td>버프 아이콘 유지</td>
 <td><code>spells</code> (Reactive Armor, Magic Reflection, 설정으로 Bless·Arch Protection·Spell Siphon용 자기 Magic Arrow), <code>potions</code> (Strength, Agility, Magic Resist), <code>food</code> (Food Satisfaction),
 <code>mushroom</code> (Magic Mushroom 먹기와 Create Food)</td></tr>
@@ -397,7 +397,7 @@ TIMER는 timer마다 <code>createtimer</code>와 첫 <code>settimer</code>를 �
 <li><code>escape/tracking</code>의 <code>var__tracking_*</code>, <code>tracking_color</code>: <code>escape/recall</code>.</li>
 <li><code>bard/instrument</code>의 <code>var__my_instrument</code>, <code>var__instrument_ok</code>, <code>wait__bard_target</code>: <code>bard/disco</code>, <code>bard/peace</code>, <code>bard/song</code>.</li>
 <li><code>necro/symbols</code>의 <code>list__necro_symbols</code>, <code>var__symbols_spent</code>, <code>interval__necro_action</code>, <code>wait__message</code>, <code>wait__ability_target</code>: 네크로 능력 블록.</li>
-<li>공격 주문의 순서 플래그: <code>magery/opener</code>의 <code>var__opener_done</code>, <code>magery/proc-core</code>의 <code>var__procs_done</code>·<code>var__proc_target</code> → <code>magery/filler</code>, <code>necro/poison-strike</code>.</li>
+<li><code>magery/rotation</code>의 순서 플래그 <code>var__opener_done</code>, <code>var__procs_done</code>, <code>var__proc_target</code>: <code>necro/poison-strike</code>.</li>
 </ul>
 
 <h2 id="07" data-part="쓰는 법">07 작업 순서</h2>

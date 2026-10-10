@@ -1,0 +1,557 @@
+# ----------------------------------------------------------------------------------------
+# The Grimoire rotation: Mana Drain and Curse, the four proc spells, then Energy Bolt.
+# Each step waits for the one before it: the procs for Curse (var__opener_done), and Energy
+# Bolt for the procs (var__procs_done). necro/poison-strike reads both.
+#
+# @ hotkeys > Interrupt, Cancel Current Target
+# ----------------------------------------------------------------------------------------
+
+
+# ----------------------------------------------------------------------------------------
+# @ config
+#
+#   config__filler_floor
+#      Mana below which the filler stops, so the next opener and proc cycle keep what they
+#      need: 22 for Mana Drain plus Curse, 30 for the four procs.
+# ----------------------------------------------------------------------------------------
+@setvar! config__filler_floor 52
+
+
+# ----------------------------------------------------------------------------------------
+# @ wait
+#
+#   interval__magic_window
+#      How long the two target scoped Grimoire riders last. The debuff icon runs two
+#      minutes, the +30% damage and refund only 60 seconds, so this is a timer and not a
+#      label read.
+# ----------------------------------------------------------------------------------------
+@setvar! interval__magic_window 60000
+
+
+# ----------------------------------------------------------------------------------------
+# @ timer
+#
+#   timer__magic_window
+#      Ready on the first pass.
+# ----------------------------------------------------------------------------------------
+timer__magic_window interval__magic_window
+
+
+# ----------------------------------------------------------------------------------------
+# @ state
+#
+#   var__opener_done
+#      1 once the target carries Curse, or no Curse reagents are left. The proc core and
+#      the filler wait for it.
+#
+#   var__proc_target
+#      The mob the last proc spell went at. Poison Strike waits until it is the current
+#      target.
+#
+#   var__procs_done
+#      1 once no proc is ready, each on its bar or out of reagents. Poison Strike and the
+#      filler wait for it.
+# ----------------------------------------------------------------------------------------
+@setvar! var__opener_done 0
+if not varexist var__proc_target
+    @setvar! var__proc_target 0
+endif
+@setvar! var__procs_done 0
+
+
+# ----------------------------------------------------------------------------------------
+# @ setup
+# ----------------------------------------------------------------------------------------
+if not listexists 'list__magic_drained_targets'
+    createlist 'list__magic_drained_targets'
+endif
+if not listexists 'list__magic_cursed_targets'
+    createlist 'list__magic_cursed_targets'
+endif
+
+
+# ----------------------------------------------------------------------------------------
+# @ loop
+# ----------------------------------------------------------------------------------------
+    # ------------------------------------------------------------------------------------
+    # OPENER
+    #
+    # Mana Drain then Curse, once per target.
+    #
+    # Both spells carry a Grimoire rider that is scoped to the creature they were cast on:
+    # Curse gives every spell of ours +30% against that target for 60 seconds, Mana Drain
+    # gives a 30% refund chance on hostile spells against it. Neither follows to the next
+    # mob, which is why membership is tracked per target and not as a global stage.
+    #
+    # Two lists, so the branch itself is the state. A target that was retargeted mid fight
+    # answers correctly with no extra bookkeeping.
+    #
+    # First, any disturb line nobody read is read off here, so the cursor polls from here
+    # to the filler only ever see their own.
+    # ------------------------------------------------------------------------------------
+    # The Grimoire riders on Curse and Mana Drain run 60 seconds while the debuff icon runs
+    # two minutes, so the lists have to expire on a clock rather than on the icon. Sweeping
+    # both at once re-opens on a target that was done seconds ago, which costs 22 mana now
+    # and then. Per target timestamps would need arithmetic, which Razor does not have.
+    if timer "timer__magic_window" >= interval__magic_window
+        clearlist 'list__magic_drained_targets'
+        clearlist 'list__magic_cursed_targets'
+        settimer "timer__magic_window" 0
+    endif
+
+    if insysmsg "Your concentration is disturbed, thus ruining thy spell."
+        # consumed, nothing else to do
+    endif
+
+    if not inlist 'list__magic_drained_targets' var__combat_target and var__regs_mana_drain = 1 and mana >= config__mana_4th and not warmode and not targetexists and not casting and cooldown "walk" = 0
+        if find var__combat_target ground -1 -1 config__target_range as alias__opener_target
+            cast 'Mana Drain'
+
+            for 60
+                if targetexists
+                    break
+                endif
+
+                if insysmsg "Your concentration is disturbed, thus ruining thy spell."
+                    break
+                endif
+
+                if config__interrupt_to_heal = 1 and diffhits >= config__emergency_hits
+                    if config__chatty = 1
+                        overhead "[ drain, cut ]" 254
+                    endif
+
+                    hotkey "> Interrupt"
+                    break
+                endif
+
+                wait wait__poll
+            endfor
+
+            if targetexists
+                if find lasttarget ground -1 -1 config__acquire_range as alias__fresh_target
+                    if not dead alias__fresh_target and var__combat_target != alias__fresh_target
+                        if noto alias__fresh_target = "hostile" or noto alias__fresh_target = "criminal" or noto alias__fresh_target = "enemy" or noto alias__fresh_target = "murderer"
+                            @setvar! var__combat_target alias__fresh_target
+                            settimer "timer__target_grace" 0
+
+                            if find var__combat_target ground -1 -1 config__target_range as alias__opener_target
+                                if config__chatty = 1
+                                    overhead "[ target, set ]" 1288 var__combat_target
+                                endif
+                            endif
+                        endif
+                    endif
+                endif
+
+                if dead alias__opener_target or var__combat_target != alias__opener_target
+                    hotkey "Cancel Current Target"
+                    wait wait__short
+                else
+                    target alias__opener_target
+                    wait wait__cast
+
+                    if insysmsg "cannot be seen"
+                        # not delivered, so the target stays off the list
+                    else
+                        pushlist 'list__magic_drained_targets' var__combat_target
+
+                    endif
+                endif
+            endif
+        endif
+    elseif not inlist 'list__magic_cursed_targets' var__combat_target and var__regs_curse = 1 and mana >= config__mana_4th and not warmode and not targetexists and not casting and cooldown "walk" = 0
+        if find var__combat_target ground -1 -1 config__target_range as alias__opener_target
+            cast 'Curse'
+
+            for 60
+                if targetexists
+                    break
+                endif
+
+                if insysmsg "Your concentration is disturbed, thus ruining thy spell."
+                    break
+                endif
+
+                if config__interrupt_to_heal = 1 and diffhits >= config__emergency_hits
+                    if config__chatty = 1
+                        overhead "[ curse, cut ]" 254
+                    endif
+
+                    hotkey "> Interrupt"
+                    break
+                endif
+
+                wait wait__poll
+            endfor
+
+            if targetexists
+                if find lasttarget ground -1 -1 config__acquire_range as alias__fresh_target
+                    if not dead alias__fresh_target and var__combat_target != alias__fresh_target
+                        if noto alias__fresh_target = "hostile" or noto alias__fresh_target = "criminal" or noto alias__fresh_target = "enemy" or noto alias__fresh_target = "murderer"
+                            @setvar! var__combat_target alias__fresh_target
+                            settimer "timer__target_grace" 0
+
+                            if find var__combat_target ground -1 -1 config__target_range as alias__opener_target
+                                if config__chatty = 1
+                                    overhead "[ target, set ]" 1288 var__combat_target
+                                endif
+                            endif
+                        endif
+                    endif
+                endif
+
+                if dead alias__opener_target or var__combat_target != alias__opener_target
+                    hotkey "Cancel Current Target"
+                    wait wait__short
+                else
+                    target alias__opener_target
+                    wait wait__cast
+
+                    if insysmsg "cannot be seen"
+                        # not delivered, so the target stays off the list
+                    else
+                        pushlist 'list__magic_cursed_targets' var__combat_target
+                        settimer "timer__magic_window" 0
+
+                    endif
+                endif
+            endif
+        endif
+    endif
+
+    # The rotation waits for Curse, because everything after it is worth 30% more once it
+    # has landed. The one thing it does not wait for is a reagent that is not coming back
+    # until the next restock: with no Curse reagents the damage goes out without the rider
+    # rather than the script standing still in front of a live target.
+    #
+    # Low mana is deliberately NOT an escape. It regenerates, the followers carry the fight
+    # meanwhile, and every point dribbled into an uncursed Magic Arrow is a point the next
+    # opener does not have. Waiting for 22 mana and casting with the rider is the better trade.
+    if inlist 'list__magic_cursed_targets' var__combat_target
+        @setvar! var__opener_done 1
+    elseif var__regs_curse = 0
+        @setvar! var__opener_done 1
+    else
+        @setvar! var__opener_done 0
+    endif
+
+    # ------------------------------------------------------------------------------------
+    # PROC CORE
+    #
+    # The four Grimoire proc spells. Each carries a large first cast bonus on its own
+    # timer, and the game announces when that timer is back, so cooldowns.xml already
+    # tracks them and this block simply reads the bars. No timer of our own, which also
+    # means the script inherits any cooldown reset the game hands out.
+    #
+    #   magic arrow  +250% on the first cast in the window
+    #   harm         +250%
+    #   fireball     +250% as a burn over 15 seconds
+    #   lightning    +200% and a hinder
+    #
+    # Ordered cheapest first. They rarely compete, because a spell whose bar is up is the
+    # only one asking, but when two are ready together the cheap one going first keeps
+    # more mana available for the opener on the next mob.
+    #
+    # Each delivery records its mob in var__proc_target, and the flag after this block
+    # tells Poison Strike and the filler whether the core is spent. Both wait for it.
+    # ------------------------------------------------------------------------------------
+    if cooldown "magic arrow" = 0 and var__regs_magic_arrow = 1 and mana >= config__mana_1st and var__opener_done = 1 and not warmode and not targetexists and not casting and cooldown "walk" = 0
+        if find var__combat_target ground -1 -1 config__target_range as alias__proc_target
+            cast 'Magic Arrow'
+
+            for 60
+                if targetexists
+                    break
+                endif
+
+                if insysmsg "Your concentration is disturbed, thus ruining thy spell."
+                    break
+                endif
+
+                if config__interrupt_to_heal = 1 and diffhits >= config__emergency_hits
+                    if config__chatty = 1
+                        overhead "[ magic arrow, cut ]" 254
+                    endif
+
+                    hotkey "> Interrupt"
+                    break
+                endif
+
+                wait wait__poll
+            endfor
+
+            if targetexists
+                if find lasttarget ground -1 -1 config__acquire_range as alias__fresh_target
+                    if not dead alias__fresh_target and var__combat_target != alias__fresh_target
+                        if noto alias__fresh_target = "hostile" or noto alias__fresh_target = "criminal" or noto alias__fresh_target = "enemy" or noto alias__fresh_target = "murderer"
+                            @setvar! var__combat_target alias__fresh_target
+                            settimer "timer__target_grace" 0
+
+                            if find var__combat_target ground -1 -1 config__target_range as alias__proc_target
+                                if config__chatty = 1
+                                    overhead "[ target, set ]" 1288 var__combat_target
+                                endif
+                            endif
+                        endif
+                    endif
+                endif
+
+                if dead alias__proc_target or var__combat_target != alias__proc_target
+                    hotkey "Cancel Current Target"
+                    wait wait__short
+                else
+                    target alias__proc_target
+                    wait wait__cast
+                    @setvar! var__proc_target var__combat_target
+                endif
+            endif
+        endif
+    elseif cooldown "harm" = 0 and var__regs_harm = 1 and mana >= config__mana_2nd and var__opener_done = 1 and not warmode and not targetexists and not casting and cooldown "walk" = 0
+        if find var__combat_target ground -1 -1 config__target_range as alias__proc_target
+            cast 'Harm'
+
+            for 60
+                if targetexists
+                    break
+                endif
+
+                if insysmsg "Your concentration is disturbed, thus ruining thy spell."
+                    break
+                endif
+
+                if config__interrupt_to_heal = 1 and diffhits >= config__emergency_hits
+                    if config__chatty = 1
+                        overhead "[ harm, cut ]" 254
+                    endif
+
+                    hotkey "> Interrupt"
+                    break
+                endif
+
+                wait wait__poll
+            endfor
+
+            if targetexists
+                if find lasttarget ground -1 -1 config__acquire_range as alias__fresh_target
+                    if not dead alias__fresh_target and var__combat_target != alias__fresh_target
+                        if noto alias__fresh_target = "hostile" or noto alias__fresh_target = "criminal" or noto alias__fresh_target = "enemy" or noto alias__fresh_target = "murderer"
+                            @setvar! var__combat_target alias__fresh_target
+                            settimer "timer__target_grace" 0
+
+                            if find var__combat_target ground -1 -1 config__target_range as alias__proc_target
+                                if config__chatty = 1
+                                    overhead "[ target, set ]" 1288 var__combat_target
+                                endif
+                            endif
+                        endif
+                    endif
+                endif
+
+                if dead alias__proc_target or var__combat_target != alias__proc_target
+                    hotkey "Cancel Current Target"
+                    wait wait__short
+                else
+                    target alias__proc_target
+                    wait wait__cast
+                    @setvar! var__proc_target var__combat_target
+                endif
+            endif
+        endif
+    elseif cooldown "fireball" = 0 and var__regs_fireball = 1 and mana >= config__mana_3rd and var__opener_done = 1 and not warmode and not targetexists and not casting and cooldown "walk" = 0
+        if find var__combat_target ground -1 -1 config__target_range as alias__proc_target
+            cast 'Fireball'
+
+            for 60
+                if targetexists
+                    break
+                endif
+
+                if insysmsg "Your concentration is disturbed, thus ruining thy spell."
+                    break
+                endif
+
+                if config__interrupt_to_heal = 1 and diffhits >= config__emergency_hits
+                    if config__chatty = 1
+                        overhead "[ fireball, cut ]" 254
+                    endif
+
+                    hotkey "> Interrupt"
+                    break
+                endif
+
+                wait wait__poll
+            endfor
+
+            if targetexists
+                if find lasttarget ground -1 -1 config__acquire_range as alias__fresh_target
+                    if not dead alias__fresh_target and var__combat_target != alias__fresh_target
+                        if noto alias__fresh_target = "hostile" or noto alias__fresh_target = "criminal" or noto alias__fresh_target = "enemy" or noto alias__fresh_target = "murderer"
+                            @setvar! var__combat_target alias__fresh_target
+                            settimer "timer__target_grace" 0
+
+                            if find var__combat_target ground -1 -1 config__target_range as alias__proc_target
+                                if config__chatty = 1
+                                    overhead "[ target, set ]" 1288 var__combat_target
+                                endif
+                            endif
+                        endif
+                    endif
+                endif
+
+                if dead alias__proc_target or var__combat_target != alias__proc_target
+                    hotkey "Cancel Current Target"
+                    wait wait__short
+                else
+                    target alias__proc_target
+                    wait wait__cast
+                    @setvar! var__proc_target var__combat_target
+                endif
+            endif
+        endif
+    elseif cooldown "lightning" = 0 and var__regs_lightning = 1 and mana >= config__mana_4th and var__opener_done = 1 and not warmode and not targetexists and not casting and cooldown "walk" = 0
+        if find var__combat_target ground -1 -1 config__target_range as alias__proc_target
+            cast 'Lightning'
+
+            for 60
+                if targetexists
+                    break
+                endif
+
+                if insysmsg "Your concentration is disturbed, thus ruining thy spell."
+                    break
+                endif
+
+                if config__interrupt_to_heal = 1 and diffhits >= config__emergency_hits
+                    if config__chatty = 1
+                        overhead "[ lightning, cut ]" 254
+                    endif
+
+                    hotkey "> Interrupt"
+                    break
+                endif
+
+                wait wait__poll
+            endfor
+
+            if targetexists
+                if find lasttarget ground -1 -1 config__acquire_range as alias__fresh_target
+                    if not dead alias__fresh_target and var__combat_target != alias__fresh_target
+                        if noto alias__fresh_target = "hostile" or noto alias__fresh_target = "criminal" or noto alias__fresh_target = "enemy" or noto alias__fresh_target = "murderer"
+                            @setvar! var__combat_target alias__fresh_target
+                            settimer "timer__target_grace" 0
+
+                            if find var__combat_target ground -1 -1 config__target_range as alias__proc_target
+                                if config__chatty = 1
+                                    overhead "[ target, set ]" 1288 var__combat_target
+                                endif
+                            endif
+                        endif
+                    endif
+                endif
+
+                if dead alias__proc_target or var__combat_target != alias__proc_target
+                    hotkey "Cancel Current Target"
+                    wait wait__short
+                else
+                    target alias__proc_target
+                    wait wait__cast
+                    @setvar! var__proc_target var__combat_target
+                endif
+            endif
+        endif
+    endif
+
+    # Poison Strike and the filler wait for the whole proc core. Every proc that lands while
+    # Corpse Skin is up leaves its disease on the target, so a strike after Magic Arrow alone
+    # pops one stack where four were on the way, and a bolt cast while a proc is ready pushes
+    # that proc and its next window back by a whole cast.
+    #
+    # This has to be a flag. A cast does not end the pass, so every block below still gets
+    # its turn, which is how both used to go out straight behind Curse and the first proc.
+    #
+    # 1 once no proc is ready, each one either on its bar or out of reagents. A missing
+    # reagent is the same escape the opener takes, it is not coming back until the next
+    # restock. Low mana is not, for the reason given at the opener. Read after the proc core
+    # has had its turn, so a proc cast this pass already counts. A bar whose message has not
+    # arrived yet reads as ready, which only holds both back one pass.
+    if cooldown "magic arrow" = 0 and var__regs_magic_arrow = 1
+        @setvar! var__procs_done 0
+    elseif cooldown "harm" = 0 and var__regs_harm = 1
+        @setvar! var__procs_done 0
+    elseif cooldown "fireball" = 0 and var__regs_fireball = 1
+        @setvar! var__procs_done 0
+    elseif cooldown "lightning" = 0 and var__regs_lightning = 1
+        @setvar! var__procs_done 0
+    else
+        @setvar! var__procs_done 1
+    endif
+
+    # ------------------------------------------------------------------------------------
+    # FILLER
+    #
+    # The four proc spells spend about 4.3 seconds of a 15 second window and then wait, so
+    # roughly two thirds of the window used to go unused. Energy Bolt has no proc timer of
+    # its own, and its Grimoire upgrade adds 30% damage and hands back 15 of its 20 mana
+    # when the target dies within five seconds, so it is the one spell worth firing purely
+    # to fill that gap.
+    #
+    # Only that gap: var__procs_done keeps it out while any proc is ready, so a bar coming
+    # back hands the next cast to the proc core. A bar that returns mid bolt waits out the
+    # rest of the cast, 1.95 seconds at most. Poison Strike comes after this block, so a
+    # bolt in the same pass adds its disease before the strike pops them.
+    #
+    # It is also the first thing to stand down when mana runs short, which is what
+    # config__filler_floor is for: the opener and one full proc cycle come first.
+    # ------------------------------------------------------------------------------------
+    if var__procs_done = 1 and mana > config__filler_floor and var__regs_energy_bolt = 1 and var__opener_done = 1 and not warmode and not targetexists and not casting and cooldown "walk" = 0
+        if find var__combat_target ground -1 -1 config__target_range as alias__filler_target
+            cast 'Energy Bolt'
+
+            for 60
+                if targetexists
+                    break
+                endif
+
+                if insysmsg "Your concentration is disturbed, thus ruining thy spell."
+                    break
+                endif
+
+                if config__interrupt_to_heal = 1 and diffhits >= config__emergency_hits
+                    if config__chatty = 1
+                        overhead "[ eb, cut ]" 254
+                    endif
+
+                    hotkey "> Interrupt"
+                    break
+                endif
+
+                wait wait__poll
+            endfor
+
+            if targetexists
+                if find lasttarget ground -1 -1 config__acquire_range as alias__fresh_target
+                    if not dead alias__fresh_target and var__combat_target != alias__fresh_target
+                        if noto alias__fresh_target = "hostile" or noto alias__fresh_target = "criminal" or noto alias__fresh_target = "enemy" or noto alias__fresh_target = "murderer"
+                            @setvar! var__combat_target alias__fresh_target
+                            settimer "timer__target_grace" 0
+
+                            if find var__combat_target ground -1 -1 config__target_range as alias__filler_target
+                                if config__chatty = 1
+                                    overhead "[ target, set ]" 1288 var__combat_target
+                                endif
+                            endif
+                        endif
+                    endif
+                endif
+
+                if dead alias__filler_target or var__combat_target != alias__filler_target
+                    hotkey "Cancel Current Target"
+                    wait wait__short
+                else
+                    target alias__filler_target
+                    wait wait__cast
+                endif
+            endif
+        endif
+    endif
