@@ -530,9 +530,13 @@ while not dead
 
     if paralyzed or poisoned or diffhits > 0
         # --------------------------------------------------------------------------------
-        # PARALYZE                                             module/recovery/pouch.razor
+        # CURE                                                  module/recovery/cure.razor
         #
-        # Nothing else can act while held, so the pouch goes out at once.
+        # Paralysis first, the one state in which nothing else can act, so the pouch goes
+        # out at once. Poison next: potion first, it is instant and has no cooldown, and
+        # it goes out during a cast. While any cure potion is carried the agent is not
+        # used, so mana stays for Greater Heal. The agent waits for the walk bar and for
+        # warmode as config__walk_guard and config__warmode_is_manual say.
         # --------------------------------------------------------------------------------
         if paralyzed
             if findtype 3705 backpack 38
@@ -542,17 +546,7 @@ while not dead
                 overhead "[ pouch, out ]" 254
                 settimer "timer__message" 0
             endif
-        endif
-
-        # --------------------------------------------------------------------------------
-        # CURE                                                  module/recovery/cure.razor
-        #
-        # Potion first, it is instant and has no cooldown, and it goes out during a cast.
-        # While any cure potion is carried the agent is not used, so mana stays for
-        # Greater Heal. The agent waits for the walk bar and for warmode as
-        # config__walk_guard and config__warmode_is_manual say.
-        # --------------------------------------------------------------------------------
-        if poisoned and not paralyzed and not hidden and not queued and not targetexists
+        elseif poisoned and not hidden and not queued and not targetexists
             if config__use_potions = 1 and findtype "Orange Potion" self
                 hotkey "Drink Cure"
                 wait wait__short

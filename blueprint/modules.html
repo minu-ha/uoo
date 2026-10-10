@@ -69,7 +69,7 @@
 </thead>
 <tbody>
 <tr><td><code>module/base.razor</code></td><td>모든 루프의 뼈대</td><td>공용 설정, 표준 대기, 경고 간격, 블록끼리의 신호, 구조적 PvP 정지, 시작 4줄, 패스 끝 대기 (06절)</td></tr>
-<tr><td><code>module/recovery/</code></td><td>살아남기</td><td><code>pouch</code> (마비), <code>cure</code>, <code>heal</code>, <code>bandage</code>, <code>light-heal</code>, <code>refresh</code></td></tr>
+<tr><td><code>module/recovery/</code></td><td>살아남기</td><td><code>cure</code> (마비면 파우치, 독이면 포션이나 에이전트), <code>heal</code>, <code>bandage</code>, <code>light-heal</code>, <code>refresh</code></td></tr>
 <tr><td><code>module/magery/</code></td><td>공격 주문과 시약</td>
 <td><code>reagents</code> (모든 마법 블록이 읽는 시약 표시와 서클별 마나), <code>opener</code> (Mana Drain, Curse), <code>proc-core</code> (Grimoire 프록 넷),
 <code>filler</code> (Energy Bolt), <code>flamestrike</code> (aspect 발동용)</td></tr>
@@ -160,9 +160,9 @@
 # ----------------------------------------------------------------------------------------
 
 # ----------------------------------------------------------------------------------------
-# @ use recovery/pouch
+# @ use recovery/cure
 #
-#   The trapped pouch while paralyzed, the one thing that can act then.
+#   The trapped pouch while paralyzed, else a cure potion or the Smart Heal/Cure agent.
 # ----------------------------------------------------------------------------------------
 
 ...
@@ -202,8 +202,8 @@ lumberjack-enhanced는 Tracking 줄을 먼저 읽도록 <code>magery/reagents</c
 <li>그룹 안의 블록은 한 단계마다 네 칸 들어가고, 배너 글은 줄어든 폭에 맞춰 다시 감긴다. 그룹 안에 그룹을 둘 수 있다.</li>
 <li>그룹이 막는 것은 블록의 loop 부분뿐이다. 선언과 setup은 그룹과 상관없이 늘 나간다. base의 <code>end</code>는 그룹 밖 맨 끝이다.</li>
 <li>조건과 <code>every</code>에 쓴 이름도 블록 코드처럼 주인 모듈을 찾는다. <code>interval__housekeeping</code>은 base의 것이다.</li>
-<li><strong>회복 블록은 모든 레시피에서 한 그룹이다.</strong> <code>recovery/pouch</code>, <code>cure</code>, <code>heal</code>, <code>bandage</code>, <code>light-heal</code>은
-<code># @ when paralyzed or poisoned or diffhits &gt; 0</code> 안에 둔다. 이 조건은 다섯 블록이 움직이는 조건을 모두 합친 것이라 (붕대는 HP가 1만 줄어도 시작한다)
+<li><strong>회복 블록은 모든 레시피에서 한 그룹이다.</strong> <code>recovery/cure</code>, <code>heal</code>, <code>bandage</code>, <code>light-heal</code>은
+<code># @ when paralyzed or poisoned or diffhits &gt; 0</code> 안에 둔다. 이 조건은 네 블록이 움직이는 조건을 모두 합친 것이라 (붕대는 HP가 1만 줄어도 시작한다)
 레시피가 기준값을 어떻게 바꾸든 맞고, 다치지 않은 패스는 블록 수만큼이 아니라 한 줄만 밟는다. <code>recovery/refresh</code>는 기력을 보므로 밖에 둔다.</li>
 <li>블록 안의 시계와 그룹의 시계는 겹친다. <code>every interval__housekeeping</code> 안의 <code>buff/food</code>는 5초마다 자기 60초 타이머를 본다.</li>
 </ul>

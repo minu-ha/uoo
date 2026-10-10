@@ -918,10 +918,10 @@ v5의 긴급 수동 주문 중단·6초 시전 대기와 <code>[ cast, check ]</
 <h4>루프 골격</h4>
 <ol>
 <li>명령 제한이면 정지한다.</li>
-<li>REAGENTS: 10초마다, 또는 <code>More reagents are needed</code> 거절 직후 시약 다섯 가지를 읽어 주문별 플래그를 만든다.
+<li>REAGENTS: 10초마다, 또는 <code>More reagents are needed</code> 거절 직후 시약 일곱 가지를 읽어 주문별 플래그를 만든다.
 패스 맨 앞이라 아래 시전 블록은 새 플래그를 읽는다.</li>
-<li>PARALYZE: 마비면 트랩 파우치.</li>
-<li>CURE: 독이면 Cure 포션. 포션이 하나라도 있으면 에이전트를 쓰지 않는다. 없거나 꺼져 있으면 Smart Heal/Cure 에이전트.</li>
+<li>회복 블록은 <code>paralyzed or poisoned or diffhits &gt; 0</code> 한 줄 안에 있다. 다치지 않은 패스는 그 줄만 본다.</li>
+<li>CURE: 마비면 트랩 파우치. 아니고 독이면 Cure 포션. 포션이 하나라도 있으면 에이전트를 쓰지 않는다. 없거나 꺼져 있으면 Smart Heal/Cure 에이전트.</li>
 <li>HEAL: 손실이 힐 포션 기준 이상이면 포션. 이 패스에 포션이 나가지 않았고 긴급 기준 이상이면 Greater Heal/Cure 에이전트.</li>
 <li>BANDAGE → LIGHT HEAL → REFRESH: 진행 중 붕대는 다시 시작하지 않는다. 가벼운 Heal은 붕대를 쓸 수 없을 때 대타로 나가고, <code>use_light_heal</code>이 1이면 붕대 옆에서도 나간다.</li>
 <li>STAT POTIONS: Strength·Agility는 STR·DEX가 기준선 아래면 5초에 한 번, Resist는 버프가 빠지면 바로 마신다. 한 포션이 떨어져도 나머지는 계속한다.</li>

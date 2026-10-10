@@ -138,10 +138,11 @@ Configure options in `recipe/pvp-recipe.razor` and rebuild. Bind PvP hotkeys to 
 `config__use_magery = 0` turns the spells off. Leaving `fight/weapon-swap` out of the recipe turns the weapon swap off.
 `config__use_bandages = 1` enables self bandages when Healing is available. No preset overrides these settings.
 
-v6 follows the shape of `bard-necro-enhanced` and `lumberjack-enhanced`: each block reads the live state and acts
-on the spot. The order is reagents, paralyze pouch, cure (potion, else the Smart Heal/Cure agent), heal (potion,
-else the Greater Heal/Cure agent at the emergency line), bandage, light Heal (the stand-in when no bandage can run, beside the bandages with `config__use_light_heal = 1`), Refresh,
-stat potions, Reactive Armor and Magic Reflection, then the weapon.
+v6 follows the shape of `bard-necro-enhanced` and `lumberjack-enhanced`: each block reads the live state and acts on
+the spot. The order is reagents, cure (the pouch while paralyzed, a potion or else the Smart Heal/Cure agent while
+poisoned), heal (potion, else the Greater Heal/Cure agent at the emergency line), bandage, light Heal (the stand-in
+when no bandage can run, beside the bandages with `config__use_light_heal = 1`), Refresh, stat potions, Reactive
+Armor and Magic Reflection, then the weapon.
 Stat potions and both buffs are kept up for the whole fight, with no walk guard. Agents and buffs wait out their own
 cast in a `for 60` poll, and our buff cast is cut at the emergency line. The script never cuts a manual cast or cursor.
 

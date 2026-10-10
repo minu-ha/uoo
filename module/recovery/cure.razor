@@ -1,5 +1,5 @@
 # ----------------------------------------------------------------------------------------
-# Cure potion first, then the Smart Heal/Cure agent when none is carried.
+# The trapped pouch while paralyzed, else a cure potion or the Smart Heal/Cure agent.
 #
 # @ hotkeys Drink Cure, > Smart Heal/Cure Self
 # ----------------------------------------------------------------------------------------
@@ -20,12 +20,21 @@
     # ------------------------------------------------------------------------------------
     # CURE
     #
-    # Potion first, it is instant and has no cooldown, and it goes out during a cast.
-    # While any cure potion is carried the agent is not used, so mana stays for Greater
-    # Heal. The agent waits for the walk bar and for warmode as config__walk_guard and
-    # config__warmode_is_manual say.
+    # Paralysis first, the one state in which nothing else can act, so the pouch goes out
+    # at once. Poison next: potion first, it is instant and has no cooldown, and it goes
+    # out during a cast. While any cure potion is carried the agent is not used, so mana
+    # stays for Greater Heal. The agent waits for the walk bar and for warmode as
+    # config__walk_guard and config__warmode_is_manual say.
     # ------------------------------------------------------------------------------------
-    if poisoned and not paralyzed and not hidden and not queued and not targetexists
+    if paralyzed
+        if findtype 3705 backpack 38
+            yell "[Pouch"
+            wait wait__short
+        elseif timer "timer__message" >= interval__message
+            overhead "[ pouch, out ]" 254
+            settimer "timer__message" 0
+        endif
+    elseif poisoned and not hidden and not queued and not targetexists
         if config__use_potions = 1 and findtype "Orange Potion" self
             hotkey "Drink Cure"
             wait wait__short
