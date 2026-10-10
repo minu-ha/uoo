@@ -1082,7 +1082,7 @@ while not dead
         endwhile
     endif
 
-    if paralyzed or poisoned or diffhits >= config__light_hits
+    if paralyzed or poisoned or diffhits > 0
         # --------------------------------------------------------------------------------
         # PARALYZE                                             module/recovery/pouch.razor
         #

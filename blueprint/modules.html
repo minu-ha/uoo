@@ -202,6 +202,9 @@ lumberjack-enhanced는 Tracking 줄을 먼저 읽도록 <code>magery/reagents</c
 <li>그룹 안의 블록은 한 단계마다 네 칸 들어가고, 배너 글은 줄어든 폭에 맞춰 다시 감긴다. 그룹 안에 그룹을 둘 수 있다.</li>
 <li>그룹이 막는 것은 블록의 loop 부분뿐이다. 선언과 setup은 그룹과 상관없이 늘 나간다. base의 <code>end</code>는 그룹 밖 맨 끝이다.</li>
 <li>조건과 <code>every</code>에 쓴 이름도 블록 코드처럼 주인 모듈을 찾는다. <code>interval__housekeeping</code>은 base의 것이다.</li>
+<li><strong>회복 블록은 모든 레시피에서 한 그룹이다.</strong> <code>recovery/pouch</code>, <code>cure</code>, <code>heal</code>, <code>bandage</code>, <code>light-heal</code>은
+<code># @ when paralyzed or poisoned or diffhits &gt; 0</code> 안에 둔다. 이 조건은 다섯 블록이 움직이는 조건을 모두 합친 것이라 (붕대는 HP가 1만 줄어도 시작한다)
+레시피가 기준값을 어떻게 바꾸든 맞고, 다치지 않은 패스는 블록 수만큼이 아니라 한 줄만 밟는다. <code>recovery/refresh</code>는 기력을 보므로 밖에 둔다.</li>
 <li>블록 안의 시계와 그룹의 시계는 겹친다. <code>every interval__housekeeping</code> 안의 <code>buff/food</code>는 5초마다 자기 60초 타이머를 본다.</li>
 </ul>
 <pre><code># ========================================================================================
@@ -403,7 +406,7 @@ TIMER는 timer마다 <code>createtimer</code>와 첫 <code>settimer</code>를 �
 
 <h3 id="07.B">07.B 블록을 넣거나 빼고, 새 동작을 더할 때</h3>
 <ul>
-<li>있는 블록을 쓰려면 레시피 <code># @ blocks</code>의 도는 순서 자리에 <code># @ use &lt;폴더&gt;/&lt;이름&gt;</code> 한 줄을 넣는다. 설정은 기본값으로 돈다.
+<li>있는 블록을 쓰려면 레시피 <code># @ blocks</code>의 도는 순서 자리에 <code># @ use &lt;폴더&gt;/&lt;이름&gt;</code> 한 줄을 넣는다. 설정은 기본값으로 돈다. 회복 블록은 회복 그룹 안에 넣는다 (03절).
 그 블록에 필요한 모듈이 빠졌으면 조립기가 이름을 대 준다.</li>
 <li>블록을 끄려면 그 줄을 지운다. 다른 블록이 그 모듈의 이름을 쓰고 있으면 조립기가 알려 준다.</li>
 <li><strong>모듈에 없는 동작이 필요하면 결과물에 손으로 넣지 않는다.</strong> 다음 조립이 덮어쓴다.
@@ -527,7 +530,7 @@ pvp 결과물에는 시작 4줄이 <code>if config__clear_at_start = 1</code> �
 <h3 id="08.D">08.D bard-necro-enhanced</h3>
 <p>같은 날 <code>combat/bard-necro-enhanced</code>도 <code>recipe/bard-necro-enhanced-recipe.razor</code>로 옮겼다. 이 루프는 하우스키핑 틱과 교전·이동 분기로
 패스를 나누어서 블록을 그대로 늘어놓을 수 없었다. 그 구조는 레시피 그룹 (03절)으로 옮겼다.
-생존 네 블록은 <code># @ when paralyzed or poisoned or diffhits &gt;= config__light_hits</code>, 하우스키핑은 <code># @ every interval__housekeeping</code>,
+생존 네 블록은 다른 레시피와 같은 <code># @ when paralyzed or poisoned or diffhits &gt; 0</code>, 하우스키핑은 <code># @ every interval__housekeeping</code>,
 교전과 이동은 <code># @ when var__fighting = 1</code>과 <code># @ otherwise</code>다.</p>
 <ul>
 <li>바드·네크로·공격 주문 블록은 새 모듈 16개로 옮겼다 (02절의 <code>bard/</code>, <code>necro/</code>, <code>magery/</code>, <code>buff/mushroom</code>). 코드는 원본과 같고 이름만 지금 규칙을 따른다.

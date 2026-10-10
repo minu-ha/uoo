@@ -2080,7 +2080,7 @@ warmode를 켜면 수동 모드라 이 블록들이 서고, 큐어, 힐, 포션,
 </tr>
 <tr>
 <td>생존</td>
-<td><code>paralyzed or poisoned or diffhits &gt; config__light_hits</code></td>
+<td><code>paralyzed or poisoned or diffhits &gt; 0</code></td>
 <td>세 상태를 한 줄로 묻고, 안에서 마비 → 큐어 → 힐 순으로 본다. 마비가 맨 앞인 것은 그 상태에선 아래가 아무것도 못 하기 때문이다.
 큐어가 힐보다 앞인 것은 큐어는 즉시고 힐은 독 틱에 일부가 새기 때문이다</td>
 </tr>
@@ -2938,7 +2938,8 @@ endif</code></pre>
 </tbody>
 </table>
 <ul>
-<li><strong>생존 게이트</strong> (2026-09-29). 마비, 독, HP 세 블록을 <code>if paralyzed or poisoned or diffhits &gt; config__light_hits</code> 한 줄 뒤에 둔다. 멀쩡한 패스는 세 줄 대신 한 줄.</li>
+<li><strong>생존 게이트</strong> (2026-09-29). 마비, 독, HP 세 블록을 <code>if paralyzed or poisoned or diffhits &gt; config__light_hits</code> 한 줄 뒤에 둔다. 멀쩡한 패스는 세 줄 대신 한 줄.
+2026-10-10부터는 모든 레시피가 회복 블록을 <code># @ when paralyzed or poisoned or diffhits &gt; 0</code>으로 묶는다 (<a href="modules.html#03">modules.html</a> 03절).</li>
 <li><strong>게이트 접기</strong> (2026-09-29). 늘 참인 바깥 <code>if</code> (수동 모드, 행동 창, 스킬과 악기 준비)를 안쪽 조건 한 줄에 합쳤다. 할 일이 없는 블록은 패스마다 한 줄만 밟는다.
 대상 <code>find</code>는 실제로 쏘는 갈래 안으로 옮겨서, 오프닝과 프록 코어는 주문이 나갈 때만 대상을 찾는다. 매 패스 세우던 플래그 둘 (<code>var__bard_ready</code>, <code>var__manual</code>)은 없애고
 게이트가 <code>warmode</code>와 악기 상태를 직접 읽는다. 드레인 둘은 <code>while queued or casting</code> 하나로, 시약 부족 문장은 리프레시 게이트의 <code>or</code>로 합쳤다.</li>
