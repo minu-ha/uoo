@@ -292,30 +292,33 @@ clearignore</code></pre>
 <th>무엇</th>
 <th>scope</th>
 <th>WebStorm 색 (Language Defaults)</th>
+<th>Light 기본</th>
 </tr>
 </thead>
 <tbody>
-<tr><td><code># @ use</code>, <code># @ config</code> 같은 지시</td><td><code>meta.tag</code></td><td>Metadata</td></tr>
-<tr><td>모듈 이름, <code># module/…razor</code> 출처</td><td><code>entity.name.class</code></td><td>Class name</td></tr>
-<tr><td>섹션 제목 (<code># CONFIG</code>)</td><td><code>markup.heading</code></td><td>Heading</td></tr>
-<tr><td>블록 제목 (<code># BANDAGE</code>)</td><td><code>entity.name.function</code></td><td>Function declaration</td></tr>
-<tr><td>상자의 이름 줄 (<code>#   config__x</code>, <code>#   heal_hits (default 35)</code>), <code>config__</code></td><td><code>variable.parameter</code></td><td>Parameter</td></tr>
-<tr><td><code>&gt;</code> 메모와 이유, <code># @ hotkeys</code> 목록</td><td><code>string</code></td><td>String</td></tr>
-<tr><td>명령 (<code>cast</code>, <code>hotkey</code>, <code>@setvar!</code>)</td><td><code>support.function</code></td><td>Function call</td></tr>
-<tr><td>조건식 (<code>poisoned</code>, <code>findtype</code>)</td><td><code>support.type</code></td><td>Predefined symbol</td></tr>
-<tr><td><code>if</code>, <code>while</code>, <code>endif</code>, <code>stop</code></td><td><code>keyword.control</code></td><td>Keyword</td></tr>
-<tr><td><code>and</code>, <code>or</code>, <code>not</code>, 비교</td><td><code>keyword.operator</code></td><td>Operator sign</td></tr>
-<tr><td><code>var__</code>, <code>timer__</code> 등 다른 접두 변수, <code>{{…}}</code></td><td><code>variable</code></td><td>Local variable</td></tr>
-<tr><td><code>self</code>, <code>backpack</code> 같은 레이어와 대상</td><td><code>constant.language</code></td><td>Constant</td></tr>
+<tr><td>명령 (<code>@setvar!</code>, <code>hotkey</code>, <code>cast</code>)과 <code>if</code>, <code>while</code>, <code>endif</code></td><td><code>keyword</code></td><td>Keyword</td><td>남색 굵게</td></tr>
+<tr><td>조건식 (<code>poisoned</code>, <code>findtype</code>, <code>insysmsg</code>)</td><td><code>constant.other</code></td><td>Constant</td><td>보라 굵게 기울임</td></tr>
+<tr><td><code>and</code>, <code>or</code>, <code>not</code>, <code>stop</code>, <code>break</code></td><td><code>entity.other.attribute-name</code></td><td>Markup → Attribute</td><td>분홍</td></tr>
+<tr><td><code>self</code>, <code>backpack</code> 같은 레이어와 대상</td><td><code>constant.character.entity</code></td><td>Markup → Entity</td><td>파랑 굵게</td></tr>
+<tr><td>문자열과 <code>&gt;</code> 메모, <code># @ hotkeys</code> 목록</td><td><code>string</code></td><td>String</td><td>초록 굵게</td></tr>
+<tr><td>문자열 안의 <code>{{…}}</code></td><td><code>constant.character.escape</code></td><td>Valid escape sequence</td><td>남색 굵게</td></tr>
+<tr><td><code># @ use</code>, <code># @ config</code> 같은 지시</td><td><code>meta.tag</code></td><td>Metadata</td><td>올리브</td></tr>
+<tr><td>모듈 이름, <code># module/…razor</code> 출처</td><td><code>entity.other.attribute-name</code></td><td>Markup → Attribute</td><td>분홍</td></tr>
+<tr><td>섹션 제목 (<code># CONFIG</code>)</td><td><code>markup.heading</code></td><td>TextMate → Heading</td><td>굵게, 밑줄</td></tr>
+<tr><td>블록 제목 (<code># BANDAGE</code>)</td><td><code>markup.bold</code></td><td>TextMate → Bold</td><td>굵게</td></tr>
+<tr><td>상자의 이름 줄 (<code>#   config__x</code>, <code>#   heal_hits (default 35)</code>)</td><td><code>constant.other</code></td><td>Constant</td><td>보라 굵게 기울임</td></tr>
+<tr><td>접두 변수 (<code>config__</code>, <code>var__</code> 등)</td><td><code>variable</code></td><td>Parameter, Local variable</td><td>색 없음</td></tr>
 </tbody>
 </table>
+<p>scope는 WebStorm의 기본 Light 구성표에서 색이 있는 항목에 맞췄다. Function call이나 Parameter처럼 Light에서 색이 없는 항목은 피했다.</p>
 <p>WebStorm에 거는 법:</p>
 <ol>
 <li>Settings → Editor → File Types → <code>Razor</code> (사용자 정의 형식)에서 <code>*.razor</code> 패턴을 지운다. 남아 있으면 TextMate 문법이 쓰이지 않는다.</li>
 <li>Settings → Editor → TextMate Bundles → <code>+</code> → 저장소의 <code>util/razor-syntax</code> 폴더를 고른다.</li>
 <li>색은 Settings → Editor → Color Scheme → Language Defaults의 위 표 이름에서 바꾼다. TextMate 문법은 이 기본 색을 따른다.</li>
+<li>문법 파일이 바뀌면 TextMate Bundles 목록에서 번들 체크를 껐다 켜고 Apply 하거나 WebStorm을 다시 연다.</li>
 </ol>
-<p>VS Code에서는 <code>util/razor-syntax</code> 폴더를 확장으로 넣으면 된다. 문법을 고치면 WebStorm은 번들을 다시 불러와야 반영된다.</p>
+<p>VS Code에서는 <code>util/razor-syntax</code> 폴더를 확장으로 넣으면 된다.</p>
 
 <h2 id="03">03 변수</h2>
 
