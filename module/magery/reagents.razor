@@ -9,13 +9,12 @@
 # ----------------------------------------------------------------------------------------
 # @ config
 #
-#   config__mana_1st, config__mana_2nd, config__mana_3rd, config__mana_4th, config__mana_5th
-#      Mana a spell of that circle needs before it is worth starting.
-#        1st  magic arrow, create food, reactive armor
+#   config__mana_1st, config__mana_2nd, config__mana_3rd, config__mana_4th
+#      Mana an attack spell of that circle needs before it is worth starting.
+#        1st  magic arrow
 #        2nd  harm
 #        3rd  fireball
 #        4th  lightning, curse, mana drain
-#        5th  magic reflection
 #
 #   config__interrupt_to_heal
 #      An attack cast in flight when the loss reaches emergency_hits.
@@ -26,7 +25,6 @@
 @setvar! config__mana_2nd 6
 @setvar! config__mana_3rd 9
 @setvar! config__mana_4th 11
-@setvar! config__mana_5th 14
 @setvar! config__interrupt_to_heal 1
 
 
@@ -58,7 +56,8 @@ timer__reagents interval__reagents
 #
 #   var__regs_cure, var__regs_heal, var__regs_greater_heal, var__regs_create_food,
 #   var__regs_reactive_armor, var__regs_magic_reflect, var__regs_magic_arrow, var__regs_harm,
-#   var__regs_fireball, var__regs_lightning, var__regs_curse, var__regs_mana_drain, var__regs_energy_bolt
+#   var__regs_fireball, var__regs_lightning, var__regs_curse, var__regs_mana_drain, var__regs_energy_bolt,
+#   var__regs_bless, var__regs_arch_protection, var__regs_flamestrike
 #      1 when every reagent of that spell was found, written only by this block.
 #        cure            garlic 3972, ginseng 3973
 #        heal            garlic, ginseng, spider silk 3981
@@ -73,6 +72,9 @@ timer__reagents interval__reagents
 #        curse           garlic, nightshade, sulfurous ash
 #        mana drain      black pearl, mandrake root, spider silk
 #        energy bolt     black pearl, nightshade
+#        bless           garlic, mandrake root
+#        arch protection garlic, ginseng, mandrake root, sulfurous ash
+#        flamestrike     spider silk, sulfurous ash
 #
 #   var__has_black_pearl, var__has_garlic, var__has_ginseng, var__has_mandrake,
 #   var__has_nightshade, var__has_ash, var__has_silk
@@ -91,6 +93,9 @@ timer__reagents interval__reagents
 @setvar! var__regs_curse 0
 @setvar! var__regs_mana_drain 0
 @setvar! var__regs_energy_bolt 0
+@setvar! var__regs_bless 0
+@setvar! var__regs_arch_protection 0
+@setvar! var__regs_flamestrike 0
 @setvar! var__has_black_pearl 0
 @setvar! var__has_garlic 0
 @setvar! var__has_ginseng 0
@@ -157,6 +162,9 @@ timer__reagents interval__reagents
             @setvar! var__regs_curse 0
             @setvar! var__regs_mana_drain 0
             @setvar! var__regs_energy_bolt 0
+            @setvar! var__regs_bless 0
+            @setvar! var__regs_arch_protection 0
+            @setvar! var__regs_flamestrike 0
 
             if var__has_garlic = 1 and var__has_ginseng = 1
                 @setvar! var__regs_cure 1
@@ -196,6 +204,15 @@ timer__reagents interval__reagents
             endif
             if var__has_black_pearl = 1 and var__has_nightshade = 1
                 @setvar! var__regs_energy_bolt 1
+            endif
+            if var__has_garlic = 1 and var__has_mandrake = 1
+                @setvar! var__regs_bless 1
+            endif
+            if var__has_garlic = 1 and var__has_ginseng = 1 and var__has_mandrake = 1 and var__has_ash = 1
+                @setvar! var__regs_arch_protection 1
+            endif
+            if var__has_silk = 1 and var__has_ash = 1
+                @setvar! var__regs_flamestrike 1
             endif
         endif
     endif
