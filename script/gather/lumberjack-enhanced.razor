@@ -18,205 +18,330 @@
 #          Cancel Current Target, Bandage Self, Drink Refresh, Use item in hand, > Interrupt.
 # Generated from recipe/lumberjack-enhanced-recipe.razor by util/build-scripts.py. Edit module/ and recipe/, not this file.
 
+
 # ####################################################################################
 # # CONFIG
 # ####################################################################################
+
 # ---- module/base.razor -----------------------------------------------------------------
-# Optional overheads. Warnings show either way.
+
+# 1 shows the optional overheads. Warnings show either way.
 @setvar! config__chatty 1
-# Journal diagnostics. A block that writes one says so in its comments.
+
+# 1 writes Journal diagnostics. A block that writes one says so in its comments.
 @setvar! config__sysmsg 1
-# Clear the client queues, the journal and the ignore list at Play (conventions 02.D).
-# 0 keeps a cursor or a cast the player holds at Play.
+
+# What Play does first (conventions 02.D).
+#   0  nothing: a cursor or a cast the player holds at Play is kept
+#   1  clear the client queues, the journal and the ignore list
 @setvar! config__clear_at_start 1
-# Magery: the Cure and heal agents, the reagent reads and the buffs. Potions and bandages stay.
+
+# 1 uses Magery: the Cure and heal agents, the reagent reads and the buffs.
+# At 0 potions and bandages still go out.
 @setvar! config__use_magery 1
-# Potions: cure, heal, Refresh and the stat potions.
+
+# 1 uses potions: cure, heal, Refresh and the stat potions.
 @setvar! config__use_potions 1
-# 1 makes our casts wait while the walk bar runs, so a step does not break them.
-# 0 casts while walking, for a fight where there is no better moment to wait for.
+
+# Our casts and the walk bar.
+#   0  cast while walking, for a fight where there is no better moment to wait for
+#   1  wait while the walk bar runs, so a step does not break the cast
 @setvar! config__walk_guard 1
-# 1 when warmode is the player's manual control window: our casts stand down while it is on.
+
+# Whose warmode it is.
+#   0  ours: our casts ignore it
+#   1  the player's manual control window: our casts and the food stand down while it
+#      is on. Potions and bandages still go out
 # This loop: Warmode is the player's: recovery casts and buffs stand down, potions still go out.
 @setvar! config__warmode_is_manual 1
 
+
 # ---- module/escape/tracking.razor ------------------------------------------------------
-# Hunt filter: 1 red (murderer), 2 grey (criminal players), 3 orange (enemy), 4 all three.
+
+# Hunt filter.
+#   1  red: murderers
+#   2  grey: criminal players
+#   3  orange: enemies
+#   4  all three
 @setvar! config__tracking_color 1
+
 # 1 leaves the Tracking window open after setup.
 @setvar! config__show_tracking 0
 
+
 # ---- module/recovery/cure.razor --------------------------------------------------------
+
 # Minimum current mana for the Cure agent.
 @setvar! config__mana_cure 6
 
+
 # ---- module/recovery/heal.razor --------------------------------------------------------
+
 # Missing hit points (not percent) that drink a heal potion.
 @setvar! config__heal_hits 35
+
 # Missing hit points that cast Greater Heal when no heal potion went out on this pass.
 # Not below heal_hits.
 # This loop: Bandages handle ordinary damage, so Greater Heal waits for 45.
 @setvar! config__emergency_hits 45
-# Minimum current mana for Greater Heal. It keeps no reserve: 31 always leaves 20 mana for an
-# attack or Teleport.
+
+# Minimum current mana for Greater Heal. It keeps no reserve: 31 always leaves 20 mana for
+# an attack or Teleport.
 @setvar! config__mana_greater_heal 11
 
+
 # ---- module/recovery/bandage.razor -----------------------------------------------------
-# 0 turns bandages off. recovery/light-heal then stands in.
+
+# 1 uses bandages. At 0 recovery/light-heal stands in.
 @setvar! config__use_bandages 1
+
 # Healing must be above this to bandage. At or below it recovery/light-heal stands in.
 @setvar! config__heal_skill_min 0
 
+
 # ---- module/recovery/light-heal.razor --------------------------------------------------
-# 1 casts the light Heal beside the bandages. At 0 it goes only while no bandage can run:
-# use_bandages 0, Healing at or below heal_skill_min, or none left and none running.
+
+# When the light Heal goes.
+#   0  only while no bandage can run: use_bandages 0, Healing at or below heal_skill_min,
+#      or none left and none running
+#   1  beside the bandages too
 @setvar! config__use_light_heal 0
+
 # Missing hit points that start the light Heal.
 @setvar! config__light_hits 15
+
 # Minimum current mana for the light Heal.
 @setvar! config__mana_heal 4
 
+
 # ---- module/recovery/refresh.razor -----------------------------------------------------
+
 # Current stamina at or below this drinks a Refresh.
 @setvar! config__refresh_stam 15
 
+
 # ---- module/escape/recall.razor --------------------------------------------------------
-# Recall on a Tracking report within 1 through 45 steps. Needs escape/tracking hunting.
+
+# 1 recalls on a Tracking report within 1 through 45 steps. Needs escape/tracking hunting.
 @setvar! config__recall_on_detection 1
+
 # 1 recalls on a Tracking report at any distance.
 @setvar! config__recall_at_any_distance 0
-# Recall once spare weight is at or below weight_remaining.
+
+# 1 recalls once spare weight is at or below weight_remaining.
 @setvar! config__recall_on_weight 1
+
 # Spare weight in stones that counts as low for recall_on_weight.
 @setvar! config__weight_remaining 10
+
 # 1 holds gathering while no Recall book is carried.
 @setvar! config__require_runebook 1
+
 # Minimum mana to send RecallCharge.
 @setvar! config__mana_recall 11
 
+
 # ---- module/buff/spells.razor ----------------------------------------------------------
-# Reactive Armor on or off.
+
+# 1 keeps Reactive Armor up.
 @setvar! config__use_reactive_armor 1
-# Magic Reflection on or off.
+
+# 1 keeps Magic Reflection up.
 @setvar! config__use_magic_reflect 1
+
 # Minimum current mana to start Reactive Armor.
 # This loop: Buffs keep the handbook's 20 mana for Greater Heal and Teleport against a PK.
 @setvar! config__mana_reactive_armor 24
+
 # Minimum current mana to start Magic Reflection.
 # This loop: Same reserve: the base 14 plus the handbook's 20.
 @setvar! config__mana_magic_reflect 34
+
 # Missing hit points at which buffs are not started, and cut mid cast.
 # This loop: Buffs only while nearly full, so gathering never trades a heal for one.
 @setvar! config__buff_max_loss 15
-# 1 buffs while poisoned. 0 holds them back and cuts one that is casting, so the cure goes first.
+
+# Buffs while poisoned.
+#   0  no: hold them back and cut one that is casting, so the cure goes first
+#   1  yes
 # This loop: The cure goes first: no buffs while poisoned.
 @setvar! config__buff_when_poisoned 0
+
 
 # ####################################################################################
 # # WAIT AND COOLDOWN
 # ####################################################################################
-# The poll inside a wait, and the pause after an action.
+
+# ---- module/base.razor -----------------------------------------------------------------
+
+# The poll inside a wait.
 @setvar! wait__poll 100
+
+# The pause after an action.
 @setvar! wait__short 200
+
 # Spacing for repeated warnings. Without it an empty potion bag shouts every pass.
 @setvar! cooldown__message 3000
+
+
+# ---- module/escape/tracking.razor ------------------------------------------------------
 
 # How long the Tracking window may take to open.
 @setvar! wait__tracking_gump 1000
 
+
+# ---- module/escape/recall.razor --------------------------------------------------------
+
 # The book, Tracking buff and weight checks run on this clock.
 @setvar! cooldown__recall_check 5000
+
+
+# ---- module/recovery/reagents.razor ----------------------------------------------------
 
 # Reagent read interval. Five lookups each time. A refill counts within this, and running out
 # is caught at once by the refusal line.
 @setvar! cooldown__reagents 10000
 
+
+# ---- module/gather/lumberjacking.razor -------------------------------------------------
+
 # Wait for the hand tool cursor in the same block before any other automatic action.
 @setvar! wait__harvest_target 3000
+
 # Let the equip request settle before the next hand verification.
 @setvar! wait__equip 1000
-# Normal tool retry. Resource exhaustion uses the shorter interval below.
+
+# Normal tool retry.
 @setvar! cooldown__harvest_retry 4000
+
+# Retry after "You do not see any harvestable resources nearby".
 @setvar! cooldown__harvest_out_retry 2000
+
+
+# ---- module/buff/food.razor ------------------------------------------------------------
 
 # The buff lasts far longer than this.
 @setvar! cooldown__food 60000
 
+
+# ---- module/pack/lumber.razor ----------------------------------------------------------
+
 # Allow inventory updates after conversion, opening the pouch and drag/drop.
 @setvar! wait__lumber_item 500
+
 # Per-phase request budget: Logs and Boards each yield after 2.5 seconds, between item requests.
 @setvar! wait__lumber_batch 2500
+
 # 120000 = 2 minutes. Use 180000 for 3 minutes.
 @setvar! cooldown__pack_lumber 120000
+
 
 # ####################################################################################
 # # TIMER
 # ####################################################################################
+
+# ---- module/base.razor -----------------------------------------------------------------
+
 # Ready on the first pass, so the first warning shows at once.
 if not timerexists "timer__message"
     createtimer "timer__message"
 endif
+settimer "timer__message" cooldown__message
+
+
+# ---- module/escape/recall.razor --------------------------------------------------------
 
 if not timerexists "timer__recall_check"
     createtimer "timer__recall_check"
 endif
+settimer "timer__recall_check" cooldown__recall_check
+
+
+# ---- module/recovery/reagents.razor ----------------------------------------------------
 
 # Ready on the first pass, so reagents are read before the first cast.
 if not timerexists "timer__reagents"
     createtimer "timer__reagents"
 endif
+settimer "timer__reagents" cooldown__reagents
+
+
+# ---- module/gather/lumberjacking.razor -------------------------------------------------
 
 if not timerexists "timer__harvest"
     createtimer "timer__harvest"
 endif
+settimer "timer__harvest" cooldown__harvest_retry
+
+
+# ---- module/buff/food.razor ------------------------------------------------------------
 
 if not timerexists "timer__food"
     createtimer "timer__food"
 endif
+settimer "timer__food" cooldown__food
+
+
+# ---- module/pack/lumber.razor ----------------------------------------------------------
 
 # Packing waits one full interval.
 if not timerexists "timer__pack_lumber"
     createtimer "timer__pack_lumber"
 endif
-
-settimer "timer__message" cooldown__message
-settimer "timer__recall_check" cooldown__recall_check
-settimer "timer__reagents" cooldown__reagents
-settimer "timer__harvest" cooldown__harvest_retry
-settimer "timer__food" cooldown__food
 settimer "timer__pack_lumber" 0
+
 
 # ####################################################################################
 # # STATE
 # ####################################################################################
-# Signals between blocks. Each keeps this value unless the loop has a block that sets it.
-#   fighting        1 while an enemy is engaged. buff/potions drinks only then. fight/target
-#                   sets it every pass, and the pvp recipe keeps it at 1.
-#   hold_casts      1 while a block keeps the cast window for itself. buff/spells stands down.
-#                   escape/recall sets it once a Recall is due.
-#   hold_gathering  1 while gathering and its packing wait. escape/recall sets it.
+
+# ---- module/base.razor -----------------------------------------------------------------
+
+# Signals between blocks. Each keeps the value here unless the loop has a block that sets it.
+
+# 1 while an enemy is engaged. buff/potions drinks only then.
+# fight/target sets it every pass, and the pvp recipe keeps it at 1.
 @setvar! var__fighting 0
+
+# 1 while a block keeps the cast window for itself. buff/spells stands down.
+# escape/recall sets it once a Recall is due.
 @setvar! var__hold_casts 0
+
+# 1 while gathering and its packing wait. escape/recall sets it.
 @setvar! var__hold_gathering 0
 
-# Last color confirmed in this client session. Survives Stop and Play only while Hunting stays active.
-# If the filter was changed manually, turn Hunting off before Play so it is checked again.
+
+# ---- module/escape/tracking.razor ------------------------------------------------------
+
+# Last color confirmed in this client session. It survives Stop and Play only while Hunting
+# stays active. After a manual filter change, turn Hunting off before Play so it is checked again.
 if not varexist var__tracking_setup_color
     @setvar! var__tracking_setup_color 0
 endif
 
 # 1 when this run reused a confirmed color or verified it during startup.
 @setvar! var__tracking_filter_confirmed 0
+
 # 1 if Hunting was active at startup or at the last escape/recall check. No repeated gump setup.
 @setvar! var__tracking_hunting_active 0
+
 # Temporary button-response flag. Wait for each response before cycling the next filter.
 @setvar! var__tracking_button_answered 0
+
+
+# ---- module/recovery/heal.razor --------------------------------------------------------
 
 # Scratch: 1 once a heal potion went out on this pass.
 @setvar! var__heal_potion_out 0
 
+
+# ---- module/recovery/light-heal.razor --------------------------------------------------
+
 # Scratch: 1 when the light Heal goes on this pass.
 @setvar! var__light_heal_due 0
+
+
+# ---- module/escape/recall.razor --------------------------------------------------------
 
 # Recall decision: 0 keep gathering, 1 stop optional work and attempt Recall when input is free.
 # Detection or low spare weight sets this to 1. Only restarting the script resets it.
@@ -234,6 +359,9 @@ endif
 # Scratch: 1 when the slow checks are due on this pass.
 @setvar! var__recall_check_due 0
 
+
+# ---- module/recovery/reagents.razor ----------------------------------------------------
+
 # Reagent flags, written only by REAGENTS. 1 when every reagent of that spell was found.
 #   Cure            garlic 3972, ginseng 3973
 #   Heal            garlic, ginseng, silk 3981
@@ -245,11 +373,16 @@ endif
 @setvar! var__regs_greater_heal 0
 @setvar! var__regs_reactive_armor 0
 @setvar! var__regs_magic_reflect 0
+
+# Scratch: 1 when that reagent was found on the last read.
 @setvar! var__has_garlic 0
 @setvar! var__has_ginseng 0
 @setvar! var__has_mandrake 0
 @setvar! var__has_ash 0
 @setvar! var__has_silk 0
+
+
+# ---- module/gather/lumberjacking.razor -------------------------------------------------
 
 # Delay for the next tool attempt, in ms. Resource exhaustion selects the shorter retry.
 # Each attempt restores the normal interval. Reuse timer__harvest without another timer.
@@ -261,8 +394,14 @@ if not varexist var__my_hatchet
     @setvar! var__my_hatchet 0
 endif
 
+
+# ---- module/pack/lumber.razor ----------------------------------------------------------
+
 # Scratch graphic for the two lumber passes: 7133 Logs, then 7127 Boards. No persistent batch stage.
 @setvar! var__lumber_graphic 0
+
+
+# ---- module/base.razor -----------------------------------------------------------------
 
 # The pvp expression means the structured-PvP restrictions, where these loops may not run.
 if pvp
@@ -276,6 +415,9 @@ if config__clear_at_start = 1
     cleardragdrop
     clearignore
 endif
+
+
+# ---- module/escape/tracking.razor ------------------------------------------------------
 
 # ####################################################################################
 # # TRACKING SETUP
@@ -398,6 +540,9 @@ if skill "Tracking" > 0
     endif
 endif
 
+
+# ---- recipe/lumberjack-enhanced-recipe.razor -------------------------------------------
+
 # pack/lumber moves Boards into this pouch. restock/loadout picks it, this asks when it is missing.
 if not varexist global__my_looting_pouch or not find global__my_looting_pouch backpack
     overhead "[ loot pouch, pick ]" 255
@@ -419,16 +564,19 @@ if config__chatty = 1
     overhead "[ lumberjack, on ]" 290
 endif
 
+
 # ####################################################################################
 # # MAIN LOOP
 # ####################################################################################
 while not dead
+    # ---- module/base.razor -------------------------------------------------------------
     # The pvp expression means structured-PvP restrictions, not a field PK encounter.
     if pvp
         overhead "[ script, blocked ]" 254
         stop
     endif
 
+    # ---- module/recovery/pouch.razor ---------------------------------------------------
     # ################################################################################
     # # PARALYZE
     # ################################################################################
@@ -443,6 +591,7 @@ while not dead
         endif
     endif
 
+    # ---- module/recovery/cure.razor ----------------------------------------------------
     # ################################################################################
     # # CURE
     # ################################################################################
@@ -483,6 +632,7 @@ while not dead
         endif
     endif
 
+    # ---- module/recovery/heal.razor ----------------------------------------------------
     # ################################################################################
     # # HEAL
     # ################################################################################
@@ -490,7 +640,8 @@ while not dead
     # Greater Heal follows when no potion went out on this pass and the loss is at the
     # emergency line: none carried, on its own cooldown, or the bar still running.
     # The bar skips the label read while it runs. The label stays authoritative when the bar
-    # is missing. Greater Heal waits for the walk bar and for warmode as the switches say.
+    # is missing. Greater Heal waits for the walk bar and for warmode as config__walk_guard and
+    # config__warmode_is_manual say.
     if not poisoned and not paralyzed and not hidden and not queued and not targetexists and diffhits >= config__heal_hits
         @setvar! var__heal_potion_out 0
         if config__use_potions = 1 and cooldown "heal pot" = 0
@@ -538,6 +689,7 @@ while not dead
         endif
     endif
 
+    # ---- module/recovery/bandage.razor -------------------------------------------------
     # ################################################################################
     # # BANDAGE
     # ################################################################################
@@ -555,12 +707,13 @@ while not dead
         endif
     endif
 
+    # ---- module/recovery/light-heal.razor ----------------------------------------------
     # ################################################################################
     # # LIGHT HEAL
     # ################################################################################
     # The bandage stand-in whenever no bandage can run: bandages off, no Healing, or none left
     # and none running. Beside the bandages only with config__use_light_heal 1. The agent waits
-    # for the walk bar and for warmode as the switches say.
+    # for the walk bar and for warmode as config__walk_guard and config__warmode_is_manual say.
     if not poisoned and not paralyzed and not hidden and not queued and not casting and not targetexists and config__use_magery = 1 and var__regs_heal = 1 and diffhits >= config__light_hits and mana >= config__mana_heal
         @setvar! var__light_heal_due 0
         if config__use_light_heal = 1 or config__use_bandages = 0 or skill "Healing" <= config__heal_skill_min
@@ -597,6 +750,7 @@ while not dead
         endif
     endif
 
+    # ---- module/recovery/refresh.razor -------------------------------------------------
     # ################################################################################
     # # REFRESH
     # ################################################################################
@@ -607,6 +761,7 @@ while not dead
         endif
     endif
 
+    # ---- module/escape/recall.razor ----------------------------------------------------
     # ####################################################################################
     # # RECALL
     # ####################################################################################
@@ -816,6 +971,7 @@ while not dead
         @setvar! var__hold_gathering 1
     endif
 
+    # ---- module/recovery/reagents.razor ------------------------------------------------
     # ################################################################################
     # # REAGENTS
     # ################################################################################
@@ -871,6 +1027,7 @@ while not dead
         endif
     endif
 
+    # ---- module/gather/lumberjacking.razor ---------------------------------------------
     # ####################################################################################
     # # SMART HARVEST
     # ####################################################################################
@@ -887,7 +1044,7 @@ while not dead
             settimer "timer__harvest" 0
             @setvar! var__harvest_retry cooldown__harvest_retry
 
-            # Follow bard-mace: an empty left hand needs equipment, regardless of type-search results.
+            # Follow archive/bard-mace: an empty left hand needs equipment, regardless of type-search results.
             if lhandempty
                 if not find var__my_hatchet backpack
                     @setvar! var__my_hatchet 0
@@ -941,6 +1098,7 @@ while not dead
         endif
     endif
 
+    # ---- module/buff/spells.razor ------------------------------------------------------
     # ################################################################################
     # # SELF BUFFS
     # ################################################################################
@@ -948,8 +1106,8 @@ while not dead
     # Not started at config__buff_max_loss, and cut there mid cast so the next pass can heal.
     # With config__buff_when_poisoned 0 poison holds them back and cuts them too, so the cure
     # goes first. var__hold_casts lets another block keep the cast window (a latched Recall).
-    # The walk and warmode switches apply as for the heal agents. The reflect bar is the
-    # server's recast lock after Reflect is used up.
+    # config__walk_guard and config__warmode_is_manual apply as for the heal agents. The reflect
+    # bar is the server's recast lock after Reflect is used up.
     if config__use_magery = 1 and var__hold_casts = 0 and not paralyzed and not hidden and not queued and not casting and not targetexists and diffhits < config__buff_max_loss
         if config__buff_when_poisoned = 1 or not poisoned
             if config__warmode_is_manual = 0 or not warmode
@@ -1008,20 +1166,25 @@ while not dead
         endif
     endif
 
+    # ---- module/buff/food.razor --------------------------------------------------------
     # ################################################################################
     # # FOOD
     # ################################################################################
-    # Looked at once a minute. The buff lasts far longer.
+    # Looked at once a minute. The buff lasts far longer. With config__warmode_is_manual 1 it
+    # stands down in warmode, as our casts do.
     if timer "timer__food" >= cooldown__food and not findbuff "Food Satisfaction"
-        if not hidden and not queued and not casting and not targetexists
-            settimer "timer__food" 0
-            if findtype tray backpack as alias__food
-                dclick alias__food
-                wait wait__short
+        if config__warmode_is_manual = 0 or not warmode
+            if not hidden and not queued and not casting and not targetexists
+                settimer "timer__food" 0
+                if findtype tray backpack as alias__food
+                    dclick alias__food
+                    wait wait__short
+                endif
             endif
         endif
     endif
 
+    # ---- module/pack/lumber.razor ------------------------------------------------------
     # ####################################################################################
     # # LUMBER
     # ####################################################################################
@@ -1109,5 +1272,6 @@ while not dead
         endif
     endif
 
+    # ---- module/base.razor -------------------------------------------------------------
     wait wait__poll
 endwhile

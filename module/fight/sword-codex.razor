@@ -1,39 +1,62 @@
 # Codex of swords: Warrior, Defensive while hurt, and the finisher, read from the codex label.
 
-#@ config
-# Stance held outside the Defensive window, by codex slot (wiki order): 1 Aggressive,
-# 2 Defensive, 3 Cleave, 4 Warrior, 5 Flaying. Cleave pays only against two or more enemies.
+
+#@ config --------------------------------------------------------------------------------
+
+# Stance held outside the Defensive window, by codex slot in wiki order.
+#   1  Aggressive
+#   2  Defensive
+#   3  Cleave      pays only against two or more enemies
+#   4  Warrior
+#   5  Flaying
 @setvar! config__sword_stance_main 4
-# Finisher to keep selected: 1 Bleed Out, 2 Execute. 0 leaves the codex finisher alone.
+
+# Finisher to keep selected.
+#   0  leave the codex finisher alone
+#   1  Bleed Out
+#   2  Execute
 @setvar! config__sword_finisher_main 2
+
 # Missing hit points above which Defensive latches on.
 @setvar! config__defensive_enter_diff 60
-# Missing hit points below which Defensive lets go. Below the enter line, so the stance cannot
-# flap while bandages tick.
+
+# Missing hit points below which Defensive lets go. Below the enter line, so the stance
+# cannot flap while bandages tick.
 @setvar! config__defensive_leave_diff 48
 
-#@ wait
-# Codex label reads: a failed switch is tried again after sword_retry, and the cache is dropped
-# every sword_resync so a stance changed by hand is picked up.
+
+#@ wait ----------------------------------------------------------------------------------
+
+# A failed stance switch is tried again after this.
 @setvar! cooldown__sword_retry 3000
+
+# The stance cache is dropped this often, so a stance changed by hand is picked up.
 @setvar! cooldown__sword_resync 30000
 
-#@ timer
+
+#@ timer ---------------------------------------------------------------------------------
+
 timer__sword_retry cooldown__sword_retry
 timer__sword_resync 0
 
-#@ state
+
+#@ state ---------------------------------------------------------------------------------
+
 # Sword stance cache. 0 means unknown, which forces a codex label read on the first pass.
 @setvar! var__sword_want config__sword_stance_main
 @setvar! var__sword_active 0
+
 # 1 when the codex label names no stance. Switching blind could toggle the stance off.
 @setvar! var__sword_disabled 0
+
 # The finisher is checked once per Play, on the first codex label read.
 @setvar! var__sword_finisher_checked 0
+
 # Scratch: 0 neither finisher named, 1 wanted finisher active, 2 the other one active.
 @setvar! var__sword_finisher_state 0
 
-#@ loop
+
+#@ loop ----------------------------------------------------------------------------------
     # ################################################################################
     # # SWORD CODEX
     # ################################################################################
@@ -45,7 +68,7 @@ timer__sword_resync 0
     # trades accuracy and defense for 4% damage resistance per rank, so it takes over while hurt.
     # Stance numbers and effects are on the wiki, Weapon_and_Parry_Codex.
     #
-    # The codex label is the only source of truth, as in bard-mace. The cache is refreshed from
+    # The codex label is the only source of truth, as in archive/bard-mace. The cache is refreshed from
     # the label on a timer, which also catches a stance changed by hand. getlabel runs after
     # recovery so a server round trip never delays a bandage or a heal potion.
     if var__sword_disabled = 0

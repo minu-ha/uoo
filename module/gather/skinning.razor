@@ -1,46 +1,65 @@
 # Forensic Evaluation carving of corpses within 2 tiles, between fights.
 #@ hotkeys Cancel Current Target
 
-#@ config
-# 1 carves every creature corpse within 2 tiles by targeting each one, grey or not. Player remains
-# are never targeted. 0 carves grey corpses only, through Smart Harvest on self. Where the server
-# refuses the first as a criminal action, grey corpses only for 5 minutes.
+
+#@ config --------------------------------------------------------------------------------
+
+# Which corpses within 2 tiles get carved.
+#   0  grey corpses only, through Smart Harvest on self
+#   1  every creature corpse, by targeting each one. Player remains are never targeted.
+#      Where the server refuses this as a criminal action, grey corpses only for 5 minutes
 @setvar! config__skin_unowned 1
 
-#@ wait
+
+#@ wait ----------------------------------------------------------------------------------
+
 # The knife cursor must arrive inside this block. A late cursor would block every input guard.
 @setvar! wait__carve_target 2000
+
 # How long Smart Harvest waits for the server reply after target self.
 @setvar! wait__carve_reply 1500
+
 # Forensic Evaluation has its own 0.5 second cooldown. This spaces the corpse search as well.
 @setvar! cooldown__carve 700
+
 # After a criminal action refusal, carve grey corpses only for 5 minutes.
 @setvar! cooldown__grey_only 300000
 
-#@ timer
+
+#@ timer ---------------------------------------------------------------------------------
+
 timer__carve cooldown__carve
 timer__grey_only cooldown__grey_only
 
-#@ state
+
+#@ state ---------------------------------------------------------------------------------
+
 # Scratch: 1 when a Z pick arrived while the knife cursor was up.
 @setvar! var__pick_during_carve 0
+
 # Scratch: 1 targets the corpse, 0 uses Smart Harvest. Chosen for each carve.
 @setvar! var__carve_direct 0
+
 # Scratch: 1 when the corpse found this pass may be carved.
 @setvar! var__corpse_ok 0
-# 1 after a corpse carving criminal act, read from the carve reply. The label check should keep
-# player remains out, so this is only a safety net. Direct carving then stays off until the next Play.
+
+# 1 after a corpse carving criminal act, read from the carve reply. Direct carving then stays off
+# until the next Play. The label check should keep player remains out, so this is a safety net.
 @setvar! var__carve_crime 0
+
 # Corpse that missed once (too far or busy). It gets one more request, then it is ignored.
 @setvar! var__carve_retry 0
+
 # Scratch Smart Harvest reply: 0 none yet, 1 carved, 2 nothing left to carve here.
 @setvar! var__carve_reply 0
+
 # Selected knife serial, reused across Stop and Play. 0 means rediscover from the backpack.
 if not varexist var__my_knife
     @setvar! var__my_knife 0
 endif
 
-#@ loop
+
+#@ loop ----------------------------------------------------------------------------------
     # ################################################################################
     # # SKINNING
     # ################################################################################

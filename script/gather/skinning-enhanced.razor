@@ -13,150 +13,252 @@
 #          Drink Magic Resist, > Interrupt.
 # Generated from recipe/skinning-enhanced-recipe.razor by util/build-scripts.py. Edit module/ and recipe/, not this file.
 
+
 # ####################################################################################
 # # CONFIG
 # ####################################################################################
+
 # ---- module/base.razor -----------------------------------------------------------------
-# Optional overheads. Warnings show either way.
+
+# 1 shows the optional overheads. Warnings show either way.
 @setvar! config__chatty 1
-# Journal diagnostics. A block that writes one says so in its comments.
+
+# 1 writes Journal diagnostics. A block that writes one says so in its comments.
 @setvar! config__sysmsg 1
-# Clear the client queues, the journal and the ignore list at Play (conventions 02.D).
-# 0 keeps a cursor or a cast the player holds at Play.
+
+# What Play does first (conventions 02.D).
+#   0  nothing: a cursor or a cast the player holds at Play is kept
+#   1  clear the client queues, the journal and the ignore list
 @setvar! config__clear_at_start 1
-# Magery: the Cure and heal agents, the reagent reads and the buffs. Potions and bandages stay.
+
+# 1 uses Magery: the Cure and heal agents, the reagent reads and the buffs.
+# At 0 potions and bandages still go out.
 @setvar! config__use_magery 1
-# Potions: cure, heal, Refresh and the stat potions.
+
+# 1 uses potions: cure, heal, Refresh and the stat potions.
 @setvar! config__use_potions 1
-# 1 makes our casts wait while the walk bar runs, so a step does not break them.
-# 0 casts while walking, for a fight where there is no better moment to wait for.
+
+# Our casts and the walk bar.
+#   0  cast while walking, for a fight where there is no better moment to wait for
+#   1  wait while the walk bar runs, so a step does not break the cast
 @setvar! config__walk_guard 1
-# 1 when warmode is the player's manual control window: our casts stand down while it is on.
+
+# Whose warmode it is.
+#   0  ours: our casts ignore it
+#   1  the player's manual control window: our casts and the food stand down while it
+#      is on. Potions and bandages still go out
 @setvar! config__warmode_is_manual 0
 
+
 # ---- module/recovery/cure.razor --------------------------------------------------------
+
 # Minimum current mana for the Cure agent.
 @setvar! config__mana_cure 6
 
+
 # ---- module/recovery/heal.razor --------------------------------------------------------
+
 # Missing hit points (not percent) that drink a heal potion.
 @setvar! config__heal_hits 35
+
 # Missing hit points that cast Greater Heal when no heal potion went out on this pass.
 # Not below heal_hits.
 # This loop: Bandages handle ordinary damage, so Greater Heal waits for 45.
 @setvar! config__emergency_hits 45
-# Minimum current mana for Greater Heal. It keeps no reserve: 31 always leaves 20 mana for an
-# attack or Teleport.
+
+# Minimum current mana for Greater Heal. It keeps no reserve: 31 always leaves 20 mana for
+# an attack or Teleport.
 @setvar! config__mana_greater_heal 11
 
+
 # ---- module/recovery/bandage.razor -----------------------------------------------------
-# 0 turns bandages off. recovery/light-heal then stands in.
+
+# 1 uses bandages. At 0 recovery/light-heal stands in.
 @setvar! config__use_bandages 1
+
 # Healing must be above this to bandage. At or below it recovery/light-heal stands in.
 # This loop: Healing 80 template. Below 10 the light Heal stands in.
 @setvar! config__heal_skill_min 10
 
+
 # ---- module/recovery/light-heal.razor --------------------------------------------------
-# 1 casts the light Heal beside the bandages. At 0 it goes only while no bandage can run:
-# use_bandages 0, Healing at or below heal_skill_min, or none left and none running.
+
+# When the light Heal goes.
+#   0  only while no bandage can run: use_bandages 0, Healing at or below heal_skill_min,
+#      or none left and none running
+#   1  beside the bandages too
 @setvar! config__use_light_heal 0
+
 # Missing hit points that start the light Heal.
 @setvar! config__light_hits 15
+
 # Minimum current mana for the light Heal.
 @setvar! config__mana_heal 4
 
+
 # ---- module/recovery/refresh.razor -----------------------------------------------------
+
 # Current stamina at or below this drinks a Refresh.
 # This loop: DEX 80 gives about 80 stamina. Refresh at 60.
 @setvar! config__refresh_stam 60
 
+
 # ---- module/fight/axe.razor ------------------------------------------------------------
+
 # Graphic of the axe to re-arm. 5187 is the two handed axe in blueprint/item-list.html.
 @setvar! config__axe_graphic 5187
 
+
 # ---- module/pack/gold-drop.razor -------------------------------------------------------
+
 # Gold dropped per pass while over max weight. Gold is cheaper than the leather.
 @setvar! config__gold_drop_amount 2000
 
+
 # ---- module/buff/potions.razor ---------------------------------------------------------
-# Magic Resist potion on or off.
+
+# 1 keeps the Magic Resist potion up.
 @setvar! config__use_resist_potion 1
-# STR with the Greater Strength potion on: your base plus 20. Below it the potion is drunk, and
-# 0 turns it off. Bless and the Strength spell, ours or an ally's, show the same icon as the
-# potion but add less than its 20, so the stat tells them apart.
+
+# STR with the Greater Strength potion on: your base plus 20. Below it the potion is drunk,
+# and 0 turns it off. Bless and the Strength spell, ours or an ally's, show the same icon as
+# the potion but add less than its 20, so the stat tells them apart.
 # This loop: STR 100 and DEX 80 template.
 @setvar! config__str_potion 120
-# DEX with the Greater Agility potion on: your base plus 20. Below it the potion is drunk, and
-# 0 turns it off. Bless and the Agility spell show the same icon, as for STR.
+
+# DEX with the Greater Agility potion on: your base plus 20. Below it the potion is drunk,
+# and 0 turns it off. Bless and the Agility spell show the same icon, as for STR.
 @setvar! config__dex_potion 100
 
+
 # ---- module/fight/sword-codex.razor ----------------------------------------------------
-# Stance held outside the Defensive window, by codex slot (wiki order): 1 Aggressive,
-# 2 Defensive, 3 Cleave, 4 Warrior, 5 Flaying. Cleave pays only against two or more enemies.
+
+# Stance held outside the Defensive window, by codex slot in wiki order.
+#   1  Aggressive
+#   2  Defensive
+#   3  Cleave      pays only against two or more enemies
+#   4  Warrior
+#   5  Flaying
 @setvar! config__sword_stance_main 4
-# Finisher to keep selected: 1 Bleed Out, 2 Execute. 0 leaves the codex finisher alone.
+
+# Finisher to keep selected.
+#   0  leave the codex finisher alone
+#   1  Bleed Out
+#   2  Execute
 @setvar! config__sword_finisher_main 2
+
 # Missing hit points above which Defensive latches on.
 @setvar! config__defensive_enter_diff 60
-# Missing hit points below which Defensive lets go. Below the enter line, so the stance cannot
-# flap while bandages tick.
+
+# Missing hit points below which Defensive lets go. Below the enter line, so the stance
+# cannot flap while bandages tick.
 @setvar! config__defensive_leave_diff 48
 
+
 # ---- module/fight/parry-codex.razor ----------------------------------------------------
-# Main stance, by codex slot (wiki order): 1 Shield Bash, 2 Warding, 3 Testudo, 4 Mirror,
-# 5 Bulwark. A stance only helps with ranks in it. Bulwark while Testudo's ranks are low, then 3.
+
+# Main stance, by codex slot in wiki order. A stance only helps with ranks in it.
+#   1  Shield Bash
+#   2  Warding
+#   3  Testudo      once its ranks catch up
+#   4  Mirror
+#   5  Bulwark      while Testudo's ranks are low
 @setvar! config__parry_stance_main 5
+
 # Stance while poisoned, bleeding or diseased, by the same slots.
 @setvar! config__parry_stance_dot 2
-# 0 keeps the main stance while the remembered enemy is within 2 tiles. 1 switches there too.
+
+# Stance next to the remembered enemy (2 tiles) while poisoned, bleeding or diseased.
+#   0  keep the main stance
+#   1  switch to parry_stance_dot there too
 @setvar! config__parry_dot_in_melee 0
-# Finisher to keep selected: 1 Last Stand, 2 Barrier. 0 leaves it alone.
+
+# Finisher to keep selected.
+#   0  leave it alone
+#   1  Last Stand
+#   2  Barrier
 @setvar! config__parry_finisher_main 1
 
+
 # ---- module/fight/weapon-ability.razor -------------------------------------------------
-# Ability slot to use: 1 Spinslash, 2 Rend, 3 Chop.
+
+# Weapon ability to use.
+#   1  Spinslash
+#   2  Rend
+#   3  Chop
 @setvar! config__ability_main 3
 
+
 # ---- module/buff/spells.razor ----------------------------------------------------------
-# Reactive Armor on or off.
+
+# 1 keeps Reactive Armor up.
 @setvar! config__use_reactive_armor 1
-# Magic Reflection on or off.
+
+# 1 keeps Magic Reflection up.
 @setvar! config__use_magic_reflect 1
+
 # Minimum current mana to start Reactive Armor.
 # This loop: Buffs keep the lumberjack handbook's 20 mana for Greater Heal and Teleport against a PK.
 @setvar! config__mana_reactive_armor 24
+
 # Minimum current mana to start Magic Reflection.
 # This loop: Same reserve: the base 14 plus the handbook's 20.
 @setvar! config__mana_magic_reflect 34
+
 # Missing hit points at which buffs are not started, and cut mid cast.
 @setvar! config__buff_max_loss 35
-# 1 buffs while poisoned. 0 holds them back and cuts one that is casting, so the cure goes first.
+
+# Buffs while poisoned.
+#   0  no: hold them back and cut one that is casting, so the cure goes first
+#   1  yes
 # This loop: The cure goes first: no buffs while poisoned.
 @setvar! config__buff_when_poisoned 0
 
+
 # ---- module/gather/skinning.razor ------------------------------------------------------
-# 1 carves every creature corpse within 2 tiles by targeting each one, grey or not. Player remains
-# are never targeted. 0 carves grey corpses only, through Smart Harvest on self. Where the server
-# refuses the first as a criminal action, grey corpses only for 5 minutes.
+
+# Which corpses within 2 tiles get carved.
+#   0  grey corpses only, through Smart Harvest on self
+#   1  every creature corpse, by targeting each one. Player remains are never targeted.
+#      Where the server refuses this as a criminal action, grey corpses only for 5 minutes
 @setvar! config__skin_unowned 1
+
 
 # ####################################################################################
 # # WAIT AND COOLDOWN
 # ####################################################################################
-# The poll inside a wait, and the pause after an action.
+
+# ---- module/base.razor -----------------------------------------------------------------
+
+# The poll inside a wait.
 @setvar! wait__poll 100
+
+# The pause after an action.
 @setvar! wait__short 200
+
 # Spacing for repeated warnings. Without it an empty potion bag shouts every pass.
 @setvar! cooldown__message 3000
+
+
+# ---- module/fight/target.razor ---------------------------------------------------------
 
 # A remembered enemy out of range this long is dropped.
 @setvar! cooldown__combat_target_grace 1200
 
+
+# ---- module/fight/axe.razor ------------------------------------------------------------
+
 # A refused equip, after a disarm for example, waits this long before the next try.
 @setvar! cooldown__equip_retry 2000
 
+
+# ---- module/pack/gold-drop.razor -------------------------------------------------------
+
 # Pause after a drop, so the weight settles before the next pass.
 @setvar! wait__gold_drop 1000
+
+
+# ---- module/buff/potions.razor ---------------------------------------------------------
 
 # A Strength or Agility potion is tried once per window. The stat arrives a round trip after the
 # drink, and a Curse, Weaken or Clumsy can hold it under the line while the potion still runs:
@@ -164,190 +266,298 @@
 # the same pace.
 @setvar! cooldown__stat_potion 5000
 
-# Codex label reads: a failed switch is tried again after sword_retry, and the cache is dropped
-# every sword_resync so a stance changed by hand is picked up.
+
+# ---- module/fight/sword-codex.razor ----------------------------------------------------
+
+# A failed stance switch is tried again after this.
 @setvar! cooldown__sword_retry 3000
+
+# The stance cache is dropped this often, so a stance changed by hand is picked up.
 @setvar! cooldown__sword_resync 30000
 
-# Codex label reads: a failed switch is tried again after parry_retry, and the cache is dropped
-# every parry_resync so a stance changed by hand is picked up.
+
+# ---- module/fight/parry-codex.razor ----------------------------------------------------
+
+# A failed stance switch is tried again after this.
 @setvar! cooldown__parry_retry 3000
+
+# The stance cache is dropped this often, so a stance changed by hand is picked up.
 @setvar! cooldown__parry_resync 30000
+
+
+# ---- module/fight/weapon-ability.razor -------------------------------------------------
 
 # Without Arms Lore the ability meter takes 60 seconds to fill.
 @setvar! cooldown__ability 60000
 
+
+# ---- module/gather/skinning.razor ------------------------------------------------------
+
 # The knife cursor must arrive inside this block. A late cursor would block every input guard.
 @setvar! wait__carve_target 2000
+
 # How long Smart Harvest waits for the server reply after target self.
 @setvar! wait__carve_reply 1500
+
 # Forensic Evaluation has its own 0.5 second cooldown. This spaces the corpse search as well.
 @setvar! cooldown__carve 700
+
 # After a criminal action refusal, carve grey corpses only for 5 minutes.
 @setvar! cooldown__grey_only 300000
+
+
+# ---- module/recovery/reagents.razor ----------------------------------------------------
 
 # Reagent read interval. Five lookups each time. A refill counts within this, and running out
 # is caught at once by the refusal line.
 @setvar! cooldown__reagents 10000
 
+
+# ---- module/buff/food.razor ------------------------------------------------------------
+
 # The buff lasts far longer than this.
 @setvar! cooldown__food 60000
 
+
+# ---- module/pack/leather.razor ---------------------------------------------------------
+
 # Allow inventory updates after opening the pouch and each drag/drop.
 @setvar! wait__pack_item 500
+
 # Request budget for one packing pass. Leftover leather waits for the next interval.
 @setvar! wait__pack_batch 2500
+
 # 120000 = 2 minutes. Use 180000 for 3 minutes.
 @setvar! cooldown__pack_leather 120000
+
 
 # ####################################################################################
 # # TIMER
 # ####################################################################################
+
+# ---- module/base.razor -----------------------------------------------------------------
+
 # Ready on the first pass, so the first warning shows at once.
 if not timerexists "timer__message"
     createtimer "timer__message"
 endif
+settimer "timer__message" cooldown__message
+
+
+# ---- module/fight/target.razor ---------------------------------------------------------
 
 if not timerexists "timer__combat_target_grace"
     createtimer "timer__combat_target_grace"
 endif
+settimer "timer__combat_target_grace" cooldown__combat_target_grace
+
+
+# ---- module/fight/axe.razor ------------------------------------------------------------
 
 if not timerexists "timer__equip"
     createtimer "timer__equip"
 endif
+settimer "timer__equip" cooldown__equip_retry
+
+
+# ---- module/buff/potions.razor ---------------------------------------------------------
 
 if not timerexists "timer__str_potion"
     createtimer "timer__str_potion"
 endif
+settimer "timer__str_potion" cooldown__stat_potion
 
 if not timerexists "timer__agi_potion"
     createtimer "timer__agi_potion"
 endif
+settimer "timer__agi_potion" cooldown__stat_potion
+
+
+# ---- module/fight/sword-codex.razor ----------------------------------------------------
 
 if not timerexists "timer__sword_retry"
     createtimer "timer__sword_retry"
 endif
+settimer "timer__sword_retry" cooldown__sword_retry
 
 if not timerexists "timer__sword_resync"
     createtimer "timer__sword_resync"
 endif
+settimer "timer__sword_resync" 0
+
+
+# ---- module/fight/parry-codex.razor ----------------------------------------------------
 
 if not timerexists "timer__parry_retry"
     createtimer "timer__parry_retry"
 endif
+settimer "timer__parry_retry" cooldown__parry_retry
 
 if not timerexists "timer__parry_resync"
     createtimer "timer__parry_resync"
 endif
+settimer "timer__parry_resync" 0
+
+
+# ---- module/fight/weapon-ability.razor -------------------------------------------------
 
 if not timerexists "timer__ability"
     createtimer "timer__ability"
 endif
+settimer "timer__ability" cooldown__ability
+
+
+# ---- module/gather/skinning.razor ------------------------------------------------------
 
 if not timerexists "timer__carve"
     createtimer "timer__carve"
 endif
+settimer "timer__carve" cooldown__carve
 
 if not timerexists "timer__grey_only"
     createtimer "timer__grey_only"
 endif
+settimer "timer__grey_only" cooldown__grey_only
+
+
+# ---- module/recovery/reagents.razor ----------------------------------------------------
 
 # Ready on the first pass, so reagents are read before the first cast.
 if not timerexists "timer__reagents"
     createtimer "timer__reagents"
 endif
+settimer "timer__reagents" cooldown__reagents
+
+
+# ---- module/buff/food.razor ------------------------------------------------------------
 
 if not timerexists "timer__food"
     createtimer "timer__food"
 endif
+settimer "timer__food" cooldown__food
+
+
+# ---- module/pack/leather.razor ---------------------------------------------------------
 
 # Packing waits one full interval.
 if not timerexists "timer__pack_leather"
     createtimer "timer__pack_leather"
 endif
-
-settimer "timer__message" cooldown__message
-settimer "timer__combat_target_grace" cooldown__combat_target_grace
-settimer "timer__equip" cooldown__equip_retry
-settimer "timer__str_potion" cooldown__stat_potion
-settimer "timer__agi_potion" cooldown__stat_potion
-settimer "timer__sword_retry" cooldown__sword_retry
-settimer "timer__sword_resync" 0
-settimer "timer__parry_retry" cooldown__parry_retry
-settimer "timer__parry_resync" 0
-settimer "timer__ability" cooldown__ability
-settimer "timer__carve" cooldown__carve
-settimer "timer__grey_only" cooldown__grey_only
-settimer "timer__reagents" cooldown__reagents
-settimer "timer__food" cooldown__food
 settimer "timer__pack_leather" 0
+
 
 # ####################################################################################
 # # STATE
 # ####################################################################################
-# Signals between blocks. Each keeps this value unless the loop has a block that sets it.
-#   fighting        1 while an enemy is engaged. buff/potions drinks only then. fight/target
-#                   sets it every pass, and the pvp recipe keeps it at 1.
-#   hold_casts      1 while a block keeps the cast window for itself. buff/spells stands down.
-#                   escape/recall sets it once a Recall is due.
-#   hold_gathering  1 while gathering and its packing wait. escape/recall sets it.
+
+# ---- module/base.razor -----------------------------------------------------------------
+
+# Signals between blocks. Each keeps the value here unless the loop has a block that sets it.
+
+# 1 while an enemy is engaged. buff/potions drinks only then.
+# fight/target sets it every pass, and the pvp recipe keeps it at 1.
 @setvar! var__fighting 0
+
+# 1 while a block keeps the cast window for itself. buff/spells stands down.
+# escape/recall sets it once a Recall is due.
 @setvar! var__hold_casts 0
+
+# 1 while gathering and its packing wait. escape/recall sets it.
 @setvar! var__hold_gathering 0
+
+
+# ---- module/fight/target.razor ---------------------------------------------------------
 
 # The enemy picked with lasttarget. Carving overwrites lasttarget, so combat potions and the
 # weapon ability read this copy instead.
 if not varexist var__combat_target
     @setvar! var__combat_target 0
 endif
+
 # Scratch copy of the lasttarget serial for the mobile range check.
 @setvar! var__fresh_serial 0
+
+
+# ---- module/recovery/heal.razor --------------------------------------------------------
 
 # Scratch: 1 once a heal potion went out on this pass.
 @setvar! var__heal_potion_out 0
 
+
+# ---- module/recovery/light-heal.razor --------------------------------------------------
+
 # Scratch: 1 when the light Heal goes on this pass.
 @setvar! var__light_heal_due 0
+
+
+# ---- module/fight/axe.razor ------------------------------------------------------------
 
 # Selected axe serial, reused across Stop and Play. 0 means rediscover from the backpack.
 if not varexist var__my_weapon
     @setvar! var__my_weapon 0
 endif
 
+
+# ---- module/fight/sword-codex.razor ----------------------------------------------------
+
 # Sword stance cache. 0 means unknown, which forces a codex label read on the first pass.
 @setvar! var__sword_want config__sword_stance_main
 @setvar! var__sword_active 0
+
 # 1 when the codex label names no stance. Switching blind could toggle the stance off.
 @setvar! var__sword_disabled 0
+
 # The finisher is checked once per Play, on the first codex label read.
 @setvar! var__sword_finisher_checked 0
+
 # Scratch: 0 neither finisher named, 1 wanted finisher active, 2 the other one active.
 @setvar! var__sword_finisher_state 0
 
-# Parry stance cache, as for the sword codex. 0 means unknown and forces a label read.
+
+# ---- module/fight/parry-codex.razor ----------------------------------------------------
+
+# Parry stance cache. 0 means unknown, which forces a codex label read on the first pass.
 @setvar! var__parry_want config__parry_stance_main
 @setvar! var__parry_active 0
+
+# 1 when the codex label names no stance. Switching blind could toggle the stance off.
 @setvar! var__parry_disabled 0
+
+# The finisher is checked once per Play, on the first codex label read.
 @setvar! var__parry_finisher_checked 0
+
+# Scratch: 0 neither finisher named, 1 wanted finisher active, 2 the other one active.
 @setvar! var__parry_finisher_state 0
+
+
+# ---- module/gather/skinning.razor ------------------------------------------------------
 
 # Scratch: 1 when a Z pick arrived while the knife cursor was up.
 @setvar! var__pick_during_carve 0
+
 # Scratch: 1 targets the corpse, 0 uses Smart Harvest. Chosen for each carve.
 @setvar! var__carve_direct 0
+
 # Scratch: 1 when the corpse found this pass may be carved.
 @setvar! var__corpse_ok 0
-# 1 after a corpse carving criminal act, read from the carve reply. The label check should keep
-# player remains out, so this is only a safety net. Direct carving then stays off until the next Play.
+
+# 1 after a corpse carving criminal act, read from the carve reply. Direct carving then stays off
+# until the next Play. The label check should keep player remains out, so this is a safety net.
 @setvar! var__carve_crime 0
+
 # Corpse that missed once (too far or busy). It gets one more request, then it is ignored.
 @setvar! var__carve_retry 0
+
 # Scratch Smart Harvest reply: 0 none yet, 1 carved, 2 nothing left to carve here.
 @setvar! var__carve_reply 0
+
 # Selected knife serial, reused across Stop and Play. 0 means rediscover from the backpack.
 if not varexist var__my_knife
     @setvar! var__my_knife 0
 endif
+
+
+# ---- module/recovery/reagents.razor ----------------------------------------------------
 
 # Reagent flags, written only by REAGENTS. 1 when every reagent of that spell was found.
 #   Cure            garlic 3972, ginseng 3973
@@ -360,11 +570,16 @@ endif
 @setvar! var__regs_greater_heal 0
 @setvar! var__regs_reactive_armor 0
 @setvar! var__regs_magic_reflect 0
+
+# Scratch: 1 when that reagent was found on the last read.
 @setvar! var__has_garlic 0
 @setvar! var__has_ginseng 0
 @setvar! var__has_mandrake 0
 @setvar! var__has_ash 0
 @setvar! var__has_silk 0
+
+
+# ---- module/base.razor -----------------------------------------------------------------
 
 # The pvp expression means the structured-PvP restrictions, where these loops may not run.
 if pvp
@@ -378,6 +593,9 @@ if config__clear_at_start = 1
     cleardragdrop
     clearignore
 endif
+
+
+# ---- recipe/skinning-enhanced-recipe.razor ---------------------------------------------
 
 # pack/leather moves leather into this pouch. restock/loadout picks it, this asks when it is missing.
 if not varexist global__my_looting_pouch or not find global__my_looting_pouch backpack
@@ -400,20 +618,23 @@ if config__chatty = 1
     overhead "[ skinning, on ]" 290
 endif
 
+
 # ####################################################################################
 # # MAIN LOOP
 # ####################################################################################
 while not dead
+    # ---- module/base.razor -------------------------------------------------------------
     # The pvp expression means structured-PvP restrictions, not a field PK encounter.
     if pvp
         overhead "[ script, blocked ]" 254
         stop
     endif
 
+    # ---- module/fight/target.razor -----------------------------------------------------
     # ################################################################################
     # # COMBAT TARGET CACHE
     # ################################################################################
-    # Same cache as bard-mace. A carve targets the corpse or yourself, which moves lasttarget.
+    # Same cache as archive/bard-mace. A carve targets the corpse or yourself, which moves lasttarget.
     # A targeted corpse is an item on the ground, so find matches it. dead and noto only take
     # mobiles, so the serial range is checked first. Mobile serials are below 0x40000000, and the
     # number has to be on the left (blueprint/razor.html part 3, debug-target-state S06).
@@ -458,6 +679,7 @@ while not dead
         @setvar! var__fighting 1
     endif
 
+    # ---- module/recovery/pouch.razor ---------------------------------------------------
     # ################################################################################
     # # PARALYZE
     # ################################################################################
@@ -472,6 +694,7 @@ while not dead
         endif
     endif
 
+    # ---- module/recovery/cure.razor ----------------------------------------------------
     # ################################################################################
     # # CURE
     # ################################################################################
@@ -512,6 +735,7 @@ while not dead
         endif
     endif
 
+    # ---- module/recovery/heal.razor ----------------------------------------------------
     # ################################################################################
     # # HEAL
     # ################################################################################
@@ -519,7 +743,8 @@ while not dead
     # Greater Heal follows when no potion went out on this pass and the loss is at the
     # emergency line: none carried, on its own cooldown, or the bar still running.
     # The bar skips the label read while it runs. The label stays authoritative when the bar
-    # is missing. Greater Heal waits for the walk bar and for warmode as the switches say.
+    # is missing. Greater Heal waits for the walk bar and for warmode as config__walk_guard and
+    # config__warmode_is_manual say.
     if not poisoned and not paralyzed and not hidden and not queued and not targetexists and diffhits >= config__heal_hits
         @setvar! var__heal_potion_out 0
         if config__use_potions = 1 and cooldown "heal pot" = 0
@@ -567,6 +792,7 @@ while not dead
         endif
     endif
 
+    # ---- module/recovery/bandage.razor -------------------------------------------------
     # ################################################################################
     # # BANDAGE
     # ################################################################################
@@ -584,12 +810,13 @@ while not dead
         endif
     endif
 
+    # ---- module/recovery/light-heal.razor ----------------------------------------------
     # ################################################################################
     # # LIGHT HEAL
     # ################################################################################
     # The bandage stand-in whenever no bandage can run: bandages off, no Healing, or none left
     # and none running. Beside the bandages only with config__use_light_heal 1. The agent waits
-    # for the walk bar and for warmode as the switches say.
+    # for the walk bar and for warmode as config__walk_guard and config__warmode_is_manual say.
     if not poisoned and not paralyzed and not hidden and not queued and not casting and not targetexists and config__use_magery = 1 and var__regs_heal = 1 and diffhits >= config__light_hits and mana >= config__mana_heal
         @setvar! var__light_heal_due 0
         if config__use_light_heal = 1 or config__use_bandages = 0 or skill "Healing" <= config__heal_skill_min
@@ -626,6 +853,7 @@ while not dead
         endif
     endif
 
+    # ---- module/recovery/refresh.razor -------------------------------------------------
     # ################################################################################
     # # REFRESH
     # ################################################################################
@@ -636,6 +864,7 @@ while not dead
         endif
     endif
 
+    # ---- module/fight/axe.razor --------------------------------------------------------
     # ################################################################################
     # # AXE
     # ################################################################################
@@ -672,7 +901,7 @@ while not dead
             if var__my_weapon != alias__equipped_weapon
                 settimer "timer__equip" 0
                 getlabel alias__equipped_weapon label__hand_weapon
-                # item-list names the type "two handed axe" and hally-mage reads "two-handed axe".
+                # item-list names the type "two handed axe" and archive/hally-mage reads "two-handed axe".
                 if "two-handed axe" in label__hand_weapon or "two handed axe" in label__hand_weapon or "Two-Handed Axe" in label__hand_weapon or "Two Handed Axe" in label__hand_weapon
                     @setvar! var__my_weapon alias__equipped_weapon
                     if config__sysmsg = 1
@@ -683,6 +912,7 @@ while not dead
         endif
     endif
 
+    # ---- module/pack/gold-drop.razor ---------------------------------------------------
     # ################################################################################
     # # GOLD
     # ################################################################################
@@ -712,6 +942,7 @@ while not dead
         endif
     endif
 
+    # ---- module/buff/potions.razor -----------------------------------------------------
     # ################################################################################
     # # STAT POTIONS
     # ################################################################################
@@ -743,6 +974,7 @@ while not dead
         endif
     endif
 
+    # ---- module/fight/sword-codex.razor ------------------------------------------------
     # ################################################################################
     # # SWORD CODEX
     # ################################################################################
@@ -754,7 +986,7 @@ while not dead
     # trades accuracy and defense for 4% damage resistance per rank, so it takes over while hurt.
     # Stance numbers and effects are on the wiki, Weapon_and_Parry_Codex.
     #
-    # The codex label is the only source of truth, as in bard-mace. The cache is refreshed from
+    # The codex label is the only source of truth, as in archive/bard-mace. The cache is refreshed from
     # the label on a timer, which also catches a stance changed by hand. getlabel runs after
     # recovery so a server round trip never delays a bandage or a heal potion.
     if var__sword_disabled = 0
@@ -889,6 +1121,7 @@ while not dead
         endif
     endif
 
+    # ---- module/fight/parry-codex.razor ------------------------------------------------
     # ################################################################################
     # # PARRY CODEX
     # ################################################################################
@@ -1033,6 +1266,7 @@ while not dead
         endif
     endif
 
+    # ---- module/fight/weapon-ability.razor ---------------------------------------------
     # ################################################################################
     # # WEAPON ABILITY
     # ################################################################################
@@ -1040,7 +1274,7 @@ while not dead
     # +15% over 15 seconds, about two hits' worth. Rend needs bleeds already on the target.
     # All three share one meter, and the ability fires on the next melee hit. Chop is further
     # scaled by weapon speed, and that formula is not documented.
-    # A timer spaces the request, as in bard-mace. A wrong interval only shifts the timing.
+    # A timer spaces the request, as in archive/bard-mace. A wrong interval only shifts the timing.
     if timer "timer__ability" >= cooldown__ability and find var__combat_target ground -1 -1 2
         if config__ability_main = 1
             say "[WeaponAbility1"
@@ -1065,6 +1299,7 @@ while not dead
         endif
     endif
 
+    # ---- module/buff/spells.razor ------------------------------------------------------
     # ################################################################################
     # # SELF BUFFS
     # ################################################################################
@@ -1072,8 +1307,8 @@ while not dead
     # Not started at config__buff_max_loss, and cut there mid cast so the next pass can heal.
     # With config__buff_when_poisoned 0 poison holds them back and cuts them too, so the cure
     # goes first. var__hold_casts lets another block keep the cast window (a latched Recall).
-    # The walk and warmode switches apply as for the heal agents. The reflect bar is the
-    # server's recast lock after Reflect is used up.
+    # config__walk_guard and config__warmode_is_manual apply as for the heal agents. The reflect
+    # bar is the server's recast lock after Reflect is used up.
     if config__use_magery = 1 and var__hold_casts = 0 and not paralyzed and not hidden and not queued and not casting and not targetexists and diffhits < config__buff_max_loss
         if config__buff_when_poisoned = 1 or not poisoned
             if config__warmode_is_manual = 0 or not warmode
@@ -1132,6 +1367,7 @@ while not dead
         endif
     endif
 
+    # ---- module/gather/skinning.razor --------------------------------------------------
     # ################################################################################
     # # SKINNING
     # ################################################################################
@@ -1329,6 +1565,7 @@ while not dead
         settimer "timer__carve" 0
     endif
 
+    # ---- module/recovery/reagents.razor ------------------------------------------------
     # ################################################################################
     # # REAGENTS
     # ################################################################################
@@ -1384,24 +1621,29 @@ while not dead
         endif
     endif
 
+    # ---- module/buff/food.razor --------------------------------------------------------
     # ################################################################################
     # # FOOD
     # ################################################################################
-    # Looked at once a minute. The buff lasts far longer.
+    # Looked at once a minute. The buff lasts far longer. With config__warmode_is_manual 1 it
+    # stands down in warmode, as our casts do.
     if timer "timer__food" >= cooldown__food and not findbuff "Food Satisfaction"
-        if not hidden and not queued and not casting and not targetexists
-            settimer "timer__food" 0
-            if findtype tray backpack as alias__food
-                dclick alias__food
-                wait wait__short
+        if config__warmode_is_manual = 0 or not warmode
+            if not hidden and not queued and not casting and not targetexists
+                settimer "timer__food" 0
+                if findtype tray backpack as alias__food
+                    dclick alias__food
+                    wait wait__short
+                endif
             endif
         endif
     endif
 
+    # ---- module/pack/leather.razor -----------------------------------------------------
     # ################################################################################
     # # LEATHER
     # ################################################################################
-    # Same shape as the lumberjack-enhanced Boards pass. No hue filter, so colored leather moves too.
+    # Same shape as the Boards pass in pack/lumber. No hue filter, so colored leather moves too.
     # Only between fights. Recursive backpack searches can return leather already in the pouch,
     # so membership is checked before ignore, and only pouch stacks are ignored.
     # No clearignore here: the list also holds the carved corpses. A refused move is found
@@ -1452,5 +1694,6 @@ while not dead
         endif
     endif
 
+    # ---- module/base.razor -------------------------------------------------------------
     wait wait__poll
 endwhile

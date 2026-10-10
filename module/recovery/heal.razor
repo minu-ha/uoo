@@ -1,21 +1,28 @@
 # Heal potion at heal_hits, Greater Heal at emergency_hits when no potion went out on this pass.
 #@ hotkeys Drink Heal, > Greater Heal/Cure Self, Cancel Current Target
 
-#@ config
+
+#@ config --------------------------------------------------------------------------------
+
 # Missing hit points (not percent) that drink a heal potion.
 @setvar! config__heal_hits 35
+
 # Missing hit points that cast Greater Heal when no heal potion went out on this pass.
 # Not below heal_hits.
 @setvar! config__emergency_hits 35
-# Minimum current mana for Greater Heal. It keeps no reserve: 31 always leaves 20 mana for an
-# attack or Teleport.
+
+# Minimum current mana for Greater Heal. It keeps no reserve: 31 always leaves 20 mana for
+# an attack or Teleport.
 @setvar! config__mana_greater_heal 11
 
-#@ state
+
+#@ state ---------------------------------------------------------------------------------
+
 # Scratch: 1 once a heal potion went out on this pass.
 @setvar! var__heal_potion_out 0
 
-#@ loop
+
+#@ loop ----------------------------------------------------------------------------------
     # ################################################################################
     # # HEAL
     # ################################################################################
@@ -23,7 +30,8 @@
     # Greater Heal follows when no potion went out on this pass and the loss is at the
     # emergency line: none carried, on its own cooldown, or the bar still running.
     # The bar skips the label read while it runs. The label stays authoritative when the bar
-    # is missing. Greater Heal waits for the walk bar and for warmode as the switches say.
+    # is missing. Greater Heal waits for the walk bar and for warmode as config__walk_guard and
+    # config__warmode_is_manual say.
     if not poisoned and not paralyzed and not hidden and not queued and not targetexists and diffhits >= config__heal_hits
         @setvar! var__heal_potion_out 0
         if config__use_potions = 1 and cooldown "heal pot" = 0

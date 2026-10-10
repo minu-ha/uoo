@@ -1,21 +1,31 @@
 # Reactive Armor, then Magic Reflection, whenever one is missing.
 #@ hotkeys > Interrupt
 
-#@ config
-# Reactive Armor on or off.
+
+#@ config --------------------------------------------------------------------------------
+
+# 1 keeps Reactive Armor up.
 @setvar! config__use_reactive_armor 1
-# Magic Reflection on or off.
+
+# 1 keeps Magic Reflection up.
 @setvar! config__use_magic_reflect 1
+
 # Minimum current mana to start Reactive Armor.
 @setvar! config__mana_reactive_armor 4
+
 # Minimum current mana to start Magic Reflection.
 @setvar! config__mana_magic_reflect 14
+
 # Missing hit points at which buffs are not started, and cut mid cast.
 @setvar! config__buff_max_loss 35
-# 1 buffs while poisoned. 0 holds them back and cuts one that is casting, so the cure goes first.
+
+# Buffs while poisoned.
+#   0  no: hold them back and cut one that is casting, so the cure goes first
+#   1  yes
 @setvar! config__buff_when_poisoned 1
 
-#@ loop
+
+#@ loop ----------------------------------------------------------------------------------
     # ################################################################################
     # # SELF BUFFS
     # ################################################################################
@@ -23,8 +33,8 @@
     # Not started at config__buff_max_loss, and cut there mid cast so the next pass can heal.
     # With config__buff_when_poisoned 0 poison holds them back and cuts them too, so the cure
     # goes first. var__hold_casts lets another block keep the cast window (a latched Recall).
-    # The walk and warmode switches apply as for the heal agents. The reflect bar is the
-    # server's recast lock after Reflect is used up.
+    # config__walk_guard and config__warmode_is_manual apply as for the heal agents. The reflect
+    # bar is the server's recast lock after Reflect is used up.
     if config__use_magery = 1 and var__hold_casts = 0 and not paralyzed and not hidden and not queued and not casting and not targetexists and diffhits < config__buff_max_loss
         if config__buff_when_poisoned = 1 or not poisoned
             if config__warmode_is_manual = 0 or not warmode

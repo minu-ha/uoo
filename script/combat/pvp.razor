@@ -28,91 +28,138 @@
 #          Drink Magic Resist, > Interrupt.
 # Generated from recipe/pvp-recipe.razor by util/build-scripts.py. Edit module/ and recipe/, not this file.
 
+
 # ####################################################################################
 # # CONFIG
 # ####################################################################################
+
 # ---- module/base.razor -----------------------------------------------------------------
-# Optional overheads. Warnings show either way.
+
+# 1 shows the optional overheads. Warnings show either way.
 @setvar! config__chatty 1
-# Journal diagnostics. A block that writes one says so in its comments.
+
+# 1 writes Journal diagnostics. A block that writes one says so in its comments.
 @setvar! config__sysmsg 1
-# Clear the client queues, the journal and the ignore list at Play (conventions 02.D).
-# 0 keeps a cursor or a cast the player holds at Play.
+
+# What Play does first (conventions 02.D).
+#   0  nothing: a cursor or a cast the player holds at Play is kept
+#   1  clear the client queues, the journal and the ignore list
 # This loop: A manual cursor or cast held at Play is kept (conventions 02.D).
 @setvar! config__clear_at_start 0
-# Magery: the Cure and heal agents, the reagent reads and the buffs. Potions and bandages stay.
+
+# 1 uses Magery: the Cure and heal agents, the reagent reads and the buffs.
+# At 0 potions and bandages still go out.
 @setvar! config__use_magery 1
-# Potions: cure, heal, Refresh and the stat potions.
+
+# 1 uses potions: cure, heal, Refresh and the stat potions.
 @setvar! config__use_potions 1
-# 1 makes our casts wait while the walk bar runs, so a step does not break them.
-# 0 casts while walking, for a fight where there is no better moment to wait for.
+
+# Our casts and the walk bar.
+#   0  cast while walking, for a fight where there is no better moment to wait for
+#   1  wait while the walk bar runs, so a step does not break the cast
 # This loop: pvp casts while walking: in a fight there is no better moment to wait for.
 @setvar! config__walk_guard 0
-# 1 when warmode is the player's manual control window: our casts stand down while it is on.
+
+# Whose warmode it is.
+#   0  ours: our casts ignore it
+#   1  the player's manual control window: our casts and the food stand down while it
+#      is on. Potions and bandages still go out
 @setvar! config__warmode_is_manual 0
 
+
 # ---- module/recovery/cure.razor --------------------------------------------------------
+
 # Minimum current mana for the Cure agent.
 @setvar! config__mana_cure 6
 
+
 # ---- module/recovery/heal.razor --------------------------------------------------------
+
 # Missing hit points (not percent) that drink a heal potion.
 @setvar! config__heal_hits 35
+
 # Missing hit points that cast Greater Heal when no heal potion went out on this pass.
 # Not below heal_hits.
 @setvar! config__emergency_hits 35
-# Minimum current mana for Greater Heal. It keeps no reserve: 31 always leaves 20 mana for an
-# attack or Teleport.
+
+# Minimum current mana for Greater Heal. It keeps no reserve: 31 always leaves 20 mana for
+# an attack or Teleport.
 @setvar! config__mana_greater_heal 11
 
+
 # ---- module/recovery/bandage.razor -----------------------------------------------------
-# 0 turns bandages off. recovery/light-heal then stands in.
+
+# 1 uses bandages. At 0 recovery/light-heal stands in.
 @setvar! config__use_bandages 1
+
 # Healing must be above this to bandage. At or below it recovery/light-heal stands in.
 @setvar! config__heal_skill_min 0
 
+
 # ---- module/recovery/light-heal.razor --------------------------------------------------
-# 1 casts the light Heal beside the bandages. At 0 it goes only while no bandage can run:
-# use_bandages 0, Healing at or below heal_skill_min, or none left and none running.
+
+# When the light Heal goes.
+#   0  only while no bandage can run: use_bandages 0, Healing at or below heal_skill_min,
+#      or none left and none running
+#   1  beside the bandages too
 @setvar! config__use_light_heal 0
+
 # Missing hit points that start the light Heal.
 @setvar! config__light_hits 15
+
 # Minimum current mana for the light Heal.
 @setvar! config__mana_heal 4
 
+
 # ---- module/recovery/refresh.razor -----------------------------------------------------
+
 # Current stamina at or below this drinks a Refresh.
 @setvar! config__refresh_stam 15
 
+
 # ---- module/buff/potions.razor ---------------------------------------------------------
-# Magic Resist potion on or off.
+
+# 1 keeps the Magic Resist potion up.
 @setvar! config__use_resist_potion 1
-# STR with the Greater Strength potion on: your base plus 20. Below it the potion is drunk, and
-# 0 turns it off. Bless and the Strength spell, ours or an ally's, show the same icon as the
-# potion but add less than its 20, so the stat tells them apart.
+
+# STR with the Greater Strength potion on: your base plus 20. Below it the potion is drunk,
+# and 0 turns it off. Bless and the Strength spell, ours or an ally's, show the same icon as
+# the potion but add less than its 20, so the stat tells them apart.
 # This loop: The loop is shared, so set this for the character that runs it.
 @setvar! config__str_potion 120
-# DEX with the Greater Agility potion on: your base plus 20. Below it the potion is drunk, and
-# 0 turns it off. Bless and the Agility spell show the same icon, as for STR.
+
+# DEX with the Greater Agility potion on: your base plus 20. Below it the potion is drunk,
+# and 0 turns it off. Bless and the Agility spell show the same icon, as for STR.
 @setvar! config__dex_potion 100
 
+
 # ---- module/buff/spells.razor ----------------------------------------------------------
-# Reactive Armor on or off.
+
+# 1 keeps Reactive Armor up.
 @setvar! config__use_reactive_armor 1
-# Magic Reflection on or off.
+
+# 1 keeps Magic Reflection up.
 @setvar! config__use_magic_reflect 1
+
 # Minimum current mana to start Reactive Armor.
 @setvar! config__mana_reactive_armor 4
+
 # Minimum current mana to start Magic Reflection.
 @setvar! config__mana_magic_reflect 14
+
 # Missing hit points at which buffs are not started, and cut mid cast.
 # This loop: Keep this equal to config__emergency_hits.
 @setvar! config__buff_max_loss 35
-# 1 buffs while poisoned. 0 holds them back and cuts one that is casting, so the cure goes first.
+
+# Buffs while poisoned.
+#   0  no: hold them back and cut one that is casting, so the cure goes first
+#   1  yes
 @setvar! config__buff_when_poisoned 1
 
+
 # ---- module/fight/weapon-swap.razor ----------------------------------------------------
-# Weapon slots. Slot N reads the "swing N" bar. Graphic 0 turns the slot off.
+
+# Weapon graphic for each slot. Slot N reads the "swing N" bar, and 0 turns the slot off.
 # A slot whose swing is ready wins, 4 down to 1. With none ready and both hands empty, the
 # lowest enabled slot re-arms.
 @setvar! config__weapon_1_graphic 31128
@@ -120,18 +167,31 @@
 @setvar! config__weapon_3_graphic 0
 @setvar! config__weapon_4_graphic 31190
 
+
 # ####################################################################################
 # # WAIT AND COOLDOWN
 # ####################################################################################
-# The poll inside a wait, and the pause after an action.
+
+# ---- module/base.razor -----------------------------------------------------------------
+
+# The poll inside a wait.
 @setvar! wait__poll 100
+
+# The pause after an action.
 @setvar! wait__short 200
+
 # Spacing for repeated warnings. Without it an empty potion bag shouts every pass.
 @setvar! cooldown__message 3000
+
+
+# ---- module/recovery/reagents.razor ----------------------------------------------------
 
 # Reagent read interval. Five lookups each time. A refill counts within this, and running out
 # is caught at once by the refusal line.
 @setvar! cooldown__reagents 10000
+
+
+# ---- module/buff/potions.razor ---------------------------------------------------------
 
 # A Strength or Agility potion is tried once per window. The stat arrives a round trip after the
 # drink, and a Curse, Weaken or Clumsy can hold it under the line while the potion still runs:
@@ -139,44 +199,63 @@
 # the same pace.
 @setvar! cooldown__stat_potion 5000
 
+
 # ####################################################################################
 # # TIMER
 # ####################################################################################
+
+# ---- module/base.razor -----------------------------------------------------------------
+
 # Ready on the first pass, so the first warning shows at once.
 if not timerexists "timer__message"
     createtimer "timer__message"
 endif
+settimer "timer__message" cooldown__message
+
+
+# ---- module/recovery/reagents.razor ----------------------------------------------------
 
 # Ready on the first pass, so reagents are read before the first cast.
 if not timerexists "timer__reagents"
     createtimer "timer__reagents"
 endif
+settimer "timer__reagents" cooldown__reagents
+
+
+# ---- module/buff/potions.razor ---------------------------------------------------------
 
 if not timerexists "timer__str_potion"
     createtimer "timer__str_potion"
 endif
+settimer "timer__str_potion" cooldown__stat_potion
 
 if not timerexists "timer__agi_potion"
     createtimer "timer__agi_potion"
 endif
-
-settimer "timer__message" cooldown__message
-settimer "timer__reagents" cooldown__reagents
-settimer "timer__str_potion" cooldown__stat_potion
 settimer "timer__agi_potion" cooldown__stat_potion
+
 
 # ####################################################################################
 # # STATE
 # ####################################################################################
-# Signals between blocks. Each keeps this value unless the loop has a block that sets it.
-#   fighting        1 while an enemy is engaged. buff/potions drinks only then. fight/target
-#                   sets it every pass, and the pvp recipe keeps it at 1.
-#   hold_casts      1 while a block keeps the cast window for itself. buff/spells stands down.
-#                   escape/recall sets it once a Recall is due.
-#   hold_gathering  1 while gathering and its packing wait. escape/recall sets it.
+
+# ---- module/base.razor -----------------------------------------------------------------
+
+# Signals between blocks. Each keeps the value here unless the loop has a block that sets it.
+
+# 1 while an enemy is engaged. buff/potions drinks only then.
+# fight/target sets it every pass, and the pvp recipe keeps it at 1.
 @setvar! var__fighting 0
+
+# 1 while a block keeps the cast window for itself. buff/spells stands down.
+# escape/recall sets it once a Recall is due.
 @setvar! var__hold_casts 0
+
+# 1 while gathering and its packing wait. escape/recall sets it.
 @setvar! var__hold_gathering 0
+
+
+# ---- module/recovery/reagents.razor ----------------------------------------------------
 
 # Reagent flags, written only by REAGENTS. 1 when every reagent of that spell was found.
 #   Cure            garlic 3972, ginseng 3973
@@ -189,17 +268,28 @@ settimer "timer__agi_potion" cooldown__stat_potion
 @setvar! var__regs_greater_heal 0
 @setvar! var__regs_reactive_armor 0
 @setvar! var__regs_magic_reflect 0
+
+# Scratch: 1 when that reagent was found on the last read.
 @setvar! var__has_garlic 0
 @setvar! var__has_ginseng 0
 @setvar! var__has_mandrake 0
 @setvar! var__has_ash 0
 @setvar! var__has_silk 0
 
+
+# ---- module/recovery/heal.razor --------------------------------------------------------
+
 # Scratch: 1 once a heal potion went out on this pass.
 @setvar! var__heal_potion_out 0
 
+
+# ---- module/recovery/light-heal.razor --------------------------------------------------
+
 # Scratch: 1 when the light Heal goes on this pass.
 @setvar! var__light_heal_due 0
+
+
+# ---- module/fight/weapon-swap.razor ----------------------------------------------------
 
 # The weapon this script armed last, kept across Plays. Only own items. See WEAPON.
 if not varexist var__weapon_armed_serial
@@ -209,14 +299,20 @@ if not varexist var__weapon_armed_graphic
     @setvar! var__weapon_armed_graphic 0
 endif
 
-# Scratch values, set and read inside WEAPON only.
-#   weapon_want  slot graphic wanted on this pass, 0 for none
-#   weapon_held  1 when the armed serial is in a hand
+# Scratch: the slot graphic wanted on this pass, 0 for none.
 @setvar! var__weapon_want 0
+
+# Scratch: 1 when the armed serial is in a hand.
 @setvar! var__weapon_held 0
+
+
+# ---- recipe/pvp-recipe.razor -----------------------------------------------------------
 
 # pvp is always in a fight, so the stat potions are kept up the whole time.
 @setvar! var__fighting 1
+
+
+# ---- module/base.razor -----------------------------------------------------------------
 
 # The pvp expression means the structured-PvP restrictions, where these loops may not run.
 if pvp
@@ -231,21 +327,27 @@ if config__clear_at_start = 1
     clearignore
 endif
 
+
+# ---- recipe/pvp-recipe.razor -----------------------------------------------------------
+
 overhead "[ pvp, on ]" 290
 if config__sysmsg = 1
     sysmsg "PvP sustain v9 loaded. Manual offense, recovery first." 88
 endif
 
+
 # ####################################################################################
 # # MAIN LOOP
 # ####################################################################################
 while not dead
+    # ---- module/base.razor -------------------------------------------------------------
     # The pvp expression means structured-PvP restrictions, not a field PK encounter.
     if pvp
         overhead "[ script, blocked ]" 254
         stop
     endif
 
+    # ---- module/recovery/reagents.razor ------------------------------------------------
     # ################################################################################
     # # REAGENTS
     # ################################################################################
@@ -301,6 +403,7 @@ while not dead
         endif
     endif
 
+    # ---- module/recovery/pouch.razor ---------------------------------------------------
     # ################################################################################
     # # PARALYZE
     # ################################################################################
@@ -315,6 +418,7 @@ while not dead
         endif
     endif
 
+    # ---- module/recovery/cure.razor ----------------------------------------------------
     # ################################################################################
     # # CURE
     # ################################################################################
@@ -355,6 +459,7 @@ while not dead
         endif
     endif
 
+    # ---- module/recovery/heal.razor ----------------------------------------------------
     # ################################################################################
     # # HEAL
     # ################################################################################
@@ -362,7 +467,8 @@ while not dead
     # Greater Heal follows when no potion went out on this pass and the loss is at the
     # emergency line: none carried, on its own cooldown, or the bar still running.
     # The bar skips the label read while it runs. The label stays authoritative when the bar
-    # is missing. Greater Heal waits for the walk bar and for warmode as the switches say.
+    # is missing. Greater Heal waits for the walk bar and for warmode as config__walk_guard and
+    # config__warmode_is_manual say.
     if not poisoned and not paralyzed and not hidden and not queued and not targetexists and diffhits >= config__heal_hits
         @setvar! var__heal_potion_out 0
         if config__use_potions = 1 and cooldown "heal pot" = 0
@@ -410,6 +516,7 @@ while not dead
         endif
     endif
 
+    # ---- module/recovery/bandage.razor -------------------------------------------------
     # ################################################################################
     # # BANDAGE
     # ################################################################################
@@ -427,12 +534,13 @@ while not dead
         endif
     endif
 
+    # ---- module/recovery/light-heal.razor ----------------------------------------------
     # ################################################################################
     # # LIGHT HEAL
     # ################################################################################
     # The bandage stand-in whenever no bandage can run: bandages off, no Healing, or none left
     # and none running. Beside the bandages only with config__use_light_heal 1. The agent waits
-    # for the walk bar and for warmode as the switches say.
+    # for the walk bar and for warmode as config__walk_guard and config__warmode_is_manual say.
     if not poisoned and not paralyzed and not hidden and not queued and not casting and not targetexists and config__use_magery = 1 and var__regs_heal = 1 and diffhits >= config__light_hits and mana >= config__mana_heal
         @setvar! var__light_heal_due 0
         if config__use_light_heal = 1 or config__use_bandages = 0 or skill "Healing" <= config__heal_skill_min
@@ -469,6 +577,7 @@ while not dead
         endif
     endif
 
+    # ---- module/recovery/refresh.razor -------------------------------------------------
     # ################################################################################
     # # REFRESH
     # ################################################################################
@@ -479,6 +588,7 @@ while not dead
         endif
     endif
 
+    # ---- module/buff/potions.razor -----------------------------------------------------
     # ################################################################################
     # # STAT POTIONS
     # ################################################################################
@@ -510,6 +620,7 @@ while not dead
         endif
     endif
 
+    # ---- module/buff/spells.razor ------------------------------------------------------
     # ################################################################################
     # # SELF BUFFS
     # ################################################################################
@@ -517,8 +628,8 @@ while not dead
     # Not started at config__buff_max_loss, and cut there mid cast so the next pass can heal.
     # With config__buff_when_poisoned 0 poison holds them back and cuts them too, so the cure
     # goes first. var__hold_casts lets another block keep the cast window (a latched Recall).
-    # The walk and warmode switches apply as for the heal agents. The reflect bar is the
-    # server's recast lock after Reflect is used up.
+    # config__walk_guard and config__warmode_is_manual apply as for the heal agents. The reflect
+    # bar is the server's recast lock after Reflect is used up.
     if config__use_magery = 1 and var__hold_casts = 0 and not paralyzed and not hidden and not queued and not casting and not targetexists and diffhits < config__buff_max_loss
         if config__buff_when_poisoned = 1 or not poisoned
             if config__warmode_is_manual = 0 or not warmode
@@ -577,6 +688,7 @@ while not dead
         endif
     endif
 
+    # ---- module/fight/weapon-swap.razor ------------------------------------------------
     # ################################################################################
     # # WEAPON
     # ################################################################################
@@ -648,5 +760,6 @@ while not dead
         endif
     endif
 
+    # ---- module/base.razor -------------------------------------------------------------
     wait wait__poll
 endwhile

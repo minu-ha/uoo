@@ -1,14 +1,19 @@
 # Drops gold at your feet while over max weight, one drop per pass.
 
-#@ config
+
+#@ config --------------------------------------------------------------------------------
+
 # Gold dropped per pass while over max weight. Gold is cheaper than the leather.
 @setvar! config__gold_drop_amount 2000
 
-#@ wait
+
+#@ wait ----------------------------------------------------------------------------------
+
 # Pause after a drop, so the weight settles before the next pass.
 @setvar! wait__gold_drop 1000
 
-#@ loop
+
+#@ loop ----------------------------------------------------------------------------------
     # ################################################################################
     # # GOLD
     # ################################################################################

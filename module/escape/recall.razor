@@ -1,30 +1,43 @@
 # One automatic Recall attempt on a Tracking report or low spare weight.
-# A Recall that is due holds the buff casts back (var__hold_casts), so the cast window stays free
-# for it, and holds gathering (var__hold_gathering), which also waits for a required book and for
-# Tracking to hunt.
+# A Recall that is due holds the buff casts back (var__hold_casts) so the cast window stays
+# free for it. It also holds gathering (var__hold_gathering), as do a missing book and Tracking
+# that is not hunting.
 
-#@ config
-# Recall on a Tracking report within 1 through 45 steps. Needs escape/tracking hunting.
+
+#@ config --------------------------------------------------------------------------------
+
+# 1 recalls on a Tracking report within 1 through 45 steps. Needs escape/tracking hunting.
 @setvar! config__recall_on_detection 1
+
 # 1 recalls on a Tracking report at any distance.
 @setvar! config__recall_at_any_distance 0
-# Recall once spare weight is at or below weight_remaining.
+
+# 1 recalls once spare weight is at or below weight_remaining.
 @setvar! config__recall_on_weight 1
+
 # Spare weight in stones that counts as low for recall_on_weight.
 @setvar! config__weight_remaining 10
+
 # 1 holds gathering while no Recall book is carried.
 @setvar! config__require_runebook 1
+
 # Minimum mana to send RecallCharge.
 @setvar! config__mana_recall 11
 
-#@ wait
+
+#@ wait ----------------------------------------------------------------------------------
+
 # The book, Tracking buff and weight checks run on this clock.
 @setvar! cooldown__recall_check 5000
 
-#@ timer
+
+#@ timer ---------------------------------------------------------------------------------
+
 timer__recall_check cooldown__recall_check
 
-#@ state
+
+#@ state ---------------------------------------------------------------------------------
+
 # Recall decision: 0 keep gathering, 1 stop optional work and attempt Recall when input is free.
 # Detection or low spare weight sets this to 1. Only restarting the script resets it.
 @setvar! var__recall_needed 0
@@ -41,7 +54,8 @@ timer__recall_check cooldown__recall_check
 # Scratch: 1 when the slow checks are due on this pass.
 @setvar! var__recall_check_due 0
 
-#@ loop
+
+#@ loop ----------------------------------------------------------------------------------
     # ####################################################################################
     # # RECALL
     # ####################################################################################

@@ -1,17 +1,27 @@
 # The weapon ability on the remembered enemy within 2 tiles, once per meter fill.
 
-#@ config
-# Ability slot to use: 1 Spinslash, 2 Rend, 3 Chop.
+
+#@ config --------------------------------------------------------------------------------
+
+# Weapon ability to use.
+#   1  Spinslash
+#   2  Rend
+#   3  Chop
 @setvar! config__ability_main 3
 
-#@ wait
+
+#@ wait ----------------------------------------------------------------------------------
+
 # Without Arms Lore the ability meter takes 60 seconds to fill.
 @setvar! cooldown__ability 60000
 
-#@ timer
+
+#@ timer ---------------------------------------------------------------------------------
+
 timer__ability cooldown__ability
 
-#@ loop
+
+#@ loop ----------------------------------------------------------------------------------
     # ################################################################################
     # # WEAPON ABILITY
     # ################################################################################
@@ -19,7 +29,7 @@ timer__ability cooldown__ability
     # +15% over 15 seconds, about two hits' worth. Rend needs bleeds already on the target.
     # All three share one meter, and the ability fires on the next melee hit. Chop is further
     # scaled by weapon speed, and that formula is not documented.
-    # A timer spaces the request, as in bard-mace. A wrong interval only shifts the timing.
+    # A timer spaces the request, as in archive/bard-mace. A wrong interval only shifts the timing.
     if timer "timer__ability" >= cooldown__ability and find var__combat_target ground -1 -1 2
         if config__ability_main = 1
             say "[WeaponAbility1"

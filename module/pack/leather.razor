@@ -1,23 +1,30 @@
 # Moves carried leather into the loot pouch every 2 minutes, between fights.
 # The pouch is global__my_looting_pouch, picked by restock/loadout or by the recipe's setup.
 
-#@ wait
+
+#@ wait ----------------------------------------------------------------------------------
+
 # Allow inventory updates after opening the pouch and each drag/drop.
 @setvar! wait__pack_item 500
+
 # Request budget for one packing pass. Leftover leather waits for the next interval.
 @setvar! wait__pack_batch 2500
+
 # 120000 = 2 minutes. Use 180000 for 3 minutes.
 @setvar! cooldown__pack_leather 120000
 
-#@ timer
+
+#@ timer ---------------------------------------------------------------------------------
+
 # Packing waits one full interval.
 timer__pack_leather 0
 
-#@ loop
+
+#@ loop ----------------------------------------------------------------------------------
     # ################################################################################
     # # LEATHER
     # ################################################################################
-    # Same shape as the lumberjack-enhanced Boards pass. No hue filter, so colored leather moves too.
+    # Same shape as the Boards pass in pack/lumber. No hue filter, so colored leather moves too.
     # Only between fights. Recursive backpack searches can return leather already in the pouch,
     # so membership is checked before ignore, and only pouch stacks are ignored.
     # No clearignore here: the list also holds the carved corpses. A refused move is found

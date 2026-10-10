@@ -524,7 +524,7 @@ v14는 파우치 소속 검사 전에 ignore하던 순서를 바로잡는다.
 리콜 블록이 자기 5초 주기로 책·Hunting·무게를 점검하고, 음식 (<code>buff/food</code>)과 목재 정리 (<code>pack/lumber</code>)는 각자의 타이머를 매 패스 본다.
 리콜 결정·책 없음·Hunting 없음은 리콜 블록이 패스마다 <code>var__hold_gathering</code> 하나로 합치고, 채집과 목재 정리는 그 값만 읽는다.
 <code>config__auto_recall</code>·<code>use_tracking</code>·<code>pack_lumber</code>는 없앴다. 블록을 끄려면 레시피에서 그 블록을 뺀다.
-음식은 skinning-enhanced와 같은 블록이 되어, 다쳤거나 독·워모드·리콜 결정 중에도 먹는다.</p>
+음식은 skinning-enhanced와 같은 블록이 되어, 다쳤거나 독·리콜 결정 중에도 먹는다. 워모드에서는 <code>warmode_is_manual</code> 1이라 쉰다.</p>
 <table>
 <thead><tr><th>설정</th><th>기본값과 의미</th></tr></thead>
 <tbody>
@@ -785,7 +785,7 @@ Heat of Battle 버프만 보고 명령 전송 전에 차단하면 실패. 실제
 주변 자원이 없으면 <code>[ harvest, out ]</code>, 나무 고갈 문장이면 <code>[ wood, out ]</code>을 보고 다음 장소로 이동한다.
 채집 불가도 프로필에서 한 번 표시되며, 스크립트의 중복 알림이 뜨면 실패</td></tr>
 <tr><td>음식 (v18)</td>
-<td>Food Satisfaction이 없으면 60초마다 백팩의 tray를 한 번 먹는다. v18부터 다쳤거나 독·워모드·리콜 결정 중에도 먹는다.
+<td>Food Satisfaction이 없으면 60초마다 백팩의 tray를 한 번 먹는다. v18부터 다쳤거나 독·리콜 결정 중에도 먹고, 워모드에서는 먹지 않는다.
 버프가 있는데 먹거나, 먹는 동작이 기존 커서·시전·큐를 덮으면 실패</td></tr>
 <tr><td>서버 저장 안내</td>
 <td>저장 시작·완료 알림은 기존 프로필에서 나온다. 스크립트에 별도 저장 상태나 저장 문구에 따른 중단·재개 분기는 없다</td></tr>

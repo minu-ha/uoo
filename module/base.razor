@@ -1,49 +1,77 @@
-# The frame of every loop. Every loop has it without a #@ use line.
+# The frame of every loop. Every recipe lists it first.
 # It holds the settings several blocks share, the standard waits, the warning spacing, the
 # signals blocks pass each other, the structured-PvP stop, the start lines and the wait at the
 # end of every pass.
 
-#@ config
-# Optional overheads. Warnings show either way.
+
+#@ config --------------------------------------------------------------------------------
+
+# 1 shows the optional overheads. Warnings show either way.
 @setvar! config__chatty 1
-# Journal diagnostics. A block that writes one says so in its comments.
+
+# 1 writes Journal diagnostics. A block that writes one says so in its comments.
 @setvar! config__sysmsg 1
-# Clear the client queues, the journal and the ignore list at Play (conventions 02.D).
-# 0 keeps a cursor or a cast the player holds at Play.
+
+# What Play does first (conventions 02.D).
+#   0  nothing: a cursor or a cast the player holds at Play is kept
+#   1  clear the client queues, the journal and the ignore list
 @setvar! config__clear_at_start 1
-# Magery: the Cure and heal agents, the reagent reads and the buffs. Potions and bandages stay.
+
+# 1 uses Magery: the Cure and heal agents, the reagent reads and the buffs.
+# At 0 potions and bandages still go out.
 @setvar! config__use_magery 1
-# Potions: cure, heal, Refresh and the stat potions.
+
+# 1 uses potions: cure, heal, Refresh and the stat potions.
 @setvar! config__use_potions 1
-# 1 makes our casts wait while the walk bar runs, so a step does not break them.
-# 0 casts while walking, for a fight where there is no better moment to wait for.
+
+# Our casts and the walk bar.
+#   0  cast while walking, for a fight where there is no better moment to wait for
+#   1  wait while the walk bar runs, so a step does not break the cast
 @setvar! config__walk_guard 1
-# 1 when warmode is the player's manual control window: our casts stand down while it is on.
+
+# Whose warmode it is.
+#   0  ours: our casts ignore it
+#   1  the player's manual control window: our casts and the food stand down while it
+#      is on. Potions and bandages still go out
 @setvar! config__warmode_is_manual 0
 
-#@ wait
-# The poll inside a wait, and the pause after an action.
+
+#@ wait ----------------------------------------------------------------------------------
+
+# The poll inside a wait.
 @setvar! wait__poll 100
+
+# The pause after an action.
 @setvar! wait__short 200
+
 # Spacing for repeated warnings. Without it an empty potion bag shouts every pass.
 @setvar! cooldown__message 3000
 
-#@ timer
+
+#@ timer ---------------------------------------------------------------------------------
+
 # Ready on the first pass, so the first warning shows at once.
 timer__message cooldown__message
 
-#@ state
-# Signals between blocks. Each keeps this value unless the loop has a block that sets it.
-#   fighting        1 while an enemy is engaged. buff/potions drinks only then. fight/target
-#                   sets it every pass, and the pvp recipe keeps it at 1.
-#   hold_casts      1 while a block keeps the cast window for itself. buff/spells stands down.
-#                   escape/recall sets it once a Recall is due.
-#   hold_gathering  1 while gathering and its packing wait. escape/recall sets it.
+
+#@ state ---------------------------------------------------------------------------------
+
+# Signals between blocks. Each keeps the value here unless the loop has a block that sets it.
+
+# 1 while an enemy is engaged. buff/potions drinks only then.
+# fight/target sets it every pass, and the pvp recipe keeps it at 1.
 @setvar! var__fighting 0
+
+# 1 while a block keeps the cast window for itself. buff/spells stands down.
+# escape/recall sets it once a Recall is due.
 @setvar! var__hold_casts 0
+
+# 1 while gathering and its packing wait. escape/recall sets it.
 @setvar! var__hold_gathering 0
 
-#@ setup
+
+#@ setup ---------------------------------------------------------------------------------
+
 # The pvp expression means the structured-PvP restrictions, where these loops may not run.
 if pvp
     overhead "[ script, blocked ]" 254
@@ -57,12 +85,14 @@ if config__clear_at_start = 1
     clearignore
 endif
 
-#@ loop
+
+#@ loop ----------------------------------------------------------------------------------
     # The pvp expression means structured-PvP restrictions, not a field PK encounter.
     if pvp
         overhead "[ script, blocked ]" 254
         stop
     endif
 
-#@ end
+
+#@ end -----------------------------------------------------------------------------------
     wait wait__poll

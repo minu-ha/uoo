@@ -2,23 +2,32 @@
 # The pouch is global__my_looting_pouch, picked by restock/loadout or by the recipe's setup.
 # Waits while var__hold_gathering is 1.
 
-#@ wait
+
+#@ wait ----------------------------------------------------------------------------------
+
 # Allow inventory updates after conversion, opening the pouch and drag/drop.
 @setvar! wait__lumber_item 500
+
 # Per-phase request budget: Logs and Boards each yield after 2.5 seconds, between item requests.
 @setvar! wait__lumber_batch 2500
+
 # 120000 = 2 minutes. Use 180000 for 3 minutes.
 @setvar! cooldown__pack_lumber 120000
 
-#@ timer
+
+#@ timer ---------------------------------------------------------------------------------
+
 # Packing waits one full interval.
 timer__pack_lumber 0
 
-#@ state
+
+#@ state ---------------------------------------------------------------------------------
+
 # Scratch graphic for the two lumber passes: 7133 Logs, then 7127 Boards. No persistent batch stage.
 @setvar! var__lumber_graphic 0
 
-#@ loop
+
+#@ loop ----------------------------------------------------------------------------------
     # ####################################################################################
     # # LUMBER
     # ####################################################################################

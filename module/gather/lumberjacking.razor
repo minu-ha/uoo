@@ -2,19 +2,29 @@
 # Waits while var__hold_gathering is 1 (escape/recall: a Recall due, no book, Tracking not hunting).
 #@ hotkeys Use item in hand
 
-#@ wait
+
+#@ wait ----------------------------------------------------------------------------------
+
 # Wait for the hand tool cursor in the same block before any other automatic action.
 @setvar! wait__harvest_target 3000
+
 # Let the equip request settle before the next hand verification.
 @setvar! wait__equip 1000
-# Normal tool retry. Resource exhaustion uses the shorter interval below.
+
+# Normal tool retry.
 @setvar! cooldown__harvest_retry 4000
+
+# Retry after "You do not see any harvestable resources nearby".
 @setvar! cooldown__harvest_out_retry 2000
 
-#@ timer
+
+#@ timer ---------------------------------------------------------------------------------
+
 timer__harvest cooldown__harvest_retry
 
-#@ state
+
+#@ state ---------------------------------------------------------------------------------
+
 # Delay for the next tool attempt, in ms. Resource exhaustion selects the shorter retry.
 # Each attempt restores the normal interval. Reuse timer__harvest without another timer.
 @setvar! var__harvest_retry cooldown__harvest_retry
@@ -25,7 +35,8 @@ if not varexist var__my_hatchet
     @setvar! var__my_hatchet 0
 endif
 
-#@ loop
+
+#@ loop ----------------------------------------------------------------------------------
     # ####################################################################################
     # # SMART HARVEST
     # ####################################################################################
@@ -42,7 +53,7 @@ endif
             settimer "timer__harvest" 0
             @setvar! var__harvest_retry cooldown__harvest_retry
 
-            # Follow bard-mace: an empty left hand needs equipment, regardless of type-search results.
+            # Follow archive/bard-mace: an empty left hand needs equipment, regardless of type-search results.
             if lhandempty
                 if not find var__my_hatchet backpack
                     @setvar! var__my_hatchet 0

@@ -1,9 +1,12 @@
 # Recipe for script/combat/pvp.razor. Build it with: python3 util/build-scripts.py
-# The blocks are module/<folder>/<name>.razor files, run in the order listed under #@ blocks.
-# module/base.razor comes first in every loop without a #@ use line.
+# The blocks run in the order listed, base first. A setting this loop changes sits indented
+# under its block, with the reason in "#" lines right above it. The "#|" lines are the builder's.
+# Every setting of this loop: python3 util/build-scripts.py --settings recipe/pvp-recipe.razor
 #@ output script/combat/pvp.razor
 
-#@ header
+
+#@ header --------------------------------------------------------------------------------
+
 # Shared field PvP self-sustain: instant items first, healing agents, PvP buffs kept up, swing based weapon swap.
 # Needs: the heal pot and reflect bars, and a swing N bar (WeaponSwing type) for each enabled weapon slot.
 # Turn it on when a PvP fight starts. All offense stays manual: attack spells, TK, explosion potions,
@@ -30,56 +33,61 @@
 #   cooldown__reagents and right after a "More reagents are needed" refusal, and the cast
 #   blocks read the flags. Potions are looked up only inside a block that already needs one.
 
-#@ blocks
+
+#@ blocks --------------------------------------------------------------------------------
+
+#@ use base                 the frame every loop has
+
+    #| What Play does first (conventions 02.D).
+    #|   0  nothing: a cursor or a cast the player holds at Play is kept
+    #|   1  clear the client queues, the journal and the ignore list
+    #| Default 1.
+    # A manual cursor or cast held at Play is kept (conventions 02.D).
+    @setvar! config__clear_at_start 0
+
+    #| Our casts and the walk bar.
+    #|   0  cast while walking, for a fight where there is no better moment to wait for
+    #|   1  wait while the walk bar runs, so a step does not break the cast
+    #| Default 1. Read by recovery/cure, recovery/heal, recovery/light-heal, buff/spells.
+    # pvp casts while walking: in a fight there is no better moment to wait for.
+    @setvar! config__walk_guard 0
+
 # Every pass, in this order.
-#@ use recovery/reagents      reagent flags for the recovery spells and the buffs
-#@ use recovery/pouch         trapped pouch while held
-#@ use recovery/cure          cure potion, else the Cure agent
-#@ use recovery/heal          heal potion, else Greater Heal at the emergency line
-#@ use recovery/bandage       self bandage
-#@ use recovery/light-heal    light Heal, the bandage stand-in
-#@ use recovery/refresh       Refresh at low stamina
-#@ use buff/potions           Strength, Agility and Magic Resist
-#@ use buff/spells            Reactive Armor, then Magic Reflection
-#@ use fight/weapon-swap      arms the slot whose swing is ready
+#@ use recovery/reagents    reagent flags for the recovery spells and the buffs
+#@ use recovery/pouch       trapped pouch while held
+#@ use recovery/cure        cure potion, else the Cure agent
+#@ use recovery/heal        heal potion, else Greater Heal at the emergency line
+#@ use recovery/bandage     self bandage
+#@ use recovery/light-heal  light Heal, the bandage stand-in
+#@ use recovery/refresh     Refresh at low stamina
 
-#@ config
-#| Only the settings this loop changes. Every other setting keeps the default in its module.
-#| Put the reason in "#" lines right above the value. util/build-scripts.py writes the "#|" lines.
-#| Every setting of this loop: python3 util/build-scripts.py --settings recipe/pvp-recipe.razor
+#@ use buff/potions         Strength, Agility and Magic Resist
 
-#| ---- module/base.razor ----------------------------------------------------------------
-#| Clear the client queues, the journal and the ignore list at Play (conventions 02.D).
-#| 0 keeps a cursor or a cast the player holds at Play.
-#| Default 1. Read by base.
-# A manual cursor or cast held at Play is kept (conventions 02.D).
-@setvar! config__clear_at_start 0
+    #| STR with the Greater Strength potion on: your base plus 20. Below it the potion is drunk,
+    #| and 0 turns it off. Bless and the Strength spell, ours or an ally's, show the same icon as
+    #| the potion but add less than its 20, so the stat tells them apart.
+    #| Default 120, the same value.
+    # The loop is shared, so set this for the character that runs it.
+    @setvar! config__str_potion 120
 
-#| 1 makes our casts wait while the walk bar runs, so a step does not break them.
-#| 0 casts while walking, for a fight where there is no better moment to wait for.
-#| Default 1. Read by recovery/cure, recovery/heal, recovery/light-heal, buff/spells.
-# pvp casts while walking: in a fight there is no better moment to wait for.
-@setvar! config__walk_guard 0
+#@ use buff/spells          Reactive Armor, then Magic Reflection
 
-#| ---- module/buff/potions.razor --------------------------------------------------------
-#| STR with the Greater Strength potion on: your base plus 20. Below it the potion is drunk, and
-#| 0 turns it off. Bless and the Strength spell, ours or an ally's, show the same icon as the
-#| potion but add less than its 20, so the stat tells them apart.
-#| Default 120. Read by buff/potions.
-# The loop is shared, so set this for the character that runs it.
-@setvar! config__str_potion 120
+    #| Missing hit points at which buffs are not started, and cut mid cast.
+    #| Default 35, the same value.
+    # Keep this equal to config__emergency_hits.
+    @setvar! config__buff_max_loss 35
 
-#| ---- module/buff/spells.razor ---------------------------------------------------------
-#| Missing hit points at which buffs are not started, and cut mid cast.
-#| Default 35. Read by buff/spells.
-# Keep this equal to config__emergency_hits.
-@setvar! config__buff_max_loss 35
+#@ use fight/weapon-swap    arms the slot whose swing is ready
 
-#@ state
+
+#@ state ---------------------------------------------------------------------------------
+
 # pvp is always in a fight, so the stat potions are kept up the whole time.
 @setvar! var__fighting 1
 
-#@ setup
+
+#@ setup ---------------------------------------------------------------------------------
+
 overhead "[ pvp, on ]" 290
 if config__sysmsg = 1
     sysmsg "PvP sustain v9 loaded. Manual offense, recovery first." 88

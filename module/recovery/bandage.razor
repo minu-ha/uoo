@@ -1,13 +1,17 @@
 # Self bandage while hurt or poisoned, never over a running one.
 #@ hotkeys Bandage Self
 
-#@ config
-# 0 turns bandages off. recovery/light-heal then stands in.
+
+#@ config --------------------------------------------------------------------------------
+
+# 1 uses bandages. At 0 recovery/light-heal stands in.
 @setvar! config__use_bandages 1
+
 # Healing must be above this to bandage. At or below it recovery/light-heal stands in.
 @setvar! config__heal_skill_min 0
 
-#@ loop
+
+#@ loop ----------------------------------------------------------------------------------
     # ################################################################################
     # # BANDAGE
     # ################################################################################

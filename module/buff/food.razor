@@ -1,23 +1,31 @@
 # Eats from a tray while Food Satisfaction is missing, looked at once a minute.
 
-#@ wait
+
+#@ wait ----------------------------------------------------------------------------------
+
 # The buff lasts far longer than this.
 @setvar! cooldown__food 60000
 
-#@ timer
+
+#@ timer ---------------------------------------------------------------------------------
+
 timer__food cooldown__food
 
-#@ loop
+
+#@ loop ----------------------------------------------------------------------------------
     # ################################################################################
     # # FOOD
     # ################################################################################
-    # Looked at once a minute. The buff lasts far longer.
+    # Looked at once a minute. The buff lasts far longer. With config__warmode_is_manual 1 it
+    # stands down in warmode, as our casts do.
     if timer "timer__food" >= cooldown__food and not findbuff "Food Satisfaction"
-        if not hidden and not queued and not casting and not targetexists
-            settimer "timer__food" 0
-            if findtype tray backpack as alias__food
-                dclick alias__food
-                wait wait__short
+        if config__warmode_is_manual = 0 or not warmode
+            if not hidden and not queued and not casting and not targetexists
+                settimer "timer__food" 0
+                if findtype tray backpack as alias__food
+                    dclick alias__food
+                    wait wait__short
+                endif
             endif
         endif
     endif
