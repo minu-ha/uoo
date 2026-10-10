@@ -33,8 +33,8 @@ order: 10
 | `script/` | Razor 스크립트. 모두가 공유한다 |
 | `module/`, `recipe/` | 한 벌만 둔 루프 블록과 루프마다의 레시피. `util/build-scripts.mjs`가 `script/combat/*`·`script/gather/*`로 조립한다 ([modules.md](modules.md)) |
 | `config/` | 사람마다 클라이언트 설정 원본 하나 (`config/<이름>/`). 링크 방식과 파일별 설명은 [config/README.md](https://github.com/minu-ha/uoo/blob/master/config/README.md) |
-| `document/` | 설계 문서. for-humanity로 사이트를 만들어 읽는다 (`pnpm docs:dev`). 무엇이 있는지는 [AGENTS.md](https://github.com/minu-ha/uoo/blob/master/AGENTS.md)의 문서 지도, 쓰는 법은 [writing.md](../working/writing.md) |
-| `language/` | README 번역본. 규칙은 [workflow.md](../working/workflow.md#05.A) 05.A절 |
+| `document/` | 설계 문서. for-humanity로 사이트를 만들어 읽는다 (`pnpm docs:dev`). 무엇이 있는지는 [문서 홈](../README.md), 쓰는 법은 [Writing](../working/writing.md) |
+| `language/` | README 번역본. 규칙은 [Writing](../working/writing.md#07) 07절 |
 | `util/` | `setup.sh` (게임을 저장소에 링크), `build-scripts.mjs` (모듈로 루프 조립), `check.sh` (스크립트 블록 짝과 선언 없이 쓴 접두 변수 검사, 인자 없이 돌리면 조립 결과물 검사도), `check-docs.mjs` (만든 문서 사이트의 끊긴 링크와 앵커, 번호 제목의 앵커 검사) |
 
 웹/서버 프로젝트가 아니다. Razor의 자동 검사는 `util/`의 두 검사기이고, 동작 검증은 인게임에서만 된다.
