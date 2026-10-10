@@ -11,7 +11,7 @@
 # Hotkeys: Drink Cure, > Smart Heal/Cure Self, Drink Heal, > Greater Heal/Cure Self,
 #          Cancel Current Target, Bandage Self, Drink Refresh, Drink Strength, Drink Agility,
 #          Drink Magic Resist, > Interrupt.
-# Generated from recipe/skinning-enhanced.recipe by util/build-scripts.py. Edit module/ and recipe/, not this file.
+# Generated from recipe/skinning-enhanced-recipe.razor by util/build-scripts.py. Edit module/ and recipe/, not this file.
 
 clearall
 clearsysmsg
@@ -26,11 +26,13 @@ endif
 # ####################################################################################
 # # CONFIG
 # ####################################################################################
+# ---- core/output -------------------------------------------------------------------
 # Optional script overheads. Essential warnings remain visible.
 @setvar! config__chatty 1
 # Journal diagnostics. Each block that writes one says so in its own comments.
 @setvar! config__sysmsg 1
 
+# ---- core/switches -----------------------------------------------------------------
 # Independent features. No option overrides another.
 @setvar! config__use_magery 1
 @setvar! config__use_potions 1
@@ -41,21 +43,28 @@ endif
 # 1 when warmode is the player's manual control window: our own casts stand down while it is on.
 @setvar! config__warmode_is_manual 0
 
+# ---- core/cure ---------------------------------------------------------------------
 # Minimum current mana for the Cure agent.
 @setvar! config__mana_cure 6
 
+# ---- core/heal ---------------------------------------------------------------------
 # Missing hit points, not percent.
 #   heal_hits       heal potion
 #   emergency_hits  Greater Heal when no heal potion can go out. Not below heal_hits
 @setvar! config__heal_hits 35
+# This loop: Bandages handle ordinary damage, so Greater Heal waits for 45.
+# heal_hits also holds carving, buffs and leather packing back.
 @setvar! config__emergency_hits 45
 # Minimum current mana for Greater Heal. It keeps no reserve: raise it to 31 to always leave
 # 20 mana for an attack or Teleport.
 @setvar! config__mana_greater_heal 11
 
+# ---- core/bandage ------------------------------------------------------------------
 # Healing must be above this to bandage. 0 means any Healing at all.
+# This loop: Healing 80 template. Below 10 the light Heal stands in.
 @setvar! config__heal_skill_min 10
 
+# ---- core/light-heal ---------------------------------------------------------------
 # Light Heal beside the bandages. With no bandage able to run (use_bandages 0, no Healing, or
 # none left) it goes anyway, as the bandage stand-in. Needs use_magery.
 @setvar! config__use_light_heal 0
@@ -63,25 +72,32 @@ endif
 @setvar! config__light_hits 15
 @setvar! config__mana_heal 4
 
+# ---- core/refresh ------------------------------------------------------------------
 # Current stamina at or below this drinks a Refresh.
+# This loop: DEX 80 gives about 80 stamina. Refresh at 60.
 @setvar! config__refresh_stam 60
 
+# ---- gather/axe --------------------------------------------------------------------
 # Re-arm the axe when the left hand is empty. 5187 is the two handed axe in blueprint/item-list.html.
 @setvar! config__use_weapon 1
 @setvar! config__weapon_graphic 5187
 
+# ---- gather/gold -------------------------------------------------------------------
 # Over max weight, drop this much gold at your feet per pass. Gold is cheaper than the leather.
 @setvar! config__use_gold_drop 1
 @setvar! config__gold_drop_amount 2000
 
+# ---- core/stat-potions -------------------------------------------------------------
 @setvar! config__use_stat_potions 1
 @setvar! config__use_resist_potion 1
 # STR and DEX with the Greater potion on: your base plus 20. Below these the potion is drunk.
 # Bless and the Strength and Agility spells, ours or an ally's, show the same icons as the
 # potions but add less than its 20, so the stat is what tells the potion apart.
+# This loop: STR 100 and DEX 80 template.
 @setvar! config__str_potion 120
 @setvar! config__dex_potion 100
 
+# ---- gather/sword-codex ------------------------------------------------------------
 # Codex of swords. The slot numbers follow the codex list order on the wiki.
 @setvar! config__use_sword_codex 1
 @setvar! config__sword_stance_aggressive 1
@@ -102,6 +118,7 @@ endif
 @setvar! config__defensive_enter_diff 60
 @setvar! config__defensive_leave_diff 48
 
+# ---- gather/parry-codex ------------------------------------------------------------
 # Codex of parrying, see PARRY CODEX. Slot numbers follow the wiki list order.
 # A stance only helps with ranks in it. Pick ranked ones.
 @setvar! config__use_parry_codex 1
@@ -121,41 +138,47 @@ endif
 @setvar! config__parry_finisher_barrier 2
 @setvar! config__parry_finisher_main config__parry_finisher_last_stand
 
+# ---- gather/weapon-ability ---------------------------------------------------------
 @setvar! config__use_weapon_ability 1
 @setvar! config__ability_spinslash 1
 @setvar! config__ability_rend 2
 @setvar! config__ability_chop 3
 @setvar! config__ability_main config__ability_chop
 
+# ---- core/self-buffs ---------------------------------------------------------------
 @setvar! config__use_reactive_armor 1
 @setvar! config__use_magic_reflect 1
 # Minimum current mana to start each buff.
+# This loop: Buffs keep the lumberjack handbook's 20 mana for Greater Heal and Teleport against a PK.
 @setvar! config__mana_reactive_armor 24
 @setvar! config__mana_magic_reflect 34
 # Missing hit points at which buffs are not started, and cut mid cast.
 @setvar! config__buff_max_loss 35
 # 0 keeps buffs back while poisoned and cuts one that is casting.
+# This loop: The cure goes first: no buffs while poisoned.
 @setvar! config__buff_when_poisoned 0
 
+# ---- gather/skinning ---------------------------------------------------------------
 # Skinning. 1 carves every creature corpse within 2 tiles, grey or not, by targeting each corpse.
 # Player remains are never targeted. 0 carves grey corpses only, through Smart Harvest on self.
 # Where the server refuses the first as a criminal action, grey corpses only for 5 minutes.
 @setvar! config__use_skinning 1
 @setvar! config__skin_unowned 1
 
+# ---- gather/leather ----------------------------------------------------------------
 # Move carried leather into the looting pouch selected by loadout.
 @setvar! config__pack_leather 1
 
 # ####################################################################################
 # # WAIT AND COOLDOWN
 # ####################################################################################
+@setvar! cooldown__combat_target_grace 1200
+
 @setvar! wait__poll 100
 @setvar! wait__short 200
 
 # Debounce for repeated warnings. Without it an empty potion bag shouts every pass.
-@setvar! cooldown__message 2700
-
-@setvar! cooldown__combat_target_grace 1200
+@setvar! cooldown__message 3000
 
 # A refused equip, after a disarm for example, waits this long before the next try.
 @setvar! cooldown__equip_retry 2000
@@ -187,7 +210,7 @@ endif
 
 # Reagent read interval. Five lookups each time. A refill counts within this, and running out
 # is caught at once by the refusal line.
-@setvar! cooldown__reagents 30000
+@setvar! cooldown__reagents 10000
 
 @setvar! cooldown__food 60000
 
@@ -201,12 +224,12 @@ endif
 # ####################################################################################
 # # TIMER
 # ####################################################################################
-if not timerexists "timer__message"
-    createtimer "timer__message"
-endif
-
 if not timerexists "timer__combat_target_grace"
     createtimer "timer__combat_target_grace"
+endif
+
+if not timerexists "timer__message"
+    createtimer "timer__message"
 endif
 
 if not timerexists "timer__equip"
@@ -261,8 +284,8 @@ if not timerexists "timer__pack_leather"
     createtimer "timer__pack_leather"
 endif
 
-settimer "timer__message" cooldown__message
 settimer "timer__combat_target_grace" cooldown__combat_target_grace
+settimer "timer__message" cooldown__message
 settimer "timer__equip" cooldown__equip_retry
 settimer "timer__str_potion" cooldown__stat_potion
 settimer "timer__agi_potion" cooldown__stat_potion

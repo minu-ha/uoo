@@ -1,7 +1,7 @@
 # One automatic Recall attempt on a Tracking report or low spare weight. Latching it holds the
 # buff casts back, so the cast window stays free for Recall.
-#@ needs core/message core/self-buffs gather/housekeeping-pass gather/tracking-setup
-#@ config
+#@ needs core/wait core/output core/message core/self-buffs gather/housekeeping-pass gather/tracking-setup
+#@ settings
 # Automatic Recall only. 0 skips its detection reads, book checks and weight decisions.
 # use_tracking controls startup setup. The profile displays any server Tracking messages.
 @setvar! config__auto_recall 1

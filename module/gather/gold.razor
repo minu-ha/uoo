@@ -1,6 +1,6 @@
 # Drops gold at your feet while over max weight, one drop per pass.
-#@ needs core/message
-#@ config
+#@ needs core/wait core/output core/message
+#@ settings
 # Over max weight, drop this much gold at your feet per pass. Gold is cheaper than the leather.
 @setvar! config__use_gold_drop 1
 @setvar! config__gold_drop_amount 2000

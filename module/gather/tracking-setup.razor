@@ -1,6 +1,6 @@
 # Tracking setup before the loop: reuses a confirmed hunt colour, or sets the filter once.
-#@ needs core/message core/heal
-#@ config
+#@ needs core/wait core/message core/heal
+#@ settings
 # Reuse an active, confirmed hunt color. Otherwise check the window and set the color before the loop.
 @setvar! config__use_tracking 1
 # Tracking color: 1 red (murderer), 2 grey (criminal), 3 orange (enemy), 4 all three.

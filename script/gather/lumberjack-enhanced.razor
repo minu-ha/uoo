@@ -16,7 +16,7 @@
 # The harvest retry only spaces attempts. It cannot shorten the server travel restriction.
 # Hotkeys: Drink Cure, > Smart Heal/Cure Self, Drink Heal, > Greater Heal/Cure Self,
 #          Cancel Current Target, Bandage Self, Drink Refresh, Use item in hand, > Interrupt.
-# Generated from recipe/lumberjack-enhanced.recipe by util/build-scripts.py. Edit module/ and recipe/, not this file.
+# Generated from recipe/lumberjack-enhanced-recipe.razor by util/build-scripts.py. Edit module/ and recipe/, not this file.
 
 clearall
 clearsysmsg
@@ -31,11 +31,13 @@ endif
 # ####################################################################################
 # # CONFIG
 # ####################################################################################
+# ---- core/output -------------------------------------------------------------------
 # Optional script overheads. Essential warnings remain visible.
 @setvar! config__chatty 1
 # Journal diagnostics. Each block that writes one says so in its own comments.
 @setvar! config__sysmsg 1
 
+# ---- core/switches -----------------------------------------------------------------
 # Independent features. No option overrides another.
 @setvar! config__use_magery 1
 @setvar! config__use_potions 1
@@ -44,33 +46,10 @@ endif
 # 0 casts while walking, for a fight where there is no better moment to wait for.
 @setvar! config__walk_guard 1
 # 1 when warmode is the player's manual control window: our own casts stand down while it is on.
+# This loop: Warmode is the player's: recovery casts and buffs stand down, potions still go out.
 @setvar! config__warmode_is_manual 1
 
-# Minimum current mana for the Cure agent.
-@setvar! config__mana_cure 6
-
-# Missing hit points, not percent.
-#   heal_hits       heal potion
-#   emergency_hits  Greater Heal when no heal potion can go out. Not below heal_hits
-@setvar! config__heal_hits 35
-@setvar! config__emergency_hits 45
-# Minimum current mana for Greater Heal. It keeps no reserve: raise it to 31 to always leave
-# 20 mana for an attack or Teleport.
-@setvar! config__mana_greater_heal 11
-
-# Healing must be above this to bandage. 0 means any Healing at all.
-@setvar! config__heal_skill_min 0
-
-# Light Heal beside the bandages. With no bandage able to run (use_bandages 0, no Healing, or
-# none left) it goes anyway, as the bandage stand-in. Needs use_magery.
-@setvar! config__use_light_heal 0
-# Missing hit points that start the light Heal, and its minimum current mana.
-@setvar! config__light_hits 15
-@setvar! config__mana_heal 4
-
-# Current stamina at or below this drinks a Refresh.
-@setvar! config__refresh_stam 15
-
+# ---- gather/tracking-setup ---------------------------------------------------------
 # Reuse an active, confirmed hunt color. Otherwise check the window and set the color before the loop.
 @setvar! config__use_tracking 1
 # Tracking color: 1 red (murderer), 2 grey (criminal), 3 orange (enemy), 4 all three.
@@ -78,6 +57,39 @@ endif
 @setvar! config__tracking_color 1
 @setvar! config__show_tracking 0
 
+# ---- core/cure ---------------------------------------------------------------------
+# Minimum current mana for the Cure agent.
+@setvar! config__mana_cure 6
+
+# ---- core/heal ---------------------------------------------------------------------
+# Missing hit points, not percent.
+#   heal_hits       heal potion
+#   emergency_hits  Greater Heal when no heal potion can go out. Not below heal_hits
+@setvar! config__heal_hits 35
+# This loop: Bandages handle ordinary damage, so Greater Heal waits for 45.
+# heal_hits also holds harvest back, light_hits the food, buffs and lumber packing.
+@setvar! config__emergency_hits 45
+# Minimum current mana for Greater Heal. It keeps no reserve: raise it to 31 to always leave
+# 20 mana for an attack or Teleport.
+@setvar! config__mana_greater_heal 11
+
+# ---- core/bandage ------------------------------------------------------------------
+# Healing must be above this to bandage. 0 means any Healing at all.
+@setvar! config__heal_skill_min 0
+
+# ---- core/light-heal ---------------------------------------------------------------
+# Light Heal beside the bandages. With no bandage able to run (use_bandages 0, no Healing, or
+# none left) it goes anyway, as the bandage stand-in. Needs use_magery.
+@setvar! config__use_light_heal 0
+# Missing hit points that start the light Heal, and its minimum current mana.
+@setvar! config__light_hits 15
+@setvar! config__mana_heal 4
+
+# ---- core/refresh ------------------------------------------------------------------
+# Current stamina at or below this drinks a Refresh.
+@setvar! config__refresh_stam 15
+
+# ---- gather/auto-recall ------------------------------------------------------------
 # Automatic Recall only. 0 skips its detection reads, book checks and weight decisions.
 # use_tracking controls startup setup. The profile displays any server Tracking messages.
 @setvar! config__auto_recall 1
@@ -93,16 +105,21 @@ endif
 # Minimum mana to send RecallCharge.
 @setvar! config__mana_recall 11
 
+# ---- core/self-buffs ---------------------------------------------------------------
 @setvar! config__use_reactive_armor 1
 @setvar! config__use_magic_reflect 1
 # Minimum current mana to start each buff.
+# This loop: Buffs keep the handbook's 20 mana for Greater Heal and Teleport against a PK.
 @setvar! config__mana_reactive_armor 24
 @setvar! config__mana_magic_reflect 34
 # Missing hit points at which buffs are not started, and cut mid cast.
+# This loop: Buffs only while nearly full, so gathering never trades a heal for one.
 @setvar! config__buff_max_loss 15
 # 0 keeps buffs back while poisoned and cuts one that is casting.
+# This loop: The cure goes first: no buffs while poisoned.
 @setvar! config__buff_when_poisoned 0
 
+# ---- gather/lumber-housekeeping ----------------------------------------------------
 # Convert Logs and pack Boards together. Reuse the looting pouch selected by loadout.
 @setvar! config__pack_lumber 1
 
@@ -115,13 +132,13 @@ endif
 # Debounce for repeated warnings. Without it an empty potion bag shouts every pass.
 @setvar! cooldown__message 3000
 
-@setvar! cooldown__housekeeping 5000
-
 @setvar! wait__target 1000
+
+@setvar! cooldown__housekeeping 5000
 
 # Reagent read interval. Five lookups each time. A refill counts within this, and running out
 # is caught at once by the refusal line.
-@setvar! cooldown__reagents 30000
+@setvar! cooldown__reagents 10000
 
 # Wait for the hand tool cursor in the same block before any other automatic action.
 @setvar! wait__harvest_target 3000
@@ -177,16 +194,6 @@ settimer "timer__pack_lumber" 0
 # ####################################################################################
 # # STATE
 # ####################################################################################
-# 1 when housekeeping is due this pass. Recall uses this clock before harvesting.
-# Inventory maintenance runs last, after Tracking detection.
-@setvar! var__housekeeping_pass 0
-
-# Scratch: 1 once a heal potion went out on this pass. HEAL only.
-@setvar! var__heal_potion_out 0
-
-# Scratch: 1 when the light Heal goes on this pass. LIGHT HEAL only.
-@setvar! var__light_heal_due 0
-
 # Last color confirmed in this client session. Survives Stop and Play only while Hunting stays active.
 # If the filter was changed manually, turn Hunting off before Play so it is checked again.
 if not varexist var__tracking_setup_color
@@ -199,6 +206,16 @@ endif
 @setvar! var__tracking_hunting_active 0
 # Temporary button-response flag. Wait for each response before cycling the next filter.
 @setvar! var__tracking_button_answered 0
+
+# 1 when housekeeping is due this pass. Recall uses this clock before harvesting.
+# Inventory maintenance runs last, after Tracking detection.
+@setvar! var__housekeeping_pass 0
+
+# Scratch: 1 once a heal potion went out on this pass. HEAL only.
+@setvar! var__heal_potion_out 0
+
+# Scratch: 1 when the light Heal goes on this pass. LIGHT HEAL only.
+@setvar! var__light_heal_due 0
 
 # Recall decision: 0 keep gathering, 1 stop optional work and attempt Recall when input is free.
 # Detection or low spare weight sets this to 1. Only restarting the script resets it.

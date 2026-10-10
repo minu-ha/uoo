@@ -1,41 +1,52 @@
 #!/usr/bin/env python3
 """Assemble Razor loops from module/ and recipe/ (design: blueprint/modules.html).
 
-A module is one block of a loop, written once and shared by every loop that uses it.
-A recipe names the output file, the modules in order, and the settings that differ.
+A recipe says what a loop is: its header, the blocks it runs in order, and every setting it has.
+A module is one block, written once: its code, its timers and state, and a description of the
+settings it reads. Settings (config__) live only in recipes. Modules never set them.
 
-    util/build-scripts.py               build every recipe/*.recipe
-    util/build-scripts.py recipe/x.recipe ...
-    util/build-scripts.py --check       rebuild in memory, fail if a committed file differs
+    util/build-scripts.py                       build every recipe/*-recipe.razor
+    util/build-scripts.py recipe/x-recipe.razor build one
+    util/build-scripts.py --check               fail if a committed loop differs from its recipe
+    util/build-scripts.py --settings recipe/x-recipe.razor
+                                                print the settings the recipe still lacks, ready to paste
 
-Module file (module/<area>/<name>.razor, id "<area>/<name>"):
-    lines before the first section are notes for whoever edits the module, never emitted
-    #@ needs core/message ...      modules that must be in the recipe too (they declare what this reads)
-    #@ after gather/x ...          modules that must come earlier in the pass when both are present
-    #@ hotkeys Drink Cure, ...     Razor hotkeys the module calls, listed in the header
-    #@ prelude | config | wait | timer | ready | state | setup | loop
-                                   starts a section. Everything up to the next one is its text
+Recipe (recipe/<loop>-recipe.razor):
+    # notes for whoever edits the recipe, before the first directive. Never emitted
+    #@ output script/<folder>/<loop>.razor
+    #@ header      the comment block at the top of the loop
+    #@ blocks      one "#@ use <module>  note" per line, in the order they run. Comments are notes
+    #@ config      every config__ the blocks read, with values and comments. Becomes CONFIG
+    #@ state       loop-only state (optional)
+    #@ setup       loop-only setup before the loop: startup message, loot pouch, resume list (optional)
 
-Recipe file (recipe/<name>.recipe):
-    #@ output script/<folder>/<name>.razor
-    #@ modules <id> <id> ...       may repeat. "." places the recipe's own sections
-    #@ set <variable> <value>      replaces the value of one @setvar! line
-    other lines are the header comment, emitted first. The recipe may carry its own sections too.
+Module (module/<area>/<name>.razor, named "<area>/<name>"):
+    # notes before the first directive. The first line also heads its settings in --settings
+    #@ needs <module> ...     modules this one reads from. Listed ones must be in the recipe, and a
+                              needed module with no loop, prelude or setup text is added by itself
+    #@ after <module> ...    must run later in the pass when both are in the recipe
+    #@ hotkeys A, B          Razor hotkeys it calls, gathered into the loop header
+    #@ settings              the config__ lines it reads, with suggested values. Never emitted
+    #@ prelude | wait | timer | ready | state | setup | loop
+                             its text for that part of the loop
 
-Output order: header, prelude, CONFIG, WAIT AND COOLDOWN, TIMER (timer then ready), STATE,
-setup, MAIN LOOP (while not dead, loop sections, endwhile). Each section takes its chunks in
-recipe order. Needs only the Python standard library.
+Output: header (plus Hotkeys and a Generated line), prelude, CONFIG (the recipe's config),
+WAIT AND COOLDOWN, TIMER (timer then ready), STATE (recipe first), setup (recipe first),
+MAIN LOOP (while not dead, loop parts in block order, endwhile). CRLF line ends.
+Needs only the Python standard library.
 """
 import pathlib
 import re
 import sys
 
 REPO = pathlib.Path(__file__).resolve().parent.parent
-SECTIONS = ['prelude', 'config', 'wait', 'timer', 'ready', 'state', 'setup', 'loop']
-DECLARING = ['config', 'wait', 'state']
-BANNERS = {'config': 'CONFIG', 'wait': 'WAIT AND COOLDOWN', 'timer': 'TIMER', 'state': 'STATE'}
+MODULE_SECTIONS = ['settings', 'prelude', 'wait', 'timer', 'ready', 'state', 'setup', 'loop']
+RECIPE_SECTIONS = ['header', 'blocks', 'config', 'state', 'setup']
+ACTIVE = ['prelude', 'setup', 'loop']
+DECLARING = ['wait', 'state']
 SETVAR = re.compile(r'^\s*@?setvar!?\s+(\S+)')
 CREATETIMER = re.compile(r'^\s*createtimer\s+"([^"]+)"')
+CONFIG = re.compile(r'config__[A-Za-z0-9_]+')
 
 
 class BuildError(Exception):
@@ -51,44 +62,6 @@ def banner(name):
     return [rule, '# # ' + name, rule]
 
 
-def parse(path, kind):
-    """Return the directives and sections of a module or recipe file."""
-    unit = {'path': path, 'needs': [], 'after': [], 'hotkeys': [], 'modules': [], 'sets': [], 'output': None,
-            'header': [], 'sections': {}}
-    current = None
-    for number, line in enumerate(read_lines(path), 1):
-        if line.startswith('#@'):
-            words = line[2:].split()
-            if not words:
-                raise BuildError('%s:%d: empty directive' % (path, number))
-            word, rest = words[0], line[2:].strip()[len(words[0]):].strip()
-            if word in SECTIONS:
-                current = word
-                unit['sections'].setdefault(word, [])
-            elif word == 'needs' and kind == 'module':
-                unit['needs'] += rest.split()
-            elif word == 'after' and kind == 'module':
-                unit['after'] += rest.split()
-            elif word == 'hotkeys' and kind == 'module':
-                unit['hotkeys'] += [h.strip() for h in rest.split(',') if h.strip()]
-            elif word == 'output' and kind == 'recipe':
-                unit['output'] = rest
-            elif word == 'modules' and kind == 'recipe':
-                unit['modules'] += rest.split()
-            elif word == 'set' and kind == 'recipe':
-                name, _, value = rest.partition(' ')
-                if not value.strip():
-                    raise BuildError('%s:%d: set needs a variable and a value' % (path, number))
-                unit['sets'].append((name, value.strip(), number))
-            else:
-                raise BuildError('%s:%d: unknown directive %s' % (path, number, word))
-        elif current:
-            unit['sections'][current].append(line)
-        elif kind == 'recipe':
-            unit['header'].append(line)
-    return unit
-
-
 def trim(lines):
     while lines and not lines[0].strip():
         lines = lines[1:]
@@ -97,70 +70,206 @@ def trim(lines):
     return lines
 
 
+def code(lines):
+    """Lines that are not comments or blank."""
+    return [l for l in lines if l.strip() and not l.strip().startswith('#')]
+
+
+def parse(path, kind):
+    sections = MODULE_SECTIONS if kind == 'module' else RECIPE_SECTIONS
+    unit = {'path': path, 'notes': [], 'needs': [], 'after': [], 'hotkeys': [], 'output': None,
+            'uses': [], 'sections': {}}
+    current = None
+    where = lambda n: '%s:%d' % (path.relative_to(REPO), n)
+    for number, line in enumerate(read_lines(path), 1):
+        if not line.startswith('#@'):
+            if current is None:
+                unit['notes'].append(line)
+            elif not (kind == 'recipe' and current == 'blocks'):
+                unit['sections'][current].append(line)
+            elif line.strip() and not line.strip().startswith('#'):
+                raise BuildError('%s: only "#@ use" lines and comments go under #@ blocks' % where(number))
+            continue
+        words = line[2:].split()
+        if not words:
+            raise BuildError('%s: empty directive' % where(number))
+        word, rest = words[0], ' '.join(words[1:])
+        if word in sections:
+            if word in unit['sections']:
+                raise BuildError('%s: second #@ %s' % (where(number), word))
+            current = word
+            unit['sections'][word] = []
+        elif kind == 'module' and word in ('needs', 'after') and current is None:
+            unit[word] += words[1:]
+        elif kind == 'module' and word == 'hotkeys' and current is None:
+            unit['hotkeys'] += [h.strip() for h in rest.split(',') if h.strip()]
+        elif kind == 'recipe' and word == 'output' and current is None:
+            unit['output'] = rest
+        elif kind == 'recipe' and word == 'use' and current == 'blocks':
+            if not words[1:]:
+                raise BuildError('%s: #@ use needs a module' % where(number))
+            unit['uses'].append((words[1], number))
+        elif kind == 'module' and word == 'config':
+            raise BuildError('%s: modules do not set config. Describe it under #@ settings, set it in the recipe' % where(number))
+        else:
+            raise BuildError('%s: unknown or misplaced directive #@ %s' % (where(number), word))
+    return unit
+
+
 def load_module(ident, cache):
     if ident not in cache:
         path = REPO / 'module' / (ident + '.razor')
         if not path.is_file():
-            raise BuildError('no module %s (%s)' % (ident, path.relative_to(REPO)))
-        cache[ident] = parse(path, 'module')
+            raise BuildError('no module %s (module/%s.razor)' % (ident, ident))
+        module = parse(path, 'module')
+        for section, lines in module['sections'].items():
+            if section != 'settings':
+                for line in code(lines):
+                    match = SETVAR.match(line)
+                    if match and match.group(1).startswith('config__'):
+                        raise BuildError('module %s sets %s outside #@ settings' % (ident, match.group(1)))
+        cache[ident] = module
     return cache[ident]
+
+
+def settings_of(module):
+    return [SETVAR.match(l).group(1) for l in code(module['sections'].get('settings', [])) if SETVAR.match(l)]
+
+
+def settings_order(order, cache):
+    """Settings groups in a recipe: the shared switch modules first, then the blocks in order."""
+    passive = [i for i in order if not any(trim(list(cache[i]['sections'].get(s, [])))
+                                           for s in MODULE_SECTIONS if s != 'settings')]
+    return passive + [i for i in order if i not in passive]
+
+
+def settings_head(ident):
+    head = '# ---- %s ' % ident
+    return head + '-' * max(4, 86 - len(head))
+
+
+def resolve(recipe, name, cache):
+    """Modules in build order: the listed ones, with needed passive modules added in front of
+    the first module that needs them."""
+    listed = []
+    for ident, number in recipe['uses']:
+        if ident in listed:
+            raise BuildError('%s:%d: %s listed twice' % (name, number, ident))
+        listed.append(ident)
+    order = []
+
+    def add(ident, chain):
+        if ident in order:
+            return
+        if ident in chain:
+            raise BuildError('%s: modules need each other: %s' % (name, ' -> '.join(chain + [ident])))
+        module = load_module(ident, cache)
+        for need in module['needs']:
+            if need in listed:
+                continue
+            needed = load_module(need, cache)
+            if any(trim(list(needed['sections'].get(s, []))) for s in ACTIVE):
+                raise BuildError('%s: %s needs %s, which runs in the loop. List it with #@ use' % (name, ident, need))
+            add(need, chain + [ident])
+        order.append(ident)
+
+    for ident in listed:
+        add(ident, [])
+    for i, ident in enumerate(order):
+        for before in load_module(ident, cache)['after']:
+            if before in order and order.index(before) > i:
+                raise BuildError('%s: %s must come after %s' % (name, ident, before))
+    return order
+
+
+def needed_settings(order, cache):
+    """config__ name -> module that describes it."""
+    owner = {}
+    for ident in order:
+        for setting in settings_of(cache[ident]):
+            owner.setdefault(setting, ident)
+    return owner
+
+
+def check_settings(recipe, name, order, cache):
+    owner = needed_settings(order, cache)
+    # Every config__ a module's code reads is described by it or by a module it needs.
+    for ident in order:
+        module = cache[ident]
+        known = set(settings_of(module))
+        for need in module['needs']:
+            known |= set(settings_of(load_module(need, cache)))
+        for section, lines in module['sections'].items():
+            if section == 'settings':
+                continue
+            for line in code(lines):
+                for setting in CONFIG.findall(line):
+                    if setting not in known:
+                        raise BuildError('module %s reads %s but neither it nor its needs describe it under #@ settings'
+                                         % (ident, setting))
+    config = code(recipe['sections'].get('config', []))
+    declared = []
+    for line in config:
+        match = SETVAR.match(line)
+        if not match or not match.group(1).startswith('config__'):
+            raise BuildError('%s: only @setvar! config__ lines go under #@ config: %s' % (name, line.strip()))
+        if match.group(1) in declared:
+            raise BuildError('%s: %s is set twice' % (name, match.group(1)))
+        declared.append(match.group(1))
+    missing = [s for s in owner if s not in declared]
+    if missing:
+        raise BuildError('%s: settings missing from #@ config: %s. Run util/build-scripts.py --settings %s'
+                         % (name, ', '.join('%s (%s)' % (s, owner[s]) for s in missing), name))
+    own = ' '.join(l for s in ('state', 'setup') for l in code(recipe['sections'].get(s, [])))
+    unused = [s for s in declared if s not in owner and s not in CONFIG.findall(own)]
+    if unused:
+        raise BuildError('%s: no block reads %s' % (name, ', '.join(unused)))
 
 
 def build(recipe_path, cache):
     recipe = parse(recipe_path, 'recipe')
-    name = recipe_path.relative_to(REPO)
+    name = str(recipe_path.relative_to(REPO))
     if not recipe['output']:
         raise BuildError('%s: no #@ output' % name)
-    order = recipe['modules'] if '.' in recipe['modules'] else ['.'] + recipe['modules']
-    units, seen = [], []
-    for ident in order:
-        if ident in seen:
-            raise BuildError('%s: %s listed twice' % (name, ident))
-        unit = recipe if ident == '.' else load_module(ident, cache)
-        for before in unit['after']:
-            if before in order and before not in seen:
-                raise BuildError('%s: %s must come after %s' % (name, ident, before))
-        seen.append(ident)
-        units.append((ident, unit))
-    for ident, unit in units:
-        for need in unit['needs']:
-            if need not in order:
-                raise BuildError('%s: %s needs %s in the recipe' % (name, ident, need))
+    if not recipe['uses']:
+        raise BuildError('%s: no blocks' % name)
+    order = resolve(recipe, name, cache)
+    check_settings(recipe, name, order, cache)
 
-    # A variable or timer is declared by one unit only.
+    units = [('recipe', recipe)] + [(ident, cache[ident]) for ident in order]
     owner = {}
     for ident, unit in units:
         for section in DECLARING + ['timer']:
-            for line in unit['sections'].get(section, []):
+            for line in code(unit['sections'].get(section, [])):
                 match = (CREATETIMER if section == 'timer' else SETVAR).match(line)
-                if match:
-                    key = match.group(1)
-                    if owner.setdefault(key, ident) != ident:
-                        raise BuildError('%s: %s is declared by %s and %s' % (name, key, owner[key], ident))
+                if match and owner.setdefault(match.group(1), ident) != ident:
+                    raise BuildError('%s: %s is declared by %s and %s' % (name, match.group(1), owner[match.group(1)], ident))
 
-    chunks = {section: [] for section in SECTIONS}
-    for ident, unit in units:
-        for section in SECTIONS:
+    def gather(section):
+        parts = []
+        for ident, unit in units:
+            if ident == 'recipe' and section not in ('state', 'setup'):
+                continue
             lines = trim(list(unit['sections'].get(section, [])))
             if lines:
-                chunks[section].append(lines)
+                parts.append(lines)
+        return parts
 
-    for variable, value, number in recipe['sets']:
-        pattern = re.compile(r'^(\s*@setvar!\s+%s\s+)\S+(.*)$' % re.escape(variable))
-        hits = [(section, c, i) for section in DECLARING for c in chunks[section]
-                for i, line in enumerate(c) if pattern.match(line)]
-        if len(hits) != 1:
-            raise BuildError('%s:%d: set %s matches %d @setvar! lines' % (name, number, variable, len(hits)))
-        section, chunk, i = hits[0]
-        chunk[i] = pattern.sub(lambda m: m.group(1) + value + m.group(2), chunk[i])
+    def join(parts, gap=True):
+        result = []
+        for part in parts:
+            if result and gap:
+                result.append('')
+            result += part
+        return result
 
     hotkeys = []
-    for ident, unit in units:
-        for hotkey in unit['hotkeys']:
+    for ident in order:
+        for hotkey in cache[ident]['hotkeys']:
             if hotkey not in hotkeys:
                 hotkeys.append(hotkey)
 
-    out = list(trim(recipe['header']))
+    out = trim(list(recipe['sections'].get('header', [])))
     if hotkeys:
         line = '# Hotkeys: '
         for i, hotkey in enumerate(hotkeys):
@@ -172,37 +281,55 @@ def build(recipe_path, cache):
         out.append(line.rstrip())
     out.append('# Generated from %s by util/build-scripts.py. Edit module/ and recipe/, not this file.' % name)
 
-    def join(parts, gap=True):
-        result = []
-        for part in parts:
-            if result and gap:
-                result.append('')
-            result += part
-        return result
-
-    if chunks['prelude']:
-        out += [''] + join(chunks['prelude'])
-    for section in ['config', 'wait']:
-        if chunks[section]:
-            out += [''] + banner(BANNERS[section]) + join(chunks[section])
-    if chunks['timer'] or chunks['ready']:
-        out += [''] + banner('TIMER') + join(chunks['timer'])
-        if chunks['ready']:
-            out += ([''] if chunks['timer'] else []) + join(chunks['ready'], gap=False)
-    if chunks['state']:
-        out += [''] + banner('STATE') + join(chunks['state'])
-    if chunks['setup']:
-        out += [''] + join(chunks['setup'])
-    out += [''] + banner('MAIN LOOP') + ['while not dead'] + join(chunks['loop']) + ['endwhile']
+    if gather('prelude'):
+        out += [''] + join(gather('prelude'))
+    config = trim(list(recipe['sections'].get('config', [])))
+    if config:
+        out += [''] + banner('CONFIG') + config
+    if gather('wait'):
+        out += [''] + banner('WAIT AND COOLDOWN') + join(gather('wait'))
+    if gather('timer') or gather('ready'):
+        out += [''] + banner('TIMER') + join(gather('timer'))
+        if gather('ready'):
+            out += ([''] if gather('timer') else []) + join(gather('ready'), gap=False)
+    if gather('state'):
+        out += [''] + banner('STATE') + join(gather('state'))
+    if gather('setup'):
+        out += [''] + join(gather('setup'))
+    out += [''] + banner('MAIN LOOP') + ['while not dead'] + join(gather('loop')) + ['endwhile']
     return recipe['output'], '\r\n'.join(out) + '\r\n'
+
+
+def settings_text(recipe_path, cache):
+    """The #@ settings of every block whose settings the recipe lacks, as recipe config text."""
+    recipe = parse(recipe_path, 'recipe')
+    name = str(recipe_path.relative_to(REPO))
+    order = resolve(recipe, name, cache)
+    declared = {SETVAR.match(l).group(1) for l in code(recipe['sections'].get('config', [])) if SETVAR.match(l)}
+    blocks = []
+    for ident in settings_order(order, cache):
+        module = cache[ident]
+        if set(settings_of(module)) - declared:
+            blocks.append([settings_head(ident)] + trim(list(module['sections'].get('settings', []))))
+    return '\n\n'.join('\n'.join(b) for b in blocks)
 
 
 def main(argv):
     check = '--check' in argv
     paths = [pathlib.Path(a).resolve() for a in argv if not a.startswith('--')]
+    cache = {}
+    if '--settings' in argv:
+        for path in paths:
+            try:
+                text = settings_text(path, cache)
+            except BuildError as error:
+                print('build-scripts: %s' % error, file=sys.stderr)
+                return 1
+            print(text or '# %s already sets everything its blocks read.' % path.relative_to(REPO))
+        return 0
     if not paths:
-        paths = sorted((REPO / 'recipe').glob('*.recipe'))
-    cache, stale, failed = {}, [], False
+        paths = sorted((REPO / 'recipe').glob('*-recipe.razor'))
+    stale, failed = [], False
     for path in paths:
         try:
             output, text = build(path, cache)
@@ -218,10 +345,9 @@ def main(argv):
         elif current != text:
             target.write_bytes(text.encode('utf-8'))
             print('built %s' % output)
-    if check and stale:
-        for output in stale:
-            print('build-scripts: %s differs from its recipe. Edit module/ and recipe/, then run util/build-scripts.py' % output,
-                  file=sys.stderr)
+    for output in stale:
+        print('build-scripts: %s differs from its recipe. Edit module/ and recipe/, then run util/build-scripts.py' % output,
+              file=sys.stderr)
     if failed or stale:
         return 1
     if check:

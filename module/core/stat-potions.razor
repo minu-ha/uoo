@@ -1,9 +1,9 @@
 # Strength and Agility by stat value, Magic Resist by its icon, while var__fighting is 1.
 # var__fighting comes from the loop: pvp is always in a fight, a hunting loop sets it from its
 # remembered enemy.
-#@ needs core/switches
+#@ needs core/wait core/switches
 #@ hotkeys Drink Strength, Drink Agility, Drink Magic Resist
-#@ config
+#@ settings
 @setvar! config__use_stat_potions 1
 @setvar! config__use_resist_potion 1
 # STR and DEX with the Greater potion on: your base plus 20. Below these the potion is drunk.

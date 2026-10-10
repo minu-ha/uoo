@@ -1,6 +1,6 @@
 # Four weapon slots, each on its own swing bar. Arms the slot whose swing is ready.
-#@ needs core/message
-#@ config
+#@ needs core/wait core/output core/message
+#@ settings
 @setvar! config__use_weapon 1
 # Weapon slots. Slot N reads the "swing N" bar. Graphic 0 turns the slot off.
 # A slot whose swing is ready wins, 4 down to 1. With none ready and both hands empty, the

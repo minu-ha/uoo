@@ -26,7 +26,7 @@
 # Hotkeys: Drink Cure, > Smart Heal/Cure Self, Drink Heal, > Greater Heal/Cure Self,
 #          Cancel Current Target, Bandage Self, Drink Refresh, Drink Strength, Drink Agility,
 #          Drink Magic Resist, > Interrupt.
-# Generated from recipe/pvp.recipe by util/build-scripts.py. Edit module/ and recipe/, not this file.
+# Generated from recipe/pvp-recipe.razor by util/build-scripts.py. Edit module/ and recipe/, not this file.
 
 if pvp
     overhead "[ script, blocked ]" 254
@@ -36,24 +36,29 @@ endif
 # ####################################################################################
 # # CONFIG
 # ####################################################################################
-# Optional script overheads. Essential warnings remain visible.
-@setvar! config__chatty 1
-# Journal diagnostics. Each block that writes one says so in its own comments.
-@setvar! config__sysmsg 1
-
+# ---- core/switches -----------------------------------------------------------------
 # Independent features. No option overrides another.
 @setvar! config__use_magery 1
 @setvar! config__use_potions 1
 @setvar! config__use_bandages 1
 # 1 makes our own casts wait while the walk bar runs, so a step does not break them.
 # 0 casts while walking, for a fight where there is no better moment to wait for.
+# This loop: pvp casts while walking: in a fight there is no better moment to wait for.
 @setvar! config__walk_guard 0
 # 1 when warmode is the player's manual control window: our own casts stand down while it is on.
 @setvar! config__warmode_is_manual 0
 
+# ---- core/output -------------------------------------------------------------------
+# Optional script overheads. Essential warnings remain visible.
+@setvar! config__chatty 1
+# Journal diagnostics. Each block that writes one says so in its own comments.
+@setvar! config__sysmsg 1
+
+# ---- core/cure ---------------------------------------------------------------------
 # Minimum current mana for the Cure agent.
 @setvar! config__mana_cure 6
 
+# ---- core/heal ---------------------------------------------------------------------
 # Missing hit points, not percent.
 #   heal_hits       heal potion
 #   emergency_hits  Greater Heal when no heal potion can go out. Not below heal_hits
@@ -63,9 +68,11 @@ endif
 # 20 mana for an attack or Teleport.
 @setvar! config__mana_greater_heal 11
 
+# ---- core/bandage ------------------------------------------------------------------
 # Healing must be above this to bandage. 0 means any Healing at all.
 @setvar! config__heal_skill_min 0
 
+# ---- core/light-heal ---------------------------------------------------------------
 # Light Heal beside the bandages. With no bandage able to run (use_bandages 0, no Healing, or
 # none left) it goes anyway, as the bandage stand-in. Needs use_magery.
 @setvar! config__use_light_heal 0
@@ -73,27 +80,33 @@ endif
 @setvar! config__light_hits 15
 @setvar! config__mana_heal 4
 
+# ---- core/refresh ------------------------------------------------------------------
 # Current stamina at or below this drinks a Refresh.
 @setvar! config__refresh_stam 15
 
+# ---- core/stat-potions -------------------------------------------------------------
 @setvar! config__use_stat_potions 1
 @setvar! config__use_resist_potion 1
 # STR and DEX with the Greater potion on: your base plus 20. Below these the potion is drunk.
 # Bless and the Strength and Agility spells, ours or an ally's, show the same icons as the
 # potions but add less than its 20, so the stat is what tells the potion apart.
+# This loop: The loop is shared, so set these two for the character that runs it.
 @setvar! config__str_potion 120
 @setvar! config__dex_potion 100
 
+# ---- core/self-buffs ---------------------------------------------------------------
 @setvar! config__use_reactive_armor 1
 @setvar! config__use_magic_reflect 1
 # Minimum current mana to start each buff.
 @setvar! config__mana_reactive_armor 4
 @setvar! config__mana_magic_reflect 14
 # Missing hit points at which buffs are not started, and cut mid cast.
+# This loop: Keep this equal to config__emergency_hits.
 @setvar! config__buff_max_loss 35
 # 0 keeps buffs back while poisoned and cuts one that is casting.
 @setvar! config__buff_when_poisoned 1
 
+# ---- combat/weapon-slots -----------------------------------------------------------
 @setvar! config__use_weapon 1
 # Weapon slots. Slot N reads the "swing N" bar. Graphic 0 turns the slot off.
 # A slot whose swing is ready wins, 4 down to 1. With none ready and both hands empty, the
@@ -106,15 +119,15 @@ endif
 # ####################################################################################
 # # WAIT AND COOLDOWN
 # ####################################################################################
+# Reagent read interval. Five lookups each time. A refill counts within this, and running out
+# is caught at once by the refusal line.
+@setvar! cooldown__reagents 10000
+
 @setvar! wait__poll 100
 @setvar! wait__short 200
 
 # Debounce for repeated warnings. Without it an empty potion bag shouts every pass.
 @setvar! cooldown__message 3000
-
-# Reagent read interval. Five lookups each time. A refill counts within this, and running out
-# is caught at once by the refusal line.
-@setvar! cooldown__reagents 10000
 
 # A Strength or Agility potion is tried once per window. The stat arrives a round trip after the
 # drink, and a Curse, Weaken or Clumsy can hold it under the line while the potion still runs:
@@ -125,12 +138,12 @@ endif
 # ####################################################################################
 # # TIMER
 # ####################################################################################
-if not timerexists "timer__message"
-    createtimer "timer__message"
-endif
-
 if not timerexists "timer__reagents"
     createtimer "timer__reagents"
+endif
+
+if not timerexists "timer__message"
+    createtimer "timer__message"
 endif
 
 if not timerexists "timer__str_potion"
@@ -141,9 +154,9 @@ if not timerexists "timer__agi_potion"
     createtimer "timer__agi_potion"
 endif
 
-settimer "timer__message" cooldown__message
 # Ready on the first pass, so reagents are read before the first cast.
 settimer "timer__reagents" cooldown__reagents
+settimer "timer__message" cooldown__message
 settimer "timer__str_potion" cooldown__stat_potion
 settimer "timer__agi_potion" cooldown__stat_potion
 
