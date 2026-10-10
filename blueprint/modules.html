@@ -563,7 +563,7 @@ pvp 결과물에는 시작 4줄이 <code>if config__clear_at_start = 1</code> �
 <tr><td>가벼운 Heal</td><td>잃은 HP 15 초과 35 미만</td><td>15 이상, 위 한계 없음 (<code>recovery/light-heal</code>)</td></tr>
 <tr><td>셀프 버프</td><td>잃은 HP와 상관없이 시전</td><td>잃은 HP 35 이상이면 시작하지 않고 시전 중이면 끊는다 (<code>buff_max_loss</code>)</td></tr>
 <tr><td>Spell Siphon</td><td>RA·Reflect와 한 <code>elseif</code> 사슬의 셋째 갈래. 자기를 찍기 전에 lasttarget을 한 번 더 읽었다</td><td><code>buff/spells</code> 사슬의 마지막 갈래 (<code>use_spell_siphon</code>). 순서는 같다. 한 시간에 한 번 나가므로 lasttarget은 다시 읽지 않는다</td></tr>
-<tr><td>스탯 포션</td><td>10초마다 셋을 보고, 없으면 경고</td><td>하우스키핑 5초 안에서 포션마다 5초 재시도. 없어도 경고하지 않는다</td></tr>
+<tr><td>스탯 포션</td><td>10초마다 셋을 보고, 없으면 경고. 민첩 기준선 120</td><td>하우스키핑 5초 안에서 포션마다 5초 재시도. 없어도 경고하지 않는다. 민첩 기준선은 이 템플릿의 DEX 25 + 20인 45 (사용자 확인)</td></tr>
 <tr><td>Refresh</td><td>없으면 경고</td><td>경고하지 않는다</td></tr>
 <tr><td>골드</td><td>하우스키핑마다 무게 밑으로 내려갈 때까지 반복</td><td>하우스키핑마다 한 번 (<code>pack/gold-drop</code>)</td></tr>
 <tr><td>음식</td><td>워모드와 상관없이</td><td>워모드에서 쉰다 (<code>warmode_is_manual</code> 1)</td></tr>
