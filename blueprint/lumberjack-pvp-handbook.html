@@ -433,7 +433,7 @@ AR의 감소식은 <a href="pvp.html#09.E">pvp.html</a> 09.E절이다.</p>
 하지만 명중·접근이 보장되지 않고, Eval 100을 얻으려면 다른 스킬 100점을 빼야 한다.
 두 빌드가 원래 둘 다 때릴 한 대를 한쪽에만 더해 유리하다고 계산하지 않는다.</p>
 <h2 id="08" data-part="채집">08 lumberjack-enhanced</h2>
-<p>대상은 <code>script/gather/lumberjack-enhanced.razor</code>다. 기존 <code>lumberjack.razor</code>를 구버전으로 보존하고,
+<p>대상은 <code>script/gather/lumberjack-enhanced.razor</code>다. 기존 <code>lumberjack.razor</code>를 구버전으로 보존하고 (2026-10-10부터 <code>script/archive/</code>),
 enhanced와 PvP 자기관리 루프는 별도 핫키로 수동 전환한다. 자동 공격과 자동 PvP 전환은 넣지 않는다.</p>
 
 <h3 id="08.A">08.A 실행 흐름</h3>
@@ -471,7 +471,7 @@ Hatchet은 <a href="https://wiki.uooutlands.com/Template:SwordsWeaponClass">공�
 <a href="https://github.com/markdwags/Razor/blob/master/Razor/Core/Item.cs">Razor는 이를 LeftHand로 부른다</a>.
 v9에서 빈손인데 백팩 Hatchet을 장착하지 않는다는 사용자 보고를 받았다. 인게임 확인됨 2026-10-05.
 <code>findtype … self</code>의 실제 검색 범위나 실패한 가드까지 확인한 것은 아니므로, <code>lefthand</code> 문법 오류라고 단정하지 않는다.
-v10은 <a href="../script/combat/bard-mace.razor">bard-mace</a>처럼 <code>lhandempty</code>를 먼저 읽고,
+v10은 <a href="../script/archive/bard-mace.razor">bard-mace</a>처럼 <code>lhandempty</code>를 먼저 읽고,
 저장한 <code>var__my_hatchet</code>을 백팩에서 찾아 <code>lift</code> → <code>drop self lefthand</code>로 장착한다.
 장착 다음 시도에서는 <code>findlayer self lefthand</code>의 serial이 저장한 도끼와 같은 경우에만 사용한다.
 검색 성공이나 장착 요청을 실제 장착으로 취급하지 않는다. 다른 왼손 장비만 비우며 오른손 무기 처리는 수동 장비 핫키에 맡긴다.

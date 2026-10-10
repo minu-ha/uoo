@@ -1,5 +1,5 @@
 # ####################################################################################
-# # BARD THROWING
+# # BARD MACE
 # ####################################################################################
 # Naming convention
 #   config__*  : tunable settings, kept at the top of the file
@@ -11,6 +11,10 @@
 #   timer__*   : createtimer / settimer target
 #   words are snake_case, the prefix is split off with a double underscore
 #
+# Gear
+#   a two handed Grinding Medium staff in lefthand, offhand stays empty. A two handed
+#   weapon reads as lhandempty false and rhandempty true, so the equip test uses lhandempty.
+#
 # warmode policy
 #   warmode ON is the manual control window, so barding stands down there.
 #   disco / peace / virtuoso only run while warmode is OFF.
@@ -18,36 +22,10 @@
 #   ability gauge fills whether or not the player drives the fight by hand.
 #
 # Literal policy
-#   wait / waitfortarget / settimer / cooldown / lift amount / comparison right-hand sides
-#   and the findtype aspect hue are lifted to variables.
-#   find and findtype source / quantity / range and overhead hue stay numeric literals.
-#
-# Overhead policy
-#   A resource or gear problem leads with the noun, so it reads at a glance.
-#   A line that echoes a game event keeps the game's own sentence.
-#   No exclamation marks.
-#   Hue carries the category, see blueprint/overheads.html for the words and the palette:
-#     290 status and information
-#     254 warning, something is missing, wrong or running out
-#     255 a prompt waiting on the player
-#     219 a weapon ability going out, subject only
-#
-# Throw status readout
-#   The moving throw count, the planted reload and the wing proc are printed by Razor's
-#   Overhead Messages agent in the profile, not by this script. They are pure display with
-#   no logic attached, and reading them here meant competing for the system message buffer.
-#   The agent watches the journal instead, so the readout does not depend on what this
-#   script does with the buffer at all.
-#   Entries live under <overheadmessages> in the Razor profile, on the same palette.
-#
-# System message buffer
-#   Nothing clears the buffer once the loop is running. The two clearsysmsg left are both in
-#   the setup above the loop, and replay reruns them. The bard blocks used to clear it
-#   before each useskill to keep a stale instrument prompt out of their own check, but that
-#   prompt only appears when the instrument is invalid, and then the useskill fails the same
-#   way and leaves no target cursor for a stale line to hijack. Clearing cost more than it
-#   saved: it wiped the planted line mid fight. The check at the top of the loop drains the
-#   prompt every pass, which is the real guard.
+#   wait / settimer / cooldown / lift amount / comparison right-hand sides and the findtype
+#   aspect hue are lifted to variables.
+#   find and findtype source / quantity / range, plus waitfortarget and overhead hue, stay
+#   as numeric literals.
 
 clearsysmsg
 clearall
@@ -61,37 +39,32 @@ cleardragdrop
 @setvar! config__use_bard_song 1
 @setvar! config__use_weapon_ability 1
 
-# Planted window readout. 1 prints the elapsed time over your head after a planted,
-# so you can see how much of the 10 second moving throw window is left.
-@setvar! config__show_planted_timer 1
-
 # Magic item mode. 1 looks for a magic suffix on the label, 0 takes the first match and
 # skips getlabel entirely, which is the cheaper path when training with plain gear.
 @setvar! config__use_magic_weapon 0
-@setvar! config__use_magic_instrument 0
+@setvar! config__use_magic_instrument 1
 
 # Aspect hue the weapon search filters on. Change this one value when the aspect changes.
-# NOTE: the repo has no precedent for a variable in the findtype hue slot. If the weapon
-# stops being found after this change, put 2241 back inline in the two findtype lines.
 # 2241 - lyric , 2767 - earth
 @setvar! config__aspect_hue 2767
 
 # Codex stance and weapon ability. The slot numbers follow the codex list order, so if the
-# in game order differs only these five numbers change.
+# in game order differs only these numbers change.
+# The stance commands are [MacingStance1..5, confirmed in game.
 @setvar! config__use_codex_stance 1
-@setvar! config__stance_torrent 1
-@setvar! config__stance_suppress 2
-@setvar! config__stance_reaper 3
-@setvar! config__stance_rake 4
-@setvar! config__stance_kite 5
-@setvar! config__ability_clash 1
-@setvar! config__ability_blitz 2
+@setvar! config__stance_aggressive 1
+@setvar! config__stance_defensive 2
+@setvar! config__stance_cleave 3
+@setvar! config__stance_wildswing 4
+@setvar! config__stance_sunder 5
+@setvar! config__ability_pummel 1
+@setvar! config__ability_stun 2
+@setvar! config__ability_smash 3
 
-# Suppress latches on above the enter line and only releases below the leave line, so the
-# stance cannot flap while bandages tick. Both are hit deficit, not percent: this repo has
-# no precedent for arithmetic inside a condition.
-@setvar! config__suppress_enter_diff 60
-@setvar! config__suppress_leave_diff 48
+# Defensive latches on above the enter line and only releases below the leave line, so the
+# stance cannot flap while bandages tick. Both are hit deficit, not percent.
+@setvar! config__defensive_enter_diff 60
+@setvar! config__defensive_leave_diff 48
 
 # Survival thresholds
 @setvar! config__heal_potion_diff 40
@@ -123,18 +96,11 @@ cleardragdrop
 # without the window that refused drink would go out every pass. An empty bag is looked up at
 # the same pace.
 @setvar! cooldown__stat_potion 5000
-# The Clash / Blitz / Hail Mary gauge refills in 24 to 60 seconds, so one minute is the
-# safe spacing. Shorter only wastes chat lines, it cannot fire the ability early.
+# Pummel, Stun and Smash share one gauge that refills in 24 to 60 seconds, so one minute is
+# the safe spacing. Shorter only wastes chat lines, it cannot fire the ability early.
 @setvar! cooldown__ability 60000
 @setvar! cooldown__stance_retry 3000
 @setvar! cooldown__stance_resync 30000
-# Planted lasts 10 seconds from the moment it is gained and does not refresh while you
-# stand, so these are absolute marks on one window, not a repeating tick.
-@setvar! cooldown__planted_2 2000
-@setvar! cooldown__planted_4 4000
-@setvar! cooldown__planted_6 6000
-@setvar! cooldown__planted_8 8000
-@setvar! cooldown__planted_10 10000
 
 # ####################################################################################
 # # TIMER
@@ -175,13 +141,6 @@ endif
 
 settimer "timer__agi_potion" cooldown__stat_potion
 
-if not timerexists "timer__planted"
-    createtimer "timer__planted"
-endif
-
-# Starts past the last mark so a fresh run prints nothing until a planted is seen.
-settimer "timer__planted" cooldown__planted_10
-
 # ####################################################################################
 # # STATE
 # ####################################################################################
@@ -197,29 +156,22 @@ if not varexist var__combat_target
     @setvar! var__combat_target 0
 endif
 
-# Starts on Rake so the dead band between the two Suppress lines has a defined answer on
+# Starts on Sunder so the dead band between the two Defensive lines has a defined answer on
 # the very first pass. var__stance_active 0 means unknown, which forces a label read.
 if not varexist var__stance_want
-    @setvar! var__stance_want config__stance_rake
+    @setvar! var__stance_want config__stance_sunder
 endif
 
 if not varexist var__stance_active
     @setvar! var__stance_active 0
 endif
 
-if not varexist var__ability_want
-    @setvar! var__ability_want 0
-endif
-
-# 0 to 4 are the marks still to print, 5 means the window is done and nothing prints.
-if not varexist var__planted_step
-    @setvar! var__planted_step 5
-endif
-
-# Latched to 1 when the codex label turns out to name no stance at all. Switching blind is
-# unsafe because the codex button is a toggle, so the feature stands down instead.
 if not varexist var__stance_disabled
     @setvar! var__stance_disabled 0
+endif
+
+if not varexist var__ability_want
+    @setvar! var__ability_want 0
 endif
 
 # ####################################################################################
@@ -281,7 +233,7 @@ if not listexists 'list__resume_script'
     createlist 'list__resume_script'
 endif
 clearlist 'list__resume_script'
-pushlist 'list__resume_script' 'Play Script: combat\bard-throwing'
+pushlist 'list__resume_script' 'Play Script: archive\bard-mace'
 
 # ####################################################################################
 # # MAIN LOOP
@@ -298,17 +250,19 @@ while not dead
     # ################################################################################
     # # WEAPON
     # ################################################################################
-    # 67734 / hurlbat
-    # The throwing weapon is one handed and takes righthand, so the parrying gauche in the
-    # SHIELD block below can hold lefthand. This is the bard-archer.razor layout, not the
-    # bard-mace.razor one, where a two handed staff sits in lefthand on its own.
+    # 3568 / 5112 / 3721 are black, gnarled and quarter staff, the two handed Grinding
+    # Medium group. Two handed is worth more here than a parrying gauche in the offhand:
+    # parry chance is 50% * (Parrying Skill / 100) and this template has no printed
+    # Parrying, so the gauche only buys what its own effective skill grants, while two
+    # handed is a flat +25% melee damage that is always on.
+    # rhandempty stays true while a two handed weapon is wielded, so test lhandempty.
     # Re-scan when the cache is empty or the weapon is gone.
-    if rhandempty
+    if lhandempty
         if not find var__my_weapon backpack
             @setvar! var__my_weapon 0
 
             if config__use_magic_weapon = 1
-                while findtype 67734 backpack config__aspect_hue as alias__found_magic_weapon
+                while findtype 3568|5112|3721 backpack config__aspect_hue as alias__found_magic_weapon
                     getlabel alias__found_magic_weapon label__found_magic_weapon
 
                     if "vanquishing" in label__found_magic_weapon or "power" in label__found_magic_weapon or "force" in label__found_magic_weapon or "might" in label__found_magic_weapon
@@ -321,8 +275,8 @@ while not dead
 
                 @clearignore
             else
-                # Plain mode takes the first hurlbat at the aspect hue without reading its label.
-                if findtype 67734 backpack config__aspect_hue as alias__found_craft_weapon
+                # Plain mode takes the first staff at the aspect hue without reading its label.
+                if findtype 3568|5112|3721 backpack config__aspect_hue as alias__found_craft_weapon
                     @setvar! var__my_weapon alias__found_craft_weapon
                 endif
             endif
@@ -330,30 +284,11 @@ while not dead
 
         if find var__my_weapon backpack as alias__equip_weapon
             lift alias__equip_weapon
-            drop self righthand
-            wait wait__long
-        else
-            if timer "timer__overhead_message" > cooldown__overhead_message
-                overhead "[ weapon, out ]" 254
-                settimer "timer__overhead_message" 0
-            endif
-        endif
-    endif
-
-    # ################################################################################
-    # # SHIELD
-    # ################################################################################
-    # 31002 / parrying gauche, listed under Shields in blueprint/item-list.html.
-    # Matched on graphic with no hue filter so a plain gauche still equips, and no cache is
-    # kept because this path never calls getlabel.
-    if lhandempty
-        if findtype 31002 backpack as alias__equip_shield
-            lift alias__equip_shield
             drop self lefthand
             wait wait__long
         else
             if timer "timer__overhead_message" > cooldown__overhead_message
-                overhead "[ gauche, out ]" 254
+                overhead "[ aspect weapon, out ]" 254
                 settimer "timer__overhead_message" 0
             endif
         endif
@@ -363,9 +298,6 @@ while not dead
     # # SYSTEM MESSAGE
     # ################################################################################
     # insysmsg consumes the matched message and everything before it, so check order matters.
-    # replay restarts the whole script from line 1, which also runs the clearsysmsg at the
-    # top, so a false match here is expensive. Nothing else in this file reads the system
-    # message buffer for display, so these three checks never have to share it.
     if insysmsg "Your concentration is disturbed, thus ruining thy spell."
         replay
     endif
@@ -382,50 +314,6 @@ while not dead
         if targetexists
             target var__my_instrument
             replay
-        endif
-    endif
-
-    # ################################################################################
-    # # PLANTED WINDOW
-    # ################################################################################
-    # Planted opens a 10 second window and does not refresh while you keep standing, so the
-    # moving throws are gone at 10 seconds whether or not you spent them. Standing still
-    # again only starts a new 3 second charge. This block reports the elapsed time so the
-    # window is visible. Nothing else reads the timer or the step.
-    #
-    # Sits directly under the instrument checks, where the old throw status block sat, so a
-    # clearsysmsg further down the loop cannot wipe the planted line before it is read.
-    # var__planted_step locks each mark, so a mark prints once and the pass after a planted
-    # cannot reprint an earlier one.
-    if config__show_planted_timer = 1
-        if insysmsg "now planted"
-            settimer "timer__planted" 0
-            @setvar! var__planted_step 0
-        endif
-
-        if var__planted_step = 0 and timer "timer__planted" >= cooldown__planted_2
-            overhead "[ planted, 2s ]" 290
-            @setvar! var__planted_step 1
-        endif
-
-        if var__planted_step = 1 and timer "timer__planted" >= cooldown__planted_4
-            overhead "[ planted, 4s ]" 290
-            @setvar! var__planted_step 2
-        endif
-
-        if var__planted_step = 2 and timer "timer__planted" >= cooldown__planted_6
-            overhead "[ planted, 6s ]" 290
-            @setvar! var__planted_step 3
-        endif
-
-        if var__planted_step = 3 and timer "timer__planted" >= cooldown__planted_8
-            overhead "[ planted, 8s ]" 290
-            @setvar! var__planted_step 4
-        endif
-
-        if var__planted_step = 4 and timer "timer__planted" >= cooldown__planted_10
-            overhead "[ throws, out ]" 254
-            @setvar! var__planted_step 5
         endif
     endif
 
@@ -534,7 +422,6 @@ while not dead
                     settimer "timer__overhead_message" 0
                 endif
             else
-
                 dclick alias__heal_potion
                 wait wait__short
                 cooldown "heal pot" cooldown__heal_potion
@@ -631,139 +518,11 @@ while not dead
     endif
 
     # ################################################################################
-    # # CODEX STANCE
-    # ################################################################################
-    # Rake is the default because its damage bonus doubles on a Moving Throw, which is what
-    # this script throws most of the time. Suppress takes over while hurt: it trades damage
-    # for a damage resistance buff that every weapon swing refreshes.
-    # Torrent, Reaper and Kite are deliberately never selected: the stance numbers are on
-    # the wiki, Weapon_and_Parry_Codex, and Torrent resets its stack every 5 hits.
-    #
-    # The codex label is the only source of truth. Outlands announces a stance change as an
-    # OVERHEAD message, not a system message: every "stance activated" trigger in the Razor
-    # cooldown definitions is an OverheadMessage, and insysmsg cannot read those. So the
-    # cache is refreshed from the label on a timer, which also catches a hand switch.
-    #
-    # No warmode gate. A stance is a passive mode, it does not care whether the player is
-    # driving the fight by hand. It does carry a not pvp gate: getlabel is on the Outlands
-    # PvP restriction list, and a restricted label would read as "no stance name" and latch
-    # the feature off for the rest of the run. This script is not a PvP script.
-    #
-    # Sits after the survival blocks on purpose: the getlabel below costs a server round
-    # trip and must never delay a bandage or a heal potion.
-    if config__use_codex_stance = 1 and var__stance_disabled = 0 and not pvp
-        # Drop the cache periodically so a stance changed by hand is picked up.
-        if timer "timer__stance_resync" > cooldown__stance_resync
-            @setvar! var__stance_active 0
-            settimer "timer__stance_resync" 0
-        endif
-
-        if diffhits > config__suppress_enter_diff
-            @setvar! var__stance_want config__stance_suppress
-        elseif diffhits < config__suppress_leave_diff
-            @setvar! var__stance_want config__stance_rake
-        endif
-
-        if var__stance_want != var__stance_active and timer "timer__stance_retry" > cooldown__stance_retry
-            settimer "timer__stance_retry" 0
-
-            if findtype 11903 backpack as alias__throwing_codex
-                getlabel alias__throwing_codex label__throwing_codex
-
-                # All five names are tested, not just the two this script drives. Finding
-                # Torrent, Reaper or Kite means the label works and the player is simply
-                # parked on another stance, which is a switch. Finding none of the five
-                # means the label does not carry the stance at all, and blind switching
-                # would risk toggling the active stance off, so the feature stands down.
-                if "Rake" in label__throwing_codex
-                    @setvar! var__stance_active config__stance_rake
-                elseif "Suppress" in label__throwing_codex
-                    @setvar! var__stance_active config__stance_suppress
-                elseif "Torrent" in label__throwing_codex
-                    @setvar! var__stance_active config__stance_torrent
-                elseif "Reaper" in label__throwing_codex
-                    @setvar! var__stance_active config__stance_reaper
-                elseif "Kite" in label__throwing_codex
-                    @setvar! var__stance_active config__stance_kite
-                else
-                    @setvar! var__stance_disabled 1
-                    overhead "[ stance, out ]" 254
-                endif
-
-                if var__stance_disabled = 0 and var__stance_want != var__stance_active
-                    if var__stance_want = 1
-                        say "[ThrowingStance1"
-                    elseif var__stance_want = 2
-                        say "[ThrowingStance2"
-                    elseif var__stance_want = 3
-                        say "[ThrowingStance3"
-                    elseif var__stance_want = 4
-                        say "[ThrowingStance4"
-                    elseif var__stance_want = 5
-                        say "[ThrowingStance5"
-                    endif
-
-                    # Assume it took. Saying it again before the label catches up would risk
-                    # toggling the stance straight back off.
-                    @setvar! var__stance_active var__stance_want
-                    settimer "timer__stance_resync" 0
-
-                    if var__stance_want = config__stance_suppress
-                        overhead "[ stance, suppress ]" 290
-                    else
-                        overhead "[ stance, rake ]" 290
-                    endif
-                endif
-            endif
-        endif
-    endif
-
-    # ################################################################################
-    # # WEAPON ABILITY
-    # ################################################################################
-    # Clash, Blitz and Hail Mary share one gauge that refills in 24 to 60 seconds, so this
-    # speaks at most once per cooldown__ability window. Distance picks between the two worth
-    # using: Clash only pays inside 2 tiles, Blitz is the kiting one and makes every throw a
-    # Moving Throw, which is exactly when Rake doubles. Hail Mary is left out because it
-    # only pays beyond 9 tiles and that distance cannot be held.
-    #
-    # Driven by a cooldown rather than the "Weapon ability ready" message on purpose: a
-    # wrong message string would stop the ability firing forever, a wrong cooldown only
-    # shifts the timing.
-    #
-    # not pvp matters here. cooldown is on the Outlands PvP restriction list and it is the
-    # only thing spacing these lines out, so a restricted cooldown would read 0 every pass
-    # and turn this into chat spam. Timers are restricted too, so there is no second guard
-    # to fall back on. This script is not a PvP script.
-    if config__use_weapon_ability = 1 and not pvp and cooldown "ability" = 0 and find var__combat_target ground -1 -1 12
-        if find var__combat_target ground -1 -1 2
-            @setvar! var__ability_want config__ability_clash
-        else
-            @setvar! var__ability_want config__ability_blitz
-        endif
-
-        if var__ability_want = 1
-            say "[WeaponAbility1"
-        elseif var__ability_want = 2
-            say "[WeaponAbility2"
-        elseif var__ability_want = 3
-            say "[WeaponAbility3"
-        endif
-
-        if var__ability_want = config__ability_clash
-            overhead "[ clash ]" 219
-        else
-            overhead "[ blitz ]" 219
-        endif
-
-        cooldown "ability" cooldown__ability
-    endif
-
-    # ################################################################################
     # # BARD SONG BUFF
     # ################################################################################
     # The aspect resets the Music cooldown right after a song, so all three are tried in one pass.
-    # No clearsysmsg in front of the blocks. See the buffer note in the file header.
+    # No clearsysmsg in front of the blocks. It wiped messages other blocks still needed, and a
+    # stale instrument prompt cannot hijack a cursor this useskill never opened.
     if config__use_bard_song = 1 and not targetexists and cooldown "disco" = 0 and cooldown "music" = 0 and not findbuff "song of discordance"
         useskill 'Discordance'
         waitfortarget wait__target
@@ -803,15 +562,6 @@ while not dead
     # ################################################################################
     # # PEACE
     # ################################################################################
-    # Runs before DISCO so the target stops attacking first. A barding break is rolled once
-    # per second against a pacified creature, not caused by your damage, so the pacify holds
-    # through the fight and it is worth spending the first barding window on it.
-    # The +25 effective skill for barding an already barded creature goes to whichever skill
-    # lands second, so leading with peace costs nothing: DISCO collects it on the next pass.
-    # No gate on the discord label. Peace has to be able to open on a fresh target, and the
-    # shared Music cooldown already keeps the two from firing in the same pass.
-    # The barding break label still gates: a broken creature is immune to peace for a while,
-    # and DISCO runs instead, which is correct because discordance survives a break.
     if not warmode and not targetexists and find var__combat_target ground -1 -1 10 as alias__peace_target
         if skill "Peacemaking" > 0 and cooldown "peace/provo" = 0 and cooldown "music" = 0
             getlabel alias__peace_target label__peace_target
@@ -900,5 +650,112 @@ while not dead
 
             wait wait__short
         endif
+
+    endif
+
+    # ################################################################################
+    # # CODEX STANCE
+    # ################################################################################
+    # Sunder is the default: it adds armor pierce on top of a flat damage bonus, and the
+    # pierce is what a flail is for. Defensive takes over while hurt, trading damage for a
+    # resistance buff that every swing refreshes.
+    #
+    # The codex label is the only source of truth. Outlands announces a stance change as an
+    # overhead message, not a system message, so insysmsg cannot read it. The cache is
+    # refreshed from the label on a timer, which also catches a stance changed by hand.
+    #
+    if config__use_codex_stance = 1 and var__stance_disabled = 0 and not pvp
+        if timer "timer__stance_resync" > cooldown__stance_resync
+            @setvar! var__stance_active 0
+            settimer "timer__stance_resync" 0
+        endif
+
+        if diffhits > config__defensive_enter_diff
+            @setvar! var__stance_want config__stance_defensive
+        elseif diffhits < config__defensive_leave_diff
+            @setvar! var__stance_want config__stance_sunder
+        endif
+
+        if var__stance_want != var__stance_active and timer "timer__stance_retry" > cooldown__stance_retry
+            settimer "timer__stance_retry" 0
+
+            if findtype 11888 backpack as alias__macing_codex
+                getlabel alias__macing_codex label__macing_codex
+
+                # All five names are tested, not just the two this script drives. Finding
+                # one of the others means the label works and the player is parked on
+                # another stance. Finding none means the label does not carry the stance at
+                # all, and blind switching would risk toggling the active stance off.
+                if "Sunder" in label__macing_codex
+                    @setvar! var__stance_active config__stance_sunder
+                elseif "Defensive" in label__macing_codex
+                    @setvar! var__stance_active config__stance_defensive
+                elseif "Aggressive" in label__macing_codex
+                    @setvar! var__stance_active config__stance_aggressive
+                elseif "Cleave" in label__macing_codex
+                    @setvar! var__stance_active config__stance_cleave
+                elseif "Wild Swing" in label__macing_codex
+                    @setvar! var__stance_active config__stance_wildswing
+                else
+                    @setvar! var__stance_disabled 1
+                    overhead "[ stance, out ]" 254
+                endif
+
+                if var__stance_disabled = 0 and var__stance_want != var__stance_active
+                    if var__stance_want = 1
+                        say "[MacingStance1"
+                    elseif var__stance_want = 2
+                        say "[MacingStance2"
+                    elseif var__stance_want = 3
+                        say "[MacingStance3"
+                    elseif var__stance_want = 4
+                        say "[MacingStance4"
+                    elseif var__stance_want = 5
+                        say "[MacingStance5"
+                    endif
+
+                    # Assume it took. Saying it again before the label catches up would risk
+                    # toggling the stance straight back off.
+                    @setvar! var__stance_active var__stance_want
+                    settimer "timer__stance_resync" 0
+
+                    if var__stance_want = config__stance_defensive
+                        overhead "[ stance, defensive ]" 290
+                    else
+                        overhead "[ stance, sunder ]" 290
+                    endif
+                endif
+            endif
+        endif
+    endif
+
+    # ################################################################################
+    # # WEAPON ABILITY
+    # ################################################################################
+    # Pummel, Stun and Smash share one gauge that refills in 24 to 60 seconds, so this
+    # speaks at most once per cooldown__ability window.
+    #
+    # Pummel ramps 10% per hit to a 50% cap over 15 seconds. Smash is one hit at 300% and
+    # roots the player for 1.5 seconds. Both are scaled by weapon speed and that formula is
+    # not documented, so which one wins on a Grinding Medium staff is not settled. Pummel is
+    # the pick for now. To switch, change the one line below to config__ability_smash.
+    #
+    # Lifted out of the DISCO and VIRTUOSO block, where it used to sit. It was only ever
+    # reached on passes that block ran, and it is not a bard action.
+    if config__use_weapon_ability = 1 and not pvp and cooldown "ability" = 0 and find var__combat_target ground -1 -1 2
+        @setvar! var__ability_want config__ability_pummel
+
+        # The slot number is what the command carries, so this maps slot to command. It has
+        # a branch per slot because say takes a literal, not a variable.
+        if var__ability_want = 1
+            say "[WeaponAbility1"
+        elseif var__ability_want = 2
+            say "[WeaponAbility2"
+        elseif var__ability_want = 3
+            say "[WeaponAbility3"
+        endif
+
+        overhead "[ pummel ]" 219
+        cooldown "ability" cooldown__ability
     endif
 endwhile

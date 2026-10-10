@@ -299,7 +299,7 @@ PK와 싸우는 것이 기본이라 Heat of Battle 중의 printed Resist가 더 
 waitfortarget wait__target
 target backpack</code></pre>
 <p>마지막 줄이 <code>target backpack</code>이면 송 (AoE)이고, <code>target lasttarget</code>이면 스킬 (단일 대상 디버프)이다.</p>
-<p>저장소의 기존 구현이 이미 이 형태다 (<code>bard-mace.razor</code> BARD SONG BUFF, <code>bard-necro-enhanced.razor</code> BARD SONG).</p>
+<p>저장소의 기존 구현이 이미 이 형태다 (<code>archive/bard-mace.razor</code> BARD SONG BUFF, <code>bard-necro-enhanced.razor</code> BARD SONG).</p>
 
 <h3 id="02.C">02.C 세 가지 쿨 계열</h3>
 <p>차단 메시지가 어느 계열인지 알려준다. <strong>이 구분이 모델의 열쇠다.</strong></p>
@@ -486,7 +486,7 @@ target backpack</code></pre>
 <pre><code>findbuff &quot;song of discordance&quot;
 findbuff &quot;song of provocation&quot;
 findbuff &quot;song of peacemaking&quot;</code></pre>
-<p>15분 만료를 직접 세지 않는다. 저장소 기존 구현 (<code>bard-mace.razor</code> BARD SONG BUFF)이 이 방식이다.
+<p>15분 만료를 직접 세지 않는다. 저장소 기존 구현 (<code>archive/bard-mace.razor</code> BARD SONG BUFF)이 이 방식이다.
 <code>bard-necro-enhanced</code>는 이것으로 게이트하지 않는다 (05.G절).</p>
 
 <h3 id="02.I">02.I 이 저장소의 cooldowns.xml 최종 형태</h3>

@@ -333,7 +333,7 @@ CE의 <a href="https://www.razorce.com/guide/commands/#dress">dress 문서</a>�
 벌목은 기존 무기 핫키의 <code>lift</code> → <code>drop self lefthand</code> 경로를 사용한다.
 v9에서 빈손인데 백팩 도끼를 장착하지 않는다는 보고를 받았다. 인게임 확인됨 2026-10-05.
 <code>findtype … self</code>의 실제 반환이나 실패한 가드가 기록된 것은 아니므로 검색 범위가 원인이라고 확정하지 않는다.
-v10은 <a href="../script/combat/bard-mace.razor">bard-mace의 장착 선례</a>처럼 <code>lhandempty</code>를 먼저 확인한다.
+v10은 <a href="../script/archive/bard-mace.razor">bard-mace의 장착 선례</a>처럼 <code>lhandempty</code>를 먼저 확인한다.
 캐시한 serial을 장착한 뒤 <code>findlayer self lefthand</code> 결과와 일치해야 도구를 사용한다.
 <a href="https://www.razorce.com/guide/expressions/#lhandempty">CE 공식 문서</a>도 <code>lhandempty</code>를 손이 빈 상태의 표현식으로 설명한다.
 수정한 새 경로의 실제 장착은 아직 확인되지 않았다.</p>
@@ -540,7 +540,7 @@ alt 바디 findtype과 여러 거리에서의 반복 결과는 확인되지 않�
 </tr>
 <tr>
 <td><code>findbuff "song of discordance"</code></td>
-<td><code>bard-mace.razor</code> BARD SONG BUFF</td>
+<td><code>archive/bard-mace.razor</code> BARD SONG BUFF</td>
 </tr>
 <tr>
 <td><code>cooldown "magic arrow" = 0</code></td>
@@ -564,7 +564,7 @@ alt 바디 findtype과 여러 거리에서의 반복 결과는 확인되지 않�
 </tr>
 <tr>
 <td><code>useskill</code> → <code>waitfortarget</code> → <code>target backpack</code></td>
-<td><code>bard-mace.razor</code> BARD SONG BUFF</td>
+<td><code>archive/bard-mace.razor</code> BARD SONG BUFF</td>
 </tr>
 <tr>
 <td><code>for 60</code> + <code>break</code>로 커서 폴링</td>

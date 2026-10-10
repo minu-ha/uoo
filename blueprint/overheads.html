@@ -15,8 +15,8 @@
 스크립트 모양은 <a href="conventions.html">conventions.html</a>, 명령 문법은 <a href="razor.html">razor.html</a>에 있다.</p>
 <ul>
 <li>설정 파일은 게임을 끈 상태에서만 고친다 (<a href="workflow.html#04.C">workflow.html</a> 04.C절).</li>
-<li>외부 출처 스크립트 (<code>loot/recycle</code> <code>loot/bank-pouch</code> <code>train/barding</code> <code>train/carto</code> <code>train/magery</code> <code>train/steal</code> <code>gather/mining</code>
-<code>gather/lumberjack</code> <code>shelf/*</code>)는 이 형식을 따르지 않고 그대로 둔다.</li>
+<li>외부 출처 스크립트 (<code>loot/bank-pouch</code> <code>train/barding</code> <code>train/carto</code> <code>train/magery</code> <code>train/steal</code> <code>archive/mining</code>
+<code>archive/lumberjack</code> <code>shelf/*</code>)는 이 형식을 따르지 않고 그대로 둔다.</li>
 </ul>
 
 <h2 id="00">00 한눈에</h2>
@@ -625,7 +625,7 @@ Heat of Battle은 <code>pvp</code> 바가 그 자리다.</li>
 </tr>
 <tr>
 <td><code>corpse skin</code> <code>ability</code></td>
-<td>트리거 없음. 스크립트가 직접 세운다 (backstab-mugging의 <code>cooldown "corpse skin" 1000</code>, bard-mace와 bard-throwing의 <code>cooldown "ability" cooldown__ability</code>)</td>
+<td>트리거 없음. 스크립트가 직접 세운다 (archive의 backstab-mugging은 <code>cooldown "corpse skin" 1000</code>, bard-mace와 bard-throwing은 <code>cooldown "ability" cooldown__ability</code>)</td>
 </tr>
 <tr>
 <td><code>drain</code></td>

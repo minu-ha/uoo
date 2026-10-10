@@ -70,7 +70,7 @@
 </tr>
 <tr>
 <td>대상 위에 띄우는 줄은 1288 (<a href="overheads.html#01.C">overheads.html</a> 01.C절)</td>
-<td>moongate의 <code>[ moongate, set ]</code> 290은 게이트 위에, backstab-mugging의 <code>[ range, out ]</code> 254는 lasttarget 위에 뜬다</td>
+<td>moongate의 <code>[ moongate, set ]</code> 290은 게이트 위에, archive/backstab-mugging의 <code>[ range, out ]</code> 254는 lasttarget 위에 뜬다</td>
 <td>1288로 바꿀까, 예외로 적을까</td>
 </tr>
 <tr>
@@ -148,9 +148,9 @@
 <tbody>
 <tr>
 <td>캐릭터 기본 STR·DEX (스탯 포션 기준선)</td>
-<td>bard-mace·bard-throwing·bard-necro-enhanced·hally-mage·dexxer-basic의 기준선 120·120, pvp의 120·100</td>
+<td>bard-necro-enhanced·dexxer-basic의 기준선 120·120, pvp의 120·100 (archive의 bard-mace·bard-throwing·hally-mage도 120·120)</td>
 <td>버프 없는 STR·DEX가 얼마인가. 기준선은 그 값 + 20이다 (<a href="pvp.html#09.D">pvp.html</a> 09.D절).
-앞의 다섯은 예전 임계값 100·100에서 기본 100·100으로 짐작했고, pvp는 벌목·skinning 템플릿의 100·80을 따랐다.
+120·120은 예전 임계값 100·100에서 기본 100·100으로 짐작했고, pvp는 벌목·skinning 템플릿의 100·80을 따랐다.
 pvp는 summoner 프로필에서도 쓰니 그 캐릭터의 기본값이 다르면 실행 전에 바꾼다.
 선이 높으면 포션이 도는 동안 5초 (bard-necro는 10초)마다 거절될 마시기가 나가고, 낮으면 포션을 아예 마시지 않는다</td>
 </tr>
@@ -231,12 +231,12 @@ Hamstring이 PvM 목록에는 있다</td>
 <tbody>
 <tr>
 <td>헤더는 설명 한 줄 + <code>Needs:</code> (<a href="conventions.html#02.C">conventions.html</a> 02.C절)</td>
-<td>bard-throwing과 bard-mace는 배너 뒤에 "Naming convention" 블록이, bard-necro-enhanced는 배너 · 설명 · Needs 순으로 온다. loadout은 헤더 없이 <code>clearall</code>로 시작한다</td>
+<td>archive의 bard-throwing과 bard-mace는 배너 뒤에 "Naming convention" 블록이, bard-necro-enhanced는 배너 · 설명 · Needs 순으로 온다. loadout은 헤더 없이 <code>clearall</code>로 시작한다</td>
 <td>긴 루프의 헤더는 어떤 모양인가</td>
 </tr>
 <tr>
 <td><code>cooldown</code> 명령은 기존 파일이 그 스타일일 때만 (<a href="conventions.html#04">conventions.html</a> 04절)</td>
-<td>bard-throwing이 <code>cooldown "ability"</code>로 게이트를 세운다</td>
+<td>archive의 bard-throwing이 <code>cooldown "ability"</code>로 게이트를 세운다</td>
 <td>규칙이 낡았나, 바가 보여야 해서 일부러 쓴 것인가</td>
 </tr>
 <tr>
@@ -247,7 +247,7 @@ Hamstring이 PvM 목록에는 있다</td>
 <tr>
 <td>시작 4줄 (<a href="conventions.html#02.D">conventions.html</a> 02.D절)</td>
 <td>loadout · claim-loot · share-loot는 <code>clearall</code> → <code>clearsysmsg</code> → <code>cleardragdrop</code> → <code>clearignore</code>,
-bard-throwing · bard-mace는 <code>clearsysmsg</code> → <code>clearall</code> → <code>clearignore</code> → <code>cleardragdrop</code></td>
+archive의 bard-throwing · bard-mace는 <code>clearsysmsg</code> → <code>clearall</code> → <code>clearignore</code> → <code>cleardragdrop</code></td>
 <td>순서가 중요한가</td>
 </tr>
 <tr>
@@ -312,7 +312,7 @@ loadout의 <code>as item</code> (<code>alias__</code> 없음)</td>
 </thead>
 <tbody>
 <tr>
-<td>hally-mage</td>
+<td>archive/hally-mage</td>
 <td><code>[ cure pot, on ]</code> 90을 아직 띄워 프로필 줄과 겹친다. <code>[ pvp, on ]</code>이 33이다 (공통 pvp는 90).
 읽는 무기 바 <code>Halberd</code> <code>Battle Axe</code> <code>Viking Sword</code> <code>Katana</code>가 어느 <code>cooldowns.xml</code>에도 없다</td>
 </tr>
@@ -679,6 +679,7 @@ Bleed Out이 선택돼 있으면 <code>[SwordsFinisher2</code>로 Execute로 바
 </tbody>
 </table>
 <h2 id="12" data-part="사냥">12 tamer-mage-enhanced 인게임 확인</h2>
+<p>2026-10-10 사용자가 지금 쓰지 않는다고 해서 <code>script/archive/</code>로 옮겼다. 아래 확인은 다시 쓸 때 본다.</p>
 <p>2026-10-09 <code>combat/tamer-mage-enhanced.razor</code> v1을 만들었다. Animal Lore·Animal Taming·Veterinary 120, Magery·Tracking 100,
 Resisting Spells·Meditation 80 템플릿용이다. bard-necro-enhanced의 생존·전투 대상·타겟 주문 모양과 lumberjack-enhanced의 Tracking 설정을 가져왔다.
 펫 명령과 대상 지정은 수동이고, 워모드를 켜면 Flamestrike·Bless·Arch Protection·Create Food가 선다.</p>
@@ -731,7 +732,8 @@ Create Food가 실제로 버섯을 만드는지 (Grimoire 단계) 확인한다</
 recycle에는 원작자가 넣어 둔 같은 장치가 있었다. 아이템 ID를 못 해 일찍 끝날 때 이전 스크립트 리스트의 항목을 <code>hotkey</code>로 실행한다.
 원작자 저장소에는 이 리스트를 읽는 스크립트만 있고 채우는 스크립트는 없어, 쓰는 사람이 채운다.
 그 리스트 이름을 저장소 규칙대로 <code>list__resume_script</code>로 바꾸고, recycle 마지막 줄도 같은 모양으로 바꿨다.
-bard-mace·bard-throwing·bard-necro-enhanced·tamer-mage-enhanced·skinning-enhanced·lumberjack-enhanced가 Play할 때 자기 핫키 이름을 이 리스트에 넣는다.
+bard-necro-enhanced·skinning-enhanced·lumberjack-enhanced가 Play할 때 자기 핫키 이름을 이 리스트에 넣는다.
+archive로 옮긴 bard-mace·bard-throwing·tamer-mage-enhanced는 <code>Play Script: archive\…</code> 이름으로 넣는다.
 pvp는 싸울 때만 켜므로 등록하지 않는다.</p>
 <p>핫키 이름은 프로필 xml이 F1을 저장한 모양 <code>Play Script: gather\skinning-enhanced</code>를 따랐다. <code>hotkey</code>가 이 이름으로 스크립트를 켜는지,
 따옴표 안의 <code>\</code>가 그대로 넘어가는지는 아직 확인되지 않았다. 변수는 단어를 <code>4294967295</code>로 읽으므로 (<a href="razor.html#03">razor.html</a> 03절) 리스트에 넣는다.</p>

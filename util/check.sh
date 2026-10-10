@@ -12,13 +12,13 @@
 #   alias__  label__                   must be bound by an "as" binding or by getlabel
 # timer__ names are skipped: they live inside quoted strings, where timerexists guards them.
 #
-#   util/check.sh                    # every file under script/
+#   util/check.sh                    # every file under script/, except script/archive/
 #   util/check.sh path/a.razor ...   # just these
 #
 # Exit 1 if anything is wrong. Needs only bash and awk.
 set -uo pipefail
 REPO="$(cd "$(dirname "$0")/.." && pwd)"
-if [ $# -eq 0 ]; then set -- $(find "$REPO/script" -name '*.razor' | sort); fi
+if [ $# -eq 0 ]; then set -- $(find "$REPO/script" -name '*.razor' -not -path "$REPO/script/archive/*" | sort); fi
 
 status=0
 for f in "$@"; do
