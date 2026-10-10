@@ -49,6 +49,25 @@
           }
         },
         {
+          "comment": "# @ when <condition>, # @ every <interval>: a recipe group, its condition read as code",
+          "match": "^\\s*(#)\\s?(@\\s*(?:when|every))\\s+(.*)$",
+          "captures": {
+            "1": {
+              "name": "comment.line.razor"
+            },
+            "2": {
+              "name": "meta.tag.directive.razor"
+            },
+            "3": {
+              "patterns": [
+                {
+                  "include": "#code"
+                }
+              ]
+            }
+          }
+        },
+        {
           "comment": "# @ config, # @ loop, # @ blocks: the line that opens a part",
           "match": "^\\s*(#)\\s?(@\\s*[a-z]+)\\b(.*)$",
           "captures": {
