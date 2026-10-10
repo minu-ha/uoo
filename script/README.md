@@ -92,8 +92,8 @@ Design notes and in-game checks are in [blueprint/open-items.html](../blueprint/
 `loot/recycle` runs every hotkey named in the list `list__resume_script` when it finishes, and also when it gives up
 for lack of item identification, so its last line no longer names a loop. Its author's own previous-script list was
 renamed to this one. The farming loops fill the list at Play with their own Razor hotkey name, the one the profile
-stores (`Play Script: gather\skinning-enhanced`): `bard-necro-enhanced`, `tamer-mage-enhanced`, `skinning-enhanced` and
-`lumberjack-enhanced`. The archived `bard-mace` and `bard-throwing` register their `Play Script: archive\…` name.
+stores (`Play Script: gather\skinning-enhanced`): `bard-necro-enhanced`, `tamer-mage-enhanced`, `dexxer-basic`,
+`skinning-enhanced` and `lumberjack-enhanced`. The archived `bard-mace` and `bard-throwing` register their `Play Script: archive\…` name.
 It is a list because a variable reads a word back as 4294967295 (blueprint/razor.html part 3).
 It lasts until the client closes, and with nothing registered recycle just ends. `combat/pvp` does not register,
 so recycling during a fight returns to the farming loop.

@@ -124,3 +124,11 @@
 if not gumpexists 2016719803
     say "[codexhotbar"
 endif
+
+# loot/recycle runs the hotkey named in this list when it finishes or gives up. A list, because
+# a variable cannot hold a word (blueprint/razor.html part 3). It lasts until the client closes.
+if not listexists 'list__resume_script'
+    createlist 'list__resume_script'
+endif
+clearlist 'list__resume_script'
+pushlist 'list__resume_script' 'Play Script: combat\dexxer-basic'
