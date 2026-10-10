@@ -1,31 +1,43 @@
+# ##################################################################################################
 # Reactive Armor, then Magic Reflection, whenever one is missing.
 #@ hotkeys > Interrupt
+# ##################################################################################################
 
 
-#@ config ------------------------------------------------------------------------------------------
-
-# 1 keeps Reactive Armor up.
+# ##################################################################################################
+#@ config
+#
+#   config__use_reactive_armor
+#      1 keeps Reactive Armor up.
+#
+#   config__use_magic_reflect
+#      1 keeps Magic Reflection up.
+#
+#   config__mana_reactive_armor
+#      Minimum current mana to start Reactive Armor.
+#
+#   config__mana_magic_reflect
+#      Minimum current mana to start Magic Reflection.
+#
+#   config__buff_max_loss
+#      Missing hit points at which buffs are not started, and cut mid cast.
+#
+#   config__buff_when_poisoned
+#      Buffs while poisoned.
+#        0  no: hold them back and cut one that is casting, so the cure goes first
+#        1  yes
+# ##################################################################################################
 @setvar! config__use_reactive_armor 1
-
-# 1 keeps Magic Reflection up.
 @setvar! config__use_magic_reflect 1
-
-# Minimum current mana to start Reactive Armor.
 @setvar! config__mana_reactive_armor 4
-
-# Minimum current mana to start Magic Reflection.
 @setvar! config__mana_magic_reflect 14
-
-# Missing hit points at which buffs are not started, and cut mid cast.
 @setvar! config__buff_max_loss 35
-
-# Buffs while poisoned.
-#   0  no: hold them back and cut one that is casting, so the cure goes first
-#   1  yes
 @setvar! config__buff_when_poisoned 1
 
 
-#@ loop --------------------------------------------------------------------------------------------
+# ##################################################################################################
+#@ loop
+# ##################################################################################################
     # ################################################################################
     # # SELF BUFFS
     # ################################################################################

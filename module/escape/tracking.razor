@@ -1,46 +1,64 @@
+# ##################################################################################################
 # Tracking setup before the loop: reuses a confirmed hunt colour, or sets the filter once.
 # The profile displays the server's Tracking messages. escape/recall reads them.
+# ##################################################################################################
 
 
-#@ config ------------------------------------------------------------------------------------------
-
-# Hunt filter.
-#   1  red: murderers
-#   2  grey: criminal players
-#   3  orange: enemies
-#   4  all three
+# ##################################################################################################
+#@ config
+#
+#   config__tracking_color
+#      Hunt filter.
+#        1  red: murderers
+#        2  grey: criminal players
+#        3  orange: enemies
+#        4  all three
+#
+#   config__show_tracking
+#      1 leaves the Tracking window open after setup.
+# ##################################################################################################
 @setvar! config__tracking_color 1
-
-# 1 leaves the Tracking window open after setup.
 @setvar! config__show_tracking 0
 
 
-#@ wait --------------------------------------------------------------------------------------------
-
-# How long the Tracking window may take to open.
+# ##################################################################################################
+#@ wait
+#
+#   wait__tracking_gump
+#      How long the Tracking window may take to open.
+# ##################################################################################################
 @setvar! wait__tracking_gump 1000
 
 
-#@ state -------------------------------------------------------------------------------------------
-
-# Last color confirmed in this client session. It survives Stop and Play only while Hunting
-# stays active. After a manual filter change, turn Hunting off before Play so it is checked again.
+# ##################################################################################################
+#@ state
+#
+#   var__tracking_setup_color
+#      Last color confirmed in this client session. It survives Stop and Play only while Hunting
+#      stays active. After a manual filter change, turn Hunting off before Play so it is checked
+#      again.
+#
+#   var__tracking_filter_confirmed
+#      1 when this run reused a confirmed color or verified it during startup.
+#
+#   var__tracking_hunting_active
+#      1 if Hunting was active at startup or at the last escape/recall check. No repeated gump
+#      setup.
+#
+#   var__tracking_button_answered
+#      Temporary button-response flag. Wait for each response before cycling the next filter.
+# ##################################################################################################
 if not varexist var__tracking_setup_color
     @setvar! var__tracking_setup_color 0
 endif
-
-# 1 when this run reused a confirmed color or verified it during startup.
 @setvar! var__tracking_filter_confirmed 0
-
-# 1 if Hunting was active at startup or at the last escape/recall check. No repeated gump setup.
 @setvar! var__tracking_hunting_active 0
-
-# Temporary button-response flag. Wait for each response before cycling the next filter.
 @setvar! var__tracking_button_answered 0
 
 
-#@ setup -------------------------------------------------------------------------------------------
-
+# ##################################################################################################
+#@ setup
+# ##################################################################################################
 # ####################################################################################
 # # TRACKING SETUP
 # ####################################################################################

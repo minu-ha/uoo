@@ -1,29 +1,41 @@
+# ##################################################################################################
 # The light Heal agent: the bandage stand-in, and beside the bandages with use_light_heal 1.
 #@ hotkeys > Smart Heal/Cure Self, Cancel Current Target
+# ##################################################################################################
 
 
-#@ config ------------------------------------------------------------------------------------------
-
-# When the light Heal goes.
-#   0  only while no bandage can run: use_bandages 0, Healing at or below heal_skill_min,
-#      or none left and none running
-#   1  beside the bandages too
+# ##################################################################################################
+#@ config
+#
+#   config__use_light_heal
+#      When the light Heal goes.
+#        0  only while no bandage can run: use_bandages 0, Healing at or below heal_skill_min,
+#           or none left and none running
+#        1  beside the bandages too
+#
+#   config__light_hits
+#      Missing hit points that start the light Heal.
+#
+#   config__mana_heal
+#      Minimum current mana for the light Heal.
+# ##################################################################################################
 @setvar! config__use_light_heal 0
-
-# Missing hit points that start the light Heal.
 @setvar! config__light_hits 15
-
-# Minimum current mana for the light Heal.
 @setvar! config__mana_heal 4
 
 
-#@ state -------------------------------------------------------------------------------------------
-
-# Scratch: 1 when the light Heal goes on this pass.
+# ##################################################################################################
+#@ state
+#
+#   var__light_heal_due
+#      Scratch: 1 when the light Heal goes on this pass.
+# ##################################################################################################
 @setvar! var__light_heal_due 0
 
 
-#@ loop --------------------------------------------------------------------------------------------
+# ##################################################################################################
+#@ loop
+# ##################################################################################################
     # ################################################################################
     # # LIGHT HEAL
     # ################################################################################

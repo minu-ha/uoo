@@ -1,63 +1,84 @@
+# ##################################################################################################
 # Codex of parrying: the main stance, Warding against damage over time, and the finisher.
+# ##################################################################################################
 
 
-#@ config ------------------------------------------------------------------------------------------
-
-# Main stance, by codex slot in wiki order. A stance only helps with ranks in it.
-#   1  Shield Bash
-#   2  Warding
-#   3  Testudo      once its ranks catch up
-#   4  Mirror
-#   5  Bulwark      while Testudo's ranks are low
+# ##################################################################################################
+#@ config
+#
+#   config__parry_stance_main
+#      Main stance, by codex slot in wiki order. A stance only helps with ranks in it.
+#        1  Shield Bash
+#        2  Warding
+#        3  Testudo      once its ranks catch up
+#        4  Mirror
+#        5  Bulwark      while Testudo's ranks are low
+#
+#   config__parry_stance_dot
+#      Stance while poisoned, bleeding or diseased, by the same slots.
+#
+#   config__parry_dot_in_melee
+#      Stance next to the remembered enemy (2 tiles) while poisoned, bleeding or diseased.
+#        0  keep the main stance
+#        1  switch to parry_stance_dot there too
+#
+#   config__parry_finisher_main
+#      Finisher to keep selected.
+#        0  leave it alone
+#        1  Last Stand
+#        2  Barrier
+# ##################################################################################################
 @setvar! config__parry_stance_main 5
-
-# Stance while poisoned, bleeding or diseased, by the same slots.
 @setvar! config__parry_stance_dot 2
-
-# Stance next to the remembered enemy (2 tiles) while poisoned, bleeding or diseased.
-#   0  keep the main stance
-#   1  switch to parry_stance_dot there too
 @setvar! config__parry_dot_in_melee 0
-
-# Finisher to keep selected.
-#   0  leave it alone
-#   1  Last Stand
-#   2  Barrier
 @setvar! config__parry_finisher_main 1
 
 
-#@ wait --------------------------------------------------------------------------------------------
-
-# A failed stance switch is tried again after this.
+# ##################################################################################################
+#@ wait
+#
+#   cooldown__parry_retry
+#      A failed stance switch is tried again after this.
+#
+#   cooldown__parry_resync
+#      The stance cache is dropped this often, so a stance changed by hand is picked up.
+# ##################################################################################################
 @setvar! cooldown__parry_retry 3000
-
-# The stance cache is dropped this often, so a stance changed by hand is picked up.
 @setvar! cooldown__parry_resync 30000
 
 
-#@ timer -------------------------------------------------------------------------------------------
-
+# ##################################################################################################
+#@ timer
+# ##################################################################################################
 timer__parry_retry cooldown__parry_retry
 timer__parry_resync 0
 
 
-#@ state -------------------------------------------------------------------------------------------
-
-# Parry stance cache. 0 means unknown, which forces a codex label read on the first pass.
+# ##################################################################################################
+#@ state
+#
+#   var__parry_want, var__parry_active
+#      Parry stance cache. 0 means unknown, which forces a codex label read on the first pass.
+#
+#   var__parry_disabled
+#      1 when the codex label names no stance. Switching blind could toggle the stance off.
+#
+#   var__parry_finisher_checked
+#      The finisher is checked once per Play, on the first codex label read.
+#
+#   var__parry_finisher_state
+#      Scratch: 0 neither finisher named, 1 wanted finisher active, 2 the other one active.
+# ##################################################################################################
 @setvar! var__parry_want config__parry_stance_main
 @setvar! var__parry_active 0
-
-# 1 when the codex label names no stance. Switching blind could toggle the stance off.
 @setvar! var__parry_disabled 0
-
-# The finisher is checked once per Play, on the first codex label read.
 @setvar! var__parry_finisher_checked 0
-
-# Scratch: 0 neither finisher named, 1 wanted finisher active, 2 the other one active.
 @setvar! var__parry_finisher_state 0
 
 
-#@ loop --------------------------------------------------------------------------------------------
+# ##################################################################################################
+#@ loop
+# ##################################################################################################
     # ################################################################################
     # # PARRY CODEX
     # ################################################################################

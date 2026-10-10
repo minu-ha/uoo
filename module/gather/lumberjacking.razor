@@ -1,42 +1,58 @@
+# ##################################################################################################
 # Smart Harvest with the Hatchet in the left hand, equipping it first when the hand is empty.
-# Waits while var__hold_gathering is 1 (escape/recall: a Recall due, no book, Tracking not hunting).
+# Waits while var__hold_gathering is 1 (escape/recall: a Recall due, no book, Tracking not
+# hunting).
 #@ hotkeys Use item in hand
+# ##################################################################################################
 
 
-#@ wait --------------------------------------------------------------------------------------------
-
-# Wait for the hand tool cursor in the same block before any other automatic action.
+# ##################################################################################################
+#@ wait
+#
+#   wait__harvest_target
+#      Wait for the hand tool cursor in the same block before any other automatic action.
+#
+#   wait__equip
+#      Let the equip request settle before the next hand verification.
+#
+#   cooldown__harvest_retry
+#      Normal tool retry.
+#
+#   cooldown__harvest_out_retry
+#      Retry after "You do not see any harvestable resources nearby".
+# ##################################################################################################
 @setvar! wait__harvest_target 3000
-
-# Let the equip request settle before the next hand verification.
 @setvar! wait__equip 1000
-
-# Normal tool retry.
 @setvar! cooldown__harvest_retry 4000
-
-# Retry after "You do not see any harvestable resources nearby".
 @setvar! cooldown__harvest_out_retry 2000
 
 
-#@ timer -------------------------------------------------------------------------------------------
-
+# ##################################################################################################
+#@ timer
+# ##################################################################################################
 timer__harvest cooldown__harvest_retry
 
 
-#@ state -------------------------------------------------------------------------------------------
-
-# Delay for the next tool attempt, in ms. Resource exhaustion selects the shorter retry.
-# Each attempt restores the normal interval. Reuse timer__harvest without another timer.
+# ##################################################################################################
+#@ state
+#
+#   var__harvest_retry
+#      Delay for the next tool attempt, in ms. Resource exhaustion selects the shorter retry. Each
+#      attempt restores the normal interval. Reuse timer__harvest without another timer.
+#
+#   var__my_hatchet
+#      Selected Hatchet serial, reused across Stop and Play in this client session. 0 means no tool
+#      selected yet. Backpack discovery is used only when this cached tool is missing.
+# ##################################################################################################
 @setvar! var__harvest_retry cooldown__harvest_retry
-
-# Selected Hatchet serial, reused across Stop and Play in this client session.
-# 0 means no tool selected yet. Backpack discovery is used only when this cached tool is missing.
 if not varexist var__my_hatchet
     @setvar! var__my_hatchet 0
 endif
 
 
-#@ loop --------------------------------------------------------------------------------------------
+# ##################################################################################################
+#@ loop
+# ##################################################################################################
     # ####################################################################################
     # # SMART HARVEST
     # ####################################################################################

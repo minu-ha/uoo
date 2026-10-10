@@ -1,61 +1,84 @@
+# ##################################################################################################
 # One automatic Recall attempt on a Tracking report or low spare weight.
 # A Recall that is due holds the buff casts back (var__hold_casts) so the cast window stays
 # free for it. It also holds gathering (var__hold_gathering), as do a missing book and Tracking
 # that is not hunting.
+# ##################################################################################################
 
 
-#@ config ------------------------------------------------------------------------------------------
-
-# 1 recalls on a Tracking report within 1 through 45 steps. Needs escape/tracking hunting.
+# ##################################################################################################
+#@ config
+#
+#   config__recall_on_detection
+#      1 recalls on a Tracking report within 1 through 45 steps. Needs escape/tracking hunting.
+#
+#   config__recall_at_any_distance
+#      1 recalls on a Tracking report at any distance.
+#
+#   config__recall_on_weight
+#      1 recalls once spare weight is at or below weight_remaining.
+#
+#   config__weight_remaining
+#      Spare weight in stones that counts as low for recall_on_weight.
+#
+#   config__require_runebook
+#      1 holds gathering while no Recall book is carried.
+#
+#   config__mana_recall
+#      Minimum mana to send RecallCharge.
+# ##################################################################################################
 @setvar! config__recall_on_detection 1
-
-# 1 recalls on a Tracking report at any distance.
 @setvar! config__recall_at_any_distance 0
-
-# 1 recalls once spare weight is at or below weight_remaining.
 @setvar! config__recall_on_weight 1
-
-# Spare weight in stones that counts as low for recall_on_weight.
 @setvar! config__weight_remaining 10
-
-# 1 holds gathering while no Recall book is carried.
 @setvar! config__require_runebook 1
-
-# Minimum mana to send RecallCharge.
 @setvar! config__mana_recall 11
 
 
-#@ wait --------------------------------------------------------------------------------------------
-
-# The book, Tracking buff and weight checks run on this clock.
+# ##################################################################################################
+#@ wait
+#
+#   cooldown__recall_check
+#      The book, Tracking buff and weight checks run on this clock.
+# ##################################################################################################
 @setvar! cooldown__recall_check 5000
 
 
-#@ timer -------------------------------------------------------------------------------------------
-
+# ##################################################################################################
+#@ timer
+# ##################################################################################################
 timer__recall_check cooldown__recall_check
 
 
-#@ state -------------------------------------------------------------------------------------------
-
-# Recall decision: 0 keep gathering, 1 stop optional work and attempt Recall when input is free.
-# Detection or low spare weight sets this to 1. Only restarting the script resets it.
+# ##################################################################################################
+#@ state
+#
+#   var__recall_needed
+#      Recall decision: 0 keep gathering, 1 stop optional work and attempt Recall when input is
+#      free. Detection or low spare weight sets this to 1. Only restarting the script resets it.
+#
+#   var__recall_sent
+#      0 waits to send RecallCharge, 1 means its command was sent. Recovery continues in either
+#      state. Keep 1 even after refusal so the running loop cannot repeat Recall. Restart for
+#      another attempt. This flag records the request, not arrival. No response timer or timed
+#      notice is needed.
+#
+#   var__recall_book_available
+#      Own-book presence, refreshed on every check before automatic Recall is sent. Initial 0 keeps
+#      book-required gathering paused until the first inventory check.
+#
+#   var__recall_check_due
+#      Scratch: 1 when the slow checks are due on this pass.
+# ##################################################################################################
 @setvar! var__recall_needed 0
-
-# 0 waits to send RecallCharge, 1 means its command was sent. Recovery continues in either state.
-# Keep 1 even after refusal so the running loop cannot repeat Recall. Restart for another attempt.
-# This flag records the request, not arrival. No response timer or timed notice is needed.
 @setvar! var__recall_sent 0
-
-# Own-book presence, refreshed on every check before automatic Recall is sent.
-# Initial 0 keeps book-required gathering paused until the first inventory check.
 @setvar! var__recall_book_available 0
-
-# Scratch: 1 when the slow checks are due on this pass.
 @setvar! var__recall_check_due 0
 
 
-#@ loop --------------------------------------------------------------------------------------------
+# ##################################################################################################
+#@ loop
+# ##################################################################################################
     # ####################################################################################
     # # RECALL
     # ####################################################################################
