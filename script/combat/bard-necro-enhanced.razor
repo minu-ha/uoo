@@ -593,11 +593,12 @@ endif
 # ----------------------------------------------------------------------------------------
 # module/necro/summon-names.razor
 # ----------------------------------------------------------------------------------------
-# The summons this script already named, by serial. It lasts until the client closes, so a
-# restart does not name them again.
+# The summons this script already named, by serial. Emptied at every start, so a summon a
+# previous run could not name gets another try.
 if not listexists 'list__named_summons'
     createlist 'list__named_summons'
 endif
+clearlist 'list__named_summons'
 
 # The names, in the order the kinds are read below. A list, because a variable cannot hold a
 # word, and foreach hands an entry to rename as it is. Rebuilt on every start.
@@ -1182,8 +1183,47 @@ while not dead
 
                 if not inlist 'list__named_summons' var__summon_seen
                     if not dead alias__fresh_summon and noto alias__fresh_summon != "hostile" and noto alias__fresh_summon != "criminal" and noto alias__fresh_summon != "enemy" and noto alias__fresh_summon != "murderer" and noto alias__fresh_summon != "innocent"
-                        @setvar! var__fresh_summon alias__fresh_summon
-                        break
+                        # The label is read here, while the alias is bound, the way every getlabel
+                        # in this repository reads it. A phrase of each stock name, in the order of
+                        # list__summon_kinds, in either case.
+                        getlabel alias__fresh_summon label__fresh_summon
+                        @setvar! var__summon_kind 99
+                        if "skeletal knight" in label__fresh_summon or "Skeletal Knight" in label__fresh_summon
+                            @setvar! var__summon_kind 0
+                        elseif "skeletal mage" in label__fresh_summon or "Skeletal Mage" in label__fresh_summon
+                            @setvar! var__summon_kind 1
+                        elseif "lich" in label__fresh_summon or "Lich" in label__fresh_summon
+                            @setvar! var__summon_kind 2
+                        elseif "mummy" in label__fresh_summon or "Mummy" in label__fresh_summon
+                            @setvar! var__summon_kind 3
+                        elseif "thrall" in label__fresh_summon or "Thrall" in label__fresh_summon
+                            @setvar! var__summon_kind 4
+                        elseif "witch" in label__fresh_summon or "Witch" in label__fresh_summon
+                            @setvar! var__summon_kind 5
+                        elseif "zombie" in label__fresh_summon or "Zombie" in label__fresh_summon
+                            @setvar! var__summon_kind 6
+                        elseif "ghost" in label__fresh_summon or "Ghost" in label__fresh_summon
+                            @setvar! var__summon_kind 7
+                        elseif "skeleton" in label__fresh_summon or "Skeleton" in label__fresh_summon
+                            @setvar! var__summon_kind 8
+                        elseif "ghoul" in label__fresh_summon or "Ghoul" in label__fresh_summon
+                            @setvar! var__summon_kind 9
+                        elseif "rotting corpse" in label__fresh_summon or "Rotting Corpse" in label__fresh_summon
+                            @setvar! var__summon_kind 10
+                        endif
+
+                        if var__summon_kind != 99
+                            @setvar! var__fresh_summon alias__fresh_summon
+                            break
+                        endif
+
+                        # A label without a known kind (not loaded yet on a fresh summon, or a
+                        # stock name this table lacks) is passed over and read again on the next
+                        # run, so the summons after it still get their names. The Journal shows
+                        # it, so a missing kind can be added.
+                        if config__sysmsg = 1
+                            sysmsg "Summon name: no known kind in its label: {{label__fresh_summon}}" 88
+                        endif
                     endif
                 endif
 
@@ -1194,40 +1234,15 @@ while not dead
 
             if var__fresh_summon != 0
                 pushlist 'list__named_summons' var__fresh_summon
-                getlabel var__fresh_summon label__fresh_summon
-                @setvar! var__summon_kind 99
 
-                # A phrase of each stock name, in the order of list__summon_kinds.
-                if "skeletal knight" in label__fresh_summon
-                    @setvar! var__summon_kind 0
-                elseif "skeletal mage" in label__fresh_summon
-                    @setvar! var__summon_kind 1
-                elseif "lich" in label__fresh_summon
-                    @setvar! var__summon_kind 2
-                elseif "mummy" in label__fresh_summon
-                    @setvar! var__summon_kind 3
-                elseif "thrall" in label__fresh_summon
-                    @setvar! var__summon_kind 4
-                elseif "witch" in label__fresh_summon
-                    @setvar! var__summon_kind 5
-                elseif "zombie" in label__fresh_summon
-                    @setvar! var__summon_kind 6
-                elseif "ghost" in label__fresh_summon
-                    @setvar! var__summon_kind 7
-                elseif "skeleton" in label__fresh_summon
-                    @setvar! var__summon_kind 8
-                elseif "ghoul" in label__fresh_summon
-                    @setvar! var__summon_kind 9
-                elseif "rotting corpse" in label__fresh_summon
-                    @setvar! var__summon_kind 10
-                endif
-
-                foreach summon_kind in list__summon_kinds
+                # The loop name pet_name is a word no other name here contains, in case Razor
+                # puts the entry in by text.
+                foreach pet_name in list__summon_kinds
                     if index = var__summon_kind
-                        @rename var__fresh_summon summon_kind
+                        @rename var__fresh_summon pet_name
 
                         if config__chatty = 1
-                            overhead "[ name, {{summon_kind}} ]" 209 var__fresh_summon
+                            overhead "[ name, {{pet_name}} ]" 209 var__fresh_summon
                         endif
                     endif
                 endfor
