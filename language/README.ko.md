@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="../document/favicon.svg" width="96" height="96" alt="UO Outlands 로고를 본뜬 불타는 O">
+<img src="../document/favicon.svg" width="96" height="96" alt="픽셀 금색 고리">
 
 # uoo
 

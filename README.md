@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="document/favicon.svg" width="96" height="96" alt="A flaming O, after the UO Outlands logo">
+<img src="document/favicon.svg" width="96" height="96" alt="A gold ring in pixels">
 
 # uoo
 
