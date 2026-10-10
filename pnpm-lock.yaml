@@ -9,8 +9,8 @@ importers:
   .:
     devDependencies:
       for-humanity:
-        specifier: 0.7.0
-        version: 0.7.0
+        specifier: 0.7.1
+        version: 0.7.1
       parse5:
         specifier: 7.3.0
         version: 7.3.0
@@ -184,8 +184,8 @@ packages:
   fault@2.0.1:
     resolution: {integrity: sha512-WtySTkS4OKev5JtpHXnib4Gxiurzh5NCGvWrFaZ34m6JehfTUhKZvn9njTfw48t6JumVQOmrKqpmGcdwxnhqBQ==}
 
-  for-humanity@0.7.0:
-    resolution: {integrity: sha512-4FJ6/cnlC/JEdfkmHfx56+rFjAzaDsciWlu3VZU6wzDcOw7tfyDuD+/qjyDlWUC/CfsEG8cGZa17AWf5RALrCg==}
+  for-humanity@0.7.1:
+    resolution: {integrity: sha512-k+r41l9zlI8LMU5YYwP0AmF40lNKlIpuw9mTzMgVHxmAI3zIxdLP+xW8p0f5Ab/2cK52dUsIIDH3Am29W9zIbQ==}
     engines: {node: '>=22'}
     hasBin: true
 
@@ -712,7 +712,7 @@ snapshots:
     dependencies:
       format: 0.2.2
 
-  for-humanity@0.7.0:
+  for-humanity@0.7.1:
     dependencies:
       '@hono/node-server': 2.1.4(hono@4.13.13)
       '@shikijs/rehype': 4.5.0
