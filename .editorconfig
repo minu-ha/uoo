@@ -10,8 +10,8 @@ indent_size = 2
 insert_final_newline = true
 trim_trailing_whitespace = true
 
-# Razor writes scripts back with CRLF. The reference files (combat/bard-throwing,
-# restock/loadout) indent with 4 spaces. No tabs.
+# Razor writes scripts back with CRLF. The reference files (gather/skinning-enhanced,
+# restock/loadout) indent with 4 spaces. No tabs. Modules under module/ are .razor too.
 [*.razor]
 end_of_line = crlf
 indent_size = 4
@@ -21,7 +21,7 @@ insert_final_newline = unset
 
 # Third-party (Jaseowns) scripts carry trailing spaces. Trimming them on save would bury
 # the one-line change in noise.
-[script/gather/*.razor]
+[script/archive/*.razor]
 trim_trailing_whitespace = false
 
 [*.{md,html}]
