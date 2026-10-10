@@ -1,5 +1,6 @@
 # ----------------------------------------------------------------------------------------
-# Reads the Unholy Symbol count off the necro hotbar into a list the abilities compare.
+# Keeps the necro hotbar open and reads its Unholy Symbol count into a list.
+# The necro abilities compare the list. A closed hotbar is opened again every 30 seconds.
 # ----------------------------------------------------------------------------------------
 
 
@@ -18,10 +19,29 @@
 #      The retry window the Unholy Symbol abilities share. The game refuses with a
 #      cooldown line of its own, so this only stops asking again every pass while that
 #      runs.
+#
+#   interval__hotbar_check
+#      How often a closed hotbar is looked for, and so how long a lost one waits. It only
+#      closes on a death, a relog or a stray click, and while it is closed every ability
+#      parks.
+#
+#   wait__hotbar_gump
+#      How long the hotbar gump may take to open.
 # ----------------------------------------------------------------------------------------
 @setvar! wait__message 400
 @setvar! wait__ability_target 1000
 @setvar! interval__necro_action 30500
+@setvar! interval__hotbar_check 30000
+@setvar! wait__hotbar_gump 1000
+
+
+# ----------------------------------------------------------------------------------------
+# @ timer
+#
+#   timer__hotbar_check
+#      Ready on the first pass, so a closed hotbar is opened at once.
+# ----------------------------------------------------------------------------------------
+timer__hotbar_check interval__hotbar_check
 
 
 # ----------------------------------------------------------------------------------------
@@ -59,8 +79,12 @@ endif
     # line only ever sees the count it names. Ten is the ceiling: the bank is Effective
     # Necromancy / 10 and this character sits at 100. Should the hotbar ever show more
     # than ten, add the higher readings above the 10/ line, or a two digit reading falls
-    # into "1/". A closed gump reads as zero, which parks every ability until necro/hotbar
-    # reopens it. An elseif chain is evaluated in a single tick, whatever its length.
+    # into "1/". An elseif chain is evaluated in a single tick, whatever its length.
+    #
+    # A closed gump reads as zero, which parks every ability. Only then, in the last arm,
+    # is the hotbar looked for, every interval__hotbar_check, so a pass that reads a count
+    # pays nothing for it. The clock restarts once it has looked, so a hotbar missing
+    # behind an open cursor is tried again on the next pass.
     #
     # The gates compare against the list, list 'x' >= n being the one size comparison a
     # script variable takes part in. Each reading refills the list only when it differs
@@ -172,5 +196,23 @@ endif
         if var__symbols_listed != 0
             clearlist 'list__necro_symbols'
             @setvar! var__symbols_listed 0
+        endif
+
+        if timer "timer__hotbar_check" >= interval__hotbar_check
+            if skill "Necromancy" > 0 and not gumpexists 622436516
+                if not targetexists and not casting
+                    settimer "timer__hotbar_check" 0
+
+                    if findtype 'necromancer book' backpack
+                        yell '[necromancyhotbar'
+                        waitforgump 622436516 wait__hotbar_gump
+                    elseif timer "timer__message" >= interval__message
+                        overhead "[ necro book, out ]" 254
+                        settimer "timer__message" 0
+                    endif
+                endif
+            else
+                settimer "timer__hotbar_check" 0
+            endif
         endif
     endif

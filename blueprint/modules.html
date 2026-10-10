@@ -79,7 +79,7 @@
 <tr><td><code>module/bard/</code></td><td>바드 스킬</td>
 <td><code>instrument</code> (악기 찾기와 점검), <code>disco</code>, <code>peace</code>, <code>song</code> (이동 중 노래 셋을 차례로)</td></tr>
 <tr><td><code>module/necro/</code></td><td>네크로 핫바와 소환수</td>
-<td><code>symbols</code> (Unholy Symbol 수 읽기), <code>hotbar</code> (핫바 열기), <code>summon-names</code> (소환수 이름 바꾸기), <code>burst</code> (Blood Oath, Corpse Skin, Evil Omen),
+<td><code>symbols</code> (핫바를 열어 두고 Unholy Symbol 수 읽기), <code>summon-names</code> (소환수 이름 바꾸기), <code>burst</code> (Blood Oath, Corpse Skin, Evil Omen),
 <code>poison-strike</code>, <code>vampiric-embrace</code></td></tr>
 <tr><td><code>module/tamer/</code></td><td>펫 스킬</td><td><code>herding</code> (목동 지팡이), <code>vet-kit</code> (나와 펫에게 수의사 키트)</td></tr>
 <tr><td><code>module/fight/</code></td><td>근접 전투 보조</td>
@@ -542,7 +542,7 @@ pvp 결과물에는 시작 4줄이 <code>if config__clear_at_start = 1</code> �
 생존 네 블록은 다른 레시피와 같은 <code># @ when paralyzed or poisoned or diffhits &gt; 0</code>, 하우스키핑은 <code># @ every interval__housekeeping</code>,
 교전과 이동은 <code># @ when var__fighting = 1</code>과 <code># @ otherwise</code>다.</p>
 <ul>
-<li>바드·네크로·공격 주문 블록은 새 모듈 16개로 옮겼다 (02절의 <code>bard/</code>, <code>necro/</code>, <code>magery/</code>, <code>buff/mushroom</code>). 코드는 원본과 같고 이름만 지금 규칙을 따른다.
+<li>바드·네크로·공격 주문 블록은 새 모듈로 옮겼다 (02절의 <code>bard/</code>, <code>necro/</code>, <code>magery/</code>, <code>buff/mushroom</code>). 코드는 원본과 같고 이름만 지금 규칙을 따른다.
 <code>cooldown__</code> 간격은 <code>interval__</code>, <code>wait__target</code>은 바드의 <code>wait__bard_target</code>과 네크로의 <code>wait__ability_target</code>,
 <code>wait__long</code>은 <code>wait__instrument_pick</code>, 핫바 대기는 <code>wait__hotbar_gump</code>가 됐다.</li>
 <li>생존·전투 대상·시약·음식·스탯 포션·골드·Refresh·셀프 버프는 다른 루프와 같은 공용 모듈이다. 원본에만 있던 동작은 공용 모듈의 설정으로 더했다
