@@ -13,57 +13,6 @@
 
 # ----------------------------------------------------------------------------------------
 # module/base.razor
-#
-#   config__chatty
-#      1 shows the optional overheads. Warnings show either way.
-#
-#   config__sysmsg
-#      1 writes Journal diagnostics. A block that writes one says so in its comments.
-#
-#   config__clear_at_start
-#      What Play does first (conventions 02.D).
-#        0  nothing: a cursor or a cast the player holds at Play is kept
-#        1  clear the client queues, the journal and the ignore list
-#
-#   config__use_magery
-#      1 uses Magery: the Cure and heal agents, the reagent reads and the buffs. At 0
-#      potions and bandages still go out.
-#      > This loop: config__use_magery 0 (default 1).
-#      > No Magery in this template.
-#
-#   config__use_potions
-#      1 uses potions: cure, heal, Refresh and the stat potions.
-#
-#   config__walk_guard
-#      Our casts and the walk bar.
-#        0  cast while walking, for a fight where there is no better moment to wait for
-#        1  wait while the walk bar runs, so a step does not break the cast
-#
-#   config__warmode_is_manual
-#      Whose warmode it is.
-#        0  ours: our casts ignore it
-#        1  the player's manual control window: our casts and the food stand down while it
-#           is on. Potions and bandages still go out
-#
-#   config__recover_in_warmode
-#      With warmode_is_manual 1, what the recovery casts (cure, heal, light Heal) do in
-#      warmode.
-#        0  stand down with the rest
-#        1  keep going, so only the other casts wait for the player
-#
-#   config__use_bandages
-#      1 uses bandages. At 0 recovery/light-heal stands in.
-#
-#   config__heal_skill_min
-#      Healing must be above this to bandage. At or below it recovery/light-heal stands
-#      in.
-#      > This loop: config__heal_skill_min 10 (default 0).
-#      > Healing must be above 10, as before the module build.
-#
-#   config__settle_first
-#      What a pass does first.
-#        0  reads the state at once. Potions still go out while a spell is casting
-#        1  waits for the item queue and any cast to finish
 # ----------------------------------------------------------------------------------------
 @setvar! config__chatty 1
 @setvar! config__sysmsg 1
@@ -80,18 +29,6 @@
 
 # ----------------------------------------------------------------------------------------
 # module/magery/reagents.razor
-#
-#   config__mana_1st, config__mana_2nd, config__mana_3rd, config__mana_4th
-#      Mana an attack spell of that circle needs before it is worth starting.
-#        1st  magic arrow
-#        2nd  harm
-#        3rd  fireball
-#        4th  lightning, curse, mana drain
-#
-#   config__interrupt_to_heal
-#      An attack cast in flight when the loss reaches emergency_hits.
-#        0  finishes
-#        1  is cut through "> Interrupt", so the next pass can heal
 # ----------------------------------------------------------------------------------------
 @setvar! config__mana_1st 4
 @setvar! config__mana_2nd 6
@@ -102,26 +39,12 @@
 
 # ----------------------------------------------------------------------------------------
 # module/recovery/cure.razor
-#
-#   config__mana_cure
-#      Minimum current mana for the Cure agent.
 # ----------------------------------------------------------------------------------------
 @setvar! config__mana_cure 6
 
 
 # ----------------------------------------------------------------------------------------
 # module/recovery/heal.razor
-#
-#   config__heal_hits
-#      Missing hit points (not percent) that drink a heal potion.
-#
-#   config__emergency_hits
-#      Missing hit points that cast Greater Heal when no heal potion went out on this
-#      pass. Not below heal_hits.
-#
-#   config__mana_greater_heal
-#      Minimum current mana for Greater Heal. It keeps no reserve: 31 always leaves 20
-#      mana for an attack or Teleport.
 # ----------------------------------------------------------------------------------------
 @setvar! config__heal_hits 35
 @setvar! config__emergency_hits 35
@@ -130,22 +53,12 @@
 
 # ----------------------------------------------------------------------------------------
 # module/recovery/refresh.razor
-#
-#   config__refresh_stam
-#      Current stamina at or below this drinks a Refresh.
-#      > This loop: config__refresh_stam 4 (default 15).
-#      > Refresh only when nearly out of stamina, below 5 as before.
 # ----------------------------------------------------------------------------------------
 @setvar! config__refresh_stam 4
 
 
 # ----------------------------------------------------------------------------------------
 # module/pack/gold-drop.razor
-#
-#   config__gold_drop_amount
-#      Gold dropped per pass while over max weight. Gold is cheaper than the leather.
-#      > This loop: config__gold_drop_amount 500 (default 2000).
-#      > 500 per drop, as before.
 # ----------------------------------------------------------------------------------------
 @setvar! config__gold_drop_amount 500
 
@@ -156,19 +69,6 @@
 
 # ----------------------------------------------------------------------------------------
 # module/base.razor
-#
-#   wait__poll
-#      The poll inside a wait.
-#
-#   wait__short
-#      The pause after an action.
-#
-#   interval__message
-#      Spacing for repeated warnings. Without it an empty potion bag shouts every pass.
-#
-#   interval__housekeeping
-#      The clock of a recipe's "# @ every interval__housekeeping" group: slow checks that
-#      share one tick.
 # ----------------------------------------------------------------------------------------
 @setvar! wait__poll 100
 @setvar! wait__short 200
@@ -178,13 +78,6 @@
 
 # ----------------------------------------------------------------------------------------
 # module/magery/reagents.razor
-#
-#   interval__reagents
-#      Reagent read interval. A refill counts within this, and running out is caught at
-#      once by the refusal line.
-#
-#   wait__cast
-#      The pause after an attack cast is delivered: the spell recovery.
 # ----------------------------------------------------------------------------------------
 @setvar! interval__reagents 10000
 @setvar! wait__cast 300
@@ -192,37 +85,24 @@
 
 # ----------------------------------------------------------------------------------------
 # module/recovery/heal.razor
-#
-#   cooldown__heal_potion
-#      Length of the heal pot bar this block starts when it drinks, so the bar runs even
-#      where no trigger starts it.
 # ----------------------------------------------------------------------------------------
 @setvar! cooldown__heal_potion 10000
 
 
 # ----------------------------------------------------------------------------------------
 # module/pack/gold-drop.razor
-#
-#   wait__gold_drop
-#      Pause after a drop, so the weight settles before the next pass.
 # ----------------------------------------------------------------------------------------
 @setvar! wait__gold_drop 1000
 
 
 # ----------------------------------------------------------------------------------------
 # module/buff/food.razor
-#
-#   interval__food
-#      The buff lasts far longer than this.
 # ----------------------------------------------------------------------------------------
 @setvar! interval__food 60000
 
 
 # ----------------------------------------------------------------------------------------
 # module/pack/scavenger.razor
-#
-#   interval__scavenger_clear
-#      How often the cache is cleared.
 # ----------------------------------------------------------------------------------------
 @setvar! interval__scavenger_clear 30000
 
@@ -233,9 +113,6 @@
 
 # ----------------------------------------------------------------------------------------
 # module/base.razor
-#
-#   timer__message
-#      Ready on the first pass, so the first warning shows at once.
 # ----------------------------------------------------------------------------------------
 if not timerexists "timer__message"
     createtimer "timer__message"
@@ -245,9 +122,6 @@ settimer "timer__message" interval__message
 
 # ----------------------------------------------------------------------------------------
 # module/magery/reagents.razor
-#
-#   timer__reagents
-#      Ready on the first pass, so reagents are read before the first cast.
 # ----------------------------------------------------------------------------------------
 if not timerexists "timer__reagents"
     createtimer "timer__reagents"
@@ -266,9 +140,6 @@ settimer "timer__food" interval__food
 
 # ----------------------------------------------------------------------------------------
 # module/pack/scavenger.razor
-#
-#   timer__scavenger_clear
-#      The first clear comes one full interval after Play.
 # ----------------------------------------------------------------------------------------
 if not timerexists "timer__scavenger_clear"
     createtimer "timer__scavenger_clear"
@@ -282,17 +153,6 @@ settimer "timer__scavenger_clear" 0
 
 # ----------------------------------------------------------------------------------------
 # module/base.razor
-#
-#   var__fighting
-#      1 while an enemy is engaged. buff/potions drinks only then. fight/target sets it
-#      every pass, and the pvp recipe keeps it at 1.
-#
-#   var__hold_casts
-#      1 while a block keeps the cast window for itself. buff/spells stands down.
-#      escape/recall sets it once a Recall is due.
-#
-#   var__hold_gathering
-#      1 while gathering and its packing wait. escape/recall sets it.
 # ----------------------------------------------------------------------------------------
 @setvar! var__fighting 0
 @setvar! var__hold_casts 0
@@ -301,33 +161,6 @@ settimer "timer__scavenger_clear" 0
 
 # ----------------------------------------------------------------------------------------
 # module/magery/reagents.razor
-#
-#   var__regs_cure, var__regs_heal, var__regs_greater_heal, var__regs_create_food,
-#   var__regs_reactive_armor, var__regs_magic_reflect, var__regs_magic_arrow,
-#   var__regs_harm, var__regs_fireball, var__regs_lightning, var__regs_curse,
-#   var__regs_mana_drain, var__regs_energy_bolt, var__regs_bless,
-#   var__regs_arch_protection, var__regs_flamestrike
-#      1 when every reagent of that spell was found, written only by this block.
-#        cure            garlic 3972, ginseng 3973
-#        heal            garlic, ginseng, spider silk 3981
-#        greater heal    garlic, ginseng, mandrake root 3974, spider silk
-#        create food     garlic, ginseng, mandrake root
-#        reactive armor  garlic, spider silk, sulfurous ash 3980
-#        magic reflect   garlic, mandrake root, spider silk
-#        magic arrow     sulfurous ash
-#        harm            nightshade 3976, spider silk
-#        fireball        black pearl 3962
-#        lightning       mandrake root, sulfurous ash
-#        curse           garlic, nightshade, sulfurous ash
-#        mana drain      black pearl, mandrake root, spider silk
-#        energy bolt     black pearl, nightshade
-#        bless           garlic, mandrake root
-#        arch protection garlic, ginseng, mandrake root, sulfurous ash
-#        flamestrike     spider silk, sulfurous ash
-#
-#   var__has_black_pearl, var__has_garlic, var__has_ginseng, var__has_mandrake,
-#   var__has_nightshade, var__has_ash, var__has_silk
-#      Scratch: 1 when that reagent was found on the last read.
 # ----------------------------------------------------------------------------------------
 @setvar! var__regs_cure 0
 @setvar! var__regs_heal 0
@@ -356,9 +189,6 @@ settimer "timer__scavenger_clear" 0
 
 # ----------------------------------------------------------------------------------------
 # module/recovery/heal.razor
-#
-#   var__heal_potion_out
-#      Scratch: 1 once a heal potion went out on this pass.
 # ----------------------------------------------------------------------------------------
 @setvar! var__heal_potion_out 0
 

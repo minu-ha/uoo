@@ -23,53 +23,6 @@
 
 # ----------------------------------------------------------------------------------------
 # module/base.razor
-#
-#   config__chatty
-#      1 shows the optional overheads. Warnings show either way.
-#
-#   config__sysmsg
-#      1 writes Journal diagnostics. A block that writes one says so in its comments.
-#
-#   config__clear_at_start
-#      What Play does first (conventions 02.D).
-#        0  nothing: a cursor or a cast the player holds at Play is kept
-#        1  clear the client queues, the journal and the ignore list
-#
-#   config__use_magery
-#      1 uses Magery: the Cure and heal agents, the reagent reads and the buffs. At 0
-#      potions and bandages still go out.
-#
-#   config__use_potions
-#      1 uses potions: cure, heal, Refresh and the stat potions.
-#
-#   config__walk_guard
-#      Our casts and the walk bar.
-#        0  cast while walking, for a fight where there is no better moment to wait for
-#        1  wait while the walk bar runs, so a step does not break the cast
-#
-#   config__warmode_is_manual
-#      Whose warmode it is.
-#        0  ours: our casts ignore it
-#        1  the player's manual control window: our casts and the food stand down while it
-#           is on. Potions and bandages still go out
-#
-#   config__recover_in_warmode
-#      With warmode_is_manual 1, what the recovery casts (cure, heal, light Heal) do in
-#      warmode.
-#        0  stand down with the rest
-#        1  keep going, so only the other casts wait for the player
-#
-#   config__use_bandages
-#      1 uses bandages. At 0 recovery/light-heal stands in.
-#
-#   config__heal_skill_min
-#      Healing must be above this to bandage. At or below it recovery/light-heal stands
-#      in.
-#
-#   config__settle_first
-#      What a pass does first.
-#        0  reads the state at once. Potions still go out while a spell is casting
-#        1  waits for the item queue and any cast to finish
 # ----------------------------------------------------------------------------------------
 @setvar! config__chatty 1
 @setvar! config__sysmsg 1
@@ -86,16 +39,6 @@
 
 # ----------------------------------------------------------------------------------------
 # module/escape/tracking.razor
-#
-#   config__tracking_color
-#      Hunt filter.
-#        1  red: murderers
-#        2  grey: criminal players
-#        3  orange: enemies
-#        4  all three
-#
-#   config__show_tracking
-#      1 leaves the Tracking window open after setup.
 # ----------------------------------------------------------------------------------------
 @setvar! config__tracking_color 1
 @setvar! config__show_tracking 0
@@ -103,24 +46,6 @@
 
 # ----------------------------------------------------------------------------------------
 # module/fight/target.razor
-#
-#   config__acquire_range
-#      How far the enemy you pick is taken up from, and kept while it stays. The pets
-#      often open on a mob past target_range, and a song or self cast would otherwise
-#      move lasttarget off it before it comes in reach.
-#      > This loop: config__acquire_range 18 (default 12).
-#      > The pick is taken up anywhere on screen and kept while it stays there.
-#
-#   config__target_range
-#      How far the remembered enemy may be and still count as a fight (var__fighting 1).
-#      Not above acquire_range.
-#      > This loop: config__target_range 10 (default 12).
-#      > Flamestrike and the stat potions engage inside this range.
-#
-#   config__target_grace
-#      How long, in ms, a remembered enemy that left acquire_range is kept.
-#      > This loop: config__target_grace 500 (default 1200).
-#      > A target that left the screen is dropped half a second later.
 # ----------------------------------------------------------------------------------------
 @setvar! config__acquire_range 18
 @setvar! config__target_range 10
@@ -129,26 +54,12 @@
 
 # ----------------------------------------------------------------------------------------
 # module/recovery/cure.razor
-#
-#   config__mana_cure
-#      Minimum current mana for the Cure agent.
 # ----------------------------------------------------------------------------------------
 @setvar! config__mana_cure 6
 
 
 # ----------------------------------------------------------------------------------------
 # module/recovery/heal.razor
-#
-#   config__heal_hits
-#      Missing hit points (not percent) that drink a heal potion.
-#
-#   config__emergency_hits
-#      Missing hit points that cast Greater Heal when no heal potion went out on this
-#      pass. Not below heal_hits.
-#
-#   config__mana_greater_heal
-#      Minimum current mana for Greater Heal. It keeps no reserve: 31 always leaves 20
-#      mana for an attack or Teleport.
 # ----------------------------------------------------------------------------------------
 @setvar! config__heal_hits 35
 @setvar! config__emergency_hits 35
@@ -157,27 +68,12 @@
 
 # ----------------------------------------------------------------------------------------
 # module/recovery/refresh.razor
-#
-#   config__refresh_stam
-#      Current stamina at or below this drinks a Refresh.
 # ----------------------------------------------------------------------------------------
 @setvar! config__refresh_stam 15
 
 
 # ----------------------------------------------------------------------------------------
 # module/magery/reagents.razor
-#
-#   config__mana_1st, config__mana_2nd, config__mana_3rd, config__mana_4th
-#      Mana an attack spell of that circle needs before it is worth starting.
-#        1st  magic arrow
-#        2nd  harm
-#        3rd  fireball
-#        4th  lightning, curse, mana drain
-#
-#   config__interrupt_to_heal
-#      An attack cast in flight when the loss reaches emergency_hits.
-#        0  finishes
-#        1  is cut through "> Interrupt", so the next pass can heal
 # ----------------------------------------------------------------------------------------
 @setvar! config__mana_1st 4
 @setvar! config__mana_2nd 6
@@ -188,21 +84,6 @@
 
 # ----------------------------------------------------------------------------------------
 # module/buff/potions.razor
-#
-#   config__use_resist_potion
-#      1 keeps the Magic Resist potion up.
-#
-#   config__str_potion
-#      STR with the Greater Strength potion on: your base plus 20. Below it the potion is
-#      drunk, and 0 turns it off. Bless and the Strength spell, ours or an ally's, show
-#      the same icon as the potion but add less than its 20, so the stat tells them apart.
-#
-#   config__dex_potion
-#      DEX with the Greater Agility potion on: your base plus 20. Below it the potion is
-#      drunk, and 0 turns it off. Bless and the Agility spell show the same icon, as for
-#      STR.
-#      > This loop: config__dex_potion 45 (default 100).
-#      > This template is DEX 25: base plus 20 with the Greater Agility potion.
 # ----------------------------------------------------------------------------------------
 @setvar! config__use_resist_potion 1
 @setvar! config__str_potion 120
@@ -211,54 +92,6 @@
 
 # ----------------------------------------------------------------------------------------
 # module/buff/spells.razor
-#
-#   config__use_reactive_armor
-#      1 keeps Reactive Armor up.
-#
-#   config__use_magic_reflect
-#      1 keeps Magic Reflection up.
-#
-#   config__mana_reactive_armor
-#      Minimum current mana to start Reactive Armor.
-#      > This loop: config__mana_reactive_armor 15 (default 4).
-#      > Each start line is the spell cost plus 11 kept for Greater Heal.
-#
-#   config__mana_magic_reflect
-#      Minimum current mana to start Magic Reflection.
-#      > This loop: config__mana_magic_reflect 25 (default 14).
-#      > Same reserve: 14 plus 11.
-#
-#   config__use_bless, config__use_arch_protection
-#      1 keeps Bless on yourself, and Arch Protection on you and the followers around you,
-#      while no enemy is engaged (var__fighting 0) and warmode is off. Both open a cursor
-#      answered with yourself, Bless a beneficial one and Arch Protection a neutral one, so
-#      they never take a cast from a fight.
-#      > This loop: config__use_bless 1 (default 0).
-#      > Bless on yourself after a fight.
-#      > This loop: config__use_arch_protection 1 (default 0).
-#      > Arch Protection on you and the pets after a fight.
-#
-#   config__mana_bless, config__mana_arch_protection
-#      Minimum current mana to start Bless and Arch Protection.
-#      > This loop: config__mana_bless 20 (default 9).
-#      > Bless costs 9: plus 11 for Greater Heal.
-#      > This loop: config__mana_arch_protection 22 (default 11).
-#      > Arch Protection costs 11: plus 11 for Greater Heal.
-#
-#   config__use_spell_siphon
-#      1 keeps the Spell Siphon buff up with a Magic Arrow on yourself, never while Magic
-#      Reflection is up, since the arrow would only burn the reflection. Warmode off.
-#
-#   config__mana_spell_siphon
-#      Minimum current mana to start the Spell Siphon arrow.
-#
-#   config__buff_max_loss
-#      Missing hit points at which buffs are not started, and cut mid cast.
-#
-#   config__buff_when_poisoned
-#      Buffs while poisoned.
-#        0  no: hold them back and cut one that is casting, so the cure goes first
-#        1  yes
 # ----------------------------------------------------------------------------------------
 @setvar! config__use_reactive_armor 1
 @setvar! config__use_magic_reflect 1
@@ -276,27 +109,12 @@
 
 # ----------------------------------------------------------------------------------------
 # module/magery/flamestrike.razor
-#
-#   config__mana_flamestrike
-#      Minimum current mana to start Flamestrike. It costs 40.
-#      > This loop: config__mana_flamestrike 51 (default 40).
-#      > 40 to cast plus 11 kept for Greater Heal.
 # ----------------------------------------------------------------------------------------
 @setvar! config__mana_flamestrike 51
 
 
 # ----------------------------------------------------------------------------------------
 # module/buff/mushroom.razor
-#
-#   config__mushroom_eat_mana
-#      Mana at or below which a mushroom is eaten.
-#
-#   config__mushroom_create_mana
-#      Mana at or above which Create Food makes more. Create Food T3 returns 25 mana on a
-#      60 second cooldown.
-#
-#   config__mushroom_min_count
-#      Mushrooms kept in the backpack: Create Food runs only below this.
 # ----------------------------------------------------------------------------------------
 @setvar! config__mushroom_eat_mana 55
 @setvar! config__mushroom_create_mana 70
@@ -305,9 +123,6 @@
 
 # ----------------------------------------------------------------------------------------
 # module/pack/gold-drop.razor
-#
-#   config__gold_drop_amount
-#      Gold dropped per pass while over max weight. Gold is cheaper than the leather.
 # ----------------------------------------------------------------------------------------
 @setvar! config__gold_drop_amount 2000
 
@@ -318,19 +133,6 @@
 
 # ----------------------------------------------------------------------------------------
 # module/base.razor
-#
-#   wait__poll
-#      The poll inside a wait.
-#
-#   wait__short
-#      The pause after an action.
-#
-#   interval__message
-#      Spacing for repeated warnings. Without it an empty potion bag shouts every pass.
-#
-#   interval__housekeeping
-#      The clock of a recipe's "# @ every interval__housekeeping" group: slow checks that
-#      share one tick.
 # ----------------------------------------------------------------------------------------
 @setvar! wait__poll 100
 @setvar! wait__short 200
@@ -340,12 +142,6 @@
 
 # ----------------------------------------------------------------------------------------
 # module/escape/tracking.razor
-#
-#   wait__tracking_gump
-#      How long the Tracking window may take to open.
-#
-#   interval__tracking_check
-#      How often the loop looks whether Hunting is still on.
 # ----------------------------------------------------------------------------------------
 @setvar! wait__tracking_gump 1000
 @setvar! interval__tracking_check 5000
@@ -353,24 +149,12 @@
 
 # ----------------------------------------------------------------------------------------
 # module/recovery/heal.razor
-#
-#   cooldown__heal_potion
-#      Length of the heal pot bar this block starts when it drinks, so the bar runs even
-#      where no trigger starts it.
 # ----------------------------------------------------------------------------------------
 @setvar! cooldown__heal_potion 10000
 
 
 # ----------------------------------------------------------------------------------------
 # module/tamer/vet-kit.razor
-#
-#   interval__vet_refused
-#      How long the next try for the pets waits after "You or your nearby followers do not
-#      require healing.", or after the supplies ran out. A hurt pass does not wait.
-#
-#   interval__vet_running
-#      How long a kit that began is taken as running when its finish line was missed. The
-#      kit takes the Veterinary bandage time, 5 seconds, on yourself as on the pets.
 # ----------------------------------------------------------------------------------------
 @setvar! interval__vet_refused 2000
 @setvar! interval__vet_running 7000
@@ -378,13 +162,6 @@
 
 # ----------------------------------------------------------------------------------------
 # module/magery/reagents.razor
-#
-#   interval__reagents
-#      Reagent read interval. A refill counts within this, and running out is caught at
-#      once by the refusal line.
-#
-#   wait__cast
-#      The pause after an attack cast is delivered: the spell recovery.
 # ----------------------------------------------------------------------------------------
 @setvar! interval__reagents 10000
 @setvar! wait__cast 300
@@ -392,30 +169,18 @@
 
 # ----------------------------------------------------------------------------------------
 # module/buff/potions.razor
-#
-#   interval__stat_potion
-#      A Strength or Agility potion is tried once per window. The stat arrives a round
-#      trip after the drink, and a Curse, Weaken or Clumsy can hold it under the line
-#      while the potion still runs: without the window that refused drink would go out
-#      every pass. An empty bag is looked up at the same pace.
 # ----------------------------------------------------------------------------------------
 @setvar! interval__stat_potion 5000
 
 
 # ----------------------------------------------------------------------------------------
 # module/buff/food.razor
-#
-#   interval__food
-#      The buff lasts far longer than this.
 # ----------------------------------------------------------------------------------------
 @setvar! interval__food 60000
 
 
 # ----------------------------------------------------------------------------------------
 # module/pack/gold-drop.razor
-#
-#   wait__gold_drop
-#      Pause after a drop, so the weight settles before the next pass.
 # ----------------------------------------------------------------------------------------
 @setvar! wait__gold_drop 1000
 
@@ -426,9 +191,6 @@
 
 # ----------------------------------------------------------------------------------------
 # module/base.razor
-#
-#   timer__message
-#      Ready on the first pass, so the first warning shows at once.
 # ----------------------------------------------------------------------------------------
 if not timerexists "timer__message"
     createtimer "timer__message"
@@ -456,9 +218,6 @@ settimer "timer__target_grace" config__target_grace
 
 # ----------------------------------------------------------------------------------------
 # module/tamer/vet-kit.razor
-#
-#   timer__vet_kit
-#      Ready on the first pass.
 # ----------------------------------------------------------------------------------------
 if not timerexists "timer__vet_kit"
     createtimer "timer__vet_kit"
@@ -468,9 +227,6 @@ settimer "timer__vet_kit" interval__vet_running
 
 # ----------------------------------------------------------------------------------------
 # module/magery/reagents.razor
-#
-#   timer__reagents
-#      Ready on the first pass, so reagents are read before the first cast.
 # ----------------------------------------------------------------------------------------
 if not timerexists "timer__reagents"
     createtimer "timer__reagents"
@@ -507,17 +263,6 @@ settimer "timer__food" interval__food
 
 # ----------------------------------------------------------------------------------------
 # module/base.razor
-#
-#   var__fighting
-#      1 while an enemy is engaged. buff/potions drinks only then. fight/target sets it
-#      every pass, and the pvp recipe keeps it at 1.
-#
-#   var__hold_casts
-#      1 while a block keeps the cast window for itself. buff/spells stands down.
-#      escape/recall sets it once a Recall is due.
-#
-#   var__hold_gathering
-#      1 while gathering and its packing wait. escape/recall sets it.
 # ----------------------------------------------------------------------------------------
 @setvar! var__fighting 0
 @setvar! var__hold_casts 0
@@ -526,22 +271,6 @@ settimer "timer__food" interval__food
 
 # ----------------------------------------------------------------------------------------
 # module/escape/tracking.razor
-#
-#   var__tracking_setup_color
-#      Last color confirmed in this client session. It survives Stop and Play only while
-#      Hunting stays active. After a manual filter change, turn Hunting off before Play so
-#      it is checked again.
-#
-#   var__tracking_filter_confirmed
-#      1 when this run reused a confirmed color or verified it during startup.
-#
-#   var__tracking_hunting_active
-#      1 if Hunting was active at startup or at the last escape/recall check. No repeated
-#      gump setup.
-#
-#   var__tracking_button_answered
-#      Temporary button-response flag. Wait for each response before cycling the next
-#      filter.
 # ----------------------------------------------------------------------------------------
 if not varexist var__tracking_setup_color
     @setvar! var__tracking_setup_color 0
@@ -553,16 +282,6 @@ endif
 
 # ----------------------------------------------------------------------------------------
 # module/fight/target.razor
-#
-#   var__combat_target
-#      The enemy picked with lasttarget, kept across Plays.
-#
-#   var__fresh_serial
-#      Scratch copy of the lasttarget serial for the mobile range check.
-#
-#   var__keep_lasttarget
-#      Scratch: 1 when a block that is about to answer its own cursor finds a new enemy
-#      in lasttarget, so it leaves the cursor and the enemy to the player.
 # ----------------------------------------------------------------------------------------
 if not varexist var__combat_target
     @setvar! var__combat_target 0
@@ -573,22 +292,12 @@ endif
 
 # ----------------------------------------------------------------------------------------
 # module/recovery/heal.razor
-#
-#   var__heal_potion_out
-#      Scratch: 1 once a heal potion went out on this pass.
 # ----------------------------------------------------------------------------------------
 @setvar! var__heal_potion_out 0
 
 
 # ----------------------------------------------------------------------------------------
 # module/tamer/vet-kit.razor
-#
-#   var__vet_running
-#      1 from a use until its finish line, so the next use cannot cancel it.
-#
-#   var__vet_wait
-#      How long after the last use or answer, on timer__vet_kit, the next try for the pets
-#      goes: 0 after a finish, interval__vet_refused after a refusal.
 # ----------------------------------------------------------------------------------------
 @setvar! var__vet_running 0
 @setvar! var__vet_wait 0
@@ -596,33 +305,6 @@ endif
 
 # ----------------------------------------------------------------------------------------
 # module/magery/reagents.razor
-#
-#   var__regs_cure, var__regs_heal, var__regs_greater_heal, var__regs_create_food,
-#   var__regs_reactive_armor, var__regs_magic_reflect, var__regs_magic_arrow,
-#   var__regs_harm, var__regs_fireball, var__regs_lightning, var__regs_curse,
-#   var__regs_mana_drain, var__regs_energy_bolt, var__regs_bless,
-#   var__regs_arch_protection, var__regs_flamestrike
-#      1 when every reagent of that spell was found, written only by this block.
-#        cure            garlic 3972, ginseng 3973
-#        heal            garlic, ginseng, spider silk 3981
-#        greater heal    garlic, ginseng, mandrake root 3974, spider silk
-#        create food     garlic, ginseng, mandrake root
-#        reactive armor  garlic, spider silk, sulfurous ash 3980
-#        magic reflect   garlic, mandrake root, spider silk
-#        magic arrow     sulfurous ash
-#        harm            nightshade 3976, spider silk
-#        fireball        black pearl 3962
-#        lightning       mandrake root, sulfurous ash
-#        curse           garlic, nightshade, sulfurous ash
-#        mana drain      black pearl, mandrake root, spider silk
-#        energy bolt     black pearl, nightshade
-#        bless           garlic, mandrake root
-#        arch protection garlic, ginseng, mandrake root, sulfurous ash
-#        flamestrike     spider silk, sulfurous ash
-#
-#   var__has_black_pearl, var__has_garlic, var__has_ginseng, var__has_mandrake,
-#   var__has_nightshade, var__has_ash, var__has_silk
-#      Scratch: 1 when that reagent was found on the last read.
 # ----------------------------------------------------------------------------------------
 @setvar! var__regs_cure 0
 @setvar! var__regs_heal 0

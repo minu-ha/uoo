@@ -30,61 +30,6 @@
 
 # ----------------------------------------------------------------------------------------
 # module/base.razor
-#
-#   config__chatty
-#      1 shows the optional overheads. Warnings show either way.
-#
-#   config__sysmsg
-#      1 writes Journal diagnostics. A block that writes one says so in its comments.
-#
-#   config__clear_at_start
-#      What Play does first (conventions 02.D).
-#        0  nothing: a cursor or a cast the player holds at Play is kept
-#        1  clear the client queues, the journal and the ignore list
-#
-#   config__use_magery
-#      1 uses Magery: the Cure and heal agents, the reagent reads and the buffs. At 0
-#      potions and bandages still go out.
-#
-#   config__use_potions
-#      1 uses potions: cure, heal, Refresh and the stat potions.
-#
-#   config__walk_guard
-#      Our casts and the walk bar.
-#        0  cast while walking, for a fight where there is no better moment to wait for
-#        1  wait while the walk bar runs, so a step does not break the cast
-#
-#   config__warmode_is_manual
-#      Whose warmode it is.
-#        0  ours: our casts ignore it
-#        1  the player's manual control window: our casts and the food stand down while it
-#           is on. Potions and bandages still go out
-#      > This loop: config__warmode_is_manual 1 (default 0).
-#      > The player casts by hand in warmode: our casts, buffs and food stand down then.
-#
-#   config__recover_in_warmode
-#      With warmode_is_manual 1, what the recovery casts (cure, heal, light Heal) do in
-#      warmode.
-#        0  stand down with the rest
-#        1  keep going, so only the other casts wait for the player
-#      > This loop: config__recover_in_warmode 1 (default 0).
-#      > What keeps the character alive keeps running in warmode.
-#
-#   config__use_bandages
-#      1 uses bandages. At 0 recovery/light-heal stands in.
-#      > This loop: config__use_bandages 0 (default 1).
-#      > No bandages in this loop: the light Heal agent stands in for them.
-#
-#   config__heal_skill_min
-#      Healing must be above this to bandage. At or below it recovery/light-heal stands
-#      in.
-#
-#   config__settle_first
-#      What a pass does first.
-#        0  reads the state at once. Potions still go out while a spell is casting
-#        1  waits for the item queue and any cast to finish
-#      > This loop: config__settle_first 1 (default 0).
-#      > Anything already in flight finishes before the pass reads state.
 # ----------------------------------------------------------------------------------------
 @setvar! config__chatty 1
 @setvar! config__sysmsg 1
@@ -101,26 +46,12 @@
 
 # ----------------------------------------------------------------------------------------
 # module/recovery/cure.razor
-#
-#   config__mana_cure
-#      Minimum current mana for the Cure agent.
 # ----------------------------------------------------------------------------------------
 @setvar! config__mana_cure 6
 
 
 # ----------------------------------------------------------------------------------------
 # module/recovery/heal.razor
-#
-#   config__heal_hits
-#      Missing hit points (not percent) that drink a heal potion.
-#
-#   config__emergency_hits
-#      Missing hit points that cast Greater Heal when no heal potion went out on this
-#      pass. Not below heal_hits.
-#
-#   config__mana_greater_heal
-#      Minimum current mana for Greater Heal. It keeps no reserve: 31 always leaves 20
-#      mana for an attack or Teleport.
 # ----------------------------------------------------------------------------------------
 @setvar! config__heal_hits 35
 @setvar! config__emergency_hits 35
@@ -129,18 +60,6 @@
 
 # ----------------------------------------------------------------------------------------
 # module/recovery/light-heal.razor
-#
-#   config__use_light_heal
-#      When the light Heal goes.
-#        0  only while no bandage can run: use_bandages 0, Healing at or below heal_skill_min,
-#           or none left and none running
-#        1  beside the bandages too
-#
-#   config__light_hits
-#      Missing hit points that start the light Heal.
-#
-#   config__mana_heal
-#      Minimum current mana for the light Heal.
 # ----------------------------------------------------------------------------------------
 @setvar! config__use_light_heal 0
 @setvar! config__light_hits 15
@@ -149,24 +68,6 @@
 
 # ----------------------------------------------------------------------------------------
 # module/fight/target.razor
-#
-#   config__acquire_range
-#      How far the enemy you pick is taken up from, and kept while it stays. The pets
-#      often open on a mob past target_range, and a song or self cast would otherwise
-#      move lasttarget off it before it comes in reach.
-#      > This loop: config__acquire_range 18 (default 12).
-#      > The whole screen: the pets often open on a mob well past target_range.
-#
-#   config__target_range
-#      How far the remembered enemy may be and still count as a fight (var__fighting 1).
-#      Not above acquire_range.
-#      > This loop: config__target_range 10 (default 12).
-#      > The bard and spell stages engage inside this range.
-#
-#   config__target_grace
-#      How long, in ms, a remembered enemy that left acquire_range is kept.
-#      > This loop: config__target_grace 500 (default 1200).
-#      > A target that left the screen is dropped half a second later.
 # ----------------------------------------------------------------------------------------
 @setvar! config__acquire_range 18
 @setvar! config__target_range 10
@@ -175,18 +76,6 @@
 
 # ----------------------------------------------------------------------------------------
 # module/magery/reagents.razor
-#
-#   config__mana_1st, config__mana_2nd, config__mana_3rd, config__mana_4th
-#      Mana an attack spell of that circle needs before it is worth starting.
-#        1st  magic arrow
-#        2nd  harm
-#        3rd  fireball
-#        4th  lightning, curse, mana drain
-#
-#   config__interrupt_to_heal
-#      An attack cast in flight when the loss reaches emergency_hits.
-#        0  finishes
-#        1  is cut through "> Interrupt", so the next pass can heal
 # ----------------------------------------------------------------------------------------
 @setvar! config__mana_1st 4
 @setvar! config__mana_2nd 6
@@ -197,43 +86,18 @@
 
 # ----------------------------------------------------------------------------------------
 # module/bard/instrument.razor
-#
-#   config__use_magic_instrument
-#      Magic instrument mode. 1 reads labels and holds out for a supremely or exceedingly
-#      prefix, 0 takes the first instrument found and skips getlabel, which is the cheaper
-#      path when the shelf only stocks crafted instruments.
 # ----------------------------------------------------------------------------------------
 @setvar! config__use_magic_instrument 1
 
 
 # ----------------------------------------------------------------------------------------
 # module/recovery/refresh.razor
-#
-#   config__refresh_stam
-#      Current stamina at or below this drinks a Refresh.
-#      > This loop: config__refresh_stam 4 (default 15).
-#      > Only a nearly empty stamina bar is worth a Refresh here.
 # ----------------------------------------------------------------------------------------
 @setvar! config__refresh_stam 4
 
 
 # ----------------------------------------------------------------------------------------
 # module/buff/potions.razor
-#
-#   config__use_resist_potion
-#      1 keeps the Magic Resist potion up.
-#
-#   config__str_potion
-#      STR with the Greater Strength potion on: your base plus 20. Below it the potion is
-#      drunk, and 0 turns it off. Bless and the Strength spell, ours or an ally's, show
-#      the same icon as the potion but add less than its 20, so the stat tells them apart.
-#
-#   config__dex_potion
-#      DEX with the Greater Agility potion on: your base plus 20. Below it the potion is
-#      drunk, and 0 turns it off. Bless and the Agility spell show the same icon, as for
-#      STR.
-#      > This loop: config__dex_potion 45 (default 100).
-#      > This template is DEX 25: base plus 20 with the Greater Agility potion.
 # ----------------------------------------------------------------------------------------
 @setvar! config__use_resist_potion 1
 @setvar! config__str_potion 120
@@ -242,37 +106,18 @@
 
 # ----------------------------------------------------------------------------------------
 # module/necro/summon-names.razor
-#
-#   config__summon_range
-#      How far the block looks for summons, the whole screen, so a summon that lagged
-#      behind is still named.
 # ----------------------------------------------------------------------------------------
 @setvar! config__summon_range 18
 
 
 # ----------------------------------------------------------------------------------------
 # module/pack/gold-drop.razor
-#
-#   config__gold_drop_amount
-#      Gold dropped per pass while over max weight. Gold is cheaper than the leather.
-#      > This loop: config__gold_drop_amount 1000 (default 2000).
-#      > Weight only changes on a pickup: one smaller lift per housekeeping tick.
 # ----------------------------------------------------------------------------------------
 @setvar! config__gold_drop_amount 1000
 
 
 # ----------------------------------------------------------------------------------------
 # module/buff/mushroom.razor
-#
-#   config__mushroom_eat_mana
-#      Mana at or below which a mushroom is eaten.
-#
-#   config__mushroom_create_mana
-#      Mana at or above which Create Food makes more. Create Food T3 returns 25 mana on a
-#      60 second cooldown.
-#
-#   config__mushroom_min_count
-#      Mushrooms kept in the backpack: Create Food runs only below this.
 # ----------------------------------------------------------------------------------------
 @setvar! config__mushroom_eat_mana 55
 @setvar! config__mushroom_create_mana 70
@@ -281,12 +126,6 @@
 
 # ----------------------------------------------------------------------------------------
 # module/necro/burst.razor
-#
-#   config__symbols_blood_oath, config__symbols_corpse_skin, config__symbols_evil_omen
-#      Unholy Symbols banked before each ability may fire: its own cost plus what the more
-#      valuable abilities above it keep back. Symbols arrive one per five seconds and bank
-#      to Effective Necromancy / 10. Blood Oath plus Corpse Skin spend six a thirty second
-#      cycle, the sustainable rotation at Necromancy 100.
 # ----------------------------------------------------------------------------------------
 @setvar! config__symbols_blood_oath 4
 @setvar! config__symbols_corpse_skin 4
@@ -295,63 +134,18 @@
 
 # ----------------------------------------------------------------------------------------
 # module/magery/rotation.razor
-#
-#   config__filler_floor
-#      Mana below which the filler stops, so the next opener and proc cycle keep what they
-#      need: 22 for Mana Drain plus Curse, 30 for the four procs.
 # ----------------------------------------------------------------------------------------
 @setvar! config__filler_floor 52
 
 
 # ----------------------------------------------------------------------------------------
 # module/necro/poison-strike.razor
-#
-#   config__symbols_poison_strike
-#      Unholy Symbols banked before Poison Strike may fire: its cost.
 # ----------------------------------------------------------------------------------------
 @setvar! config__symbols_poison_strike 1
 
 
 # ----------------------------------------------------------------------------------------
 # module/buff/spells.razor
-#
-#   config__use_reactive_armor
-#      1 keeps Reactive Armor up.
-#
-#   config__use_magic_reflect
-#      1 keeps Magic Reflection up.
-#
-#   config__mana_reactive_armor
-#      Minimum current mana to start Reactive Armor.
-#
-#   config__mana_magic_reflect
-#      Minimum current mana to start Magic Reflection.
-#
-#   config__use_bless, config__use_arch_protection
-#      1 keeps Bless on yourself, and Arch Protection on you and the followers around you,
-#      while no enemy is engaged (var__fighting 0) and warmode is off. Both open a cursor
-#      answered with yourself, Bless a beneficial one and Arch Protection a neutral one, so
-#      they never take a cast from a fight.
-#
-#   config__mana_bless, config__mana_arch_protection
-#      Minimum current mana to start Bless and Arch Protection.
-#
-#   config__use_spell_siphon
-#      1 keeps the Spell Siphon buff up with a Magic Arrow on yourself, never while Magic
-#      Reflection is up, since the arrow would only burn the reflection. Warmode off.
-#      > This loop: config__use_spell_siphon 1 (default 0).
-#      > The walk keeps Spell Siphon up with a Magic Arrow on self.
-#
-#   config__mana_spell_siphon
-#      Minimum current mana to start the Spell Siphon arrow.
-#
-#   config__buff_max_loss
-#      Missing hit points at which buffs are not started, and cut mid cast.
-#
-#   config__buff_when_poisoned
-#      Buffs while poisoned.
-#        0  no: hold them back and cut one that is casting, so the cure goes first
-#        1  yes
 # ----------------------------------------------------------------------------------------
 @setvar! config__use_reactive_armor 1
 @setvar! config__use_magic_reflect 1
@@ -369,10 +163,6 @@
 
 # ----------------------------------------------------------------------------------------
 # module/necro/vampiric-embrace.razor
-#
-#   config__symbols_vampiric_embrace
-#      Unholy Symbols banked before Vampiric Embrace may fire: its 3 plus the 6 the fight
-#      abilities need. Walk only, so it competes with nothing else.
 # ----------------------------------------------------------------------------------------
 @setvar! config__symbols_vampiric_embrace 9
 
@@ -383,19 +173,6 @@
 
 # ----------------------------------------------------------------------------------------
 # module/base.razor
-#
-#   wait__poll
-#      The poll inside a wait.
-#
-#   wait__short
-#      The pause after an action.
-#
-#   interval__message
-#      Spacing for repeated warnings. Without it an empty potion bag shouts every pass.
-#
-#   interval__housekeeping
-#      The clock of a recipe's "# @ every interval__housekeeping" group: slow checks that
-#      share one tick.
 # ----------------------------------------------------------------------------------------
 @setvar! wait__poll 100
 @setvar! wait__short 200
@@ -405,23 +182,12 @@
 
 # ----------------------------------------------------------------------------------------
 # module/recovery/heal.razor
-#
-#   cooldown__heal_potion
-#      Length of the heal pot bar this block starts when it drinks, so the bar runs even
-#      where no trigger starts it.
 # ----------------------------------------------------------------------------------------
 @setvar! cooldown__heal_potion 10000
 
 
 # ----------------------------------------------------------------------------------------
 # module/magery/reagents.razor
-#
-#   interval__reagents
-#      Reagent read interval. A refill counts within this, and running out is caught at
-#      once by the refusal line.
-#
-#   wait__cast
-#      The pause after an attack cast is delivered: the spell recovery.
 # ----------------------------------------------------------------------------------------
 @setvar! interval__reagents 10000
 @setvar! wait__cast 300
@@ -429,27 +195,6 @@
 
 # ----------------------------------------------------------------------------------------
 # module/necro/symbols.razor
-#
-#   wait__message
-#      How long an ability gets to answer before its reply is read. One round trip plus
-#      the server's turn. A reply that arrives late is not lost: the next pass fires again
-#      and reads the cooldown refusal instead.
-#
-#   wait__ability_target
-#      How long the cursor of Poison Strike or Vampiric Embrace may take.
-#
-#   interval__necro_action
-#      The retry window the Unholy Symbol abilities share. The game refuses with a
-#      cooldown line of its own, so this only stops asking again every pass while that
-#      runs.
-#
-#   interval__hotbar_check
-#      How often a closed hotbar is looked for, and so how long a lost one waits. It only
-#      closes on a death, a relog or a stray click, and while it is closed every ability
-#      parks.
-#
-#   wait__hotbar_gump
-#      How long the hotbar gump may take to open.
 # ----------------------------------------------------------------------------------------
 @setvar! wait__message 400
 @setvar! wait__ability_target 1000
@@ -460,18 +205,6 @@
 
 # ----------------------------------------------------------------------------------------
 # module/bard/instrument.razor
-#
-#   wait__bard_target
-#      How long a bard skill cursor gets before the block gives up on it. A skill cursor
-#      is instant, so this is only spent in full on a failure. Read by bard/disco,
-#      bard/peace and bard/song.
-#
-#   wait__instrument_pick
-#      The pause after the manual instrument pick, so the target lands.
-#
-#   interval__instrument_check
-#      How often the backpack is checked for the instrument. It only leaves on a break or
-#      a steal.
 # ----------------------------------------------------------------------------------------
 @setvar! wait__bard_target 1000
 @setvar! wait__instrument_pick 750
@@ -480,71 +213,42 @@
 
 # ----------------------------------------------------------------------------------------
 # module/buff/food.razor
-#
-#   interval__food
-#      The buff lasts far longer than this.
 # ----------------------------------------------------------------------------------------
 @setvar! interval__food 60000
 
 
 # ----------------------------------------------------------------------------------------
 # module/buff/potions.razor
-#
-#   interval__stat_potion
-#      A Strength or Agility potion is tried once per window. The stat arrives a round
-#      trip after the drink, and a Curse, Weaken or Clumsy can hold it under the line
-#      while the potion still runs: without the window that refused drink would go out
-#      every pass. An empty bag is looked up at the same pace.
 # ----------------------------------------------------------------------------------------
 @setvar! interval__stat_potion 5000
 
 
 # ----------------------------------------------------------------------------------------
 # module/pack/gold-drop.razor
-#
-#   wait__gold_drop
-#      Pause after a drop, so the weight settles before the next pass.
 # ----------------------------------------------------------------------------------------
 @setvar! wait__gold_drop 1000
 
 
 # ----------------------------------------------------------------------------------------
 # module/bard/disco.razor
-#
-#   interval__disco_seen
-#      How long a target is left alone once its label has shown discord. Discordance runs
-#      about two minutes.
 # ----------------------------------------------------------------------------------------
 @setvar! interval__disco_seen 30000
 
 
 # ----------------------------------------------------------------------------------------
 # module/bard/peace.razor
-#
-#   interval__peace_seen
-#      How long the label is left unread once it has shown pacified or a barding break.
-#      Two seconds is the gap between the 10 second slot and the 12 second pacify.
 # ----------------------------------------------------------------------------------------
 @setvar! interval__peace_seen 2000
 
 
 # ----------------------------------------------------------------------------------------
 # module/magery/rotation.razor
-#
-#   interval__magic_window
-#      How long the two target scoped Grimoire riders last. The debuff icon runs two
-#      minutes, the +30% damage and refund only 60 seconds, so this is a timer and not a
-#      label read.
 # ----------------------------------------------------------------------------------------
 @setvar! interval__magic_window 60000
 
 
 # ----------------------------------------------------------------------------------------
 # module/necro/vampiric-embrace.razor
-#
-#   interval__embrace_miss
-#      How long Vampiric Embrace waits after "You do not see any corpses near that
-#      location." Nothing was spent, so it is a short pause while the player walks on.
 # ----------------------------------------------------------------------------------------
 @setvar! interval__embrace_miss 5000
 
@@ -555,9 +259,6 @@
 
 # ----------------------------------------------------------------------------------------
 # module/base.razor
-#
-#   timer__message
-#      Ready on the first pass, so the first warning shows at once.
 # ----------------------------------------------------------------------------------------
 if not timerexists "timer__message"
     createtimer "timer__message"
@@ -576,9 +277,6 @@ settimer "timer__target_grace" config__target_grace
 
 # ----------------------------------------------------------------------------------------
 # module/magery/reagents.razor
-#
-#   timer__reagents
-#      Ready on the first pass, so reagents are read before the first cast.
 # ----------------------------------------------------------------------------------------
 if not timerexists "timer__reagents"
     createtimer "timer__reagents"
@@ -588,9 +286,6 @@ settimer "timer__reagents" interval__reagents
 
 # ----------------------------------------------------------------------------------------
 # module/necro/symbols.razor
-#
-#   timer__hotbar_check
-#      Ready on the first pass, so a closed hotbar is opened at once.
 # ----------------------------------------------------------------------------------------
 if not timerexists "timer__hotbar_check"
     createtimer "timer__hotbar_check"
@@ -641,9 +336,6 @@ settimer "timer__disco_seen" 0
 
 # ----------------------------------------------------------------------------------------
 # module/bard/peace.razor
-#
-#   timer__peace_seen
-#      Ready on the first pass.
 # ----------------------------------------------------------------------------------------
 if not timerexists "timer__peace_seen"
     createtimer "timer__peace_seen"
@@ -653,9 +345,6 @@ settimer "timer__peace_seen" interval__peace_seen
 
 # ----------------------------------------------------------------------------------------
 # module/necro/burst.razor
-#
-#   timer__blood_oath, timer__corpse_skin, timer__evil_omen
-#      Ready on the first pass.
 # ----------------------------------------------------------------------------------------
 if not timerexists "timer__blood_oath"
     createtimer "timer__blood_oath"
@@ -675,9 +364,6 @@ settimer "timer__evil_omen" interval__necro_action
 
 # ----------------------------------------------------------------------------------------
 # module/magery/rotation.razor
-#
-#   timer__magic_window
-#      Ready on the first pass.
 # ----------------------------------------------------------------------------------------
 if not timerexists "timer__magic_window"
     createtimer "timer__magic_window"
@@ -687,9 +373,6 @@ settimer "timer__magic_window" interval__magic_window
 
 # ----------------------------------------------------------------------------------------
 # module/necro/poison-strike.razor
-#
-#   timer__poison_strike
-#      Ready on the first pass.
 # ----------------------------------------------------------------------------------------
 if not timerexists "timer__poison_strike"
     createtimer "timer__poison_strike"
@@ -699,9 +382,6 @@ settimer "timer__poison_strike" interval__necro_action
 
 # ----------------------------------------------------------------------------------------
 # module/necro/vampiric-embrace.razor
-#
-#   timer__vampiric_embrace, timer__embrace_miss
-#      Ready on the first pass.
 # ----------------------------------------------------------------------------------------
 if not timerexists "timer__vampiric_embrace"
     createtimer "timer__vampiric_embrace"
@@ -716,9 +396,6 @@ settimer "timer__embrace_miss" interval__embrace_miss
 
 # ----------------------------------------------------------------------------------------
 # recipe/bard-necro-enhanced-recipe.razor
-#
-#   timer__housekeeping
-#      The clocks of the # @ every groups.
 # ----------------------------------------------------------------------------------------
 if not timerexists "timer__housekeeping"
     createtimer "timer__housekeeping"
@@ -732,17 +409,6 @@ settimer "timer__housekeeping" interval__housekeeping
 
 # ----------------------------------------------------------------------------------------
 # module/base.razor
-#
-#   var__fighting
-#      1 while an enemy is engaged. buff/potions drinks only then. fight/target sets it
-#      every pass, and the pvp recipe keeps it at 1.
-#
-#   var__hold_casts
-#      1 while a block keeps the cast window for itself. buff/spells stands down.
-#      escape/recall sets it once a Recall is due.
-#
-#   var__hold_gathering
-#      1 while gathering and its packing wait. escape/recall sets it.
 # ----------------------------------------------------------------------------------------
 @setvar! var__fighting 0
 @setvar! var__hold_casts 0
@@ -751,34 +417,18 @@ settimer "timer__housekeeping" interval__housekeeping
 
 # ----------------------------------------------------------------------------------------
 # module/recovery/heal.razor
-#
-#   var__heal_potion_out
-#      Scratch: 1 once a heal potion went out on this pass.
 # ----------------------------------------------------------------------------------------
 @setvar! var__heal_potion_out 0
 
 
 # ----------------------------------------------------------------------------------------
 # module/recovery/light-heal.razor
-#
-#   var__light_heal_due
-#      Scratch: 1 when the light Heal goes on this pass.
 # ----------------------------------------------------------------------------------------
 @setvar! var__light_heal_due 0
 
 
 # ----------------------------------------------------------------------------------------
 # module/fight/target.razor
-#
-#   var__combat_target
-#      The enemy picked with lasttarget, kept across Plays.
-#
-#   var__fresh_serial
-#      Scratch copy of the lasttarget serial for the mobile range check.
-#
-#   var__keep_lasttarget
-#      Scratch: 1 when a block that is about to answer its own cursor finds a new enemy
-#      in lasttarget, so it leaves the cursor and the enemy to the player.
 # ----------------------------------------------------------------------------------------
 if not varexist var__combat_target
     @setvar! var__combat_target 0
@@ -789,33 +439,6 @@ endif
 
 # ----------------------------------------------------------------------------------------
 # module/magery/reagents.razor
-#
-#   var__regs_cure, var__regs_heal, var__regs_greater_heal, var__regs_create_food,
-#   var__regs_reactive_armor, var__regs_magic_reflect, var__regs_magic_arrow,
-#   var__regs_harm, var__regs_fireball, var__regs_lightning, var__regs_curse,
-#   var__regs_mana_drain, var__regs_energy_bolt, var__regs_bless,
-#   var__regs_arch_protection, var__regs_flamestrike
-#      1 when every reagent of that spell was found, written only by this block.
-#        cure            garlic 3972, ginseng 3973
-#        heal            garlic, ginseng, spider silk 3981
-#        greater heal    garlic, ginseng, mandrake root 3974, spider silk
-#        create food     garlic, ginseng, mandrake root
-#        reactive armor  garlic, spider silk, sulfurous ash 3980
-#        magic reflect   garlic, mandrake root, spider silk
-#        magic arrow     sulfurous ash
-#        harm            nightshade 3976, spider silk
-#        fireball        black pearl 3962
-#        lightning       mandrake root, sulfurous ash
-#        curse           garlic, nightshade, sulfurous ash
-#        mana drain      black pearl, mandrake root, spider silk
-#        energy bolt     black pearl, nightshade
-#        bless           garlic, mandrake root
-#        arch protection garlic, ginseng, mandrake root, sulfurous ash
-#        flamestrike     spider silk, sulfurous ash
-#
-#   var__has_black_pearl, var__has_garlic, var__has_ginseng, var__has_mandrake,
-#   var__has_nightshade, var__has_ash, var__has_silk
-#      Scratch: 1 when that reagent was found on the last read.
 # ----------------------------------------------------------------------------------------
 @setvar! var__regs_cure 0
 @setvar! var__regs_heal 0
@@ -844,14 +467,6 @@ endif
 
 # ----------------------------------------------------------------------------------------
 # module/necro/symbols.razor
-#
-#   var__symbols_listed
-#      The reading the list was last filled from. 99 matches no reading, so the first pass
-#      fills the list whatever a previous run left in it.
-#
-#   var__symbols_spent
-#      Scratch: 1 once a necro ability spent symbols on this pass. Poison Strike sits that
-#      pass out, since the list is only rebuilt on the next one.
 # ----------------------------------------------------------------------------------------
 @setvar! var__symbols_listed 99
 @setvar! var__symbols_spent 0
@@ -859,13 +474,6 @@ endif
 
 # ----------------------------------------------------------------------------------------
 # module/bard/instrument.razor
-#
-#   var__my_instrument
-#      The instrument the bard skills play, kept across Plays. 0 when none.
-#
-#   var__instrument_ok
-#      1 while the instrument was in the backpack at the last check. The bard blocks test
-#      it with not warmode and var__my_instrument.
 # ----------------------------------------------------------------------------------------
 if not varexist var__my_instrument
     @setvar! var__my_instrument 0
@@ -875,16 +483,6 @@ endif
 
 # ----------------------------------------------------------------------------------------
 # module/necro/summon-names.razor
-#
-#   var__summon_seen
-#      Scratch: the match the walk is looking at, copied out of its alias for inlist.
-#
-#   var__fresh_summon
-#      Scratch: the first own summon not named yet, 0 for none.
-#
-#   var__summon_kind
-#      Scratch: the kind read off its label, as an index into list__summon_kinds. 99 for a
-#      kind the list does not have.
 # ----------------------------------------------------------------------------------------
 @setvar! var__summon_seen 0
 @setvar! var__fresh_summon 0
@@ -893,27 +491,12 @@ endif
 
 # ----------------------------------------------------------------------------------------
 # module/bard/disco.razor
-#
-#   var__disco_seen
-#      The target last seen discorded, 0 when none. Empty at every start.
 # ----------------------------------------------------------------------------------------
 @setvar! var__disco_seen 0
 
 
 # ----------------------------------------------------------------------------------------
 # module/magery/rotation.razor
-#
-#   var__opener_done
-#      1 once the target carries Curse, or no Curse reagents are left. The proc core and
-#      the filler wait for it.
-#
-#   var__proc_target
-#      The mob the last proc spell went at. Poison Strike waits until it is the current
-#      target.
-#
-#   var__procs_done
-#      1 once no proc is ready, each on its bar or out of reagents. Poison Strike and the
-#      filler wait for it.
 # ----------------------------------------------------------------------------------------
 @setvar! var__opener_done 0
 if not varexist var__proc_target
@@ -924,13 +507,6 @@ endif
 
 # ----------------------------------------------------------------------------------------
 # module/bard/song.razor
-#
-#   var__song_next
-#      Which song plays next: 1 discordance, 2 peacemaking, 3 provocation. Literal values,
-#      since Razor has no arithmetic.
-#
-#   var__song_after
-#      Scratch: the song after the one just played.
 # ----------------------------------------------------------------------------------------
 if not varexist var__song_next
     @setvar! var__song_next 1

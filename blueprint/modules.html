@@ -178,7 +178,7 @@
 #      &gt; Bandages handle ordinary damage, so Greater Heal waits for 45.
 # ----------------------------------------------------------------------------------------
 @setvar! config__emergency_hits 45</code></pre>
-<p>결과물의 CONFIG도 모듈마다 같은 모양으로 나오고, 레시피가 바꾼 설정 밑에는 <code>&gt; This loop: …</code>와 이유가 붙는다.</p>
+<p>결과물에는 설명이 나가지 않는다. CONFIG에는 모듈마다 경로 상자와 이 루프의 값만 있고, 설정이 하는 일과 바꾼 이유는 레시피와 모듈에서 읽는다 (05절).</p>
 <p>블록 순서는 루프 안 순서다. <code>insysmsg</code>는 맞은 줄과 그보다 오래된 줄을 함께 소비하므로 Journal을 읽는 블록끼리는 순서가 중요하다.
 lumberjack-enhanced는 Tracking 줄을 먼저 읽도록 <code>magery/reagents</code>를 <code>escape/recall</code> 뒤에, skinning-enhanced는 칼질 응답 뒤에 둔다.</p>
 <p><strong>그룹은 블록 여러 개를 한 조건 밑에 묶는다.</strong> 블록마다 같은 조건을 따로 물으면 그 조건이 거짓인 패스도 블록 수만큼 문장 값을 낸다
@@ -323,8 +323,9 @@ lumberjack-enhanced는 Tracking 줄을 먼저 읽도록 <code>magery/reagents</c
 <li>헤더: 레시피 헤더 → 블록들이 선언한 핫키를 모은 <code>Hotkeys:</code> 줄 → "Generated from recipe/… by util/build-scripts.py" 줄.</li>
 <li>CONFIG → WAIT AND COOLDOWN → TIMER → STATE → setup → MAIN LOOP (<code>while not dead</code>, 블록마다의 <code>loop</code>, base의 <code>end</code>, <code>endwhile</code>).
 자리마다 base가 먼저, 블록이 레시피 순서대로, 레시피가 마지막이다. 그룹은 loop 안에서 <code>if</code>·<code>else</code>·<code>endif</code>가 되고, <code># @ every</code>의 시계는 TIMER 끝에 레시피 몫으로 나온다. 레시피의 STATE가 뒤에 오므로 모듈 상태에 다른 시작값을 줄 수 있다 (pvp의 <code>var__fighting 1</code>).</li>
-<li>큰 칸 (CONFIG 등)은 conventions의 배너 모양이다 (<a href="conventions.html#02.B">conventions.html</a> 02.B절). 그 안의 조각은
-모듈과 같은 상자로 나온다. 상자 첫 줄이 어느 파일에서 왔는지 (<code># module/recovery/heal.razor</code>), 그 밑이 설명이고, 값은 상자 밑이다. loop 안의 블록은 배너의 줄과 제목만 나가고 제목 오른쪽에 모듈 경로가 붙는다. 배너 설명은 결과물에 넣지 않는다. 블록이 하는 일은 그 모듈 파일에서 읽고, 코드 사이 주석은 그대로 나간다.
+<li>큰 칸 (CONFIG 등)은 conventions의 배너 모양이다 (<a href="conventions.html#02.B">conventions.html</a> 02.B절). <strong>결과물에는 설명을 넣지 않는다.</strong>
+그 안의 조각은 어느 파일에서 왔는지만 적은 상자 (<code># module/recovery/heal.razor</code>) 밑에 값과 코드가 온다. loop 안의 블록은 배너의 줄과 제목만 나가고 제목 오른쪽에 모듈 경로가 붙는다.
+설정과 블록이 하는 일, 레시피가 값을 바꾼 이유는 그 경로의 파일에서 읽는다. 코드 사이 주석은 그대로 나간다.
 TIMER는 timer마다 <code>createtimer</code>와 첫 <code>settimer</code>를 붙여 쓴다.</li>
 <li>레시피는 조립할 때마다 정리된 모양으로 다시 쓴다. 큰 칸마다 <code>=</code> 상자, 블록마다 <code>-</code> 상자, 설정은 주인 블록의 상자 밑이다.</li>
 <li>조립기는 아래에서 멈추고 고칠 곳을 알려 준다.

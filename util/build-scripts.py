@@ -576,47 +576,20 @@ def recipe_text(loop, modules):
     return text_of(out)
 
 
-def entry_lines(entries, notes_of=lambda entry: []):
-    """The descriptions of a section: "#   name, name", "#      what they do", any notes."""
-    out = []
-    for entry in entries:
-        line = '#   '
-        out += ['#'] if out else []
-        for i, name in enumerate(entry['names']):
-            piece = name + (',' if i < len(entry['names']) - 1 else '')
-            if len(line) + len(piece) > WIDTH and line.strip() != '#':
-                out.append(line.rstrip())
-                line = '#   '
-            line += piece + ' '
-        out.append(line.rstrip())
-        out += [(TEXT + d).rstrip() for d in entry['description']] + notes_of(entry)
-    return out
-
-
-def source_box(source, lines=()):
-    """The box over a piece of the loop: where it came from, and what its names are."""
-    return [BOX, '# ' + source] + (['#'] + list(lines) if lines else []) + [BOX]
+def source_box(source):
+    """The box over a piece of the loop: the file it came from, where its names are explained."""
+    return [BOX, '# ' + source, BOX]
 
 
 def config_part(loop, module):
-    """A module's settings in CONFIG, with this loop's values and the reasons for them."""
+    """A module's settings in CONFIG, with this loop's values. What they do and why the loop
+    changes them stay in the module and the recipe."""
     over = loop['over']
-    defaults = {s['name']: s['value'] for s in module['settings']}
-
-    def notes_of(entry):
-        out = []
-        for name in entry['names']:
-            if name in over:
-                same = ', the default' if over[name]['value'] == defaults[name] else ' (default %s)' % defaults[name]
-                out.append(TEXT + '> This loop: %s %s%s.' % (name, over[name]['value'], same))
-                out += [TEXT + '> ' + n for n in over[name]['notes']]
-        return out
-
     values = []
     for line in module['code']['config']:
         name = SETVAR.match(line).group(1)
         values.append('@setvar! %s %s' % (name, over[name]['value']) if name in over else line)
-    return source_box(module_path(module['ident']), entry_lines(module['entries']['config'], notes_of)) + values
+    return source_box(module_path(module['ident'])) + values
 
 
 def timer_lines(unit):
@@ -642,13 +615,11 @@ def build(path, modules, owner):
                 continue
             code = timer_lines(unit) if section == 'timer' else trim(unit['code'][section])
             if code:
-                found.append(source_box(source, entry_lines(unit['entries'][section])) + code)
+                found.append(source_box(source) + code)
         if with_recipe and trim(lines_of(recipe, section)):
             found.append(source_box(name) + trim(lines_of(recipe, section)))
         if section == 'timer' and loop['clocks']:
-            found.append(source_box(name, ['#   ' + ', '.join(t for t, _ in loop['clocks']),
-                                           TEXT + 'The clocks of the # @ every groups.'])
-                         + timer_lines({'code': {'timer': ['%s %s' % c for c in loop['clocks']]}}))
+            found.append(source_box(name) + timer_lines({'code': {'timer': ['%s %s' % c for c in loop['clocks']]}}))
         return found
 
     def loop_lines():
@@ -678,14 +649,12 @@ def build(path, modules, owner):
         end = trim(lines_of(modules[BASE], 'end'))
         return out + ([''] + block_banner(end, module_path(BASE)) if end else [])
 
-    def code_parts(section, indent=''):
+    def setup_parts():
         found = []
         for source, unit in units + [(name, recipe)]:
-            if unit is recipe and section != 'setup':
-                continue
-            lines = trim(lines_of(unit, section))
+            lines = trim(lines_of(unit, 'setup'))
             if lines:
-                found.append(block_banner(lines, source) if indent else source_box(source) + lines)
+                found.append(source_box(source) + lines)
         return found
 
     out = trim(lines_of(recipe, 'header'))
@@ -711,8 +680,8 @@ def build(path, modules, owner):
     for title, lines in sections:
         if lines:
             out += ['', ''] + banner(title) + [''] + lines
-    if code_parts('setup'):
-        out += ['', ''] + join(code_parts('setup'), 2)
+    if setup_parts():
+        out += ['', ''] + join(setup_parts(), 2)
     out += ['', ''] + banner('MAIN LOOP') + ['while not dead']
     out += loop_lines() + ['endwhile']
 
