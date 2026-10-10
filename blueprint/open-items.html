@@ -778,6 +778,7 @@ Journal에 <code>Recycle check: …</code>가 아이템마다, 저장할 때 <co
 <tr><td>시작</td><td>Play하면 악기를 찾고 (없으면 <code>[ inst, pick ]</code>), <code>[ bard necro, on ]</code>이 뜬다</td></tr>
 <tr><td>소환수 이름</td><td>소환 후 5초 안에 <code>[ name, lych ]</code>처럼 이름이 뜨고 네임태그가 바뀌어야 한다. 안 바뀌면 Journal을 본다. <code>Summon name: no known kind in its label: …</code>이 뜨면 그 라벨을 기록하고, 아무것도 안 뜨는데 오버헤드만 뜨면 <code>rename</code>이 거부된 것이다.
 2026-10-10 고친 판은 종류를 읽었지만 (<code>[ name, mummy ]</code>) 서버가 <code>That name is unacceptable.</code>로 거절했다. 종류 단어를 피한 철자 (<code>mumi</code> 등)로 바꿨으니, 새 이름이 받아지는지 본다</td></tr>
+<tr><td>Rag Witch 바디</td><td><code>mumi</code>는 바뀌었지만 rag witch는 안 바뀌었다 (2026-10-10). 바디 번호 740이 틀린 것으로 보고 기본 이름 <code>a rag witch</code>로도 찾게 했다. Journal에 <code>a rag witch found by its name, not its body</code>가 뜨면 그 rag witch에 <code>&gt;info</code>를 해서 Body 번호를 알려 준다. 그 번호를 바디 목록에 넣고 이름 찾기는 지운다. Vampire Thrall 722도 같은 출처라 확인되지 않았다</td></tr>
 <tr><td>교전과 이동</td><td>적을 찍으면 10칸 안에서 Disco·Peace·네크로 버스트·오프너·프록이 예전 순서로 나가고, 적이 없으면 버섯·RA·Reflect·Spell Siphon·노래·Vampiric Embrace가 돈다</td></tr>
 <tr><td>Spell Siphon 순서</td><td>RA와 Reflect가 빠진 채 이동하면 RA, Reflect가 먼저 서고 Siphon Magic Arrow는 그다음 패스에 나가야 한다</td></tr>
 <tr><td>독과 힐</td><td>독에 걸린 채 다치면 큐어가 먼저 나가고 힐 포션·Greater Heal은 독이 풀린 뒤에 나간다. 예전보다 위험하게 느껴지면 기록한다</td></tr>
