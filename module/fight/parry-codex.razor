@@ -1,11 +1,7 @@
-# ##################################################################################################
-# Codex of parrying: the main stance, Warding against damage over time, and the finisher.
-# ##################################################################################################
+# Codex of parrying: the main stance, Warding against damage over time, the finisher.
 
 
-# ##################################################################################################
-#@ config
-#
+#@ config --------------------------------------------------------------------------------
 #   config__parry_stance_main
 #      Main stance, by codex slot in wiki order. A stance only helps with ranks in it.
 #        1  Shield Bash
@@ -27,48 +23,42 @@
 #        0  leave it alone
 #        1  Last Stand
 #        2  Barrier
-# ##################################################################################################
 @setvar! config__parry_stance_main 5
 @setvar! config__parry_stance_dot 2
 @setvar! config__parry_dot_in_melee 0
 @setvar! config__parry_finisher_main 1
 
 
-# ##################################################################################################
-#@ wait
-#
+#@ wait ----------------------------------------------------------------------------------
 #   cooldown__parry_retry
 #      A failed stance switch is tried again after this.
 #
 #   cooldown__parry_resync
 #      The stance cache is dropped this often, so a stance changed by hand is picked up.
-# ##################################################################################################
 @setvar! cooldown__parry_retry 3000
 @setvar! cooldown__parry_resync 30000
 
 
-# ##################################################################################################
-#@ timer
-# ##################################################################################################
+#@ timer ---------------------------------------------------------------------------------
 timer__parry_retry cooldown__parry_retry
 timer__parry_resync 0
 
 
-# ##################################################################################################
-#@ state
-#
+#@ state ---------------------------------------------------------------------------------
 #   var__parry_want, var__parry_active
-#      Parry stance cache. 0 means unknown, which forces a codex label read on the first pass.
+#      Parry stance cache. 0 means unknown, which forces a codex label read on the first
+#      pass.
 #
 #   var__parry_disabled
-#      1 when the codex label names no stance. Switching blind could toggle the stance off.
+#      1 when the codex label names no stance. Switching blind could toggle the stance
+#      off.
 #
 #   var__parry_finisher_checked
 #      The finisher is checked once per Play, on the first codex label read.
 #
 #   var__parry_finisher_state
-#      Scratch: 0 neither finisher named, 1 wanted finisher active, 2 the other one active.
-# ##################################################################################################
+#      Scratch: 0 neither finisher named, 1 wanted finisher active, 2 the other one
+#      active.
 @setvar! var__parry_want config__parry_stance_main
 @setvar! var__parry_active 0
 @setvar! var__parry_disabled 0
@@ -76,9 +66,7 @@ timer__parry_resync 0
 @setvar! var__parry_finisher_state 0
 
 
-# ##################################################################################################
-#@ loop
-# ##################################################################################################
+#@ loop ----------------------------------------------------------------------------------
     # ################################################################################
     # # PARRY CODEX
     # ################################################################################

@@ -3,9 +3,7 @@
 #@ output script/gather/skinning-enhanced.razor
 
 
-# ##################################################################################################
-#@ header
-# ##################################################################################################
+#@ header ================================================================================
 
 # Dungeon Two-Handed Axe melee with Magery self support, combat potions, sword codex control and corpse skinning.
 # Needs: a Two-Handed Axe, a skinning knife, codices of swords and parrying, bandages, potions and reagents.
@@ -19,96 +17,81 @@
 # Design notes and in-game checks: blueprint/open-items.html part 11.
 
 
-# ##################################################################################################
-#@ blocks
-#   One box per block, in the order the blocks run, base first. The builder writes the boxes.
-#   To change a setting, write its @setvar! line under any box, with the reason as a "#" line
-#   right above it. The builder moves both under the box of the module that has the setting,
-#   the reason as a "> " line in the box. In a box only the "> " lines are yours.
-# ##################################################################################################
+#@ blocks ================================================================================
+#   One "#@ use" line per block, in the order the blocks run, base first. The builder writes
+#   the lines under it. Yours are the "> " lines (a note on the block, or under a setting the
+#   reason for its value) and the @setvar! lines. Write a new @setvar! line under any block,
+#   its reason as a "#" line right above it: the builder moves both to the block it belongs to.
 
-# ##################################################################################################
-#@ use base                  the frame every loop has
-# ##################################################################################################
+#@ use base ------------------------------------------------------------------------------
+#   The frame of every loop. Every recipe lists it first.
 
-# ##################################################################################################
-#@ use fight/target          remembers the enemy picked with lasttarget
-# ##################################################################################################
+#@ use fight/target ----------------------------------------------------------------------
+#   Remembers the enemy picked with lasttarget while it stays within 12 tiles.
 
-# ##################################################################################################
-#@ use recovery/pouch        trapped pouch while held
-# ##################################################################################################
+#@ use recovery/pouch --------------------------------------------------------------------
+#   The trapped pouch while paralyzed, the one thing that can act then.
 
-# ##################################################################################################
-#@ use recovery/cure         cure potion, else the Cure agent
-# ##################################################################################################
+#@ use recovery/cure ---------------------------------------------------------------------
+#   Cure potion first, then the Smart Heal/Cure agent when none is carried.
 
-# ##################################################################################################
-#@ use recovery/heal         heal potion, else Greater Heal at the emergency line
+#@ use recovery/heal ---------------------------------------------------------------------
+#   Heal potion at heal_hits, else Greater Heal at emergency_hits.
 #
 #   emergency_hits (default 35)
-#      Missing hit points that cast Greater Heal when no heal potion went out on this pass. Not
-#      below heal_hits.
+#      Missing hit points that cast Greater Heal when no heal potion went out on this
+#      pass. Not below heal_hits.
 #      > Bandages handle ordinary damage, so Greater Heal waits for 45.
-# ##################################################################################################
 @setvar! config__emergency_hits 45
 
-# ##################################################################################################
-#@ use recovery/bandage      self bandage
+#@ use recovery/bandage ------------------------------------------------------------------
+#   Self bandage while hurt or poisoned, never over a running one.
 #
 #   heal_skill_min (default 0)
-#      Healing must be above this to bandage. At or below it recovery/light-heal stands in.
+#      Healing must be above this to bandage. At or below it recovery/light-heal stands
+#      in.
 #      Also read by recovery/light-heal.
 #      > Healing 80 template. Below 10 the light Heal stands in.
-# ##################################################################################################
 @setvar! config__heal_skill_min 10
 
-# ##################################################################################################
-#@ use recovery/light-heal   light Heal, the bandage stand-in
-# ##################################################################################################
+#@ use recovery/light-heal ---------------------------------------------------------------
+#   The light Heal agent: the bandage stand-in, or beside them with use_light_heal 1.
 
-# ##################################################################################################
-#@ use recovery/refresh      Refresh at low stamina
+#@ use recovery/refresh ------------------------------------------------------------------
+#   Total Refresh at or below refresh_stam.
 #
 #   refresh_stam (default 15)
 #      Current stamina at or below this drinks a Refresh.
 #      > DEX 80 gives about 80 stamina. Refresh at 60.
-# ##################################################################################################
 @setvar! config__refresh_stam 60
 
-# ##################################################################################################
-#@ use fight/axe             re-arms the Two-Handed Axe
-# ##################################################################################################
+#@ use fight/axe -------------------------------------------------------------------------
+#   Re-arms the cached Two-Handed Axe when the left hand is empty.
 
-# ##################################################################################################
-#@ use pack/gold-drop        drops gold while over weight
-# ##################################################################################################
+#@ use pack/gold-drop --------------------------------------------------------------------
+#   Drops gold at your feet while over max weight, one drop per pass.
 
-# ##################################################################################################
-#@ use buff/potions          Strength, Agility and Magic Resist while an enemy is remembered
+#@ use buff/potions ----------------------------------------------------------------------
+#   Strength and Agility by stat value, Magic Resist by its icon, while fighting.
 #
 #   str_potion (default 120, the same value)
-#      STR with the Greater Strength potion on: your base plus 20. Below it the potion is drunk, and
-#      0 turns it off. Bless and the Strength spell, ours or an ally's, show the same icon as the
-#      potion but add less than its 20, so the stat tells them apart.
+#      STR with the Greater Strength potion on: your base plus 20. Below it the potion is
+#      drunk, and 0 turns it off. Bless and the Strength spell, ours or an ally's, show
+#      the same icon as the potion but add less than its 20, so the stat tells them apart.
 #      > STR 100 and DEX 80 template.
-# ##################################################################################################
 @setvar! config__str_potion 120
 
-# ##################################################################################################
-#@ use fight/sword-codex     Warrior, Defensive while hurt, and the finisher
-# ##################################################################################################
+#@ use fight/sword-codex -----------------------------------------------------------------
+#   Codex of swords: Warrior, Defensive while hurt, and the finisher.
 
-# ##################################################################################################
-#@ use fight/parry-codex     Bulwark, Warding against damage over time, and the finisher
-# ##################################################################################################
+#@ use fight/parry-codex -----------------------------------------------------------------
+#   Codex of parrying: the main stance, Warding against damage over time, the finisher.
 
-# ##################################################################################################
-#@ use fight/weapon-ability  Chop on the enemy within 2 tiles
-# ##################################################################################################
+#@ use fight/weapon-ability --------------------------------------------------------------
+#   The weapon ability on the remembered enemy within 2 tiles, once per meter fill.
 
-# ##################################################################################################
-#@ use buff/spells           Reactive Armor, then Magic Reflection
+#@ use buff/spells -----------------------------------------------------------------------
+#   Reactive Armor, then Magic Reflection, whenever one is missing.
 #
 #   mana_reactive_armor (default 4)
 #      Minimum current mana to start Reactive Armor.
@@ -123,31 +106,25 @@
 #        0  no: hold them back and cut one that is casting, so the cure goes first
 #        1  yes
 #      > The cure goes first: no buffs while poisoned.
-# ##################################################################################################
 @setvar! config__mana_reactive_armor 24
 @setvar! config__mana_magic_reflect 34
 @setvar! config__buff_when_poisoned 0
 
-# ##################################################################################################
-#@ use gather/skinning       carves corpses between fights
-# ##################################################################################################
+#@ use gather/skinning -------------------------------------------------------------------
+#   Forensic Evaluation carving of corpses within 2 tiles, between fights.
 
-# ##################################################################################################
-#@ use recovery/reagents     reagent flags, read after the carve replies so it cannot consume them
-# ##################################################################################################
+#@ use recovery/reagents -----------------------------------------------------------------
+#   Reagent flags for the Magery casts, read on a clock and right after a refusal.
+#   > Read after gather/skinning, so it cannot consume the carve replies.
 
-# ##################################################################################################
-#@ use buff/food             eats from a tray
-# ##################################################################################################
+#@ use buff/food -------------------------------------------------------------------------
+#   Eats from a tray while Food Satisfaction is missing, looked at once a minute.
 
-# ##################################################################################################
-#@ use pack/leather          moves leather into the loot pouch
-# ##################################################################################################
+#@ use pack/leather ----------------------------------------------------------------------
+#   Moves carried leather into the loot pouch every 2 minutes, between fights.
 
 
-# ##################################################################################################
-#@ setup
-# ##################################################################################################
+#@ setup =================================================================================
 
 # pack/leather moves leather into this pouch. restock/loadout picks it, this asks when it is missing.
 if not varexist global__my_looting_pouch or not find global__my_looting_pouch backpack

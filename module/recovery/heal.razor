@@ -1,40 +1,30 @@
-# ##################################################################################################
-# Heal potion at heal_hits, Greater Heal at emergency_hits when no potion went out on this pass.
+# Heal potion at heal_hits, else Greater Heal at emergency_hits.
 #@ hotkeys Drink Heal, > Greater Heal/Cure Self, Cancel Current Target
-# ##################################################################################################
 
 
-# ##################################################################################################
-#@ config
-#
+#@ config --------------------------------------------------------------------------------
 #   config__heal_hits
 #      Missing hit points (not percent) that drink a heal potion.
 #
 #   config__emergency_hits
-#      Missing hit points that cast Greater Heal when no heal potion went out on this pass. Not
-#      below heal_hits.
+#      Missing hit points that cast Greater Heal when no heal potion went out on this
+#      pass. Not below heal_hits.
 #
 #   config__mana_greater_heal
-#      Minimum current mana for Greater Heal. It keeps no reserve: 31 always leaves 20 mana for an
-#      attack or Teleport.
-# ##################################################################################################
+#      Minimum current mana for Greater Heal. It keeps no reserve: 31 always leaves 20
+#      mana for an attack or Teleport.
 @setvar! config__heal_hits 35
 @setvar! config__emergency_hits 35
 @setvar! config__mana_greater_heal 11
 
 
-# ##################################################################################################
-#@ state
-#
+#@ state ---------------------------------------------------------------------------------
 #   var__heal_potion_out
 #      Scratch: 1 once a heal potion went out on this pass.
-# ##################################################################################################
 @setvar! var__heal_potion_out 0
 
 
-# ##################################################################################################
-#@ loop
-# ##################################################################################################
+#@ loop ----------------------------------------------------------------------------------
     # ################################################################################
     # # HEAL
     # ################################################################################

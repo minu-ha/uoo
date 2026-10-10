@@ -10,38 +10,37 @@
     util/build-scripts.py --new-module <folder>/<name>
                                                   write an empty module to fill in
 
-Both kinds of file are made of boxes: a "#" rule line, the "#@" line and what explains it, a
-"#" rule line, then the lines it explains.
+A "#@" line opens a part and runs on as a rule: "====" for the parts of a recipe, "----" for a
+block of a recipe and a section of a module. The "#" lines under it explain the lines that follow.
 
 Module: module/<folder>/<name>.razor, called <folder>/<name>. One block of a loop, the folder
 says what it looks after. module/base.razor is the frame of every loop.
-    head box             what the block does (the first line is a summary), "#@ hotkeys A, B"
-    #@ config box        config__ settings: in the box "#   name" and "#      what it does" for
-                         each, under the box the @setvar! lines with the defaults, joined up
-    #@ wait box          wait__ and cooldown__ values, the same in every loop, written the same way
-    #@ timer box         one "timer__x <start>" per line under the box, the start a cooldown__
-                         name or 0. Describing them in the box is optional
-    #@ state box         var__ state, written the same way. Guards (if not varexist) may wrap them
-    #@ setup, loop, end  code, under a box with only the "#@" line. end is base only
-Every name a section declares is described in its box, and each name belongs to one module.
+    head                 what the block does (the first line is the summary), "#@ hotkeys A, B"
+    #@ config ---        "#   name" and "#      what it does" for each config__ setting, then the
+                         @setvar! lines with the defaults, joined up
+    #@ wait ---          wait__ and cooldown__ values, the same in every loop, written the same way
+    #@ timer ---         one "timer__x <start>" line per timer, the start a cooldown__ name or 0.
+                         Describing them is optional
+    #@ state ---         var__ state, written the same way. Guards (if not varexist) may wrap them
+    #@ setup, loop, end  code. end is base only
+Every name a section declares is described above it, and each name belongs to one module.
 A block may use the names of any module the loop has. The builder works out which those are.
 
 Recipe: recipe/<loop>-recipe.razor, one loop.
-    #@ output            the loop file it builds, before the first box
-    #@ header box        the comment block at the top of the loop
-    #@ blocks box        one box per block, in the order they run, base first: the
-                         "#@ use <module>  note" line and the settings it changes (what each
-                         does, its default, the other blocks that read it, "> " reason lines),
-                         then under the box the @setvar! lines of those settings. The builder
-                         writes the box. Only the "#@ use" line, the "> " lines and the @setvar!
-                         lines are the reader's, and a "#" line right above an @setvar! line is
-                         its reason
-    #@ state box         loop-only state, or another start value for a module's state (optional)
-    #@ setup box         loop-only setup: loot pouch, resume list, loaded message (optional)
+    #@ output            the loop file it builds, before the first part
+    #@ header ===        the comment block at the top of the loop
+    #@ blocks ===        one "#@ use <module> ---" per block, in the order they run, base first.
+                         Under it the builder writes the module's summary and the settings this
+                         loop changes (what each does, its default, the other blocks that read
+                         it). The reader writes "> " lines (a note on the block, or under a
+                         setting the reason for its value) and the @setvar! lines. A "#" line
+                         right above an @setvar! line is its reason
+    #@ state ===         loop-only state, or another start value for a module's state (optional)
+    #@ setup ===         loop-only setup: loot pouch, resume list, loaded message (optional)
 
 Output: header with Hotkeys and Generated lines, CONFIG, WAIT AND COOLDOWN, TIMER, STATE,
 setup, MAIN LOOP. Each part takes base first, then the blocks in order, then the recipe, each
-piece in a box naming the file it came from. CRLF line ends. Needs only the Python standard library.
+piece under a line naming the file it came from. CRLF line ends. Needs only the Python standard library.
 """
 import pathlib
 import re
@@ -54,10 +53,9 @@ BASE = 'base'
 MODULE_SECTIONS = ['config', 'wait', 'timer', 'state', 'setup', 'loop', 'end']
 RECIPE_SECTIONS = ['header', 'blocks', 'state', 'setup']
 DECLARES = {'config': ('config__',), 'wait': ('wait__', 'cooldown__'), 'timer': ('timer__',), 'state': ('var__',)}
-WIDTH = 100
-BOX = '# ' + '#' * (WIDTH - 2)
-BOX_RULE = re.compile(r'^# #{%d}\s*$' % (WIDTH - 2))
-SECTION = re.compile(r'^#@\s*([a-z]+)\s*-*\s*$')
+WIDTH = 90
+SECTION = re.compile(r'^#@\s*([a-z]+)\s*[-=]*\s*$')
+RULE_LINE = re.compile(r'^#\s*[-=#]{8,}\s*$')
 NAME = re.compile(r'\b(?:config|wait|cooldown|timer|var)__[A-Za-z0-9_]+')
 FULL_NAME = re.compile(r'^(?:config|wait|cooldown|timer|var)__[A-Za-z0-9_]+$')
 SETVAR = re.compile(r'^\s*@?setvar!?\s+(\S+)\s*(.*)$')
@@ -67,11 +65,13 @@ DESC_NAMES = re.compile(r'^#   (\S.*)$')
 DESC_TEXT = re.compile(r'^#      (.*)$')
 BOX_SETTING = re.compile(r'^#\s+([a-z0-9_]+) \(default ')
 TEXT = '#      '
-BLOCKS_GUIDE = ['#   One box per block, in the order the blocks run, base first. The builder writes the boxes.',
-                '#   To change a setting, write its @setvar! line under any box, with the reason as a "#" line',
-                '#   right above it. The builder moves both under the box of the module that has the setting,',
-                '#   the reason as a "> " line in the box. In a box only the "> " lines are yours.']
 INDENT = '    '
+BLOCKS_GUIDE = [
+    '#   One "#@ use" line per block, in the order the blocks run, base first. The builder writes',
+    '#   the lines under it. Yours are the "> " lines (a note on the block, or under a setting the',
+    '#   reason for its value) and the @setvar! lines. Write a new @setvar! line under any block,',
+    '#   its reason as a "#" line right above it: the builder moves both to the block it belongs to.',
+]
 
 
 class BuildError(Exception):
@@ -119,13 +119,17 @@ def comment_text(line):
     return text[1:] if text.startswith(' ') else text
 
 
+def ruled(text, char='-', width=WIDTH):
+    return text + ' ' + char * max(4, width - len(text) - 1)
+
+
 def banner(name):
-    return [BOX, '# # ' + name, BOX]
+    line = '# ' + '#' * 84
+    return [line, '# # ' + name, line]
 
 
 def parse(path, kind):
-    """Directives, notes and section lines. Box rule lines only shape the file, so they are
-    dropped, except under a recipe's #@ blocks where they close a block's box."""
+    """Directives, notes and section lines. Rule lines only shape the file and are dropped."""
     allowed = MODULE_SECTIONS if kind == 'module' else RECIPE_SECTIONS
     unit = {'path': path, 'notes': [], 'hotkeys': [], 'output': None, 'blocks': [], 'sections': {}}
     current = None
@@ -146,15 +150,15 @@ def parse(path, kind):
             elif word == 'output' and kind == 'recipe' and current is None:
                 unit['output'] = ' '.join(words[1:])
             elif word == 'use' and kind == 'recipe' and current == 'blocks' and len(words) > 1:
-                unit['blocks'].append(('use', number, words[1], ' '.join(words[2:])))
+                unit['blocks'].append(('use', number, words[1], ' '.join(words[2:]).strip(' -=')))
             elif word == 'config' and kind == 'recipe':
-                raise BuildError('%s: a recipe has no #@ config. A setting goes under the box of its block' % where)
+                raise BuildError('%s: a recipe has no #@ config. A setting goes under the #@ use line of its block' % where)
             else:
                 raise BuildError('%s: unknown or misplaced directive: %s' % (where, line.strip()))
+        elif RULE_LINE.match(line):
+            continue
         elif kind == 'recipe' and current == 'blocks':
             unit['blocks'].append(('line', number, line))
-        elif BOX_RULE.match(line):
-            continue
         elif current is None:
             unit['notes'].append(line)
         else:
@@ -167,21 +171,18 @@ def lines_of(unit, section):
 
 
 def split_box(module, section):
-    """A declaring section as its box (the comment lines first) and its code (the rest). The box
-    reads as entries: "#   name, name" lines, then "#      text" lines describing them."""
-    name, lines = rel(module['path']), module['sections'].get(section, [])
-    box, code, entries = [], [], []
-    for number, line in lines:
-        if code and not is_code(line) and line.strip():
-            raise BuildError('%s:%d: describe names in the box above them, not between them' % (name, number))
+    """A declaring section as its descriptions (the comment lines first) and its code (the rest).
+    The descriptions read as entries: "#   name, name" lines, then "#      text" lines."""
+    name, code, entries = rel(module['path']), [], []
+    for number, line in module['sections'].get(section, []):
         if is_code(line):
             code.append((number, line))
-        elif line.strip():
-            box.append((number, line))
-    for number, line in box:
-        text, names = DESC_TEXT.match(line), DESC_NAMES.match(line)
-        if line.strip() == '#':
             continue
+        if not line.strip() or line.strip() == '#':
+            continue
+        if code:
+            raise BuildError('%s:%d: describe names above them, not between them' % (name, number))
+        text, names = DESC_TEXT.match(line), DESC_NAMES.match(line)
         if text and entries and entries[-1]['names']:
             entries[-1]['description'].append(text.group(1).rstrip())
         elif names and all(FULL_NAME.match(n.strip()) for n in names.group(1).rstrip(',').split(',')):
@@ -189,9 +190,9 @@ def split_box(module, section):
                 entries.append({'names': [], 'description': [], 'number': number})
             entries[-1]['names'] += [n.strip() for n in names.group(1).rstrip(',').split(',')]
         else:
-            raise BuildError('%s:%d: in a box, write "#   name, name" and under it "#      what they do"'
+            raise BuildError('%s:%d: describe names as "#   name, name" with "#      what they do" under it'
                              % (name, number))
-    return [line for _, line in box], code, entries
+    return code, entries
 
 
 def load_module(path):
@@ -206,11 +207,11 @@ def load_module(path):
     if 'end' in module['sections'] and ident != BASE:
         raise BuildError('%s: only module/base.razor has #@ end' % name)
 
-    declared, module['entries'], module['code'], described = {}, {}, {}, {}
+    declared, described, module['entries'], module['code'] = {}, {}, {}, {}
     for section, prefixes in DECLARES.items():
         if section not in module['sections']:
             continue
-        box, code, entries = split_box(module, section)
+        code, entries = split_box(module, section)
         module['entries'][section], module['code'][section] = entries, [line for _, line in code]
         for number, line in code:
             where = '%s:%d' % (name, number)
@@ -223,7 +224,7 @@ def load_module(path):
                 if not match:
                     if section == 'state' and GUARD.match(line):
                         continue
-                    raise BuildError('%s: only @setvar! lines go under the #@ %s box' % (where, section))
+                    raise BuildError('%s: only @setvar! lines go under #@ %s' % (where, section))
                 if section != 'state' and not match.group(2).strip():
                     raise BuildError('%s: %s needs a value' % (where, match.group(1)))
             declared_name = match.group(1)
@@ -236,23 +237,24 @@ def load_module(path):
         for entry in entries:
             for n in entry['names']:
                 if n not in declared or not n.startswith(prefixes):
-                    raise BuildError('%s:%d: the #@ %s box describes %s, which it does not declare'
+                    raise BuildError('%s:%d: #@ %s describes %s, which it does not declare'
                                      % (name, entry['number'], section, n))
                 described[n] = entry['description']
         if section != 'timer':
             for n, number in declared.items():
                 if n.startswith(prefixes) and n not in described:
-                    raise BuildError('%s:%d: describe %s in the #@ %s box above it' % (name, number, n, section))
+                    raise BuildError('%s:%d: describe %s under #@ %s' % (name, number, n, section))
     for section in ('setup', 'loop', 'end'):
         for number, line in module['sections'].get(section, []):
             match = SETVAR.match(line) if is_code(line) else None
             if match and match.group(1).startswith('config__'):
-                raise BuildError('%s:%d: a block never changes a setting. A recipe does, under the box of the block'
-                                 % (name, number))
+                raise BuildError('%s:%d: a block never changes a setting. A recipe does' % (name, number))
     module['declared'] = declared
-    module['settings'] = [{'name': SETVAR.match(l).group(1), 'value': SETVAR.match(l).group(2).strip(),
-                           'number': declared[SETVAR.match(l).group(1)], 'description': described[SETVAR.match(l).group(1)]}
-                          for l in module['code'].get('config', [])]
+    module['settings'] = []
+    for line in module['code'].get('config', []):
+        setting = SETVAR.match(line).group(1)
+        module['settings'].append({'name': setting, 'value': SETVAR.match(line).group(2).strip(),
+                                   'number': declared[setting], 'description': described[setting]})
     module['refs'] = references(module, MODULE_SECTIONS)
     module['used'] = module['refs'] - set(declared)
     return module
@@ -292,31 +294,30 @@ def load_modules():
 
 
 def read_blocks(recipe, name):
-    """#@ blocks as entries (the #@ use line and its note) and the settings written under them:
-    config__ name -> value, reason lines, line number. In a block's box only the "> " lines are
-    the reader's. A comment right above an @setvar! line is a reason too, and moves into the box."""
+    """#@ blocks as entries and the settings written under them: config__ name -> value, reason
+    lines, line number. Under a #@ use line the builder's lines run to the first blank line or
+    @setvar! line. Of those only the "> " lines are the reader's: a note on the block, or under a
+    setting the reason for its value. A comment right above an @setvar! line is a reason too."""
     entries, over, reasons, pending = [], {}, {}, []
     box, setting = False, None
 
     def settle():
         if pending:
-            raise BuildError('%s:%d: a reason goes right above its @setvar! line, or as a "> " line in the box'
+            raise BuildError('%s:%d: a reason goes right above its @setvar! line, or as a "> " line'
                              % (name, pending[0][1]))
 
     for item in recipe['blocks']:
         if item[0] == 'line' and not entries:
-            continue  # the #@ blocks box: the builder's own guide
+            continue  # the guide under #@ blocks is the builder's
         if item[0] == 'use':
             settle()
-            entries.append({'ident': item[2], 'note': item[3], 'number': item[1]})
+            entries.append({'ident': item[2], 'number': item[1], 'old': [],
+                            'notes': [item[3]] if item[3] else []})
             box, setting = True, None
             continue
         _, number, line = item
         text = line.strip()
         if not text:
-            settle()
-            continue
-        if BOX_RULE.match(text):
             settle()
             box = False
             continue
@@ -329,17 +330,19 @@ def read_blocks(recipe, name):
                 pending.append((reason if reason is not None else body, number))
             elif BOX_SETTING.match(text):
                 setting = 'config__' + BOX_SETTING.match(text).group(1)
-            elif reason is not None:
-                if not setting:
-                    raise BuildError('%s:%d: a "> " reason goes under the setting it explains' % (name, number))
+            elif reason is not None and setting:
                 reasons.setdefault(setting, []).append(reason)
+            elif reason is not None:
+                entries[-1]['notes'].append(reason)
+            elif not line.startswith('#   '):
+                entries[-1]['old'].append((number, line.rstrip()))  # not in a shape the builder writes
             continue
         match = SETVAR.match(line)
         if not match or not match.group(1).startswith('config__') or not match.group(2).strip():
-            raise BuildError('%s:%d: under #@ blocks go the block boxes and, under each box, '
+            raise BuildError('%s:%d: under #@ blocks go "#@ use" lines and, under each, '
                              '"@setvar! config__<name> <value>" lines' % (name, number))
         if not entries:
-            raise BuildError('%s:%d: a setting goes under the box of its block' % (name, number))
+            raise BuildError('%s:%d: a setting goes under the #@ use line of its block' % (name, number))
         if match.group(1) in over:
             raise BuildError('%s:%d: %s is set twice' % (name, number, match.group(1)))
         box = False
@@ -377,7 +380,7 @@ def prepare(path, modules, owner):
     for number, line in recipe['sections'].get('state', []):
         match = SETVAR.match(line) if is_code(line) else None
         if match and not match.group(1).startswith('var__'):
-            raise BuildError('%s:%d: a recipe sets var__ state only. A setting goes under the box of its block'
+            raise BuildError('%s:%d: a recipe sets var__ state only. A setting goes under the #@ use line of its block'
                              % (name, number))
         if match:
             own.add(match.group(1))
@@ -425,88 +428,97 @@ def read_by(loop, setting):
     return ('Also read by ' if len(others) < len(found) else 'Read by ') + ', '.join(others) + '.'
 
 
-def wrapped(text):
-    return textwrap.wrap(text, WIDTH, initial_indent=TEXT, subsequent_indent=TEXT + '   ')
+def wrapped(text, first='#   ', rest=None):
+    return textwrap.wrap(text, WIDTH, initial_indent=first, subsequent_indent=rest or first,
+                         break_long_words=False, break_on_hyphens=False)
 
 
-def block_box(loop, modules, entry, width):
-    """One block of #@ blocks: its box, then the @setvar! lines of the settings it changes."""
+def block_lines(loop, modules, entry):
+    """One block of #@ blocks: its #@ use line, the summary, notes and changed settings under
+    it, then the @setvar! lines of those settings."""
     module, over = modules[entry['ident']], loop['over']
     changed = [s for s in module['settings'] if s['name'] in over]
-    out = [BOX, ('#@ use %-*s  %s' % (width, entry['ident'], entry['note'])).rstrip()]
+    out = [ruled('#@ use ' + entry['ident'])] + wrapped(module['description'][0])
     if 'setup' in module['sections'] and 'loop' not in module['sections']:
         out.append('#   Runs once, before the loop.')
+    out += ['#   > ' + n for n in entry['notes']]
     for setting in changed:
         value = over[setting['name']]
         same = ', the same value' if value['value'] == setting['value'] else ''
         out += ['#', '#   %s (default %s%s)' % (setting['name'][len('config__'):], setting['value'], same)]
         out += [(TEXT + d).rstrip() for d in setting['description']]
         if read_by(loop, setting['name']):
-            out += wrapped(read_by(loop, setting['name']))
+            out += wrapped(read_by(loop, setting['name']), TEXT, TEXT + '   ')
         out += [TEXT + '> ' + n for n in value['notes']]
-    out.append(BOX)
-    out += ['@setvar! %s %s' % (s['name'], over[s['name']]['value']) for s in changed]
-    return out
+    return out + ['@setvar! %s %s' % (s['name'], over[s['name']]['value']) for s in changed]
 
 
 def recipe_text(loop, modules):
-    """The recipe as the builder writes it back: notes, output, then one box per section, the
-    blocks as one box each with each change under the box of the module that has it."""
+    """The recipe as the builder writes it back: notes, output, then each part under its
+    "====" line, every block under its "----" line with each change under the block it belongs to."""
     recipe = loop['recipe']
-    width = max(len(e['ident']) for e in loop['entries'])
     out = trim(recipe['notes']) + ['#@ output ' + recipe['output']]
+    blocks = [block_lines(loop, modules, e) for e in loop['entries']]
+    for entry, lines in zip(loop['entries'], blocks):
+        kept = set(lines)
+        for number, line in entry['old']:
+            if line not in kept:
+                print('build-scripts: %s:%d: dropped a line under #@ use %s that the builder did not write. '
+                      'Write your own lines as "> " lines: %s' % (loop['name'], number, entry['ident'], line),
+                      file=sys.stderr)
     for section in RECIPE_SECTIONS:
         if section not in recipe['sections']:
             continue
+        out += ['', '', ruled('#@ ' + section, '=')]
         if section == 'blocks':
-            body = join([block_box(loop, modules, e, width) for e in loop['entries']])
-            out += ['', '', BOX, '#@ blocks'] + BLOCKS_GUIDE + [BOX, ''] + body
+            out += BLOCKS_GUIDE + [''] + join(blocks)
         else:
-            out += ['', '', BOX, '#@ ' + section, BOX, ''] + trim(lines_of(recipe, section))
+            out += [''] + trim(lines_of(recipe, section))
     return text_of(out)
 
 
-def source_box(source, box=()):
-    return [BOX, '# ' + source] + list(box) + [BOX]
-
-
-def entry_lines(entry, notes=()):
-    """One entry of a box: a blank comment line, the names, what they do, then any notes."""
-    out, line = ['#'], '#   '
-    for i, name in enumerate(entry['names']):
-        piece = name + (',' if i < len(entry['names']) - 1 else '')
-        if len(line) + len(piece) > WIDTH and line.strip() != '#':
-            out.append(line.rstrip())
-            line = '#   '
-        line += piece + ' '
-    out.append(line.rstrip())
-    return out + [(TEXT + d).rstrip() for d in entry['description']] + list(notes)
+def entry_lines(entries, notes_of=lambda entry: []):
+    """The descriptions of a section: "#   name, name", "#      what they do", any notes."""
+    out = []
+    for entry in entries:
+        line = '#   '
+        out += ['#'] if out else []
+        for i, name in enumerate(entry['names']):
+            piece = name + (',' if i < len(entry['names']) - 1 else '')
+            if len(line) + len(piece) > WIDTH and line.strip() != '#':
+                out.append(line.rstrip())
+                line = '#   '
+            line += piece + ' '
+        out.append(line.rstrip())
+        out += [(TEXT + d).rstrip() for d in entry['description']] + notes_of(entry)
+    return out
 
 
 def config_part(loop, module):
-    """A module's settings in CONFIG: its box with this loop's values and reasons, then the values."""
+    """A module's settings in CONFIG, with this loop's values and the reasons for them."""
     over = loop['over']
     defaults = {s['name']: s['value'] for s in module['settings']}
-    box = []
-    for entry in module['entries']['config']:
-        notes = []
+
+    def notes_of(entry):
+        out = []
         for name in entry['names']:
             if name in over:
                 same = ', the default' if over[name]['value'] == defaults[name] else ' (default %s)' % defaults[name]
-                notes.append(TEXT + '> This loop: %s %s%s.' % (name, over[name]['value'], same))
-                notes += [TEXT + '> ' + n for n in over[name]['notes']]
-        box += entry_lines(entry, notes)
+                out.append(TEXT + '> This loop: %s %s%s.' % (name, over[name]['value'], same))
+                out += [TEXT + '> ' + n for n in over[name]['notes']]
+        return out
+
     values = []
     for line in module['code']['config']:
         name = SETVAR.match(line).group(1)
         values.append('@setvar! %s %s' % (name, over[name]['value']) if name in over else line)
-    return source_box(module_path(module['ident']), box) + values
+    return [ruled('# ' + module_path(module['ident']))] + entry_lines(module['entries']['config'], notes_of) + values
 
 
 def timer_lines(unit):
     """A module's timers, each made if missing and set to its start value."""
     out = []
-    for line in unit.get('code', {}).get('timer', []):
+    for line in unit['code'].get('timer', []):
         timer, start = TIMER.match(line.strip()).groups()
         out += ([''] if out else []) + ['if not timerexists "%s"' % timer, '    createtimer "%s"' % timer, 'endif',
                                         'settimer "%s" %s' % (timer, start)]
@@ -526,20 +538,19 @@ def build(path, modules, owner):
                 continue
             code = timer_lines(unit) if section == 'timer' else trim(unit['code'][section])
             if code:
-                box = [l for e in unit['entries'][section] for l in entry_lines(e)]
-                found.append(source_box(source, box) + code)
+                found.append([ruled('# ' + source)] + entry_lines(unit['entries'][section]) + code)
         if with_recipe and trim(lines_of(recipe, section)):
-            found.append(source_box(name) + trim(lines_of(recipe, section)))
+            found.append([ruled('# ' + name)] + trim(lines_of(recipe, section)))
         return found
 
     def code_parts(section, indent=''):
         found = []
         for source, unit in units + [(name, recipe)]:
-            lines = trim(lines_of(unit, section))
-            if lines and unit is recipe and section != 'setup':
+            if unit is recipe and section != 'setup':
                 continue
+            lines = trim(lines_of(unit, section))
             if lines:
-                found.append(([indent + '# ' + source] if indent else source_box(source)) + lines)
+                found.append([indent + ('# ' + source if indent else ruled('# ' + source))] + lines)
         return found
 
     out = trim(lines_of(recipe, 'header'))
@@ -558,15 +569,15 @@ def build(path, modules, owner):
     out.append('# Generated from %s by util/build-scripts.py. Edit module/ and recipe/, not this file.' % name)
 
     config = [config_part(loop, unit) for _, unit in units if unit['code'].get('config')]
-    sections = [('CONFIG', join(config)),
-                ('WAIT AND COOLDOWN', join(declaring('wait'))),
-                ('TIMER', join(declaring('timer'))),
-                ('STATE', join(declaring('state', True)))]
+    sections = [('CONFIG', join(config, 2)),
+                ('WAIT AND COOLDOWN', join(declaring('wait'), 2)),
+                ('TIMER', join(declaring('timer'), 2)),
+                ('STATE', join(declaring('state', True), 2))]
     for title, lines in sections:
         if lines:
             out += ['', ''] + banner(title) + [''] + lines
     if code_parts('setup'):
-        out += ['', ''] + join(code_parts('setup'))
+        out += ['', ''] + join(code_parts('setup'), 2)
     out += ['', ''] + banner('MAIN LOOP') + ['while not dead']
     out += join(code_parts('loop', INDENT) + code_parts('end', INDENT)) + ['endwhile']
 
@@ -598,27 +609,20 @@ def settings_text(path, modules, owner):
     return '\n'.join(out)
 
 
-TEMPLATE = """{box}
-# One line on what this block does. It shows in --settings.
+TEMPLATE = """# One line on what this block does. It shows in --settings and in the recipes that use it.
 # More lines when the block needs them: what it waits for, why it works this way.
 #@ hotkeys
-{box}
 
 
-{box}
-#@ config
-#
+{config}
 #   config__{snake}_example
-#      What this setting changes. Each name the section declares is described here.
+#      What this setting changes. Each name a section declares is described above it.
 #        0  what 0 does
 #        1  what 1 does
-{box}
 @setvar! config__{snake}_example 1
 
 
-{box}
-#@ loop
-{box}
+{loop}
     # ################################################################################
     # # {title}
     # ################################################################################
@@ -634,9 +638,10 @@ def new_module(ident):
     if path.exists():
         raise BuildError('%s already exists' % rel(path))
     name = ident.split('/')[1]
-    text = TEMPLATE.format(box=BOX, snake=name.replace('-', '_'), title=name.replace('-', ' ').upper())
+    text = TEMPLATE.format(config=ruled('#@ config'), loop=ruled('#@ loop'),
+                           snake=name.replace('-', '_'), title=name.replace('-', ' ').upper())
     path.write_bytes(text_of(text.rstrip('\n').split('\n')).encode())
-    print('wrote %s. Add a box with "#@ use %s" to the recipe that runs it.' % (rel(path), ident))
+    print('wrote %s. Add "#@ use %s" to the recipe that runs it.' % (rel(path), ident))
 
 
 def main(argv):

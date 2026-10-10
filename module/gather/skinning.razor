@@ -1,52 +1,42 @@
-# ##################################################################################################
 # Forensic Evaluation carving of corpses within 2 tiles, between fights.
 #@ hotkeys Cancel Current Target
-# ##################################################################################################
 
 
-# ##################################################################################################
-#@ config
-#
+#@ config --------------------------------------------------------------------------------
 #   config__skin_unowned
 #      Which corpses within 2 tiles get carved.
 #        0  grey corpses only, through Smart Harvest on self
 #        1  every creature corpse, by targeting each one. Player remains are never targeted.
 #           Where the server refuses this as a criminal action, grey corpses only for 5 minutes
-# ##################################################################################################
 @setvar! config__skin_unowned 1
 
 
-# ##################################################################################################
-#@ wait
-#
+#@ wait ----------------------------------------------------------------------------------
 #   wait__carve_target
-#      The knife cursor must arrive inside this block. A late cursor would block every input guard.
+#      The knife cursor must arrive inside this block. A late cursor would block every
+#      input guard.
 #
 #   wait__carve_reply
 #      How long Smart Harvest waits for the server reply after target self.
 #
 #   cooldown__carve
-#      Forensic Evaluation has its own 0.5 second cooldown. This spaces the corpse search as well.
+#      Forensic Evaluation has its own 0.5 second cooldown. This spaces the corpse search
+#      as well.
 #
 #   cooldown__grey_only
 #      After a criminal action refusal, carve grey corpses only for 5 minutes.
-# ##################################################################################################
 @setvar! wait__carve_target 2000
 @setvar! wait__carve_reply 1500
 @setvar! cooldown__carve 700
 @setvar! cooldown__grey_only 300000
 
 
-# ##################################################################################################
-#@ timer
-# ##################################################################################################
+#@ timer ---------------------------------------------------------------------------------
 timer__carve cooldown__carve
 timer__grey_only cooldown__grey_only
 
 
-# ##################################################################################################
-#@ state
-#
+#@ state ---------------------------------------------------------------------------------
 #   var__pick_during_carve
 #      Scratch: 1 when a Z pick arrived while the knife cursor was up.
 #
@@ -57,19 +47,20 @@ timer__grey_only cooldown__grey_only
 #      Scratch: 1 when the corpse found this pass may be carved.
 #
 #   var__carve_crime
-#      1 after a corpse carving criminal act, read from the carve reply. Direct carving then stays
-#      off until the next Play. The label check should keep player remains out, so this is a safety
-#      net.
+#      1 after a corpse carving criminal act, read from the carve reply. Direct carving
+#      then stays off until the next Play. The label check should keep player remains out,
+#      so this is a safety net.
 #
 #   var__carve_retry
-#      Corpse that missed once (too far or busy). It gets one more request, then it is ignored.
+#      Corpse that missed once (too far or busy). It gets one more request, then it is
+#      ignored.
 #
 #   var__carve_reply
 #      Scratch Smart Harvest reply: 0 none yet, 1 carved, 2 nothing left to carve here.
 #
 #   var__my_knife
-#      Selected knife serial, reused across Stop and Play. 0 means rediscover from the backpack.
-# ##################################################################################################
+#      Selected knife serial, reused across Stop and Play. 0 means rediscover from the
+#      backpack.
 @setvar! var__pick_during_carve 0
 @setvar! var__carve_direct 0
 @setvar! var__corpse_ok 0
@@ -81,9 +72,7 @@ if not varexist var__my_knife
 endif
 
 
-# ##################################################################################################
-#@ loop
-# ##################################################################################################
+#@ loop ----------------------------------------------------------------------------------
     # ################################################################################
     # # SKINNING
     # ################################################################################
