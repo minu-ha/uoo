@@ -1,31 +1,64 @@
+<div align="center">
+
+<img src="../.github/ankh.svg" width="96" height="96" alt="uoo 앵크">
+
 # uoo
 
-[English](../README.md) · **한국어**
+**Ultima Online Outlands용 Razor 스크립트**
 
-**[Ultima Online Outlands](https://uooutlands.com/)**용 Razor 스크립트와 클라이언트 설정.
+사냥, 채집, 스킬 훈련, 집 정리. 루프는 공용 블록으로 조립하고, 이유는 문서로 남긴다.
 
-![Outlands](https://img.shields.io/badge/UO-Outlands-8b1a1a) ![Razor](https://img.shields.io/badge/Razor-Outlands%20fork-2b6cb0) ![License](https://img.shields.io/badge/license-MIT-green)
+[Outlands](https://uooutlands.com/) · [Razor Scripting](https://wiki.uooutlands.com/Razor_Scripting) · [문서](../blueprint/README.md)
 
-사냥 루프, 핫키 매크로, 스킬 트레이너, 집 정리 스크립트. Outlands 클라이언트에 딸려오는 Razor 빌드와
-그 확장 문법 기준이라 일반 Razor CE나 UOSteam에서는 그대로 돌아가지 않습니다.
-문법 참고: [Outlands 위키 Razor Scripting](https://wiki.uooutlands.com/Razor_Scripting).
+[![MIT](https://img.shields.io/badge/license-MIT-1111aa?style=flat-square)](../LICENSE)
+![UO Outlands](https://img.shields.io/badge/UO-Outlands-8b1a1a?style=flat-square)
+![Razor](https://img.shields.io/badge/Razor-Outlands%20fork-2b6cb0?style=flat-square)
+![Node 22+](https://img.shields.io/badge/node-22%2B-444444?style=flat-square)
+![Docs](https://img.shields.io/badge/docs-for%20humanity-444444?style=flat-square)
 
-## 쓰는 법
+[Quick start](#quick-start) · [스크립트](../script/README.md) · [문서](../blueprint/README.md) · [설정](config.ko.md) · [English](../README.md)
+
+</div>
+
+## A few loops. Every reason kept.
+
+- **바로 돌린다.** Outlands 클라이언트에 딸린 Razor용 사냥 루프, 핫키 매크로, 스킬 트레이너, 집 정리 스크립트.
+  그 Razor의 확장 문법을 쓰므로 일반 Razor CE나 UOSteam에서는 그대로 돌아가지 않습니다.
+- **한 번만 쓴다.** 전투·채집 루프는 `recipe/`의 레시피가 `module/`의 공용 블록을 모아 조립합니다.
+  블록 하나를 고치면 그 블록을 쓰는 모든 루프가 함께 고쳐집니다.
+- **이유를 남긴다.** 메커니즘, 숫자, 인게임 확인은 문서에 두고, 확인된 것과 아직 확인되지 않은 것을 표시합니다.
+- **설정도 git으로.** Razor와 ClassicUO 프로필은 `config/`에 두고, 스크립트 하나로 게임에 연결합니다.
+
+## Quick start
 
 - **스크립트 하나만 필요하면** `.razor` 파일을 Razor `Scripts` 폴더에 복사하면 끝입니다.
-- **저장소에서 바로 돌리고, 내 설정도 git으로 관리하고, 수정도 올리고 싶으면** clone 하고
-  `util/setup.sh`를 한 번 실행합니다. 무엇을 하는지는 [config.ko.md](config.ko.md).
+- **저장소에서 바로 돌리고, 내 설정도 git으로 관리하고, 수정도 올리고 싶으면** clone 하고 `util/setup.sh`를 한 번 실행합니다.
+  무엇을 하는지는 [config.ko.md](config.ko.md).
+
+### 빌드와 검사
+
+루프나 문서를 고치려면 Node.js 22 이상과 pnpm이 필요합니다.
+
+```sh
+pnpm install
+pnpm build       # module/과 recipe/로 script/combat, script/gather를 조립
+pnpm check       # 블록 짝, 값을 넣지 않은 변수, 오래된 루프, 문서 링크
+pnpm test        # PvP 시뮬레이터와 문서 검사의 테스트
+pnpm docs:dev    # localhost:4321에서 문서 읽기
+```
+
+생성된 루프는 손으로 고치지 않습니다. `module/`과 `recipe/`를 고치고 `pnpm build`를 돌립니다.
 
 ## 어디에 뭐가
 
-|                                  |                                                                                                                                                          |
-|----------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------|
-| [`script/`](../script/README.md) | 스크립트. 하는 일별로 묶음                                                                                                                               |
-| [`config/`](config.ko.md)        | Razor · ClassicUO 설정, 사람마다 폴더 하나. 게임을 저장소에 연결하는 방법                                                                                |
-| `blueprint/`                     | HTML 설계 문서. `_index.html`을 연다: 작업 방식, 규칙, 모듈, Razor, 오버헤드, PvP, Bard Necro, 벌목·PvP, 키 배치, 아이템 ID, 확인할 것. 지도는 [AGENTS.md](../AGENTS.md) |
-| `language/`                      | README 번역본 (이 파일)                                                                                                                                  |
-| `module/`, `recipe/`             | 한 벌만 둔 루프 블록과, `util/build-scripts.py`가 `script/combat/`·`script/gather/`의 모든 루프로 조립하는 레시피                                       |
-| `util/`                          | `setup.sh`는 게임을 저장소에 링크, `build-scripts.py`는 루프 조립, `razor-syntax/`는 WebStorm·VS Code용 `.razor` 하이라이팅, `check.sh`는 스크립트 블록 짝 검사, `check-blueprint.sh`는 설계 문서 링크 검사                                        |
+| 폴더                                   | 무엇                                                                                                                         |
+|----------------------------------------|------------------------------------------------------------------------------------------------------------------------------|
+| [`script/`](../script/README.md)       | 스크립트. 하는 일별로 묶음                                                                                                   |
+| `module/`, `recipe/`                   | 한 벌만 둔 루프 블록과, `util/build-scripts.mjs`가 `script/combat/`·`script/gather/`의 모든 루프로 조립하는 레시피           |
+| [`blueprint/`](../blueprint/README.md) | Markdown 설계 문서. [for humanity](https://for-humanity.fyi)로 읽는다: 작업 방식, 규칙, 모듈, Razor, 오버헤드, PvP, Bard Necro, 벌목·PvP, 키 배치, 아이템 ID, 확인할 것. 지도는 [AGENTS.md](../AGENTS.md) |
+| [`config/`](config.ko.md)              | Razor · ClassicUO 설정, 사람마다 폴더 하나. 게임을 저장소에 연결하는 방법                                                    |
+| `util/`                                | `setup.sh`는 게임을 저장소에 링크, `build-scripts.mjs`는 루프 조립, `check.sh`는 스크립트 검사, `check-docs.mjs`는 문서 링크 검사, `pvp-sim.mjs`는 필드 결투 모델, `razor-syntax/`는 WebStorm·VS Code용 `.razor` 하이라이팅 |
+| `language/`                            | README 번역본 (이 파일)                                                                                                      |
 
 ## 크레딧
 
@@ -33,5 +66,7 @@
 - Demlar — 드레스 스크립트 아이디어
 - raveX — 스틸 트레이너
 - [outlandsbutler.com](https://www.outlandsbutler.com/) — `shelf/` 로드아웃 스크립트 생성
+
+## License
 
 나머지는 [MIT](../LICENSE). 제3자 스크립트는 원저자의 조건을 따릅니다. UO Outlands와 무관합니다.
