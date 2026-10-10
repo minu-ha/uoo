@@ -1,5 +1,5 @@
 # ----------------------------------------------------------------------------------------
-# Remembers the enemy picked with lasttarget and sets var__fighting while it is in reach.
+# Remembers the picked enemy and sets var__fighting while it is in reach.
 # Songs, carving and self casts move lasttarget, so blocks read this copy instead.
 # ----------------------------------------------------------------------------------------
 
@@ -57,11 +57,11 @@ endif
     # COMBAT TARGET
     #
     # A pick within config__acquire_range becomes the remembered enemy. A carve or a song
-    # targets a corpse or an item, and dead and noto only take mobiles, so the serial range
-    # is checked first: mobile serials are below 0x40000000, and the number has to be on the
-    # left (blueprint/razor.html part 3, debug-target-state S06). The enemy is a fight
-    # (var__fighting 1) inside config__target_range, kept outside it while still within
-    # config__acquire_range, and dropped config__target_grace after it leaves that.
+    # targets a corpse or an item, and dead and noto only take mobiles, so the serial
+    # range is checked first: mobile serials are below 0x40000000, and the number has to
+    # be on the left (blueprint/razor.html part 3, debug-target-state S06). The enemy is a
+    # fight (var__fighting 1) inside config__target_range, kept outside it while still
+    # within config__acquire_range, and dropped config__target_grace after it leaves that.
     # ------------------------------------------------------------------------------------
     if find lasttarget ground -1 -1 config__acquire_range as alias__fresh_target
         if var__combat_target != alias__fresh_target

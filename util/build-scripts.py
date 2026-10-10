@@ -133,16 +133,37 @@ def banner(name):
 
 def block_banner(lines, source, depth=0):
     """A block in the loop starts with its "-" banner. Inside a group it moves in by four
-    spaces a level, its rules shortened to keep the width, and the file it came from goes on
-    the right of the title line."""
+    spaces a level, its rules shortened and its text refilled to keep the width, and the file
+    it came from goes on the right of the title line."""
     lines = [(' ' * 4 * depth + l) if l.strip() else l for l in lines]
     indent = lines[0][:len(lines[0]) - len(lines[0].lstrip())]
     rule = indent + '# ' + '-' * (WIDTH - len(indent) - 2)
     closing = next(i for i in range(2, len(lines)) if BLOCK_RULE.match(lines[i]))
+    if depth:
+        lines = lines[:2] + refill(lines[2:closing], indent) + lines[closing:]
+        closing = next(i for i in range(2, len(lines)) if BLOCK_RULE.match(lines[i]))
     title = lines[1].rstrip()
     lines[1] = title + ' ' * max(2, WIDTH - len(title) - len(source)) + source
     lines[0] = lines[closing] = rule
     return lines
+
+
+def refill(lines, indent):
+    """Banner text wrapped again to the width left at this indent. A line that starts with
+    spaces after its "#" (a table or a list) stays as it is, and so does a blank "#"."""
+    out, paragraph = [], []
+    for line in lines + [None]:
+        text = line.strip()[2:] if line is not None and line.strip().startswith('# ') else ''
+        if text and not text.startswith(' '):
+            paragraph.append(text)
+            continue
+        if paragraph:
+            out += [indent + '# ' + t for t in textwrap.wrap(' '.join(paragraph), WIDTH - len(indent) - 2,
+                                                              break_long_words=False, break_on_hyphens=False)]
+            paragraph = []
+        if line is not None:
+            out.append(line)
+    return out
 
 
 def parse(path, kind):
@@ -224,6 +245,9 @@ def load_module(path):
     if not description or any(is_code(l) for l in module['notes']):
         raise BuildError('%s: say what the block does in "#" lines before the first section' % name)
     module['description'] = description
+    if len(description[0]) > WIDTH - 4:
+        raise BuildError('%s: the first line is the summary the recipe shows, keep it to %d characters'
+                         % (name, WIDTH - 4))
     if 'end' in module['sections'] and ident != BASE:
         raise BuildError('%s: only module/base.razor has # @ end' % name)
 
@@ -664,7 +688,7 @@ def build(path, modules, owner):
             else:
                 depth -= 1
                 out.append(INDENT + '    ' * depth + 'endif')
-            gap = item['kind'] == 'end'
+            gap = item['kind'] in ('end', 'every')
         end = trim(lines_of(modules[BASE], 'end'))
         return out + ([''] + block_banner(end, module_path(BASE)) if end else [])
 

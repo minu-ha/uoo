@@ -280,6 +280,7 @@ TIMER는 timer마다 <code>createtimer</code>와 첫 <code>settimer</code>를 �
 <li>모듈 칸의 상자가 칸이 선언하는 이름을 빠뜨렸거나, 선언하지 않는 이름을 설명한다. 설명 줄이 <code>#   이름</code>, <code>#      설명</code> 모양이 아니다.</li>
 <li>두 모듈이 같은 이름을 선언한다. 칸에 다른 접두의 이름이 있다. 블록이 <code>config__</code>에 값을 넣는다.</li>
 <li>결과물 주석에 <code>;</code>이 있다 (<a href="razor.html#03">razor.html</a> 03절).</li>
+<li>모듈 첫 줄 요약이 86자를 넘는다. 레시피 상자에 한 줄로 보여야 한다.</li>
 </ul></li>
 <li>줄 끝은 CRLF로 쓴다 (<code>.gitattributes</code>). 바뀐 결과물과 레시피만 다시 쓴다.</li>
 <li><code>util/check.sh</code>를 인자 없이 돌리면 끝에 <code>util/build-scripts.py --check</code>도 돈다. 누가 결과물을 직접 고쳤거나, 모듈 설명을 고치고 조립하지 않았으면 여기서 잡힌다.</li>

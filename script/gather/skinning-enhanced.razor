@@ -909,7 +909,8 @@ while not dead
     # PASS START                                                         module/base.razor
     #
     # The pvp expression means structured-PvP restrictions, not a field PK encounter. With
-    # config__settle_first 1 the pass then waits for the item queue and any cast to finish.
+    # config__settle_first 1 the pass then waits for the item queue and any cast to
+    # finish.
     # ------------------------------------------------------------------------------------
     if pvp
         overhead "[ script, blocked ]" 254
@@ -926,11 +927,11 @@ while not dead
     # COMBAT TARGET                                              module/fight/target.razor
     #
     # A pick within config__acquire_range becomes the remembered enemy. A carve or a song
-    # targets a corpse or an item, and dead and noto only take mobiles, so the serial range
-    # is checked first: mobile serials are below 0x40000000, and the number has to be on the
-    # left (blueprint/razor.html part 3, debug-target-state S06). The enemy is a fight
-    # (var__fighting 1) inside config__target_range, kept outside it while still within
-    # config__acquire_range, and dropped config__target_grace after it leaves that.
+    # targets a corpse or an item, and dead and noto only take mobiles, so the serial
+    # range is checked first: mobile serials are below 0x40000000, and the number has to
+    # be on the left (blueprint/razor.html part 3, debug-target-state S06). The enemy is a
+    # fight (var__fighting 1) inside config__target_range, kept outside it while still
+    # within config__acquire_range, and dropped config__target_grace after it leaves that.
     # ------------------------------------------------------------------------------------
     if find lasttarget ground -1 -1 config__acquire_range as alias__fresh_target
         if var__combat_target != alias__fresh_target
@@ -1872,9 +1873,9 @@ while not dead
     # ------------------------------------------------------------------------------------
     # REAGENTS                                                module/magery/reagents.razor
     #
-    # On the interval, or at once after a refusal for reagents, so a stale flag cannot send the
-    # same doomed cast every pass. Each reagent is looked up once, and every spell flag comes
-    # from those seven with plain comparisons.
+    # On the interval, or at once after a refusal for reagents, so a stale flag cannot
+    # send the same doomed cast every pass. Each reagent is looked up once, and every
+    # spell flag comes from those seven with plain comparisons.
     # ------------------------------------------------------------------------------------
     if config__use_magery = 1
         if timer "timer__reagents" >= interval__reagents or insysmsg "More reagents are needed"

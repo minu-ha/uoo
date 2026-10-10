@@ -29,8 +29,8 @@ timer__scavenger_clear 0
     # ------------------------------------------------------------------------------------
     # SCAVENGER CACHE
     #
-    # The scavenger passes over an item it already handled until its cache is cleared, so a
-    # clear every 30 seconds gives those items another try.
+    # The scavenger passes over an item it already handled until its cache is cleared, so
+    # a clear every 30 seconds gives those items another try.
     # ------------------------------------------------------------------------------------
     if timer "timer__scavenger_clear" >= interval__scavenger_clear
         settimer "timer__scavenger_clear" 0

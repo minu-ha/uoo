@@ -1,6 +1,6 @@
 # ----------------------------------------------------------------------------------------
-# What the Magery casts need: reagent flags read on a clock and after a refusal, the mana
-# each circle takes, and the settings every attack cast shares.
+# Reagent flags for the Magery casts, the mana per circle and the shared cast settings.
+# The flags are read on a clock and after a "More reagents are needed" refusal.
 # insysmsg consumes older journal lines too, so the recipe puts this block after any other
 # block that reads the journal.
 # ----------------------------------------------------------------------------------------
@@ -106,9 +106,9 @@ timer__reagents interval__reagents
     # ------------------------------------------------------------------------------------
     # REAGENTS
     #
-    # On the interval, or at once after a refusal for reagents, so a stale flag cannot send the
-    # same doomed cast every pass. Each reagent is looked up once, and every spell flag comes
-    # from those seven with plain comparisons.
+    # On the interval, or at once after a refusal for reagents, so a stale flag cannot
+    # send the same doomed cast every pass. Each reagent is looked up once, and every
+    # spell flag comes from those seven with plain comparisons.
     # ------------------------------------------------------------------------------------
     if config__use_magery = 1
         if timer "timer__reagents" >= interval__reagents or insysmsg "More reagents are needed"

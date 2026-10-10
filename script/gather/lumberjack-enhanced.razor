@@ -785,7 +785,8 @@ while not dead
     # PASS START                                                         module/base.razor
     #
     # The pvp expression means structured-PvP restrictions, not a field PK encounter. With
-    # config__settle_first 1 the pass then waits for the item queue and any cast to finish.
+    # config__settle_first 1 the pass then waits for the item queue and any cast to
+    # finish.
     # ------------------------------------------------------------------------------------
     if pvp
         overhead "[ script, blocked ]" 254
@@ -1200,9 +1201,9 @@ while not dead
     # ------------------------------------------------------------------------------------
     # REAGENTS                                                module/magery/reagents.razor
     #
-    # On the interval, or at once after a refusal for reagents, so a stale flag cannot send the
-    # same doomed cast every pass. Each reagent is looked up once, and every spell flag comes
-    # from those seven with plain comparisons.
+    # On the interval, or at once after a refusal for reagents, so a stale flag cannot
+    # send the same doomed cast every pass. Each reagent is looked up once, and every
+    # spell flag comes from those seven with plain comparisons.
     # ------------------------------------------------------------------------------------
     if config__use_magery = 1
         if timer "timer__reagents" >= interval__reagents or insysmsg "More reagents are needed"
