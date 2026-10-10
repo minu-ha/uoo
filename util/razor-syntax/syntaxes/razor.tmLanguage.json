@@ -1,0 +1,249 @@
+{
+  "name": "Razor Script",
+  "scopeName": "source.razor",
+  "fileTypes": [
+    "razor"
+  ],
+  "patterns": [
+    {
+      "include": "#comment-lines"
+    },
+    {
+      "include": "#code"
+    }
+  ],
+  "repository": {
+    "comment-lines": {
+      "patterns": [
+        {
+          "comment": "# @ use <module>: the block line of a recipe",
+          "match": "^\\s*(#)\\s?(@\\s*use)\\s+(\\S+)(.*)$",
+          "captures": {
+            "1": {
+              "name": "comment.line.razor"
+            },
+            "2": {
+              "name": "meta.tag.directive.razor"
+            },
+            "3": {
+              "name": "entity.name.class.module.razor"
+            },
+            "4": {
+              "name": "comment.line.razor"
+            }
+          }
+        },
+        {
+          "comment": "# @ output <file>, # @ hotkeys <list>",
+          "match": "^\\s*(#)\\s?(@\\s*(?:output|hotkeys))\\s+(.*)$",
+          "captures": {
+            "1": {
+              "name": "comment.line.razor"
+            },
+            "2": {
+              "name": "meta.tag.directive.razor"
+            },
+            "3": {
+              "name": "string.unquoted.directive.razor"
+            }
+          }
+        },
+        {
+          "comment": "# @ config, # @ loop, # @ blocks: the line that opens a part",
+          "match": "^\\s*(#)\\s?(@\\s*[a-z]+)\\b(.*)$",
+          "captures": {
+            "1": {
+              "name": "comment.line.razor"
+            },
+            "2": {
+              "name": "meta.tag.directive.razor"
+            },
+            "3": {
+              "name": "comment.line.razor"
+            }
+          }
+        },
+        {
+          "comment": "A block banner title with the file it came from on the right",
+          "match": "^(\\s+#)\\s+([A-Z][A-Z0-9 /&,.'()+:-]*[A-Z0-9)])\\s{2,}((?:module|recipe)/[\\w./-]+\\.razor)\\s*$",
+          "captures": {
+            "1": {
+              "name": "comment.line.razor"
+            },
+            "2": {
+              "name": "entity.name.function.block.razor"
+            },
+            "3": {
+              "name": "entity.name.class.source.razor"
+            }
+          }
+        },
+        {
+          "comment": "# module/x.razor: where a piece of a built loop came from",
+          "match": "^\\s*(#)\\s+((?:module|recipe)/[\\w./-]+\\.razor)\\s*$",
+          "captures": {
+            "1": {
+              "name": "comment.line.razor"
+            },
+            "2": {
+              "name": "entity.name.class.source.razor"
+            }
+          }
+        },
+        {
+          "comment": "A title in capitals at the left edge: a part of the file (CONFIG, MAIN LOOP)",
+          "match": "^(#)\\s+([A-Z][A-Z0-9 /&,.'()+:-]*[A-Z0-9)])\\s*$",
+          "captures": {
+            "1": {
+              "name": "comment.line.razor"
+            },
+            "2": {
+              "name": "markup.heading.part.razor"
+            }
+          }
+        },
+        {
+          "comment": "A title in capitals, indented: a block of the loop (BANDAGE)",
+          "match": "^(\\s+#)\\s+([A-Z][A-Z0-9 /&,.'()+:-]*[A-Z0-9)])\\s*$",
+          "captures": {
+            "1": {
+              "name": "comment.line.razor"
+            },
+            "2": {
+              "name": "entity.name.function.block.razor"
+            }
+          }
+        },
+        {
+          "comment": "#   config__x, var__y: the names a module box describes",
+          "match": "^\\s*(#)   ((?:config|wait|cooldown|timer|var)__\\w+(?:,\\s*(?:config|wait|cooldown|timer|var)__\\w+)*,?)\\s*$",
+          "captures": {
+            "1": {
+              "name": "comment.line.razor"
+            },
+            "2": {
+              "name": "variable.parameter.name.razor"
+            }
+          }
+        },
+        {
+          "comment": "#   heal_hits (default 35): a setting a recipe changes",
+          "match": "^\\s*(#)   ([a-z0-9_]+)\\s+(\\(default\\s+)([^,)]+)(.*)$",
+          "captures": {
+            "1": {
+              "name": "comment.line.razor"
+            },
+            "2": {
+              "name": "variable.parameter.name.razor"
+            },
+            "3": {
+              "name": "comment.line.razor"
+            },
+            "4": {
+              "name": "constant.numeric.razor"
+            },
+            "5": {
+              "name": "comment.line.razor"
+            }
+          }
+        },
+        {
+          "comment": "> a note or a reason, written by the reader",
+          "match": "^\\s*(#)\\s+(>.*)$",
+          "captures": {
+            "1": {
+              "name": "comment.line.razor"
+            },
+            "2": {
+              "name": "string.unquoted.note.razor"
+            }
+          }
+        },
+        {
+          "match": "^\\s*#.*$",
+          "name": "comment.line.number-sign.razor"
+        },
+        {
+          "match": "^\\s*//.*$",
+          "name": "comment.line.double-slash.razor"
+        }
+      ]
+    },
+    "code": {
+      "patterns": [
+        {
+          "begin": "\"",
+          "end": "\"",
+          "name": "string.quoted.double.razor",
+          "patterns": [
+            {
+              "include": "#in-string"
+            }
+          ]
+        },
+        {
+          "begin": "'",
+          "end": "'",
+          "name": "string.quoted.single.razor",
+          "patterns": [
+            {
+              "include": "#in-string"
+            }
+          ]
+        },
+        {
+          "match": "^\\s*(@?(?:promptresponse|cleardragdrop|setlasttarget|waitforprompt|waitforsysmsg|waitfortarget|gumpresponse|menuresponse|targetrelloc|clearignore|clearsysmsg|createtimer|removetimer|waitforgump|waitformenu|clearhands|createlist|dclicktype|droprelloc|lasttarget|removelist|setability|targettype|classicuo|clearlist|gumpclose|interrupt|organizer|scavenger|targetloc|alliance|clearall|cooldown|getlabel|lifttype|overhead|pushlist|setskill|settimer|unignore|unsetvar|useskill|poplist|restock|undress|useonce|whisper|attack|dclick|hotkey|ignore|potion|random|rename|replay|script|setvar|sysmsg|target|virtue|dress|emote|guild|music|pause|skill|sound|cast|drop|lift|menu|sell|wait|walk|yell|say|wft)!?)(?=\\s|$)",
+          "captures": {
+            "1": {
+              "name": "support.function.command.razor"
+            }
+          }
+        },
+        {
+          "match": "\\b(?:continue|endwhile|foreach|elseif|endfor|replay|break|endif|while|else|loop|stop|for|if)\\b",
+          "name": "keyword.control.razor"
+        },
+        {
+          "match": "\\b(?:and|not|as|in|or)\\b",
+          "name": "keyword.operator.word.razor"
+        },
+        {
+          "match": "\\bconfig__\\w+",
+          "name": "variable.parameter.config.razor"
+        },
+        {
+          "match": "\\b(?:var|wait|cooldown|timer|alias|label|list|global)__\\w+",
+          "name": "variable.other.razor"
+        },
+        {
+          "match": "\\b(?:findtypelist|maxfollowers|targetexists|timerexists|diffweight|gumpexists|lhandempty|listexists|rhandempty|bandaging|counttype|findlayer|followers|itemcount|maxweight|paralyzed|diffhits|diffmana|diffstam|findbuff|findtype|insysmsg|poisoned|position|varexist|counter|maxmana|maxstam|mounted|poplist|warmode|atlist|hidden|ingump|inlist|invuln|queued|weight|count|invul|maxhp|skill|timer|dead|find|list|mana|name|noto|stam|dex|hue|int|pvp|str|hp)\\b",
+          "name": "support.type.expression.razor"
+        },
+        {
+          "match": "\\b(?:middletorso|facialhair|innertorso|lastobject|lasttarget|outertorso|innerlegs|outerlegs|righthand|backpack|bracelet|earrings|lefthand|talisman|gloves|ground|cloak|hands|index|pants|shirt|shoes|waist|arms|face|hair|head|last|neck|ring|self)\\b",
+          "name": "constant.language.razor"
+        },
+        {
+          "match": "\\b0x[0-9A-Fa-f]+\\b|\\b\\d+\\b",
+          "name": "constant.numeric.razor"
+        },
+        {
+          "match": ">=|<=|!=|=|<|>",
+          "name": "keyword.operator.razor"
+        }
+      ]
+    },
+    "in-string": {
+      "patterns": [
+        {
+          "match": "\\{\\{[^}]*\\}\\}",
+          "name": "variable.other.interpolation.razor"
+        },
+        {
+          "match": "\\b(?:config|var|wait|cooldown|timer|list)__\\w+",
+          "name": "variable.other.razor"
+        }
+      ]
+    }
+  }
+}

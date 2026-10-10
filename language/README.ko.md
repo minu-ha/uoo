@@ -25,7 +25,7 @@
 | `blueprint/`                     | HTML 설계 문서. `_index.html`을 연다: 작업 방식, 규칙, 모듈, Razor, 오버헤드, PvP, Bard Necro, 벌목·PvP, 키 배치, 아이템 ID, 확인할 것. 지도는 [AGENTS.md](../AGENTS.md) |
 | `language/`                      | README 번역본 (이 파일)                                                                                                                                  |
 | `module/`, `recipe/`             | 한 벌만 둔 루프 블록과, `util/build-scripts.py`가 `script/combat/pvp`·`script/gather/*`로 조립하는 레시피                                                 |
-| `util/`                          | `setup.sh`는 게임을 저장소에 링크, `build-scripts.py`는 루프 조립, `check.sh`는 스크립트 블록 짝 검사, `check-blueprint.sh`는 설계 문서 링크 검사                                        |
+| `util/`                          | `setup.sh`는 게임을 저장소에 링크, `build-scripts.py`는 루프 조립, `razor-syntax/`는 WebStorm·VS Code용 `.razor` 하이라이팅, `check.sh`는 스크립트 블록 짝 검사, `check-blueprint.sh`는 설계 문서 링크 검사                                        |
 
 ## 크레딧
 

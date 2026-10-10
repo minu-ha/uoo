@@ -52,7 +52,7 @@ Ultima Online Outlands용 Razor 스크립트 (`script/`), 클라이언트 설정
 | [blueprint/_index.html](blueprint/_index.html)                                   | 브라우저로 여는 첫 화면. 문서 목록은 `_index.js`의 `blueprint_docs`, 모든 문서의 모양은 `_index.css` |
 | [blueprint/workflow.html](blueprint/workflow.html)                               | 근거 우선순위와 참고 사이트, 작업 순서, 변경 보고, 게임 반영·검증, 글의 언어와 번역본, 커밋          |
 | [blueprint/modules.html](blueprint/modules.html)                                 | 모듈 폴더, 레시피와 모듈 형식, 조립 규칙, base와 블록끼리의 신호, 옮긴 기록                          |
-| [blueprint/conventions.html](blueprint/conventions.html)                         | 폴더와 파일 이름, 스크립트 모양과 배너, 변수 접두, serial, 타이머 관용구                              |
+| [blueprint/conventions.html](blueprint/conventions.html)                         | 폴더와 파일 이름, 스크립트 모양과 배너, 변수 접두, serial, 타이머 관용구, 편집기 하이라이팅           |
 | [blueprint/razor.html](blueprint/razor.html)                                     | Outlands Razor 확장 문법, 확인된 함정, 되는 구문의 선례, 명령문 비용, PvP 명령 제약                  |
 | [blueprint/overheads.html](blueprint/overheads.html)                             | 알림 세 경로, `[ 대상, 상태 ]` 형식, 어휘, hue, 쿨다운 바, 프로필 오버헤드 표                        |
 | [blueprint/pvp.html](blueprint/pvp.html)                                         | 템플릿과 무관한 PvP 규칙과 숫자                                                                      |
