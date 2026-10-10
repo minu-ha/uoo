@@ -95,7 +95,9 @@ endif
 
 # Missing hit points, as in lumberjack-enhanced. Bandages handle ordinary damage.
 # heal_hits drinks a heal potion and also holds skinning, buffs and packing back.
-# light_hits is the light Heal line, used only when no bandage can run.
+# light_hits is the light Heal line. It stands in for a bandage that cannot run, and with
+# use_light_heal 1 it also goes beside the bandages.
+@setvar! config__use_light_heal 0
 @setvar! config__heal_hits 35
 @setvar! config__emergency_hits 45
 @setvar! config__light_hits 15
@@ -356,7 +358,7 @@ if config__pack_leather = 1
 endif
 
 if config__sysmsg = 1
-    sysmsg "Skinning enhanced v9 loaded: skin unowned={{config__skin_unowned}}, sword stance={{config__sword_stance_main}}, parry stance={{config__parry_stance_main}}." 88
+    sysmsg "Skinning enhanced v10 loaded: skin unowned={{config__skin_unowned}}, sword stance={{config__sword_stance_main}}, parry stance={{config__parry_stance_main}}." 88
 endif
 if config__chatty = 1
     overhead "[ skinning, on ]" 290
@@ -491,12 +493,15 @@ while not dead
     endif
 
     # HEALING SPELL: Greater Heal for heavy damage, whether or not a bandage is running.
-    # A light Heal only stands in for a bandage, so loss under 45 costs no mana while bandaging.
+    # A light Heal stands in for a bandage that cannot run, so loss under 45 costs no mana while
+    # bandaging. config__use_light_heal 1 lets it go beside the bandages as well.
     if config__use_magery = 1 and not poisoned
         if diffhits >= config__emergency_hits and var__regs_greater_heal = 1 and mana >= config__mana_greater_heal
             @setvar! var__heal_spell 2
-        elseif diffhits >= config__light_hits and not bandaging
-            if var__regs_heal = 1 and mana >= config__mana_heal
+        elseif diffhits >= config__light_hits and var__regs_heal = 1 and mana >= config__mana_heal
+            if config__use_light_heal = 1
+                @setvar! var__heal_spell 1
+            elseif not bandaging
                 if skill "Healing" = 0 or var__bandage_available = 0
                     @setvar! var__heal_spell 1
                 endif

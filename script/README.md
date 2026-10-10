@@ -103,7 +103,7 @@ Use [gather/skinning-enhanced.razor](gather/skinning-enhanced.razor) for dungeon
 The template is a Two-Handed Axe dexxer with Magery 80 for recovery and PK readiness.
 It is `bard-mace` without the bard parts, plus the Magery self support of `lumberjack-enhanced`:
 Smart Heal/Cure and Greater Heal agents, and Reactive Armor and Magic Reflection kept up above the 20 mana GH + Teleport budget.
-A cure potion goes first. A light Heal only stands in for bandages. Warmode is toggled by hand (Tab) and no block depends on it.
+A cure potion goes first. A light Heal stands in for bandages that cannot run, and `config__use_light_heal = 1` lets it go beside them. Warmode is toggled by hand (Tab) and no block depends on it.
 Melee and targeting stay manual (Z then V). An empty left hand re-arms the cached Two-Handed Axe (5187) when no cast is running.
 Over max weight, 2000 gold is dropped at your feet per pass. The skinning knife is used from the backpack.
 `config__skin_unowned = 1` targets each creature corpse within 2 tiles, grey or not. Its label must read "corpse" without "remains":
@@ -162,7 +162,7 @@ Configure independent options in that file. Bind PvP hotkeys to `Play Script: co
 
 v6 follows the shape of `bard-necro-enhanced` and `lumberjack-enhanced`: each block reads the live state and acts
 on the spot. The order is reagents, paralyze pouch, cure (potion, else the Smart Heal/Cure agent), heal (potion,
-else the Greater Heal/Cure agent at the emergency line), bandage, light Heal when no bandage can run, Refresh,
+else the Greater Heal/Cure agent at the emergency line), bandage, light Heal (the stand-in when no bandage can run, beside the bandages with `config__use_light_heal = 1`), Refresh,
 stat potions, Reactive Armor and Magic Reflection, then the weapon.
 Stat potions and both buffs are kept up for the whole fight, with no walk guard. Agents and buffs wait out their own
 cast in a `for 60` poll, and our buff cast is cut at the emergency line. The script never cuts a manual cast or cursor.

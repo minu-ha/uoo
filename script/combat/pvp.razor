@@ -48,6 +48,10 @@ endif
 @setvar! config__use_reactive_armor 1
 @setvar! config__use_magic_reflect 1
 
+# Light Heal beside the bandages. With no bandage able to run (use_bandages 0, no Healing, or
+# none left) it goes anyway, as the bandage stand-in. Needs use_magery.
+@setvar! config__use_light_heal 0
+
 # STR and DEX with the Greater potion on: your base plus 20. Below these the potion is drunk.
 # Bless and the Strength and Agility spells, ours or an ally's, show the same icons as the
 # potions but add less than its 20, so the stat is what tells the potion apart.
@@ -58,7 +62,7 @@ endif
 # Missing hit points, not percent.
 #   heal_hits       heal potion
 #   emergency_hits  Greater Heal when no heal potion can go out, and the buff cut. Not below heal_hits
-#   light_hits      light Heal when no bandage can run
+#   light_hits      light Heal, see use_light_heal
 @setvar! config__heal_hits 35
 @setvar! config__emergency_hits 35
 @setvar! config__light_hits 15
@@ -154,13 +158,15 @@ endif
 #   heal_potion_out  HEAL: 1 once a heal potion went out on this pass
 #   weapon_want      WEAPON: slot graphic wanted on this pass, 0 for none
 #   weapon_held      WEAPON: 1 when the armed serial is in a hand
+#   light_heal_due   LIGHT HEAL: 1 when the light Heal goes on this pass
 @setvar! var__heal_potion_out 0
+@setvar! var__light_heal_due 0
 @setvar! var__weapon_want 0
 @setvar! var__weapon_held 0
 
 overhead "[ pvp, on ]" 290
 if config__sysmsg = 1
-    sysmsg "PvP sustain v7 loaded. Manual offense, recovery first." 88
+    sysmsg "PvP sustain v8 loaded. Manual offense, recovery first." 88
 endif
 
 # ####################################################################################
@@ -347,12 +353,20 @@ while not dead
     # ################################################################################
     # # LIGHT HEAL
     # ################################################################################
-    # Only when no bandage can run: bandages off, no Healing, or none left.
-    if not poisoned and not paralyzed and not hidden and not queued and not casting and not targetexists and not bandaging and config__use_magery = 1 and var__regs_heal = 1 and diffhits >= config__light_hits and mana >= config__mana_heal
-        if config__use_bandages = 0 or skill "Healing" = 0 or not findtype 3617 self
+    # The bandage stand-in whenever no bandage can run: bandages off, no Healing, or none left
+    # and none running. Beside the bandages only with config__use_light_heal 1.
+    if not poisoned and not paralyzed and not hidden and not queued and not casting and not targetexists and config__use_magery = 1 and var__regs_heal = 1 and diffhits >= config__light_hits and mana >= config__mana_heal
+        @setvar! var__light_heal_due 0
+        if config__use_light_heal = 1 or config__use_bandages = 0 or skill "Healing" = 0
+            @setvar! var__light_heal_due 1
+        elseif not bandaging and not findtype 3617 self
+            @setvar! var__light_heal_due 1
+        endif
+
+        if var__light_heal_due = 1
             hotkey "> Smart Heal/Cure Self"
             if config__sysmsg = 1
-                sysmsg "Agent: Smart Heal/Cure Self, no bandage." 88
+                sysmsg "Agent: Smart Heal/Cure Self, light Heal." 88
             endif
             wait wait__short
 

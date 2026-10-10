@@ -61,6 +61,9 @@ endif
 @setvar! config__require_runebook 1
 
 # Missing hit points, rather than absolute HP. Bandages handle ordinary damage.
+# light_hits starts the light Heal. It stands in for a bandage that cannot run (no Healing, or
+# none left), and with use_light_heal 1 it also goes beside the bandages.
+@setvar! config__use_light_heal 0
 @setvar! config__heal_hits 35
 @setvar! config__emergency_hits 45
 @setvar! config__light_hits 15
@@ -246,7 +249,7 @@ if config__pack_lumber = 1
 endif
 
 if config__sysmsg = 1
-    sysmsg "Lumberjack enhanced v15 loaded: auto recall={{config__auto_recall}}, tracking color={{config__tracking_color}}." 88
+    sysmsg "Lumberjack enhanced v16 loaded: auto recall={{config__auto_recall}}, tracking color={{config__tracking_color}}." 88
 endif
 if config__chatty = 1
     overhead "[ lumberjack, on ]" 290
@@ -466,11 +469,14 @@ while not dead
         endif
     endif
 
-    # HEALING SPELL: stronger recovery takes priority over a light Heal.
+    # HEALING SPELL: stronger recovery takes priority over a light Heal. The light Heal stands in
+    # for a bandage that cannot run, and goes beside the bandages only with config__use_light_heal 1.
     if diffhits >= config__emergency_hits and not poisoned and var__regs_greater_heal = 1 and mana >= config__mana_greater_heal
         @setvar! var__heal_spell 2
-    elseif diffhits >= config__light_hits and not poisoned and not bandaging
-        if var__regs_heal = 1 and mana >= config__mana_heal
+    elseif diffhits >= config__light_hits and not poisoned and var__regs_heal = 1 and mana >= config__mana_heal
+        if config__use_light_heal = 1
+            @setvar! var__heal_spell 1
+        elseif not bandaging
             if skill "Healing" = 0 or var__bandage_available = 0
                 @setvar! var__heal_spell 1
             endif

@@ -860,6 +860,7 @@ v5는 위에서 고른 번호를 변수에 담고 아래 실행부가 다시 읽
 v6의 블록은 각자 지금 상태를 읽고 그 자리에서 행동하며 다음 블록에 결정을 넘기지 않는다.
 v5의 긴급 수동 주문 중단·6초 시전 대기와 <code>[ cast, check ]</code> 정지·준비 동작의 5초 주기·주문의 이동 가드·재시도 타이머 8개를 없앴다.
 2026-10-09 v7은 Strength·Agility 포션을 버프 대신 STR·DEX 값으로 판정하고 포션마다 5초 재시도 간격을 두었다 (09.D절).
+2026-10-10 v8은 가벼운 Heal을 붕대 옵션과 따로 <code>use_light_heal</code>로 정한다. 붕대를 쓸 수 없으면 옵션과 상관없이 대타로 나간다.
 현재 본문은 아직 인게임에서 확인되지 않았다.</p>
 
 <h4>입력 규칙</h4>
@@ -881,6 +882,9 @@ v5의 긴급 수동 주문 중단·6초 시전 대기와 <code>[ cast, check ]</
 <tbody>
 <tr><td><code>use_magery</code> / <code>use_weapon</code> / <code>use_bandages</code></td><td>각 1</td>
 <td>회복 에이전트·버프·시약 읽기 / 무기 장착 / Healing이 있고 피해·독이 있을 때 붕대</td></tr>
+<tr><td><code>use_light_heal</code></td><td>0</td>
+<td>붕대 옆에서도 <code>light_hits</code>부터 가벼운 Heal을 쓴다. 붕대를 쓸 수 없으면 (<code>use_bandages</code> 0, Healing 없음, 붕대 없음) 이 값과 상관없이 대타로 쓴다.
+<code>use_magery</code>가 1이어야 한다</td></tr>
 <tr><td><code>use_potions</code> / <code>use_stat_potions</code> / <code>use_resist_potion</code></td><td>각 1</td>
 <td>회복·Refresh 포션 / Strength·Agility와 선택한 Resist 포션 / Resist 포션의 추가 스위치</td></tr>
 <tr><td><code>str_potion</code> / <code>dex_potion</code></td><td>120 / 100</td>
@@ -889,7 +893,7 @@ v5의 긴급 수동 주문 중단·6초 시전 대기와 <code>[ cast, check ]</
 <tr><td><code>use_reactive_armor</code> / <code>use_magic_reflect</code></td><td>각 1</td>
 <td>빠지면 시전·커서가 없을 때 바로 다시 건다. 이동 가드 없음</td></tr>
 <tr><td><code>heal_hits</code> / <code>emergency_hits</code> / <code>light_hits</code></td><td>35 / 35 / 15</td>
-<td>최대 HP 대비 손실량. 힐 포션 / 포션이 나갈 수 없을 때 GH와 버프 중단 / 붕대를 쓸 수 없을 때 Heal.
+<td>최대 HP 대비 손실량. 힐 포션 / 포션이 나갈 수 없을 때 GH와 버프 중단 / 가벼운 Heal (<code>use_light_heal</code>).
 <code>emergency_hits</code>는 <code>heal_hits</code>보다 낮게 두지 않는다. 최대 HP 120이면 기본 기준은 현재 HP 85 이하</td></tr>
 <tr><td><code>refresh_stam</code></td><td>15</td><td>현재 STA가 이 값 이하이면 Refresh</td></tr>
 <tr><td><code>mana_cure</code> / <code>mana_greater_heal</code> / <code>mana_heal</code></td><td>6 / 11 / 4</td>
@@ -911,7 +915,7 @@ v5의 긴급 수동 주문 중단·6초 시전 대기와 <code>[ cast, check ]</
 <li>PARALYZE: 마비면 트랩 파우치.</li>
 <li>CURE: 독이면 Cure 포션. 포션이 하나라도 있으면 에이전트를 쓰지 않는다. 없거나 꺼져 있으면 Smart Heal/Cure 에이전트.</li>
 <li>HEAL: 손실이 힐 포션 기준 이상이면 포션. 이 패스에 포션이 나가지 않았고 긴급 기준 이상이면 Greater Heal/Cure 에이전트.</li>
-<li>BANDAGE → LIGHT HEAL → REFRESH: 진행 중 붕대는 다시 시작하지 않는다. 가벼운 Heal은 붕대를 쓸 수 없을 때만.</li>
+<li>BANDAGE → LIGHT HEAL → REFRESH: 진행 중 붕대는 다시 시작하지 않는다. 가벼운 Heal은 붕대를 쓸 수 없을 때 대타로 나가고, <code>use_light_heal</code>이 1이면 붕대 옆에서도 나간다.</li>
 <li>STAT POTIONS: Strength·Agility는 STR·DEX가 기준선 아래면 5초에 한 번, Resist는 버프가 빠지면 바로 마신다. 한 포션이 떨어져도 나머지는 계속한다.</li>
 <li>SELF BUFFS: RA → Reflect가 빠지면 긴급 기준 아래에서 바로 건다.</li>
 <li>WEAPON: 시전·커서가 없을 때 원하는 슬롯의 무기가 손에 없으면 장착을 요청한다.</li>

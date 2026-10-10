@@ -540,9 +540,10 @@ v14는 파우치 소속 검사 전에 ignore하던 순서를 바로잡는다.
 <td>1, 10, 1. 자동 리콜을 켠 경우 남은 무게 10 이하에서 리콜 필요 여부를 기록한다.
 책은 5초 주기로 보유 여부를 캐시하고, 마지막 설정은 책 없음으로 채집을 보류할지 정한다.
 0이어도 실제 리콜에는 책이 필요하다. 책 검사는 충전량이나 Home 룬의 존재를 확인하지 않는다</td></tr>
-<tr><td><code>config__heal_hits</code>, <code>emergency_hits</code>, <code>light_hits</code></td>
-<td>잃은 HP 35, 45, 15. 평소 붕대, 35부터 힐 포션, 45부터 Greater Heal을 보조로 쓴다.
-붕대를 쓸 수 없으면 15부터 Smart Heal/Cure를 시도한다. 독이면 Cure 포션과 해독 주문을 먼저 쓴다</td></tr>
+<tr><td><code>config__heal_hits</code>, <code>emergency_hits</code>, <code>light_hits</code>, <code>use_light_heal</code></td>
+<td>잃은 HP 35, 45, 15와 0. 평소 붕대, 35부터 힐 포션, 45부터 Greater Heal을 보조로 쓴다.
+붕대를 쓸 수 없으면 15부터 Smart Heal/Cure를 대타로 시도한다. v16부터 <code>use_light_heal</code>이 1이면 붕대 옆에서도 쓴다.
+독이면 Cure 포션과 해독 주문을 먼저 쓴다</td></tr>
 <tr><td><code>config__use_reactive_armor</code>, <code>use_magic_reflect</code></td>
 <td>각 1. 리콜이 필요하지 않고 안전할 때 마나 24, 34부터 각각 시전한다.
 준비 버프 뒤 GH + Teleport 마나 예산 20을 남기기 위한 시작 조건이다.
@@ -694,7 +695,7 @@ END 뒤에도 채집이 보류되면 큐·커서 안내와 리콜·책·Hunting 
 <thead><tr><th>상황</th><th>예상과 실패 판정</th></tr></thead>
 <tbody>
 <tr><td>안전한 나무 옆에서 시작, 기존 필터가 몬스터 또는 우호 플레이어</td>
-<td>sysmsg ON의 <code>Lumberjack enhanced v15 loaded</code>와 chatty ON의 <code>[ lumberjack, on ]</code> 뒤 기본 red 필터를 확인하고 Hunting을 유지한다.
+<td>sysmsg ON의 <code>Lumberjack enhanced v16 loaded</code>와 chatty ON의 <code>[ lumberjack, on ]</code> 뒤 기본 red 필터를 확인하고 Hunting을 유지한다.
 재실행에서 확인한 색상의 Hunting이 켜져 있으면 창·버튼 조작이 없어야 한다.
 자동 리콜 OFF에서도 <code>use_tracking = 1</code>이면 설정해야 한다. 기존 Hunting을 꺼 버리면 실패.
 감지 리콜 ON에서 필터 확인이 안 되면 <code>[ track, miss ]</code> 또는 <code>[ track, check ]</code> 후 채집을 보류한다</td></tr>
