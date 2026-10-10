@@ -7,6 +7,7 @@ Ultima Online Outlands용 Razor 스크립트 (`script/`), 클라이언트 설정
 ## 목차
 
 1. [항상 지키는 것](#1-항상-지키는-것)
+   - [커밋](#커밋)
 2. [언제 무엇을 읽나](#2-언제-무엇을-읽나)
 3. [문서 지도](#3-문서-지도)
 
@@ -22,7 +23,19 @@ Ultima Online Outlands용 Razor 스크립트 (`script/`), 클라이언트 설정
 - 다른 사람의 `config/`는 건드리지 않고, `settings.json`은 절대 커밋하지 않는다 → [conventions.md](blueprint/conventions.md#01.D) 01.D절
 - 스크립트에 serial 리터럴을 쓰지 않는다 → [conventions.md](blueprint/conventions.md#03.C) 03.C절
 - 생성된 루프 (`script/combat/*`, `script/gather/*`)는 직접 고치지 않는다. `module/`·`recipe/`를 고치고 `pnpm build` (`node util/build-scripts.mjs`)로 만든다 → [modules.md](blueprint/modules.md#07) 07절
-- 커밋은 사용자가 하라고 할 때만, push는 따로 요청이 있을 때만 → [workflow.md](blueprint/workflow.md#06) 06절
+- 커밋은 아래 [커밋](#커밋) 규칙을 따른다
+
+### 커밋
+
+커밋 규칙의 정본은 여기다. 좋은 제목과 나쁜 제목의 예는 [workflow.md](blueprint/workflow.md#06) 06절에 있다.
+
+- 커밋은 사용자가 하라고 할 때만, push는 따로 요청이 있을 때만 한다.
+- 한 커밋에 한 가지 변경. 스크립트 수정과 문서 수정이 서로 독립이면 나눈다.
+- 제목은 영어 한 줄, 동사 원형으로 시작하고 마침표를 찍지 않는다. `feat:` `fix:` 같은 Conventional Commits 접두는 쓰지 않는다.
+- 본문과 트레일러 (`Co-Authored-By` 등)는 넣지 않는다.
+- 요청 범위의 파일만 넣는다. `config/`의 게임 설정 변경과 `settings.json`은 따로 요청이 없으면 넣지 않는다.
+- 커밋 전에 `pnpm check`와 `git diff --check`를 돌린다. `util/`을 고쳤으면 `pnpm test`도 돌린다.
+- 예: `Port the loop builder to Node`, `Keep every summon name two letters away from the creature words`
 
 ## 2. 언제 무엇을 읽나
 
@@ -42,7 +55,7 @@ Ultima Online Outlands용 Razor 스크립트 (`script/`), 클라이언트 설정
 | `findtype` 인자 (graphic id, hue)       | [item-list.md](blueprint/item-list.md)                                                                                           |
 | 문서를 고치거나 새로 만들 때            | [writing.md](blueprint/writing.md)                                                                                               |
 | 사용자에게 물을 것이 남았을 때          | [open-items.md](blueprint/open-items.md)                                                                                         |
-| 커밋할 때                               | [workflow.md](blueprint/workflow.md#06) 06절                                                                                     |
+| 커밋할 때                               | 이 파일의 [커밋](#커밋), 제목의 예는 [workflow.md](blueprint/workflow.md#06) 06절                                                |
 
 ## 3. 문서 지도
 
