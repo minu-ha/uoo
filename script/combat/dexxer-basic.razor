@@ -403,10 +403,6 @@ pushlist 'list__resume_script' 'Play Script: combat\dexxer-basic'
 while not dead
     # ------------------------------------------------------------------------------------
     # PASS START                                                         module/base.razor
-    #
-    # The pvp expression means structured-PvP restrictions, not a field PK encounter. With
-    # config__settle_first 1 the pass then waits for the item queue and any cast to
-    # finish.
     # ------------------------------------------------------------------------------------
     if pvp
         overhead "[ script, blocked ]" 254
@@ -421,10 +417,6 @@ while not dead
 
     # ------------------------------------------------------------------------------------
     # REAGENTS                                                module/magery/reagents.razor
-    #
-    # On the interval, or at once after a refusal for reagents, so a stale flag cannot
-    # send the same doomed cast every pass. Each reagent is looked up once, and every
-    # spell flag comes from those seven with plain comparisons.
     # ------------------------------------------------------------------------------------
     if config__use_magery = 1
         if timer "timer__reagents" >= interval__reagents or insysmsg "More reagents are needed"
@@ -531,12 +523,6 @@ while not dead
     if paralyzed or poisoned or diffhits > 0
         # --------------------------------------------------------------------------------
         # CURE                                                  module/recovery/cure.razor
-        #
-        # Paralysis first, the one state in which nothing else can act, so the pouch goes
-        # out at once. Poison next: potion first, it is instant and has no cooldown, and
-        # it goes out during a cast. While any cure potion is carried the agent is not
-        # used, so mana stays for Greater Heal. The agent waits for the walk bar and for
-        # warmode as config__walk_guard and config__warmode_is_manual say.
         # --------------------------------------------------------------------------------
         if paralyzed
             if findtype 3705 backpack 38
@@ -582,13 +568,6 @@ while not dead
 
         # --------------------------------------------------------------------------------
         # HEAL                                                  module/recovery/heal.razor
-        #
-        # Heavy damage drinks first, because the potion is instant and goes out during a
-        # cast. Greater Heal follows when no potion went out on this pass and the loss is
-        # at the emergency line: none carried, on its own cooldown, or the bar still
-        # running. The bar skips the label read while it runs. The label stays
-        # authoritative when the bar is missing. Greater Heal waits for the walk bar and
-        # for warmode as config__walk_guard and config__warmode_is_manual say.
         # --------------------------------------------------------------------------------
         if not poisoned and not paralyzed and not hidden and not queued and not targetexists and diffhits >= config__heal_hits
             @setvar! var__heal_potion_out 0
@@ -640,9 +619,6 @@ while not dead
 
         # --------------------------------------------------------------------------------
         # BANDAGE                                            module/recovery/bandage.razor
-        #
-        # Never restarts a running bandage, and full health does not start one. Its target
-        # cursor would replace a held precast, so it waits while any cursor is up.
         # --------------------------------------------------------------------------------
         if config__use_bandages = 1 and not bandaging and not paralyzed and not hidden and not queued and not targetexists and skill "Healing" > config__heal_skill_min
             if diffhits > 0 or poisoned
@@ -669,9 +645,6 @@ while not dead
 
     # ------------------------------------------------------------------------------------
     # GOLD                                                     module/pack/gold-drop.razor
-    #
-    # One drop per pass, so recovery still runs between drops. A refused drop goes back to
-    # the pack.
     # ------------------------------------------------------------------------------------
     if weight > maxweight
         if not hidden and not queued and not casting and not targetexists
@@ -700,9 +673,6 @@ while not dead
 
     # ------------------------------------------------------------------------------------
     # FOOD                                                          module/buff/food.razor
-    #
-    # Looked at once a minute. The buff lasts far longer. With config__warmode_is_manual 1
-    # it stands down in warmode, as our casts do.
     # ------------------------------------------------------------------------------------
     if timer "timer__food" >= interval__food and not findbuff "Food Satisfaction"
         if config__warmode_is_manual = 0 or not warmode
@@ -718,9 +688,6 @@ while not dead
 
     # ------------------------------------------------------------------------------------
     # SCAVENGER CACHE                                          module/pack/scavenger.razor
-    #
-    # The scavenger passes over an item it already handled until its cache is cleared, so
-    # a clear every 30 seconds gives those items another try.
     # ------------------------------------------------------------------------------------
     if timer "timer__scavenger_clear" >= interval__scavenger_clear
         settimer "timer__scavenger_clear" 0

@@ -813,10 +813,6 @@ endif
 while not dead
     # ------------------------------------------------------------------------------------
     # PASS START                                                         module/base.razor
-    #
-    # The pvp expression means structured-PvP restrictions, not a field PK encounter. With
-    # config__settle_first 1 the pass then waits for the item queue and any cast to
-    # finish.
     # ------------------------------------------------------------------------------------
     if pvp
         overhead "[ script, blocked ]" 254
@@ -831,10 +827,6 @@ while not dead
 
     # ------------------------------------------------------------------------------------
     # TRACKING CHECK                                          module/escape/tracking.razor
-    #
-    # Hunting has to stay on for the profile's Tracking overheads to warn and for
-    # escape/recall to read a report, so the loop looks at it every interval__tracking_check
-    # and asks for it while it is off. A character without Tracking skips it.
     # ------------------------------------------------------------------------------------
     if timer "timer__tracking_check" >= interval__tracking_check and skill "Tracking" > 0
         settimer "timer__tracking_check" 0
@@ -851,13 +843,6 @@ while not dead
 
     # ------------------------------------------------------------------------------------
     # COMBAT TARGET                                              module/fight/target.razor
-    #
-    # A pick within config__acquire_range becomes the remembered enemy. A carve or a song
-    # targets a corpse or an item, and dead and noto only take mobiles, so the serial
-    # range is checked first: mobile serials are below 0x40000000, and the number has to
-    # be on the left (blueprint/razor.html part 3, debug-target-state S06). The enemy is a
-    # fight (var__fighting 1) inside config__target_range, kept outside it while still
-    # within config__acquire_range, and dropped config__target_grace after it leaves that.
     # ------------------------------------------------------------------------------------
     if find lasttarget ground -1 -1 config__acquire_range as alias__fresh_target
         if var__combat_target != alias__fresh_target
@@ -903,12 +888,6 @@ while not dead
     if paralyzed or poisoned or diffhits > 0
         # --------------------------------------------------------------------------------
         # CURE                                                  module/recovery/cure.razor
-        #
-        # Paralysis first, the one state in which nothing else can act, so the pouch goes
-        # out at once. Poison next: potion first, it is instant and has no cooldown, and
-        # it goes out during a cast. While any cure potion is carried the agent is not
-        # used, so mana stays for Greater Heal. The agent waits for the walk bar and for
-        # warmode as config__walk_guard and config__warmode_is_manual say.
         # --------------------------------------------------------------------------------
         if paralyzed
             if findtype 3705 backpack 38
@@ -954,13 +933,6 @@ while not dead
 
         # --------------------------------------------------------------------------------
         # HEAL                                                  module/recovery/heal.razor
-        #
-        # Heavy damage drinks first, because the potion is instant and goes out during a
-        # cast. Greater Heal follows when no potion went out on this pass and the loss is
-        # at the emergency line: none carried, on its own cooldown, or the bar still
-        # running. The bar skips the label read while it runs. The label stays
-        # authoritative when the bar is missing. Greater Heal waits for the walk bar and
-        # for warmode as config__walk_guard and config__warmode_is_manual say.
         # --------------------------------------------------------------------------------
         if not poisoned and not paralyzed and not hidden and not queued and not targetexists and diffhits >= config__heal_hits
             @setvar! var__heal_potion_out 0
@@ -1023,19 +995,6 @@ while not dead
 
     # ------------------------------------------------------------------------------------
     # VET KIT                                                   module/tamer/vet-kit.razor
-    #
-    # Veterinary supplies (25750), the self bandage that also reaches the followers.
-    #   running  A kit that began is left alone until "You finish using veterinary
-    #            supplies", because using the supplies again cancels it.
-    #            interval__vet_running ends the wait when another insysmsg consumed that
-    #            line first.
-    #   hurt     Any hit point loss sends the kit at once.
-    #   pets     At full health the kit goes once var__vet_wait has passed: at once after a
-    #            finish, and interval__vet_refused after "do not require healing". diffhits
-    #            reads only our own hit points, so that answer is the pets' health check.
-    # Bandaging gates it too, since a manual bandage on a pet would be cancelled the same
-    # way. The answer is read on the spot. With no answer the kit is taken as running, so a
-    # late begin line cannot let the next pass cancel it.
     # ------------------------------------------------------------------------------------
     if var__vet_running = 1
         if insysmsg "You finish using veterinary supplies"
@@ -1082,10 +1041,6 @@ while not dead
 
     # ------------------------------------------------------------------------------------
     # REAGENTS                                                module/magery/reagents.razor
-    #
-    # On the interval, or at once after a refusal for reagents, so a stale flag cannot
-    # send the same doomed cast every pass. Each reagent is looked up once, and every
-    # spell flag comes from those seven with plain comparisons.
     # ------------------------------------------------------------------------------------
     if config__use_magery = 1
         if timer "timer__reagents" >= interval__reagents or insysmsg "More reagents are needed"
@@ -1191,13 +1146,6 @@ while not dead
 
     # ------------------------------------------------------------------------------------
     # STAT POTIONS                                               module/buff/potions.razor
-    #
-    # Kept up while var__fighting is 1. Strength and Agility read the stat against
-    # config__str_potion and config__dex_potion, because Bless and the Strength and
-    # Agility spells show the same icons as the potions, and each is tried once per
-    # interval__stat_potion. Magic Resist has an icon of its own and is drunk once it is
-    # missing. Each potion is judged on its own, so running out of one does not hold up
-    # the others.
     # ------------------------------------------------------------------------------------
     if var__fighting = 1 and config__use_potions = 1 and not paralyzed and not hidden and not targetexists
         if not queued and str < config__str_potion and timer "timer__str_potion" >= interval__stat_potion
@@ -1224,21 +1172,6 @@ while not dead
 
     # ------------------------------------------------------------------------------------
     # SELF BUFFS                                                  module/buff/spells.razor
-    #
-    # One cast per pass, in this order: Reactive Armor and Magic Reflection whenever one is
-    # missing, then Bless and Arch Protection out of a fight, then the Spell Siphon arrow.
-    # Not started at config__buff_max_loss, and cut there mid cast so the next pass can
-    # heal. With config__buff_when_poisoned 0 poison holds them back and cuts them too, so
-    # the cure goes first. var__hold_casts lets another block keep the cast window (a
-    # latched Recall). config__walk_guard and config__warmode_is_manual apply as for the
-    # heal agents, and the three cursor casts also stand down in warmode.
-    #
-    # The reflect bar is the server's recast lock after Reflect is used up. Bless shows
-    # Strength, Agility and Cunning, and only Cunning is Bless alone, since the stat potions
-    # show the other two. Arch Protection shows Protection. Each icon arrives a round trip
-    # after the target, so the block waits for it before the next pass reads it. Spell
-    # Siphon starts on the first spell to hit us and lasts sixty minutes, so the arrow goes
-    # out about once an hour.
     # ------------------------------------------------------------------------------------
     if config__use_magery = 1 and var__hold_casts = 0 and not paralyzed and not hidden and not queued and not casting and not targetexists and diffhits < config__buff_max_loss
         if config__buff_when_poisoned = 1 or not poisoned
@@ -1413,13 +1346,6 @@ while not dead
 
     # ------------------------------------------------------------------------------------
     # FLAMESTRIKE                                          module/magery/flamestrike.razor
-    #
-    # On the engaged enemy (var__fighting), with warmode off, and not at the emergency line.
-    # The targeted cast shape of blueprint/razor.html part 4: drain a stale disturbance,
-    # cast, poll for the cursor, then read lasttarget once more. If the player picked
-    # another enemy during the cast, or the enemy died, the cursor is cancelled and the
-    # next pass casts on the new pick. An emergency during the cast cuts it as
-    # config__interrupt_to_heal says.
     # ------------------------------------------------------------------------------------
     if var__fighting = 1 and not warmode and var__regs_flamestrike = 1 and mana >= config__mana_flamestrike and diffhits < config__emergency_hits and not paralyzed and not hidden and not queued and not casting and not targetexists and cooldown "walk" = 0
         if find var__combat_target ground -1 -1 config__target_range as alias__fs_target
@@ -1472,9 +1398,6 @@ while not dead
 
     # ------------------------------------------------------------------------------------
     # FOOD                                                          module/buff/food.razor
-    #
-    # Looked at once a minute. The buff lasts far longer. With config__warmode_is_manual 1
-    # it stands down in warmode, as our casts do.
     # ------------------------------------------------------------------------------------
     if timer "timer__food" >= interval__food and not findbuff "Food Satisfaction"
         if config__warmode_is_manual = 0 or not warmode
@@ -1490,11 +1413,6 @@ while not dead
 
     # ------------------------------------------------------------------------------------
     # MUSHROOM                                                  module/buff/mushroom.razor
-    #
-    # Eating is an item use, so like a potion it goes out during a cast and on the move,
-    # and waits only for a held cursor. Create Food is a cast and waits for a fight to end,
-    # so its 60 second cooldown burns on the walk rather than taking a cast from the
-    # rotation. It also stands down in warmode and for the walk bar.
     # ------------------------------------------------------------------------------------
     if mana <= config__mushroom_eat_mana and not findbuff 'Magic Mushroom Cooldown' and not hidden and not queued and not targetexists and findtype "mushroom" backpack
         hotkey 'Eat Magic Mushroom'
@@ -1518,9 +1436,6 @@ while not dead
 
     # ------------------------------------------------------------------------------------
     # GOLD                                                     module/pack/gold-drop.razor
-    #
-    # One drop per pass, so recovery still runs between drops. A refused drop goes back to
-    # the pack.
     # ------------------------------------------------------------------------------------
     if weight > maxweight
         if not hidden and not queued and not casting and not targetexists

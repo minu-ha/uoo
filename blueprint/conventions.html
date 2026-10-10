@@ -257,7 +257,13 @@ while not dead
     endif
 endwhile</code></pre>
 <p>모듈과 레시피의 상자 (<code># @ config</code>, <code># @ use</code>)도 같은 <code>-</code>와 <code>=</code> 줄을 쓴다 (<a href="modules.html#03">modules.html</a> 03절).
-조립한 루프에서는 블록 배너 제목 줄 오른쪽에 그 블록이 온 모듈 파일이 붙는다.</p>
+조립한 루프에서는 블록 배너가 줄과 제목만 남고, 제목 줄 오른쪽에 그 블록이 온 모듈 파일이 붙는다. 블록이 하는 일은 그 모듈 파일의 배너에서 읽는다.
+배너 밖, 코드 사이의 주석은 결과물에도 그대로 나간다.</p>
+<pre><code>    # ------------------------------------------------------------------------------------
+    # BANDAGE                                               module/recovery/bandage.razor
+    # ------------------------------------------------------------------------------------
+    if config__use_bandages = 1 and not bandaging and not paralyzed
+        ...</code></pre>
 
 <h3 id="02.C">02.C 헤더</h3>
 <p>직접 만든 스크립트는 첫 줄에 한 줄 설명, 둘째 줄에 <code>Needs:</code>로 전제조건을 쓴다 (<code>script/loot/claim-loot.razor</code>).

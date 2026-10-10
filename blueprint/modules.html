@@ -199,7 +199,7 @@ lumberjack-enhanced는 Tracking 줄을 먼저 읽도록 <code>magery/reagents</c
 </tbody>
 </table>
 <ul>
-<li>그룹 안의 블록은 한 단계마다 네 칸 들어가고, 배너 글은 줄어든 폭에 맞춰 다시 감긴다. 그룹 안에 그룹을 둘 수 있다.</li>
+<li>그룹 안의 블록은 한 단계마다 네 칸 들어가고, 배너 줄은 줄어든 폭에 맞춘다. 그룹 안에 그룹을 둘 수 있다.</li>
 <li>그룹이 막는 것은 블록의 loop 부분뿐이다. 선언과 setup은 그룹과 상관없이 늘 나간다. base의 <code>end</code>는 그룹 밖 맨 끝이다.</li>
 <li>조건과 <code>every</code>에 쓴 이름도 블록 코드처럼 주인 모듈을 찾는다. <code>interval__housekeeping</code>은 base의 것이다.</li>
 <li><strong>회복 블록은 모든 레시피에서 한 그룹이다.</strong> <code>recovery/cure</code>, <code>heal</code>, <code>bandage</code>, <code>light-heal</code>은
@@ -324,7 +324,7 @@ lumberjack-enhanced는 Tracking 줄을 먼저 읽도록 <code>magery/reagents</c
 <li>CONFIG → WAIT AND COOLDOWN → TIMER → STATE → setup → MAIN LOOP (<code>while not dead</code>, 블록마다의 <code>loop</code>, base의 <code>end</code>, <code>endwhile</code>).
 자리마다 base가 먼저, 블록이 레시피 순서대로, 레시피가 마지막이다. 그룹은 loop 안에서 <code>if</code>·<code>else</code>·<code>endif</code>가 되고, <code># @ every</code>의 시계는 TIMER 끝에 레시피 몫으로 나온다. 레시피의 STATE가 뒤에 오므로 모듈 상태에 다른 시작값을 줄 수 있다 (pvp의 <code>var__fighting 1</code>).</li>
 <li>큰 칸 (CONFIG 등)은 conventions의 배너 모양이다 (<a href="conventions.html#02.B">conventions.html</a> 02.B절). 그 안의 조각은
-모듈과 같은 상자로 나온다. 상자 첫 줄이 어느 파일에서 왔는지 (<code># module/recovery/heal.razor</code>), 그 밑이 설명이고, 값은 상자 밑이다. loop 안의 블록은 배너 위에 <code># module/…razor</code> 한 줄이 붙는다.
+모듈과 같은 상자로 나온다. 상자 첫 줄이 어느 파일에서 왔는지 (<code># module/recovery/heal.razor</code>), 그 밑이 설명이고, 값은 상자 밑이다. loop 안의 블록은 배너의 줄과 제목만 나가고 제목 오른쪽에 모듈 경로가 붙는다. 배너 설명은 결과물에 넣지 않는다. 블록이 하는 일은 그 모듈 파일에서 읽고, 코드 사이 주석은 그대로 나간다.
 TIMER는 timer마다 <code>createtimer</code>와 첫 <code>settimer</code>를 붙여 쓴다.</li>
 <li>레시피는 조립할 때마다 정리된 모양으로 다시 쓴다. 큰 칸마다 <code>=</code> 상자, 블록마다 <code>-</code> 상자, 설정은 주인 블록의 상자 밑이다.</li>
 <li>조립기는 아래에서 멈추고 고칠 곳을 알려 준다.
@@ -627,7 +627,7 @@ pvp 결과물에는 시작 4줄이 <code>if config__clear_at_start = 1</code> �
 <code>elseif</code> 사슬 하나면 순서가 저절로 지켜진다. 플래그와 패스마다의 한 줄이 없어졌다. 한 시간에 한 번 나가는 화살이라 자기를 찍기 전에 lasttarget을 다시 읽지 않는다</td></tr>
 <tr><td><code>recovery/pouch</code></td><td><code>recovery/cure</code></td><td>코드 9줄이고 모든 레시피에서 cure 바로 앞에 붙어 있었다. 마비면 파우치, 아니면 독을 본다 (<code>if</code> / <code>elseif</code>)</td></tr>
 <tr><td><code>magery/opener</code>, <code>proc-core</code>, <code>filler</code></td><td><code>magery/rotation</code></td><td>프록은 Curse를 (<code>var__opener_done</code>), Energy Bolt는 프록을 (<code>var__procs_done</code>) 기다려서
-하나만 쓸 수 없다. 단계마다 배너는 그대로 두었다 (조립기가 한 블록의 배너를 모두 그룹 깊이에 맞춘다)</td></tr>
+하나만 쓸 수 없다. 단계마다 배너는 그대로 두었다</td></tr>
 </tbody>
 </table>
 <p>합치지 않은 것도 적어 둔다. <code>fight/axe</code>와 <code>fight/weapon-swap</code>은 비슷해 보이지만, 앞의 것은 2초 시계로 빈 손만 보고 뒤의 것은 패스마다 두 손을 읽는 PvP용이라 비용이 다르다.

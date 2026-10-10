@@ -823,10 +823,6 @@ endif
 while not dead
     # ------------------------------------------------------------------------------------
     # PASS START                                                         module/base.razor
-    #
-    # The pvp expression means structured-PvP restrictions, not a field PK encounter. With
-    # config__settle_first 1 the pass then waits for the item queue and any cast to
-    # finish.
     # ------------------------------------------------------------------------------------
     if pvp
         overhead "[ script, blocked ]" 254
@@ -841,10 +837,6 @@ while not dead
 
     # ------------------------------------------------------------------------------------
     # TRACKING CHECK                                          module/escape/tracking.razor
-    #
-    # Hunting has to stay on for the profile's Tracking overheads to warn and for
-    # escape/recall to read a report, so the loop looks at it every interval__tracking_check
-    # and asks for it while it is off. A character without Tracking skips it.
     # ------------------------------------------------------------------------------------
     if timer "timer__tracking_check" >= interval__tracking_check and skill "Tracking" > 0
         settimer "timer__tracking_check" 0
@@ -862,12 +854,6 @@ while not dead
     if paralyzed or poisoned or diffhits > 0
         # --------------------------------------------------------------------------------
         # CURE                                                  module/recovery/cure.razor
-        #
-        # Paralysis first, the one state in which nothing else can act, so the pouch goes
-        # out at once. Poison next: potion first, it is instant and has no cooldown, and
-        # it goes out during a cast. While any cure potion is carried the agent is not
-        # used, so mana stays for Greater Heal. The agent waits for the walk bar and for
-        # warmode as config__walk_guard and config__warmode_is_manual say.
         # --------------------------------------------------------------------------------
         if paralyzed
             if findtype 3705 backpack 38
@@ -913,13 +899,6 @@ while not dead
 
         # --------------------------------------------------------------------------------
         # HEAL                                                  module/recovery/heal.razor
-        #
-        # Heavy damage drinks first, because the potion is instant and goes out during a
-        # cast. Greater Heal follows when no potion went out on this pass and the loss is
-        # at the emergency line: none carried, on its own cooldown, or the bar still
-        # running. The bar skips the label read while it runs. The label stays
-        # authoritative when the bar is missing. Greater Heal waits for the walk bar and
-        # for warmode as config__walk_guard and config__warmode_is_manual say.
         # --------------------------------------------------------------------------------
         if not poisoned and not paralyzed and not hidden and not queued and not targetexists and diffhits >= config__heal_hits
             @setvar! var__heal_potion_out 0
@@ -971,9 +950,6 @@ while not dead
 
         # --------------------------------------------------------------------------------
         # BANDAGE                                            module/recovery/bandage.razor
-        #
-        # Never restarts a running bandage, and full health does not start one. Its target
-        # cursor would replace a held precast, so it waits while any cursor is up.
         # --------------------------------------------------------------------------------
         if config__use_bandages = 1 and not bandaging and not paralyzed and not hidden and not queued and not targetexists and skill "Healing" > config__heal_skill_min
             if diffhits > 0 or poisoned
@@ -989,11 +965,6 @@ while not dead
 
         # --------------------------------------------------------------------------------
         # LIGHT HEAL                                      module/recovery/light-heal.razor
-        #
-        # The bandage stand-in whenever no bandage can run: bandages off, no Healing, or
-        # none left and none running. Beside the bandages only with config__use_light_heal
-        # 1. The agent waits for the walk bar and for warmode as config__walk_guard and
-        # config__warmode_is_manual say.
         # --------------------------------------------------------------------------------
         if not poisoned and not paralyzed and not hidden and not queued and not casting and not targetexists and config__use_magery = 1 and var__regs_heal = 1 and diffhits >= config__light_hits and mana >= config__mana_heal
             @setvar! var__light_heal_due 0
@@ -1044,9 +1015,6 @@ while not dead
 
     # ------------------------------------------------------------------------------------
     # RECALL                                                    module/escape/recall.razor
-    #
-    # The slow checks (book, weight) run every interval__recall_check. Whether Tracking is
-    # hunting comes from escape/tracking.
     # ------------------------------------------------------------------------------------
     @setvar! var__recall_check_due 0
     if timer "timer__recall_check" >= interval__recall_check
@@ -1244,10 +1212,6 @@ while not dead
 
     # ------------------------------------------------------------------------------------
     # REAGENTS                                                module/magery/reagents.razor
-    #
-    # On the interval, or at once after a refusal for reagents, so a stale flag cannot
-    # send the same doomed cast every pass. Each reagent is looked up once, and every
-    # spell flag comes from those seven with plain comparisons.
     # ------------------------------------------------------------------------------------
     if config__use_magery = 1
         if timer "timer__reagents" >= interval__reagents or insysmsg "More reagents are needed"
@@ -1353,10 +1317,6 @@ while not dead
 
     # ------------------------------------------------------------------------------------
     # SMART HARVEST                                      module/gather/lumberjacking.razor
-    #
-    # Tracking/Recall reads take priority over this lower-priority result message. The
-    # profile displays harvest,out. Start the next retry from this response, without
-    # blocking recovery.
     # ------------------------------------------------------------------------------------
     if insysmsg "You do not see any harvestable resources nearby"
         @setvar! var__harvest_retry interval__harvest_out_retry
@@ -1425,21 +1385,6 @@ while not dead
 
     # ------------------------------------------------------------------------------------
     # SELF BUFFS                                                  module/buff/spells.razor
-    #
-    # One cast per pass, in this order: Reactive Armor and Magic Reflection whenever one is
-    # missing, then Bless and Arch Protection out of a fight, then the Spell Siphon arrow.
-    # Not started at config__buff_max_loss, and cut there mid cast so the next pass can
-    # heal. With config__buff_when_poisoned 0 poison holds them back and cuts them too, so
-    # the cure goes first. var__hold_casts lets another block keep the cast window (a
-    # latched Recall). config__walk_guard and config__warmode_is_manual apply as for the
-    # heal agents, and the three cursor casts also stand down in warmode.
-    #
-    # The reflect bar is the server's recast lock after Reflect is used up. Bless shows
-    # Strength, Agility and Cunning, and only Cunning is Bless alone, since the stat potions
-    # show the other two. Arch Protection shows Protection. Each icon arrives a round trip
-    # after the target, so the block waits for it before the next pass reads it. Spell
-    # Siphon starts on the first spell to hit us and lasts sixty minutes, so the arrow goes
-    # out about once an hour.
     # ------------------------------------------------------------------------------------
     if config__use_magery = 1 and var__hold_casts = 0 and not paralyzed and not hidden and not queued and not casting and not targetexists and diffhits < config__buff_max_loss
         if config__buff_when_poisoned = 1 or not poisoned
@@ -1614,9 +1559,6 @@ while not dead
 
     # ------------------------------------------------------------------------------------
     # FOOD                                                          module/buff/food.razor
-    #
-    # Looked at once a minute. The buff lasts far longer. With config__warmode_is_manual 1
-    # it stands down in warmode, as our casts do.
     # ------------------------------------------------------------------------------------
     if timer "timer__food" >= interval__food and not findbuff "Food Satisfaction"
         if config__warmode_is_manual = 0 or not warmode
@@ -1632,9 +1574,6 @@ while not dead
 
     # ------------------------------------------------------------------------------------
     # LUMBER                                                      module/pack/lumber.razor
-    #
-    # Try each selected stack once, with no snapshots or foreach iterator. Bound scans by
-    # the existing timer. A failed conversion/drop waits for the next interval.
     # ------------------------------------------------------------------------------------
     if var__hold_gathering = 0 and timer "timer__pack_lumber" >= interval__pack_lumber
         if diffhits < config__light_hits and not poisoned and not paralyzed and not warmode

@@ -24,7 +24,8 @@ says what it looks after. module/base.razor is the frame of every loop.
                            Describing them is optional
     # @ state box          var__ state, written the same way. Guards (if not varexist) may wrap them
     # @ setup, loop, end   code under a box with only the "# @" line. end is base only. A loop or
-                           end block starts with its "-" banner: the title, what it does, a rule
+                           end block starts with its "-" banner: the title, what it does, a rule.
+                           The built loop keeps the rules and the title, with the module path
 Every name a section declares is described in its box, and each name belongs to one module.
 A block may use the names of any module the loop has. The builder works out which those are.
 
@@ -133,43 +134,22 @@ def banner(name):
 
 def block_banner(lines, source, depth=0):
     """A block in the loop starts with its "-" banner, and a block with steps has one more
-    banner per step. Inside a group they move in by four spaces a level, their rules
-    shortened and their text refilled to keep the width, and the file the block came from
-    goes on the right of the first title line."""
+    banner per step. The built loop keeps only the rules and the title of each, with the file
+    the block came from on the right of the first title: what the block does is written in
+    that file. Inside a group the block moves in by four spaces a level and its rules are
+    shortened to keep the width."""
     lines = [(' ' * 4 * depth + l) if l.strip() else l for l in lines]
     indent = lines[0][:len(lines[0]) - len(lines[0].lstrip())]
     rule = indent + '# ' + '-' * (WIDTH - len(indent) - 2)
     title_line = re.compile(re.escape(indent) + r"# [A-Z][A-Z0-9 /&,.'()+:-]*$")
     starts = [i for i in range(len(lines) - 1)
               if BLOCK_RULE.match(lines[i]) and lines[i].startswith(indent + '#') and title_line.match(lines[i + 1].rstrip())]
-    starts = sorted(set([0] + starts))
-    for start in reversed(starts):
+    for start in reversed(sorted(set([0] + starts))):
         closing = next(i for i in range(start + 2, len(lines)) if BLOCK_RULE.match(lines[i]))
-        if depth:
-            lines = lines[:start + 2] + refill(lines[start + 2:closing], indent) + lines[closing:]
-            closing = next(i for i in range(start + 2, len(lines)) if BLOCK_RULE.match(lines[i]))
-        lines[start] = lines[closing] = rule
+        lines[start:closing + 1] = [rule, lines[start + 1].rstrip(), rule]
     title = lines[1].rstrip()
     lines[1] = title + ' ' * max(2, WIDTH - len(title) - len(source)) + source
     return lines
-
-
-def refill(lines, indent):
-    """Banner text wrapped again to the width left at this indent. A line that starts with
-    spaces after its "#" (a table or a list) stays as it is, and so does a blank "#"."""
-    out, paragraph = [], []
-    for line in lines + [None]:
-        text = line.strip()[2:] if line is not None and line.strip().startswith('# ') else ''
-        if text and not text.startswith(' '):
-            paragraph.append(text)
-            continue
-        if paragraph:
-            out += [indent + '# ' + t for t in textwrap.wrap(' '.join(paragraph), WIDTH - len(indent) - 2,
-                                                              break_long_words=False, break_on_hyphens=False)]
-            paragraph = []
-        if line is not None:
-            out.append(line)
-    return out
 
 
 def parse(path, kind):
