@@ -1,0 +1,1516 @@
+# Tamer mage loop: self recovery, veterinary supplies for you and the pets, self buffs and
+# Flamestrike for the aspect proc.
+# Needs: veterinary supplies (25750), reagents, potions, Create Food reagents or magic
+# mushrooms.
+# Template: Animal Lore, Animal Taming, Veterinary 120, Magery, Tracking 100, Resisting
+# Spells, Meditation 80. STR 100, DEX 25, INT 100.
+# Optional cooldown bars: heal pot, walk, reflect. A missing bar reads 0.
+# Pets and targeting stay manual (summoner Z then V). The script never commands a pet.
+# Warmode is the manual control window: Flamestrike, Bless, Arch Protection and Create
+# Food stand down. Survival, Reactive Armor, Magic Reflection, veterinary supplies and
+# potions ignore it.
+# Tracking only warns, through the profile overheads. Meet a PK with combat/pvp (F4).
+# Design and in-game checks: blueprint/open-items.html part 12.
+# Hotkeys: Drink Cure, > Smart Heal/Cure Self, Drink Heal, > Greater Heal/Cure Self,
+#          Cancel Current Target, Drink Refresh, Drink Strength, Drink Agility, Drink Magic Resist,
+#          > Interrupt, Eat Magic Mushroom.
+# Generated from recipe/tamer-mage-enhanced-recipe.razor by util/build-scripts.py. Edit module/ and recipe/, not this file.
+
+
+# ========================================================================================
+# CONFIG
+# ========================================================================================
+
+# ----------------------------------------------------------------------------------------
+# module/base.razor
+#
+#   config__chatty
+#      1 shows the optional overheads. Warnings show either way.
+#
+#   config__sysmsg
+#      1 writes Journal diagnostics. A block that writes one says so in its comments.
+#
+#   config__clear_at_start
+#      What Play does first (conventions 02.D).
+#        0  nothing: a cursor or a cast the player holds at Play is kept
+#        1  clear the client queues, the journal and the ignore list
+#
+#   config__use_magery
+#      1 uses Magery: the Cure and heal agents, the reagent reads and the buffs. At 0
+#      potions and bandages still go out.
+#
+#   config__use_potions
+#      1 uses potions: cure, heal, Refresh and the stat potions.
+#
+#   config__walk_guard
+#      Our casts and the walk bar.
+#        0  cast while walking, for a fight where there is no better moment to wait for
+#        1  wait while the walk bar runs, so a step does not break the cast
+#
+#   config__warmode_is_manual
+#      Whose warmode it is.
+#        0  ours: our casts ignore it
+#        1  the player's manual control window: our casts and the food stand down while it
+#           is on. Potions and bandages still go out
+#
+#   config__recover_in_warmode
+#      With warmode_is_manual 1, what the recovery casts (cure, heal, light Heal) do in
+#      warmode.
+#        0  stand down with the rest
+#        1  keep going, so only the other casts wait for the player
+#
+#   config__use_bandages
+#      1 uses bandages. At 0 recovery/light-heal stands in.
+#
+#   config__heal_skill_min
+#      Healing must be above this to bandage. At or below it recovery/light-heal stands
+#      in.
+#
+#   config__settle_first
+#      What a pass does first.
+#        0  reads the state at once. Potions still go out while a spell is casting
+#        1  waits for the item queue and any cast to finish
+# ----------------------------------------------------------------------------------------
+@setvar! config__chatty 1
+@setvar! config__sysmsg 1
+@setvar! config__clear_at_start 1
+@setvar! config__use_magery 1
+@setvar! config__use_potions 1
+@setvar! config__walk_guard 1
+@setvar! config__warmode_is_manual 0
+@setvar! config__recover_in_warmode 0
+@setvar! config__use_bandages 1
+@setvar! config__heal_skill_min 0
+@setvar! config__settle_first 0
+
+
+# ----------------------------------------------------------------------------------------
+# module/escape/tracking.razor
+#
+#   config__tracking_color
+#      Hunt filter.
+#        1  red: murderers
+#        2  grey: criminal players
+#        3  orange: enemies
+#        4  all three
+#
+#   config__show_tracking
+#      1 leaves the Tracking window open after setup.
+# ----------------------------------------------------------------------------------------
+@setvar! config__tracking_color 1
+@setvar! config__show_tracking 0
+
+
+# ----------------------------------------------------------------------------------------
+# module/fight/target.razor
+#
+#   config__acquire_range
+#      How far the enemy you pick is taken up from, and kept while it stays. The pets
+#      often open on a mob past target_range, and a song or self cast would otherwise
+#      move lasttarget off it before it comes in reach.
+#      > This loop: config__acquire_range 18 (default 12).
+#      > The pick is taken up anywhere on screen and kept while it stays there.
+#
+#   config__target_range
+#      How far the remembered enemy may be and still count as a fight (var__fighting 1).
+#      Not above acquire_range.
+#      > This loop: config__target_range 10 (default 12).
+#      > Flamestrike and the stat potions engage inside this range.
+#
+#   config__target_grace
+#      How long, in ms, a remembered enemy that left acquire_range is kept.
+#      > This loop: config__target_grace 500 (default 1200).
+#      > A target that left the screen is dropped half a second later.
+# ----------------------------------------------------------------------------------------
+@setvar! config__acquire_range 18
+@setvar! config__target_range 10
+@setvar! config__target_grace 500
+
+
+# ----------------------------------------------------------------------------------------
+# module/recovery/cure.razor
+#
+#   config__mana_cure
+#      Minimum current mana for the Cure agent.
+# ----------------------------------------------------------------------------------------
+@setvar! config__mana_cure 6
+
+
+# ----------------------------------------------------------------------------------------
+# module/recovery/heal.razor
+#
+#   config__heal_hits
+#      Missing hit points (not percent) that drink a heal potion.
+#
+#   config__emergency_hits
+#      Missing hit points that cast Greater Heal when no heal potion went out on this
+#      pass. Not below heal_hits.
+#
+#   config__mana_greater_heal
+#      Minimum current mana for Greater Heal. It keeps no reserve: 31 always leaves 20
+#      mana for an attack or Teleport.
+# ----------------------------------------------------------------------------------------
+@setvar! config__heal_hits 35
+@setvar! config__emergency_hits 35
+@setvar! config__mana_greater_heal 11
+
+
+# ----------------------------------------------------------------------------------------
+# module/recovery/refresh.razor
+#
+#   config__refresh_stam
+#      Current stamina at or below this drinks a Refresh.
+# ----------------------------------------------------------------------------------------
+@setvar! config__refresh_stam 15
+
+
+# ----------------------------------------------------------------------------------------
+# module/magery/reagents.razor
+#
+#   config__mana_1st, config__mana_2nd, config__mana_3rd, config__mana_4th
+#      Mana an attack spell of that circle needs before it is worth starting.
+#        1st  magic arrow
+#        2nd  harm
+#        3rd  fireball
+#        4th  lightning, curse, mana drain
+#
+#   config__interrupt_to_heal
+#      An attack cast in flight when the loss reaches emergency_hits.
+#        0  finishes
+#        1  is cut through "> Interrupt", so the next pass can heal
+# ----------------------------------------------------------------------------------------
+@setvar! config__mana_1st 4
+@setvar! config__mana_2nd 6
+@setvar! config__mana_3rd 9
+@setvar! config__mana_4th 11
+@setvar! config__interrupt_to_heal 1
+
+
+# ----------------------------------------------------------------------------------------
+# module/buff/potions.razor
+#
+#   config__use_resist_potion
+#      1 keeps the Magic Resist potion up.
+#
+#   config__str_potion
+#      STR with the Greater Strength potion on: your base plus 20. Below it the potion is
+#      drunk, and 0 turns it off. Bless and the Strength spell, ours or an ally's, show
+#      the same icon as the potion but add less than its 20, so the stat tells them apart.
+#
+#   config__dex_potion
+#      DEX with the Greater Agility potion on: your base plus 20. Below it the potion is
+#      drunk, and 0 turns it off. Bless and the Agility spell show the same icon, as for
+#      STR.
+#      > This loop: config__dex_potion 45 (default 100).
+#      > This template is DEX 25: base plus 20 with the Greater Agility potion.
+# ----------------------------------------------------------------------------------------
+@setvar! config__use_resist_potion 1
+@setvar! config__str_potion 120
+@setvar! config__dex_potion 45
+
+
+# ----------------------------------------------------------------------------------------
+# module/buff/spells.razor
+#
+#   config__use_reactive_armor
+#      1 keeps Reactive Armor up.
+#
+#   config__use_magic_reflect
+#      1 keeps Magic Reflection up.
+#
+#   config__mana_reactive_armor
+#      Minimum current mana to start Reactive Armor.
+#      > This loop: config__mana_reactive_armor 15 (default 4).
+#      > Each start line is the spell cost plus 11 kept for Greater Heal.
+#
+#   config__mana_magic_reflect
+#      Minimum current mana to start Magic Reflection.
+#      > This loop: config__mana_magic_reflect 25 (default 14).
+#      > Same reserve: 14 plus 11.
+#
+#   config__use_bless, config__use_arch_protection
+#      1 keeps Bless on yourself, and Arch Protection on you and the followers around you,
+#      while no enemy is engaged (var__fighting 0) and warmode is off. Both open a cursor,
+#      answered with yourself, so they never take a cast from a fight.
+#      > This loop: config__use_bless 1 (default 0).
+#      > Bless on yourself after a fight.
+#      > This loop: config__use_arch_protection 1 (default 0).
+#      > Arch Protection on you and the pets after a fight.
+#
+#   config__mana_bless, config__mana_arch_protection
+#      Minimum current mana to start Bless and Arch Protection.
+#      > This loop: config__mana_bless 20 (default 9).
+#      > Bless costs 9: plus 11 for Greater Heal.
+#      > This loop: config__mana_arch_protection 22 (default 11).
+#      > Arch Protection costs 11: plus 11 for Greater Heal.
+#
+#   config__buff_max_loss
+#      Missing hit points at which buffs are not started, and cut mid cast.
+#
+#   config__buff_when_poisoned
+#      Buffs while poisoned.
+#        0  no: hold them back and cut one that is casting, so the cure goes first
+#        1  yes
+# ----------------------------------------------------------------------------------------
+@setvar! config__use_reactive_armor 1
+@setvar! config__use_magic_reflect 1
+@setvar! config__mana_reactive_armor 15
+@setvar! config__mana_magic_reflect 25
+@setvar! config__use_bless 1
+@setvar! config__use_arch_protection 1
+@setvar! config__mana_bless 20
+@setvar! config__mana_arch_protection 22
+@setvar! config__buff_max_loss 35
+@setvar! config__buff_when_poisoned 1
+
+
+# ----------------------------------------------------------------------------------------
+# module/magery/flamestrike.razor
+#
+#   config__mana_flamestrike
+#      Minimum current mana to start Flamestrike. It costs 40.
+#      > This loop: config__mana_flamestrike 51 (default 40).
+#      > 40 to cast plus 11 kept for Greater Heal.
+# ----------------------------------------------------------------------------------------
+@setvar! config__mana_flamestrike 51
+
+
+# ----------------------------------------------------------------------------------------
+# module/buff/mushroom.razor
+#
+#   config__mushroom_eat_mana
+#      Mana at or below which a mushroom is eaten.
+#
+#   config__mushroom_create_mana
+#      Mana at or above which Create Food makes more. Create Food T3 returns 25 mana on a
+#      60 second cooldown.
+#
+#   config__mushroom_min_count
+#      Mushrooms kept in the backpack: Create Food runs only below this.
+# ----------------------------------------------------------------------------------------
+@setvar! config__mushroom_eat_mana 55
+@setvar! config__mushroom_create_mana 70
+@setvar! config__mushroom_min_count 2
+
+
+# ----------------------------------------------------------------------------------------
+# module/pack/gold-drop.razor
+#
+#   config__gold_drop_amount
+#      Gold dropped per pass while over max weight. Gold is cheaper than the leather.
+# ----------------------------------------------------------------------------------------
+@setvar! config__gold_drop_amount 2000
+
+
+# ========================================================================================
+# WAIT AND COOLDOWN
+# ========================================================================================
+
+# ----------------------------------------------------------------------------------------
+# module/base.razor
+#
+#   wait__poll
+#      The poll inside a wait.
+#
+#   wait__short
+#      The pause after an action.
+#
+#   interval__message
+#      Spacing for repeated warnings. Without it an empty potion bag shouts every pass.
+#
+#   interval__housekeeping
+#      The clock of a recipe's "# @ every interval__housekeeping" group: slow checks that
+#      share one tick.
+# ----------------------------------------------------------------------------------------
+@setvar! wait__poll 100
+@setvar! wait__short 200
+@setvar! interval__message 3000
+@setvar! interval__housekeeping 5000
+
+
+# ----------------------------------------------------------------------------------------
+# module/escape/tracking.razor
+#
+#   wait__tracking_gump
+#      How long the Tracking window may take to open.
+#
+#   interval__tracking_check
+#      How often the loop looks whether Hunting is still on.
+# ----------------------------------------------------------------------------------------
+@setvar! wait__tracking_gump 1000
+@setvar! interval__tracking_check 5000
+
+
+# ----------------------------------------------------------------------------------------
+# module/recovery/heal.razor
+#
+#   cooldown__heal_potion
+#      Length of the heal pot bar this block starts when it drinks, so the bar runs even
+#      where no trigger starts it.
+# ----------------------------------------------------------------------------------------
+@setvar! cooldown__heal_potion 10000
+
+
+# ----------------------------------------------------------------------------------------
+# module/tamer/vet-kit.razor
+#
+#   interval__vet_refused
+#      How long the next try for the pets waits after "You or your nearby followers do not
+#      require healing.", or after the supplies ran out. A hurt pass does not wait.
+#
+#   interval__vet_running
+#      How long a kit that began is taken as running when its finish line was missed. The
+#      kit takes the Veterinary bandage time, 5 seconds, on yourself as on the pets.
+# ----------------------------------------------------------------------------------------
+@setvar! interval__vet_refused 2000
+@setvar! interval__vet_running 7000
+
+
+# ----------------------------------------------------------------------------------------
+# module/magery/reagents.razor
+#
+#   interval__reagents
+#      Reagent read interval. A refill counts within this, and running out is caught at
+#      once by the refusal line.
+#
+#   wait__cast
+#      The pause after an attack cast is delivered: the spell recovery.
+# ----------------------------------------------------------------------------------------
+@setvar! interval__reagents 10000
+@setvar! wait__cast 300
+
+
+# ----------------------------------------------------------------------------------------
+# module/buff/potions.razor
+#
+#   interval__stat_potion
+#      A Strength or Agility potion is tried once per window. The stat arrives a round
+#      trip after the drink, and a Curse, Weaken or Clumsy can hold it under the line
+#      while the potion still runs: without the window that refused drink would go out
+#      every pass. An empty bag is looked up at the same pace.
+# ----------------------------------------------------------------------------------------
+@setvar! interval__stat_potion 5000
+
+
+# ----------------------------------------------------------------------------------------
+# module/buff/food.razor
+#
+#   interval__food
+#      The buff lasts far longer than this.
+# ----------------------------------------------------------------------------------------
+@setvar! interval__food 60000
+
+
+# ----------------------------------------------------------------------------------------
+# module/pack/gold-drop.razor
+#
+#   wait__gold_drop
+#      Pause after a drop, so the weight settles before the next pass.
+# ----------------------------------------------------------------------------------------
+@setvar! wait__gold_drop 1000
+
+
+# ========================================================================================
+# TIMER
+# ========================================================================================
+
+# ----------------------------------------------------------------------------------------
+# module/base.razor
+#
+#   timer__message
+#      Ready on the first pass, so the first warning shows at once.
+# ----------------------------------------------------------------------------------------
+if not timerexists "timer__message"
+    createtimer "timer__message"
+endif
+settimer "timer__message" interval__message
+
+
+# ----------------------------------------------------------------------------------------
+# module/escape/tracking.razor
+# ----------------------------------------------------------------------------------------
+if not timerexists "timer__tracking_check"
+    createtimer "timer__tracking_check"
+endif
+settimer "timer__tracking_check" interval__tracking_check
+
+
+# ----------------------------------------------------------------------------------------
+# module/fight/target.razor
+# ----------------------------------------------------------------------------------------
+if not timerexists "timer__target_grace"
+    createtimer "timer__target_grace"
+endif
+settimer "timer__target_grace" config__target_grace
+
+
+# ----------------------------------------------------------------------------------------
+# module/tamer/vet-kit.razor
+#
+#   timer__vet_kit
+#      Ready on the first pass.
+# ----------------------------------------------------------------------------------------
+if not timerexists "timer__vet_kit"
+    createtimer "timer__vet_kit"
+endif
+settimer "timer__vet_kit" interval__vet_running
+
+
+# ----------------------------------------------------------------------------------------
+# module/magery/reagents.razor
+#
+#   timer__reagents
+#      Ready on the first pass, so reagents are read before the first cast.
+# ----------------------------------------------------------------------------------------
+if not timerexists "timer__reagents"
+    createtimer "timer__reagents"
+endif
+settimer "timer__reagents" interval__reagents
+
+
+# ----------------------------------------------------------------------------------------
+# module/buff/potions.razor
+# ----------------------------------------------------------------------------------------
+if not timerexists "timer__str_potion"
+    createtimer "timer__str_potion"
+endif
+settimer "timer__str_potion" interval__stat_potion
+
+if not timerexists "timer__agi_potion"
+    createtimer "timer__agi_potion"
+endif
+settimer "timer__agi_potion" interval__stat_potion
+
+
+# ----------------------------------------------------------------------------------------
+# module/buff/food.razor
+# ----------------------------------------------------------------------------------------
+if not timerexists "timer__food"
+    createtimer "timer__food"
+endif
+settimer "timer__food" interval__food
+
+
+# ========================================================================================
+# STATE
+# ========================================================================================
+
+# ----------------------------------------------------------------------------------------
+# module/base.razor
+#
+#   var__fighting
+#      1 while an enemy is engaged. buff/potions drinks only then. fight/target sets it
+#      every pass, and the pvp recipe keeps it at 1.
+#
+#   var__hold_casts
+#      1 while a block keeps the cast window for itself. buff/spells stands down.
+#      escape/recall sets it once a Recall is due.
+#
+#   var__hold_gathering
+#      1 while gathering and its packing wait. escape/recall sets it.
+# ----------------------------------------------------------------------------------------
+@setvar! var__fighting 0
+@setvar! var__hold_casts 0
+@setvar! var__hold_gathering 0
+
+
+# ----------------------------------------------------------------------------------------
+# module/escape/tracking.razor
+#
+#   var__tracking_setup_color
+#      Last color confirmed in this client session. It survives Stop and Play only while
+#      Hunting stays active. After a manual filter change, turn Hunting off before Play so
+#      it is checked again.
+#
+#   var__tracking_filter_confirmed
+#      1 when this run reused a confirmed color or verified it during startup.
+#
+#   var__tracking_hunting_active
+#      1 if Hunting was active at startup or at the last escape/recall check. No repeated
+#      gump setup.
+#
+#   var__tracking_button_answered
+#      Temporary button-response flag. Wait for each response before cycling the next
+#      filter.
+# ----------------------------------------------------------------------------------------
+if not varexist var__tracking_setup_color
+    @setvar! var__tracking_setup_color 0
+endif
+@setvar! var__tracking_filter_confirmed 0
+@setvar! var__tracking_hunting_active 0
+@setvar! var__tracking_button_answered 0
+
+
+# ----------------------------------------------------------------------------------------
+# module/fight/target.razor
+#
+#   var__combat_target
+#      The enemy picked with lasttarget, kept across Plays.
+#
+#   var__fresh_serial
+#      Scratch copy of the lasttarget serial for the mobile range check.
+#
+#   var__keep_lasttarget
+#      Scratch: 1 when a block that is about to answer its own cursor finds a new enemy
+#      in lasttarget, so it leaves the cursor and the enemy to the player.
+# ----------------------------------------------------------------------------------------
+if not varexist var__combat_target
+    @setvar! var__combat_target 0
+endif
+@setvar! var__fresh_serial 0
+@setvar! var__keep_lasttarget 0
+
+
+# ----------------------------------------------------------------------------------------
+# module/recovery/heal.razor
+#
+#   var__heal_potion_out
+#      Scratch: 1 once a heal potion went out on this pass.
+# ----------------------------------------------------------------------------------------
+@setvar! var__heal_potion_out 0
+
+
+# ----------------------------------------------------------------------------------------
+# module/tamer/vet-kit.razor
+#
+#   var__vet_running
+#      1 from a use until its finish line, so the next use cannot cancel it.
+#
+#   var__vet_wait
+#      How long after the last use or answer, on timer__vet_kit, the next try for the pets
+#      goes: 0 after a finish, interval__vet_refused after a refusal.
+# ----------------------------------------------------------------------------------------
+@setvar! var__vet_running 0
+@setvar! var__vet_wait 0
+
+
+# ----------------------------------------------------------------------------------------
+# module/magery/reagents.razor
+#
+#   var__regs_cure, var__regs_heal, var__regs_greater_heal, var__regs_create_food,
+#   var__regs_reactive_armor, var__regs_magic_reflect, var__regs_magic_arrow,
+#   var__regs_harm, var__regs_fireball, var__regs_lightning, var__regs_curse,
+#   var__regs_mana_drain, var__regs_energy_bolt, var__regs_bless,
+#   var__regs_arch_protection, var__regs_flamestrike
+#      1 when every reagent of that spell was found, written only by this block.
+#        cure            garlic 3972, ginseng 3973
+#        heal            garlic, ginseng, spider silk 3981
+#        greater heal    garlic, ginseng, mandrake root 3974, spider silk
+#        create food     garlic, ginseng, mandrake root
+#        reactive armor  garlic, spider silk, sulfurous ash 3980
+#        magic reflect   garlic, mandrake root, spider silk
+#        magic arrow     sulfurous ash
+#        harm            nightshade 3976, spider silk
+#        fireball        black pearl 3962
+#        lightning       mandrake root, sulfurous ash
+#        curse           garlic, nightshade, sulfurous ash
+#        mana drain      black pearl, mandrake root, spider silk
+#        energy bolt     black pearl, nightshade
+#        bless           garlic, mandrake root
+#        arch protection garlic, ginseng, mandrake root, sulfurous ash
+#        flamestrike     spider silk, sulfurous ash
+#
+#   var__has_black_pearl, var__has_garlic, var__has_ginseng, var__has_mandrake,
+#   var__has_nightshade, var__has_ash, var__has_silk
+#      Scratch: 1 when that reagent was found on the last read.
+# ----------------------------------------------------------------------------------------
+@setvar! var__regs_cure 0
+@setvar! var__regs_heal 0
+@setvar! var__regs_greater_heal 0
+@setvar! var__regs_create_food 0
+@setvar! var__regs_reactive_armor 0
+@setvar! var__regs_magic_reflect 0
+@setvar! var__regs_magic_arrow 0
+@setvar! var__regs_harm 0
+@setvar! var__regs_fireball 0
+@setvar! var__regs_lightning 0
+@setvar! var__regs_curse 0
+@setvar! var__regs_mana_drain 0
+@setvar! var__regs_energy_bolt 0
+@setvar! var__regs_bless 0
+@setvar! var__regs_arch_protection 0
+@setvar! var__regs_flamestrike 0
+@setvar! var__has_black_pearl 0
+@setvar! var__has_garlic 0
+@setvar! var__has_ginseng 0
+@setvar! var__has_mandrake 0
+@setvar! var__has_nightshade 0
+@setvar! var__has_ash 0
+@setvar! var__has_silk 0
+
+
+# ----------------------------------------------------------------------------------------
+# module/buff/spells.razor
+#
+#   var__buff_cast
+#      1 once this block cast a buff. magery/spell-siphon waits for a pass without one, and
+#      clears it.
+# ----------------------------------------------------------------------------------------
+@setvar! var__buff_cast 0
+
+
+# ----------------------------------------------------------------------------------------
+# module/base.razor
+# ----------------------------------------------------------------------------------------
+# The pvp expression means the structured-PvP restrictions, where these loops may not run.
+if pvp
+    overhead "[ script, blocked ]" 254
+    stop
+endif
+
+if config__clear_at_start = 1
+    clearall
+    clearsysmsg
+    cleardragdrop
+    clearignore
+endif
+
+
+# ----------------------------------------------------------------------------------------
+# module/escape/tracking.razor
+# ----------------------------------------------------------------------------------------
+# Reuse the color verified by this script while Hunting remains active.
+# A buff alone does not identify the filter. A first run checks the current window instead.
+if skill "Tracking" > 0
+    if findbuff "tracking" and var__tracking_setup_color = config__tracking_color
+        @setvar! var__tracking_filter_confirmed 1
+        @setvar! var__tracking_hunting_active 1
+    elseif diffhits < config__heal_hits and not poisoned and not warmode
+        if not hidden and not queued and not casting and not targetexists
+            useskill "Tracking"
+            waitforgump 4267467659 wait__tracking_gump
+
+            if gumpexists 4267467659
+                # Do not cycle past an already correct filter. The window displays the selected type.
+                if config__tracking_color = 1 and ingump "Murderer Players" 4267467659
+                    @setvar! var__tracking_filter_confirmed 1
+                elseif config__tracking_color = 2 and ingump "Criminal Players" 4267467659
+                    @setvar! var__tracking_filter_confirmed 1
+                elseif config__tracking_color = 3 and ingump "Enemy Players" 4267467659
+                    @setvar! var__tracking_filter_confirmed 1
+                elseif config__tracking_color = 4 and ingump "All Hostile Players" 4267467659
+                    @setvar! var__tracking_filter_confirmed 1
+                endif
+
+                if var__tracking_filter_confirmed = 0
+                    # An active hunt must stop before cycling through animals and other player colors.
+                    if findbuff "tracking"
+                        gumpresponse 6 4267467659
+                        wait wait__short
+                        for 60
+                            if not findbuff "tracking"
+                                break
+                            endif
+                            wait wait__poll
+                        endfor
+                    endif
+
+                    # Discard the old target and old filter replies only while setting up.
+                    clearsysmsg
+                    if not findbuff "tracking" and gumpexists 4267467659
+                        # Button 8 cycles ten hunt filters. Bound the attempt to one complete rotation.
+                        for 10
+                            if diffhits >= config__heal_hits or poisoned or warmode or hidden or queued or casting or targetexists
+                                break
+                            endif
+                            if not gumpexists 4267467659
+                                break
+                            endif
+                            gumpresponse 8 4267467659
+                            @setvar! var__tracking_button_answered 0
+                            # Only one selection is outstanding. Do not outrun a delayed server response.
+                            for 60
+                                if diffhits >= config__heal_hits or poisoned or warmode or hidden or queued or casting or targetexists
+                                    break
+                                endif
+                                if config__tracking_color = 1
+                                    if insysmsg "You will now hunt murderer players"
+                                        @setvar! var__tracking_filter_confirmed 1
+                                        @setvar! var__tracking_button_answered 1
+                                        break
+                                    endif
+                                elseif config__tracking_color = 2
+                                    if insysmsg "You will now hunt criminal players"
+                                        @setvar! var__tracking_filter_confirmed 1
+                                        @setvar! var__tracking_button_answered 1
+                                        break
+                                    endif
+                                elseif config__tracking_color = 3
+                                    if insysmsg "You will now hunt enemy players"
+                                        @setvar! var__tracking_filter_confirmed 1
+                                        @setvar! var__tracking_button_answered 1
+                                        break
+                                    endif
+                                elseif config__tracking_color = 4
+                                    if insysmsg "You will now hunt all hostile players"
+                                        @setvar! var__tracking_filter_confirmed 1
+                                        @setvar! var__tracking_button_answered 1
+                                        break
+                                    endif
+                                endif
+                                if insysmsg "You will now hunt"
+                                    @setvar! var__tracking_button_answered 1
+                                    break
+                                endif
+                                wait wait__poll
+                            endfor
+                            if var__tracking_filter_confirmed = 1 or var__tracking_button_answered = 0
+                                break
+                            endif
+                        endfor
+                    endif
+                endif
+
+                if var__tracking_filter_confirmed = 1 and gumpexists 4267467659 and diffhits < config__heal_hits and not poisoned and not warmode and not hidden and not queued and not casting and not targetexists
+                    # Setup reports belong to the old/intermediate filter, never to Recall detection.
+                    clearsysmsg
+                    if not findbuff "tracking"
+                        gumpresponse 6 4267467659
+                        wait wait__short
+                    endif
+                    if findbuff "tracking"
+                        @setvar! var__tracking_hunting_active 1
+                        @setvar! var__tracking_setup_color config__tracking_color
+                    endif
+                    if config__show_tracking = 0
+                        gumpclose 4267467659
+                    endif
+                elseif timer "timer__message" >= interval__message
+                    overhead "[ track, miss ]" 254
+                    settimer "timer__message" 0
+                endif
+            elseif timer "timer__message" >= interval__message
+                overhead "[ track, miss ]" 254
+                settimer "timer__message" 0
+            endif
+        endif
+    endif
+endif
+
+
+# ----------------------------------------------------------------------------------------
+# recipe/tamer-mage-enhanced-recipe.razor
+# ----------------------------------------------------------------------------------------
+# loot/recycle runs the hotkey named in this list when it finishes or gives up. A list, because
+# a variable cannot hold a word (blueprint/razor.html part 3). It lasts until the client closes.
+if not listexists 'list__resume_script'
+    createlist 'list__resume_script'
+endif
+clearlist 'list__resume_script'
+pushlist 'list__resume_script' 'Play Script: combat\tamer-mage-enhanced'
+
+if config__sysmsg = 1
+    sysmsg "Tamer mage enhanced v6 loaded: flamestrike mana={{config__mana_flamestrike}}, tracking color={{config__tracking_color}}." 88
+endif
+if config__chatty = 1
+    overhead "[ tamer, on ]" 290
+endif
+
+
+# ========================================================================================
+# MAIN LOOP
+# ========================================================================================
+while not dead
+    # ------------------------------------------------------------------------------------
+    # PASS START                                                         module/base.razor
+    #
+    # The pvp expression means structured-PvP restrictions, not a field PK encounter. With
+    # config__settle_first 1 the pass then waits for the item queue and any cast to
+    # finish.
+    # ------------------------------------------------------------------------------------
+    if pvp
+        overhead "[ script, blocked ]" 254
+        stop
+    endif
+
+    if config__settle_first = 1
+        while queued or casting
+            wait wait__short
+        endwhile
+    endif
+
+    # ------------------------------------------------------------------------------------
+    # TRACKING CHECK                                          module/escape/tracking.razor
+    #
+    # Hunting has to stay on for the profile's Tracking overheads to warn and for
+    # escape/recall to read a report, so the loop looks at it every interval__tracking_check
+    # and asks for it while it is off. A character without Tracking skips it.
+    # ------------------------------------------------------------------------------------
+    if timer "timer__tracking_check" >= interval__tracking_check and skill "Tracking" > 0
+        settimer "timer__tracking_check" 0
+        @setvar! var__tracking_hunting_active 0
+        if var__tracking_filter_confirmed = 1 and findbuff "tracking"
+            @setvar! var__tracking_hunting_active 1
+        endif
+
+        if var__tracking_hunting_active = 0 and timer "timer__message" >= interval__message
+            overhead "[ track, check ]" 255
+            settimer "timer__message" 0
+        endif
+    endif
+
+    # ------------------------------------------------------------------------------------
+    # COMBAT TARGET                                              module/fight/target.razor
+    #
+    # A pick within config__acquire_range becomes the remembered enemy. A carve or a song
+    # targets a corpse or an item, and dead and noto only take mobiles, so the serial
+    # range is checked first: mobile serials are below 0x40000000, and the number has to
+    # be on the left (blueprint/razor.html part 3, debug-target-state S06). The enemy is a
+    # fight (var__fighting 1) inside config__target_range, kept outside it while still
+    # within config__acquire_range, and dropped config__target_grace after it leaves that.
+    # ------------------------------------------------------------------------------------
+    if find lasttarget ground -1 -1 config__acquire_range as alias__fresh_target
+        if var__combat_target != alias__fresh_target
+            @setvar! var__fresh_serial alias__fresh_target
+            if 0x40000000 > var__fresh_serial
+                if not dead alias__fresh_target
+                    if noto alias__fresh_target = "hostile" or noto alias__fresh_target = "criminal" or noto alias__fresh_target = "enemy" or noto alias__fresh_target = "murderer"
+                        @setvar! var__combat_target alias__fresh_target
+                        settimer "timer__target_grace" 0
+                        if config__chatty = 1
+                            overhead "[ target, set ]" 1288 var__combat_target
+                        endif
+                        if config__sysmsg = 1
+                            sysmsg "Combat target: {{alias__fresh_target}}." 88
+                        endif
+                    endif
+                endif
+            endif
+        endif
+    endif
+
+    @setvar! var__fighting 0
+    if var__combat_target = 0
+        # No enemy remembered, nothing to keep.
+    elseif find var__combat_target ground -1 -1 config__target_range as alias__stored_target
+        settimer "timer__target_grace" 0
+        if dead alias__stored_target
+            @setvar! var__combat_target 0
+        elseif noto alias__stored_target != "hostile" and noto alias__stored_target != "criminal" and noto alias__stored_target != "enemy" and noto alias__stored_target != "murderer"
+            @setvar! var__combat_target 0
+        else
+            @setvar! var__fighting 1
+        endif
+    elseif find var__combat_target ground -1 -1 config__acquire_range as alias__stored_target
+        settimer "timer__target_grace" 0
+        if dead alias__stored_target
+            @setvar! var__combat_target 0
+        endif
+    elseif timer "timer__target_grace" >= config__target_grace
+        @setvar! var__combat_target 0
+    endif
+
+    if paralyzed or poisoned or diffhits > 0
+        # --------------------------------------------------------------------------------
+        # PARALYZE                                             module/recovery/pouch.razor
+        #
+        # Nothing else can act while held, so the pouch goes out at once, as in
+        # bard-necro-enhanced.
+        # --------------------------------------------------------------------------------
+        if paralyzed
+            if findtype 3705 backpack 38
+                yell "[Pouch"
+                wait wait__short
+            elseif timer "timer__message" >= interval__message
+                overhead "[ pouch, out ]" 254
+                settimer "timer__message" 0
+            endif
+        endif
+
+        # --------------------------------------------------------------------------------
+        # CURE                                                  module/recovery/cure.razor
+        #
+        # Potion first, it is instant and has no cooldown, and it goes out during a cast.
+        # While any cure potion is carried the agent is not used, so mana stays for
+        # Greater Heal. The agent waits for the walk bar and for warmode as
+        # config__walk_guard and config__warmode_is_manual say.
+        # --------------------------------------------------------------------------------
+        if poisoned and not paralyzed and not hidden and not queued and not targetexists
+            if config__use_potions = 1 and findtype "Orange Potion" self
+                hotkey "Drink Cure"
+                wait wait__short
+            else
+                if config__use_potions = 1 and timer "timer__message" >= interval__message
+                    overhead "[ cure pot, out ]" 254
+                    settimer "timer__message" 0
+                endif
+
+                if config__use_magery = 1 and var__regs_cure = 1 and mana >= config__mana_cure and not casting
+                    if config__warmode_is_manual = 0 or config__recover_in_warmode = 1 or not warmode
+                        if config__walk_guard = 0 or cooldown "walk" = 0
+                            hotkey "> Smart Heal/Cure Self"
+                            if config__sysmsg = 1
+                                sysmsg "Agent: Smart Heal/Cure Self for poison." 88
+                            endif
+                            wait wait__short
+
+                            for 60
+                                if not casting
+                                    break
+                                endif
+                                if insysmsg "Your concentration is disturbed, thus ruining thy spell."
+                                    break
+                                endif
+                                wait wait__poll
+                            endfor
+                        endif
+                    endif
+                endif
+            endif
+        endif
+
+        # --------------------------------------------------------------------------------
+        # HEAL                                                  module/recovery/heal.razor
+        #
+        # Heavy damage drinks first, because the potion is instant and goes out during a
+        # cast. Greater Heal follows when no potion went out on this pass and the loss is
+        # at the emergency line: none carried, on its own cooldown, or the bar still
+        # running. The bar skips the label read while it runs. The label stays
+        # authoritative when the bar is missing. Greater Heal waits for the walk bar and
+        # for warmode as config__walk_guard and config__warmode_is_manual say.
+        # --------------------------------------------------------------------------------
+        if not poisoned and not paralyzed and not hidden and not queued and not targetexists and diffhits >= config__heal_hits
+            @setvar! var__heal_potion_out 0
+            if config__use_potions = 1 and cooldown "heal pot" = 0
+                if findtype "Yellow Potion" self as alias__heal_potion
+                    getlabel alias__heal_potion label__heal_potion
+                    if "next usable" in label__heal_potion
+                        # Still on its own cooldown.
+                    else
+                        hotkey "Drink Heal"
+                        cooldown "heal pot" cooldown__heal_potion
+                        @setvar! var__heal_potion_out 1
+                        wait wait__short
+                    endif
+                elseif timer "timer__message" >= interval__message
+                    overhead "[ heal pot, out ]" 254
+                    settimer "timer__message" 0
+                endif
+            endif
+
+            if var__heal_potion_out = 0 and diffhits >= config__emergency_hits and config__use_magery = 1 and var__regs_greater_heal = 1 and mana >= config__mana_greater_heal and not casting
+                if config__warmode_is_manual = 0 or config__recover_in_warmode = 1 or not warmode
+                    if config__walk_guard = 0 or cooldown "walk" = 0
+                        hotkey "> Greater Heal/Cure Self"
+                        if config__sysmsg = 1
+                            sysmsg "Agent: Greater Heal/Cure Self." 88
+                        endif
+                        wait wait__short
+
+                        for 60
+                            if not casting
+                                break
+                            endif
+                            if insysmsg "Your concentration is disturbed, thus ruining thy spell."
+                                break
+                            endif
+                            wait wait__poll
+                        endfor
+
+                        # The agent leaves its beneficial cursor up when there is nothing left to heal.
+                        if targetexists "beneficial" and diffhits = 0
+                            hotkey "Cancel Current Target"
+                            wait wait__short
+                        endif
+                    endif
+                endif
+            endif
+        endif
+    endif
+
+    # ------------------------------------------------------------------------------------
+    # REFRESH                                                module/recovery/refresh.razor
+    # ------------------------------------------------------------------------------------
+    if stam <= config__refresh_stam and config__use_potions = 1 and not paralyzed and not hidden and not queued and not targetexists
+        if findtype "Red Potion" self
+            hotkey "Drink Refresh"
+            wait wait__short
+        endif
+    endif
+
+    # ------------------------------------------------------------------------------------
+    # VET KIT                                                   module/tamer/vet-kit.razor
+    #
+    # Veterinary supplies (25750), the self bandage that also reaches the followers.
+    #   running  A kit that began is left alone until "You finish using veterinary
+    #            supplies", because using the supplies again cancels it.
+    #            interval__vet_running ends the wait when another insysmsg consumed that
+    #            line first.
+    #   hurt     Any hit point loss sends the kit at once.
+    #   pets     At full health the kit goes once var__vet_wait has passed: at once after a
+    #            finish, and interval__vet_refused after "do not require healing". diffhits
+    #            reads only our own hit points, so that answer is the pets' health check.
+    # Bandaging gates it too, since a manual bandage on a pet would be cancelled the same
+    # way. The answer is read on the spot. With no answer the kit is taken as running, so a
+    # late begin line cannot let the next pass cancel it.
+    # ------------------------------------------------------------------------------------
+    if var__vet_running = 1
+        if insysmsg "You finish using veterinary supplies"
+            @setvar! var__vet_running 0
+            @setvar! var__vet_wait 0
+        elseif timer "timer__vet_kit" >= interval__vet_running
+            @setvar! var__vet_running 0
+            @setvar! var__vet_wait 0
+        endif
+    endif
+
+    if var__vet_running = 0 and not bandaging and not hidden and not queued and not targetexists
+        if diffhits > 0 or timer "timer__vet_kit" >= var__vet_wait
+            settimer "timer__vet_kit" 0
+            if findtype 25750 backpack as alias__vet_kit
+                dclick alias__vet_kit
+                @setvar! var__vet_running 1
+                for 20
+                    if insysmsg "You begin using veterinary supplies"
+                        break
+                    endif
+                    if insysmsg "do not require healing"
+                        @setvar! var__vet_running 0
+                        break
+                    endif
+                    wait wait__poll
+                endfor
+
+                # Nothing was applied. A hurt pass tries again at once, the pets after the wait.
+                if var__vet_running = 0
+                    @setvar! var__vet_wait interval__vet_refused
+                    settimer "timer__vet_kit" 0
+                endif
+            else
+                # Out of supplies. Looked up again after the same wait, or at once when hurt.
+                @setvar! var__vet_wait interval__vet_refused
+                if timer "timer__message" >= interval__message
+                    overhead "[ vet kit, out ]" 254
+                    settimer "timer__message" 0
+                endif
+            endif
+        endif
+    endif
+
+    # ------------------------------------------------------------------------------------
+    # REAGENTS                                                module/magery/reagents.razor
+    #
+    # On the interval, or at once after a refusal for reagents, so a stale flag cannot
+    # send the same doomed cast every pass. Each reagent is looked up once, and every
+    # spell flag comes from those seven with plain comparisons.
+    # ------------------------------------------------------------------------------------
+    if config__use_magery = 1
+        if timer "timer__reagents" >= interval__reagents or insysmsg "More reagents are needed"
+            settimer "timer__reagents" 0
+
+            @setvar! var__has_black_pearl 0
+            @setvar! var__has_garlic 0
+            @setvar! var__has_ginseng 0
+            @setvar! var__has_mandrake 0
+            @setvar! var__has_nightshade 0
+            @setvar! var__has_ash 0
+            @setvar! var__has_silk 0
+
+            if findtype 3962 self
+                @setvar! var__has_black_pearl 1
+            endif
+            if findtype 3972 self
+                @setvar! var__has_garlic 1
+            endif
+            if findtype 3973 self
+                @setvar! var__has_ginseng 1
+            endif
+            if findtype 3974 self
+                @setvar! var__has_mandrake 1
+            endif
+            if findtype 3976 self
+                @setvar! var__has_nightshade 1
+            endif
+            if findtype 3980 self
+                @setvar! var__has_ash 1
+            endif
+            if findtype 3981 self
+                @setvar! var__has_silk 1
+            endif
+
+            @setvar! var__regs_cure 0
+            @setvar! var__regs_heal 0
+            @setvar! var__regs_greater_heal 0
+            @setvar! var__regs_create_food 0
+            @setvar! var__regs_reactive_armor 0
+            @setvar! var__regs_magic_reflect 0
+            @setvar! var__regs_magic_arrow 0
+            @setvar! var__regs_harm 0
+            @setvar! var__regs_fireball 0
+            @setvar! var__regs_lightning 0
+            @setvar! var__regs_curse 0
+            @setvar! var__regs_mana_drain 0
+            @setvar! var__regs_energy_bolt 0
+            @setvar! var__regs_bless 0
+            @setvar! var__regs_arch_protection 0
+            @setvar! var__regs_flamestrike 0
+
+            if var__has_garlic = 1 and var__has_ginseng = 1
+                @setvar! var__regs_cure 1
+            endif
+            if var__has_garlic = 1 and var__has_ginseng = 1 and var__has_silk = 1
+                @setvar! var__regs_heal 1
+            endif
+            if var__has_garlic = 1 and var__has_ginseng = 1 and var__has_mandrake = 1 and var__has_silk = 1
+                @setvar! var__regs_greater_heal 1
+            endif
+            if var__has_garlic = 1 and var__has_ginseng = 1 and var__has_mandrake = 1
+                @setvar! var__regs_create_food 1
+            endif
+            if var__has_garlic = 1 and var__has_silk = 1 and var__has_ash = 1
+                @setvar! var__regs_reactive_armor 1
+            endif
+            if var__has_garlic = 1 and var__has_mandrake = 1 and var__has_silk = 1
+                @setvar! var__regs_magic_reflect 1
+            endif
+            if var__has_ash = 1
+                @setvar! var__regs_magic_arrow 1
+            endif
+            if var__has_nightshade = 1 and var__has_silk = 1
+                @setvar! var__regs_harm 1
+            endif
+            if var__has_black_pearl = 1
+                @setvar! var__regs_fireball 1
+            endif
+            if var__has_mandrake = 1 and var__has_ash = 1
+                @setvar! var__regs_lightning 1
+            endif
+            if var__has_garlic = 1 and var__has_nightshade = 1 and var__has_ash = 1
+                @setvar! var__regs_curse 1
+            endif
+            if var__has_black_pearl = 1 and var__has_mandrake = 1 and var__has_silk = 1
+                @setvar! var__regs_mana_drain 1
+            endif
+            if var__has_black_pearl = 1 and var__has_nightshade = 1
+                @setvar! var__regs_energy_bolt 1
+            endif
+            if var__has_garlic = 1 and var__has_mandrake = 1
+                @setvar! var__regs_bless 1
+            endif
+            if var__has_garlic = 1 and var__has_ginseng = 1 and var__has_mandrake = 1 and var__has_ash = 1
+                @setvar! var__regs_arch_protection 1
+            endif
+            if var__has_silk = 1 and var__has_ash = 1
+                @setvar! var__regs_flamestrike 1
+            endif
+        endif
+    endif
+
+    # ------------------------------------------------------------------------------------
+    # STAT POTIONS                                               module/buff/potions.razor
+    #
+    # Kept up while var__fighting is 1. Strength and Agility read the stat against
+    # config__str_potion and config__dex_potion, because Bless and the Strength and
+    # Agility spells show the same icons as the potions, and each is tried once per
+    # interval__stat_potion. Magic Resist has an icon of its own and is drunk once it is
+    # missing. Each potion is judged on its own, so running out of one does not hold up
+    # the others.
+    # ------------------------------------------------------------------------------------
+    if var__fighting = 1 and config__use_potions = 1 and not paralyzed and not hidden and not targetexists
+        if not queued and str < config__str_potion and timer "timer__str_potion" >= interval__stat_potion
+            settimer "timer__str_potion" 0
+            if findtype "White Potion" self
+                hotkey "Drink Strength"
+                wait wait__short
+            endif
+        endif
+        if not queued and dex < config__dex_potion and timer "timer__agi_potion" >= interval__stat_potion
+            settimer "timer__agi_potion" 0
+            if findtype "Blue Potion" self
+                hotkey "Drink Agility"
+                wait wait__short
+            endif
+        endif
+        if config__use_resist_potion = 1 and not queued and not findbuff "Magic Resist Potion"
+            if findtype "Black Potion" self
+                hotkey "Drink Magic Resist"
+                wait wait__short
+            endif
+        endif
+    endif
+
+    # ------------------------------------------------------------------------------------
+    # SELF BUFFS                                                  module/buff/spells.razor
+    #
+    # Reactive Armor, then Magic Reflection, whenever one is missing and the window is
+    # free, then Bless and Arch Protection out of a fight. One cast per pass. Bless shows
+    # Strength, Agility and Cunning, and only Cunning is Bless alone, since the stat
+    # potions show the other two. Arch Protection shows Protection. Each icon arrives a
+    # round trip after the target, so the block waits for it before the next pass reads it. Not started at config__buff_max_loss, and cut there mid cast so the next pass
+    # can heal. With config__buff_when_poisoned 0 poison holds them back and cuts them
+    # too, so the cure goes first. var__hold_casts lets another block keep the cast window
+    # (a latched Recall). config__walk_guard and config__warmode_is_manual apply as for
+    # the heal agents. The reflect bar is the server's recast lock after Reflect is used
+    # up.
+    # ------------------------------------------------------------------------------------
+    if config__use_magery = 1 and var__hold_casts = 0 and not paralyzed and not hidden and not queued and not casting and not targetexists and diffhits < config__buff_max_loss
+        if config__buff_when_poisoned = 1 or not poisoned
+            if config__warmode_is_manual = 0 or not warmode
+                if config__walk_guard = 0 or cooldown "walk" = 0
+                    if config__use_reactive_armor = 1 and var__regs_reactive_armor = 1 and mana >= config__mana_reactive_armor and not findbuff "Reactive Armor"
+                        cast "Reactive Armor"
+                        @setvar! var__buff_cast 1
+                        if config__sysmsg = 1
+                            sysmsg "Buff: Reactive Armor." 88
+                        endif
+                        wait wait__short
+
+                        for 60
+                            if not casting
+                                break
+                            endif
+                            if insysmsg "Your concentration is disturbed, thus ruining thy spell."
+                                break
+                            endif
+                            if diffhits >= config__buff_max_loss
+                                hotkey "> Interrupt"
+                                break
+                            endif
+                            if config__buff_when_poisoned = 0 and poisoned
+                                hotkey "> Interrupt"
+                                break
+                            endif
+                            wait wait__poll
+                        endfor
+                    elseif config__use_magic_reflect = 1 and var__regs_magic_reflect = 1 and mana >= config__mana_magic_reflect and cooldown "reflect" = 0 and not findbuff "Magic Reflection"
+                        cast "Magic Reflection"
+                        @setvar! var__buff_cast 1
+                        if config__sysmsg = 1
+                            sysmsg "Buff: Magic Reflection." 88
+                        endif
+                        wait wait__short
+
+                        for 60
+                            if not casting
+                                break
+                            endif
+                            if insysmsg "Your concentration is disturbed, thus ruining thy spell."
+                                break
+                            endif
+                            if diffhits >= config__buff_max_loss
+                                hotkey "> Interrupt"
+                                break
+                            endif
+                            if config__buff_when_poisoned = 0 and poisoned
+                                hotkey "> Interrupt"
+                                break
+                            endif
+                            wait wait__poll
+                        endfor
+                    elseif config__use_bless = 1 and var__fighting = 0 and not warmode and var__regs_bless = 1 and mana >= config__mana_bless and not findbuff "Cunning"
+                        cast "Bless"
+                        @setvar! var__buff_cast 1
+                        if config__sysmsg = 1
+                            sysmsg "Buff: Bless." 88
+                        endif
+                        wait wait__short
+
+                        for 60
+                            if targetexists
+                                break
+                            endif
+                            if insysmsg "Your concentration is disturbed, thus ruining thy spell."
+                                break
+                            endif
+                            if diffhits >= config__buff_max_loss
+                                hotkey "> Interrupt"
+                                break
+                            endif
+                            if config__buff_when_poisoned = 0 and poisoned
+                                hotkey "> Interrupt"
+                                break
+                            endif
+                            wait wait__poll
+                        endfor
+
+                        if targetexists "beneficial"
+                            target self
+                            for 10
+                                if findbuff "Cunning"
+                                    break
+                                endif
+                                wait wait__poll
+                            endfor
+                        endif
+                    elseif config__use_arch_protection = 1 and var__fighting = 0 and not warmode and var__regs_arch_protection = 1 and mana >= config__mana_arch_protection and not findbuff "Protection"
+                        cast "Arch Protection"
+                        @setvar! var__buff_cast 1
+                        if config__sysmsg = 1
+                            sysmsg "Buff: Arch Protection." 88
+                        endif
+                        wait wait__short
+
+                        for 60
+                            if targetexists
+                                break
+                            endif
+                            if insysmsg "Your concentration is disturbed, thus ruining thy spell."
+                                break
+                            endif
+                            if diffhits >= config__buff_max_loss
+                                hotkey "> Interrupt"
+                                break
+                            endif
+                            if config__buff_when_poisoned = 0 and poisoned
+                                hotkey "> Interrupt"
+                                break
+                            endif
+                            wait wait__poll
+                        endfor
+
+                        if targetexists "beneficial"
+                            target self
+                            for 10
+                                if findbuff "Protection"
+                                    break
+                                endif
+                                wait wait__poll
+                            endfor
+                        endif
+                    endif
+                endif
+            endif
+        endif
+    endif
+
+    # ------------------------------------------------------------------------------------
+    # FLAMESTRIKE                                          module/magery/flamestrike.razor
+    #
+    # On the engaged enemy (var__fighting), with warmode off, and not at the emergency line.
+    # The targeted cast shape of blueprint/razor.html part 4: drain a stale disturbance,
+    # cast, poll for the cursor, then read lasttarget once more. If the player picked
+    # another enemy during the cast, or the enemy died, the cursor is cancelled and the
+    # next pass casts on the new pick. An emergency during the cast cuts it as
+    # config__interrupt_to_heal says.
+    # ------------------------------------------------------------------------------------
+    if var__fighting = 1 and not warmode and var__regs_flamestrike = 1 and mana >= config__mana_flamestrike and diffhits < config__emergency_hits and not paralyzed and not hidden and not queued and not casting and not targetexists and cooldown "walk" = 0
+        if find var__combat_target ground -1 -1 config__target_range as alias__fs_target
+            if insysmsg "Your concentration is disturbed, thus ruining thy spell."
+                # Consumed. A stale disturbance cannot end the poll below early.
+            endif
+            cast "Flamestrike"
+            wait wait__short
+
+            for 60
+                if targetexists
+                    break
+                endif
+                if insysmsg "Your concentration is disturbed, thus ruining thy spell."
+                    break
+                endif
+                if config__interrupt_to_heal = 1 and diffhits >= config__emergency_hits
+                    if config__chatty = 1
+                        overhead "[ flamestrike, cut ]" 254
+                    endif
+                    hotkey "> Interrupt"
+                    break
+                endif
+                wait wait__poll
+            endfor
+
+            if targetexists "harmful"
+                @setvar! var__keep_lasttarget 0
+                if find lasttarget ground -1 -1 config__acquire_range as alias__fresh_target
+                    if not dead alias__fresh_target and var__combat_target != alias__fresh_target
+                        if noto alias__fresh_target = "hostile" or noto alias__fresh_target = "criminal" or noto alias__fresh_target = "enemy" or noto alias__fresh_target = "murderer"
+                            @setvar! var__keep_lasttarget 1
+                        endif
+                    endif
+                endif
+
+                if var__keep_lasttarget = 1 or dead alias__fs_target
+                    hotkey "Cancel Current Target"
+                    wait wait__short
+                else
+                    target alias__fs_target
+                    if config__sysmsg = 1
+                        sysmsg "Flamestrike on {{alias__fs_target}}." 88
+                    endif
+                    wait wait__cast
+                endif
+            endif
+        endif
+    endif
+
+    # ------------------------------------------------------------------------------------
+    # FOOD                                                          module/buff/food.razor
+    #
+    # Looked at once a minute. The buff lasts far longer. With config__warmode_is_manual 1
+    # it stands down in warmode, as our casts do.
+    # ------------------------------------------------------------------------------------
+    if timer "timer__food" >= interval__food and not findbuff "Food Satisfaction"
+        if config__warmode_is_manual = 0 or not warmode
+            if not hidden and not queued and not casting and not targetexists
+                settimer "timer__food" 0
+                if findtype tray backpack as alias__food
+                    dclick alias__food
+                    wait wait__short
+                endif
+            endif
+        endif
+    endif
+
+    # ------------------------------------------------------------------------------------
+    # MUSHROOM                                                  module/buff/mushroom.razor
+    #
+    # Eating is an item use, so like a potion it goes out during a cast and on the move,
+    # and waits only for a held cursor. Create Food is a cast and waits for a fight to end,
+    # so its 60 second cooldown burns on the walk rather than taking a cast from the
+    # rotation. It also stands down in warmode and for the walk bar.
+    # ------------------------------------------------------------------------------------
+    if mana <= config__mushroom_eat_mana and not findbuff 'Magic Mushroom Cooldown' and not hidden and not queued and not targetexists and findtype "mushroom" backpack
+        hotkey 'Eat Magic Mushroom'
+        wait wait__short
+    elseif var__fighting = 0 and mana >= config__mushroom_create_mana and var__regs_create_food = 1 and not warmode and not targetexists and not casting and cooldown "walk" = 0 and counttype "mushroom" backpack < config__mushroom_min_count
+        cast 'Create Food'
+        wait wait__short
+
+        for 60
+            if not casting
+                break
+            endif
+
+            if insysmsg "Your concentration is disturbed, thus ruining thy spell."
+                break
+            endif
+
+            wait wait__poll
+        endfor
+    endif
+
+    # ------------------------------------------------------------------------------------
+    # GOLD                                                     module/pack/gold-drop.razor
+    #
+    # One drop per pass, so recovery still runs between drops. A refused drop goes back to
+    # the pack.
+    # ------------------------------------------------------------------------------------
+    if weight > maxweight
+        if not hidden and not queued and not casting and not targetexists
+            if findtype "gold coin" backpack as alias__found_gold
+                lift alias__found_gold config__gold_drop_amount
+                droprelloc 0 0
+                if config__sysmsg = 1
+                    sysmsg "Gold drop: up to {{config__gold_drop_amount}} at your feet, weight over max." 88
+                endif
+                wait wait__short
+
+                if insysmsg "cannot drop anything"
+                    drop backpack -1 -1 -1
+                endif
+
+                wait wait__gold_drop
+                if config__chatty = 1
+                    overhead "[ gold, dropped ]" 290
+                endif
+            elseif timer "timer__message" >= interval__message
+                overhead "[ weight, over ]" 254
+                settimer "timer__message" 0
+            endif
+        endif
+    endif
+
+    # ------------------------------------------------------------------------------------
+    # END OF PASS                                                        module/base.razor
+    # ------------------------------------------------------------------------------------
+    wait wait__poll
+endwhile

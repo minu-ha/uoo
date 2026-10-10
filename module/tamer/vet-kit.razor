@@ -1,0 +1,106 @@
+# ----------------------------------------------------------------------------------------
+# Veterinary supplies on you and the followers around you, never over a running kit.
+# The kit is a tamer's self bandage, and it keeps being tried for the pets at full health:
+# with no one to heal the server answers "do not require healing" and applies nothing.
+# ----------------------------------------------------------------------------------------
+
+
+# ----------------------------------------------------------------------------------------
+# @ wait
+#
+#   interval__vet_refused
+#      How long the next try for the pets waits after "You or your nearby followers do not
+#      require healing.", or after the supplies ran out. A hurt pass does not wait.
+#
+#   interval__vet_running
+#      How long a kit that began is taken as running when its finish line was missed. The
+#      kit takes the Veterinary bandage time, 5 seconds, on yourself as on the pets.
+# ----------------------------------------------------------------------------------------
+@setvar! interval__vet_refused 2000
+@setvar! interval__vet_running 7000
+
+
+# ----------------------------------------------------------------------------------------
+# @ timer
+#
+#   timer__vet_kit
+#      Ready on the first pass.
+# ----------------------------------------------------------------------------------------
+timer__vet_kit interval__vet_running
+
+
+# ----------------------------------------------------------------------------------------
+# @ state
+#
+#   var__vet_running
+#      1 from a use until its finish line, so the next use cannot cancel it.
+#
+#   var__vet_wait
+#      How long after the last use or answer, on timer__vet_kit, the next try for the pets
+#      goes: 0 after a finish, interval__vet_refused after a refusal.
+# ----------------------------------------------------------------------------------------
+@setvar! var__vet_running 0
+@setvar! var__vet_wait 0
+
+
+# ----------------------------------------------------------------------------------------
+# @ loop
+# ----------------------------------------------------------------------------------------
+    # ------------------------------------------------------------------------------------
+    # VET KIT
+    #
+    # Veterinary supplies (25750), the self bandage that also reaches the followers.
+    #   running  A kit that began is left alone until "You finish using veterinary
+    #            supplies", because using the supplies again cancels it.
+    #            interval__vet_running ends the wait when another insysmsg consumed that
+    #            line first.
+    #   hurt     Any hit point loss sends the kit at once.
+    #   pets     At full health the kit goes once var__vet_wait has passed: at once after a
+    #            finish, and interval__vet_refused after "do not require healing". diffhits
+    #            reads only our own hit points, so that answer is the pets' health check.
+    # Bandaging gates it too, since a manual bandage on a pet would be cancelled the same
+    # way. The answer is read on the spot. With no answer the kit is taken as running, so a
+    # late begin line cannot let the next pass cancel it.
+    # ------------------------------------------------------------------------------------
+    if var__vet_running = 1
+        if insysmsg "You finish using veterinary supplies"
+            @setvar! var__vet_running 0
+            @setvar! var__vet_wait 0
+        elseif timer "timer__vet_kit" >= interval__vet_running
+            @setvar! var__vet_running 0
+            @setvar! var__vet_wait 0
+        endif
+    endif
+
+    if var__vet_running = 0 and not bandaging and not hidden and not queued and not targetexists
+        if diffhits > 0 or timer "timer__vet_kit" >= var__vet_wait
+            settimer "timer__vet_kit" 0
+            if findtype 25750 backpack as alias__vet_kit
+                dclick alias__vet_kit
+                @setvar! var__vet_running 1
+                for 20
+                    if insysmsg "You begin using veterinary supplies"
+                        break
+                    endif
+                    if insysmsg "do not require healing"
+                        @setvar! var__vet_running 0
+                        break
+                    endif
+                    wait wait__poll
+                endfor
+
+                # Nothing was applied. A hurt pass tries again at once, the pets after the wait.
+                if var__vet_running = 0
+                    @setvar! var__vet_wait interval__vet_refused
+                    settimer "timer__vet_kit" 0
+                endif
+            else
+                # Out of supplies. Looked up again after the same wait, or at once when hurt.
+                @setvar! var__vet_wait interval__vet_refused
+                if timer "timer__message" >= interval__message
+                    overhead "[ vet kit, out ]" 254
+                    settimer "timer__message" 0
+                endif
+            endif
+        endif
+    endif

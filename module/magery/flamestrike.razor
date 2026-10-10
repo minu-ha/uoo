@@ -1,0 +1,77 @@
+# ----------------------------------------------------------------------------------------
+# Flamestrike on the engaged enemy, for the aspect proc.
+#
+# @ hotkeys > Interrupt, Cancel Current Target
+# ----------------------------------------------------------------------------------------
+
+
+# ----------------------------------------------------------------------------------------
+# @ config
+#
+#   config__mana_flamestrike
+#      Minimum current mana to start Flamestrike. It costs 40.
+# ----------------------------------------------------------------------------------------
+@setvar! config__mana_flamestrike 40
+
+
+# ----------------------------------------------------------------------------------------
+# @ loop
+# ----------------------------------------------------------------------------------------
+    # ------------------------------------------------------------------------------------
+    # FLAMESTRIKE
+    #
+    # On the engaged enemy (var__fighting), with warmode off, and not at the emergency line.
+    # The targeted cast shape of blueprint/razor.html part 4: drain a stale disturbance,
+    # cast, poll for the cursor, then read lasttarget once more. If the player picked
+    # another enemy during the cast, or the enemy died, the cursor is cancelled and the
+    # next pass casts on the new pick. An emergency during the cast cuts it as
+    # config__interrupt_to_heal says.
+    # ------------------------------------------------------------------------------------
+    if var__fighting = 1 and not warmode and var__regs_flamestrike = 1 and mana >= config__mana_flamestrike and diffhits < config__emergency_hits and not paralyzed and not hidden and not queued and not casting and not targetexists and cooldown "walk" = 0
+        if find var__combat_target ground -1 -1 config__target_range as alias__fs_target
+            if insysmsg "Your concentration is disturbed, thus ruining thy spell."
+                # Consumed. A stale disturbance cannot end the poll below early.
+            endif
+            cast "Flamestrike"
+            wait wait__short
+
+            for 60
+                if targetexists
+                    break
+                endif
+                if insysmsg "Your concentration is disturbed, thus ruining thy spell."
+                    break
+                endif
+                if config__interrupt_to_heal = 1 and diffhits >= config__emergency_hits
+                    if config__chatty = 1
+                        overhead "[ flamestrike, cut ]" 254
+                    endif
+                    hotkey "> Interrupt"
+                    break
+                endif
+                wait wait__poll
+            endfor
+
+            if targetexists "harmful"
+                @setvar! var__keep_lasttarget 0
+                if find lasttarget ground -1 -1 config__acquire_range as alias__fresh_target
+                    if not dead alias__fresh_target and var__combat_target != alias__fresh_target
+                        if noto alias__fresh_target = "hostile" or noto alias__fresh_target = "criminal" or noto alias__fresh_target = "enemy" or noto alias__fresh_target = "murderer"
+                            @setvar! var__keep_lasttarget 1
+                        endif
+                    endif
+                endif
+
+                if var__keep_lasttarget = 1 or dead alias__fs_target
+                    hotkey "Cancel Current Target"
+                    wait wait__short
+                else
+                    target alias__fs_target
+                    if config__sysmsg = 1
+                        sysmsg "Flamestrike on {{alias__fs_target}}." 88
+                    endif
+                    wait wait__cast
+                endif
+            endif
+        endif
+    endif

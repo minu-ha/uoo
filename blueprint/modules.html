@@ -33,7 +33,7 @@
 <tr><td><a href="#09">09</a></td><td>아직 옮기지 않은 것</td></tr>
 </tbody>
 </table>
-<p>인게임 확인 항목은 <a href="open-items.html">open-items.html</a> 09절 (lumberjack-enhanced), 10절 (pvp), 11절 (skinning-enhanced), 14절 (bard-necro-enhanced)에 있다.</p>
+<p>인게임 확인 항목은 <a href="open-items.html">open-items.html</a> 09절 (lumberjack-enhanced), 10절 (pvp), 11절 (skinning-enhanced), 12절 (tamer-mage-enhanced), 14절 (bard-necro-enhanced)에 있다.</p>
 
 <h2 id="01" data-part="설계">01 왜 모듈인가</h2>
 <p><strong>같은 블록이 루프마다 복사돼 있었다.</strong> 2026-10-09 스탯 포션 판정을 바꾸는 데 스크립트 8개를 고쳤고,
@@ -72,7 +72,7 @@
 <tr><td><code>module/recovery/</code></td><td>살아남기</td><td><code>pouch</code> (마비), <code>cure</code>, <code>heal</code>, <code>bandage</code>, <code>light-heal</code>, <code>refresh</code></td></tr>
 <tr><td><code>module/magery/</code></td><td>공격 주문과 시약</td>
 <td><code>reagents</code> (모든 마법 블록이 읽는 시약 표시와 서클별 마나), <code>opener</code> (Mana Drain, Curse), <code>proc-core</code> (Grimoire 프록 넷),
-<code>filler</code> (Energy Bolt), <code>spell-siphon</code> (자기에게 Magic Arrow)</td></tr>
+<code>filler</code> (Energy Bolt), <code>spell-siphon</code> (자기에게 Magic Arrow), <code>flamestrike</code> (aspect 발동용)</td></tr>
 <tr><td><code>module/buff/</code></td><td>버프 아이콘 유지</td>
 <td><code>spells</code> (Reactive Armor, Magic Reflection, 설정으로 Bless와 Arch Protection), <code>potions</code> (Strength, Agility, Magic Resist), <code>food</code> (Food Satisfaction),
 <code>mushroom</code> (Magic Mushroom 먹기와 Create Food)</td></tr>
@@ -81,7 +81,7 @@
 <tr><td><code>module/necro/</code></td><td>네크로 핫바와 소환수</td>
 <td><code>symbols</code> (Unholy Symbol 수 읽기), <code>hotbar</code> (핫바 열기), <code>summon-names</code> (소환수 이름 바꾸기), <code>burst</code> (Blood Oath, Corpse Skin, Evil Omen),
 <code>poison-strike</code>, <code>vampiric-embrace</code></td></tr>
-<tr><td><code>module/tamer/</code></td><td>펫 스킬</td><td><code>herding</code> (목동 지팡이)</td></tr>
+<tr><td><code>module/tamer/</code></td><td>펫 스킬</td><td><code>herding</code> (목동 지팡이), <code>vet-kit</code> (나와 펫에게 수의사 키트)</td></tr>
 <tr><td><code>module/fight/</code></td><td>근접 전투 보조</td>
 <td><code>target</code> (기억한 적), <code>weapon-swap</code> (pvp 무기 슬롯), <code>axe</code>, <code>sword-codex</code>, <code>parry-codex</code>, <code>weapon-ability</code></td></tr>
 <tr><td><code>module/gather/</code></td><td>채집</td><td><code>lumberjacking</code> (Smart Harvest), <code>skinning</code> (칼질)</td></tr>
@@ -569,6 +569,37 @@ pvp 결과물에는 시작 4줄이 <code>if config__clear_at_start = 1</code> �
 </tbody>
 </table>
 <p>인게임 확인 항목은 <a href="open-items.html#14">open-items.html</a> 14절에 더했다.</p>
+
+<h3 id="08.E">08.E tamer-mage-enhanced</h3>
+<p>같은 날 archive에 있던 <code>tamer-mage-enhanced</code> (v5)를 <code>recipe/tamer-mage-enhanced-recipe.razor</code>로 옮기고 결과물을 <code>script/combat/</code>에 되돌렸다 (v6).
+새 모듈은 <code>tamer/vet-kit</code>과 <code>magery/flamestrike</code> 둘이고, 나머지는 공용 모듈을 넓혀서 썼다.</p>
+<ul>
+<li><code>magery/reagents</code>가 Bless, Arch Protection, Flamestrike 시약도 읽는다.</li>
+<li><code>buff/spells</code>에 Bless와 Arch Protection 갈래를 더했다. 기본은 꺼져 있고 (<code>use_bless</code>, <code>use_arch_protection</code>) tamer 레시피만 켠다.</li>
+<li>Hunting 점검을 <code>escape/recall</code>에서 <code>escape/tracking</code>으로 옮겼다. 리콜이 없는 tamer도 같은 경고를 받는다.</li>
+<li>켜고 끄는 설정 (<code>use_vet_kit</code>, <code>use_flamestrike</code>, <code>use_stat_potions</code>, <code>use_gold_drop</code>, <code>use_tracking</code>)은 없앴다. 레시피에 넣으면 켜진다.
+가벼운 Heal은 기본이 꺼져 있었으므로 <code>recovery/light-heal</code>을 넣지 않았다.</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>무엇</th>
+<th>전</th>
+<th>지금</th>
+</tr>
+</thead>
+<tbody>
+<tr><td>Bless·Arch Protection</td><td>기억한 적이 없을 때</td><td>교전 중이 아닐 때 (<code>var__fighting</code> 0). 적이 10칸 밖에 있으면 건다</td></tr>
+<tr><td>버프 끊기</td><td>잃은 HP 35 (<code>emergency_hits</code>)</td><td>같은 35지만 <code>buff_max_loss</code>를 본다</td></tr>
+<tr><td>Flamestrike 끊기</td><td>늘 끊었다</td><td><code>interrupt_to_heal</code>을 따른다 (기본 1). 끊으면 <code>[ flamestrike, cut ]</code>. 대상에 쏜 뒤 대기는 0.3초 (<code>wait__cast</code>)</td></tr>
+<tr><td>시약 읽기</td><td>30초마다, 패스 맨 앞</td><td>10초마다, 수의사 키트 뒤. 키트의 Journal 줄을 먼저 읽게 한다</td></tr>
+<tr><td>힐 포션</td><td>마신 뒤 바를 켜지 않았다</td><td>heal pot 바를 켠다 (<code>recovery/heal</code>)</td></tr>
+<tr><td>음식</td><td>시전 중에도</td><td>시전이 끝나면</td></tr>
+<tr><td>골드</td><td>떨군 뒤 0.2초</td><td>1초 (<code>wait__gold_drop</code>), <code>[ gold, dropped ]</code></td></tr>
+<tr><td>전투 대상</td><td>lasttarget이 무엇이든 받았다</td><td>모바일 serial만 받는다 (<code>fight/target</code>)</td></tr>
+</tbody>
+</table>
+<p>인게임 확인 항목은 <a href="open-items.html#12">open-items.html</a> 12절에 있다.</p>
 
 <h2 id="09">09 아직 옮기지 않은 것</h2>
 <ul>

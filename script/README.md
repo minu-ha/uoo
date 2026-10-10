@@ -25,13 +25,14 @@ Combat loops are named after the template (`dexxer-basic`), variants get a suffi
 | Script                | Template                                                                                                             |
 |-----------------------|----------------------------------------------------------------------------------------------------------------------|
 | `bard-necro-enhanced` | Discord / Peace / Provo + Necromancy summons + Spirit Speak, with the Grimoire proc rotation                         |
+| `tamer-mage-enhanced` | Tamer mage: veterinary supplies for you and the pets, self buffs, Flamestrike for the aspect proc                    |
 | `pvp`                 | Shared field PvP self sustain with Magery, bandage, potion and swing-based weapon settings. All offense stays manual |
 | `dexxer-basic`        | Minimal dexxer sustain: bandages, heal, cure and Refresh potions, pouch, gold drop, food                             |
 
 Each one is built from `recipe/<script>-recipe.razor`.
 
-Not in use and moved to `archive/` on 2026-10-10: `tamer-mage-enhanced` (tamer mage with veterinary supplies),
-`bard-mace`, `bard-throwing`, `hally-mage`, `backstab-mugging`, and the old `lumberjack` and `mining` gather loops.
+Not in use and moved to `archive/` on 2026-10-10: `bard-mace`, `bard-throwing`, `hally-mage`, `backstab-mugging`,
+and the old `lumberjack` and `mining` gather loops.
 To use one again, move it back to its folder.
 
 A new combat loop gets a row here. Every loop has the same shape, set out in
@@ -91,8 +92,8 @@ Design notes and in-game checks are in [blueprint/open-items.html](../blueprint/
 `loot/recycle` runs every hotkey named in the list `list__resume_script` when it finishes, and also when it gives up
 for lack of item identification, so its last line no longer names a loop. Its author's own previous-script list was
 renamed to this one. The farming loops fill the list at Play with their own Razor hotkey name, the one the profile
-stores (`Play Script: gather\skinning-enhanced`): `bard-necro-enhanced`, `skinning-enhanced` and `lumberjack-enhanced`.
-The archived `bard-mace`, `bard-throwing` and `tamer-mage-enhanced` register their `Play Script: archive\…` name.
+stores (`Play Script: gather\skinning-enhanced`): `bard-necro-enhanced`, `tamer-mage-enhanced`, `skinning-enhanced` and
+`lumberjack-enhanced`. The archived `bard-mace` and `bard-throwing` register their `Play Script: archive\…` name.
 It is a list because a variable reads a word back as 4294967295 (blueprint/razor.html part 3).
 It lasts until the client closes, and with nothing registered recycle just ends. `combat/pvp` does not register,
 so recycling during a fight returns to the farming loop.

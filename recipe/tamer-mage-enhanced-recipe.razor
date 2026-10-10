@@ -1,0 +1,217 @@
+# Recipe for script/combat/tamer-mage-enhanced.razor. Build it with: python3 util/build-scripts.py
+# Every setting of this loop: python3 util/build-scripts.py --settings recipe/tamer-mage-enhanced-recipe.razor
+# @ output script/combat/tamer-mage-enhanced.razor
+
+
+# ========================================================================================
+# @ header
+# ========================================================================================
+
+# Tamer mage loop: self recovery, veterinary supplies for you and the pets, self buffs and
+# Flamestrike for the aspect proc.
+# Needs: veterinary supplies (25750), reagents, potions, Create Food reagents or magic
+# mushrooms.
+# Template: Animal Lore, Animal Taming, Veterinary 120, Magery, Tracking 100, Resisting
+# Spells, Meditation 80. STR 100, DEX 25, INT 100.
+# Optional cooldown bars: heal pot, walk, reflect. A missing bar reads 0.
+# Pets and targeting stay manual (summoner Z then V). The script never commands a pet.
+# Warmode is the manual control window: Flamestrike, Bless, Arch Protection and Create
+# Food stand down. Survival, Reactive Armor, Magic Reflection, veterinary supplies and
+# potions ignore it.
+# Tracking only warns, through the profile overheads. Meet a PK with combat/pvp (F4).
+# Design and in-game checks: blueprint/open-items.html part 12.
+
+
+# ========================================================================================
+# @ blocks
+#
+#   One box per block, in the order the blocks run, base first. The builder writes the box.
+#   Yours are the "> " lines in it (a note on the block, or under a setting the reason for
+#   its value) and the @setvar! lines under it. Write a new @setvar! line under any box, its
+#   reason as a "#" line right above it: the builder moves both to the box it belongs to.
+# ========================================================================================
+
+# ----------------------------------------------------------------------------------------
+# @ use base
+#
+#   The frame of every loop. Every recipe lists it first.
+# ----------------------------------------------------------------------------------------
+
+# ----------------------------------------------------------------------------------------
+# @ use escape/tracking
+#
+#   Sets the Tracking hunt filter once before the loop, then warns while Hunting is off.
+# ----------------------------------------------------------------------------------------
+
+# ----------------------------------------------------------------------------------------
+# @ use fight/target
+#
+#   Remembers the picked enemy and sets var__fighting while it is in reach.
+#
+#   acquire_range (default 12)
+#      How far the enemy you pick is taken up from, and kept while it stays. The pets
+#      often open on a mob past target_range, and a song or self cast would otherwise
+#      move lasttarget off it before it comes in reach.
+#      Also read by magery/flamestrike.
+#      > The pick is taken up anywhere on screen and kept while it stays there.
+#
+#   target_range (default 12)
+#      How far the remembered enemy may be and still count as a fight (var__fighting 1).
+#      Not above acquire_range.
+#      Also read by magery/flamestrike.
+#      > Flamestrike and the stat potions engage inside this range.
+#
+#   target_grace (default 1200)
+#      How long, in ms, a remembered enemy that left acquire_range is kept.
+#      > A target that left the screen is dropped half a second later.
+# ----------------------------------------------------------------------------------------
+@setvar! config__acquire_range 18
+@setvar! config__target_range 10
+@setvar! config__target_grace 500
+
+# ========================================================================================
+# @ when paralyzed or poisoned or diffhits > 0
+# ========================================================================================
+
+# ----------------------------------------------------------------------------------------
+# @ use recovery/pouch
+#
+#   The trapped pouch while paralyzed, the one thing that can act then.
+# ----------------------------------------------------------------------------------------
+
+# ----------------------------------------------------------------------------------------
+# @ use recovery/cure
+#
+#   Cure potion first, then the Smart Heal/Cure agent when none is carried.
+# ----------------------------------------------------------------------------------------
+
+# ----------------------------------------------------------------------------------------
+# @ use recovery/heal
+#
+#   Heal potion at heal_hits, else Greater Heal at emergency_hits.
+# ----------------------------------------------------------------------------------------
+
+# ========================================================================================
+# @ end
+# ========================================================================================
+
+# ----------------------------------------------------------------------------------------
+# @ use recovery/refresh
+#
+#   Total Refresh at or below refresh_stam.
+# ----------------------------------------------------------------------------------------
+
+# ----------------------------------------------------------------------------------------
+# @ use tamer/vet-kit
+#
+#   Veterinary supplies on you and the followers around you, never over a running kit.
+# ----------------------------------------------------------------------------------------
+
+# ----------------------------------------------------------------------------------------
+# @ use magery/reagents
+#
+#   Reagent flags for the Magery casts, the mana per circle and the shared cast settings.
+# ----------------------------------------------------------------------------------------
+
+# ----------------------------------------------------------------------------------------
+# @ use buff/potions
+#
+#   Strength and Agility by stat value, Magic Resist by its icon, while fighting.
+#
+#   dex_potion (default 100)
+#      DEX with the Greater Agility potion on: your base plus 20. Below it the potion is
+#      drunk, and 0 turns it off. Bless and the Agility spell show the same icon, as for
+#      STR.
+#      > This template is DEX 25: base plus 20 with the Greater Agility potion.
+# ----------------------------------------------------------------------------------------
+@setvar! config__dex_potion 45
+
+# ----------------------------------------------------------------------------------------
+# @ use buff/spells
+#
+#   Reactive Armor, then Magic Reflection, whenever one is missing.
+#
+#   mana_reactive_armor (default 4)
+#      Minimum current mana to start Reactive Armor.
+#      > Each start line is the spell cost plus 11 kept for Greater Heal.
+#
+#   mana_magic_reflect (default 14)
+#      Minimum current mana to start Magic Reflection.
+#      > Same reserve: 14 plus 11.
+#
+#   use_bless (default 0)
+#      1 keeps Bless on yourself, and Arch Protection on you and the followers around you,
+#      while no enemy is engaged (var__fighting 0) and warmode is off. Both open a cursor,
+#      answered with yourself, so they never take a cast from a fight.
+#      > Bless on yourself after a fight.
+#
+#   use_arch_protection (default 0)
+#      1 keeps Bless on yourself, and Arch Protection on you and the followers around you,
+#      while no enemy is engaged (var__fighting 0) and warmode is off. Both open a cursor,
+#      answered with yourself, so they never take a cast from a fight.
+#      > Arch Protection on you and the pets after a fight.
+#
+#   mana_bless (default 9)
+#      Minimum current mana to start Bless and Arch Protection.
+#      > Bless costs 9: plus 11 for Greater Heal.
+#
+#   mana_arch_protection (default 11)
+#      Minimum current mana to start Bless and Arch Protection.
+#      > Arch Protection costs 11: plus 11 for Greater Heal.
+# ----------------------------------------------------------------------------------------
+@setvar! config__mana_reactive_armor 15
+@setvar! config__mana_magic_reflect 25
+@setvar! config__use_bless 1
+@setvar! config__use_arch_protection 1
+@setvar! config__mana_bless 20
+@setvar! config__mana_arch_protection 22
+
+# ----------------------------------------------------------------------------------------
+# @ use magery/flamestrike
+#
+#   Flamestrike on the engaged enemy, for the aspect proc.
+#
+#   mana_flamestrike (default 40)
+#      Minimum current mana to start Flamestrike. It costs 40.
+#      Also read by this recipe.
+#      > 40 to cast plus 11 kept for Greater Heal.
+# ----------------------------------------------------------------------------------------
+@setvar! config__mana_flamestrike 51
+
+# ----------------------------------------------------------------------------------------
+# @ use buff/food
+#
+#   Eats from a tray while Food Satisfaction is missing, looked at once a minute.
+# ----------------------------------------------------------------------------------------
+
+# ----------------------------------------------------------------------------------------
+# @ use buff/mushroom
+#
+#   Eats a Magic Mushroom at low mana, and makes more with Create Food at high mana.
+# ----------------------------------------------------------------------------------------
+
+# ----------------------------------------------------------------------------------------
+# @ use pack/gold-drop
+#
+#   Drops gold at your feet while over max weight, one drop per pass.
+# ----------------------------------------------------------------------------------------
+
+
+# ========================================================================================
+# @ setup
+# ========================================================================================
+
+# loot/recycle runs the hotkey named in this list when it finishes or gives up. A list, because
+# a variable cannot hold a word (blueprint/razor.html part 3). It lasts until the client closes.
+if not listexists 'list__resume_script'
+    createlist 'list__resume_script'
+endif
+clearlist 'list__resume_script'
+pushlist 'list__resume_script' 'Play Script: combat\tamer-mage-enhanced'
+
+if config__sysmsg = 1
+    sysmsg "Tamer mage enhanced v6 loaded: flamestrike mana={{config__mana_flamestrike}}, tracking color={{config__tracking_color}}." 88
+endif
+if config__chatty = 1
+    overhead "[ tamer, on ]" 290
+endif
