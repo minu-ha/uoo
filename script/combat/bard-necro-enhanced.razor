@@ -601,22 +601,24 @@ endif
 clearlist 'list__named_summons'
 
 # The names, in the order the kinds are read below. A list, because a variable cannot hold a
-# word, and foreach hands an entry to rename as it is. Rebuilt on every start.
+# word, and foreach hands an entry to rename as it is. Rebuilt on every start. Each is spelt
+# so it does not hold the creature's own word: the server refused "mummy" with "That name is
+# unacceptable." (2026-10-10), and RunUO's name check also refuses words such as "mage".
 if not listexists 'list__summon_kinds'
     createlist 'list__summon_kinds'
 endif
 clearlist 'list__summon_kinds'
-pushlist 'list__summon_kinds' 'knight'
-pushlist 'list__summon_kinds' 'mage'
-pushlist 'list__summon_kinds' 'lich'
-pushlist 'list__summon_kinds' 'mummy'
-pushlist 'list__summon_kinds' 'thrall'
-pushlist 'list__summon_kinds' 'witch'
-pushlist 'list__summon_kinds' 'zombie'
-pushlist 'list__summon_kinds' 'ghost'
-pushlist 'list__summon_kinds' 'skeleton'
-pushlist 'list__summon_kinds' 'ghoul'
-pushlist 'list__summon_kinds' 'corpse'
+pushlist 'list__summon_kinds' 'knite'
+pushlist 'list__summon_kinds' 'magi'
+pushlist 'list__summon_kinds' 'lych'
+pushlist 'list__summon_kinds' 'mumi'
+pushlist 'list__summon_kinds' 'thral'
+pushlist 'list__summon_kinds' 'wytch'
+pushlist 'list__summon_kinds' 'zombi'
+pushlist 'list__summon_kinds' 'gost'
+pushlist 'list__summon_kinds' 'skelly'
+pushlist 'list__summon_kinds' 'ghul'
+pushlist 'list__summon_kinds' 'rotter'
 
 
 # ----------------------------------------------------------------------------------------

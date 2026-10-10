@@ -129,7 +129,7 @@ Reactive Armor 자체는 Magery로 걸고, 루프가 이동 중에 유지한다 
 <li>테이머 듀오와 함께 다니는 경우가 많다. <strong>본체는 후열이다.</strong></li>
 <li>주 사냥터 난이도 <strong>300~500</strong>.</li>
 <li>PK를 만나면 도망가지 않고 싸우는 것이 기본이다. 그래서 Herding 대신 Resisting Spells 80 (06.C절).</li>
-<li>캐릭터 이름 <code>nomeehej</code>. 소환수는 종류 이름 (<code>lich</code>, <code>mummy</code>, <code>thrall</code>, <code>witch</code> 등)으로 자동 개명된다 (04.H절).</li>
+<li>캐릭터 이름 <code>nomeehej</code>. 소환수는 종류를 알아볼 수 있는 이름 (<code>lych</code>, <code>mumi</code>, <code>thral</code>, <code>wytch</code> 등)으로 자동 개명된다 (04.H절).</li>
 </ul>
 
 <h3 id="01.B">01.B 측정 결과</h3>
@@ -1796,7 +1796,7 @@ Provocation 송 (팔로워 딜 +8.5%)만 이동 중 라운드로빈으로 받는
 재소환을 감지할 필요가 없다 (05.G절 "설계 결정"). 소환수를 찾는 유일한 블록은 이름을 붙이는 <code>SUMMON NAMES</code>다.</li>
 <li><strong>적 Lich와 내 Lich는 그래픽이 같다.</strong> 소환수를 타입으로 찾는 코드를 새로 쓸 일이 있으면
 <code>noto</code> 필터가 필수다. <code>fight/target</code>과 <code>necro/summon-names</code> 모듈이 그 형태다.</li>
-<li><strong>소환수 이름은 자동으로 바뀐다.</strong> <code>SUMMON NAMES</code> 블록이 새 소환수를 종류 이름 (<code>lich</code>, <code>mummy</code> 등)으로 바꾼다.
+<li><strong>소환수 이름은 자동으로 바뀐다.</strong> <code>SUMMON NAMES</code> 블록이 새 소환수를 종류를 알아볼 수 있는 이름 (<code>lych</code>, <code>mumi</code> 등)으로 바꾼다.
 설계와 실패 증상은 04.H절.</li>
 <li><strong>바디 번호 (<code>&gt;info</code>).</strong> 내 소환수의 Notoriety는 2 (friend).</li>
 </ul>
@@ -1860,14 +1860,23 @@ Provocation 송 (팔로워 딜 +8.5%)만 이동 중 라운드로빈으로 받는
 </tr>
 </thead>
 <tbody>
-<tr><td><code>skeletal knight</code></td><td><code>knight</code></td></tr>
-<tr><td><code>skeletal mage</code></td><td><code>mage</code></td></tr>
-<tr><td><code>lich</code>, <code>mummy</code>, <code>thrall</code>, <code>witch</code>, <code>zombie</code>, <code>ghost</code>, <code>skeleton</code>, <code>ghoul</code></td><td>같은 말</td></tr>
-<tr><td><code>rotting corpse</code></td><td><code>corpse</code></td></tr>
+<tr><td><code>skeletal knight</code></td><td><code>knite</code></td></tr>
+<tr><td><code>skeletal mage</code></td><td><code>magi</code></td></tr>
+<tr><td><code>lich</code></td><td><code>lych</code></td></tr>
+<tr><td><code>mummy</code></td><td><code>mumi</code></td></tr>
+<tr><td><code>thrall</code></td><td><code>thral</code></td></tr>
+<tr><td><code>witch</code></td><td><code>wytch</code></td></tr>
+<tr><td><code>zombie</code></td><td><code>zombi</code></td></tr>
+<tr><td><code>ghost</code></td><td><code>gost</code></td></tr>
+<tr><td><code>skeleton</code></td><td><code>skelly</code></td></tr>
+<tr><td><code>ghoul</code></td><td><code>ghul</code></td></tr>
+<tr><td><code>rotting corpse</code></td><td><code>rotter</code></td></tr>
 </tbody>
 </table>
 <p>이름은 모듈 setup이 채우는 <code>list__summon_kinds</code> 리스트다. 변수는 단어를 못 담지만 리스트 항목은 글자를 유지하고 <code>foreach</code> 변수가 그대로 <code>rename</code>에 넘어간다 (2026-09-28 프로브).
-끄려면 레시피에서 <code>necro/summon-names</code>를 뺀다. 같은 종류가 둘이면 둘 다 같은 이름이다.</p>
+끄려면 레시피에서 <code>necro/summon-names</code>를 뺀다. 같은 종류가 둘이면 둘 다 같은 이름이다.
+<strong>이름에 종류 단어를 그대로 쓰지 않는다.</strong> 2026-10-10 <code>mummy</code>는 서버가 <code>That name is unacceptable.</code>로 거절했다 (인게임 확인).
+몬스터 종류 단어를 막는 것으로 보고, RunUO 계열 이름 검사가 막는 <code>mage</code> 같은 단어도 피해서 철자를 바꿨다. 새 이름이 거절되면 같은 줄이 뜬다.</p>
 <h4>왜 이 모양인가</h4>
 <ul>
 <li><strong>바디 번호로 찾는다.</strong> 프로브 (2026-09-28)로 확인한 것: <code>findtype</code>은 바디 번호로도 기본 이름으로도 소환수를 잡고
@@ -1909,7 +1918,7 @@ Razor는 소환 직후 <code>CanRename</code>을 안다. <code>rename</code>은 
 </thead>
 <tbody>
 <tr>
-<td>소환 후 5초 안에 <code>[ name, lich ]</code>처럼 종류 이름이 소환수 머리 위에 뜨고 (<code>config__chatty 1</code>일 때) 네임태그가 바뀐다</td>
+<td>소환 후 5초 안에 <code>[ name, lych ]</code>처럼 종류 이름이 소환수 머리 위에 뜨고 (<code>config__chatty 1</code>일 때) 네임태그가 바뀐다</td>
 <td>정상</td>
 </tr>
 <tr>
@@ -3328,7 +3337,7 @@ PvP에서 소환수가 무엇을 잃고 어느 소환수가 더 버티는지는 
 </tr>
 <tr>
 <td>SUMMON NAMES 종류 이름 (2026-10-10)</td>
-<td>소환수마다 <code>[ name, lich ]</code>처럼 종류 이름이 뜨고 네임태그가 바뀐다. 라벨에서 종류를 읽는 것은 아직 확인되지 않았다</td>
+<td>소환수마다 <code>[ name, lych ]</code>처럼 종류 이름이 뜨고 네임태그가 바뀐다. 라벨에서 종류를 읽는 것은 아직 확인되지 않았다</td>
 <td>04.H절 "실패하면 이렇게 보인다" 표</td>
 </tr>
 <tr>
