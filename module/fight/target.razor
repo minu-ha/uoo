@@ -1,62 +1,81 @@
 # ----------------------------------------------------------------------------------------
-# Remembers the enemy picked with lasttarget while it stays within 12 tiles.
-# Sets var__fighting from it. Carving moves lasttarget, so blocks read this copy instead.
+# Remembers the enemy picked with lasttarget and sets var__fighting while it is in reach.
+# Songs, carving and self casts move lasttarget, so blocks read this copy instead.
 # ----------------------------------------------------------------------------------------
 
 
 # ----------------------------------------------------------------------------------------
-# @ wait
+# @ config
 #
-#   interval__combat_target_grace
-#      A remembered enemy out of range this long is dropped.
+#   config__acquire_range
+#      How far the enemy you pick is taken up from, and kept while it stays. The pets
+#      often open on a mob past target_range, and a song or self cast would otherwise
+#      move lasttarget off it before it comes in reach.
+#
+#   config__target_range
+#      How far the remembered enemy may be and still count as a fight (var__fighting 1).
+#      Not above acquire_range.
+#
+#   config__target_grace
+#      How long, in ms, a remembered enemy that left acquire_range is kept.
 # ----------------------------------------------------------------------------------------
-@setvar! interval__combat_target_grace 1200
+@setvar! config__acquire_range 12
+@setvar! config__target_range 12
+@setvar! config__target_grace 1200
 
 
 # ----------------------------------------------------------------------------------------
 # @ timer
 # ----------------------------------------------------------------------------------------
-timer__combat_target_grace interval__combat_target_grace
+timer__target_grace config__target_grace
 
 
 # ----------------------------------------------------------------------------------------
 # @ state
 #
 #   var__combat_target
-#      The enemy picked with lasttarget. Carving overwrites lasttarget, so combat potions
-#      and the weapon ability read this copy instead.
+#      The enemy picked with lasttarget, kept across Plays.
 #
 #   var__fresh_serial
 #      Scratch copy of the lasttarget serial for the mobile range check.
+#
+#   var__keep_lasttarget
+#      Scratch: 1 when a block that is about to answer its own cursor finds a new enemy
+#      in lasttarget, so it leaves the cursor and the enemy to the player.
 # ----------------------------------------------------------------------------------------
 if not varexist var__combat_target
     @setvar! var__combat_target 0
 endif
 @setvar! var__fresh_serial 0
+@setvar! var__keep_lasttarget 0
 
 
 # ----------------------------------------------------------------------------------------
 # @ loop
 # ----------------------------------------------------------------------------------------
     # ------------------------------------------------------------------------------------
-    # COMBAT TARGET CACHE
+    # COMBAT TARGET
     #
-    # Same cache as archive/bard-mace. A carve targets the corpse or yourself, which moves
-    # lasttarget. A targeted corpse is an item on the ground, so find matches it. dead and
-    # noto only take mobiles, so the serial range is checked first. Mobile serials are
-    # below 0x40000000, and the number has to be on the left (blueprint/razor.html part 3,
-    # debug-target-state S06).
+    # A pick within config__acquire_range becomes the remembered enemy. A carve or a song
+    # targets a corpse or an item, and dead and noto only take mobiles, so the serial range
+    # is checked first: mobile serials are below 0x40000000, and the number has to be on the
+    # left (blueprint/razor.html part 3, debug-target-state S06). The enemy is a fight
+    # (var__fighting 1) inside config__target_range, kept outside it while still within
+    # config__acquire_range, and dropped config__target_grace after it leaves that.
     # ------------------------------------------------------------------------------------
-    if find lasttarget ground -1 -1 12 as alias__fresh_target
+    if find lasttarget ground -1 -1 config__acquire_range as alias__fresh_target
         if var__combat_target != alias__fresh_target
             @setvar! var__fresh_serial alias__fresh_target
             if 0x40000000 > var__fresh_serial
                 if not dead alias__fresh_target
                     if noto alias__fresh_target = "hostile" or noto alias__fresh_target = "criminal" or noto alias__fresh_target = "enemy" or noto alias__fresh_target = "murderer"
                         @setvar! var__combat_target alias__fresh_target
-                        settimer "timer__combat_target_grace" 0
+                        settimer "timer__target_grace" 0
+                        if config__chatty = 1
+                            overhead "[ target, set ]" 1288 var__combat_target
+                        endif
                         if config__sysmsg = 1
-                            sysmsg "Combat target: {{alias__fresh_target}}. Skinning and leather packing wait." 88
+                            sysmsg "Combat target: {{alias__fresh_target}}." 88
                         endif
                     endif
                 endif
@@ -64,26 +83,23 @@ endif
         endif
     endif
 
-    if find var__combat_target ground -1 -1 12 as alias__stored_target
+    @setvar! var__fighting 0
+    if var__combat_target = 0
+        # No enemy remembered, nothing to keep.
+    elseif find var__combat_target ground -1 -1 config__target_range as alias__stored_target
+        settimer "timer__target_grace" 0
         if dead alias__stored_target
             @setvar! var__combat_target 0
-            if config__sysmsg = 1
-                sysmsg "Combat target cleared: dead." 88
-            endif
         elseif noto alias__stored_target != "hostile" and noto alias__stored_target != "criminal" and noto alias__stored_target != "enemy" and noto alias__stored_target != "murderer"
             @setvar! var__combat_target 0
         else
-            settimer "timer__combat_target_grace" 0
+            @setvar! var__fighting 1
         endif
-    elseif var__combat_target != 0 and timer "timer__combat_target_grace" >= interval__combat_target_grace
+    elseif find var__combat_target ground -1 -1 config__acquire_range as alias__stored_target
+        settimer "timer__target_grace" 0
+        if dead alias__stored_target
+            @setvar! var__combat_target 0
+        endif
+    elseif timer "timer__target_grace" >= config__target_grace
         @setvar! var__combat_target 0
-        if config__sysmsg = 1
-            sysmsg "Combat target cleared: gone from 12 tiles." 88
-        endif
-    endif
-
-    # base declares it. Fight-only blocks such as the stat potions read it.
-    @setvar! var__fighting 0
-    if var__combat_target != 0
-        @setvar! var__fighting 1
     endif

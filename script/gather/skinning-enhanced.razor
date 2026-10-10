@@ -49,6 +49,26 @@
 #        0  ours: our casts ignore it
 #        1  the player's manual control window: our casts and the food stand down while it
 #           is on. Potions and bandages still go out
+#
+#   config__recover_in_warmode
+#      With warmode_is_manual 1, what the recovery casts (cure, heal, light Heal) do in
+#      warmode.
+#        0  stand down with the rest
+#        1  keep going, so only the other casts wait for the player
+#
+#   config__use_bandages
+#      1 uses bandages. At 0 recovery/light-heal stands in.
+#
+#   config__heal_skill_min
+#      Healing must be above this to bandage. At or below it recovery/light-heal stands
+#      in.
+#      > This loop: config__heal_skill_min 10 (default 0).
+#      > Healing 80 template. Below 10 the light Heal stands in.
+#
+#   config__settle_first
+#      What a pass does first.
+#        0  reads the state at once. Potions still go out while a spell is casting
+#        1  waits for the item queue and any cast to finish
 # ----------------------------------------------------------------------------------------
 @setvar! config__chatty 1
 @setvar! config__sysmsg 1
@@ -57,6 +77,30 @@
 @setvar! config__use_potions 1
 @setvar! config__walk_guard 1
 @setvar! config__warmode_is_manual 0
+@setvar! config__recover_in_warmode 0
+@setvar! config__use_bandages 1
+@setvar! config__heal_skill_min 10
+@setvar! config__settle_first 0
+
+
+# ----------------------------------------------------------------------------------------
+# module/fight/target.razor
+#
+#   config__acquire_range
+#      How far the enemy you pick is taken up from, and kept while it stays. The pets
+#      often open on a mob past target_range, and a song or self cast would otherwise
+#      move lasttarget off it before it comes in reach.
+#
+#   config__target_range
+#      How far the remembered enemy may be and still count as a fight (var__fighting 1).
+#      Not above acquire_range.
+#
+#   config__target_grace
+#      How long, in ms, a remembered enemy that left acquire_range is kept.
+# ----------------------------------------------------------------------------------------
+@setvar! config__acquire_range 12
+@setvar! config__target_range 12
+@setvar! config__target_grace 1200
 
 
 # ----------------------------------------------------------------------------------------
@@ -87,22 +131,6 @@
 @setvar! config__heal_hits 35
 @setvar! config__emergency_hits 45
 @setvar! config__mana_greater_heal 11
-
-
-# ----------------------------------------------------------------------------------------
-# module/recovery/bandage.razor
-#
-#   config__use_bandages
-#      1 uses bandages. At 0 recovery/light-heal stands in.
-#
-#   config__heal_skill_min
-#      Healing must be above this to bandage. At or below it recovery/light-heal stands
-#      in.
-#      > This loop: config__heal_skill_min 10 (default 0).
-#      > Healing 80 template. Below 10 the light Heal stands in.
-# ----------------------------------------------------------------------------------------
-@setvar! config__use_bandages 1
-@setvar! config__heal_skill_min 10
 
 
 # ----------------------------------------------------------------------------------------
@@ -300,6 +328,31 @@
 @setvar! config__skin_unowned 1
 
 
+# ----------------------------------------------------------------------------------------
+# module/magery/reagents.razor
+#
+#   config__mana_1st, config__mana_2nd, config__mana_3rd, config__mana_4th,
+#   config__mana_5th
+#      Mana a spell of that circle needs before it is worth starting.
+#        1st  magic arrow, create food, reactive armor
+#        2nd  harm
+#        3rd  fireball
+#        4th  lightning, curse, mana drain
+#        5th  magic reflection
+#
+#   config__interrupt_to_heal
+#      An attack cast in flight when the loss reaches emergency_hits.
+#        0  finishes
+#        1  is cut through "> Interrupt", so the next pass can heal
+# ----------------------------------------------------------------------------------------
+@setvar! config__mana_1st 4
+@setvar! config__mana_2nd 6
+@setvar! config__mana_3rd 9
+@setvar! config__mana_4th 11
+@setvar! config__mana_5th 14
+@setvar! config__interrupt_to_heal 1
+
+
 # ========================================================================================
 # WAIT AND COOLDOWN
 # ========================================================================================
@@ -315,19 +368,25 @@
 #
 #   interval__message
 #      Spacing for repeated warnings. Without it an empty potion bag shouts every pass.
+#
+#   interval__housekeeping
+#      The clock of a recipe's "# @ every interval__housekeeping" group: slow checks that
+#      share one tick.
 # ----------------------------------------------------------------------------------------
 @setvar! wait__poll 100
 @setvar! wait__short 200
 @setvar! interval__message 3000
+@setvar! interval__housekeeping 5000
 
 
 # ----------------------------------------------------------------------------------------
-# module/fight/target.razor
+# module/recovery/heal.razor
 #
-#   interval__combat_target_grace
-#      A remembered enemy out of range this long is dropped.
+#   cooldown__heal_potion
+#      Length of the heal pot bar this block starts when it drinks, so the bar runs even
+#      where no trigger starts it.
 # ----------------------------------------------------------------------------------------
-@setvar! interval__combat_target_grace 1200
+@setvar! cooldown__heal_potion 10000
 
 
 # ----------------------------------------------------------------------------------------
@@ -419,13 +478,17 @@
 
 
 # ----------------------------------------------------------------------------------------
-# module/recovery/reagents.razor
+# module/magery/reagents.razor
 #
 #   interval__reagents
-#      Reagent read interval. Five lookups each time. A refill counts within this, and
-#      running out is caught at once by the refusal line.
+#      Reagent read interval. A refill counts within this, and running out is caught at
+#      once by the refusal line.
+#
+#   wait__cast
+#      The pause after an attack cast is delivered: the spell recovery.
 # ----------------------------------------------------------------------------------------
 @setvar! interval__reagents 10000
+@setvar! wait__cast 300
 
 
 # ----------------------------------------------------------------------------------------
@@ -473,10 +536,10 @@ settimer "timer__message" interval__message
 # ----------------------------------------------------------------------------------------
 # module/fight/target.razor
 # ----------------------------------------------------------------------------------------
-if not timerexists "timer__combat_target_grace"
-    createtimer "timer__combat_target_grace"
+if not timerexists "timer__target_grace"
+    createtimer "timer__target_grace"
 endif
-settimer "timer__combat_target_grace" interval__combat_target_grace
+settimer "timer__target_grace" config__target_grace
 
 
 # ----------------------------------------------------------------------------------------
@@ -554,7 +617,7 @@ settimer "timer__grey_only" interval__grey_only
 
 
 # ----------------------------------------------------------------------------------------
-# module/recovery/reagents.razor
+# module/magery/reagents.razor
 #
 #   timer__reagents
 #      Ready on the first pass, so reagents are read before the first cast.
@@ -613,16 +676,20 @@ settimer "timer__pack_leather" 0
 # module/fight/target.razor
 #
 #   var__combat_target
-#      The enemy picked with lasttarget. Carving overwrites lasttarget, so combat potions
-#      and the weapon ability read this copy instead.
+#      The enemy picked with lasttarget, kept across Plays.
 #
 #   var__fresh_serial
 #      Scratch copy of the lasttarget serial for the mobile range check.
+#
+#   var__keep_lasttarget
+#      Scratch: 1 when a block that is about to answer its own cursor finds a new enemy
+#      in lasttarget, so it leaves the cursor and the enemy to the player.
 # ----------------------------------------------------------------------------------------
 if not varexist var__combat_target
     @setvar! var__combat_target 0
 endif
 @setvar! var__fresh_serial 0
+@setvar! var__keep_lasttarget 0
 
 
 # ----------------------------------------------------------------------------------------
@@ -745,29 +812,49 @@ endif
 
 
 # ----------------------------------------------------------------------------------------
-# module/recovery/reagents.razor
+# module/magery/reagents.razor
 #
-#   var__regs_cure, var__regs_heal, var__regs_greater_heal, var__regs_reactive_armor,
-#   var__regs_magic_reflect
-#      Reagent flags, written only by REAGENTS. 1 when every reagent of that spell was
-#      found.
-#        Cure            garlic 3972, ginseng 3973
-#        Heal            garlic, ginseng, silk 3981
-#        Greater Heal    garlic, ginseng, silk, mandrake 3974
-#        Reactive Armor  garlic, silk, ash 3980
-#        Reflection      garlic, silk, mandrake
+#   var__regs_cure, var__regs_heal, var__regs_greater_heal, var__regs_create_food,
+#   var__regs_reactive_armor, var__regs_magic_reflect, var__regs_magic_arrow,
+#   var__regs_harm, var__regs_fireball, var__regs_lightning, var__regs_curse,
+#   var__regs_mana_drain, var__regs_energy_bolt
+#      1 when every reagent of that spell was found, written only by this block.
+#        cure            garlic 3972, ginseng 3973
+#        heal            garlic, ginseng, spider silk 3981
+#        greater heal    garlic, ginseng, mandrake root 3974, spider silk
+#        create food     garlic, ginseng, mandrake root
+#        reactive armor  garlic, spider silk, sulfurous ash 3980
+#        magic reflect   garlic, mandrake root, spider silk
+#        magic arrow     sulfurous ash
+#        harm            nightshade 3976, spider silk
+#        fireball        black pearl 3962
+#        lightning       mandrake root, sulfurous ash
+#        curse           garlic, nightshade, sulfurous ash
+#        mana drain      black pearl, mandrake root, spider silk
+#        energy bolt     black pearl, nightshade
 #
-#   var__has_garlic, var__has_ginseng, var__has_mandrake, var__has_ash, var__has_silk
+#   var__has_black_pearl, var__has_garlic, var__has_ginseng, var__has_mandrake,
+#   var__has_nightshade, var__has_ash, var__has_silk
 #      Scratch: 1 when that reagent was found on the last read.
 # ----------------------------------------------------------------------------------------
 @setvar! var__regs_cure 0
 @setvar! var__regs_heal 0
 @setvar! var__regs_greater_heal 0
+@setvar! var__regs_create_food 0
 @setvar! var__regs_reactive_armor 0
 @setvar! var__regs_magic_reflect 0
+@setvar! var__regs_magic_arrow 0
+@setvar! var__regs_harm 0
+@setvar! var__regs_fireball 0
+@setvar! var__regs_lightning 0
+@setvar! var__regs_curse 0
+@setvar! var__regs_mana_drain 0
+@setvar! var__regs_energy_bolt 0
+@setvar! var__has_black_pearl 0
 @setvar! var__has_garlic 0
 @setvar! var__has_ginseng 0
 @setvar! var__has_mandrake 0
+@setvar! var__has_nightshade 0
 @setvar! var__has_ash 0
 @setvar! var__has_silk 0
 
@@ -819,34 +906,45 @@ endif
 # ========================================================================================
 while not dead
     # ------------------------------------------------------------------------------------
-    # STRUCTURED PVP STOP                                                module/base.razor
+    # PASS START                                                         module/base.razor
     #
-    # The pvp expression means structured-PvP restrictions, not a field PK encounter.
+    # The pvp expression means structured-PvP restrictions, not a field PK encounter. With
+    # config__settle_first 1 the pass then waits for the item queue and any cast to finish.
     # ------------------------------------------------------------------------------------
     if pvp
         overhead "[ script, blocked ]" 254
         stop
     endif
 
+    if config__settle_first = 1
+        while queued or casting
+            wait wait__short
+        endwhile
+    endif
+
     # ------------------------------------------------------------------------------------
-    # COMBAT TARGET CACHE                                        module/fight/target.razor
+    # COMBAT TARGET                                              module/fight/target.razor
     #
-    # Same cache as archive/bard-mace. A carve targets the corpse or yourself, which moves
-    # lasttarget. A targeted corpse is an item on the ground, so find matches it. dead and
-    # noto only take mobiles, so the serial range is checked first. Mobile serials are
-    # below 0x40000000, and the number has to be on the left (blueprint/razor.html part 3,
-    # debug-target-state S06).
+    # A pick within config__acquire_range becomes the remembered enemy. A carve or a song
+    # targets a corpse or an item, and dead and noto only take mobiles, so the serial range
+    # is checked first: mobile serials are below 0x40000000, and the number has to be on the
+    # left (blueprint/razor.html part 3, debug-target-state S06). The enemy is a fight
+    # (var__fighting 1) inside config__target_range, kept outside it while still within
+    # config__acquire_range, and dropped config__target_grace after it leaves that.
     # ------------------------------------------------------------------------------------
-    if find lasttarget ground -1 -1 12 as alias__fresh_target
+    if find lasttarget ground -1 -1 config__acquire_range as alias__fresh_target
         if var__combat_target != alias__fresh_target
             @setvar! var__fresh_serial alias__fresh_target
             if 0x40000000 > var__fresh_serial
                 if not dead alias__fresh_target
                     if noto alias__fresh_target = "hostile" or noto alias__fresh_target = "criminal" or noto alias__fresh_target = "enemy" or noto alias__fresh_target = "murderer"
                         @setvar! var__combat_target alias__fresh_target
-                        settimer "timer__combat_target_grace" 0
+                        settimer "timer__target_grace" 0
+                        if config__chatty = 1
+                            overhead "[ target, set ]" 1288 var__combat_target
+                        endif
                         if config__sysmsg = 1
-                            sysmsg "Combat target: {{alias__fresh_target}}. Skinning and leather packing wait." 88
+                            sysmsg "Combat target: {{alias__fresh_target}}." 88
                         endif
                     endif
                 endif
@@ -854,28 +952,25 @@ while not dead
         endif
     endif
 
-    if find var__combat_target ground -1 -1 12 as alias__stored_target
+    @setvar! var__fighting 0
+    if var__combat_target = 0
+        # No enemy remembered, nothing to keep.
+    elseif find var__combat_target ground -1 -1 config__target_range as alias__stored_target
+        settimer "timer__target_grace" 0
         if dead alias__stored_target
             @setvar! var__combat_target 0
-            if config__sysmsg = 1
-                sysmsg "Combat target cleared: dead." 88
-            endif
         elseif noto alias__stored_target != "hostile" and noto alias__stored_target != "criminal" and noto alias__stored_target != "enemy" and noto alias__stored_target != "murderer"
             @setvar! var__combat_target 0
         else
-            settimer "timer__combat_target_grace" 0
+            @setvar! var__fighting 1
         endif
-    elseif var__combat_target != 0 and timer "timer__combat_target_grace" >= interval__combat_target_grace
+    elseif find var__combat_target ground -1 -1 config__acquire_range as alias__stored_target
+        settimer "timer__target_grace" 0
+        if dead alias__stored_target
+            @setvar! var__combat_target 0
+        endif
+    elseif timer "timer__target_grace" >= config__target_grace
         @setvar! var__combat_target 0
-        if config__sysmsg = 1
-            sysmsg "Combat target cleared: gone from 12 tiles." 88
-        endif
-    endif
-
-    # base declares it. Fight-only blocks such as the stat potions read it.
-    @setvar! var__fighting 0
-    if var__combat_target != 0
-        @setvar! var__fighting 1
     endif
 
     # ------------------------------------------------------------------------------------
@@ -913,7 +1008,7 @@ while not dead
             endif
 
             if config__use_magery = 1 and var__regs_cure = 1 and mana >= config__mana_cure and not casting
-                if config__warmode_is_manual = 0 or not warmode
+                if config__warmode_is_manual = 0 or config__recover_in_warmode = 1 or not warmode
                     if config__walk_guard = 0 or cooldown "walk" = 0
                         hotkey "> Smart Heal/Cure Self"
                         if config__sysmsg = 1
@@ -955,6 +1050,7 @@ while not dead
                     # Still on its own cooldown.
                 else
                     hotkey "Drink Heal"
+                    cooldown "heal pot" cooldown__heal_potion
                     @setvar! var__heal_potion_out 1
                     wait wait__short
                 endif
@@ -965,7 +1061,7 @@ while not dead
         endif
 
         if var__heal_potion_out = 0 and diffhits >= config__emergency_hits and config__use_magery = 1 and var__regs_greater_heal = 1 and mana >= config__mana_greater_heal and not casting
-            if config__warmode_is_manual = 0 or not warmode
+            if config__warmode_is_manual = 0 or config__recover_in_warmode = 1 or not warmode
                 if config__walk_guard = 0 or cooldown "walk" = 0
                     hotkey "> Greater Heal/Cure Self"
                     if config__sysmsg = 1
@@ -1028,7 +1124,7 @@ while not dead
         endif
 
         if var__light_heal_due = 1
-            if config__warmode_is_manual = 0 or not warmode
+            if config__warmode_is_manual = 0 or config__recover_in_warmode = 1 or not warmode
                 if config__walk_guard = 0 or cooldown "walk" = 0
                     hotkey "> Smart Heal/Cure Self"
                     if config__sysmsg = 1
@@ -1651,14 +1747,14 @@ while not dead
                         # No enemy was remembered when this block started, so a live enemy in lasttarget
                         # now is a Z pressed during the cursor wait.
                         @setvar! var__pick_during_carve 0
-                        if find lasttarget ground -1 -1 12 as alias__fresh_target
+                        if find lasttarget ground -1 -1 config__acquire_range as alias__fresh_target
                             @setvar! var__fresh_serial alias__fresh_target
                             if 0x40000000 > var__fresh_serial
                                 if not dead alias__fresh_target
                                     if noto alias__fresh_target = "hostile" or noto alias__fresh_target = "criminal" or noto alias__fresh_target = "enemy" or noto alias__fresh_target = "murderer"
                                         @setvar! var__pick_during_carve 1
                                         @setvar! var__combat_target alias__fresh_target
-                                        settimer "timer__combat_target_grace" 0
+                                        settimer "timer__target_grace" 0
                                     endif
                                 endif
                             endif
@@ -1774,21 +1870,27 @@ while not dead
     endif
 
     # ------------------------------------------------------------------------------------
-    # REAGENTS                                              module/recovery/reagents.razor
+    # REAGENTS                                                module/magery/reagents.razor
     #
-    # On the interval, or at once after a refusal for reagents, so a stale flag cannot
-    # send the same doomed cast every pass.
+    # On the interval, or at once after a refusal for reagents, so a stale flag cannot send the
+    # same doomed cast every pass. Each reagent is looked up once, and every spell flag comes
+    # from those seven with plain comparisons.
     # ------------------------------------------------------------------------------------
     if config__use_magery = 1
         if timer "timer__reagents" >= interval__reagents or insysmsg "More reagents are needed"
             settimer "timer__reagents" 0
 
+            @setvar! var__has_black_pearl 0
             @setvar! var__has_garlic 0
             @setvar! var__has_ginseng 0
             @setvar! var__has_mandrake 0
+            @setvar! var__has_nightshade 0
             @setvar! var__has_ash 0
             @setvar! var__has_silk 0
 
+            if findtype 3962 self
+                @setvar! var__has_black_pearl 1
+            endif
             if findtype 3972 self
                 @setvar! var__has_garlic 1
             endif
@@ -1797,6 +1899,9 @@ while not dead
             endif
             if findtype 3974 self
                 @setvar! var__has_mandrake 1
+            endif
+            if findtype 3976 self
+                @setvar! var__has_nightshade 1
             endif
             if findtype 3980 self
                 @setvar! var__has_ash 1
@@ -1808,8 +1913,16 @@ while not dead
             @setvar! var__regs_cure 0
             @setvar! var__regs_heal 0
             @setvar! var__regs_greater_heal 0
+            @setvar! var__regs_create_food 0
             @setvar! var__regs_reactive_armor 0
             @setvar! var__regs_magic_reflect 0
+            @setvar! var__regs_magic_arrow 0
+            @setvar! var__regs_harm 0
+            @setvar! var__regs_fireball 0
+            @setvar! var__regs_lightning 0
+            @setvar! var__regs_curse 0
+            @setvar! var__regs_mana_drain 0
+            @setvar! var__regs_energy_bolt 0
 
             if var__has_garlic = 1 and var__has_ginseng = 1
                 @setvar! var__regs_cure 1
@@ -1817,14 +1930,38 @@ while not dead
             if var__has_garlic = 1 and var__has_ginseng = 1 and var__has_silk = 1
                 @setvar! var__regs_heal 1
             endif
-            if var__has_garlic = 1 and var__has_ginseng = 1 and var__has_silk = 1 and var__has_mandrake = 1
+            if var__has_garlic = 1 and var__has_ginseng = 1 and var__has_mandrake = 1 and var__has_silk = 1
                 @setvar! var__regs_greater_heal 1
+            endif
+            if var__has_garlic = 1 and var__has_ginseng = 1 and var__has_mandrake = 1
+                @setvar! var__regs_create_food 1
             endif
             if var__has_garlic = 1 and var__has_silk = 1 and var__has_ash = 1
                 @setvar! var__regs_reactive_armor 1
             endif
-            if var__has_garlic = 1 and var__has_silk = 1 and var__has_mandrake = 1
+            if var__has_garlic = 1 and var__has_mandrake = 1 and var__has_silk = 1
                 @setvar! var__regs_magic_reflect 1
+            endif
+            if var__has_ash = 1
+                @setvar! var__regs_magic_arrow 1
+            endif
+            if var__has_nightshade = 1 and var__has_silk = 1
+                @setvar! var__regs_harm 1
+            endif
+            if var__has_black_pearl = 1
+                @setvar! var__regs_fireball 1
+            endif
+            if var__has_mandrake = 1 and var__has_ash = 1
+                @setvar! var__regs_lightning 1
+            endif
+            if var__has_garlic = 1 and var__has_nightshade = 1 and var__has_ash = 1
+                @setvar! var__regs_curse 1
+            endif
+            if var__has_black_pearl = 1 and var__has_mandrake = 1 and var__has_silk = 1
+                @setvar! var__regs_mana_drain 1
+            endif
+            if var__has_black_pearl = 1 and var__has_nightshade = 1
+                @setvar! var__regs_energy_bolt 1
             endif
         endif
     endif

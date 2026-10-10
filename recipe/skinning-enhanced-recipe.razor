@@ -32,12 +32,20 @@
 # @ use base
 #
 #   The frame of every loop. Every recipe lists it first.
+#
+#   heal_skill_min (default 0)
+#      Healing must be above this to bandage. At or below it recovery/light-heal stands
+#      in.
+#      Read by recovery/bandage, recovery/light-heal.
+#      > Healing 80 template. Below 10 the light Heal stands in.
 # ----------------------------------------------------------------------------------------
+@setvar! config__heal_skill_min 10
 
 # ----------------------------------------------------------------------------------------
 # @ use fight/target
 #
-#   Remembers the enemy picked with lasttarget while it stays within 12 tiles.
+#   Remembers the enemy picked with lasttarget and sets var__fighting while it is in
+#   reach.
 # ----------------------------------------------------------------------------------------
 
 # ----------------------------------------------------------------------------------------
@@ -68,14 +76,7 @@
 # @ use recovery/bandage
 #
 #   Self bandage while hurt or poisoned, never over a running one.
-#
-#   heal_skill_min (default 0)
-#      Healing must be above this to bandage. At or below it recovery/light-heal stands
-#      in.
-#      Also read by recovery/light-heal.
-#      > Healing 80 template. Below 10 the light Heal stands in.
 # ----------------------------------------------------------------------------------------
-@setvar! config__heal_skill_min 10
 
 # ----------------------------------------------------------------------------------------
 # @ use recovery/light-heal
@@ -167,9 +168,10 @@
 # ----------------------------------------------------------------------------------------
 
 # ----------------------------------------------------------------------------------------
-# @ use recovery/reagents
+# @ use magery/reagents
 #
-#   Reagent flags for the Magery casts, read on a clock and right after a refusal.
+#   What the Magery casts need: reagent flags read on a clock and after a refusal, the
+#   mana
 #   > Read after gather/skinning, so it cannot consume the carve replies.
 # ----------------------------------------------------------------------------------------
 

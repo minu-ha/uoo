@@ -25,6 +25,16 @@
 
 
 # ----------------------------------------------------------------------------------------
+# @ wait
+#
+#   cooldown__heal_potion
+#      Length of the heal pot bar this block starts when it drinks, so the bar runs even
+#      where no trigger starts it.
+# ----------------------------------------------------------------------------------------
+@setvar! cooldown__heal_potion 10000
+
+
+# ----------------------------------------------------------------------------------------
 # @ state
 #
 #   var__heal_potion_out
@@ -55,6 +65,7 @@
                     # Still on its own cooldown.
                 else
                     hotkey "Drink Heal"
+                    cooldown "heal pot" cooldown__heal_potion
                     @setvar! var__heal_potion_out 1
                     wait wait__short
                 endif
@@ -65,7 +76,7 @@
         endif
 
         if var__heal_potion_out = 0 and diffhits >= config__emergency_hits and config__use_magery = 1 and var__regs_greater_heal = 1 and mana >= config__mana_greater_heal and not casting
-            if config__warmode_is_manual = 0 or not warmode
+            if config__warmode_is_manual = 0 or config__recover_in_warmode = 1 or not warmode
                 if config__walk_guard = 0 or cooldown "walk" = 0
                     hotkey "> Greater Heal/Cure Self"
                     if config__sysmsg = 1

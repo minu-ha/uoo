@@ -54,7 +54,7 @@
         endif
 
         if var__light_heal_due = 1
-            if config__warmode_is_manual = 0 or not warmode
+            if config__warmode_is_manual = 0 or config__recover_in_warmode = 1 or not warmode
                 if config__walk_guard = 0 or cooldown "walk" = 0
                     hotkey "> Smart Heal/Cure Self"
                     if config__sysmsg = 1

@@ -1,19 +1,47 @@
 # ----------------------------------------------------------------------------------------
-# Reagent flags for the Magery casts, read on a clock and right after a refusal.
-# The flags cover Cure, Heal, Greater Heal and the two buffs. insysmsg consumes older
-# journal lines too, so the recipe puts this block after any other block that reads the
-# journal.
+# What the Magery casts need: reagent flags read on a clock and after a refusal, the mana
+# each circle takes, and the settings every attack cast shares.
+# insysmsg consumes older journal lines too, so the recipe puts this block after any other
+# block that reads the journal.
 # ----------------------------------------------------------------------------------------
+
+
+# ----------------------------------------------------------------------------------------
+# @ config
+#
+#   config__mana_1st, config__mana_2nd, config__mana_3rd, config__mana_4th, config__mana_5th
+#      Mana a spell of that circle needs before it is worth starting.
+#        1st  magic arrow, create food, reactive armor
+#        2nd  harm
+#        3rd  fireball
+#        4th  lightning, curse, mana drain
+#        5th  magic reflection
+#
+#   config__interrupt_to_heal
+#      An attack cast in flight when the loss reaches emergency_hits.
+#        0  finishes
+#        1  is cut through "> Interrupt", so the next pass can heal
+# ----------------------------------------------------------------------------------------
+@setvar! config__mana_1st 4
+@setvar! config__mana_2nd 6
+@setvar! config__mana_3rd 9
+@setvar! config__mana_4th 11
+@setvar! config__mana_5th 14
+@setvar! config__interrupt_to_heal 1
 
 
 # ----------------------------------------------------------------------------------------
 # @ wait
 #
 #   interval__reagents
-#      Reagent read interval. Five lookups each time. A refill counts within this, and
-#      running out is caught at once by the refusal line.
+#      Reagent read interval. A refill counts within this, and running out is caught at
+#      once by the refusal line.
+#
+#   wait__cast
+#      The pause after an attack cast is delivered: the spell recovery.
 # ----------------------------------------------------------------------------------------
 @setvar! interval__reagents 10000
+@setvar! wait__cast 300
 
 
 # ----------------------------------------------------------------------------------------
@@ -28,27 +56,46 @@ timer__reagents interval__reagents
 # ----------------------------------------------------------------------------------------
 # @ state
 #
-#   var__regs_cure, var__regs_heal, var__regs_greater_heal, var__regs_reactive_armor,
-#   var__regs_magic_reflect
-#      Reagent flags, written only by REAGENTS. 1 when every reagent of that spell was
-#      found.
-#        Cure            garlic 3972, ginseng 3973
-#        Heal            garlic, ginseng, silk 3981
-#        Greater Heal    garlic, ginseng, silk, mandrake 3974
-#        Reactive Armor  garlic, silk, ash 3980
-#        Reflection      garlic, silk, mandrake
+#   var__regs_cure, var__regs_heal, var__regs_greater_heal, var__regs_create_food,
+#   var__regs_reactive_armor, var__regs_magic_reflect, var__regs_magic_arrow, var__regs_harm,
+#   var__regs_fireball, var__regs_lightning, var__regs_curse, var__regs_mana_drain, var__regs_energy_bolt
+#      1 when every reagent of that spell was found, written only by this block.
+#        cure            garlic 3972, ginseng 3973
+#        heal            garlic, ginseng, spider silk 3981
+#        greater heal    garlic, ginseng, mandrake root 3974, spider silk
+#        create food     garlic, ginseng, mandrake root
+#        reactive armor  garlic, spider silk, sulfurous ash 3980
+#        magic reflect   garlic, mandrake root, spider silk
+#        magic arrow     sulfurous ash
+#        harm            nightshade 3976, spider silk
+#        fireball        black pearl 3962
+#        lightning       mandrake root, sulfurous ash
+#        curse           garlic, nightshade, sulfurous ash
+#        mana drain      black pearl, mandrake root, spider silk
+#        energy bolt     black pearl, nightshade
 #
-#   var__has_garlic, var__has_ginseng, var__has_mandrake, var__has_ash, var__has_silk
+#   var__has_black_pearl, var__has_garlic, var__has_ginseng, var__has_mandrake,
+#   var__has_nightshade, var__has_ash, var__has_silk
 #      Scratch: 1 when that reagent was found on the last read.
 # ----------------------------------------------------------------------------------------
 @setvar! var__regs_cure 0
 @setvar! var__regs_heal 0
 @setvar! var__regs_greater_heal 0
+@setvar! var__regs_create_food 0
 @setvar! var__regs_reactive_armor 0
 @setvar! var__regs_magic_reflect 0
+@setvar! var__regs_magic_arrow 0
+@setvar! var__regs_harm 0
+@setvar! var__regs_fireball 0
+@setvar! var__regs_lightning 0
+@setvar! var__regs_curse 0
+@setvar! var__regs_mana_drain 0
+@setvar! var__regs_energy_bolt 0
+@setvar! var__has_black_pearl 0
 @setvar! var__has_garlic 0
 @setvar! var__has_ginseng 0
 @setvar! var__has_mandrake 0
+@setvar! var__has_nightshade 0
 @setvar! var__has_ash 0
 @setvar! var__has_silk 0
 
@@ -59,19 +106,25 @@ timer__reagents interval__reagents
     # ------------------------------------------------------------------------------------
     # REAGENTS
     #
-    # On the interval, or at once after a refusal for reagents, so a stale flag cannot
-    # send the same doomed cast every pass.
+    # On the interval, or at once after a refusal for reagents, so a stale flag cannot send the
+    # same doomed cast every pass. Each reagent is looked up once, and every spell flag comes
+    # from those seven with plain comparisons.
     # ------------------------------------------------------------------------------------
     if config__use_magery = 1
         if timer "timer__reagents" >= interval__reagents or insysmsg "More reagents are needed"
             settimer "timer__reagents" 0
 
+            @setvar! var__has_black_pearl 0
             @setvar! var__has_garlic 0
             @setvar! var__has_ginseng 0
             @setvar! var__has_mandrake 0
+            @setvar! var__has_nightshade 0
             @setvar! var__has_ash 0
             @setvar! var__has_silk 0
 
+            if findtype 3962 self
+                @setvar! var__has_black_pearl 1
+            endif
             if findtype 3972 self
                 @setvar! var__has_garlic 1
             endif
@@ -80,6 +133,9 @@ timer__reagents interval__reagents
             endif
             if findtype 3974 self
                 @setvar! var__has_mandrake 1
+            endif
+            if findtype 3976 self
+                @setvar! var__has_nightshade 1
             endif
             if findtype 3980 self
                 @setvar! var__has_ash 1
@@ -91,8 +147,16 @@ timer__reagents interval__reagents
             @setvar! var__regs_cure 0
             @setvar! var__regs_heal 0
             @setvar! var__regs_greater_heal 0
+            @setvar! var__regs_create_food 0
             @setvar! var__regs_reactive_armor 0
             @setvar! var__regs_magic_reflect 0
+            @setvar! var__regs_magic_arrow 0
+            @setvar! var__regs_harm 0
+            @setvar! var__regs_fireball 0
+            @setvar! var__regs_lightning 0
+            @setvar! var__regs_curse 0
+            @setvar! var__regs_mana_drain 0
+            @setvar! var__regs_energy_bolt 0
 
             if var__has_garlic = 1 and var__has_ginseng = 1
                 @setvar! var__regs_cure 1
@@ -100,14 +164,38 @@ timer__reagents interval__reagents
             if var__has_garlic = 1 and var__has_ginseng = 1 and var__has_silk = 1
                 @setvar! var__regs_heal 1
             endif
-            if var__has_garlic = 1 and var__has_ginseng = 1 and var__has_silk = 1 and var__has_mandrake = 1
+            if var__has_garlic = 1 and var__has_ginseng = 1 and var__has_mandrake = 1 and var__has_silk = 1
                 @setvar! var__regs_greater_heal 1
+            endif
+            if var__has_garlic = 1 and var__has_ginseng = 1 and var__has_mandrake = 1
+                @setvar! var__regs_create_food 1
             endif
             if var__has_garlic = 1 and var__has_silk = 1 and var__has_ash = 1
                 @setvar! var__regs_reactive_armor 1
             endif
-            if var__has_garlic = 1 and var__has_silk = 1 and var__has_mandrake = 1
+            if var__has_garlic = 1 and var__has_mandrake = 1 and var__has_silk = 1
                 @setvar! var__regs_magic_reflect 1
+            endif
+            if var__has_ash = 1
+                @setvar! var__regs_magic_arrow 1
+            endif
+            if var__has_nightshade = 1 and var__has_silk = 1
+                @setvar! var__regs_harm 1
+            endif
+            if var__has_black_pearl = 1
+                @setvar! var__regs_fireball 1
+            endif
+            if var__has_mandrake = 1 and var__has_ash = 1
+                @setvar! var__regs_lightning 1
+            endif
+            if var__has_garlic = 1 and var__has_nightshade = 1 and var__has_ash = 1
+                @setvar! var__regs_curse 1
+            endif
+            if var__has_black_pearl = 1 and var__has_mandrake = 1 and var__has_silk = 1
+                @setvar! var__regs_mana_drain 1
+            endif
+            if var__has_black_pearl = 1 and var__has_nightshade = 1
+                @setvar! var__regs_energy_bolt 1
             endif
         endif
     endif

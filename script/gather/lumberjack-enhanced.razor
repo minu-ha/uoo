@@ -56,6 +56,24 @@
 #           is on. Potions and bandages still go out
 #      > This loop: config__warmode_is_manual 1 (default 0).
 #      > Warmode is the player's: recovery casts and buffs stand down, potions still go out.
+#
+#   config__recover_in_warmode
+#      With warmode_is_manual 1, what the recovery casts (cure, heal, light Heal) do in
+#      warmode.
+#        0  stand down with the rest
+#        1  keep going, so only the other casts wait for the player
+#
+#   config__use_bandages
+#      1 uses bandages. At 0 recovery/light-heal stands in.
+#
+#   config__heal_skill_min
+#      Healing must be above this to bandage. At or below it recovery/light-heal stands
+#      in.
+#
+#   config__settle_first
+#      What a pass does first.
+#        0  reads the state at once. Potions still go out while a spell is casting
+#        1  waits for the item queue and any cast to finish
 # ----------------------------------------------------------------------------------------
 @setvar! config__chatty 1
 @setvar! config__sysmsg 1
@@ -64,6 +82,10 @@
 @setvar! config__use_potions 1
 @setvar! config__walk_guard 1
 @setvar! config__warmode_is_manual 1
+@setvar! config__recover_in_warmode 0
+@setvar! config__use_bandages 1
+@setvar! config__heal_skill_min 0
+@setvar! config__settle_first 0
 
 
 # ----------------------------------------------------------------------------------------
@@ -111,20 +133,6 @@
 @setvar! config__heal_hits 35
 @setvar! config__emergency_hits 45
 @setvar! config__mana_greater_heal 11
-
-
-# ----------------------------------------------------------------------------------------
-# module/recovery/bandage.razor
-#
-#   config__use_bandages
-#      1 uses bandages. At 0 recovery/light-heal stands in.
-#
-#   config__heal_skill_min
-#      Healing must be above this to bandage. At or below it recovery/light-heal stands
-#      in.
-# ----------------------------------------------------------------------------------------
-@setvar! config__use_bandages 1
-@setvar! config__heal_skill_min 0
 
 
 # ----------------------------------------------------------------------------------------
@@ -187,6 +195,31 @@
 
 
 # ----------------------------------------------------------------------------------------
+# module/magery/reagents.razor
+#
+#   config__mana_1st, config__mana_2nd, config__mana_3rd, config__mana_4th,
+#   config__mana_5th
+#      Mana a spell of that circle needs before it is worth starting.
+#        1st  magic arrow, create food, reactive armor
+#        2nd  harm
+#        3rd  fireball
+#        4th  lightning, curse, mana drain
+#        5th  magic reflection
+#
+#   config__interrupt_to_heal
+#      An attack cast in flight when the loss reaches emergency_hits.
+#        0  finishes
+#        1  is cut through "> Interrupt", so the next pass can heal
+# ----------------------------------------------------------------------------------------
+@setvar! config__mana_1st 4
+@setvar! config__mana_2nd 6
+@setvar! config__mana_3rd 9
+@setvar! config__mana_4th 11
+@setvar! config__mana_5th 14
+@setvar! config__interrupt_to_heal 1
+
+
+# ----------------------------------------------------------------------------------------
 # module/buff/spells.razor
 #
 #   config__use_reactive_armor
@@ -240,10 +273,15 @@
 #
 #   interval__message
 #      Spacing for repeated warnings. Without it an empty potion bag shouts every pass.
+#
+#   interval__housekeeping
+#      The clock of a recipe's "# @ every interval__housekeeping" group: slow checks that
+#      share one tick.
 # ----------------------------------------------------------------------------------------
 @setvar! wait__poll 100
 @setvar! wait__short 200
 @setvar! interval__message 3000
+@setvar! interval__housekeeping 5000
 
 
 # ----------------------------------------------------------------------------------------
@@ -256,6 +294,16 @@
 
 
 # ----------------------------------------------------------------------------------------
+# module/recovery/heal.razor
+#
+#   cooldown__heal_potion
+#      Length of the heal pot bar this block starts when it drinks, so the bar runs even
+#      where no trigger starts it.
+# ----------------------------------------------------------------------------------------
+@setvar! cooldown__heal_potion 10000
+
+
+# ----------------------------------------------------------------------------------------
 # module/escape/recall.razor
 #
 #   interval__recall_check
@@ -265,13 +313,17 @@
 
 
 # ----------------------------------------------------------------------------------------
-# module/recovery/reagents.razor
+# module/magery/reagents.razor
 #
 #   interval__reagents
-#      Reagent read interval. Five lookups each time. A refill counts within this, and
-#      running out is caught at once by the refusal line.
+#      Reagent read interval. A refill counts within this, and running out is caught at
+#      once by the refusal line.
+#
+#   wait__cast
+#      The pause after an attack cast is delivered: the spell recovery.
 # ----------------------------------------------------------------------------------------
 @setvar! interval__reagents 10000
+@setvar! wait__cast 300
 
 
 # ----------------------------------------------------------------------------------------
@@ -348,7 +400,7 @@ settimer "timer__recall_check" interval__recall_check
 
 
 # ----------------------------------------------------------------------------------------
-# module/recovery/reagents.razor
+# module/magery/reagents.razor
 #
 #   timer__reagents
 #      Ready on the first pass, so reagents are read before the first cast.
@@ -485,29 +537,49 @@ endif
 
 
 # ----------------------------------------------------------------------------------------
-# module/recovery/reagents.razor
+# module/magery/reagents.razor
 #
-#   var__regs_cure, var__regs_heal, var__regs_greater_heal, var__regs_reactive_armor,
-#   var__regs_magic_reflect
-#      Reagent flags, written only by REAGENTS. 1 when every reagent of that spell was
-#      found.
-#        Cure            garlic 3972, ginseng 3973
-#        Heal            garlic, ginseng, silk 3981
-#        Greater Heal    garlic, ginseng, silk, mandrake 3974
-#        Reactive Armor  garlic, silk, ash 3980
-#        Reflection      garlic, silk, mandrake
+#   var__regs_cure, var__regs_heal, var__regs_greater_heal, var__regs_create_food,
+#   var__regs_reactive_armor, var__regs_magic_reflect, var__regs_magic_arrow,
+#   var__regs_harm, var__regs_fireball, var__regs_lightning, var__regs_curse,
+#   var__regs_mana_drain, var__regs_energy_bolt
+#      1 when every reagent of that spell was found, written only by this block.
+#        cure            garlic 3972, ginseng 3973
+#        heal            garlic, ginseng, spider silk 3981
+#        greater heal    garlic, ginseng, mandrake root 3974, spider silk
+#        create food     garlic, ginseng, mandrake root
+#        reactive armor  garlic, spider silk, sulfurous ash 3980
+#        magic reflect   garlic, mandrake root, spider silk
+#        magic arrow     sulfurous ash
+#        harm            nightshade 3976, spider silk
+#        fireball        black pearl 3962
+#        lightning       mandrake root, sulfurous ash
+#        curse           garlic, nightshade, sulfurous ash
+#        mana drain      black pearl, mandrake root, spider silk
+#        energy bolt     black pearl, nightshade
 #
-#   var__has_garlic, var__has_ginseng, var__has_mandrake, var__has_ash, var__has_silk
+#   var__has_black_pearl, var__has_garlic, var__has_ginseng, var__has_mandrake,
+#   var__has_nightshade, var__has_ash, var__has_silk
 #      Scratch: 1 when that reagent was found on the last read.
 # ----------------------------------------------------------------------------------------
 @setvar! var__regs_cure 0
 @setvar! var__regs_heal 0
 @setvar! var__regs_greater_heal 0
+@setvar! var__regs_create_food 0
 @setvar! var__regs_reactive_armor 0
 @setvar! var__regs_magic_reflect 0
+@setvar! var__regs_magic_arrow 0
+@setvar! var__regs_harm 0
+@setvar! var__regs_fireball 0
+@setvar! var__regs_lightning 0
+@setvar! var__regs_curse 0
+@setvar! var__regs_mana_drain 0
+@setvar! var__regs_energy_bolt 0
+@setvar! var__has_black_pearl 0
 @setvar! var__has_garlic 0
 @setvar! var__has_ginseng 0
 @setvar! var__has_mandrake 0
+@setvar! var__has_nightshade 0
 @setvar! var__has_ash 0
 @setvar! var__has_silk 0
 
@@ -710,13 +782,20 @@ endif
 # ========================================================================================
 while not dead
     # ------------------------------------------------------------------------------------
-    # STRUCTURED PVP STOP                                                module/base.razor
+    # PASS START                                                         module/base.razor
     #
-    # The pvp expression means structured-PvP restrictions, not a field PK encounter.
+    # The pvp expression means structured-PvP restrictions, not a field PK encounter. With
+    # config__settle_first 1 the pass then waits for the item queue and any cast to finish.
     # ------------------------------------------------------------------------------------
     if pvp
         overhead "[ script, blocked ]" 254
         stop
+    endif
+
+    if config__settle_first = 1
+        while queued or casting
+            wait wait__short
+        endwhile
     endif
 
     # ------------------------------------------------------------------------------------
@@ -754,7 +833,7 @@ while not dead
             endif
 
             if config__use_magery = 1 and var__regs_cure = 1 and mana >= config__mana_cure and not casting
-                if config__warmode_is_manual = 0 or not warmode
+                if config__warmode_is_manual = 0 or config__recover_in_warmode = 1 or not warmode
                     if config__walk_guard = 0 or cooldown "walk" = 0
                         hotkey "> Smart Heal/Cure Self"
                         if config__sysmsg = 1
@@ -796,6 +875,7 @@ while not dead
                     # Still on its own cooldown.
                 else
                     hotkey "Drink Heal"
+                    cooldown "heal pot" cooldown__heal_potion
                     @setvar! var__heal_potion_out 1
                     wait wait__short
                 endif
@@ -806,7 +886,7 @@ while not dead
         endif
 
         if var__heal_potion_out = 0 and diffhits >= config__emergency_hits and config__use_magery = 1 and var__regs_greater_heal = 1 and mana >= config__mana_greater_heal and not casting
-            if config__warmode_is_manual = 0 or not warmode
+            if config__warmode_is_manual = 0 or config__recover_in_warmode = 1 or not warmode
                 if config__walk_guard = 0 or cooldown "walk" = 0
                     hotkey "> Greater Heal/Cure Self"
                     if config__sysmsg = 1
@@ -869,7 +949,7 @@ while not dead
         endif
 
         if var__light_heal_due = 1
-            if config__warmode_is_manual = 0 or not warmode
+            if config__warmode_is_manual = 0 or config__recover_in_warmode = 1 or not warmode
                 if config__walk_guard = 0 or cooldown "walk" = 0
                     hotkey "> Smart Heal/Cure Self"
                     if config__sysmsg = 1
@@ -1118,21 +1198,27 @@ while not dead
     endif
 
     # ------------------------------------------------------------------------------------
-    # REAGENTS                                              module/recovery/reagents.razor
+    # REAGENTS                                                module/magery/reagents.razor
     #
-    # On the interval, or at once after a refusal for reagents, so a stale flag cannot
-    # send the same doomed cast every pass.
+    # On the interval, or at once after a refusal for reagents, so a stale flag cannot send the
+    # same doomed cast every pass. Each reagent is looked up once, and every spell flag comes
+    # from those seven with plain comparisons.
     # ------------------------------------------------------------------------------------
     if config__use_magery = 1
         if timer "timer__reagents" >= interval__reagents or insysmsg "More reagents are needed"
             settimer "timer__reagents" 0
 
+            @setvar! var__has_black_pearl 0
             @setvar! var__has_garlic 0
             @setvar! var__has_ginseng 0
             @setvar! var__has_mandrake 0
+            @setvar! var__has_nightshade 0
             @setvar! var__has_ash 0
             @setvar! var__has_silk 0
 
+            if findtype 3962 self
+                @setvar! var__has_black_pearl 1
+            endif
             if findtype 3972 self
                 @setvar! var__has_garlic 1
             endif
@@ -1141,6 +1227,9 @@ while not dead
             endif
             if findtype 3974 self
                 @setvar! var__has_mandrake 1
+            endif
+            if findtype 3976 self
+                @setvar! var__has_nightshade 1
             endif
             if findtype 3980 self
                 @setvar! var__has_ash 1
@@ -1152,8 +1241,16 @@ while not dead
             @setvar! var__regs_cure 0
             @setvar! var__regs_heal 0
             @setvar! var__regs_greater_heal 0
+            @setvar! var__regs_create_food 0
             @setvar! var__regs_reactive_armor 0
             @setvar! var__regs_magic_reflect 0
+            @setvar! var__regs_magic_arrow 0
+            @setvar! var__regs_harm 0
+            @setvar! var__regs_fireball 0
+            @setvar! var__regs_lightning 0
+            @setvar! var__regs_curse 0
+            @setvar! var__regs_mana_drain 0
+            @setvar! var__regs_energy_bolt 0
 
             if var__has_garlic = 1 and var__has_ginseng = 1
                 @setvar! var__regs_cure 1
@@ -1161,14 +1258,38 @@ while not dead
             if var__has_garlic = 1 and var__has_ginseng = 1 and var__has_silk = 1
                 @setvar! var__regs_heal 1
             endif
-            if var__has_garlic = 1 and var__has_ginseng = 1 and var__has_silk = 1 and var__has_mandrake = 1
+            if var__has_garlic = 1 and var__has_ginseng = 1 and var__has_mandrake = 1 and var__has_silk = 1
                 @setvar! var__regs_greater_heal 1
+            endif
+            if var__has_garlic = 1 and var__has_ginseng = 1 and var__has_mandrake = 1
+                @setvar! var__regs_create_food 1
             endif
             if var__has_garlic = 1 and var__has_silk = 1 and var__has_ash = 1
                 @setvar! var__regs_reactive_armor 1
             endif
-            if var__has_garlic = 1 and var__has_silk = 1 and var__has_mandrake = 1
+            if var__has_garlic = 1 and var__has_mandrake = 1 and var__has_silk = 1
                 @setvar! var__regs_magic_reflect 1
+            endif
+            if var__has_ash = 1
+                @setvar! var__regs_magic_arrow 1
+            endif
+            if var__has_nightshade = 1 and var__has_silk = 1
+                @setvar! var__regs_harm 1
+            endif
+            if var__has_black_pearl = 1
+                @setvar! var__regs_fireball 1
+            endif
+            if var__has_mandrake = 1 and var__has_ash = 1
+                @setvar! var__regs_lightning 1
+            endif
+            if var__has_garlic = 1 and var__has_nightshade = 1 and var__has_ash = 1
+                @setvar! var__regs_curse 1
+            endif
+            if var__has_black_pearl = 1 and var__has_mandrake = 1 and var__has_silk = 1
+                @setvar! var__regs_mana_drain 1
+            endif
+            if var__has_black_pearl = 1 and var__has_nightshade = 1
+                @setvar! var__regs_energy_bolt 1
             endif
         endif
     endif

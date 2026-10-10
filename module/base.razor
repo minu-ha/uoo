@@ -38,6 +38,24 @@
 #        0  ours: our casts ignore it
 #        1  the player's manual control window: our casts and the food stand down while it
 #           is on. Potions and bandages still go out
+#
+#   config__recover_in_warmode
+#      With warmode_is_manual 1, what the recovery casts (cure, heal, light Heal) do in
+#      warmode.
+#        0  stand down with the rest
+#        1  keep going, so only the other casts wait for the player
+#
+#   config__use_bandages
+#      1 uses bandages. At 0 recovery/light-heal stands in.
+#
+#   config__heal_skill_min
+#      Healing must be above this to bandage. At or below it recovery/light-heal stands
+#      in.
+#
+#   config__settle_first
+#      What a pass does first.
+#        0  reads the state at once. Potions still go out while a spell is casting
+#        1  waits for the item queue and any cast to finish
 # ----------------------------------------------------------------------------------------
 @setvar! config__chatty 1
 @setvar! config__sysmsg 1
@@ -46,6 +64,10 @@
 @setvar! config__use_potions 1
 @setvar! config__walk_guard 1
 @setvar! config__warmode_is_manual 0
+@setvar! config__recover_in_warmode 0
+@setvar! config__use_bandages 1
+@setvar! config__heal_skill_min 0
+@setvar! config__settle_first 0
 
 
 # ----------------------------------------------------------------------------------------
@@ -59,10 +81,15 @@
 #
 #   interval__message
 #      Spacing for repeated warnings. Without it an empty potion bag shouts every pass.
+#
+#   interval__housekeeping
+#      The clock of a recipe's "# @ every interval__housekeeping" group: slow checks that
+#      share one tick.
 # ----------------------------------------------------------------------------------------
 @setvar! wait__poll 100
 @setvar! wait__short 200
 @setvar! interval__message 3000
+@setvar! interval__housekeeping 5000
 
 
 # ----------------------------------------------------------------------------------------
@@ -114,13 +141,20 @@ endif
 # @ loop
 # ----------------------------------------------------------------------------------------
     # ------------------------------------------------------------------------------------
-    # STRUCTURED PVP STOP
+    # PASS START
     #
-    # The pvp expression means structured-PvP restrictions, not a field PK encounter.
+    # The pvp expression means structured-PvP restrictions, not a field PK encounter. With
+    # config__settle_first 1 the pass then waits for the item queue and any cast to finish.
     # ------------------------------------------------------------------------------------
     if pvp
         overhead "[ script, blocked ]" 254
         stop
+    endif
+
+    if config__settle_first = 1
+        while queued or casting
+            wait wait__short
+        endwhile
     endif
 
 

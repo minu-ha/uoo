@@ -30,15 +30,23 @@
 #   use_magery (default 1)
 #      1 uses Magery: the Cure and heal agents, the reagent reads and the buffs. At 0
 #      potions and bandages still go out.
-#      Read by recovery/reagents, recovery/cure, recovery/heal.
+#      Read by magery/reagents, recovery/cure, recovery/heal.
 #      > No Magery in this template.
+#
+#   heal_skill_min (default 0)
+#      Healing must be above this to bandage. At or below it recovery/light-heal stands
+#      in.
+#      Read by recovery/bandage.
+#      > Healing must be above 10, as before the module build.
 # ----------------------------------------------------------------------------------------
 @setvar! config__use_magery 0
+@setvar! config__heal_skill_min 10
 
 # ----------------------------------------------------------------------------------------
-# @ use recovery/reagents
+# @ use magery/reagents
 #
-#   Reagent flags for the Magery casts, read on a clock and right after a refusal.
+#   What the Magery casts need: reagent flags read on a clock and after a refusal, the
+#   mana
 #   > The cure and heal blocks read its flags. With Magery off it reads nothing.
 # ----------------------------------------------------------------------------------------
 
@@ -64,13 +72,7 @@
 # @ use recovery/bandage
 #
 #   Self bandage while hurt or poisoned, never over a running one.
-#
-#   heal_skill_min (default 0)
-#      Healing must be above this to bandage. At or below it recovery/light-heal stands
-#      in.
-#      > Healing must be above 10, as before the module build.
 # ----------------------------------------------------------------------------------------
-@setvar! config__heal_skill_min 10
 
 # ----------------------------------------------------------------------------------------
 # @ use recovery/refresh
