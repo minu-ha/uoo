@@ -24,15 +24,20 @@ insert_final_newline = unset
 [script/archive/*.razor]
 trim_trailing_whitespace = false
 
-[*.{md,html}]
+[*.md]
 max_line_length = 200
+
+# Node scripts and package.json follow for-humanity's style. Not every .json: ClassicUO writes
+# the profile .json files under config/ with 2 spaces.
+[{*.mjs,package.json}]
+indent_size = 4
 
 [*.sh]
 indent_style = tab
 
 # Graphic id list. The lines inside its code blocks are long by design, and scripts cite
 # it by category name, not line number.
-[blueprint/item-list.html]
+[blueprint/item-list.md]
 indent_size = 4
 max_line_length = off
 

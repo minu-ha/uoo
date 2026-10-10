@@ -9,7 +9,7 @@
     },
     "scripts": {
         "build": "node util/build-scripts.mjs",
-        "check": "util/check.sh",
+        "check": "util/check.sh && pnpm docs:build && node util/check-docs.mjs",
         "test": "node --test util/*.test.mjs",
         "docs:dev": "for-humanity dev blueprint",
         "docs:build": "for-humanity build blueprint",

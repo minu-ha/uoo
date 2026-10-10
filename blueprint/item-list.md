@@ -1,26 +1,28 @@
-<!doctype html>
-<html lang="ko">
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>BLUEPRINT - UOO</title>
-<link rel="icon" href="favicon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="_index.css">
-<script src="_index.js"></script>
+---
+name: Item List
+label: 아이템 목록
+group: Reference
+order: 50
+---
 
-<body class="bp_index__root">
-<main class="bp_index__doc">
-<h1>Item List</h1>
-<p>UO Outlands 아이템의 이름과 graphic ID다. <code>findtype</code> 인자와 hue를 찾을 때 본다. 실행하는 스크립트가 아니다.
-분류 이름과 줄은 원문 그대로 영어다.</p>
+UO Outlands 아이템의 이름과 graphic ID다. `findtype` 인자와 hue를 찾을 때 본다. 실행하는 스크립트가 아니다.
+분류 이름과 줄은 원문 그대로 영어다.
 
-<h2 id="00">00 한눈에</h2>
-<p>한 줄이 아이템 하나다. <code>#</code> 뒤가 <code>getlabel</code>로 읽히는 이름, 따옴표 안이 <code>findtype</code>에 쓰는 이름, 그 뒤가 graphic ID다.
-ID가 여럿이면 <code>|</code>로 잇고, 괄호에는 hue나 메모가 붙는다. 분류 첫 줄의 <code>all IDs</code>는 그 분류 전체를 한 번에 찾을 때 쓴다.</p>
-<pre><code>#Greater Heal potion "Yellow Potion" 3852 (Potion hue 0, keg hue 253)</code></pre>
-<p>스크립트 주석에서 이 목록을 가리킬 때는 줄 번호가 아니라 분류 이름으로 쓴다 (<code>listed under Shields in blueprint/item-list.html</code>). 목록을 고치면 줄 번호가 밀린다.</p>
+## <a id="00"></a>00 한눈에
 
-<h2 id="01">01 Alchemy Potions, bottles, keg</h2>
-<pre><code>#Alchemy Potions, bottles, keg - all IDs: 3846|3847|3848|3849|3850|3851|3852|3853|3854|6464
+한 줄이 아이템 하나다. `#` 뒤가 `getlabel`로 읽히는 이름, 따옴표 안이 `findtype`에 쓰는 이름, 그 뒤가 graphic ID다.
+ID가 여럿이면 `|`로 잇고, 괄호에는 hue나 메모가 붙는다. 분류 첫 줄의 `all IDs`는 그 분류 전체를 한 번에 찾을 때 쓴다.
+
+```
+#Greater Heal potion "Yellow Potion" 3852 (Potion hue 0, keg hue 253)
+```
+
+스크립트 주석에서 이 목록을 가리킬 때는 줄 번호가 아니라 분류 이름으로 쓴다 (`listed under Shields in blueprint/item-list.md`). 목록을 고치면 줄 번호가 밀린다.
+
+## <a id="01"></a>01 Alchemy Potions, bottles, keg
+
+```
+#Alchemy Potions, bottles, keg - all IDs: 3846|3847|3848|3849|3850|3851|3852|3853|3854|6464
 
     #a potion keg "keg" 6464
     #empty Bottles "empty bottle%s%" 3854
@@ -31,10 +33,13 @@ ID가 여럿이면 <code>|</code>로 잇고, 괄호에는 hue나 메모가 붙�
     #Greater Magic Resist potion "Black Potion" 3846 (Potion hue 0, keg hue 1109)
     #Greater Explosion potion "Purple Potion" 3853 (Potion hue 0, keg hue 419)
     #greater poison potion, deadly poison potion, lethal poison potion "Green Potion" 3850 (Potion hue 0, keg hue 363)
-    #Total Refresh potion "Red Potion" 3851 (Potion hue 0, keg hue 37)</code></pre>
+    #Total Refresh potion "Red Potion" 3851 (Potion hue 0, keg hue 37)
+```
 
-<h2 id="02">02 Armor</h2>
-<pre><code>#Armor - all IDs: 5056|5059|5060|5061|5063|5070|5074|5075|5076|5078|5085|5089|5090|5101|5103|5105|5106|5129|5131|5132|5135|5138|5139|5142|5143|5144|5146|5201|5203|5204|5205|5207|7169|7170|7173|7175|7177|7179|7181|7610|7947|31003|31004|31005|31006|31007|31008|31009|31010|31011|31012|31015|31191
+## <a id="02"></a>02 Armor
+
+```
+#Armor - all IDs: 5056|5059|5060|5061|5063|5070|5074|5075|5076|5078|5085|5089|5090|5101|5103|5105|5106|5129|5131|5132|5135|5138|5139|5142|5143|5144|5146|5201|5203|5204|5205|5207|7169|7170|7173|7175|7177|7179|7181|7610|7947|31003|31004|31005|31006|31007|31008|31009|31010|31011|31012|31015|31191
 
     #Leather - all IDs: 5061|5063|5070|5074|5075|7169|7175|7177|7179|7610|31191
         #female leather chest "leather armor" 7175
@@ -99,39 +104,45 @@ ID가 여럿이면 <code>|</code>로 잇고, 괄호에는 hue나 메모가 붙�
         #platemail leggings "platemail legs" 5146
         #platemail chest "platemail" 5142
         #norse helm "bascinet" 5135
-        #platemail skirt "plate skirt" 31008</code></pre>
+        #platemail skirt "plate skirt" 31008
+```
 
-<h2 id="03">03 Armor crates</h2>
-<pre><code>#Armor crates (for hue see material types) - all IDs: 18043|18044|18045|18046|18047|18048|18049|18050|18051|18052|18053
+## <a id="03"></a>03 Armor crates
+
+```
+#Armor crates (for hue see material types) - all IDs: 18043|18044|18045|18046|18047|18048|18049|18050|18051|18052|18053
 
     #empty armor crate "empty armor crate" 18043
 
     #Leather armor: 18047|18048
         #regular: leather armor crate [mastercrafted by ...] "leather crate" 18047
-        #dullhide - avarhide: &lt;materialtype&gt; leather armor crate [mastercrafted by ...] "leather crate" 18048
+        #dullhide - avarhide: <materialtype> leather armor crate [mastercrafted by ...] "leather crate" 18048
 
     #Studded armor: 18052|18053
         #regular: studded armor crate [mastercrafted by ...] "studded crate" 18052
-        #dullhide - avarhide: &lt;materialtype&gt; studded armor crate [mastercrafted by ...] "studded crate" 18053
+        #dullhide - avarhide: <materialtype> studded armor crate [mastercrafted by ...] "studded crate" 18053
 
     #Bone armor: 18044|18045
         #regular: bone armor crate [mastercrafted by ...] "bone armor crate" 18044
-        #dullhide - avarhide: &lt;materialtype&gt; bone armor crate [mastercrafted by ...] "bone armor crate" 18045
+        #dullhide - avarhide: <materialtype> bone armor crate [mastercrafted by ...] "bone armor crate" 18045
 
     #Ringmail: 18050|18051
         #regular: ringmail armor crate [mastercrafted by ...] "ringmail crate" 18050
-        #dull copper - avarite: &lt;materialtype&gt; ringmail armor crate [mastercrafted by ...] "ringmail crate" 18051
+        #dull copper - avarite: <materialtype> ringmail armor crate [mastercrafted by ...] "ringmail crate" 18051
 
     #Chainmail: 18046
         #regular: chainmail armor crate [mastercrafted by ...] "chainmail crate" 18046
-        #dull copper - avarite: &lt;materialtype&gt; chainmail armor crate [mastercrafted by ...] "chainmail crate" 18046
+        #dull copper - avarite: <materialtype> chainmail armor crate [mastercrafted by ...] "chainmail crate" 18046
 
     #Platemail: 18049
         #regular: platemail armor crate [mastercrafted by ...] "platemail crate" 18049
-        #dull copper - avarite: &lt;materialtype&gt; platemail armor crate [mastercrafted by ...] "platemail crate" 18049</code></pre>
+        #dull copper - avarite: <materialtype> platemail armor crate [mastercrafted by ...] "platemail crate" 18049
+```
 
-<h2 id="04">04 Banker NPCs</h2>
-<pre><code>#Banker NPCs - all IDs: 0x2E6|0x2E4|0x2E2|0xC0|0xBF|0xC1|0x101|0x390F7|0x100|0x1DD6|0xE02|0xF317|0xAD8|0x17E|0x17D|0x5962|0xD88|0xDF0|0x6A|0x5BAF|0x2596|0x3E|0x3D|0x1B1|0x9A7|0x1EA
+## <a id="04"></a>04 Banker NPCs
+
+```
+#Banker NPCs - all IDs: 0x2E6|0x2E4|0x2E2|0xC0|0xBF|0xC1|0x101|0x390F7|0x100|0x1DD6|0xE02|0xF317|0xAD8|0x17E|0x17D|0x5962|0xD88|0xDF0|0x6A|0x5BAF|0x2596|0x3E|0x3D|0x1B1|0x9A7|0x1EA
 #              all names:   Alligra|Alphonse|Becca|Brandi|Britta|Corbin|Daryl|Duane|Errol|Feronia|Fielding|Ganesa|Ingmar|Len|Orlantha|Osmond|Rafferty|Renee|Roi|Stanton|Stephan|Sun|Susan|Tano|Trind|Zakia
 
     //Anchors Rest - all IDs: 0x2E6|0x2E4|0x2E2
@@ -180,10 +191,13 @@ ID가 여럿이면 <code>|</code>로 잇고, 괄호에는 hue나 메모가 붙�
         #Trind 0x9A7
 
     //Shelter Island
-        #Len 0x1EA</code></pre>
+        #Len 0x1EA
+```
 
-<h2 id="05">05 Books and Tomes</h2>
-<pre><code>#Books and Tomes - all IDs: 3834|6238|8786|8787|8901|11881|11882|11883|11884|11885|11886|11887|11888|11889|11890|11891|11893|11895|11896|11897|11898|11902|11903|19814|29103|29105|41471|42516|45340|45823|70142|70143|70144|70145|70158|70159|70160|70161|70162|70163|70164|70165|70166|70167|70168
+## <a id="05"></a>05 Books and Tomes
+
+```
+#Books and Tomes - all IDs: 3834|6238|8786|8787|8901|11881|11882|11883|11884|11885|11886|11887|11888|11889|11890|11891|11893|11895|11896|11897|11898|11902|11903|19814|29103|29105|41471|42516|45340|45823|70142|70143|70144|70145|70158|70159|70160|70161|70162|70163|70164|70165|70166|70167|70168
 
     #a checkbook [blessed] "checkbook" 45823
     #book of chivalry [blessed] "paladin spellbook" 8786
@@ -234,10 +248,13 @@ ID가 여럿이면 <code>|</code>로 잇고, 괄호에는 hue나 메모가 붙�
     #taming bestiary "taming bestiary" 11881
     #tome of heroism "book" 41471
     #trap kit "trap kit" 19814
-    #wizard's grimoire ' "wizards grimoire" 11883</code></pre>
+    #wizard's grimoire ' "wizards grimoire" 11883
+```
 
-<h2 id="06">06 Brewing</h2>
-<pre><code>#Brewing - all IDs: 50675|51078|51109|51111
+## <a id="06"></a>06 Brewing
+
+```
+#Brewing - all IDs: 50675|51078|51109|51111
 
     #brewing cask "brewing barrel" 51111|51112
     #brewing kettle "brewing kettle" 51109|51110
@@ -245,10 +262,13 @@ ID가 여럿이면 <code>|</code>로 잇고, 괄호에는 hue나 메모가 붙�
         #barley seed "bag of seeds" 51078 (Hue 2418)
         #hops seed "bag of seeds" 51078 (Hue 2208)
         #melloweed seed "bag of seeds" 51078 (Hue 0)
-    #cleansing brew "bottle" 50675</code></pre>
+    #cleansing brew "bottle" 50675
+```
 
-<h2 id="07">07 Commodity</h2>
-<pre><code>#Commodity - all IDs: 19226|19227|19228|19229|19232|19233|19234|19235|19236|19237|19239|19243|19244|19245|19246|19247|19248|19249|19250|19251|19252|19253|19254|19255|29382
+## <a id="07"></a>07 Commodity
+
+```
+#Commodity - all IDs: 19226|19227|19228|19229|19232|19233|19234|19235|19236|19237|19239|19243|19244|19245|19246|19247|19248|19249|19250|19251|19252|19253|19254|19255|29382
 
     #Boards commodity - all IDs: 19227|19239
         #board commodity "crate" 19239
@@ -283,10 +303,13 @@ ID가 여럿이면 <code>|</code>로 잇고, 괄호에는 hue나 메모가 붙�
         #raw drumstick commodity "crate" 19244
         #raw fish steak commodity "crate" 19243
         #raw ribs commodity "crate" 19245
-        #shaft commodity "crate" 19255</code></pre>
+        #shaft commodity "crate" 19255
+```
 
-<h2 id="08">08 Containers</h2>
-<pre><code>#Containers (a lot of them have two IDs, depending on their rotation) - all IDs: 2472|2473|2474|2475|2637|2639|2641|2643|2717|3644|3645|3646|3647|3648|3649|3650|3651|3701|3702|3705|3708|3709|3710|3712|4263|4266|11468|11473|11761|12215|18282|18283|24246|29077|29078|29086|29087|29832|29833|30765|41449|41450|41451|41452|41453|41454|41455|41456|41464|57514|57519
+## <a id="08"></a>08 Containers
+
+```
+#Containers (a lot of them have two IDs, depending on their rotation) - all IDs: 2472|2473|2474|2475|2637|2639|2641|2643|2717|3644|3645|3646|3647|3648|3649|3650|3651|3701|3702|3705|3708|3709|3710|3712|4263|4266|11468|11473|11761|12215|18282|18283|24246|29077|29078|29086|29087|29832|29833|30765|41449|41450|41451|41452|41453|41454|41455|41456|41464|57514|57519
 
     #a magic item vault "magic item chest|sm magic item vault" 11468|11473|57514|57519
     #a prevalia trunk "rares chest" 4263|4266
@@ -320,10 +343,13 @@ ID가 여럿이면 <code>|</code>로 잇고, 괄호에는 hue나 메모가 붙�
         #wooden box "wooden box" 2474|3709 (weight 2)
         #wooden chest "wooden chest" 3650|3651 (weight 2)
         #Wooden Chest (Dyeable) "ph chest" 41455|41456 (hue 0, weight 2)
-        #wooden treasure map chest "wooden chest" 29086|29087</code></pre>
+        #wooden treasure map chest "wooden chest" 29086|29087
+```
 
-<h2 id="09">09 Crafting tools</h2>
-<pre><code>#Crafting tools - all IDs of items storable in shelf (marked as standard if more than one per category): 2431|3739|3997|4027|4028|4031|4032|4148|4149|7864|7865
+## <a id="09"></a>09 Crafting tools
+
+```
+#Crafting tools - all IDs of items storable in shelf (marked as standard if more than one per category): 2431|3739|3997|4027|4028|4031|4032|4148|4149|7864|7865
 
     #Alchemy - all IDs: 3739
         #mortar and pestle "mortar and pestle" 3739
@@ -350,19 +376,25 @@ ID가 여럿이면 <code>|</code>로 잇고, 괄호에는 hue나 메모가 붙�
     #Tailoring - all IDs: 3997
         #sewing kit "sewing kit" 3997
     #Tinkering - all IDs: 7864|7865
-        #tinker's tools ' "tool kit" 7864|7865</code></pre>
+        #tinker's tools ' "tool kit" 7864|7865
+```
 
-<h2 id="10">10 Currency</h2>
-<pre><code>#Currency - all IDs: 2539|3821|3891|5360|16898
+## <a id="10"></a>10 Currency
+
+```
+#Currency - all IDs: 2539|3821|3891|5360|16898
 
     #doubloons "muffins" 2539 (pre expansion)
     #doubloons "doubloon" 3891
     #gold coin "gold coin" 3821
     #prevalia coins "prevalia coin" 16898
-    #check "deed" 5360 (Hue: Gold coin 2125, Prev. Coin 2929, Doubloons 2414)</code></pre>
+    #check "deed" 5360 (Hue: Gold coin 2125, Prev. Coin 2929, Doubloons 2414)
+```
 
-<h2 id="11">11 Delectable food</h2>
-<pre><code>#Delectable food - all IDs 28879|28880|28881|28883|28885|28886|28888|29773|29774
+## <a id="11"></a>11 Delectable food
+
+```
+#Delectable food - all IDs 28879|28880|28881|28883|28885|28886|28888|29773|29774
 
     #bacon feast "tray" 29774
     #crab feast "tray" 28883
@@ -372,10 +404,13 @@ ID가 여럿이면 <code>|</code>로 잇고, 괄호에는 hue나 메모가 붙�
     #meat shank feast "tray" 28888
     #poultry feast "tray" 28886
     #sausage feast "tray" 29773
-    #steak feast "tray" 28881</code></pre>
+    #steak feast "tray" 28881
+```
 
-<h2 id="12">12 Ground items</h2>
-<pre><code>#Ground items
+## <a id="12"></a>12 Ground items
+
+```
+#Ground items
 
     #a trash barrel "barrel" 3703
     #anvil "anvil" 4015|4016
@@ -400,10 +435,13 @@ ID가 여럿이면 <code>|</code>로 잇고, 괄호에는 hue나 메모가 붙�
     #spinning wheel "spinning wheel" 4117|4121
     #training dummy "training dummy" 4208|4212
     #upright loom "upright loom" 4191|4192|4193|4194
-    #wooden door "wooden door" 1749|1751|1757|1759|1773|1775|1765|1767 (closed) | 1750|1752|1758|1760|1766|1768|1774|1776 (open)</code></pre>
+    #wooden door "wooden door" 1749|1751|1757|1759|1773|1775|1765|1767 (closed) | 1750|1752|1758|1760|1766|1768|1774|1776 (open)
+```
 
-<h2 id="13">13 Ground runes/Floor runes</h2>
-<pre><code>#Ground runes/Floor runes - all IDs: 39889|39891|39892|39896|39897|39898|39905|39909|39911|39912|39916|39917|39918
+## <a id="13"></a>13 Ground runes/Floor runes
+
+```
+#Ground runes/Floor runes - all IDs: 39889|39891|39892|39896|39897|39898|39905|39909|39911|39912|39916|39917|39918
 
     #aggression rune "rune" 39892       (hue 2117)
     #essence rune "rune" 39909          (hue 2916)
@@ -417,18 +455,24 @@ ID가 여럿이면 <code>|</code>로 잇고, 괄호에는 hue나 메모가 붙�
     #spellshielding rune "rune" 39916   (hue 2606)
     #spell rune "rune" 39891            (hue 2606)
     #toxicity rune "rune" 39911         (hue 2384)
-    #trap rune "rune" 39917             (hue 2376)</code></pre>
+    #trap rune "rune" 39917             (hue 2376)
+```
 
-<h2 id="14">14 Harvesting tools</h2>
-<pre><code>#Harvesting tools - all IDs: 3520|3907|3908|3717|3718|11552|11564
+## <a id="14"></a>14 Harvesting tools
+
+```
+#Harvesting tools - all IDs: 3520|3907|3908|3717|3718|11552|11564
 
     #fishing pole "fishing pole" 3520
     #hatchet "hatchet" 3907|3908
     #pickaxe "pickaxe" 3717|3718
-    #skinning knife "Elven Spellblade" 11552|11564</code></pre>
+    #skinning knife "Elven Spellblade" 11552|11564
+```
 
-<h2 id="15">15 Harvesting items</h2>
-<pre><code>#Harvesting items - all IDs: 2422|2426|2489|2496|2508|2515|2545|4225|5639|5641|6585|7121|7127|7133|7154|7708|7710|7711|17617|17619
+## <a id="15"></a>15 Harvesting items
+
+```
+#Harvesting items - all IDs: 2422|2426|2489|2496|2508|2515|2545|4225|5639|5641|6585|7121|7127|7133|7154|7708|7710|7711|17617|17619
 
     #board "board%s" 7127
     #iron ingot "iron ingot%s" 7154
@@ -450,10 +494,13 @@ ID가 여럿이면 <code>|</code>로 잇고, 괄호에는 hue나 메모가 붙�
     #raw meat shank "raw leg%s% of lamb" 5641
     #raw ribs "cut%s% of raw ribs" 2545
     #raw sausage "sausage%s%" 2496
-    #raw steaks "sliced ham" 7711</code></pre>
+    #raw steaks "sliced ham" 7711
+```
 
-<h2 id="16">16 Hues</h2>
-<pre><code>#Hues
+## <a id="16"></a>16 Hues
+
+```
+#Hues
     #Aspect Hues
         #Agorawave 4221
         #Air 2263
@@ -491,19 +538,25 @@ ID가 여럿이면 <code>|</code>로 잇고, 괄호에는 hue나 메모가 붙�
         #Verehide/Verewood/Verite           2207
         #Valehide/Valewood/Valorite         2219
         #Avarhide/Avarwood/Avarite          1763
-    #Potion kegs see alchemy</code></pre>
+    #Potion kegs see alchemy
+```
 
-<h2 id="17">17 Jewelry</h2>
-<pre><code>//Jewelry (for hues see Jewels) - all IDs: 4230|4231|4232|4233|4234
+## <a id="17"></a>17 Jewelry
+
+```
+//Jewelry (for hues see Jewels) - all IDs: 4230|4231|4232|4233|4234
 
     #beads "necklace" 4233
     #necklace "necklace" 4232
     #ring "ring" 4234
     #earrings "earrings" 4231
-    #signet ring "bracelet" 4230</code></pre>
+    #signet ring "bracelet" 4230
+```
 
-<h2 id="18">18 Jewels</h2>
-<pre><code>//Jewels - all IDs: 3856|3859|3861|3862|3865|3873|3877|3878|3885
+## <a id="18"></a>18 Jewels
+
+```
+//Jewels - all IDs: 3856|3859|3861|3862|3865|3873|3877|3878|3885
 
     #citrine "citrine%s%" 3861 (hue 0)
     #tourmaline "tourmaline%s%" 3885 (hue 2001)
@@ -513,10 +566,13 @@ ID가 여럿이면 <code>|</code>로 잇고, 괄호에는 hue나 메모가 붙�
     #sapphire "sapphire%s%" 3865 (hue 96)
     #emerald "emerald%s%" 3856 (hue 2185)
     #star sapphire "star sapphire%s%" 3873 (hue 2880)
-    #diamond "diamond%s%" 3878 (hue 2901)</code></pre>
+    #diamond "diamond%s%" 3878 (hue 2901)
+```
 
-<h2 id="19">19 Magery spells and spell scrolls</h2>
-<pre><code>#Magery spells and spell scrolls - all scroll IDs: 7981|7982|7983|7984|7985|7986|7987|7988|7989|7990|7991|7992|7993|7994|7995|7996|7997|7998|7999|8000|8001|8002|8003|8004|8005|8006|8007|8008|8009|8010|8011|8012|8013|8014|8015|8016|8017|8018|8019|8020|8021|8022|8023|8024|8025|8026|8027|8028|8029|8031|8032|8033|8034|8035|8036|8037|8038|8039|8041|8042|8043|8044
+## <a id="19"></a>19 Magery spells and spell scrolls
+
+```
+#Magery spells and spell scrolls - all scroll IDs: 7981|7982|7983|7984|7985|7986|7987|7988|7989|7990|7991|7992|7993|7994|7995|7996|7997|7998|7999|8000|8001|8002|8003|8004|8005|8006|8007|8008|8009|8010|8011|8012|8013|8014|8015|8016|8017|8018|8019|8020|8021|8022|8023|8024|8025|8026|8027|8028|8029|8031|8032|8033|8034|8035|8036|8037|8038|8039|8041|8042|8043|8044
 
     #1st Circle - all scroll IDs: 7981|7982|7983|7984|7985|7986|7987|7988
         #1 hotkey "Clumsy" | Magery req. 0/30 - Mana Cost 4 - Casttime 0.50 sec - Regs: 3963|3976 (Bloodmoss, Nightshade) | clumsy scroll "Clumsy Scroll" 7982
@@ -596,10 +652,13 @@ ID가 여럿이면 <code>|</code>로 잇고, 괄호에는 hue나 메모가 붙�
         #61 hotkey "Summon Daemon" | Magery req. 80/100 - Mana Cost 50 - Casttime 6.00 sec - Regs: 3963|3974|3981|3980 (Bloodmoss, Mandrake Root, Spiders Silk, Sulfurous Ash) | summon daemon scroll "Summon Daemon" 8041
         #62 hotkey "Earth Elemental" | Magery req. 80/100 - Mana Cost 50 - Casttime 6.00 sec - Regs: 3963|3974|3981 (Bloodmoss, Mandrake Root, Spiders Silk) | summon earth elemental scroll "Summon Earth Eleme" 8042
         #63 hotkey "Fire Elemental" | Magery req. 80/100 - Mana Cost 50 - Casttime 6.00 sec - Regs: 3963|3974|3981|3980 (Bloodmoss, Mandrake Root, Spiders Silk, Sulfurous Ash) | summon fire elemental scroll "Summon Fire Elemen" 8043
-        #64 hotkey "Water Elemental" | Magery req. 80/100 - Mana Cost 50 - Casttime 6.00 sec - Regs: 3963|3974|3981 (Bloodmoss, Mandrake Root, Spiders Silk) | summon water elemental scroll "Summon Water Eleme" 8044</code></pre>
+        #64 hotkey "Water Elemental" | Magery req. 80/100 - Mana Cost 50 - Casttime 6.00 sec - Regs: 3963|3974|3981 (Bloodmoss, Mandrake Root, Spiders Silk) | summon water elemental scroll "Summon Water Eleme" 8044
+```
 
-<h2 id="20">20 Mount breeding</h2>
-<pre><code>#Mount breeding - all IDs: 29030|20498|20499|20500|25669|25670|25730|25731|29064|29065|40800
+## <a id="20"></a>20 Mount breeding
+
+```
+#Mount breeding - all IDs: 29030|20498|20499|20500|25669|25670|25730|25731|29064|29065|40800
 
     #a tacking shelf (mount breeding item) "wall display" 25669|25670
     #feeding trough "feeder trough" 40800
@@ -636,10 +695,13 @@ ID가 여럿이면 <code>|</code>로 잇고, 괄호에는 hue나 메모가 붙�
         #squash "squash" 3186
         #Tomato "peach%es%" 2514 (hue 2117)
         #turnip "turnip" 3386
-        #watermelon "watermelon%s%" 3164</code></pre>
+        #watermelon "watermelon%s%" 3164
+```
 
-<h2 id="21">21 Mount tokens</h2>
-<pre><code>#Mount tokens - all IDs: 8417|8438|8478|8479|8480|8481|8484|8488|8501|8502|8503|9052|43320
+## <a id="21"></a>21 Mount tokens
+
+```
+#Mount tokens - all IDs: 8417|8438|8478|8479|8480|8481|8484|8488|8501|8502|8503|9052|43320
 
     #desert ostard mount token "desert ostard" 8501
     #direwolf mount token "statue" 43320
@@ -651,10 +713,13 @@ ID가 여럿이면 <code>|</code>로 잇고, 괄호에는 hue나 메모가 붙�
     #polar bear mount token "Polar Bear Frame" 8417
     #skeletal mount token "skeletal mount token" 8488
     #tundra ostard mount token "desert ostard" 8501
-    #unicorn mount token "unicorn" 9052</code></pre>
+    #unicorn mount token "unicorn" 9052
+```
 
-<h2 id="22">22 Plant items</h2>
-<pre><code>#Plant items - all IDs: 2323|3703|3707|3715|4090|4154|4550|4551|5344|5453|6187|6193|6327|6328|6330|6333|6334|6335|6337|6338|6341|11942|19403|20498|20499|20500|20501|20502|20503|22326|25570|28719|28741|28987|29030|29217|29343|29345|29372|29868|51078|51098|51188|53611|55139|56408|56410|56413|56415|56416|56417|58196|64500
+## <a id="22"></a>22 Plant items
+
+```
+#Plant items - all IDs: 2323|3703|3707|3715|4090|4154|4550|4551|5344|5453|6187|6193|6327|6328|6330|6333|6334|6335|6337|6338|6341|11942|19403|20498|20499|20500|20501|20502|20503|22326|25570|28719|28741|28987|29030|29217|29343|29345|29372|29868|51078|51098|51188|53611|55139|56408|56410|56413|56415|56416|56417|58196|64500
 
     #a garden shelf "garden shelf" 51188
     #brewing seeds "bag of seeds" 51078
@@ -730,13 +795,19 @@ ID가 여럿이면 <code>|</code>로 잇고, 괄호에는 hue나 메모가 붙�
         #a painted watering can "watering can" 56416|56417
         #water barrel "barrel" 3703 | water barrel "water barrel" 5453
         #water bucket "bucket" 5344 | water bucket "bucket of water" 4090
-        #water tub "empty tub" 3715 | water tub "water tub" 3707</code></pre>
+        #water tub "empty tub" 3715 | water tub "water tub" 3707
+```
 
-<h2 id="23">23 Plants</h2>
-<pre><code>#Plants - all IDs:</code></pre>
+## <a id="23"></a>23 Plants
 
-<h2 id="24">24 Regs</h2>
-<pre><code>#Regs - all IDs:  3962|3963|3972|3973|3974|3976|3980|3981
+```
+#Plants - all IDs:
+```
+
+## <a id="24"></a>24 Regs
+
+```
+#Regs - all IDs:  3962|3963|3972|3973|3974|3976|3980|3981
 
     #black pearl "Black Pearl%s%" 3962
     #bloodmoss "Blood Moss" 3963
@@ -745,10 +816,13 @@ ID가 여럿이면 <code>|</code>로 잇고, 괄호에는 hue나 메모가 붙�
     #mandrake root "Mandrake Root%s%" 3974
     #nightshade "Nightshade" 3976
     #spider's silk ' "Spider's Silk" ' 3981
-    #sulfurous ash "Sulfurous Ash" 3980</code></pre>
+    #sulfurous ash "Sulfurous Ash" 3980
+```
 
-<h2 id="25">25 Ship</h2>
-<pre><code>#Ship - all IDs: 5188|5189|5370|3530|3699|9917|25758|31169|31172|45315|58325
+## <a id="25"></a>25 Ship
+
+```
+#Ship - all IDs: 5188|5189|5370|3530|3699|9917|25758|31169|31172|45315|58325
 
     #a large ship bomb "barrel" 5188
     #a small ship bomb "barrel" 5189
@@ -761,10 +835,13 @@ ID가 여럿이면 <code>|</code>로 잇고, 괄호에는 hue나 메모가 붙�
     #harpoon "harpoon" 31169
     #pirate booty "bag of gems" 45315
     #ship repair kit "ship repair kit" 25758
-    #trident "trident" 31172</code></pre>
+    #trident "trident" 31172
+```
 
-<h2 id="26">26 Tailoring/Crafted clothing items</h2>
-<pre><code>#Tailoring/Crafted clothing items - all IDs: 5397|5398|5399|5422|5431|5433|5435|5437|5440|5441|5443|5898|5899|5901|5903|5905|5907|5908|5909|5910|5911|5912|5913|5914|5915|5916|7933|7935|7937|7939|8059|8095|8097|8189|21787|21797|21799|21809|21826|21831|21838|21853|21863|21879|21925|21931|21943|21950|22184|22185|22429|30608
+## <a id="26"></a>26 Tailoring/Crafted clothing items
+
+```
+#Tailoring/Crafted clothing items - all IDs: 5397|5398|5399|5422|5431|5433|5435|5437|5440|5441|5443|5898|5899|5901|5903|5905|5907|5908|5909|5910|5911|5912|5913|5914|5915|5916|7933|7935|7937|7939|8059|8095|8097|8189|21787|21797|21799|21809|21826|21831|21838|21853|21863|21879|21925|21931|21943|21950|22184|22185|22429|30608
 
     #Artisan Clothing - all IDs: 21787|21797|21799|21809|21826|21831|21838|21853|21863|21879|21925|21931|21943|21950|22184|22185|22429|30608
         #archer's cap ' "archers cap" 30608
@@ -830,10 +907,13 @@ ID가 여럿이면 <code>|</code>로 잇고, 괄호에는 hue나 메모가 붙�
         #robe "robe" 7939
         #shirt "shirt" 5399
         #surcoat "surcoat" 8189
-        #tunic "tunic" 8097</code></pre>
+        #tunic "tunic" 8097
+```
 
-<h2 id="27">27 Unique fish types</h2>
-<pre><code>#Unique fish types (aquarium &amp; catch of the week) - all IDs: 9775|15106|15107|15108|15124|17155|17157|17159|17604|17606|17637|28819|28820|28821|28822|28823|28824|28825|28826|28827|28828|28829|28830|28831|28833|28834|28835|28836|28837|28838|28839|28840|28841|28842|28843|28844|28845|44209|44211|44212|44214|44215|44218|44221|44223|44224|44226|44227|44229|44230|44242|44244|44245|44248|44251|44256|44257|44260|47231|47232|47233|47234|47235|47236|47237|47238|47239|47240|47241|47242|47243|47244|47245|47246|47247|47248|47249|47251|47252|47253|47254|47255|47256|47257|47258|47259|47260|47262|47263|47267|47268|47271|47283|47284|47285
+## <a id="27"></a>27 Unique fish types
+
+```
+#Unique fish types (aquarium & catch of the week) - all IDs: 9775|15106|15107|15108|15124|17155|17157|17159|17604|17606|17637|28819|28820|28821|28822|28823|28824|28825|28826|28827|28828|28829|28830|28831|28833|28834|28835|28836|28837|28838|28839|28840|28841|28842|28843|28844|28845|44209|44211|44212|44214|44215|44218|44221|44223|44224|44226|44227|44229|44230|44242|44244|44245|44248|44251|44256|44257|44260|47231|47232|47233|47234|47235|47236|47237|47238|47239|47240|47241|47242|47243|47244|47245|47246|47247|47248|47249|47251|47252|47253|47254|47255|47256|47257|47258|47259|47260|47262|47263|47267|47268|47271|47283|47284|47285
 
         #Freshwater Fish - all IDs: 9775|15107|17155|17159|17604|17637|28824|28826|28827|28831|28834|28844|44211|44212|44214|44215|44223|44224|44229|44226|44230|44239|44242|44244|44245|44254|44256|44257|47239|47242|47244|47248|47260
             #a cod "fish" 44211
@@ -921,10 +1001,13 @@ ID가 여럿이면 <code>|</code>로 잇고, 괄호에는 hue나 메모가 붙�
             #Treasurefish "fish" 47254
             #Triggerfish "fish" 28841
             #Two-Stripe "fish" 44218
-            #White Shark "shark" 28825</code></pre>
+            #White Shark "shark" 28825
+```
 
-<h2 id="28">28 Valuables, special items, rare items</h2>
-<pre><code>#Valuables, special items, rare items - all IDs: 576|2472|2475|2594|2597|2744|2750|2760|2771|2778|2799|3648|3649|3650|3651|3708|3712|3735|3736|3737|3738|3827|3836|3838|3839|3842|3843|3901|3985|4026|4248|5356|5359|5981|8826|15296|15297|17087|17686|19717|22244|22336|23996|23997|24343|24434|25359|29025|29036|29040|29832|29833|43166|43179|43206|48405|48407|70148|70151|70154|70157
+## <a id="28"></a>28 Valuables, special items, rare items
+
+```
+#Valuables, special items, rare items - all IDs: 576|2472|2475|2594|2597|2744|2750|2760|2771|2778|2799|3648|3649|3650|3651|3708|3712|3735|3736|3737|3738|3827|3836|3838|3839|3842|3843|3901|3985|4026|4248|5356|5359|5981|8826|15296|15297|17087|17686|19717|22244|22336|23996|23997|24343|24434|25359|29025|29036|29040|29832|29833|43166|43179|43206|48405|48407|70148|70151|70154|70157
 
     #a chromatic core "chroma core" 4025
     #arcane essence "arcane essence" 3901
@@ -986,10 +1069,13 @@ ID가 여럿이면 <code>|</code>로 잇고, 괄호에는 hue나 메모가 붙�
     #skill ball "void orb" 22336
     #skill scroll "scroll of calling" 8826
     #spell hue deed "spell hue deed" 5359|11858
-    #survival gear "dig tools" 37181</code></pre>
+    #survival gear "dig tools" 37181
+```
 
-<h2 id="29">29 Weapons, Arcane Staffs, Spellbook, Wands, Instruments and Shields</h2>
-<pre><code>#Weapons, Arcane Staffs, Spellbook, Wands, Instruments and Shields - all IDs: "3568|3570|3571|3572|3573|3713|3719|3721|3740|3742|3762|3763|3834|3909|3911|3913|3915|3917|3920|3922|3932|3934|3937|3938|5040|5042|5044|5046|5049|5112|5115|5117|5119|5121|5123|5125|5127|5177|5179|5181|5182|5185|5187|7026|7027|7029|7031|7033|7034|7035|7107|7109|10245|20006|20008|20010|20012|20014|20016|22187|30988|30989|30990|30991|30992|30993|30994|30995|30996|30997|30998|30999|31000|31001|31002|31014|31017|31019|31021|31023|31025|31027|31029|31031|31033|31035|31037|31038|31041|31043|31045|31047|31049|31051|31053|31055|31128|31130|31141|31142|31176|31178|31180|31182|31184|31186|31188|31190|chakram|francisca|hurlbat|javelin|throwing knife|throwing star|dual wield tracker knife|duel wield katana|dual wield norse axe|dual wield rapier|dual wield sabre|dual wield scimitar"
+## <a id="29"></a>29 Weapons, Arcane Staffs, Spellbook, Wands, Instruments and Shields
+
+```
+#Weapons, Arcane Staffs, Spellbook, Wands, Instruments and Shields - all IDs: "3568|3570|3571|3572|3573|3713|3719|3721|3740|3742|3762|3763|3834|3909|3911|3913|3915|3917|3920|3922|3932|3934|3937|3938|5040|5042|5044|5046|5049|5112|5115|5117|5119|5121|5123|5125|5127|5177|5179|5181|5182|5185|5187|7026|7027|7029|7031|7033|7034|7035|7107|7109|10245|20006|20008|20010|20012|20014|20016|22187|30988|30989|30990|30991|30992|30993|30994|30995|30996|30997|30998|30999|31000|31001|31002|31014|31017|31019|31021|31023|31025|31027|31029|31031|31033|31035|31037|31038|31041|31043|31045|31047|31049|31051|31053|31055|31128|31130|31141|31142|31176|31178|31180|31182|31184|31186|31188|31190|chakram|francisca|hurlbat|javelin|throwing knife|throwing star|dual wield tracker knife|duel wield katana|dual wield norse axe|dual wield rapier|dual wield sabre|dual wield scimitar"
 
     #Arcane Staffs - all IDs: 31017|31019|31021|31023|31025|31027|31029|31031|31033|31035|31037|31038|31041|31043|31045|31047|31049|31051|31053|31055
         #abyssal staff "abyssal staff" 31053
@@ -1139,10 +1225,13 @@ ID가 여럿이면 <code>|</code>로 잇고, 괄호에는 hue나 메모가 붙�
     #Wrestling - all IDs: 22187|31141|31142
         #cestus "caesti" 31141
         #fistblade "fistblade" 31142
-        #martial manual "martial arts scroll" 22187</code></pre>
+        #martial manual "martial arts scroll" 22187
+```
 
-<h2 id="30">30 Other items</h2>
-<pre><code>//Other items
+## <a id="30"></a>30 Other items
+
+```
+//Other items
 
     #a bank deposit safe "bank deposit safe" 41517|41518|41519|41460
     #a bolt of cloth "bolt%s% of cloth" 3989
@@ -1224,6 +1313,5 @@ ID가 여럿이면 <code>|</code>로 잇고, 괄호에는 hue나 메모가 붙�
     #water pipe "bong" 51100
     #wood frame donation map "map of Outlands" 28963|28964
 
-    #To be continued ... (maybe)</code></pre>
-
-</main>
+    #To be continued ... (maybe)
+```
