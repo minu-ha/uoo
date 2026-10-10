@@ -13,7 +13,7 @@
 # Design and in-game checks: blueprint/open-items.html part 12.
 # Hotkeys: Drink Cure, > Smart Heal/Cure Self, Drink Heal, > Greater Heal/Cure Self,
 #          Cancel Current Target, Drink Refresh, Drink Strength, Drink Agility, Drink Magic Resist,
-#          > Interrupt, Eat Magic Mushroom.
+#          > Interrupt, Target Self, Eat Magic Mushroom.
 # Generated from recipe/tamer-mage-enhanced-recipe.razor by util/build-scripts.py. Edit module/ and recipe/, not this file.
 
 
@@ -245,6 +245,13 @@
 #      > This loop: config__mana_arch_protection 22 (default 11).
 #      > Arch Protection costs 11: plus 11 for Greater Heal.
 #
+#   config__use_spell_siphon
+#      1 keeps the Spell Siphon buff up with a Magic Arrow on yourself, never while Magic
+#      Reflection is up, since the arrow would only burn the reflection. Warmode off.
+#
+#   config__mana_spell_siphon
+#      Minimum current mana to start the Spell Siphon arrow.
+#
 #   config__buff_max_loss
 #      Missing hit points at which buffs are not started, and cut mid cast.
 #
@@ -261,6 +268,8 @@
 @setvar! config__use_arch_protection 1
 @setvar! config__mana_bless 20
 @setvar! config__mana_arch_protection 22
+@setvar! config__use_spell_siphon 0
+@setvar! config__mana_spell_siphon 4
 @setvar! config__buff_max_loss 35
 @setvar! config__buff_when_poisoned 1
 
@@ -638,16 +647,6 @@ endif
 @setvar! var__has_nightshade 0
 @setvar! var__has_ash 0
 @setvar! var__has_silk 0
-
-
-# ----------------------------------------------------------------------------------------
-# module/buff/spells.razor
-#
-#   var__buff_cast
-#      1 once this block cast a buff. magery/spell-siphon waits for a pass without one, and
-#      clears it.
-# ----------------------------------------------------------------------------------------
-@setvar! var__buff_cast 0
 
 
 # ----------------------------------------------------------------------------------------
@@ -1232,16 +1231,20 @@ while not dead
     # ------------------------------------------------------------------------------------
     # SELF BUFFS                                                  module/buff/spells.razor
     #
-    # Reactive Armor, then Magic Reflection, whenever one is missing and the window is
-    # free, then Bless and Arch Protection out of a fight. One cast per pass. Bless shows
-    # Strength, Agility and Cunning, and only Cunning is Bless alone, since the stat
-    # potions show the other two. Arch Protection shows Protection. Each icon arrives a
-    # round trip after the target, so the block waits for it before the next pass reads it. Not started at config__buff_max_loss, and cut there mid cast so the next pass
-    # can heal. With config__buff_when_poisoned 0 poison holds them back and cuts them
-    # too, so the cure goes first. var__hold_casts lets another block keep the cast window
-    # (a latched Recall). config__walk_guard and config__warmode_is_manual apply as for
-    # the heal agents. The reflect bar is the server's recast lock after Reflect is used
-    # up.
+    # One cast per pass, in this order: Reactive Armor and Magic Reflection whenever one is
+    # missing, then Bless and Arch Protection out of a fight, then the Spell Siphon arrow.
+    # Not started at config__buff_max_loss, and cut there mid cast so the next pass can
+    # heal. With config__buff_when_poisoned 0 poison holds them back and cuts them too, so
+    # the cure goes first. var__hold_casts lets another block keep the cast window (a
+    # latched Recall). config__walk_guard and config__warmode_is_manual apply as for the
+    # heal agents, and the three cursor casts also stand down in warmode.
+    #
+    # The reflect bar is the server's recast lock after Reflect is used up. Bless shows
+    # Strength, Agility and Cunning, and only Cunning is Bless alone, since the stat potions
+    # show the other two. Arch Protection shows Protection. Each icon arrives a round trip
+    # after the target, so the block waits for it before the next pass reads it. Spell
+    # Siphon starts on the first spell to hit us and lasts sixty minutes, so the arrow goes
+    # out about once an hour.
     # ------------------------------------------------------------------------------------
     if config__use_magery = 1 and var__hold_casts = 0 and not paralyzed and not hidden and not queued and not casting and not targetexists and diffhits < config__buff_max_loss
         if config__buff_when_poisoned = 1 or not poisoned
@@ -1249,7 +1252,6 @@ while not dead
                 if config__walk_guard = 0 or cooldown "walk" = 0
                     if config__use_reactive_armor = 1 and var__regs_reactive_armor = 1 and mana >= config__mana_reactive_armor and not findbuff "Reactive Armor"
                         cast "Reactive Armor"
-                        @setvar! var__buff_cast 1
                         if config__sysmsg = 1
                             sysmsg "Buff: Reactive Armor." 88
                         endif
@@ -1274,7 +1276,6 @@ while not dead
                         endfor
                     elseif config__use_magic_reflect = 1 and var__regs_magic_reflect = 1 and mana >= config__mana_magic_reflect and cooldown "reflect" = 0 and not findbuff "Magic Reflection"
                         cast "Magic Reflection"
-                        @setvar! var__buff_cast 1
                         if config__sysmsg = 1
                             sysmsg "Buff: Magic Reflection." 88
                         endif
@@ -1299,7 +1300,6 @@ while not dead
                         endfor
                     elseif config__use_bless = 1 and var__fighting = 0 and not warmode and var__regs_bless = 1 and mana >= config__mana_bless and not findbuff "Cunning"
                         cast "Bless"
-                        @setvar! var__buff_cast 1
                         if config__sysmsg = 1
                             sysmsg "Buff: Bless." 88
                         endif
@@ -1338,7 +1338,6 @@ while not dead
                         endif
                     elseif config__use_arch_protection = 1 and var__fighting = 0 and not warmode and var__regs_arch_protection = 1 and mana >= config__mana_arch_protection and not findbuff "Protection"
                         cast "Arch Protection"
-                        @setvar! var__buff_cast 1
                         if config__sysmsg = 1
                             sysmsg "Buff: Arch Protection." 88
                         endif
@@ -1370,6 +1369,43 @@ while not dead
                                 endif
                                 wait wait__poll
                             endfor
+                        elseif targetexists
+                            # Not the cursor this spell opens. Left open it would hold every block.
+                            hotkey "Cancel Current Target"
+                            wait wait__short
+                        endif
+                    elseif config__use_spell_siphon = 1 and not warmode and var__regs_magic_arrow = 1 and mana >= config__mana_spell_siphon and not findbuff "Spell Siphon" and not findbuff "Magic Reflection"
+                        # A disturb line an earlier cast left is read off first, so the poll sees only its own.
+                        if insysmsg "Your concentration is disturbed, thus ruining thy spell."
+                            # consumed, nothing else to do
+                        endif
+                        cast "Magic Arrow"
+                        if config__sysmsg = 1
+                            sysmsg "Buff: Magic Arrow on yourself for Spell Siphon." 88
+                        endif
+                        wait wait__short
+
+                        for 60
+                            if targetexists
+                                break
+                            endif
+                            if insysmsg "Your concentration is disturbed, thus ruining thy spell."
+                                break
+                            endif
+                            if diffhits >= config__buff_max_loss
+                                hotkey "> Interrupt"
+                                break
+                            endif
+                            if config__buff_when_poisoned = 0 and poisoned
+                                hotkey "> Interrupt"
+                                break
+                            endif
+                            wait wait__poll
+                        endfor
+
+                        if targetexists "harmful"
+                            hotkey 'Target Self'
+                            wait wait__cast
                         elseif targetexists
                             # Not the cursor this spell opens. Left open it would hold every block.
                             hotkey "Cancel Current Target"

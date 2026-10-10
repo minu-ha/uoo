@@ -116,8 +116,7 @@
 #      often open on a mob past target_range, and a song or self cast would otherwise
 #      move lasttarget off it before it comes in reach.
 #      Also read by bard/disco, bard/peace, magery/opener, magery/proc-core,
-#         magery/filler, necro/poison-strike, magery/spell-siphon, bard/song,
-#         necro/vampiric-embrace.
+#         magery/filler, necro/poison-strike, bard/song, necro/vampiric-embrace.
 #      > The whole screen: the pets often open on a mob well past target_range.
 #
 #   target_range (default 12)
@@ -268,13 +267,13 @@
 # @ use buff/spells
 #
 #   Reactive Armor, then Magic Reflection, whenever one is missing.
-# ----------------------------------------------------------------------------------------
-
-# ----------------------------------------------------------------------------------------
-# @ use magery/spell-siphon
 #
-#   A Magic Arrow on self for the Spell Siphon buff, never with Magic Reflection up.
+#   use_spell_siphon (default 0)
+#      1 keeps the Spell Siphon buff up with a Magic Arrow on yourself, never while Magic
+#      Reflection is up, since the arrow would only burn the reflection. Warmode off.
+#      > The walk keeps Spell Siphon up with a Magic Arrow on self.
 # ----------------------------------------------------------------------------------------
+@setvar! config__use_spell_siphon 1
 
 # ----------------------------------------------------------------------------------------
 # @ use bard/song
