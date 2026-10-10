@@ -77,10 +77,11 @@
 <td><code>spells</code> (Reactive Armor, Magic Reflection), <code>potions</code> (Strength, Agility, Magic Resist), <code>food</code> (Food Satisfaction),
 <code>mushroom</code> (Magic Mushroom 먹기와 Create Food)</td></tr>
 <tr><td><code>module/bard/</code></td><td>바드 스킬</td>
-<td><code>instrument</code> (악기 찾기와 점검), <code>herding</code> (목동 지팡이), <code>disco</code>, <code>peace</code>, <code>song</code> (이동 중 노래 셋을 차례로)</td></tr>
+<td><code>instrument</code> (악기 찾기와 점검), <code>disco</code>, <code>peace</code>, <code>song</code> (이동 중 노래 셋을 차례로)</td></tr>
 <tr><td><code>module/necro/</code></td><td>네크로 핫바와 소환수</td>
 <td><code>symbols</code> (Unholy Symbol 수 읽기), <code>hotbar</code> (핫바 열기), <code>summon-names</code> (소환수 이름 바꾸기), <code>burst</code> (Blood Oath, Corpse Skin, Evil Omen),
 <code>poison-strike</code>, <code>vampiric-embrace</code></td></tr>
+<tr><td><code>module/tamer/</code></td><td>펫 스킬</td><td><code>herding</code> (목동 지팡이)</td></tr>
 <tr><td><code>module/fight/</code></td><td>근접 전투 보조</td>
 <td><code>target</code> (기억한 적), <code>weapon-swap</code> (pvp 무기 슬롯), <code>axe</code>, <code>sword-codex</code>, <code>parry-codex</code>, <code>weapon-ability</code></td></tr>
 <tr><td><code>module/gather/</code></td><td>채집</td><td><code>lumberjacking</code> (Smart Harvest), <code>skinning</code> (칼질)</td></tr>
@@ -534,7 +535,7 @@ pvp 결과물에는 시작 4줄이 <code>if config__clear_at_start = 1</code> �
 <code>wait__long</code>은 <code>wait__instrument_pick</code>, 핫바 대기는 <code>wait__hotbar_gump</code>가 됐다.</li>
 <li>생존·전투 대상·시약·음식·스탯 포션·골드·Refresh·셀프 버프는 다른 루프와 같은 공용 모듈이다. 원본에만 있던 동작은 공용 모듈의 설정으로 더했다
 (<code>settle_first</code>, <code>recover_in_warmode</code>, heal pot 바 시작).</li>
-<li>Herding은 꺼져 있었으므로 <code>bard/herding</code>은 만들기만 하고 레시피에 넣지 않았다. 켜고 끄는 설정 <code>use_herding</code>과 <code>name_summons</code>는 없앴다.
+<li>Herding은 꺼져 있었으므로 <code>tamer/herding</code>은 만들기만 하고 레시피에 넣지 않았다. Herding은 테이머 스킬이라 <code>tamer/</code>에 둔다. 켜고 끄는 설정 <code>use_herding</code>과 <code>name_summons</code>는 없앴다.
 소환수 이름 목록은 레시피 setup이 채운다.</li>
 </ul>
 <table>
