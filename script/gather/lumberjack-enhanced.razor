@@ -235,6 +235,14 @@
 #      > This loop: config__mana_magic_reflect 34 (default 14).
 #      > Same reserve: the base 14 plus the handbook's 20.
 #
+#   config__use_bless, config__use_arch_protection
+#      1 keeps Bless on yourself, and Arch Protection on you and the followers around you,
+#      while no enemy is engaged (var__fighting 0) and warmode is off. Both open a cursor,
+#      answered with yourself, so they never take a cast from a fight.
+#
+#   config__mana_bless, config__mana_arch_protection
+#      Minimum current mana to start Bless and Arch Protection.
+#
 #   config__buff_max_loss
 #      Missing hit points at which buffs are not started, and cut mid cast.
 #      > This loop: config__buff_max_loss 15 (default 35).
@@ -251,6 +259,10 @@
 @setvar! config__use_magic_reflect 1
 @setvar! config__mana_reactive_armor 24
 @setvar! config__mana_magic_reflect 34
+@setvar! config__use_bless 0
+@setvar! config__use_arch_protection 0
+@setvar! config__mana_bless 9
+@setvar! config__mana_arch_protection 11
 @setvar! config__buff_max_loss 15
 @setvar! config__buff_when_poisoned 0
 
@@ -624,8 +636,8 @@ endif
 # module/buff/spells.razor
 #
 #   var__buff_cast
-#      1 once Reactive Armor or Magic Reflection was cast. magery/spell-siphon waits for a
-#      pass without one, and clears it.
+#      1 once this block cast a buff. magery/spell-siphon waits for a pass without one, and
+#      clears it.
 # ----------------------------------------------------------------------------------------
 @setvar! var__buff_cast 0
 
@@ -1421,7 +1433,10 @@ while not dead
     # SELF BUFFS                                                  module/buff/spells.razor
     #
     # Reactive Armor, then Magic Reflection, whenever one is missing and the window is
-    # free. Not started at config__buff_max_loss, and cut there mid cast so the next pass
+    # free, then Bless and Arch Protection out of a fight. One cast per pass. Bless shows
+    # Strength, Agility and Cunning, and only Cunning is Bless alone, since the stat
+    # potions show the other two. Arch Protection shows Protection. Each icon arrives a
+    # round trip after the target, so the block waits for it before the next pass reads it. Not started at config__buff_max_loss, and cut there mid cast so the next pass
     # can heal. With config__buff_when_poisoned 0 poison holds them back and cuts them
     # too, so the cure goes first. var__hold_casts lets another block keep the cast window
     # (a latched Recall). config__walk_guard and config__warmode_is_manual apply as for
@@ -1482,6 +1497,76 @@ while not dead
                             endif
                             wait wait__poll
                         endfor
+                    elseif config__use_bless = 1 and var__fighting = 0 and not warmode and var__regs_bless = 1 and mana >= config__mana_bless and not findbuff "Cunning"
+                        cast "Bless"
+                        @setvar! var__buff_cast 1
+                        if config__sysmsg = 1
+                            sysmsg "Buff: Bless." 88
+                        endif
+                        wait wait__short
+
+                        for 60
+                            if targetexists
+                                break
+                            endif
+                            if insysmsg "Your concentration is disturbed, thus ruining thy spell."
+                                break
+                            endif
+                            if diffhits >= config__buff_max_loss
+                                hotkey "> Interrupt"
+                                break
+                            endif
+                            if config__buff_when_poisoned = 0 and poisoned
+                                hotkey "> Interrupt"
+                                break
+                            endif
+                            wait wait__poll
+                        endfor
+
+                        if targetexists "beneficial"
+                            target self
+                            for 10
+                                if findbuff "Cunning"
+                                    break
+                                endif
+                                wait wait__poll
+                            endfor
+                        endif
+                    elseif config__use_arch_protection = 1 and var__fighting = 0 and not warmode and var__regs_arch_protection = 1 and mana >= config__mana_arch_protection and not findbuff "Protection"
+                        cast "Arch Protection"
+                        @setvar! var__buff_cast 1
+                        if config__sysmsg = 1
+                            sysmsg "Buff: Arch Protection." 88
+                        endif
+                        wait wait__short
+
+                        for 60
+                            if targetexists
+                                break
+                            endif
+                            if insysmsg "Your concentration is disturbed, thus ruining thy spell."
+                                break
+                            endif
+                            if diffhits >= config__buff_max_loss
+                                hotkey "> Interrupt"
+                                break
+                            endif
+                            if config__buff_when_poisoned = 0 and poisoned
+                                hotkey "> Interrupt"
+                                break
+                            endif
+                            wait wait__poll
+                        endfor
+
+                        if targetexists "beneficial"
+                            target self
+                            for 10
+                                if findbuff "Protection"
+                                    break
+                                endif
+                                wait wait__poll
+                            endfor
+                        endif
                     endif
                 endif
             endif
