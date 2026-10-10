@@ -195,7 +195,7 @@
 # ----------------------------------------------------------------------------------------
 # @ use necro/summon-names
 #
-#   Renames fresh summons, in order, to lookalikes of the character's name.
+#   Names each fresh summon after its kind: lich, mummy, thrall, witch and so on.
 # ----------------------------------------------------------------------------------------
 
 # ----------------------------------------------------------------------------------------
@@ -301,14 +301,6 @@
 # ========================================================================================
 # @ setup
 # ========================================================================================
-
-# necro/summon-names renames fresh summons to these lookalikes of the character's name, in
-# order. A list, because a variable cannot hold a word. The server refuses digits. Rebuilt
-# on every start, so an edit here is what the block reads.
-clearlist 'list__summon_names'
-pushlist 'list__summon_names' 'nomeehei'
-pushlist 'list__summon_names' 'nomeehel'
-pushlist 'list__summon_names' 'nomeeheh'
 
 # loot/recycle runs the hotkey named in this list when it finishes or gives up. A list, because
 # a variable cannot hold a word (blueprint/razor.html part 3). It lasts until the client closes.

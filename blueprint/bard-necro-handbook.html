@@ -129,7 +129,7 @@ Reactive Armor 자체는 Magery로 걸고, 루프가 이동 중에 유지한다 
 <li>테이머 듀오와 함께 다니는 경우가 많다. <strong>본체는 후열이다.</strong></li>
 <li>주 사냥터 난이도 <strong>300~500</strong>.</li>
 <li>PK를 만나면 도망가지 않고 싸우는 것이 기본이다. 그래서 Herding 대신 Resisting Spells 80 (06.C절).</li>
-<li>캐릭터 이름 <code>nomeehej</code>. 소환수는 <code>nomeehei</code> / <code>nomeehel</code> / <code>nomeeheh</code>로 자동 개명된다 (04.H절).</li>
+<li>캐릭터 이름 <code>nomeehej</code>. 소환수는 종류 이름 (<code>lich</code>, <code>mummy</code>, <code>thrall</code>, <code>witch</code> 등)으로 자동 개명된다 (04.H절).</li>
 </ul>
 
 <h3 id="01.B">01.B 측정 결과</h3>
@@ -1796,8 +1796,8 @@ Provocation 송 (팔로워 딜 +8.5%)만 이동 중 라운드로빈으로 받는
 재소환을 감지할 필요가 없다 (05.G절 "설계 결정"). 소환수를 찾는 유일한 블록은 이름을 붙이는 <code>SUMMON NAMES</code>다.</li>
 <li><strong>적 Lich와 내 Lich는 그래픽이 같다.</strong> 소환수를 타입으로 찾는 코드를 새로 쓸 일이 있으면
 <code>noto</code> 필터가 필수다. <code>fight/target</code>과 <code>necro/summon-names</code> 모듈이 그 형태다.</li>
-<li><strong>소환수 이름은 자동으로 바뀐다.</strong> <code>SUMMON NAMES</code> 블록이 새 소환수를 나온 순서대로 <code>nomeehei</code> / <code>nomeehel</code> /
-<code>nomeeheh</code>로 바꾼다. 설계와 실패 증상은 04.H절.</li>
+<li><strong>소환수 이름은 자동으로 바뀐다.</strong> <code>SUMMON NAMES</code> 블록이 새 소환수를 종류 이름 (<code>lich</code>, <code>mummy</code> 등)으로 바꾼다.
+설계와 실패 증상은 04.H절.</li>
 <li><strong>바디 번호 (<code>&gt;info</code>).</strong> 내 소환수의 Notoriety는 2 (friend).</li>
 </ul>
 <table>
@@ -1850,41 +1850,24 @@ Provocation 송 (팔로워 딜 +8.5%)만 이동 중 라운드로빈으로 받는
 </table>
 
 <h3 id="04.H">04.H 소환수 이름, SUMMON NAMES 블록</h3>
-<p>새로 나온 소환수는 기본 이름 (<code>a lich</code> 등)을 달고 있다. 블록이 그것을 <strong>내 이름의 닮은꼴</strong> 셋 중
-비어 있는 첫 번째로 바꾼다. PK가 네임태그를 읽어도 넷 중 누가 본체인지 한 번 더 봐야 한다.</p>
+<p>새로 나온 소환수는 기본 이름 (<code>a lich</code> 등)을 달고 있다. 블록이 그것을 <strong>종류 이름</strong>으로 바꾼다.
+펫 체력바와 네임태그만 보고 지금 무엇이 나와 있는지 알 수 있고, 펫 명령에 그 이름을 부를 수 있다 (2026-10-10 사용자 결정. 그 전에는 PK를 헷갈리게 하려고 내 이름의 닮은꼴 셋을 썼다).</p>
 <table>
 <thead>
 <tr>
-<th>슬롯</th>
-<th>이름</th>
-<th>비고</th>
+<th>라벨에 든 말</th>
+<th>새 이름</th>
 </tr>
 </thead>
 <tbody>
-<tr>
-<td>본체</td>
-<td><code>nomeehej</code></td>
-<td></td>
-</tr>
-<tr>
-<td>1</td>
-<td><code>nomeehei</code></td>
-<td>먼저 나온 소환수</td>
-</tr>
-<tr>
-<td>2</td>
-<td><code>nomeehel</code></td>
-<td>두 번째</td>
-</tr>
-<tr>
-<td>3</td>
-<td><code>nomeeheh</code></td>
-<td>세 번째 (Summon Creature 같은 1슬롯짜리를 셋째로 뽑았을 때)</td>
-</tr>
+<tr><td><code>skeletal knight</code></td><td><code>knight</code></td></tr>
+<tr><td><code>skeletal mage</code></td><td><code>mage</code></td></tr>
+<tr><td><code>lich</code>, <code>mummy</code>, <code>thrall</code>, <code>witch</code>, <code>zombie</code>, <code>ghost</code>, <code>skeleton</code>, <code>ghoul</code></td><td>같은 말</td></tr>
+<tr><td><code>rotting corpse</code></td><td><code>corpse</code></td></tr>
 </tbody>
 </table>
-<p>이름은 레시피 setup이 채우는 <code>list__summon_names</code> 리스트 (<code>pushlist</code> 세 줄). 변수는 단어를 못 담지만 리스트 항목은 글자를 유지하고 <code>foreach</code> 변수가 그대로 <code>rename</code>에 넘어간다 (2026-09-28 프로브).
-끄려면 레시피에서 <code>necro/summon-names</code>를 뺀다.</p>
+<p>이름은 모듈 setup이 채우는 <code>list__summon_kinds</code> 리스트다. 변수는 단어를 못 담지만 리스트 항목은 글자를 유지하고 <code>foreach</code> 변수가 그대로 <code>rename</code>에 넘어간다 (2026-09-28 프로브).
+끄려면 레시피에서 <code>necro/summon-names</code>를 뺀다. 같은 종류가 둘이면 둘 다 같은 이름이다.</p>
 <h4>왜 이 모양인가</h4>
 <ul>
 <li><strong>바디 번호로 찾는다.</strong> 프로브 (2026-09-28)로 확인한 것: <code>findtype</code>은 바디 번호로도 기본 이름으로도 소환수를 잡고
@@ -1901,15 +1884,15 @@ Razor는 소환 직후 <code>CanRename</code>을 안다. <code>rename</code>은 
 <li><strong><code>noto</code> 필터는 구식 스크립트의 팔로워 필터에 <code>innocent</code>를 더한 것.</strong> 내 소환수는 <code>&gt;info</code>에 Notoriety 2 (friend, 초록)로
 읽힌다. 야생 리치는 통과 못 하고, 통과해도 <code>rename</code>이 거부한다. 다른 플레이어의 소환수는 길드·동맹이 아니면 <code>innocent</code> (파랑)라 거른다.
 길드원의 소환수는 friend라 <code>noto</code>로는 못 가르므로, 맨 엘리멘탈을 바디 목록에서 뺀 것이 그 몫을 한다.</li>
-<li><strong>이름을 바꿔도 바디는 그대로 매치된다.</strong> 그래서 "이미 바꿨는가"를 <strong>슬롯 변수 셋 (<code>var__summon_named_1..3</code>)의
-serial</strong>로 묻는다. 슬롯에 있는 serial은 건너뛰고, <code>find</code>가 살아 있는 걸 못 보면 슬롯을 비운다.
-죽거나 해제된 소환수의 이름을 다음 소환이 이어받는다. 스크립트를 다시 켜면 슬롯이 비므로 이미 이름 붙은
-소환수도 한 번 더 이름을 받는다 (같은 세 이름 안에서 순서만 바뀔 수 있다).</li>
-<li><strong>이름은 리스트에서 슬롯 번호로 꺼낸다.</strong> 빈 슬롯을 <code>var__free_slot</code> (0 1 2, 빈 슬롯이 없으면 3)으로 고르고 그 자리에서 슬롯 변수에 serial을
-넣은 뒤, <code>foreach summon_name in list__summon_names</code> 안에서 <code>index = var__free_slot</code>인 항목으로 <code>rename</code> 한다. 내장 <code>index</code>가 왼쪽이라 변수와 비교해도 된다.</li>
+<li><strong>이름을 바꿔도 바디는 그대로 매치된다.</strong> 그래서 "이미 바꿨는가"를 <strong><code>list__named_summons</code>에 넣어 둔 serial</strong>로 묻는다.
+이름을 붙이기 전에 serial을 넣고, 걷기에서 리스트에 있는 serial은 건너뛴다. 리스트는 클라이언트를 끌 때까지 남아서 다시 켜도 같은 소환수에 또 붙이지 않고,
+팔로워가 하나도 없으면 비운다.</li>
+<li><strong>종류는 라벨에서 한 번 읽는다.</strong> 이름을 바꾸기 전에 <code>getlabel</code>로 기본 이름을 읽어 종류 번호 (<code>var__summon_kind</code>)를 정하고,
+<code>foreach summon_kind in list__summon_kinds</code> 안에서 <code>index = var__summon_kind</code>인 항목으로 <code>rename</code> 한다. 내장 <code>index</code>가 왼쪽이라 변수와 비교해도 된다.
+리스트에 없는 종류는 99라서 이름을 받지 않는다.</li>
 <li><strong>매치를 전부 훑는다.</strong> 이 포크의 <code>findtype</code>은 부를 때마다 <strong>같은 모빌</strong>을 돌려준다 (Razor CE의 무작위가 아니다).
 한 번만 부르면 이미 이름 붙은 리치만 계속 나와 둘째 소환수에 닿지 못했다 (2026-09-28 인게임). 그래서 구식
-<code>bard-necro</code> 팔로워 캐시처럼 <code>while findtype … as</code> → 슬롯·<code>noto</code> 검사 → 아니면 <code>@ignore</code> → <code>endwhile</code> → <code>@clearignore</code>로
+<code>bard-necro</code> 팔로워 캐시처럼 <code>while findtype … as</code> → 리스트·<code>noto</code> 검사 → 아니면 <code>@ignore</code> → <code>endwhile</code> → <code>@clearignore</code>로
 한 틱 안에서 다 본다. 이름은 하우스키핑 틱 (5초)마다 한 마리씩 붙는다. 연달아 둘을 뽑아도 먼저 나온 쪽이 먼저 잡힌다.
 둘째를 시전하는 6초 동안 첫째가 혼자 있기 때문이다. <code>@clearignore</code>는 5초마다 한 번이고, 이 루프의 다른 곳은 ignore 목록에 기대지 않는다.</li>
 <li>시전도 커서도 없어서 교전 여부와 무관하게 돈다. <code>followers &gt; 0</code>일 때만.</li>
@@ -1924,24 +1907,20 @@ serial</strong>로 묻는다. 슬롯에 있는 serial은 건너뛰고, <code>fin
 </thead>
 <tbody>
 <tr>
-<td>소환 후 5초 안에 <code>[ name, nomeehei ]</code>가 소환수 머리 위에 뜨고 (<code>config__chatty 1</code>일 때) 네임태그가 바뀐다</td>
+<td>소환 후 5초 안에 <code>[ name, lich ]</code>처럼 종류 이름이 소환수 머리 위에 뜨고 (<code>config__chatty 1</code>일 때) 네임태그가 바뀐다</td>
 <td>정상</td>
 </tr>
 <tr>
 <td>오버헤드는 뜨는데 네임태그가 그대로</td>
-<td>서버가 이름을 거부한 것 (<code>That name is unacceptable.</code>). 이름이 변수를 거쳤거나 숫자면 이렇게 된다. 슬롯은 찼다고 보므로 스크립트를 다시 켜야 재시도한다</td>
+<td>서버가 이름을 거부한 것 (<code>That name is unacceptable.</code>). 이름이 변수를 거쳤거나 숫자면 이렇게 된다. serial은 이미 리스트에 들어가서 그 소환수는 다시 시도하지 않는다</td>
 </tr>
 <tr>
 <td>오버헤드가 아예 안 뜬다</td>
-<td>그 소환수의 바디 번호가 <code>findtype</code> 줄에 없는 것. <code>&gt;info</code>로 읽어서 더한다</td>
-</tr>
-<tr>
-<td>두 마리가 같은 이름</td>
-<td>슬롯 변수가 비워진 것. 소환수가 <code>config__summon_range</code> (18) 밖으로 나갔다가 돌아온 경우. 값을 키운다</td>
+<td>그 소환수의 바디 번호가 <code>findtype</code> 줄에 없거나, 라벨의 기본 이름이 종류 표에 없는 것. <code>&gt;info</code>로 읽어서 둘 다 더한다</td>
 </tr>
 <tr>
 <td>남의 소환수 머리 위에 <code>[ name, … ]</code>가 뜬다</td>
-<td>길드원이 언데드를 뽑은 것. 이름은 안 바뀌지만 그 슬롯이 막혀 내 다음 소환수가 이름을 못 받을 수 있다</td>
+<td>길드원이 언데드를 뽑은 것. 이름은 안 바뀌고 (<code>rename</code>은 내 펫에만 간다), 그 serial은 리스트에 남아 다시 보지 않는다</td>
 </tr>
 </tbody>
 </table>
@@ -2365,7 +2344,7 @@ Poison Strike와 필러는 <code>PROC CORE</code> 바로 뒤에서 계산하는 
 </tr>
 <tr>
 <td>소환수 이름</td>
-<td><code>list__summon_names</code>를 시작할 때마다 다시 채운다. 이름을 고치면 다음 시작부터 그 이름이 붙는다</td>
+<td><code>list__summon_kinds</code>를 시작할 때마다 다시 채운다 (<code>necro/summon-names</code> setup). 이미 이름 붙인 serial의 <code>list__named_summons</code>는 클라이언트를 끌 때까지 남는다</td>
 </tr>
 </tbody>
 </table>
@@ -3349,8 +3328,8 @@ PvP에서 소환수가 무엇을 잃고 어느 소환수가 더 버티는지는 
 <td>같은 주문이 계속 헛시전되면 캐릭터 이름으로 뜬 이 줄을 <code>insysmsg</code>가 못 읽는 것</td>
 </tr>
 <tr>
-<td>SUMMON NAMES 셋째 이름. 1슬롯짜리를 셋째로 뽑았을 때</td>
-<td><code>[ name, nomeeheh ]</code>가 뜬다. 둘까지는 확인됐다</td>
+<td>SUMMON NAMES 종류 이름 (2026-10-10)</td>
+<td>소환수마다 <code>[ name, lich ]</code>처럼 종류 이름이 뜨고 네임태그가 바뀐다. 라벨에서 종류를 읽는 것은 아직 확인되지 않았다</td>
 <td>04.H절 "실패하면 이렇게 보인다" 표</td>
 </tr>
 <tr>

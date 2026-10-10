@@ -1,7 +1,7 @@
 # ----------------------------------------------------------------------------------------
-# Renames fresh summons, in order, to lookalikes of the character's name.
-# A PK reading nameplates then has to guess which one is the player. The names come from
-# list__summon_names, which the recipe fills in its setup: a variable cannot hold a word.
+# Names each fresh summon after its kind: lich, mummy, thrall, witch and so on.
+# The pet bars and nameplates then show what is out, and a summon answers to its name in
+# a pet command.
 # ----------------------------------------------------------------------------------------
 
 
@@ -10,7 +10,7 @@
 #
 #   config__summon_range
 #      How far the block looks for summons, the whole screen, so a summon that lagged
-#      behind still holds its name.
+#      behind is still named.
 # ----------------------------------------------------------------------------------------
 @setvar! config__summon_range 18
 
@@ -18,36 +18,47 @@
 # ----------------------------------------------------------------------------------------
 # @ state
 #
-#   var__summon_named_1, var__summon_named_2, var__summon_named_3
-#      Serial of the summon wearing each name, 0 while that name is free. Rechecked with
-#      find on every run, so a summon that died or was dismissed frees its name.
+#   var__summon_seen
+#      Scratch: the match the walk is looking at, copied out of its alias for inlist.
 #
 #   var__fresh_summon
-#      Scratch: the first own summon still wearing its stock name, 0 for none.
+#      Scratch: the first own summon not named yet, 0 for none.
 #
-#   var__free_slot
-#      Scratch: the first free name, as an index into list__summon_names. 3 is past the
-#      end.
+#   var__summon_kind
+#      Scratch: the kind read off its label, as an index into list__summon_kinds. 99 for a
+#      kind the list does not have.
 # ----------------------------------------------------------------------------------------
-if not varexist var__summon_named_1
-    @setvar! var__summon_named_1 0
-endif
-if not varexist var__summon_named_2
-    @setvar! var__summon_named_2 0
-endif
-if not varexist var__summon_named_3
-    @setvar! var__summon_named_3 0
-endif
+@setvar! var__summon_seen 0
 @setvar! var__fresh_summon 0
-@setvar! var__free_slot 0
+@setvar! var__summon_kind 99
 
 
 # ----------------------------------------------------------------------------------------
 # @ setup
 # ----------------------------------------------------------------------------------------
-if not listexists 'list__summon_names'
-    createlist 'list__summon_names'
+# The summons this script already named, by serial. It lasts until the client closes, so a
+# restart does not name them again.
+if not listexists 'list__named_summons'
+    createlist 'list__named_summons'
 endif
+
+# The names, in the order the kinds are read below. A list, because a variable cannot hold a
+# word, and foreach hands an entry to rename as it is. Rebuilt on every start.
+if not listexists 'list__summon_kinds'
+    createlist 'list__summon_kinds'
+endif
+clearlist 'list__summon_kinds'
+pushlist 'list__summon_kinds' 'knight'
+pushlist 'list__summon_kinds' 'mage'
+pushlist 'list__summon_kinds' 'lich'
+pushlist 'list__summon_kinds' 'mummy'
+pushlist 'list__summon_kinds' 'thrall'
+pushlist 'list__summon_kinds' 'witch'
+pushlist 'list__summon_kinds' 'zombie'
+pushlist 'list__summon_kinds' 'ghost'
+pushlist 'list__summon_kinds' 'skeleton'
+pushlist 'list__summon_kinds' 'ghoul'
+pushlist 'list__summon_kinds' 'corpse'
 
 
 # ----------------------------------------------------------------------------------------
@@ -56,77 +67,38 @@ endif
     # ------------------------------------------------------------------------------------
     # SUMMON NAMES
     #
-    # A fresh summon still wears its stock name, "a lich" and so on, and gets the first
-    # free lookalike of the character's name. Nothing here casts or opens a cursor, so it
-    # runs engaged or not, one rename per run: a pair summoned back to back gets its names
-    # in the order they appeared. A clock group such as every interval__housekeeping keeps
-    # it off most passes.
+    # A fresh summon still wears its stock name, "a lich" and so on, and is renamed to the
+    # last word of it: lich, mummy, thrall, witch, zombie, ghost, skeleton, knight, mage,
+    # ghoul, corpse. Nothing here casts or opens a cursor, so it runs engaged or not, one
+    # rename per run. A clock group such as every interval__housekeeping keeps it off most
+    # passes.
     #
-    # How the pieces hold together. Summons are found by body id. A stock name would find
-    # them too, but Razor may keep the old name cached after the rename, and the body
-    # never changes. The as alias lives only inside the block that bound it, like every
-    # alias, so the serial is copied into var__fresh_summon before anything reads it: read
-    # outside, the alias came back as mobile 4294967295. The client asks the server for
-    # every new mobile's status, and that reply is what gives Razor the "this is your pet"
-    # flag rename checks, so a summon is known the moment it appears. The noto test
-    # started as the old bard-necro follower filter: an own summon reads notoriety 2,
-    # friend, in >info, and a wild lich never passes. It also turns away innocent, which
-    # is how another player's summon reads unless that player is guild or allied: another
-    # player's earth elemental took the third name on 2026-09-29. A renamed summon still
-    # matches its body, so the three slot variables carry the serials, a match already
-    # sitting in a slot is skipped, and a slot frees itself when find no longer sees its
-    # summon alive. The name comes out of the list__summon_names list by slot index:
-    # foreach carries a list entry as text, which a variable cannot.
+    # Summons are found by body id, because Razor may keep the old name cached after a
+    # rename and the body never changes. The kind is read off the label once, before the
+    # rename, and its name comes out of list__summon_kinds by index. A renamed summon still matches its body, so its serial goes into
+    # list__named_summons and the walk skips it from then on. The list is emptied once no
+    # follower is left. The noto test keeps own summons only: they read friend, and another
+    # player's summon reads innocent unless that player is guild or allied.
     # ------------------------------------------------------------------------------------
     if followers > 0
-        if var__summon_named_1 != 0
-            if find var__summon_named_1 ground -1 -1 config__summon_range as alias__named_summon
-                if dead alias__named_summon
-                    @setvar! var__summon_named_1 0
-                endif
-            else
-                @setvar! var__summon_named_1 0
-            endif
-        endif
-
-        if var__summon_named_2 != 0
-            if find var__summon_named_2 ground -1 -1 config__summon_range as alias__named_summon
-                if dead alias__named_summon
-                    @setvar! var__summon_named_2 0
-                endif
-            else
-                @setvar! var__summon_named_2 0
-            endif
-        endif
-
-        if var__summon_named_3 != 0
-            if find var__summon_named_3 ground -1 -1 config__summon_range as alias__named_summon
-                if dead alias__named_summon
-                    @setvar! var__summon_named_3 0
-                endif
-            else
-                @setvar! var__summon_named_3 0
-            endif
-        endif
-
         @setvar! var__fresh_summon 0
 
         # Bodies. Lich 24 and ancient mummy 158 read off >info, vampire thrall 722 and rag
-        # witch 740 from the old bard-necro follower cache, and the Summon Creature undead pool
-        # as far as the stock client art goes, zombie 3, ghost 26, skeleton 50, 56, 57,
+        # witch 740 from the old bard-necro follower cache, and the Summon Creature undead
+        # pool as far as the stock client art goes, zombie 3, ghost 26, skeleton 50, 56, 57,
         # skeletal knight 147, skeletal mage 148, ghoul 153, rotting corpse 155. Skeletal
         # Fiend, skeletal marksman and rotting flesh are Outlands bodies: read theirs with
-        # >info when one is out and add the number here. The plain elementals and daemon a
-        # summon gives without Vengeful Spirit, 9 and 13 to 16, are left out: this character
-        # always summons through it, and other mages' elementals on screen were being taken
-        # for its own, a guildmate's among them, which the noto test cannot tell apart.
+        # >info when one is out and add the number here, and its name below. The plain
+        # elementals and daemon a summon gives without Vengeful Spirit, 9 and 13 to 16, are
+        # left out: other mages' elementals on screen were taken for our own, a guildmate's
+        # among them, which the noto test cannot tell apart.
         # Walk every match, not just the first: this Razor hands back the same mobile on
-        # every call, so a single findtype would return the summon already named and never
-        # reach the second one. Each rejected match is ignored for the rest of the walk, the
-        # first fresh own summon is copied out, and the ignore list is emptied again so the
-        # slot checks above and the rest of the loop see everything.
+        # every call. Each rejected match is ignored for the rest of the walk, and the
+        # ignore list is emptied again so the rest of the loop sees everything.
         while findtype 24|158|722|740|3|26|50|56|57|147|148|153|155 ground -1 -1 config__summon_range as alias__fresh_summon
-            if alias__fresh_summon != var__summon_named_1 and alias__fresh_summon != var__summon_named_2 and alias__fresh_summon != var__summon_named_3
+            @setvar! var__summon_seen alias__fresh_summon
+
+            if not inlist 'list__named_summons' var__summon_seen
                 if not dead alias__fresh_summon and noto alias__fresh_summon != "hostile" and noto alias__fresh_summon != "criminal" and noto alias__fresh_summon != "enemy" and noto alias__fresh_summon != "murderer" and noto alias__fresh_summon != "innocent"
                     @setvar! var__fresh_summon alias__fresh_summon
                     break
@@ -139,29 +111,45 @@ endif
         @clearignore
 
         if var__fresh_summon != 0
-            # The first free slot, as an index into list__summon_names. 3 is past the end, so with
-            # every name taken the loop below matches nothing.
-            if var__summon_named_1 = 0
-                @setvar! var__free_slot 0
-                @setvar! var__summon_named_1 var__fresh_summon
-            elseif var__summon_named_2 = 0
-                @setvar! var__free_slot 1
-                @setvar! var__summon_named_2 var__fresh_summon
-            elseif var__summon_named_3 = 0
-                @setvar! var__free_slot 2
-                @setvar! var__summon_named_3 var__fresh_summon
-            else
-                @setvar! var__free_slot 3
+            pushlist 'list__named_summons' var__fresh_summon
+            getlabel var__fresh_summon label__fresh_summon
+            @setvar! var__summon_kind 99
+
+            # A phrase of each stock name, in the order of list__summon_kinds.
+            if "skeletal knight" in label__fresh_summon
+                @setvar! var__summon_kind 0
+            elseif "skeletal mage" in label__fresh_summon
+                @setvar! var__summon_kind 1
+            elseif "lich" in label__fresh_summon
+                @setvar! var__summon_kind 2
+            elseif "mummy" in label__fresh_summon
+                @setvar! var__summon_kind 3
+            elseif "thrall" in label__fresh_summon
+                @setvar! var__summon_kind 4
+            elseif "witch" in label__fresh_summon
+                @setvar! var__summon_kind 5
+            elseif "zombie" in label__fresh_summon
+                @setvar! var__summon_kind 6
+            elseif "ghost" in label__fresh_summon
+                @setvar! var__summon_kind 7
+            elseif "skeleton" in label__fresh_summon
+                @setvar! var__summon_kind 8
+            elseif "ghoul" in label__fresh_summon
+                @setvar! var__summon_kind 9
+            elseif "rotting corpse" in label__fresh_summon
+                @setvar! var__summon_kind 10
             endif
 
-            foreach summon_name in list__summon_names
-                if index = var__free_slot
-                    @rename var__fresh_summon summon_name
+            foreach summon_kind in list__summon_kinds
+                if index = var__summon_kind
+                    @rename var__fresh_summon summon_kind
 
                     if config__chatty = 1
-                        overhead "[ name, {{summon_name}} ]" 209 var__fresh_summon
+                        overhead "[ name, {{summon_kind}} ]" 209 var__fresh_summon
                     endif
                 endif
             endfor
         endif
+    else
+        clearlist 'list__named_summons'
     endif
