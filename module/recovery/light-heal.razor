@@ -1,16 +1,19 @@
 # The light Heal agent: the bandage stand-in, and beside the bandages with use_light_heal 1.
-#@ needs core/wait core/output core/switches core/reagents core/bandage
 #@ hotkeys > Smart Heal/Cure Self, Cancel Current Target
-#@ settings
-# Light Heal beside the bandages. With no bandage able to run (use_bandages 0, no Healing, or
-# none left) it goes anyway, as the bandage stand-in. Needs use_magery.
+
+#@ config
+# 1 casts the light Heal beside the bandages. At 0 it goes only while no bandage can run:
+# use_bandages 0, Healing at or below heal_skill_min, or none left and none running.
 @setvar! config__use_light_heal 0
-# Missing hit points that start the light Heal, and its minimum current mana.
+# Missing hit points that start the light Heal.
 @setvar! config__light_hits 15
+# Minimum current mana for the light Heal.
 @setvar! config__mana_heal 4
+
 #@ state
-# Scratch: 1 when the light Heal goes on this pass. LIGHT HEAL only.
+# Scratch: 1 when the light Heal goes on this pass.
 @setvar! var__light_heal_due 0
+
 #@ loop
     # ################################################################################
     # # LIGHT HEAL

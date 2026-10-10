@@ -13,177 +13,150 @@
 #          Drink Magic Resist, > Interrupt.
 # Generated from recipe/skinning-enhanced-recipe.razor by util/build-scripts.py. Edit module/ and recipe/, not this file.
 
-clearall
-clearsysmsg
-cleardragdrop
-clearignore
-
-if pvp
-    overhead "[ script, blocked ]" 254
-    stop
-endif
-
 # ####################################################################################
 # # CONFIG
 # ####################################################################################
-# ---- core/output -------------------------------------------------------------------
-# Optional script overheads. Essential warnings remain visible.
+# ---- module/base.razor -----------------------------------------------------------------
+# Optional overheads. Warnings show either way.
 @setvar! config__chatty 1
-# Journal diagnostics. Each block that writes one says so in its own comments.
+# Journal diagnostics. A block that writes one says so in its comments.
 @setvar! config__sysmsg 1
-
-# ---- core/switches -----------------------------------------------------------------
-# Independent features. No option overrides another.
+# Clear the client queues, the journal and the ignore list at Play (conventions 02.D).
+# 0 keeps a cursor or a cast the player holds at Play.
+@setvar! config__clear_at_start 1
+# Magery: the Cure and heal agents, the reagent reads and the buffs. Potions and bandages stay.
 @setvar! config__use_magery 1
+# Potions: cure, heal, Refresh and the stat potions.
 @setvar! config__use_potions 1
-@setvar! config__use_bandages 1
-# 1 makes our own casts wait while the walk bar runs, so a step does not break them.
+# 1 makes our casts wait while the walk bar runs, so a step does not break them.
 # 0 casts while walking, for a fight where there is no better moment to wait for.
 @setvar! config__walk_guard 1
-# 1 when warmode is the player's manual control window: our own casts stand down while it is on.
+# 1 when warmode is the player's manual control window: our casts stand down while it is on.
 @setvar! config__warmode_is_manual 0
 
-# ---- core/cure ---------------------------------------------------------------------
+# ---- module/recovery/cure.razor --------------------------------------------------------
 # Minimum current mana for the Cure agent.
 @setvar! config__mana_cure 6
 
-# ---- core/heal ---------------------------------------------------------------------
-# Missing hit points, not percent.
-#   heal_hits       heal potion
-#   emergency_hits  Greater Heal when no heal potion can go out. Not below heal_hits
+# ---- module/recovery/heal.razor --------------------------------------------------------
+# Missing hit points (not percent) that drink a heal potion.
 @setvar! config__heal_hits 35
+# Missing hit points that cast Greater Heal when no heal potion went out on this pass.
+# Not below heal_hits.
 # This loop: Bandages handle ordinary damage, so Greater Heal waits for 45.
-# heal_hits also holds carving, buffs and leather packing back.
 @setvar! config__emergency_hits 45
-# Minimum current mana for Greater Heal. It keeps no reserve: raise it to 31 to always leave
-# 20 mana for an attack or Teleport.
+# Minimum current mana for Greater Heal. It keeps no reserve: 31 always leaves 20 mana for an
+# attack or Teleport.
 @setvar! config__mana_greater_heal 11
 
-# ---- core/bandage ------------------------------------------------------------------
-# Healing must be above this to bandage. 0 means any Healing at all.
+# ---- module/recovery/bandage.razor -----------------------------------------------------
+# 0 turns bandages off. recovery/light-heal then stands in.
+@setvar! config__use_bandages 1
+# Healing must be above this to bandage. At or below it recovery/light-heal stands in.
 # This loop: Healing 80 template. Below 10 the light Heal stands in.
 @setvar! config__heal_skill_min 10
 
-# ---- core/light-heal ---------------------------------------------------------------
-# Light Heal beside the bandages. With no bandage able to run (use_bandages 0, no Healing, or
-# none left) it goes anyway, as the bandage stand-in. Needs use_magery.
+# ---- module/recovery/light-heal.razor --------------------------------------------------
+# 1 casts the light Heal beside the bandages. At 0 it goes only while no bandage can run:
+# use_bandages 0, Healing at or below heal_skill_min, or none left and none running.
 @setvar! config__use_light_heal 0
-# Missing hit points that start the light Heal, and its minimum current mana.
+# Missing hit points that start the light Heal.
 @setvar! config__light_hits 15
+# Minimum current mana for the light Heal.
 @setvar! config__mana_heal 4
 
-# ---- core/refresh ------------------------------------------------------------------
+# ---- module/recovery/refresh.razor -----------------------------------------------------
 # Current stamina at or below this drinks a Refresh.
 # This loop: DEX 80 gives about 80 stamina. Refresh at 60.
 @setvar! config__refresh_stam 60
 
-# ---- gather/axe --------------------------------------------------------------------
-# Re-arm the axe when the left hand is empty. 5187 is the two handed axe in blueprint/item-list.html.
-@setvar! config__use_weapon 1
-@setvar! config__weapon_graphic 5187
+# ---- module/fight/axe.razor ------------------------------------------------------------
+# Graphic of the axe to re-arm. 5187 is the two handed axe in blueprint/item-list.html.
+@setvar! config__axe_graphic 5187
 
-# ---- gather/gold -------------------------------------------------------------------
-# Over max weight, drop this much gold at your feet per pass. Gold is cheaper than the leather.
-@setvar! config__use_gold_drop 1
+# ---- module/pack/gold-drop.razor -------------------------------------------------------
+# Gold dropped per pass while over max weight. Gold is cheaper than the leather.
 @setvar! config__gold_drop_amount 2000
 
-# ---- core/stat-potions -------------------------------------------------------------
-@setvar! config__use_stat_potions 1
+# ---- module/buff/potions.razor ---------------------------------------------------------
+# Magic Resist potion on or off.
 @setvar! config__use_resist_potion 1
-# STR and DEX with the Greater potion on: your base plus 20. Below these the potion is drunk.
-# Bless and the Strength and Agility spells, ours or an ally's, show the same icons as the
-# potions but add less than its 20, so the stat is what tells the potion apart.
+# STR with the Greater Strength potion on: your base plus 20. Below it the potion is drunk, and
+# 0 turns it off. Bless and the Strength spell, ours or an ally's, show the same icon as the
+# potion but add less than its 20, so the stat tells them apart.
 # This loop: STR 100 and DEX 80 template.
 @setvar! config__str_potion 120
+# DEX with the Greater Agility potion on: your base plus 20. Below it the potion is drunk, and
+# 0 turns it off. Bless and the Agility spell show the same icon, as for STR.
 @setvar! config__dex_potion 100
 
-# ---- gather/sword-codex ------------------------------------------------------------
-# Codex of swords. The slot numbers follow the codex list order on the wiki.
-@setvar! config__use_sword_codex 1
-@setvar! config__sword_stance_aggressive 1
-@setvar! config__sword_stance_defensive 2
-@setvar! config__sword_stance_cleave 3
-@setvar! config__sword_stance_warrior 4
-@setvar! config__sword_stance_flaying 5
-# Stance held outside the Defensive window. Cleave pays only against two or more enemies.
-@setvar! config__sword_stance_main config__sword_stance_warrior
-
-# Finisher slot to keep selected. 0 leaves the codex finisher alone.
-@setvar! config__sword_finisher_bleed_out 1
-@setvar! config__sword_finisher_execute 2
-@setvar! config__sword_finisher_main config__sword_finisher_execute
-
-# Defensive latches on above the enter line and only releases below the leave line, so the
-# stance cannot flap while bandages tick. Both are hit deficit, not percent.
+# ---- module/fight/sword-codex.razor ----------------------------------------------------
+# Stance held outside the Defensive window, by codex slot (wiki order): 1 Aggressive,
+# 2 Defensive, 3 Cleave, 4 Warrior, 5 Flaying. Cleave pays only against two or more enemies.
+@setvar! config__sword_stance_main 4
+# Finisher to keep selected: 1 Bleed Out, 2 Execute. 0 leaves the codex finisher alone.
+@setvar! config__sword_finisher_main 2
+# Missing hit points above which Defensive latches on.
 @setvar! config__defensive_enter_diff 60
+# Missing hit points below which Defensive lets go. Below the enter line, so the stance cannot
+# flap while bandages tick.
 @setvar! config__defensive_leave_diff 48
 
-# ---- gather/parry-codex ------------------------------------------------------------
-# Codex of parrying, see PARRY CODEX. Slot numbers follow the wiki list order.
-# A stance only helps with ranks in it. Pick ranked ones.
-@setvar! config__use_parry_codex 1
-@setvar! config__parry_stance_shield_bash 1
-@setvar! config__parry_stance_warding 2
-@setvar! config__parry_stance_testudo 3
-@setvar! config__parry_stance_mirror 4
-@setvar! config__parry_stance_bulwark 5
-# Bulwark while Testudo's ranks are low. Switch to config__parry_stance_testudo once they catch up.
-@setvar! config__parry_stance_main config__parry_stance_bulwark
-# Stance while poisoned, bleeding or diseased.
-@setvar! config__parry_stance_dot config__parry_stance_warding
+# ---- module/fight/parry-codex.razor ----------------------------------------------------
+# Main stance, by codex slot (wiki order): 1 Shield Bash, 2 Warding, 3 Testudo, 4 Mirror,
+# 5 Bulwark. A stance only helps with ranks in it. Bulwark while Testudo's ranks are low, then 3.
+@setvar! config__parry_stance_main 5
+# Stance while poisoned, bleeding or diseased, by the same slots.
+@setvar! config__parry_stance_dot 2
 # 0 keeps the main stance while the remembered enemy is within 2 tiles. 1 switches there too.
 @setvar! config__parry_dot_in_melee 0
-# Parry finisher slot to keep selected. 0 leaves it alone.
-@setvar! config__parry_finisher_last_stand 1
-@setvar! config__parry_finisher_barrier 2
-@setvar! config__parry_finisher_main config__parry_finisher_last_stand
+# Finisher to keep selected: 1 Last Stand, 2 Barrier. 0 leaves it alone.
+@setvar! config__parry_finisher_main 1
 
-# ---- gather/weapon-ability ---------------------------------------------------------
-@setvar! config__use_weapon_ability 1
-@setvar! config__ability_spinslash 1
-@setvar! config__ability_rend 2
-@setvar! config__ability_chop 3
-@setvar! config__ability_main config__ability_chop
+# ---- module/fight/weapon-ability.razor -------------------------------------------------
+# Ability slot to use: 1 Spinslash, 2 Rend, 3 Chop.
+@setvar! config__ability_main 3
 
-# ---- core/self-buffs ---------------------------------------------------------------
+# ---- module/buff/spells.razor ----------------------------------------------------------
+# Reactive Armor on or off.
 @setvar! config__use_reactive_armor 1
+# Magic Reflection on or off.
 @setvar! config__use_magic_reflect 1
-# Minimum current mana to start each buff.
+# Minimum current mana to start Reactive Armor.
 # This loop: Buffs keep the lumberjack handbook's 20 mana for Greater Heal and Teleport against a PK.
 @setvar! config__mana_reactive_armor 24
+# Minimum current mana to start Magic Reflection.
+# This loop: Same reserve: the base 14 plus the handbook's 20.
 @setvar! config__mana_magic_reflect 34
 # Missing hit points at which buffs are not started, and cut mid cast.
 @setvar! config__buff_max_loss 35
-# 0 keeps buffs back while poisoned and cuts one that is casting.
+# 1 buffs while poisoned. 0 holds them back and cuts one that is casting, so the cure goes first.
 # This loop: The cure goes first: no buffs while poisoned.
 @setvar! config__buff_when_poisoned 0
 
-# ---- gather/skinning ---------------------------------------------------------------
-# Skinning. 1 carves every creature corpse within 2 tiles, grey or not, by targeting each corpse.
-# Player remains are never targeted. 0 carves grey corpses only, through Smart Harvest on self.
-# Where the server refuses the first as a criminal action, grey corpses only for 5 minutes.
-@setvar! config__use_skinning 1
+# ---- module/gather/skinning.razor ------------------------------------------------------
+# 1 carves every creature corpse within 2 tiles by targeting each one, grey or not. Player remains
+# are never targeted. 0 carves grey corpses only, through Smart Harvest on self. Where the server
+# refuses the first as a criminal action, grey corpses only for 5 minutes.
 @setvar! config__skin_unowned 1
-
-# ---- gather/leather ----------------------------------------------------------------
-# Move carried leather into the looting pouch selected by loadout.
-@setvar! config__pack_leather 1
 
 # ####################################################################################
 # # WAIT AND COOLDOWN
 # ####################################################################################
-@setvar! cooldown__combat_target_grace 1200
-
+# The poll inside a wait, and the pause after an action.
 @setvar! wait__poll 100
 @setvar! wait__short 200
-
-# Debounce for repeated warnings. Without it an empty potion bag shouts every pass.
+# Spacing for repeated warnings. Without it an empty potion bag shouts every pass.
 @setvar! cooldown__message 3000
+
+# A remembered enemy out of range this long is dropped.
+@setvar! cooldown__combat_target_grace 1200
 
 # A refused equip, after a disarm for example, waits this long before the next try.
 @setvar! cooldown__equip_retry 2000
 
-@setvar! wait__long 1000
+# Pause after a drop, so the weight settles before the next pass.
+@setvar! wait__gold_drop 1000
 
 # A Strength or Agility potion is tried once per window. The stat arrives a round trip after the
 # drink, and a Curse, Weaken or Clumsy can hold it under the line while the potion still runs:
@@ -191,10 +164,15 @@ endif
 # the same pace.
 @setvar! cooldown__stat_potion 5000
 
-# Codex label reads: a failed switch is tried again after stance_retry, and the cache is dropped
-# every stance_resync so a stance changed by hand is picked up. The parry codex uses them too.
-@setvar! cooldown__stance_retry 3000
-@setvar! cooldown__stance_resync 30000
+# Codex label reads: a failed switch is tried again after sword_retry, and the cache is dropped
+# every sword_resync so a stance changed by hand is picked up.
+@setvar! cooldown__sword_retry 3000
+@setvar! cooldown__sword_resync 30000
+
+# Codex label reads: a failed switch is tried again after parry_retry, and the cache is dropped
+# every parry_resync so a stance changed by hand is picked up.
+@setvar! cooldown__parry_retry 3000
+@setvar! cooldown__parry_resync 30000
 
 # Without Arms Lore the ability meter takes 60 seconds to fill.
 @setvar! cooldown__ability 60000
@@ -212,6 +190,7 @@ endif
 # is caught at once by the refusal line.
 @setvar! cooldown__reagents 10000
 
+# The buff lasts far longer than this.
 @setvar! cooldown__food 60000
 
 # Allow inventory updates after opening the pouch and each drag/drop.
@@ -224,12 +203,13 @@ endif
 # ####################################################################################
 # # TIMER
 # ####################################################################################
-if not timerexists "timer__combat_target_grace"
-    createtimer "timer__combat_target_grace"
-endif
-
+# Ready on the first pass, so the first warning shows at once.
 if not timerexists "timer__message"
     createtimer "timer__message"
+endif
+
+if not timerexists "timer__combat_target_grace"
+    createtimer "timer__combat_target_grace"
 endif
 
 if not timerexists "timer__equip"
@@ -272,6 +252,7 @@ if not timerexists "timer__grey_only"
     createtimer "timer__grey_only"
 endif
 
+# Ready on the first pass, so reagents are read before the first cast.
 if not timerexists "timer__reagents"
     createtimer "timer__reagents"
 endif
@@ -280,31 +261,40 @@ if not timerexists "timer__food"
     createtimer "timer__food"
 endif
 
+# Packing waits one full interval.
 if not timerexists "timer__pack_leather"
     createtimer "timer__pack_leather"
 endif
 
-settimer "timer__combat_target_grace" cooldown__combat_target_grace
 settimer "timer__message" cooldown__message
+settimer "timer__combat_target_grace" cooldown__combat_target_grace
 settimer "timer__equip" cooldown__equip_retry
 settimer "timer__str_potion" cooldown__stat_potion
 settimer "timer__agi_potion" cooldown__stat_potion
-settimer "timer__sword_retry" cooldown__stance_retry
+settimer "timer__sword_retry" cooldown__sword_retry
 settimer "timer__sword_resync" 0
-settimer "timer__parry_retry" cooldown__stance_retry
+settimer "timer__parry_retry" cooldown__parry_retry
 settimer "timer__parry_resync" 0
 settimer "timer__ability" cooldown__ability
 settimer "timer__carve" cooldown__carve
 settimer "timer__grey_only" cooldown__grey_only
-# Ready on the first pass, so reagents are read before the first cast.
 settimer "timer__reagents" cooldown__reagents
 settimer "timer__food" cooldown__food
-# Packing waits one full interval.
 settimer "timer__pack_leather" 0
 
 # ####################################################################################
 # # STATE
 # ####################################################################################
+# Signals between blocks. Each keeps this value unless the loop has a block that sets it.
+#   fighting        1 while an enemy is engaged. buff/potions drinks only then. fight/target
+#                   sets it every pass, and the pvp recipe keeps it at 1.
+#   hold_casts      1 while a block keeps the cast window for itself. buff/spells stands down.
+#                   escape/recall sets it once a Recall is due.
+#   hold_gathering  1 while gathering and its packing wait. escape/recall sets it.
+@setvar! var__fighting 0
+@setvar! var__hold_casts 0
+@setvar! var__hold_gathering 0
+
 # The enemy picked with lasttarget. Carving overwrites lasttarget, so combat potions and the
 # weapon ability read this copy instead.
 if not varexist var__combat_target
@@ -312,13 +302,11 @@ if not varexist var__combat_target
 endif
 # Scratch copy of the lasttarget serial for the mobile range check.
 @setvar! var__fresh_serial 0
-# 1 while an enemy is remembered. Recomputed every pass from var__combat_target.
-@setvar! var__fighting 0
 
-# Scratch: 1 once a heal potion went out on this pass. HEAL only.
+# Scratch: 1 once a heal potion went out on this pass.
 @setvar! var__heal_potion_out 0
 
-# Scratch: 1 when the light Heal goes on this pass. LIGHT HEAL only.
+# Scratch: 1 when the light Heal goes on this pass.
 @setvar! var__light_heal_due 0
 
 # Selected axe serial, reused across Stop and Play. 0 means rediscover from the backpack.
@@ -342,9 +330,6 @@ endif
 @setvar! var__parry_disabled 0
 @setvar! var__parry_finisher_checked 0
 @setvar! var__parry_finisher_state 0
-
-# 1 while another block holds our buff casts back. Nothing sets it unless the loop has such a block.
-@setvar! var__hold_casts 0
 
 # Scratch: 1 when a Z pick arrived while the knife cursor was up.
 @setvar! var__pick_during_carve 0
@@ -381,11 +366,23 @@ endif
 @setvar! var__has_ash 0
 @setvar! var__has_silk 0
 
-if config__pack_leather = 1
-    if not varexist global__my_looting_pouch or not find global__my_looting_pouch backpack
-        overhead "[ loot pouch, pick ]" 255
-        setvar global__my_looting_pouch
-    endif
+# The pvp expression means the structured-PvP restrictions, where these loops may not run.
+if pvp
+    overhead "[ script, blocked ]" 254
+    stop
+endif
+
+if config__clear_at_start = 1
+    clearall
+    clearsysmsg
+    cleardragdrop
+    clearignore
+endif
+
+# pack/leather moves leather into this pouch. restock/loadout picks it, this asks when it is missing.
+if not varexist global__my_looting_pouch or not find global__my_looting_pouch backpack
+    overhead "[ loot pouch, pick ]" 255
+    setvar global__my_looting_pouch
 endif
 
 # loot/recycle runs the hotkey named in this list when it finishes or gives up. A list, because
@@ -455,7 +452,7 @@ while not dead
         endif
     endif
 
-    # Fight-only blocks such as the stat potions read this.
+    # base declares it. Fight-only blocks such as the stat potions read it.
     @setvar! var__fighting 0
     if var__combat_target != 0
         @setvar! var__fighting 1
@@ -640,19 +637,19 @@ while not dead
     endif
 
     # ################################################################################
-    # # WEAPON
+    # # AXE
     # ################################################################################
     # The Two-Handed Axe takes the lefthand layer, so an empty left hand means it is gone.
     # Arming before a cast completes interrupts the cast (wiki Combat Overview), so casting blocks this.
     # An axe already in hand is adopted once by label, including a replacement with a new serial.
     # Any other left hand item is left alone.
-    if config__use_weapon = 1 and timer "timer__equip" >= cooldown__equip_retry
+    if timer "timer__equip" >= cooldown__equip_retry
         if lhandempty
             if not hidden and not queued and not casting and not targetexists
                 settimer "timer__equip" 0
                 if not find var__my_weapon backpack
                     @setvar! var__my_weapon 0
-                    if findtype config__weapon_graphic backpack as alias__packed_weapon
+                    if findtype config__axe_graphic backpack as alias__packed_weapon
                         @setvar! var__my_weapon alias__packed_weapon
                     endif
                 endif
@@ -690,7 +687,7 @@ while not dead
     # # GOLD
     # ################################################################################
     # One drop per pass, so recovery still runs between drops. A refused drop goes back to the pack.
-    if config__use_gold_drop = 1 and weight > maxweight
+    if weight > maxweight
         if not hidden and not queued and not casting and not targetexists
             if findtype "gold coin" backpack as alias__found_gold
                 lift alias__found_gold config__gold_drop_amount
@@ -704,7 +701,7 @@ while not dead
                     drop backpack -1 -1 -1
                 endif
 
-                wait wait__long
+                wait wait__gold_drop
                 if config__chatty = 1
                     overhead "[ gold, dropped ]" 290
                 endif
@@ -723,7 +720,7 @@ while not dead
     # icons as the potions, and each is tried once per cooldown__stat_potion. Magic Resist has an
     # icon of its own and is drunk once it is missing. Each potion is judged on its own, so
     # running out of one does not hold up the others.
-    if var__fighting = 1 and config__use_potions = 1 and config__use_stat_potions = 1 and not paralyzed and not hidden and not targetexists
+    if var__fighting = 1 and config__use_potions = 1 and not paralyzed and not hidden and not targetexists
         if not queued and str < config__str_potion and timer "timer__str_potion" >= cooldown__stat_potion
             settimer "timer__str_potion" 0
             if findtype "White Potion" self
@@ -760,19 +757,19 @@ while not dead
     # The codex label is the only source of truth, as in bard-mace. The cache is refreshed from
     # the label on a timer, which also catches a stance changed by hand. getlabel runs after
     # recovery so a server round trip never delays a bandage or a heal potion.
-    if config__use_sword_codex = 1 and var__sword_disabled = 0
-        if timer "timer__sword_resync" > cooldown__stance_resync
+    if var__sword_disabled = 0
+        if timer "timer__sword_resync" > cooldown__sword_resync
             @setvar! var__sword_active 0
             settimer "timer__sword_resync" 0
         endif
 
         if diffhits > config__defensive_enter_diff
-            @setvar! var__sword_want config__sword_stance_defensive
+            @setvar! var__sword_want 2
         elseif diffhits < config__defensive_leave_diff
             @setvar! var__sword_want config__sword_stance_main
         endif
 
-        if var__sword_want != var__sword_active and timer "timer__sword_retry" > cooldown__stance_retry
+        if var__sword_want != var__sword_active and timer "timer__sword_retry" > cooldown__sword_retry
             settimer "timer__sword_retry" 0
 
             if findtype 11890 backpack as alias__sword_codex
@@ -781,15 +778,15 @@ while not dead
                 # All five names are tested. Finding none means the label does not carry the
                 # stance, and blind switching would risk toggling the active stance off.
                 if "Warrior" in label__sword_codex
-                    @setvar! var__sword_active config__sword_stance_warrior
+                    @setvar! var__sword_active 4
                 elseif "Defensive" in label__sword_codex
-                    @setvar! var__sword_active config__sword_stance_defensive
+                    @setvar! var__sword_active 2
                 elseif "Aggressive" in label__sword_codex
-                    @setvar! var__sword_active config__sword_stance_aggressive
+                    @setvar! var__sword_active 1
                 elseif "Cleave" in label__sword_codex
-                    @setvar! var__sword_active config__sword_stance_cleave
+                    @setvar! var__sword_active 3
                 elseif "Flaying" in label__sword_codex
-                    @setvar! var__sword_active config__sword_stance_flaying
+                    @setvar! var__sword_active 5
                 else
                     @setvar! var__sword_disabled 1
                     overhead "[ sword stance, off ]" 254
@@ -809,7 +806,7 @@ while not dead
                 if var__sword_disabled = 0 and var__sword_finisher_checked = 0 and config__sword_finisher_main != 0
                     @setvar! var__sword_finisher_checked 1
                     @setvar! var__sword_finisher_state 0
-                    if config__sword_finisher_main = config__sword_finisher_execute
+                    if config__sword_finisher_main = 2
                         if "Execute" in label__sword_codex
                             @setvar! var__sword_finisher_state 1
                         elseif "Bleed Out" in label__sword_codex
@@ -835,14 +832,14 @@ while not dead
                         # Keep the finisher and stance commands apart.
                         wait wait__short
                         if config__chatty = 1
-                            if config__sword_finisher_main = config__sword_finisher_execute
+                            if config__sword_finisher_main = 2
                                 overhead "[ sword, execute ]" 290
                             else
                                 overhead "[ sword, bleed out ]" 290
                             endif
                         endif
                     elseif var__sword_finisher_state = 0
-                        if config__sword_finisher_main = config__sword_finisher_execute
+                        if config__sword_finisher_main = 2
                             overhead "[ execute, off ]" 254
                         else
                             overhead "[ bleed out, off ]" 254
@@ -872,15 +869,15 @@ while not dead
                     settimer "timer__sword_resync" 0
 
                     if config__chatty = 1
-                        if var__sword_want = config__sword_stance_defensive
+                        if var__sword_want = 2
                             overhead "[ sword, defensive ]" 290
-                        elseif var__sword_want = config__sword_stance_warrior
+                        elseif var__sword_want = 4
                             overhead "[ sword, warrior ]" 290
-                        elseif var__sword_want = config__sword_stance_aggressive
+                        elseif var__sword_want = 1
                             overhead "[ sword, aggressive ]" 290
-                        elseif var__sword_want = config__sword_stance_cleave
+                        elseif var__sword_want = 3
                             overhead "[ sword, cleave ]" 290
-                        elseif var__sword_want = config__sword_stance_flaying
+                        elseif var__sword_want = 5
                             overhead "[ sword, flaying ]" 290
                         endif
                     endif
@@ -900,7 +897,8 @@ while not dead
     #   Testudo  damage resistance 3%, 6% while you are in the front arc of the target
     #   Warding  damage resistance 2%, and poison, bleed and disease ticks 6% lower
     #   Bulwark  5% after 3 seconds standing still. Mirror 2% and spell damage 6% lower.
-    # Testudo is the main stance. A creature meleeing you nearly always has you in its front arc.
+    # Testudo is the stance to hold once ranked. A creature meleeing you nearly always has you in
+    # its front arc.
     # Warding takes over while poisoned, bleeding or diseased, but only away from melee. Next to
     # the remembered enemy Testudo still blocks 4% per rank more of every hit, which outweighs
     # the tick reduction unless the ticks deal most of the damage. config__parry_dot_in_melee 1
@@ -913,8 +911,8 @@ while not dead
     # Same label machinery as SWORD CODEX. No stance name in the label means none is selected or
     # the label does not show it, and a blind command could toggle it off, so the block warns once
     # and stands down for this Play.
-    if config__use_parry_codex = 1 and var__parry_disabled = 0
-        if timer "timer__parry_resync" > cooldown__stance_resync
+    if var__parry_disabled = 0
+        if timer "timer__parry_resync" > cooldown__parry_resync
             @setvar! var__parry_active 0
             settimer "timer__parry_resync" 0
         endif
@@ -926,21 +924,21 @@ while not dead
             endif
         endif
 
-        if var__parry_want != var__parry_active and timer "timer__parry_retry" > cooldown__stance_retry
+        if var__parry_want != var__parry_active and timer "timer__parry_retry" > cooldown__parry_retry
             settimer "timer__parry_retry" 0
 
             if findtype 11889 backpack as alias__parry_codex
                 getlabel alias__parry_codex label__parry_codex
                 if "Testudo" in label__parry_codex
-                    @setvar! var__parry_active config__parry_stance_testudo
+                    @setvar! var__parry_active 3
                 elseif "Warding" in label__parry_codex
-                    @setvar! var__parry_active config__parry_stance_warding
+                    @setvar! var__parry_active 2
                 elseif "Shield Bash" in label__parry_codex
-                    @setvar! var__parry_active config__parry_stance_shield_bash
+                    @setvar! var__parry_active 1
                 elseif "Mirror" in label__parry_codex
-                    @setvar! var__parry_active config__parry_stance_mirror
+                    @setvar! var__parry_active 4
                 elseif "Bulwark" in label__parry_codex
-                    @setvar! var__parry_active config__parry_stance_bulwark
+                    @setvar! var__parry_active 5
                 else
                     @setvar! var__parry_disabled 1
                     overhead "[ parry stance, off ]" 254
@@ -953,7 +951,7 @@ while not dead
                 if var__parry_disabled = 0 and var__parry_finisher_checked = 0 and config__parry_finisher_main != 0
                     @setvar! var__parry_finisher_checked 1
                     @setvar! var__parry_finisher_state 0
-                    if config__parry_finisher_main = config__parry_finisher_last_stand
+                    if config__parry_finisher_main = 1
                         if "Last Stand" in label__parry_codex
                             @setvar! var__parry_finisher_state 1
                         elseif "Barrier" in label__parry_codex
@@ -979,14 +977,14 @@ while not dead
                         # Keep the finisher and stance commands apart.
                         wait wait__short
                         if config__chatty = 1
-                            if config__parry_finisher_main = config__parry_finisher_last_stand
+                            if config__parry_finisher_main = 1
                                 overhead "[ parry, last stand ]" 290
                             else
                                 overhead "[ parry, barrier ]" 290
                             endif
                         endif
                     elseif var__parry_finisher_state = 0
-                        if config__parry_finisher_main = config__parry_finisher_last_stand
+                        if config__parry_finisher_main = 1
                             overhead "[ last stand, off ]" 254
                         else
                             overhead "[ barrier, off ]" 254
@@ -1015,15 +1013,15 @@ while not dead
                     settimer "timer__parry_resync" 0
 
                     if config__chatty = 1
-                        if var__parry_want = config__parry_stance_testudo
+                        if var__parry_want = 3
                             overhead "[ parry, testudo ]" 290
-                        elseif var__parry_want = config__parry_stance_warding
+                        elseif var__parry_want = 2
                             overhead "[ parry, warding ]" 290
-                        elseif var__parry_want = config__parry_stance_shield_bash
+                        elseif var__parry_want = 1
                             overhead "[ parry, shield bash ]" 290
-                        elseif var__parry_want = config__parry_stance_mirror
+                        elseif var__parry_want = 4
                             overhead "[ parry, mirror ]" 290
-                        elseif var__parry_want = config__parry_stance_bulwark
+                        elseif var__parry_want = 5
                             overhead "[ parry, bulwark ]" 290
                         endif
                     endif
@@ -1043,7 +1041,7 @@ while not dead
     # All three share one meter, and the ability fires on the next melee hit. Chop is further
     # scaled by weapon speed, and that formula is not documented.
     # A timer spaces the request, as in bard-mace. A wrong interval only shifts the timing.
-    if config__use_weapon_ability = 1 and timer "timer__ability" >= cooldown__ability and find var__combat_target ground -1 -1 2
+    if timer "timer__ability" >= cooldown__ability and find var__combat_target ground -1 -1 2
         if config__ability_main = 1
             say "[WeaponAbility1"
         elseif config__ability_main = 2
@@ -1057,11 +1055,11 @@ while not dead
         endif
 
         if config__chatty = 1
-            if config__ability_main = config__ability_chop
+            if config__ability_main = 3
                 overhead "[ chop ]" 219
-            elseif config__ability_main = config__ability_spinslash
+            elseif config__ability_main = 1
                 overhead "[ spinslash ]" 219
-            elseif config__ability_main = config__ability_rend
+            elseif config__ability_main = 2
                 overhead "[ rend ]" 219
             endif
         endif
@@ -1167,7 +1165,7 @@ while not dead
         endif
     endif
 
-    if config__use_skinning = 1 and timer "timer__carve" >= cooldown__carve and var__combat_target = 0
+    if timer "timer__carve" >= cooldown__carve and var__combat_target = 0
         settimer "timer__carve" 0
         @setvar! var__carve_direct 0
         if config__skin_unowned = 1 and var__carve_crime = 0 and timer "timer__grey_only" >= cooldown__grey_only
@@ -1334,8 +1332,8 @@ while not dead
     # ################################################################################
     # # REAGENTS
     # ################################################################################
-    # First in the pass, so every cast block below reads fresh flags. On the interval, or at once
-    # after a refusal for reagents, so a stale flag cannot send the same doomed cast every pass.
+    # On the interval, or at once after a refusal for reagents, so a stale flag cannot send the
+    # same doomed cast every pass.
     if config__use_magery = 1
         if timer "timer__reagents" >= cooldown__reagents or insysmsg "More reagents are needed"
             settimer "timer__reagents" 0
@@ -1408,7 +1406,7 @@ while not dead
     # so membership is checked before ignore, and only pouch stacks are ignored.
     # No clearignore here: the list also holds the carved corpses. A refused move is found
     # again and retried until the pass budget runs out, then on the next interval.
-    if config__pack_leather = 1 and timer "timer__pack_leather" >= cooldown__pack_leather and var__combat_target = 0
+    if timer "timer__pack_leather" >= cooldown__pack_leather and var__combat_target = 0
         if diffhits < config__heal_hits and not poisoned and not paralyzed
             if not hidden and not queued and not casting and not targetexists
                 settimer "timer__pack_leather" 0

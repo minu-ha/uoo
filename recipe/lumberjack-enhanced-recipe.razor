@@ -1,13 +1,13 @@
 # Recipe for script/gather/lumberjack-enhanced.razor. Build it with: python3 util/build-scripts.py
-# Every setting of the loop is under #@ config, grouped by the module that reads it.
-# The blocks are files in module/, run in the order listed under #@ blocks.
+# The blocks are module/<folder>/<name>.razor files, run in the order listed under #@ blocks.
+# module/base.razor comes first in every loop without a #@ use line.
 #@ output script/gather/lumberjack-enhanced.razor
 
 #@ header
 # Lumberjack gathering with self recovery, independent Tracking setup and one automatic Recall attempt.
 # Needs: One Hatchet, bandages, reagents, recovery and harvest hotkeys. Automatic Recall needs a charged book with a Home rune.
-# Tracking reuses a confirmed, active hunt color. Setup is independent of auto_recall.
-# Housekeeping converts all wood colors to Boards and packs them in the loadout looting pouch every 2 minutes.
+# Tracking reuses a confirmed, active hunt color. Gathering waits for it, for a carried book and for a due Recall.
+# Every 2 minutes Logs of all wood colors become Boards and go into the loadout looting pouch.
 # For Tracking-triggered Recall, set Hunt Frequency to Always Get Closest in the Tracking window.
 # Design and in-game checks: blueprint/lumberjack-pvp-handbook.html part 8.
 # Optional cooldown bars: heal pot, walk, reflect. A missing walk or reflect bar cannot
@@ -23,52 +23,65 @@
 
 #@ blocks
 # Before the loop.
-#@ use core/start                    clears the client queues
-#@ use core/pvp-stop                 stops inside structured PvP, here and at the top of every pass
-#@ use gather/tracking-setup         sets the Tracking hunt filter once
+#@ use escape/tracking           sets the Tracking hunt filter once
 # Every pass, in this order.
-#@ use gather/housekeeping-pass      five second clock for the slow checks
-#@ use core/paralyze                 trapped pouch while held
-#@ use core/cure                     cure potion, else the Cure agent
-#@ use core/heal                     heal potion, else Greater Heal at the emergency line
-#@ use core/bandage                  self bandage
-#@ use core/light-heal               light Heal, the bandage stand-in
-#@ use core/refresh                  Refresh at low stamina
-#@ use gather/auto-recall            one Recall on a Tracking report or low spare weight
-#@ use core/reagents                 reagent flags, read after Tracking so it cannot consume a report
-#@ use gather/harvest                Smart Harvest with the Hatchet
-#@ use core/self-buffs               Reactive Armor, then Magic Reflection
-#@ use gather/lumber-housekeeping    food, Logs into Boards, Boards into the loot pouch
-#@ use core/pass-wait                end of the pass
+#@ use recovery/pouch            trapped pouch while held
+#@ use recovery/cure             cure potion, else the Cure agent
+#@ use recovery/heal             heal potion, else Greater Heal at the emergency line
+#@ use recovery/bandage          self bandage
+#@ use recovery/light-heal       light Heal, the bandage stand-in
+#@ use recovery/refresh          Refresh at low stamina
+#@ use escape/recall             one Recall on a Tracking report or low spare weight
+#@ use recovery/reagents         reagent flags, read after the Tracking reports so it cannot consume one
+#@ use gather/lumberjacking      Smart Harvest with the Hatchet
+#@ use buff/spells               Reactive Armor, then Magic Reflection
+#@ use buff/food                 eats from a tray
+#@ use pack/lumber               Logs into Boards, Boards into the loot pouch
 
 #@ config
-# Only the settings this loop changes. Every other setting keeps its module default.
-# A comment right above a setting says why, and shows up in the loop as "# This loop: ...".
-# See every setting with the value this loop uses: python3 util/build-scripts.py --settings recipe/lumberjack-enhanced-recipe.razor
+#| Only the settings this loop changes. Every other setting keeps the default in its module.
+#| Put the reason in "#" lines right above the value. util/build-scripts.py writes the "#|" lines.
+#| Every setting of this loop: python3 util/build-scripts.py --settings recipe/lumberjack-enhanced-recipe.razor
 
+#| ---- module/base.razor ----------------------------------------------------------------
+#| 1 when warmode is the player's manual control window: our casts stand down while it is on.
+#| Default 0. Read by recovery/cure, recovery/heal, recovery/light-heal, buff/spells.
 # Warmode is the player's: recovery casts and buffs stand down, potions still go out.
 @setvar! config__warmode_is_manual 1
 
+#| ---- module/recovery/heal.razor -------------------------------------------------------
+#| Missing hit points that cast Greater Heal when no heal potion went out on this pass.
+#| Not below heal_hits.
+#| Default 35. Read by recovery/heal.
 # Bandages handle ordinary damage, so Greater Heal waits for 45.
-# heal_hits also holds harvest back, light_hits the food, buffs and lumber packing.
 @setvar! config__emergency_hits 45
 
+#| ---- module/buff/spells.razor ---------------------------------------------------------
+#| Minimum current mana to start Reactive Armor.
+#| Default 4. Read by buff/spells.
 # Buffs keep the handbook's 20 mana for Greater Heal and Teleport against a PK.
 @setvar! config__mana_reactive_armor 24
+
+#| Minimum current mana to start Magic Reflection.
+#| Default 14. Read by buff/spells.
+# Same reserve: the base 14 plus the handbook's 20.
 @setvar! config__mana_magic_reflect 34
 
+#| Missing hit points at which buffs are not started, and cut mid cast.
+#| Default 35. Read by buff/spells.
 # Buffs only while nearly full, so gathering never trades a heal for one.
 @setvar! config__buff_max_loss 15
 
+#| 1 buffs while poisoned. 0 holds them back and cuts one that is casting, so the cure goes first.
+#| Default 1. Read by buff/spells.
 # The cure goes first: no buffs while poisoned.
 @setvar! config__buff_when_poisoned 0
 
 #@ setup
-if config__pack_lumber = 1
-    if not varexist global__my_looting_pouch or not find global__my_looting_pouch backpack
-        overhead "[ loot pouch, pick ]" 255
-        setvar global__my_looting_pouch
-    endif
+# pack/lumber moves Boards into this pouch. restock/loadout picks it, this asks when it is missing.
+if not varexist global__my_looting_pouch or not find global__my_looting_pouch backpack
+    overhead "[ loot pouch, pick ]" 255
+    setvar global__my_looting_pouch
 endif
 
 # loot/recycle runs the hotkey named in this list when it finishes or gives up. A list, because
@@ -80,7 +93,7 @@ clearlist 'list__resume_script'
 pushlist 'list__resume_script' 'Play Script: gather\lumberjack-enhanced'
 
 if config__sysmsg = 1
-    sysmsg "Lumberjack enhanced v17 loaded: auto recall={{config__auto_recall}}, tracking color={{config__tracking_color}}." 88
+    sysmsg "Lumberjack enhanced v18 loaded: tracking color={{config__tracking_color}}." 88
 endif
 if config__chatty = 1
     overhead "[ lumberjack, on ]" 290

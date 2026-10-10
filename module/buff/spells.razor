@@ -1,19 +1,20 @@
 # Reactive Armor, then Magic Reflection, whenever one is missing.
-#@ needs core/wait core/output core/switches core/reagents
 #@ hotkeys > Interrupt
-#@ settings
+
+#@ config
+# Reactive Armor on or off.
 @setvar! config__use_reactive_armor 1
+# Magic Reflection on or off.
 @setvar! config__use_magic_reflect 1
-# Minimum current mana to start each buff.
+# Minimum current mana to start Reactive Armor.
 @setvar! config__mana_reactive_armor 4
+# Minimum current mana to start Magic Reflection.
 @setvar! config__mana_magic_reflect 14
 # Missing hit points at which buffs are not started, and cut mid cast.
 @setvar! config__buff_max_loss 35
-# 0 keeps buffs back while poisoned and cuts one that is casting.
+# 1 buffs while poisoned. 0 holds them back and cuts one that is casting, so the cure goes first.
 @setvar! config__buff_when_poisoned 1
-#@ state
-# 1 while another block holds our buff casts back. Nothing sets it unless the loop has such a block.
-@setvar! var__hold_casts 0
+
 #@ loop
     # ################################################################################
     # # SELF BUFFS

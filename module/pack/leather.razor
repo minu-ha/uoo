@@ -1,8 +1,6 @@
-# Moves carried leather into the loot pouch every couple of minutes, between fights.
-#@ needs core/wait core/output core/message core/heal gather/combat-target
-#@ settings
-# Move carried leather into the looting pouch selected by loadout.
-@setvar! config__pack_leather 1
+# Moves carried leather into the loot pouch every 2 minutes, between fights.
+# The pouch is global__my_looting_pouch, picked by restock/loadout or by the recipe's setup.
+
 #@ wait
 # Allow inventory updates after opening the pouch and each drag/drop.
 @setvar! wait__pack_item 500
@@ -10,13 +8,11 @@
 @setvar! wait__pack_batch 2500
 # 120000 = 2 minutes. Use 180000 for 3 minutes.
 @setvar! cooldown__pack_leather 120000
+
 #@ timer
-if not timerexists "timer__pack_leather"
-    createtimer "timer__pack_leather"
-endif
-#@ ready
 # Packing waits one full interval.
-settimer "timer__pack_leather" 0
+timer__pack_leather 0
+
 #@ loop
     # ################################################################################
     # # LEATHER
@@ -26,7 +22,7 @@ settimer "timer__pack_leather" 0
     # so membership is checked before ignore, and only pouch stacks are ignored.
     # No clearignore here: the list also holds the carved corpses. A refused move is found
     # again and retried until the pass budget runs out, then on the next interval.
-    if config__pack_leather = 1 and timer "timer__pack_leather" >= cooldown__pack_leather and var__combat_target = 0
+    if timer "timer__pack_leather" >= cooldown__pack_leather and var__combat_target = 0
         if diffhits < config__heal_hits and not poisoned and not paralyzed
             if not hidden and not queued and not casting and not targetexists
                 settimer "timer__pack_leather" 0

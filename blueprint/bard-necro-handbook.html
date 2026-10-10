@@ -3002,8 +3002,9 @@ Peace 슬롯이 열렸는데 대상이 진정이나 브레이크 중이면, 전�
 </ul>
 
 <h3 id="05.I">05.I 공통 pvp의 mage 설정</h3>
-<p><a href="../script/combat/pvp.razor">combat/pvp.razor</a>에서 <code>config__use_magery = 1</code>·<code>config__use_weapon = 0</code>으로
-공통 <a href="pvp.html#05.E">PvP 자기관리 루프</a>의 자기 마법을 사용한다. 각 기능은 독립 설정이며 템플릿 프리셋은 없다.
+<p><a href="../script/combat/pvp.razor">combat/pvp.razor</a>는 <code>config__use_magery = 1</code>로
+공통 <a href="pvp.html#05.E">PvP 자기관리 루프</a>의 자기 마법을 사용한다. 무기 교체가 필요 없으면 <a href="../recipe/pvp-recipe.razor">recipe/pvp-recipe.razor</a>에서
+<code>fight/weapon-swap</code> 줄을 빼고 다시 조립한다 (<a href="modules.html#07.B">modules.html</a> 07.B절). 각 기능은 독립 설정이며 템플릿 프리셋은 없다.
 PK를 만나면 F1을 끄고 이것을 켠다. 이전 템플릿별 PvP 파일은 삭제했으므로 F4를 Razor에서
 <code>Play Script: combat\pvp</code>로 다시 연결한다 (<a href="hotkeys.html#04">hotkeys.html</a> 04절).</p>
 <p>2026-10-05 상대 탐색·Q 대상 캐시·자동 TK·Explosion→EB·소환수 공격을 제거했다.

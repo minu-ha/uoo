@@ -438,20 +438,21 @@ enhanced와 PvP 자기관리 루프는 별도 핫키로 수동 전환한다. 자
 
 <h3 id="08.A">08.A 실행 흐름</h3>
 <ol>
-<li>설정·타이머·상태를 초기화한다. <code>config__use_tracking = 1</code>이면 시작 부분에서
+<li>설정·타이머·상태를 초기화한다. 레시피에 <code>escape/tracking</code>이 있고 Tracking 스킬이 있으면 시작 부분에서
 Tracking을 준비한다. 같은 클라이언트 세션에서 확인한 색상으로 Hunting이 켜져 있으면 재사용한다.
-첫 실행은 현재 창의 색상을 읽고, 변경할 때만 Hunting을 끈 뒤 필터를 순환한다. 자동 리콜과 무관하며 기본 필터는 red다.</li>
+첫 실행은 현재 창의 색상을 읽고, 변경할 때만 Hunting을 끈 뒤 필터를 순환한다. 리콜 설정과 무관하며 기본 필터는 red다.</li>
 <li>루프에서는 마비 해제·해독·붕대·포션·주문 회복을 먼저 처리한다.
-생존 → 자동 리콜 → Hatchet 확인·Smart Harvest → 자기 버프 → housekeeping 순서다.
-시약·음식·목재 정리는 가장 아래에서 처리한다. 집 문·Stockpile 기능은 제거했다.</li>
-<li>생존 바로 뒤의 <code>AUTO RECALL</code>에서 리콜용 Tracking 감지·책·무게·요청·실패 응답을 한 곳에서 처리한다.
-자동 리콜을 끄면 이 블록 전체를 건너뛰며 감지 때문에 채집이나 자기 버프를 중단하지 않는다.</li>
-<li>리콜이 필요해지면 같은 패스부터 채집·목재 정리·준비 버프를 보류하고 회복을 계속한다.
+생존 → 자동 리콜 → 시약 → Hatchet 확인·Smart Harvest → 자기 버프 → 음식 → 목재 정리 순서다.
+v18부터 음식과 목재 정리는 housekeeping 주기 없이 각자의 타이머를 매 패스 본다. 집 문·Stockpile 기능은 제거했다.
+블록 이름과 순서의 정본은 <code>recipe/lumberjack-enhanced-recipe.razor</code>, 모듈 구성은 <a href="modules.html#02">modules.html</a> 02절이다.</li>
+<li>생존 바로 뒤의 <code>RECALL</code> (<code>escape/recall</code>)에서 리콜용 Tracking 감지·책·무게·요청·실패 응답을 한 곳에서 처리한다.
+자동 리콜을 쓰지 않으려면 레시피에서 이 블록을 빼고 다시 조립한다. 그러면 감지·책 때문에 채집이나 자기 버프를 중단하지 않는다.</li>
+<li>리콜이 필요해지면 같은 패스부터 채집·목재 정리·준비 버프를 보류하고 회복을 계속한다. v18부터 음식은 리콜 결정과 무관하게 먹는다.
 <code>RecallCharge Home</code>은 실제 Recall 주문 요청이다. Moongate를 이용하는 동작은 없다.
 요청은 실행당 한 번이며, 명령 전송을 도착으로 취급하지 않는다. 싸우려면 사용자가 PvP 스크립트로 전환한다.</li>
 <li>서버의 Tracking·저장·채집 결과와 채집 거절 안내는 프로필 오버헤드에서 표시한다.
 리콜 전송 뒤 실제 거절 문구는 같은 리콜 블록에서 안내한다.
-시약 부족 메시지는 리콜 감지 뒤에 읽고 다음 housekeeping의 시약 재검색을 예약한다.</li>
+시약 부족 메시지는 리콜 감지 뒤에 읽고 같은 패스에서 시약을 다시 읽는다.</li>
 <li><code>util/check.sh script/gather/lumberjack-enhanced.razor</code>, <code>util/check-blueprint.sh</code>,
 <code>git diff --check</code>와 두 프로필의 XML·오버헤드 변경 범위를 확인한다.
 아래 인게임 확인 항목은 정적 검증과 구분한다.</li>
@@ -519,31 +520,37 @@ v14는 파우치 소속 검사 전에 ignore하던 순서를 바로잡는다.
 공식 문서상 ignore는 검색을 제외하므로 판별은 ignore 전에 한다. 직접 serial 검색의 적용 차이는
 <a href="razor.html#03">razor.html</a> 03절과 구분하며, 현재 포크에서 이 순서가 실제 반복 이동의 원인인지는 아직 확인되지 않았다.
 근거와 재확인 범위는 <a href="razor.html#03">razor.html</a> 03절과 <a href="open-items.html#09">open-items.html</a> 09절에 있다.</p>
+<p>2026-10-10 v18은 모듈을 관심사별 폴더로 다시 나누면서 housekeeping 주기를 없앴다 (<a href="modules.html#08">modules.html</a> 08절).
+리콜 블록이 자기 5초 주기로 책·Hunting·무게를 점검하고, 음식 (<code>buff/food</code>)과 목재 정리 (<code>pack/lumber</code>)는 각자의 타이머를 매 패스 본다.
+리콜 결정·책 없음·Hunting 없음은 리콜 블록이 패스마다 <code>var__hold_gathering</code> 하나로 합치고, 채집과 목재 정리는 그 값만 읽는다.
+<code>config__auto_recall</code>·<code>use_tracking</code>·<code>pack_lumber</code>는 없앴다. 블록을 끄려면 레시피에서 그 블록을 뺀다.
+음식은 skinning-enhanced와 같은 블록이 되어, 다쳤거나 독·워모드·리콜 결정 중에도 먹는다.</p>
 <table>
 <thead><tr><th>설정</th><th>기본값과 의미</th></tr></thead>
 <tbody>
 <tr><td><code>config__chatty</code>, <code>config__sysmsg</code></td>
 <td>각 1. chatty는 선택적인 스크립트 오버헤드, sysmsg는 시작 버전·리콜 원인·도끼 장착 요청·목재 정리의 Journal 진단이다.
 서로 독립적으로 끌 수 있다. 부족·차단 경고와 프로필의 서버 사건 표시는 두 설정을 꺼도 유지한다</td></tr>
-<tr><td><code>config__auto_recall</code></td>
-<td>1. 리콜에만 적용한다. 0이면 리콜 블록의 감지 메시지·Hunting 점검·책·여유 무게·실패 응답 조회를 건너뛴다.
+<tr><td><code>escape/recall</code> 블록 (v17까지 <code>config__auto_recall</code>)</td>
+<td>레시피의 <code>#@ use escape/recall</code>. 빼고 조립하면 감지 메시지·Hunting 점검·책·여유 무게·실패 응답 조회가 모두 없고,
+<code>var__hold_gathering</code>을 세우는 블록도 없어 책·Hunting 때문에 채집을 보류하지 않는다.
 시작 부분의 Tracking 설정과 프로필 화면 표시는 유지한다. 가까운 red 때문에 채집·자기 회복을 중단하지 않는다</td></tr>
-<tr><td><code>config__recall_on_detection</code>, <code>use_tracking</code>, <code>tracking_color</code>, <code>show_tracking</code></td>
-<td>1, 1, 1, 0. <code>use_tracking</code>은 시작 설정을 독립적으로 제어한다.
+<tr><td><code>config__recall_on_detection</code>, <code>tracking_color</code>, <code>show_tracking</code></td>
+<td>1, 1, 0. 시작 설정은 레시피의 <code>escape/tracking</code>이 하고 (v17까지 <code>use_tracking</code>), Tracking 스킬이 0이면 건너뛴다.
 색상 값은 1 red / 2 grey / 3 orange / 4 세 그룹 전체다. 설정은 시작 부분에서 한 번만 한다.
-감지 리콜은 <code>auto_recall</code>·<code>recall_on_detection</code>·<code>use_tracking</code>을 모두 켜고 Hunting을 확인한 경우에만 동작한다.
+감지 리콜은 <code>recall_on_detection</code>이 1이고 Hunting을 확인한 경우에만 동작한다.
 발견 시 다음 패스부터 채집·준비 버프를 보류하고 리콜을 요청하는 옵션이다</td></tr>
 <tr><td><code>config__recall_at_any_distance</code></td>
 <td>0. 기본은 기존 1~45 steps 분기에서 리콜 필요 여부를 기록한다.
 1이면 준비된 필터의 발견 문구만으로 리콜을 요청한다. 화면 알림은 프로필에서 처리한다</td></tr>
 <tr><td><code>config__recall_on_weight</code>, <code>weight_remaining</code>, <code>require_runebook</code></td>
-<td>1, 10, 1. 자동 리콜을 켠 경우 남은 무게 10 이하에서 리콜 필요 여부를 기록한다.
+<td>1, 10, 1. 리콜 블록이 있으면 남은 무게 10 이하에서 리콜 필요 여부를 기록한다.
 책은 5초 주기로 보유 여부를 캐시하고, 마지막 설정은 책 없음으로 채집을 보류할지 정한다.
 0이어도 실제 리콜에는 책이 필요하다. 책 검사는 충전량이나 Home 룬의 존재를 확인하지 않는다</td></tr>
 <tr><td><code>config__heal_hits</code>, <code>emergency_hits</code>, <code>light_hits</code>, <code>use_light_heal</code></td>
 <td>잃은 HP 35, 45, 15와 0. 평소 붕대, 35부터 힐 포션, 45부터 Greater Heal을 보조로 쓴다.
 붕대를 쓸 수 없으면 15부터 Smart Heal/Cure를 대타로 시도한다. v16부터 <code>use_light_heal</code>이 1이면 붕대 옆에서도 쓴다.
-독이면 Cure 포션과 해독 주문을 먼저 쓴다. v17부터 이 회복은 pvp와 같은 core 블록이다 (<a href="modules.html#06">modules.html</a> 06절).
+독이면 Cure 포션과 해독 주문을 먼저 쓴다. v17부터 이 회복은 pvp와 같은 <code>recovery/</code> 모듈이다 (<a href="modules.html#02">modules.html</a> 02절).
 워모드에서 회복 주문이 서는 규칙은 <code>warmode_is_manual</code> 1로 남겼다</td></tr>
 <tr><td><code>config__use_reactive_armor</code>, <code>use_magic_reflect</code></td>
 <td>각 1. 리콜이 필요하지 않고 안전할 때 마나 24, 34부터 각각 시전한다.
@@ -552,8 +559,8 @@ v14는 파우치 소속 검사 전에 ignore하던 순서를 바로잡는다.
 <tr><td><code>config__use_potions</code></td>
 <td>1. 독·피해·스태미나에 대한 기존 Cure·Heal·Refresh 포션을 사용한다.
 리콜 준비용 Strength·Agility 포션과 그 옵션은 제거했다</td></tr>
-<tr><td><code>config__pack_lumber</code></td>
-<td>1. Logs 가공과 Boards 파우치 이동을 한 묶음으로 켠다. 0이면 선택·정리 모두 건너뛴다.
+<tr><td><code>pack/lumber</code> 블록 (v17까지 <code>config__pack_lumber</code>)</td>
+<td>레시피의 <code>#@ use pack/lumber</code>. Logs 가공과 Boards 파우치 이동을 한 묶음으로 한다. 빼고 조립하면 정리하지 않는다.
 <code>loadout</code>에서 선택한 <code>global__my_looting_pouch</code>를 재사용하고, 없거나 백팩에 없으면 시작할 때 파우치를 선택한다.
 Logs 7133·Boards 7127은 <a href="item-list.html#15">item-list.html</a> 15절의 값이며 색상은 제한하지 않는다.
 <a href="https://wiki.uooutlands.com/Lumberjacking">공식 Lumberjacking 문서</a>의 Logs 더블클릭 가공 경로를 사용한다</td></tr>
@@ -562,15 +569,15 @@ Logs 7133·Boards 7127은 <a href="item-list.html#15">item-list.html</a> 15절�
 </table>
 <p>축약 설정 이름도 실제 파일에서는 모두 <code>config__</code>로 시작한다.
 남은 설정은 스태미나 15 이하의 Refresh와 출력 빈도다. Hatchet 한 개로 채집하며 예비 수량은 검사하지 않는다.
-빈손 장착은 책·Hunting·무게 준비 조건을 기다리지 않는다. 리콜 결정·회복·수동 입력 가드는 장착과 채집에 공통 적용한다.
-자동 리콜을 꺼도 실제 남은 무게가 0 이하이면 채집을 보류한다.</p>
+빈손 장착은 남은 무게를 기다리지 않는다. v18부터 <code>var__hold_gathering</code> (리콜 결정, 책 필수인데 책 없음, 감지 리콜인데 Hunting 없음)은
+장착과 채집을 함께 보류한다. 회복·수동 입력 가드도 장착과 채집에 공통 적용한다.
+리콜 블록이 없어도 실제 남은 무게가 0 이하이면 채집을 보류한다.</p>
 <p>채집 직전에는 <code>if / elseif / else</code> 사슬로 중단 이유를 순서대로 확인한다.
 손의 도끼·남은 무게·수동 입력 중 하나라도 준비되지 않았으면 보류한다.
-그다음 자동 리콜과 책 필수를 켰는데 책이 없는 경우, 감지용 세 설정을 모두 켰는데 Hunting이 없는 경우를 각각 보류한다.
-모든 차단 조건을 통과하면 도구 사용 → 커서 대기 → 자기 타깃을 같은 블록에서 처리한다.
-설정 중 하나라도 0이면 해당 책·Hunting 필수 조건을 건너뛰므로 기존 동작은 유지한다.
-<code>use_tracking = 0</code>은 시작 설정·감지 리콜·Hunting 필수 조건을 끈다.
-자동 리콜의 무게·책 필수 조건은 유지하므로 건강·남은 무게·수동 입력 조건도 별도로 통과해야 한다.
+책·Hunting 조건은 v18부터 이 사슬에 없다. 리콜 블록이 패스마다 리콜 결정과 함께 <code>var__hold_gathering</code> 하나로 합치고,
+채집 블록은 맨 앞 조건에서 그 값만 읽는다. 모든 차단 조건을 통과하면 도구 사용 → 커서 대기 → 자기 타깃을 같은 블록에서 처리한다.
+<code>require_runebook</code>이 0이면 책 조건, <code>recall_on_detection</code>이 0이면 Hunting 조건을 건너뛴다. 리콜 블록을 빼면 둘 다 없다.
+건강·남은 무게·수동 입력 조건은 그와 별도로 통과해야 한다.
 <code>and</code>만 이어진 조건은 합칠 수 있지만 <code>or</code> 예외까지 한 줄로 섞지는 않는다.
 괄호는 이 포크의 확인된 선례가 없으며, CE 원본은 혼합 논리 연산을 왼쪽부터 평가한다.
 <a href="https://github.com/markdwags/Razor/blob/master/Razor/Scripts/Engine/Interpreter.cs">CE Interpreter의 EvaluateLogicalExpression</a>을 참고했다.
@@ -584,18 +591,18 @@ grey는 범죄자 필터의 이름이며 모든 회색 대상을 따로 검색�
 <tbody>
 <tr><td><code>var__recall_needed</code></td>
 <td>0은 채집 계속, 1은 리콜 필요. 감지 또는 여유 무게 부족으로 1이 되면 실행을 다시 시작할 때까지 유지한다.
-채집·준비 버프·목재 정리의 중단 조건으로 직접 사용한다. 숨은 <code>gather_ready</code> 캐시는 없다</td></tr>
+1이면 리콜 블록이 같은 패스에 <code>var__hold_casts</code>와 <code>var__hold_gathering</code>을 1로 두어 준비 버프·채집·목재 정리를 세운다</td></tr>
 <tr><td><code>var__recall_sent</code></td>
 <td>0은 명령 미전송, 1은 RecallCharge 전송. 회복 루프가 계속 도는 동안 중복 요청과 리콜용 재검색을 막는다.
 실패해도 1을 유지하며 새 요청은 재실행으로 시작한다. 명령 전송을 도착 성공으로 보지 않는다</td></tr>
 <tr><td><code>var__recall_book_available</code></td>
-<td>리콜 책 보유 캐시. 시작값 0에서 첫 패스의 채집 전 점검으로 갱신하고 이후 같은 5초 주기를 사용한다.
-책 필수 설정은 채집 조건에 직접 표시한다. 요청 직전에 책을 한 번 더 확인한다.
-그때 책이 사라졌으면 캐시를 0으로 바꿔 다음 housekeeping까지 검색을 보류한다</td></tr>
+<td>리콜 책 보유 캐시. 시작값 0에서 첫 패스의 채집 전 점검으로 갱신하고 이후 리콜 블록의 5초 점검 주기를 쓴다.
+책 필수이고 0이면 <code>var__hold_gathering</code>이 채집을 세운다. 요청 직전에 책을 한 번 더 확인한다.
+그때 책이 사라졌으면 캐시를 0으로 바꿔 다음 점검까지 검색을 보류한다</td></tr>
 <tr><td><code>var__tracking_filter_confirmed</code>, <code>tracking_hunting_active</code>, <code>tracking_button_answered</code></td>
 <td>설정한 색상에 대한 서버 확인, 최근 확인한 Hunting 활성 여부, 현재 필터 버튼의 응답 여부다.
 필터·버튼 상태는 시작 설정에 필요하며, Hunting 상태의 루프 점검은 감지 리콜을 켜고 리콜 결정을 하기 전까지만 한다.
-감지 리콜을 켰으면 채집 조건에도 확인한 Hunting 활성 여부를 직접 적는다</td></tr>
+감지 리콜을 켰는데 Hunting이 아니면 리콜 블록이 <code>var__hold_gathering</code>으로 채집을 세운다</td></tr>
 <tr><td><code>var__tracking_setup_color</code></td>
 <td>같은 클라이언트 세션에서 확인한 색상 값. Hunting이 켜져 있고 config 색상과 같으면 시작 설정을 재사용한다.
 버프만으로 색상을 알 수 없으므로 첫 실행은 창 또는 서버 응답으로 확인한다.
@@ -605,10 +612,10 @@ grey는 범죄자 필터의 이름이며 모든 회색 대상을 따로 검색�
 같은 채집 블록에서 중립 커서를 <code>target self</code>로 처리하므로 대기 중 다른 자동 행동이 끼어들지 않는다.
 도구 큐가 남았다는 이유로 자기 타깃을 건너뛰지 않는다. 새 수동 시전·숨기·warmode·다른 종류의 커서는 처리하지 않는다.
 시간 초과 뒤 커서가 없으면 자기 타깃을 보내지 않으며, 다음 시도 간격은 이 블록이 끝난 뒤부터 센다</td></tr>
-<tr><td><code>var__housekeeping_pass</code>, <code>regs_*</code>, 시약별 보유 변수</td>
-<td>이번 패스의 housekeeping 예정 여부와 주문별 시약 조합이다. 루프 시작에서 5초 주기의 도래만 기록한다.
-리콜의 책·Hunting·무게 점검은 이 예정값으로 채집 전에 처리하고, 음식·목재 정리는 루프 끝에서 실행한다.
-v17부터 시약은 core 블록이 30초마다, 그리고 부족 안내를 읽은 즉시 갱신한다. 그 블록은 자동 리콜 뒤에 있어 Tracking 줄을 먼저 읽는다</td></tr>
+<tr><td><code>var__recall_check_due</code>, <code>regs_*</code>, 시약별 보유 변수</td>
+<td>이번 패스가 리콜 블록의 5초 점검 차례인지와 주문별 시약 조합이다. v18에서 housekeeping 주기 (<code>var__housekeeping_pass</code>)를 없앴다.
+리콜의 책·Hunting·무게 점검은 이 값으로 채집 전에 처리하고, 음식·목재 정리는 루프 끝에서 각자의 타이머로 실행한다.
+시약은 <code>recovery/reagents</code>가 10초마다, 그리고 부족 안내를 읽은 즉시 갱신한다. 그 블록은 자동 리콜 뒤에 있어 Tracking 줄을 먼저 읽는다</td></tr>
 <tr><td><code>cooldown__harvest_retry</code>, <code>cooldown__harvest_out_retry</code>, <code>var__harvest_retry</code></td>
 <td>기본 재시도 4000ms와 주변 자원 없음 응답 뒤 재시도 2000ms다.
 var__harvest_retry는 다음 시도에 적용할 간격을 기억한다. 처음과 각 시도 직후는 기본값, 자원 없음 응답을 읽으면 짧은 값이다.
@@ -620,14 +627,16 @@ var__harvest_retry는 다음 시도에 적용할 간격을 기억한다. 처음�
 이미 든 도끼가 캐시와 다르면 라벨을 한 번 읽고 도끼 serial을 저장한다. 다른 왼손 도구면 비워 다음 시도에서 도끼를 장착한다.
 새 타이머는 만들지 않고 기존 <code>timer__harvest</code>로 장착 재시도와 채집을 함께 조절한다.
 장착 뒤에는 손 슬롯 serial을 다시 확인하며, 캐시나 요청만으로 성공했다고 표시하지 않는다</td></tr>
-<tr><td><code>var__hold_casts</code></td>
+<tr><td><code>var__hold_casts</code>, <code>var__hold_gathering</code></td>
 <td>v17에서 <code>var__bandage_available</code>·<code>heal_spell</code>·<code>buff_cast</code>를 없앴다. 회복 블록이 각자 지금 상태를 읽고 바로 시전한다.
-리콜이 정해지면 자동 리콜 블록이 <code>var__hold_casts</code>를 1로 두어 자기 버프를 세운다</td></tr>
-<tr><td><code>timer__housekeeping</code>, <code>cooldown__housekeeping</code></td>
-<td>기존 5초 주기를 재사용하며 리콜 전용 scan 타이머는 없다. 리콜 책과 무게는 명령 전송 전까지 점검한다.
+두 값은 <code>module/base.razor</code>가 0으로 선언하는 블록 사이 신호다 (<a href="modules.html#06">modules.html</a> 06절).
+리콜이 정해지면 리콜 블록이 <code>var__hold_casts</code>를 1로 두어 자기 버프를 세운다.
+<code>var__hold_gathering</code>은 리콜 결정·책 없음·Hunting 없음에서 1이 되어 채집과 목재 정리를 세운다</td></tr>
+<tr><td><code>timer__recall_check</code>, <code>cooldown__recall_check</code></td>
+<td>5000ms. v18에서 housekeeping 주기 대신 리콜 블록이 쓰는 점검 주기다. 리콜 책과 무게는 명령 전송 전까지 점검한다.
 Hunting 상태는 리콜 필요 여부를 정하기 전까지만 읽는다. Tracking 메시지는 준비 상태일 때 매 패스 확인하며 무게 판정보다 먼저 처리한다</td></tr>
 <tr><td><code>cooldown__pack_lumber</code>, <code>timer__pack_lumber</code>, <code>wait__lumber_item</code></td>
-<td>120000ms 주기로 housekeeping에서 정리한다. 180000ms로 바꾸면 3분이다. 첫 정리도 이 주기 뒤에 한다.
+<td>120000ms 주기로 정리한다. v18부터 housekeeping을 기다리지 않고 매 패스 이 타이머를 본다. 180000ms로 바꾸면 3분이다. 첫 정리도 이 주기 뒤에 한다.
 입력이 비어 있고 회복이 필요하지 않을 때 시작하며, 묶음별 사용·이동 뒤 500ms를 기다린다.
 작업 중에는 같은 타이머로 단계별 시간을 재고, 정리 끝에서 0으로 돌려 다음 2분을 센다.
 가공·이동 실패와 남은 묶음은 다음 주기에 시도한다. 파우치가 없는 경우도 이 주기로 제한한다</td></tr>
@@ -649,7 +658,7 @@ Boards는 가공 후 현재 인벤토리에서 찾아 변환·병합 전 serial�
 <td>전송 뒤 실제 서버 거절 메시지만 확인한다. 5초 경과 안내와 그 반복 방지 상태는 없다.
 도착과 남은 채집 제한 시간을 추정하지 않고, 거절이나 응답 지연 뒤에도 채집을 자동 재개하지 않는다</td></tr>
 <tr><td>채집 조건과 나머지 타이머</td>
-<td>리콜 필요 여부·실제 무게 한도·책 필수 설정·Hunting 필요 설정·건강·수동 입력 조건을 채집 블록에서 직접 읽는다.
+<td><code>var__hold_gathering</code>·실제 무게 한도·건강·수동 입력 조건을 채집 블록에서 읽는다. 리콜 필요 여부·책·Hunting은 리콜 블록이 그 값으로 합친다.
 회복·버프·채집 재시도와 시약·음식 주기는 각각 유지한다. 서버 저장 상태는 별도로 관리하지 않는다</td></tr>
 </tbody>
 </table>
@@ -659,7 +668,7 @@ Boards는 가공 후 현재 인벤토리에서 찾아 변환·병합 전 serial�
 시작 설정에서 Hunting을 멈추고 필터를 확인한 뒤에는 <code>clearsysmsg</code>로 이전·중간 필터의 메시지를 비운다.</p>
 <p>리콜 감지는 채집 전에 읽으므로 발견된 경보는 같은 패스의 채집·정리를 보류한다.
 채집의 3초 커서 대기나 목재 정리 중 새로 도착한 경보는 다음 패스에서 읽으며,
-해당 동작 중 계속 감지하는 것은 아니다. 시약 부족은 리콜 감지 뒤에 읽고 다음 housekeeping에 반영한다.
+해당 동작 중 계속 감지하는 것은 아니다. 시약 부족은 리콜 감지 뒤에 읽고 같은 패스에서 시약을 다시 읽는다.
 목재는 각 가공·이동 요청 사이에서 회복·수동 입력·큐 상태를 다시 확인한다.
 단계별 시간 예산이 끝나면 남은 목재는 다음 정리 주기로 넘겨 생존·채집 점검으로 돌아간다.</p>
 <p>2026-10-05 사용자가 목재 가공·파우치 이동 성공 뒤 다른 Logs가 남고 채집이 멈춘다고 보고했다.
@@ -680,13 +689,13 @@ END 뒤에도 채집이 보류되면 큐·커서 안내와 리콜·책·Hunting 
 <li>Tracking 감지 리콜을 사용할 때 Tracking 창의 Hunt Frequency를 <strong>Always Get Closest</strong>로 둔다.
 스크립트는 대상 필터를 맞추지만 추적 빈도 모드를 바꾸지는 않는다.
 공식 모드의 차이는 <a href="https://wiki.uooutlands.com/Tracking">Tracking 문서</a>의 Hunting 항목을 본다.</li>
-<li><code>config__auto_recall = 1</code>로 사용할 때는 충전한 책에 <code>Home</code> 룬을 준비한다.
+<li>레시피가 <code>escape/recall</code>을 쓰면 충전한 책에 <code>Home</code> 룬을 준비한다.
 다른 이름이면 파일의 <code>say "[RecallCharge Home"</code> 한 줄을 바꾼다.
 명령 의미는 <a href="https://wiki.uooutlands.com/Commands">공식 Commands 문서</a>의 RecallCharge 항목에 있다.</li>
 <li>Hatchet·붕대·시약·포션을 넣고 <code>Use item in hand</code>, <code>Bandage Self</code>, 각 Drink 핫키,
 <code>&gt; Smart Heal/Cure Self</code>, <code>&gt; Greater Heal/Cure Self</code>, <code>&gt; Interrupt</code>,
 <code>Cancel Current Target</code>가 현재 캐릭터에서 동작하는지 확인한다.</li>
-<li><code>config__pack_lumber = 1</code>이면 백팩 안의 파우치를 준비한다. 시작 시 <code>[ loot pouch, pick ]</code>이 뜨면 한 번 선택한다.
+<li>백팩 안의 파우치를 준비한다. 파우치가 정해지지 않았거나 백팩에 없으면 시작 시 <code>[ loot pouch, pick ]</code>이 뜨고, 한 번 선택한다.
 이미 <code>loadout</code>으로 지정했다면 그 값을 사용한다. 실행 중 파우치가 없으면 <code>[ loot pouch, out ]</code>을 표시하고 정리는 건너뛴다.</li>
 <li>현재 캐릭터의 <code>heal pot</code>, <code>walk</code>, <code>reflect</code> 바를 확인한다.
 없는 바는 0으로 보이므로 이동 차단과 Reflect 재시전 제한을 보호하지 못한다. 설정 변경은 별도 작업이다.</li>
@@ -695,22 +704,22 @@ END 뒤에도 채집이 보류되면 큐·커서 안내와 리콜·책·Hunting 
 <thead><tr><th>상황</th><th>예상과 실패 판정</th></tr></thead>
 <tbody>
 <tr><td>안전한 나무 옆에서 시작, 기존 필터가 몬스터 또는 우호 플레이어</td>
-<td>sysmsg ON의 <code>Lumberjack enhanced v17 loaded</code>와 chatty ON의 <code>[ lumberjack, on ]</code> 뒤 기본 red 필터를 확인하고 Hunting을 유지한다.
+<td>sysmsg ON의 <code>Lumberjack enhanced v18 loaded</code>와 chatty ON의 <code>[ lumberjack, on ]</code> 뒤 기본 red 필터를 확인하고 Hunting을 유지한다.
 재실행에서 확인한 색상의 Hunting이 켜져 있으면 창·버튼 조작이 없어야 한다.
-자동 리콜 OFF에서도 <code>use_tracking = 1</code>이면 설정해야 한다. 기존 Hunting을 꺼 버리면 실패.
+레시피에 리콜 블록이 없어도 <code>escape/tracking</code>이 있으면 설정해야 한다. 기존 Hunting을 꺼 버리면 실패.
 감지 리콜 ON에서 필터 확인이 안 되면 <code>[ track, miss ]</code> 또는 <code>[ track, check ]</code> 후 채집을 보류한다</td></tr>
 <tr><td>Tracking 설정 후 장시간 채집, Hunting 해제, 시작할 때 수동 시전</td>
 <td>채집 중 Tracking 창이나 필터 버튼을 다시 조작하면 실패. 다른 색상으로 바꾸기 전 Hunting을 먼저 끄고,
 설정 중 곰 같은 중간 필터의 추적 문구로 리콜하지 않아야 한다.
 Hunting 해제는 감지 리콜 ON일 때 다음 채집 전 상태 점검에서 채집 보류로 반영한다.
-자동 리콜 OFF에서는 Hunting 때문에 채집을 보류하지 않는다.
+리콜 블록이 없거나 <code>recall_on_detection</code>이 0이면 Hunting 때문에 채집을 보류하지 않는다.
 초기 설정을 못 마친 경우 회복은 계속하며, 안전해진 뒤 재실행해 필터와 Hunting을 다시 확인한다</td></tr>
 <tr><td>grey·orange·전체 필터 선택</td>
 <td>2·3·4로 각각 재실행해 범죄자·적대 길드·전체 필터 확인 문장이 맞는지 기록한다.
 선택한 필터와 다르면 감지 리콜 ON일 때 채집을 보류한다. 감지 화면 표시는 프로필의 <code>[ track, … ]</code>를 사용한다</td></tr>
 <tr><td>Hatchet 없음·교체·손에 다른 무기, 나무 고갈</td>
 <td>손과 백팩에 도끼가 모두 없으면 <code>[ hatchet, out ]</code>. 한 개만 있어도 수량 경고 없이 채집한다.
-빈손이면 책·Hunting이 미준비이거나 무게가 가득 차도 캐시한 백팩 도끼를 장착한다.
+빈손이면 무게가 가득 차도 캐시한 백팩 도끼를 장착한다. v18부터 책 필수인데 책이 없거나 감지 리콜인데 Hunting이 없으면 장착도 기다린다.
 sysmsg ON이면 <code>Hatchet equip requested: stored serial=…</code>이 나오고 1000ms 뒤 루프로 돌아온다.
 다음 시도에서 왼손 serial이 <code>var__my_hatchet</code>과 같은 경우에만 <code>Use item in hand</code>로 사용한다.
 장착을 거절한 경우나 캐시가 백팩에만 남은 경우 채집으로 넘어가면 실패다. 다른 왼손 장비만 비우고 오른손은 수동으로 처리한다.
@@ -730,7 +739,7 @@ sysmsg ON이면 <code>Hatchet equip requested: stored serial=…</code>이 나�
 <td>실행 후 2분에 일반·특수 Logs가 Boards로 바뀌고 선택한 파우치로 이동해야 한다.
 기존 Boards와 합쳐진 묶음도 옮기며 이미 파우치에 있던 Boards를 다시 들어 올리면 실패다.
 가공 실패·파우치 용량 부족은 묶음당 한 번만 요청하고 다음 주기까지 기다려야 한다.
-옵션 OFF·아직 주기 전·기존 커서·시전·피해·리콜 결정 뒤에는 정리하지 않는다.
+아직 주기 전·기존 커서·시전·피해와 <code>var__hold_gathering</code> (리콜 결정·책 없음·Hunting 없음)일 때는 정리하지 않는다.
 중간에 수동 입력이나 회복 조건이 생기면 다음 묶음 전 중단하고 기존 커서는 건드리지 않아야 한다
 sysmsg ON에서 Lumber pack BEGIN → convert/skip/move request → END가 나오고 채집이 재개되는지 확인한다.
 파우치 안 Boards는 skip만 기록하고 이동시키지 않아야 한다. 다음 주기에도 새로 생긴 백팩 Boards만 이동 요청해야 한다.
@@ -745,7 +754,7 @@ sysmsg ON에서 Lumber pack BEGIN → convert/skip/move request → END가 나�
 검색어·hue·숫자 자리의 정본은 <a href="overheads.html#07">overheads.html</a> 07절이다</td></tr>
 <tr><td>독, 보통 피해, 큰 피해, 포션·붕대·시약 부족</td>
 <td>채집보다 해독과 회복이 먼저다. 부족하면 <code>[ cure pot, out ]</code>, <code>[ bandage, out ]</code>,
-<code>[ heal pot, out ]</code>. 시약은 첫 housekeeping에서 준비되고, 부족 안내를 패스 끝에서 확인한 뒤 다음 housekeeping에서 다시 읽어야 한다.
+<code>[ heal pot, out ]</code>. 시약은 첫 패스에서 읽고, 이후 10초마다와 부족 안내를 읽은 즉시 다시 읽어야 한다.
 포션 재사용 불가 중 반복 음용하거나 붕대 진행 중 계속 새 붕대를 쓰면 실패</td></tr>
 <tr><td>수동 프리캐스트·폭발 포션 커서, warmode, 이동</td>
 <td>기존 커서를 채집이 자기에게 보내지 않아야 한다. warmode에서는 채집·자동 주문을 보류한다.
@@ -755,9 +764,9 @@ sysmsg ON에서 Lumber pack BEGIN → convert/skip/move request → END가 나�
 <td>기본 설정에서는 46 steps로 리콜하지 않고, 45 steps에서 리콜 필요 여부를 기록한다.
 화면의 추적 안내는 프로필에서 나온다. 채집 전 감지한 같은 패스부터 채집을 보류해야 한다.
 시약 부족·시전 끊김 안내가 함께 도착해도 감지를 놓치지 않는지 확인한다</td></tr>
-<tr><td>자동 리콜 끔, 책 없음, 남은 무게 1~10, 가까운 red</td>
-<td><code>config__auto_recall = 0</code>이면 책이나 여유 무게 때문에 채집을 보류하거나 RecallCharge를 요청하면 실패.
-Tracking 시작 설정은 <code>use_tracking</code>에 따라 실행한다.
+<tr><td>리콜 블록 없음, 책 없음, 남은 무게 1~10, 가까운 red</td>
+<td>레시피에서 <code>escape/recall</code>을 빼고 조립하면 책이나 여유 무게 때문에 채집을 보류하거나 RecallCharge를 요청하면 실패.
+Tracking 시작 설정은 <code>escape/tracking</code>이 있으면 실행한다.
 루프에서 리콜용 버프·감지 메시지를 조회하거나 가까운 red 때문에 채집·자기 버프를 중단하면 실패. 화면 안내는 유지한다</td></tr>
 <tr><td>리콜 허용·Heat of Battle·마나 부족·룬 없음·지연 응답</td>
 <td>요청하면 <code>[ recall, on ]</code>, 읽은 서버 거절은 <code>[ recall, blocked ]</code>, 마나 부족은 <code>[ mana, low ]</code>.
@@ -766,15 +775,18 @@ sysmsg ON이면 <code>Recall trigger: Tracking report</code> 또는 <code>Recall
 Heat of Battle 버프만 보고 명령 전송 전에 차단하면 실패. 실제 서버의 허용·거절을 별도로 기록한다.
 시간만 지나서는 결과 안내를 띄우지 않는다. 전송 뒤 회복은 계속하고 채집은 재실행 전까지 보류한다.
 실제 도착은 화면으로 확인한다. 같은 실행에서 Recall을 다시 요청하거나 준비용 Strength·Agility 포션을 마시면 실패.
-요청 직전 책을 제거한 경우 다음 housekeeping까지 재검색을 보류하는지도 확인한다</td></tr>
+요청 직전 책을 제거한 경우 다음 5초 점검까지 재검색을 보류하는지도 확인한다</td></tr>
 <tr><td>무게 리콜 켬·끔, 실제 무게 한도, 여행 직후</td>
-<td>자동 리콜과 무게 리콜을 모두 켜면 다음 채집 전 상태 점검에서 <code>[ weight, low ]</code> 이후 채집 중단과 리콜 요청이 나와야 한다.
+<td>무게 리콜을 켜면 (기본) 다음 채집 전 5초 점검에서 <code>[ weight, low ]</code> 이후 채집 중단과 리콜 요청이 나와야 한다.
 무게 리콜을 끄면 여유 조건으로 멈추지 않는다. 실제 남은 무게 0 이하에서는 채집을 보류한다.
 여행 거절은 두 프로필에서 <code>[ harvest, wait ]</code>로 표시한다.
 서버는 실제 이동 후 60초 동안 채집을 제한한다. 스크립트의 4초 재시도로 이 제한이 풀리지는 않는다.
 거절 안내를 받은 때부터 새 60초를 세는 동작은 없다.
 주변 자원이 없으면 <code>[ harvest, out ]</code>, 나무 고갈 문장이면 <code>[ wood, out ]</code>을 보고 다음 장소로 이동한다.
 채집 불가도 프로필에서 한 번 표시되며, 스크립트의 중복 알림이 뜨면 실패</td></tr>
+<tr><td>음식 (v18)</td>
+<td>Food Satisfaction이 없으면 60초마다 백팩의 tray를 한 번 먹는다. v18부터 다쳤거나 독·워모드·리콜 결정 중에도 먹는다.
+버프가 있는데 먹거나, 먹는 동작이 기존 커서·시전·큐를 덮으면 실패</td></tr>
 <tr><td>서버 저장 안내</td>
 <td>저장 시작·완료 알림은 기존 프로필에서 나온다. 스크립트에 별도 저장 상태나 저장 문구에 따른 중단·재개 분기는 없다</td></tr>
 
@@ -807,8 +819,8 @@ Scripts 탭의 Reload all scripts 뒤 Play로 반복 확인하고, 외부 파일
 만피에서 다음 붕대를 준비하는 자기 MA는 수동으로 남긴다. 기준과 입력 경합의 한계는 공통 문서 05.E절을 따른다.</p>
 
 <h3 id="09.B">09.B 독립 설정</h3>
-<p>마법·무기·붕대를 모두 사용하려면 <code>config__use_magery = 1</code>·<code>config__use_weapon = 1</code>·<code>config__use_bandages = 1</code>로 둔다.
-세 기능은 현재 기본 1이다. Magery가 없는 템플릿은 Magery만 0으로 바꾼다.
+<p>마법과 붕대는 <code>config__use_magery</code>·<code>config__use_bandages</code>가 기본 1이고, 무기 교체는 레시피의 <code>fight/weapon-swap</code> 블록이 맡는다.
+지금 pvp에는 셋이 모두 들어 있다. Magery가 없는 템플릿은 Magery만 0으로 바꾼다.
 회복 마나와 자원을 남기려면 RA·Reflect·Resist 포션 중 불필요한 옵션을 각각 0으로 끈다.
 시폰용 자기 MA와 버섯의 자동화 옵션은 제거했다.
 한 기능을 바꾸어도 다른 기능의 설정은 덮어쓰지 않는다.</p>

@@ -1,14 +1,14 @@
-# The enemy picked with lasttarget, kept while it stays within 12 tiles. Carving and other self
-# targets move lasttarget, so the blocks read this copy. Sets var__fighting for the stat potions.
-#@ needs core/output
+# Remembers the enemy picked with lasttarget while it stays within 12 tiles.
+# Sets var__fighting from it. Carving and other self targets move lasttarget, so blocks read
+# this copy.
+
 #@ wait
+# A remembered enemy out of range this long is dropped.
 @setvar! cooldown__combat_target_grace 1200
+
 #@ timer
-if not timerexists "timer__combat_target_grace"
-    createtimer "timer__combat_target_grace"
-endif
-#@ ready
-settimer "timer__combat_target_grace" cooldown__combat_target_grace
+timer__combat_target_grace cooldown__combat_target_grace
+
 #@ state
 # The enemy picked with lasttarget. Carving overwrites lasttarget, so combat potions and the
 # weapon ability read this copy instead.
@@ -17,8 +17,7 @@ if not varexist var__combat_target
 endif
 # Scratch copy of the lasttarget serial for the mobile range check.
 @setvar! var__fresh_serial 0
-# 1 while an enemy is remembered. Recomputed every pass from var__combat_target.
-@setvar! var__fighting 0
+
 #@ loop
     # ################################################################################
     # # COMBAT TARGET CACHE
@@ -62,7 +61,7 @@ endif
         endif
     endif
 
-    # Fight-only blocks such as the stat potions read this.
+    # base declares it. Fight-only blocks such as the stat potions read it.
     @setvar! var__fighting 0
     if var__combat_target != 0
         @setvar! var__fighting 1

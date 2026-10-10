@@ -1,0 +1,68 @@
+# The frame of every loop. Every loop has it without a #@ use line.
+# It holds the settings several blocks share, the standard waits, the warning spacing, the
+# signals blocks pass each other, the structured-PvP stop, the start lines and the wait at the
+# end of every pass.
+
+#@ config
+# Optional overheads. Warnings show either way.
+@setvar! config__chatty 1
+# Journal diagnostics. A block that writes one says so in its comments.
+@setvar! config__sysmsg 1
+# Clear the client queues, the journal and the ignore list at Play (conventions 02.D).
+# 0 keeps a cursor or a cast the player holds at Play.
+@setvar! config__clear_at_start 1
+# Magery: the Cure and heal agents, the reagent reads and the buffs. Potions and bandages stay.
+@setvar! config__use_magery 1
+# Potions: cure, heal, Refresh and the stat potions.
+@setvar! config__use_potions 1
+# 1 makes our casts wait while the walk bar runs, so a step does not break them.
+# 0 casts while walking, for a fight where there is no better moment to wait for.
+@setvar! config__walk_guard 1
+# 1 when warmode is the player's manual control window: our casts stand down while it is on.
+@setvar! config__warmode_is_manual 0
+
+#@ wait
+# The poll inside a wait, and the pause after an action.
+@setvar! wait__poll 100
+@setvar! wait__short 200
+# Spacing for repeated warnings. Without it an empty potion bag shouts every pass.
+@setvar! cooldown__message 3000
+
+#@ timer
+# Ready on the first pass, so the first warning shows at once.
+timer__message cooldown__message
+
+#@ state
+# Signals between blocks. Each keeps this value unless the loop has a block that sets it.
+#   fighting        1 while an enemy is engaged. buff/potions drinks only then. fight/target
+#                   sets it every pass, and the pvp recipe keeps it at 1.
+#   hold_casts      1 while a block keeps the cast window for itself. buff/spells stands down.
+#                   escape/recall sets it once a Recall is due.
+#   hold_gathering  1 while gathering and its packing wait. escape/recall sets it.
+@setvar! var__fighting 0
+@setvar! var__hold_casts 0
+@setvar! var__hold_gathering 0
+
+#@ setup
+# The pvp expression means the structured-PvP restrictions, where these loops may not run.
+if pvp
+    overhead "[ script, blocked ]" 254
+    stop
+endif
+
+if config__clear_at_start = 1
+    clearall
+    clearsysmsg
+    cleardragdrop
+    clearignore
+endif
+
+#@ loop
+    # The pvp expression means structured-PvP restrictions, not a field PK encounter.
+    if pvp
+        overhead "[ script, blocked ]" 254
+        stop
+    endif
+
+#@ end
+    wait wait__poll

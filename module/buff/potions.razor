@@ -1,33 +1,28 @@
 # Strength and Agility by stat value, Magic Resist by its icon, while var__fighting is 1.
-# var__fighting comes from the loop: pvp is always in a fight, a hunting loop sets it from its
-# remembered enemy.
-#@ needs core/wait core/switches
 #@ hotkeys Drink Strength, Drink Agility, Drink Magic Resist
-#@ settings
-@setvar! config__use_stat_potions 1
+
+#@ config
+# Magic Resist potion on or off.
 @setvar! config__use_resist_potion 1
-# STR and DEX with the Greater potion on: your base plus 20. Below these the potion is drunk.
-# Bless and the Strength and Agility spells, ours or an ally's, show the same icons as the
-# potions but add less than its 20, so the stat is what tells the potion apart.
+# STR with the Greater Strength potion on: your base plus 20. Below it the potion is drunk, and
+# 0 turns it off. Bless and the Strength spell, ours or an ally's, show the same icon as the
+# potion but add less than its 20, so the stat tells them apart.
 @setvar! config__str_potion 120
+# DEX with the Greater Agility potion on: your base plus 20. Below it the potion is drunk, and
+# 0 turns it off. Bless and the Agility spell show the same icon, as for STR.
 @setvar! config__dex_potion 100
+
 #@ wait
 # A Strength or Agility potion is tried once per window. The stat arrives a round trip after the
 # drink, and a Curse, Weaken or Clumsy can hold it under the line while the potion still runs:
 # without the window that refused drink would go out every pass. An empty bag is looked up at
 # the same pace.
 @setvar! cooldown__stat_potion 5000
-#@ timer
-if not timerexists "timer__str_potion"
-    createtimer "timer__str_potion"
-endif
 
-if not timerexists "timer__agi_potion"
-    createtimer "timer__agi_potion"
-endif
-#@ ready
-settimer "timer__str_potion" cooldown__stat_potion
-settimer "timer__agi_potion" cooldown__stat_potion
+#@ timer
+timer__str_potion cooldown__stat_potion
+timer__agi_potion cooldown__stat_potion
+
 #@ loop
     # ################################################################################
     # # STAT POTIONS
@@ -37,7 +32,7 @@ settimer "timer__agi_potion" cooldown__stat_potion
     # icons as the potions, and each is tried once per cooldown__stat_potion. Magic Resist has an
     # icon of its own and is drunk once it is missing. Each potion is judged on its own, so
     # running out of one does not hold up the others.
-    if var__fighting = 1 and config__use_potions = 1 and config__use_stat_potions = 1 and not paralyzed and not hidden and not targetexists
+    if var__fighting = 1 and config__use_potions = 1 and not paralyzed and not hidden and not targetexists
         if not queued and str < config__str_potion and timer "timer__str_potion" >= cooldown__stat_potion
             settimer "timer__str_potion" 0
             if findtype "White Potion" self

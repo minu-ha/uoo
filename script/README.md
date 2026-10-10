@@ -39,14 +39,15 @@ A new combat loop gets a row here. Every loop has the same shape, set out in
 
 Use [gather/lumberjack-enhanced.razor](gather/lumberjack-enhanced.razor) for lumberjacking.
 It uses plain `config__*` settings and defaults to red-only Tracking.
-`config__use_tracking` controls Tracking setup independently of automatic Recall.
+Tracking setup runs whenever the recipe has `escape/tracking` and the character has Tracking.
 An active hunt reuses the color already verified by this script. A first run checks the current window before cycling filters.
 Filter changes stop Hunting first and discard setup reports before resuming. Turn Hunting off before Play after a manual filter change.
-`config__auto_recall = 0` skips the loop's Recall detection, book checks and spare-weight decisions.
-The loop runs Survival → automatic Recall → Smart Harvest → self buffs → housekeeping.
-Reagents, food and lumber maintenance run last. House door and Stockpile code has been removed.
+Leaving `escape/recall` out of the recipe drops the loop's Recall detection, book checks and spare-weight decisions.
+The loop runs Survival → automatic Recall → reagents → Smart Harvest → self buffs → food → lumber packing.
+House door and Stockpile code has been removed.
 State comments explain the Recall decision and command-sent flag; harvest guards show each pause condition directly.
-Book, Hunting and spare-weight checks reuse housekeeping's 5-second clock. Detection messages are read before weight and reagent errors.
+Book, Hunting and spare-weight checks run on Recall's own 5-second clock (v18). Detection messages are read before weight and reagent errors.
+Recall sets `var__hold_gathering` while a Recall is due, a required book is missing or detection is on without Hunting. Harvest equip, harvest and lumber packing wait on it.
 One Recall command is sent per Play. Recovery continues afterwards; harvesting stays paused until restart.
 Only an actual server refusal produces a result notice. There is no response timer or notice state.
 `config__chatty = 1` enables optional script overheads. `config__sysmsg = 1` independently enables Journal diagnostics.
@@ -54,7 +55,7 @@ Both default to 1; essential warnings remain visible with both off. With sysmsg 
 The v10 equip path follows `bard-mace`: `lhandempty` first, then equip the cached `var__my_hatchet` from the backpack.
 Graphic searches discover a missing backpack tool; they do not prove equipment. The cache survives Stop/Play in this client session.
 An unfamiliar held tool is read once: adopt a Hatchet serial or clear only the different left-hand item.
-Book, Hunting and weight readiness gate harvesting, rather than empty-hand equipment.
+Spare weight gates harvesting, not empty-hand equipment. Since v18 `var__hold_gathering` pauses both.
 v12 replaces the four nested positive gates with one `if / elseif / else` chain of blocking conditions.
 Each condition uses only `and` or only `or`, preserving disabled-option bypasses without parentheses or a readiness flag.
 Adjacent `and`-only schedule guards are combined for harvest and lumber maintenance.
@@ -70,7 +71,7 @@ v15 reads `You do not see any harvestable resources nearby` after Tracking/Recal
 `cooldown__harvest_out_retry = 2000` sets that interval; `var__harvest_retry` holds the next delay on the existing timer.
 Each attempt restores the normal interval. Recovery continues during the delay, and player input/Recall guards still apply.
 Other refusals keep the normal retry. One tool is enough; only absence is reported.
-`config__pack_lumber = 1` converts Logs and moves Boards to `global__my_looting_pouch` during housekeeping.
+`pack/lumber` converts Logs and moves Boards to `global__my_looting_pouch` on its own 2-minute timer.
 It reuses the pouch selected by `loadout`; if unavailable at startup, select a carried pouch once.
 `cooldown__pack_lumber = 120000` means every 2 minutes; use `180000` for 3 minutes.
 v11 removes the scratch list and `foreach`. It searches current Logs, then current Boards, with no hue filter.
@@ -90,8 +91,8 @@ v14는 파우치 소속을 먼저 검사한 뒤 `ignore`한다. 검색 제외 �
 `config__sysmsg = 1`이면 `BEGIN` → 가공·`skip: already in pouch`·`move request` → `END`를 기록한다.
 이동 요청 로그는 서버 이동·병합 완료의 증거가 아니다. 파우치 제외와 병합 후 새 묶음 처리는 모의 검사했으며 실제 v14는 재확인이 필요하다.
 Manual actions, recovery needs and a latched Recall decision defer this optional work.
-Tracking-triggered Recall requires all three options: `auto_recall`, `recall_on_detection` and `use_tracking`.
-Disabling any one bypasses the Hunting requirement for harvesting. Disabling Tracking keeps weight Recall and book requirements.
+Tracking-triggered Recall requires `config__recall_on_detection = 1` and an active hunt from `escape/tracking`.
+With it at 0 harvesting does not wait for Hunting. Weight Recall and the book requirement stay.
 Recall preparation uses no Strength or Agility potions. Fighting requires switching to the PvP script.
 Harvest results, skill reports and refusal overheads are in both Razor profiles. The server enforces the 60-second post-travel harvest delay;
 the loop's 4-second command retry does not replace that rule or start a new 60-second delay from a refusal.
@@ -118,7 +119,7 @@ and `setlasttarget` cannot restore it in this client. A Z pick made during the k
 The sword codex holds Warrior, Defensive while hurt, the Execute finisher and the Chop ability, none of which rely on weapon specials.
 The parry codex holds Bulwark for now (Testudo once its ranks catch up) and the Last Stand finisher,
 and Warding while poisoned, bleeding or diseased away from melee. Carving results and the Sanctuary refusal are profile overheads.
-`config__pack_leather = 1` moves carried leather into the loadout looting pouch every 2 minutes between fights.
+`pack/leather` moves carried leather into the loadout looting pouch every 2 minutes between fights.
 It ignores only pouch stacks and never clears the list, so carved corpses stay skipped.
 Meet a PK with `combat/pvp` (F4).
 Design notes and in-game checks are in [blueprint/open-items.html](../blueprint/open-items.html#11) part 11.
@@ -170,8 +171,8 @@ assigns them, with line numbers. Bash and awk only.
 ## Shared PvP sustain
 
 Use [combat/pvp.razor](combat/pvp.razor) for every template, turned on when a PvP fight starts.
-Configure independent options in that file. Bind PvP hotkeys to `Play Script: combat\pvp`.
-`config__use_magery` and `config__use_weapon` each accept 0/1: spells only, weapons only, both or neither.
+Configure options in `recipe/pvp-recipe.razor` and rebuild. Bind PvP hotkeys to `Play Script: combat\pvp`.
+`config__use_magery = 0` turns the spells off. Leaving `fight/weapon-swap` out of the recipe turns the weapon swap off.
 `config__use_bandages = 1` enables self bandages when Healing is available. No preset overrides these settings.
 
 v6 follows the shape of `bard-necro-enhanced` and `lumberjack-enhanced`: each block reads the live state and acts

@@ -1,12 +1,12 @@
 # Forensic Evaluation carving of corpses within 2 tiles, between fights.
-#@ needs core/wait core/output core/message core/heal gather/combat-target
 #@ hotkeys Cancel Current Target
-#@ settings
-# Skinning. 1 carves every creature corpse within 2 tiles, grey or not, by targeting each corpse.
-# Player remains are never targeted. 0 carves grey corpses only, through Smart Harvest on self.
-# Where the server refuses the first as a criminal action, grey corpses only for 5 minutes.
-@setvar! config__use_skinning 1
+
+#@ config
+# 1 carves every creature corpse within 2 tiles by targeting each one, grey or not. Player remains
+# are never targeted. 0 carves grey corpses only, through Smart Harvest on self. Where the server
+# refuses the first as a criminal action, grey corpses only for 5 minutes.
 @setvar! config__skin_unowned 1
+
 #@ wait
 # The knife cursor must arrive inside this block. A late cursor would block every input guard.
 @setvar! wait__carve_target 2000
@@ -16,17 +16,11 @@
 @setvar! cooldown__carve 700
 # After a criminal action refusal, carve grey corpses only for 5 minutes.
 @setvar! cooldown__grey_only 300000
-#@ timer
-if not timerexists "timer__carve"
-    createtimer "timer__carve"
-endif
 
-if not timerexists "timer__grey_only"
-    createtimer "timer__grey_only"
-endif
-#@ ready
-settimer "timer__carve" cooldown__carve
-settimer "timer__grey_only" cooldown__grey_only
+#@ timer
+timer__carve cooldown__carve
+timer__grey_only cooldown__grey_only
+
 #@ state
 # Scratch: 1 when a Z pick arrived while the knife cursor was up.
 @setvar! var__pick_during_carve 0
@@ -45,6 +39,7 @@ settimer "timer__grey_only" cooldown__grey_only
 if not varexist var__my_knife
     @setvar! var__my_knife 0
 endif
+
 #@ loop
     # ################################################################################
     # # SKINNING
@@ -79,7 +74,7 @@ endif
         endif
     endif
 
-    if config__use_skinning = 1 and timer "timer__carve" >= cooldown__carve and var__combat_target = 0
+    if timer "timer__carve" >= cooldown__carve and var__combat_target = 0
         settimer "timer__carve" 0
         @setvar! var__carve_direct 0
         if config__skin_unowned = 1 and var__carve_crime = 0 and timer "timer__grey_only" >= cooldown__grey_only

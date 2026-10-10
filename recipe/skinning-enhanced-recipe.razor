@@ -1,6 +1,6 @@
 # Recipe for script/gather/skinning-enhanced.razor. Build it with: python3 util/build-scripts.py
-# Every setting of the loop is under #@ config, grouped by the module that reads it.
-# The blocks are files in module/, run in the order listed under #@ blocks.
+# The blocks are module/<folder>/<name>.razor files, run in the order listed under #@ blocks.
+# module/base.razor comes first in every loop without a #@ use line.
 #@ output script/gather/skinning-enhanced.razor
 
 #@ header
@@ -16,61 +16,79 @@
 # Design notes and in-game checks: blueprint/open-items.html part 11.
 
 #@ blocks
-# Before the loop.
-#@ use core/start                    clears the client queues
-#@ use core/pvp-stop                 stops inside structured PvP, here and at the top of every pass
 # Every pass, in this order.
-#@ use gather/combat-target          remembers the enemy picked with lasttarget
-#@ use core/paralyze                 trapped pouch while held
-#@ use core/cure                     cure potion, else the Cure agent
-#@ use core/heal                     heal potion, else Greater Heal at the emergency line
-#@ use core/bandage                  self bandage
-#@ use core/light-heal               light Heal, the bandage stand-in
-#@ use core/refresh                  Refresh at low stamina
-#@ use gather/axe                    re-arms the Two-Handed Axe
-#@ use gather/gold                   drops gold while over weight
-#@ use core/stat-potions             Strength, Agility and Magic Resist while an enemy is remembered
-#@ use gather/sword-codex            Warrior, Defensive while hurt, and the finisher
-#@ use gather/parry-codex            Bulwark, Warding against damage over time, and the finisher
-#@ use gather/weapon-ability         Chop on the enemy within 2 tiles
-#@ use core/self-buffs               Reactive Armor, then Magic Reflection
-#@ use gather/skinning               carves corpses between fights
-#@ use core/reagents                 reagent flags, read after the carve replies so it cannot consume them
-#@ use gather/food                   eats from a tray
-#@ use gather/leather                moves leather into the loot pouch
-#@ use core/pass-wait                end of the pass
+#@ use fight/target            remembers the enemy picked with lasttarget
+#@ use recovery/pouch          trapped pouch while held
+#@ use recovery/cure           cure potion, else the Cure agent
+#@ use recovery/heal           heal potion, else Greater Heal at the emergency line
+#@ use recovery/bandage        self bandage
+#@ use recovery/light-heal     light Heal, the bandage stand-in
+#@ use recovery/refresh        Refresh at low stamina
+#@ use fight/axe               re-arms the Two-Handed Axe
+#@ use pack/gold-drop          drops gold while over weight
+#@ use buff/potions            Strength, Agility and Magic Resist while an enemy is remembered
+#@ use fight/sword-codex       Warrior, Defensive while hurt, and the finisher
+#@ use fight/parry-codex       Bulwark, Warding against damage over time, and the finisher
+#@ use fight/weapon-ability    Chop on the enemy within 2 tiles
+#@ use buff/spells             Reactive Armor, then Magic Reflection
+#@ use gather/skinning         carves corpses between fights
+#@ use recovery/reagents       reagent flags, read after the carve replies so it cannot consume them
+#@ use buff/food               eats from a tray
+#@ use pack/leather            moves leather into the loot pouch
 
 #@ config
-# Only the settings this loop changes. Every other setting keeps its module default.
-# A comment right above a setting says why, and shows up in the loop as "# This loop: ...".
-# See every setting with the value this loop uses: python3 util/build-scripts.py --settings recipe/skinning-enhanced-recipe.razor
+#| Only the settings this loop changes. Every other setting keeps the default in its module.
+#| Put the reason in "#" lines right above the value. util/build-scripts.py writes the "#|" lines.
+#| Every setting of this loop: python3 util/build-scripts.py --settings recipe/skinning-enhanced-recipe.razor
 
+#| ---- module/recovery/heal.razor -------------------------------------------------------
+#| Missing hit points that cast Greater Heal when no heal potion went out on this pass.
+#| Not below heal_hits.
+#| Default 35. Read by recovery/heal.
 # Bandages handle ordinary damage, so Greater Heal waits for 45.
-# heal_hits also holds carving, buffs and leather packing back.
 @setvar! config__emergency_hits 45
 
+#| ---- module/recovery/bandage.razor ----------------------------------------------------
+#| Healing must be above this to bandage. At or below it recovery/light-heal stands in.
+#| Default 0. Read by recovery/bandage, recovery/light-heal.
 # Healing 80 template. Below 10 the light Heal stands in.
 @setvar! config__heal_skill_min 10
 
+#| ---- module/recovery/refresh.razor ----------------------------------------------------
+#| Current stamina at or below this drinks a Refresh.
+#| Default 15. Read by recovery/refresh.
 # DEX 80 gives about 80 stamina. Refresh at 60.
 @setvar! config__refresh_stam 60
 
+#| ---- module/buff/potions.razor --------------------------------------------------------
+#| STR with the Greater Strength potion on: your base plus 20. Below it the potion is drunk, and
+#| 0 turns it off. Bless and the Strength spell, ours or an ally's, show the same icon as the
+#| potion but add less than its 20, so the stat tells them apart.
+#| Default 120. Read by buff/potions.
 # STR 100 and DEX 80 template.
 @setvar! config__str_potion 120
 
+#| ---- module/buff/spells.razor ---------------------------------------------------------
+#| Minimum current mana to start Reactive Armor.
+#| Default 4. Read by buff/spells.
 # Buffs keep the lumberjack handbook's 20 mana for Greater Heal and Teleport against a PK.
 @setvar! config__mana_reactive_armor 24
+
+#| Minimum current mana to start Magic Reflection.
+#| Default 14. Read by buff/spells.
+# Same reserve: the base 14 plus the handbook's 20.
 @setvar! config__mana_magic_reflect 34
 
+#| 1 buffs while poisoned. 0 holds them back and cuts one that is casting, so the cure goes first.
+#| Default 1. Read by buff/spells.
 # The cure goes first: no buffs while poisoned.
 @setvar! config__buff_when_poisoned 0
 
 #@ setup
-if config__pack_leather = 1
-    if not varexist global__my_looting_pouch or not find global__my_looting_pouch backpack
-        overhead "[ loot pouch, pick ]" 255
-        setvar global__my_looting_pouch
-    endif
+# pack/leather moves leather into this pouch. restock/loadout picks it, this asks when it is missing.
+if not varexist global__my_looting_pouch or not find global__my_looting_pouch backpack
+    overhead "[ loot pouch, pick ]" 255
+    setvar global__my_looting_pouch
 endif
 
 # loot/recycle runs the hotkey named in this list when it finishes or gives up. A list, because

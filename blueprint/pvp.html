@@ -876,23 +876,26 @@ v5의 긴급 수동 주문 중단·6초 시전 대기와 <code>[ cast, check ]</
 </ul>
 
 <h4>독립 설정</h4>
-<p>아래 이름은 <code>config__</code> 접두를 생략했다. 템플릿 프리셋 없이 CONFIG의 각 값을 직접 바꾼다.
-한 옵션으로 다른 옵션을 덮어쓰지 않으며 Magery·무기·붕대는 각각 끌 수 있다.</p>
+<p>아래 이름은 <code>config__</code> 접두를 생략했다. 템플릿 프리셋 없이 <code>recipe/pvp-recipe.razor</code>의 <code>#@ config</code>에 바꿀 값을 쓰고 다시 조립한다
+(<a href="modules.html#07.A">modules.html</a> 07.A절). 한 옵션으로 다른 옵션을 덮어쓰지 않으며 Magery·붕대는 각각 끌 수 있다.
+무기 교체는 레시피의 <code>fight/weapon-swap</code> 블록이라, 끄려면 그 줄을 뺀다.</p>
 <table>
 <thead><tr><th>옵션</th><th>기본값</th><th>효과</th></tr></thead>
 <tbody>
-<tr><td><code>use_magery</code> / <code>use_weapon</code> / <code>use_bandages</code></td><td>각 1</td>
-<td>회복 에이전트·버프·시약 읽기 / 무기 장착 / Healing이 있고 피해·독이 있을 때 붕대</td></tr>
+<tr><td><code>clear_at_start</code></td><td>0</td>
+<td>Play 때 시작 4줄을 돌리지 않아, 들고 있던 수동 커서와 시전이 남는다 (<a href="conventions.html#02.D">conventions.html</a> 02.D절)</td></tr>
+<tr><td><code>use_magery</code> / <code>use_bandages</code></td><td>각 1</td>
+<td>회복 에이전트·버프·시약 읽기 / Healing이 있고 피해·독이 있을 때 붕대</td></tr>
 <tr><td><code>use_light_heal</code></td><td>0</td>
 <td>붕대 옆에서도 <code>light_hits</code>부터 가벼운 Heal을 쓴다. 붕대를 쓸 수 없으면 (<code>use_bandages</code> 0, Healing 없음, 붕대 없음) 이 값과 상관없이 대타로 쓴다.
 <code>use_magery</code>가 1이어야 한다</td></tr>
-<tr><td><code>use_potions</code> / <code>use_stat_potions</code> / <code>use_resist_potion</code></td><td>각 1</td>
-<td>회복·Refresh 포션 / Strength·Agility와 선택한 Resist 포션 / Resist 포션의 추가 스위치</td></tr>
+<tr><td><code>use_potions</code> / <code>use_resist_potion</code></td><td>각 1</td>
+<td>회복·Refresh·스탯 포션 / Magic Resist 포션</td></tr>
 <tr><td><code>str_potion</code> / <code>dex_potion</code></td><td>120 / 100</td>
 <td>Greater 포션을 마신 STR·DEX, 곧 기본 + 20. 그보다 낮으면 Strength·Agility 포션을 마신다.
-공유 루프라 실행하는 캐릭터의 기본값에 맞춘다. 기본값은 STR 100·DEX 80 기준이다 (09.D절)</td></tr>
+공유 루프라 실행하는 캐릭터의 기본값에 맞춘다. 기본값은 STR 100·DEX 80 기준이다 (09.D절). 0이면 그 포션을 끈다</td></tr>
 <tr><td><code>walk_guard</code> / <code>warmode_is_manual</code></td><td>0 / 0</td>
-<td>공통 core 블록의 스위치. pvp는 걷는 중에도 시전하고 워모드를 보지 않는다 (<a href="modules.html#06">modules.html</a> 06절)</td></tr>
+<td>base의 공용 설정. pvp는 걷는 중에도 시전하고 워모드를 보지 않는다 (<a href="modules.html#06">modules.html</a> 06절)</td></tr>
 <tr><td><code>buff_max_loss</code> / <code>buff_when_poisoned</code></td><td>35 / 1</td>
 <td>잃은 HP가 이 값 이상이면 버프를 시작하지 않고 시전 중이면 끊는다 / 독일 때도 버프를 건다. <code>emergency_hits</code>를 바꾸면 이 값도 맞춘다</td></tr>
 <tr><td><code>use_reactive_armor</code> / <code>use_magic_reflect</code></td><td>각 1</td>

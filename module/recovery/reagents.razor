@@ -1,17 +1,16 @@
-# Reagent flags for the Magery recovery spells and the two self buffs, read on a clock and
-# right after a refusal. Each loop sets its own interval.
-#@ needs core/switches
+# Reagent flags for the Magery casts, read on a clock and right after a refusal.
+# The flags cover Cure, Heal, Greater Heal and the two buffs. insysmsg consumes older journal
+# lines too, so the recipe puts this block after any block that reads the journal for something else.
+
 #@ wait
 # Reagent read interval. Five lookups each time. A refill counts within this, and running out
 # is caught at once by the refusal line.
 @setvar! cooldown__reagents 10000
+
 #@ timer
-if not timerexists "timer__reagents"
-    createtimer "timer__reagents"
-endif
-#@ ready
 # Ready on the first pass, so reagents are read before the first cast.
-settimer "timer__reagents" cooldown__reagents
+timer__reagents cooldown__reagents
+
 #@ state
 # Reagent flags, written only by REAGENTS. 1 when every reagent of that spell was found.
 #   Cure            garlic 3972, ginseng 3973
@@ -29,12 +28,13 @@ settimer "timer__reagents" cooldown__reagents
 @setvar! var__has_mandrake 0
 @setvar! var__has_ash 0
 @setvar! var__has_silk 0
+
 #@ loop
     # ################################################################################
     # # REAGENTS
     # ################################################################################
-    # First in the pass, so every cast block below reads fresh flags. On the interval, or at once
-    # after a refusal for reagents, so a stale flag cannot send the same doomed cast every pass.
+    # On the interval, or at once after a refusal for reagents, so a stale flag cannot send the
+    # same doomed cast every pass.
     if config__use_magery = 1
         if timer "timer__reagents" >= cooldown__reagents or insysmsg "More reagents are needed"
             settimer "timer__reagents" 0

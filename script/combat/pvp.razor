@@ -2,7 +2,7 @@
 # Needs: the heal pot and reflect bars, and a swing N bar (WeaponSwing type) for each enabled weapon slot.
 # Turn it on when a PvP fight starts. All offense stays manual: attack spells, TK, explosion potions,
 # pets, targeting and melee requests. The script never cuts a manual cast or cursor.
-# No start 4 lines (conventions 02.D): a manual cursor or cast held at Play is kept.
+# No start 4 lines (conventions 02.D, config__clear_at_start 0): a manual cursor or cast held at Play is kept.
 # Arm/Dress must remove conflicting equipment.
 # Design and in-game checks: blueprint/pvp.html part 5.E, blueprint/open-items.html part 10.
 #
@@ -28,86 +28,90 @@
 #          Drink Magic Resist, > Interrupt.
 # Generated from recipe/pvp-recipe.razor by util/build-scripts.py. Edit module/ and recipe/, not this file.
 
-if pvp
-    overhead "[ script, blocked ]" 254
-    stop
-endif
-
 # ####################################################################################
 # # CONFIG
 # ####################################################################################
-# ---- core/switches -----------------------------------------------------------------
-# Independent features. No option overrides another.
+# ---- module/base.razor -----------------------------------------------------------------
+# Optional overheads. Warnings show either way.
+@setvar! config__chatty 1
+# Journal diagnostics. A block that writes one says so in its comments.
+@setvar! config__sysmsg 1
+# Clear the client queues, the journal and the ignore list at Play (conventions 02.D).
+# 0 keeps a cursor or a cast the player holds at Play.
+# This loop: A manual cursor or cast held at Play is kept (conventions 02.D).
+@setvar! config__clear_at_start 0
+# Magery: the Cure and heal agents, the reagent reads and the buffs. Potions and bandages stay.
 @setvar! config__use_magery 1
+# Potions: cure, heal, Refresh and the stat potions.
 @setvar! config__use_potions 1
-@setvar! config__use_bandages 1
-# 1 makes our own casts wait while the walk bar runs, so a step does not break them.
+# 1 makes our casts wait while the walk bar runs, so a step does not break them.
 # 0 casts while walking, for a fight where there is no better moment to wait for.
 # This loop: pvp casts while walking: in a fight there is no better moment to wait for.
 @setvar! config__walk_guard 0
-# 1 when warmode is the player's manual control window: our own casts stand down while it is on.
+# 1 when warmode is the player's manual control window: our casts stand down while it is on.
 @setvar! config__warmode_is_manual 0
 
-# ---- core/output -------------------------------------------------------------------
-# Optional script overheads. Essential warnings remain visible.
-@setvar! config__chatty 1
-# Journal diagnostics. Each block that writes one says so in its own comments.
-@setvar! config__sysmsg 1
-
-# ---- core/cure ---------------------------------------------------------------------
+# ---- module/recovery/cure.razor --------------------------------------------------------
 # Minimum current mana for the Cure agent.
 @setvar! config__mana_cure 6
 
-# ---- core/heal ---------------------------------------------------------------------
-# Missing hit points, not percent.
-#   heal_hits       heal potion
-#   emergency_hits  Greater Heal when no heal potion can go out. Not below heal_hits
+# ---- module/recovery/heal.razor --------------------------------------------------------
+# Missing hit points (not percent) that drink a heal potion.
 @setvar! config__heal_hits 35
+# Missing hit points that cast Greater Heal when no heal potion went out on this pass.
+# Not below heal_hits.
 @setvar! config__emergency_hits 35
-# Minimum current mana for Greater Heal. It keeps no reserve: raise it to 31 to always leave
-# 20 mana for an attack or Teleport.
+# Minimum current mana for Greater Heal. It keeps no reserve: 31 always leaves 20 mana for an
+# attack or Teleport.
 @setvar! config__mana_greater_heal 11
 
-# ---- core/bandage ------------------------------------------------------------------
-# Healing must be above this to bandage. 0 means any Healing at all.
+# ---- module/recovery/bandage.razor -----------------------------------------------------
+# 0 turns bandages off. recovery/light-heal then stands in.
+@setvar! config__use_bandages 1
+# Healing must be above this to bandage. At or below it recovery/light-heal stands in.
 @setvar! config__heal_skill_min 0
 
-# ---- core/light-heal ---------------------------------------------------------------
-# Light Heal beside the bandages. With no bandage able to run (use_bandages 0, no Healing, or
-# none left) it goes anyway, as the bandage stand-in. Needs use_magery.
+# ---- module/recovery/light-heal.razor --------------------------------------------------
+# 1 casts the light Heal beside the bandages. At 0 it goes only while no bandage can run:
+# use_bandages 0, Healing at or below heal_skill_min, or none left and none running.
 @setvar! config__use_light_heal 0
-# Missing hit points that start the light Heal, and its minimum current mana.
+# Missing hit points that start the light Heal.
 @setvar! config__light_hits 15
+# Minimum current mana for the light Heal.
 @setvar! config__mana_heal 4
 
-# ---- core/refresh ------------------------------------------------------------------
+# ---- module/recovery/refresh.razor -----------------------------------------------------
 # Current stamina at or below this drinks a Refresh.
 @setvar! config__refresh_stam 15
 
-# ---- core/stat-potions -------------------------------------------------------------
-@setvar! config__use_stat_potions 1
+# ---- module/buff/potions.razor ---------------------------------------------------------
+# Magic Resist potion on or off.
 @setvar! config__use_resist_potion 1
-# STR and DEX with the Greater potion on: your base plus 20. Below these the potion is drunk.
-# Bless and the Strength and Agility spells, ours or an ally's, show the same icons as the
-# potions but add less than its 20, so the stat is what tells the potion apart.
-# This loop: The loop is shared, so set these two for the character that runs it.
+# STR with the Greater Strength potion on: your base plus 20. Below it the potion is drunk, and
+# 0 turns it off. Bless and the Strength spell, ours or an ally's, show the same icon as the
+# potion but add less than its 20, so the stat tells them apart.
+# This loop: The loop is shared, so set this for the character that runs it.
 @setvar! config__str_potion 120
+# DEX with the Greater Agility potion on: your base plus 20. Below it the potion is drunk, and
+# 0 turns it off. Bless and the Agility spell show the same icon, as for STR.
 @setvar! config__dex_potion 100
 
-# ---- core/self-buffs ---------------------------------------------------------------
+# ---- module/buff/spells.razor ----------------------------------------------------------
+# Reactive Armor on or off.
 @setvar! config__use_reactive_armor 1
+# Magic Reflection on or off.
 @setvar! config__use_magic_reflect 1
-# Minimum current mana to start each buff.
+# Minimum current mana to start Reactive Armor.
 @setvar! config__mana_reactive_armor 4
+# Minimum current mana to start Magic Reflection.
 @setvar! config__mana_magic_reflect 14
 # Missing hit points at which buffs are not started, and cut mid cast.
 # This loop: Keep this equal to config__emergency_hits.
 @setvar! config__buff_max_loss 35
-# 0 keeps buffs back while poisoned and cuts one that is casting.
+# 1 buffs while poisoned. 0 holds them back and cuts one that is casting, so the cure goes first.
 @setvar! config__buff_when_poisoned 1
 
-# ---- combat/weapon-slots -----------------------------------------------------------
-@setvar! config__use_weapon 1
+# ---- module/fight/weapon-swap.razor ----------------------------------------------------
 # Weapon slots. Slot N reads the "swing N" bar. Graphic 0 turns the slot off.
 # A slot whose swing is ready wins, 4 down to 1. With none ready and both hands empty, the
 # lowest enabled slot re-arms.
@@ -119,15 +123,15 @@ endif
 # ####################################################################################
 # # WAIT AND COOLDOWN
 # ####################################################################################
+# The poll inside a wait, and the pause after an action.
+@setvar! wait__poll 100
+@setvar! wait__short 200
+# Spacing for repeated warnings. Without it an empty potion bag shouts every pass.
+@setvar! cooldown__message 3000
+
 # Reagent read interval. Five lookups each time. A refill counts within this, and running out
 # is caught at once by the refusal line.
 @setvar! cooldown__reagents 10000
-
-@setvar! wait__poll 100
-@setvar! wait__short 200
-
-# Debounce for repeated warnings. Without it an empty potion bag shouts every pass.
-@setvar! cooldown__message 3000
 
 # A Strength or Agility potion is tried once per window. The stat arrives a round trip after the
 # drink, and a Curse, Weaken or Clumsy can hold it under the line while the potion still runs:
@@ -138,12 +142,14 @@ endif
 # ####################################################################################
 # # TIMER
 # ####################################################################################
-if not timerexists "timer__reagents"
-    createtimer "timer__reagents"
-endif
-
+# Ready on the first pass, so the first warning shows at once.
 if not timerexists "timer__message"
     createtimer "timer__message"
+endif
+
+# Ready on the first pass, so reagents are read before the first cast.
+if not timerexists "timer__reagents"
+    createtimer "timer__reagents"
 endif
 
 if not timerexists "timer__str_potion"
@@ -154,17 +160,23 @@ if not timerexists "timer__agi_potion"
     createtimer "timer__agi_potion"
 endif
 
-# Ready on the first pass, so reagents are read before the first cast.
-settimer "timer__reagents" cooldown__reagents
 settimer "timer__message" cooldown__message
+settimer "timer__reagents" cooldown__reagents
 settimer "timer__str_potion" cooldown__stat_potion
 settimer "timer__agi_potion" cooldown__stat_potion
 
 # ####################################################################################
 # # STATE
 # ####################################################################################
-# pvp is always in a fight, so the stat potions are kept up the whole time.
-@setvar! var__fighting 1
+# Signals between blocks. Each keeps this value unless the loop has a block that sets it.
+#   fighting        1 while an enemy is engaged. buff/potions drinks only then. fight/target
+#                   sets it every pass, and the pvp recipe keeps it at 1.
+#   hold_casts      1 while a block keeps the cast window for itself. buff/spells stands down.
+#                   escape/recall sets it once a Recall is due.
+#   hold_gathering  1 while gathering and its packing wait. escape/recall sets it.
+@setvar! var__fighting 0
+@setvar! var__hold_casts 0
+@setvar! var__hold_gathering 0
 
 # Reagent flags, written only by REAGENTS. 1 when every reagent of that spell was found.
 #   Cure            garlic 3972, ginseng 3973
@@ -183,14 +195,11 @@ settimer "timer__agi_potion" cooldown__stat_potion
 @setvar! var__has_ash 0
 @setvar! var__has_silk 0
 
-# Scratch: 1 once a heal potion went out on this pass. HEAL only.
+# Scratch: 1 once a heal potion went out on this pass.
 @setvar! var__heal_potion_out 0
 
-# Scratch: 1 when the light Heal goes on this pass. LIGHT HEAL only.
+# Scratch: 1 when the light Heal goes on this pass.
 @setvar! var__light_heal_due 0
-
-# 1 while another block holds our buff casts back. Nothing sets it unless the loop has such a block.
-@setvar! var__hold_casts 0
 
 # The weapon this script armed last, kept across Plays. Only own items. See WEAPON.
 if not varexist var__weapon_armed_serial
@@ -205,6 +214,22 @@ endif
 #   weapon_held  1 when the armed serial is in a hand
 @setvar! var__weapon_want 0
 @setvar! var__weapon_held 0
+
+# pvp is always in a fight, so the stat potions are kept up the whole time.
+@setvar! var__fighting 1
+
+# The pvp expression means the structured-PvP restrictions, where these loops may not run.
+if pvp
+    overhead "[ script, blocked ]" 254
+    stop
+endif
+
+if config__clear_at_start = 1
+    clearall
+    clearsysmsg
+    cleardragdrop
+    clearignore
+endif
 
 overhead "[ pvp, on ]" 290
 if config__sysmsg = 1
@@ -224,8 +249,8 @@ while not dead
     # ################################################################################
     # # REAGENTS
     # ################################################################################
-    # First in the pass, so every cast block below reads fresh flags. On the interval, or at once
-    # after a refusal for reagents, so a stale flag cannot send the same doomed cast every pass.
+    # On the interval, or at once after a refusal for reagents, so a stale flag cannot send the
+    # same doomed cast every pass.
     if config__use_magery = 1
         if timer "timer__reagents" >= cooldown__reagents or insysmsg "More reagents are needed"
             settimer "timer__reagents" 0
@@ -462,7 +487,7 @@ while not dead
     # icons as the potions, and each is tried once per cooldown__stat_potion. Magic Resist has an
     # icon of its own and is drunk once it is missing. Each potion is judged on its own, so
     # running out of one does not hold up the others.
-    if var__fighting = 1 and config__use_potions = 1 and config__use_stat_potions = 1 and not paralyzed and not hidden and not targetexists
+    if var__fighting = 1 and config__use_potions = 1 and not paralyzed and not hidden and not targetexists
         if not queued and str < config__str_potion and timer "timer__str_potion" >= cooldown__stat_potion
             settimer "timer__str_potion" 0
             if findtype "White Potion" self
@@ -561,7 +586,7 @@ while not dead
     # hand reads. A weapon already in hand is adopted without a request. Arming during a cast
     # would interrupt it (wiki Combat Overview), so this waits for a free window.
     # The equip request is not proof of a swing.
-    if config__use_weapon = 1 and not paralyzed and not hidden and not queued and not casting and not targetexists
+    if not paralyzed and not hidden and not queued and not casting and not targetexists
         @setvar! var__weapon_want 0
         if config__weapon_4_graphic != 0 and cooldown "swing 4" = 0
             @setvar! var__weapon_want config__weapon_4_graphic

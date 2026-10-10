@@ -1,13 +1,12 @@
-# Eats from a tray once a minute while Food Satisfaction is missing.
-#@ needs core/wait
+# Eats from a tray while Food Satisfaction is missing, looked at once a minute.
+
 #@ wait
+# The buff lasts far longer than this.
 @setvar! cooldown__food 60000
+
 #@ timer
-if not timerexists "timer__food"
-    createtimer "timer__food"
-endif
-#@ ready
-settimer "timer__food" cooldown__food
+timer__food cooldown__food
+
 #@ loop
     # ################################################################################
     # # FOOD

@@ -1,41 +1,27 @@
 # Codex of swords: Warrior, Defensive while hurt, and the finisher, read from the codex label.
-#@ needs core/wait core/output core/message
-#@ settings
-# Codex of swords. The slot numbers follow the codex list order on the wiki.
-@setvar! config__use_sword_codex 1
-@setvar! config__sword_stance_aggressive 1
-@setvar! config__sword_stance_defensive 2
-@setvar! config__sword_stance_cleave 3
-@setvar! config__sword_stance_warrior 4
-@setvar! config__sword_stance_flaying 5
-# Stance held outside the Defensive window. Cleave pays only against two or more enemies.
-@setvar! config__sword_stance_main config__sword_stance_warrior
 
-# Finisher slot to keep selected. 0 leaves the codex finisher alone.
-@setvar! config__sword_finisher_bleed_out 1
-@setvar! config__sword_finisher_execute 2
-@setvar! config__sword_finisher_main config__sword_finisher_execute
-
-# Defensive latches on above the enter line and only releases below the leave line, so the
-# stance cannot flap while bandages tick. Both are hit deficit, not percent.
+#@ config
+# Stance held outside the Defensive window, by codex slot (wiki order): 1 Aggressive,
+# 2 Defensive, 3 Cleave, 4 Warrior, 5 Flaying. Cleave pays only against two or more enemies.
+@setvar! config__sword_stance_main 4
+# Finisher to keep selected: 1 Bleed Out, 2 Execute. 0 leaves the codex finisher alone.
+@setvar! config__sword_finisher_main 2
+# Missing hit points above which Defensive latches on.
 @setvar! config__defensive_enter_diff 60
+# Missing hit points below which Defensive lets go. Below the enter line, so the stance cannot
+# flap while bandages tick.
 @setvar! config__defensive_leave_diff 48
-#@ wait
-# Codex label reads: a failed switch is tried again after stance_retry, and the cache is dropped
-# every stance_resync so a stance changed by hand is picked up. The parry codex uses them too.
-@setvar! cooldown__stance_retry 3000
-@setvar! cooldown__stance_resync 30000
-#@ timer
-if not timerexists "timer__sword_retry"
-    createtimer "timer__sword_retry"
-endif
 
-if not timerexists "timer__sword_resync"
-    createtimer "timer__sword_resync"
-endif
-#@ ready
-settimer "timer__sword_retry" cooldown__stance_retry
-settimer "timer__sword_resync" 0
+#@ wait
+# Codex label reads: a failed switch is tried again after sword_retry, and the cache is dropped
+# every sword_resync so a stance changed by hand is picked up.
+@setvar! cooldown__sword_retry 3000
+@setvar! cooldown__sword_resync 30000
+
+#@ timer
+timer__sword_retry cooldown__sword_retry
+timer__sword_resync 0
+
 #@ state
 # Sword stance cache. 0 means unknown, which forces a codex label read on the first pass.
 @setvar! var__sword_want config__sword_stance_main
@@ -46,6 +32,7 @@ settimer "timer__sword_resync" 0
 @setvar! var__sword_finisher_checked 0
 # Scratch: 0 neither finisher named, 1 wanted finisher active, 2 the other one active.
 @setvar! var__sword_finisher_state 0
+
 #@ loop
     # ################################################################################
     # # SWORD CODEX
@@ -61,19 +48,19 @@ settimer "timer__sword_resync" 0
     # The codex label is the only source of truth, as in bard-mace. The cache is refreshed from
     # the label on a timer, which also catches a stance changed by hand. getlabel runs after
     # recovery so a server round trip never delays a bandage or a heal potion.
-    if config__use_sword_codex = 1 and var__sword_disabled = 0
-        if timer "timer__sword_resync" > cooldown__stance_resync
+    if var__sword_disabled = 0
+        if timer "timer__sword_resync" > cooldown__sword_resync
             @setvar! var__sword_active 0
             settimer "timer__sword_resync" 0
         endif
 
         if diffhits > config__defensive_enter_diff
-            @setvar! var__sword_want config__sword_stance_defensive
+            @setvar! var__sword_want 2
         elseif diffhits < config__defensive_leave_diff
             @setvar! var__sword_want config__sword_stance_main
         endif
 
-        if var__sword_want != var__sword_active and timer "timer__sword_retry" > cooldown__stance_retry
+        if var__sword_want != var__sword_active and timer "timer__sword_retry" > cooldown__sword_retry
             settimer "timer__sword_retry" 0
 
             if findtype 11890 backpack as alias__sword_codex
@@ -82,15 +69,15 @@ settimer "timer__sword_resync" 0
                 # All five names are tested. Finding none means the label does not carry the
                 # stance, and blind switching would risk toggling the active stance off.
                 if "Warrior" in label__sword_codex
-                    @setvar! var__sword_active config__sword_stance_warrior
+                    @setvar! var__sword_active 4
                 elseif "Defensive" in label__sword_codex
-                    @setvar! var__sword_active config__sword_stance_defensive
+                    @setvar! var__sword_active 2
                 elseif "Aggressive" in label__sword_codex
-                    @setvar! var__sword_active config__sword_stance_aggressive
+                    @setvar! var__sword_active 1
                 elseif "Cleave" in label__sword_codex
-                    @setvar! var__sword_active config__sword_stance_cleave
+                    @setvar! var__sword_active 3
                 elseif "Flaying" in label__sword_codex
-                    @setvar! var__sword_active config__sword_stance_flaying
+                    @setvar! var__sword_active 5
                 else
                     @setvar! var__sword_disabled 1
                     overhead "[ sword stance, off ]" 254
@@ -110,7 +97,7 @@ settimer "timer__sword_resync" 0
                 if var__sword_disabled = 0 and var__sword_finisher_checked = 0 and config__sword_finisher_main != 0
                     @setvar! var__sword_finisher_checked 1
                     @setvar! var__sword_finisher_state 0
-                    if config__sword_finisher_main = config__sword_finisher_execute
+                    if config__sword_finisher_main = 2
                         if "Execute" in label__sword_codex
                             @setvar! var__sword_finisher_state 1
                         elseif "Bleed Out" in label__sword_codex
@@ -136,14 +123,14 @@ settimer "timer__sword_resync" 0
                         # Keep the finisher and stance commands apart.
                         wait wait__short
                         if config__chatty = 1
-                            if config__sword_finisher_main = config__sword_finisher_execute
+                            if config__sword_finisher_main = 2
                                 overhead "[ sword, execute ]" 290
                             else
                                 overhead "[ sword, bleed out ]" 290
                             endif
                         endif
                     elseif var__sword_finisher_state = 0
-                        if config__sword_finisher_main = config__sword_finisher_execute
+                        if config__sword_finisher_main = 2
                             overhead "[ execute, off ]" 254
                         else
                             overhead "[ bleed out, off ]" 254
@@ -173,15 +160,15 @@ settimer "timer__sword_resync" 0
                     settimer "timer__sword_resync" 0
 
                     if config__chatty = 1
-                        if var__sword_want = config__sword_stance_defensive
+                        if var__sword_want = 2
                             overhead "[ sword, defensive ]" 290
-                        elseif var__sword_want = config__sword_stance_warrior
+                        elseif var__sword_want = 4
                             overhead "[ sword, warrior ]" 290
-                        elseif var__sword_want = config__sword_stance_aggressive
+                        elseif var__sword_want = 1
                             overhead "[ sword, aggressive ]" 290
-                        elseif var__sword_want = config__sword_stance_cleave
+                        elseif var__sword_want = 3
                             overhead "[ sword, cleave ]" 290
-                        elseif var__sword_want = config__sword_stance_flaying
+                        elseif var__sword_want = 5
                             overhead "[ sword, flaying ]" 290
                         endif
                     endif

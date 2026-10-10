@@ -1,38 +1,37 @@
 # Re-arms the cached Two-Handed Axe when the left hand is empty.
-#@ needs core/wait core/output core/message
-#@ settings
-# Re-arm the axe when the left hand is empty. 5187 is the two handed axe in blueprint/item-list.html.
-@setvar! config__use_weapon 1
-@setvar! config__weapon_graphic 5187
+
+#@ config
+# Graphic of the axe to re-arm. 5187 is the two handed axe in blueprint/item-list.html.
+@setvar! config__axe_graphic 5187
+
 #@ wait
 # A refused equip, after a disarm for example, waits this long before the next try.
 @setvar! cooldown__equip_retry 2000
+
 #@ timer
-if not timerexists "timer__equip"
-    createtimer "timer__equip"
-endif
-#@ ready
-settimer "timer__equip" cooldown__equip_retry
+timer__equip cooldown__equip_retry
+
 #@ state
 # Selected axe serial, reused across Stop and Play. 0 means rediscover from the backpack.
 if not varexist var__my_weapon
     @setvar! var__my_weapon 0
 endif
+
 #@ loop
     # ################################################################################
-    # # WEAPON
+    # # AXE
     # ################################################################################
     # The Two-Handed Axe takes the lefthand layer, so an empty left hand means it is gone.
     # Arming before a cast completes interrupts the cast (wiki Combat Overview), so casting blocks this.
     # An axe already in hand is adopted once by label, including a replacement with a new serial.
     # Any other left hand item is left alone.
-    if config__use_weapon = 1 and timer "timer__equip" >= cooldown__equip_retry
+    if timer "timer__equip" >= cooldown__equip_retry
         if lhandempty
             if not hidden and not queued and not casting and not targetexists
                 settimer "timer__equip" 0
                 if not find var__my_weapon backpack
                     @setvar! var__my_weapon 0
-                    if findtype config__weapon_graphic backpack as alias__packed_weapon
+                    if findtype config__axe_graphic backpack as alias__packed_weapon
                         @setvar! var__my_weapon alias__packed_weapon
                     endif
                 endif

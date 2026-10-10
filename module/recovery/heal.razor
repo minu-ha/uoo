@@ -1,18 +1,20 @@
-# Heal potion at heal_hits, Greater Heal at emergency_hits when no potion went out.
-#@ needs core/wait core/output core/switches core/message core/reagents
+# Heal potion at heal_hits, Greater Heal at emergency_hits when no potion went out on this pass.
 #@ hotkeys Drink Heal, > Greater Heal/Cure Self, Cancel Current Target
-#@ settings
-# Missing hit points, not percent.
-#   heal_hits       heal potion
-#   emergency_hits  Greater Heal when no heal potion can go out. Not below heal_hits
+
+#@ config
+# Missing hit points (not percent) that drink a heal potion.
 @setvar! config__heal_hits 35
+# Missing hit points that cast Greater Heal when no heal potion went out on this pass.
+# Not below heal_hits.
 @setvar! config__emergency_hits 35
-# Minimum current mana for Greater Heal. It keeps no reserve: raise it to 31 to always leave
-# 20 mana for an attack or Teleport.
+# Minimum current mana for Greater Heal. It keeps no reserve: 31 always leaves 20 mana for an
+# attack or Teleport.
 @setvar! config__mana_greater_heal 11
+
 #@ state
-# Scratch: 1 once a heal potion went out on this pass. HEAL only.
+# Scratch: 1 once a heal potion went out on this pass.
 @setvar! var__heal_potion_out 0
+
 #@ loop
     # ################################################################################
     # # HEAL

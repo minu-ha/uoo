@@ -1,6 +1,7 @@
 # Smart Harvest with the Hatchet in the left hand, equipping it first when the hand is empty.
-#@ needs core/wait core/output core/message core/heal gather/auto-recall gather/tracking-setup
+# Waits while var__hold_gathering is 1 (escape/recall: a Recall due, no book, Tracking not hunting).
 #@ hotkeys Use item in hand
+
 #@ wait
 # Wait for the hand tool cursor in the same block before any other automatic action.
 @setvar! wait__harvest_target 3000
@@ -9,12 +10,10 @@
 # Normal tool retry. Resource exhaustion uses the shorter interval below.
 @setvar! cooldown__harvest_retry 4000
 @setvar! cooldown__harvest_out_retry 2000
+
 #@ timer
-if not timerexists "timer__harvest"
-    createtimer "timer__harvest"
-endif
-#@ ready
-settimer "timer__harvest" cooldown__harvest_retry
+timer__harvest cooldown__harvest_retry
+
 #@ state
 # Delay for the next tool attempt, in ms. Resource exhaustion selects the shorter retry.
 # Each attempt restores the normal interval. Reuse timer__harvest without another timer.
@@ -25,6 +24,7 @@ settimer "timer__harvest" cooldown__harvest_retry
 if not varexist var__my_hatchet
     @setvar! var__my_hatchet 0
 endif
+
 #@ loop
     # ####################################################################################
     # # SMART HARVEST
@@ -36,8 +36,8 @@ endif
         settimer "timer__harvest" 0
     endif
 
-    # Equip independently of book, Hunting and weight readiness. Only a Recall decision pauses both.
-    if var__recall_needed = 0 and diffhits < config__heal_hits and not poisoned and not paralyzed and not warmode and timer "timer__harvest" >= var__harvest_retry
+    # Equip independently of spare weight. var__hold_gathering pauses both equip and harvest.
+    if var__hold_gathering = 0 and diffhits < config__heal_hits and not poisoned and not paralyzed and not warmode and timer "timer__harvest" >= var__harvest_retry
         if not hidden and not queued and not casting and not targetexists and cooldown "walk" = 0
             settimer "timer__harvest" 0
             @setvar! var__harvest_retry cooldown__harvest_retry
@@ -78,14 +78,9 @@ endif
                 endif
 
                 # A slot-to-serial match proves this selected tool is actually in lefthand.
-                # One guard chain preserves book/Hunting bypasses without mixing and/or.
                 # Recheck input after tool discovery. Do not add a separate ready state.
                 if var__my_hatchet != alias__equipped_hatchet or diffweight <= 0 or hidden or queued or casting or targetexists or warmode
                     # The hand, spare weight or player input is not ready for harvesting.
-                elseif config__auto_recall != 0 and config__require_runebook != 0 and var__recall_book_available != 1
-                    # Automatic Recall requires a carried book only when require_runebook is on.
-                elseif config__auto_recall != 0 and config__recall_on_detection != 0 and config__use_tracking != 0 and var__tracking_hunting_active != 1
-                    # Hunting is required only when all three detection switches are on.
                 else
                     hotkey "Use item in hand"
                     waitfortarget wait__harvest_target

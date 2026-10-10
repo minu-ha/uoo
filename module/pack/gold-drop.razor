@@ -1,17 +1,19 @@
 # Drops gold at your feet while over max weight, one drop per pass.
-#@ needs core/wait core/output core/message
-#@ settings
-# Over max weight, drop this much gold at your feet per pass. Gold is cheaper than the leather.
-@setvar! config__use_gold_drop 1
+
+#@ config
+# Gold dropped per pass while over max weight. Gold is cheaper than the leather.
 @setvar! config__gold_drop_amount 2000
+
 #@ wait
-@setvar! wait__long 1000
+# Pause after a drop, so the weight settles before the next pass.
+@setvar! wait__gold_drop 1000
+
 #@ loop
     # ################################################################################
     # # GOLD
     # ################################################################################
     # One drop per pass, so recovery still runs between drops. A refused drop goes back to the pack.
-    if config__use_gold_drop = 1 and weight > maxweight
+    if weight > maxweight
         if not hidden and not queued and not casting and not targetexists
             if findtype "gold coin" backpack as alias__found_gold
                 lift alias__found_gold config__gold_drop_amount
@@ -25,7 +27,7 @@
                     drop backpack -1 -1 -1
                 endif
 
-                wait wait__long
+                wait wait__gold_drop
                 if config__chatty = 1
                     overhead "[ gold, dropped ]" 290
                 endif

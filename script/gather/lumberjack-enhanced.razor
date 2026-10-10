@@ -1,7 +1,7 @@
 # Lumberjack gathering with self recovery, independent Tracking setup and one automatic Recall attempt.
 # Needs: One Hatchet, bandages, reagents, recovery and harvest hotkeys. Automatic Recall needs a charged book with a Home rune.
-# Tracking reuses a confirmed, active hunt color. Setup is independent of auto_recall.
-# Housekeeping converts all wood colors to Boards and packs them in the loadout looting pouch every 2 minutes.
+# Tracking reuses a confirmed, active hunt color. Gathering waits for it, for a carried book and for a due Recall.
+# Every 2 minutes Logs of all wood colors become Boards and go into the loadout looting pouch.
 # For Tracking-triggered Recall, set Hunt Frequency to Always Get Closest in the Tracking window.
 # Design and in-game checks: blueprint/lumberjack-pvp-handbook.html part 8.
 # Optional cooldown bars: heal pot, walk, reflect. A missing walk or reflect bar cannot
@@ -18,123 +18,114 @@
 #          Cancel Current Target, Bandage Self, Drink Refresh, Use item in hand, > Interrupt.
 # Generated from recipe/lumberjack-enhanced-recipe.razor by util/build-scripts.py. Edit module/ and recipe/, not this file.
 
-clearall
-clearsysmsg
-cleardragdrop
-clearignore
-
-if pvp
-    overhead "[ script, blocked ]" 254
-    stop
-endif
-
 # ####################################################################################
 # # CONFIG
 # ####################################################################################
-# ---- core/output -------------------------------------------------------------------
-# Optional script overheads. Essential warnings remain visible.
+# ---- module/base.razor -----------------------------------------------------------------
+# Optional overheads. Warnings show either way.
 @setvar! config__chatty 1
-# Journal diagnostics. Each block that writes one says so in its own comments.
+# Journal diagnostics. A block that writes one says so in its comments.
 @setvar! config__sysmsg 1
-
-# ---- core/switches -----------------------------------------------------------------
-# Independent features. No option overrides another.
+# Clear the client queues, the journal and the ignore list at Play (conventions 02.D).
+# 0 keeps a cursor or a cast the player holds at Play.
+@setvar! config__clear_at_start 1
+# Magery: the Cure and heal agents, the reagent reads and the buffs. Potions and bandages stay.
 @setvar! config__use_magery 1
+# Potions: cure, heal, Refresh and the stat potions.
 @setvar! config__use_potions 1
-@setvar! config__use_bandages 1
-# 1 makes our own casts wait while the walk bar runs, so a step does not break them.
+# 1 makes our casts wait while the walk bar runs, so a step does not break them.
 # 0 casts while walking, for a fight where there is no better moment to wait for.
 @setvar! config__walk_guard 1
-# 1 when warmode is the player's manual control window: our own casts stand down while it is on.
+# 1 when warmode is the player's manual control window: our casts stand down while it is on.
 # This loop: Warmode is the player's: recovery casts and buffs stand down, potions still go out.
 @setvar! config__warmode_is_manual 1
 
-# ---- gather/tracking-setup ---------------------------------------------------------
-# Reuse an active, confirmed hunt color. Otherwise check the window and set the color before the loop.
-@setvar! config__use_tracking 1
-# Tracking color: 1 red (murderer), 2 grey (criminal), 3 orange (enemy), 4 all three.
-# Grey here means Criminal Players. The profile displays server Tracking messages.
+# ---- module/escape/tracking.razor ------------------------------------------------------
+# Hunt filter: 1 red (murderer), 2 grey (criminal players), 3 orange (enemy), 4 all three.
 @setvar! config__tracking_color 1
+# 1 leaves the Tracking window open after setup.
 @setvar! config__show_tracking 0
 
-# ---- core/cure ---------------------------------------------------------------------
+# ---- module/recovery/cure.razor --------------------------------------------------------
 # Minimum current mana for the Cure agent.
 @setvar! config__mana_cure 6
 
-# ---- core/heal ---------------------------------------------------------------------
-# Missing hit points, not percent.
-#   heal_hits       heal potion
-#   emergency_hits  Greater Heal when no heal potion can go out. Not below heal_hits
+# ---- module/recovery/heal.razor --------------------------------------------------------
+# Missing hit points (not percent) that drink a heal potion.
 @setvar! config__heal_hits 35
+# Missing hit points that cast Greater Heal when no heal potion went out on this pass.
+# Not below heal_hits.
 # This loop: Bandages handle ordinary damage, so Greater Heal waits for 45.
-# heal_hits also holds harvest back, light_hits the food, buffs and lumber packing.
 @setvar! config__emergency_hits 45
-# Minimum current mana for Greater Heal. It keeps no reserve: raise it to 31 to always leave
-# 20 mana for an attack or Teleport.
+# Minimum current mana for Greater Heal. It keeps no reserve: 31 always leaves 20 mana for an
+# attack or Teleport.
 @setvar! config__mana_greater_heal 11
 
-# ---- core/bandage ------------------------------------------------------------------
-# Healing must be above this to bandage. 0 means any Healing at all.
+# ---- module/recovery/bandage.razor -----------------------------------------------------
+# 0 turns bandages off. recovery/light-heal then stands in.
+@setvar! config__use_bandages 1
+# Healing must be above this to bandage. At or below it recovery/light-heal stands in.
 @setvar! config__heal_skill_min 0
 
-# ---- core/light-heal ---------------------------------------------------------------
-# Light Heal beside the bandages. With no bandage able to run (use_bandages 0, no Healing, or
-# none left) it goes anyway, as the bandage stand-in. Needs use_magery.
+# ---- module/recovery/light-heal.razor --------------------------------------------------
+# 1 casts the light Heal beside the bandages. At 0 it goes only while no bandage can run:
+# use_bandages 0, Healing at or below heal_skill_min, or none left and none running.
 @setvar! config__use_light_heal 0
-# Missing hit points that start the light Heal, and its minimum current mana.
+# Missing hit points that start the light Heal.
 @setvar! config__light_hits 15
+# Minimum current mana for the light Heal.
 @setvar! config__mana_heal 4
 
-# ---- core/refresh ------------------------------------------------------------------
+# ---- module/recovery/refresh.razor -----------------------------------------------------
 # Current stamina at or below this drinks a Refresh.
 @setvar! config__refresh_stam 15
 
-# ---- gather/auto-recall ------------------------------------------------------------
-# Automatic Recall only. 0 skips its detection reads, book checks and weight decisions.
-# use_tracking controls startup setup. The profile displays any server Tracking messages.
-@setvar! config__auto_recall 1
-
-# Recall on a Tracking report within 1 through 45 steps. Requires auto_recall and use_tracking.
+# ---- module/escape/recall.razor --------------------------------------------------------
+# Recall on a Tracking report within 1 through 45 steps. Needs escape/tracking hunting.
 @setvar! config__recall_on_detection 1
-
+# 1 recalls on a Tracking report at any distance.
 @setvar! config__recall_at_any_distance 0
+# Recall once spare weight is at or below weight_remaining.
 @setvar! config__recall_on_weight 1
+# Spare weight in stones that counts as low for recall_on_weight.
 @setvar! config__weight_remaining 10
-# When automatic Recall is on, pause harvest if no Recall book is available.
+# 1 holds gathering while no Recall book is carried.
 @setvar! config__require_runebook 1
 # Minimum mana to send RecallCharge.
 @setvar! config__mana_recall 11
 
-# ---- core/self-buffs ---------------------------------------------------------------
+# ---- module/buff/spells.razor ----------------------------------------------------------
+# Reactive Armor on or off.
 @setvar! config__use_reactive_armor 1
+# Magic Reflection on or off.
 @setvar! config__use_magic_reflect 1
-# Minimum current mana to start each buff.
+# Minimum current mana to start Reactive Armor.
 # This loop: Buffs keep the handbook's 20 mana for Greater Heal and Teleport against a PK.
 @setvar! config__mana_reactive_armor 24
+# Minimum current mana to start Magic Reflection.
+# This loop: Same reserve: the base 14 plus the handbook's 20.
 @setvar! config__mana_magic_reflect 34
 # Missing hit points at which buffs are not started, and cut mid cast.
 # This loop: Buffs only while nearly full, so gathering never trades a heal for one.
 @setvar! config__buff_max_loss 15
-# 0 keeps buffs back while poisoned and cuts one that is casting.
+# 1 buffs while poisoned. 0 holds them back and cuts one that is casting, so the cure goes first.
 # This loop: The cure goes first: no buffs while poisoned.
 @setvar! config__buff_when_poisoned 0
-
-# ---- gather/lumber-housekeeping ----------------------------------------------------
-# Convert Logs and pack Boards together. Reuse the looting pouch selected by loadout.
-@setvar! config__pack_lumber 1
 
 # ####################################################################################
 # # WAIT AND COOLDOWN
 # ####################################################################################
+# The poll inside a wait, and the pause after an action.
 @setvar! wait__poll 100
 @setvar! wait__short 200
-
-# Debounce for repeated warnings. Without it an empty potion bag shouts every pass.
+# Spacing for repeated warnings. Without it an empty potion bag shouts every pass.
 @setvar! cooldown__message 3000
 
-@setvar! wait__target 1000
+# How long the Tracking window may take to open.
+@setvar! wait__tracking_gump 1000
 
-@setvar! cooldown__housekeeping 5000
+# The book, Tracking buff and weight checks run on this clock.
+@setvar! cooldown__recall_check 5000
 
 # Reagent read interval. Five lookups each time. A refill counts within this, and running out
 # is caught at once by the refusal line.
@@ -148,25 +139,29 @@ endif
 @setvar! cooldown__harvest_retry 4000
 @setvar! cooldown__harvest_out_retry 2000
 
+# The buff lasts far longer than this.
+@setvar! cooldown__food 60000
+
 # Allow inventory updates after conversion, opening the pouch and drag/drop.
 @setvar! wait__lumber_item 500
 # Per-phase request budget: Logs and Boards each yield after 2.5 seconds, between item requests.
 @setvar! wait__lumber_batch 2500
-@setvar! cooldown__food 60000
 # 120000 = 2 minutes. Use 180000 for 3 minutes.
 @setvar! cooldown__pack_lumber 120000
 
 # ####################################################################################
 # # TIMER
 # ####################################################################################
+# Ready on the first pass, so the first warning shows at once.
 if not timerexists "timer__message"
     createtimer "timer__message"
 endif
 
-if not timerexists "timer__housekeeping"
-    createtimer "timer__housekeeping"
+if not timerexists "timer__recall_check"
+    createtimer "timer__recall_check"
 endif
 
+# Ready on the first pass, so reagents are read before the first cast.
 if not timerexists "timer__reagents"
     createtimer "timer__reagents"
 endif
@@ -179,13 +174,13 @@ if not timerexists "timer__food"
     createtimer "timer__food"
 endif
 
+# Packing waits one full interval.
 if not timerexists "timer__pack_lumber"
     createtimer "timer__pack_lumber"
 endif
 
 settimer "timer__message" cooldown__message
-settimer "timer__housekeeping" cooldown__housekeeping
-# Ready on the first pass, so reagents are read before the first cast.
+settimer "timer__recall_check" cooldown__recall_check
 settimer "timer__reagents" cooldown__reagents
 settimer "timer__harvest" cooldown__harvest_retry
 settimer "timer__food" cooldown__food
@@ -194,6 +189,16 @@ settimer "timer__pack_lumber" 0
 # ####################################################################################
 # # STATE
 # ####################################################################################
+# Signals between blocks. Each keeps this value unless the loop has a block that sets it.
+#   fighting        1 while an enemy is engaged. buff/potions drinks only then. fight/target
+#                   sets it every pass, and the pvp recipe keeps it at 1.
+#   hold_casts      1 while a block keeps the cast window for itself. buff/spells stands down.
+#                   escape/recall sets it once a Recall is due.
+#   hold_gathering  1 while gathering and its packing wait. escape/recall sets it.
+@setvar! var__fighting 0
+@setvar! var__hold_casts 0
+@setvar! var__hold_gathering 0
+
 # Last color confirmed in this client session. Survives Stop and Play only while Hunting stays active.
 # If the filter was changed manually, turn Hunting off before Play so it is checked again.
 if not varexist var__tracking_setup_color
@@ -202,19 +207,15 @@ endif
 
 # 1 when this run reused a confirmed color or verified it during startup.
 @setvar! var__tracking_filter_confirmed 0
-# 1 if Hunting was active at startup or the last housekeeping check. No repeated gump setup.
+# 1 if Hunting was active at startup or at the last escape/recall check. No repeated gump setup.
 @setvar! var__tracking_hunting_active 0
 # Temporary button-response flag. Wait for each response before cycling the next filter.
 @setvar! var__tracking_button_answered 0
 
-# 1 when housekeeping is due this pass. Recall uses this clock before harvesting.
-# Inventory maintenance runs last, after Tracking detection.
-@setvar! var__housekeeping_pass 0
-
-# Scratch: 1 once a heal potion went out on this pass. HEAL only.
+# Scratch: 1 once a heal potion went out on this pass.
 @setvar! var__heal_potion_out 0
 
-# Scratch: 1 when the light Heal goes on this pass. LIGHT HEAL only.
+# Scratch: 1 when the light Heal goes on this pass.
 @setvar! var__light_heal_due 0
 
 # Recall decision: 0 keep gathering, 1 stop optional work and attempt Recall when input is free.
@@ -226,9 +227,12 @@ endif
 # This flag records the request, not arrival. No response timer or timed notice is needed.
 @setvar! var__recall_sent 0
 
-# Own-book presence, refreshed on housekeeping passes before automatic Recall is sent.
+# Own-book presence, refreshed on every check before automatic Recall is sent.
 # Initial 0 keeps book-required gathering paused until the first inventory check.
 @setvar! var__recall_book_available 0
+
+# Scratch: 1 when the slow checks are due on this pass.
+@setvar! var__recall_check_due 0
 
 # Reagent flags, written only by REAGENTS. 1 when every reagent of that spell was found.
 #   Cure            garlic 3972, ginseng 3973
@@ -257,32 +261,20 @@ if not varexist var__my_hatchet
     @setvar! var__my_hatchet 0
 endif
 
-# 1 while another block holds our buff casts back. Nothing sets it unless the loop has such a block.
-@setvar! var__hold_casts 0
-
 # Scratch graphic for the two lumber passes: 7133 Logs, then 7127 Boards. No persistent batch stage.
 @setvar! var__lumber_graphic 0
 
-if config__pack_lumber = 1
-    if not varexist global__my_looting_pouch or not find global__my_looting_pouch backpack
-        overhead "[ loot pouch, pick ]" 255
-        setvar global__my_looting_pouch
-    endif
+# The pvp expression means the structured-PvP restrictions, where these loops may not run.
+if pvp
+    overhead "[ script, blocked ]" 254
+    stop
 endif
 
-# loot/recycle runs the hotkey named in this list when it finishes or gives up. A list, because
-# a variable cannot hold a word (blueprint/razor.html part 3). It lasts until the client closes.
-if not listexists 'list__resume_script'
-    createlist 'list__resume_script'
-endif
-clearlist 'list__resume_script'
-pushlist 'list__resume_script' 'Play Script: gather\lumberjack-enhanced'
-
-if config__sysmsg = 1
-    sysmsg "Lumberjack enhanced v17 loaded: auto recall={{config__auto_recall}}, tracking color={{config__tracking_color}}." 88
-endif
-if config__chatty = 1
-    overhead "[ lumberjack, on ]" 290
+if config__clear_at_start = 1
+    clearall
+    clearsysmsg
+    cleardragdrop
+    clearignore
 endif
 
 # ####################################################################################
@@ -290,14 +282,14 @@ endif
 # ####################################################################################
 # Reuse the color verified by this script while Hunting remains active.
 # A buff alone does not identify the filter. A first run checks the current window instead.
-if config__use_tracking = 1 and skill "Tracking" > 0
+if skill "Tracking" > 0
     if findbuff "tracking" and var__tracking_setup_color = config__tracking_color
         @setvar! var__tracking_filter_confirmed 1
         @setvar! var__tracking_hunting_active 1
     elseif diffhits < config__heal_hits and not poisoned and not warmode
         if not hidden and not queued and not casting and not targetexists
             useskill "Tracking"
-            waitforgump 4267467659 wait__target
+            waitforgump 4267467659 wait__tracking_gump
 
             if gumpexists 4267467659
                 # Do not cycle past an already correct filter. The window displays the selected type.
@@ -406,6 +398,27 @@ if config__use_tracking = 1 and skill "Tracking" > 0
     endif
 endif
 
+# pack/lumber moves Boards into this pouch. restock/loadout picks it, this asks when it is missing.
+if not varexist global__my_looting_pouch or not find global__my_looting_pouch backpack
+    overhead "[ loot pouch, pick ]" 255
+    setvar global__my_looting_pouch
+endif
+
+# loot/recycle runs the hotkey named in this list when it finishes or gives up. A list, because
+# a variable cannot hold a word (blueprint/razor.html part 3). It lasts until the client closes.
+if not listexists 'list__resume_script'
+    createlist 'list__resume_script'
+endif
+clearlist 'list__resume_script'
+pushlist 'list__resume_script' 'Play Script: gather\lumberjack-enhanced'
+
+if config__sysmsg = 1
+    sysmsg "Lumberjack enhanced v18 loaded: tracking color={{config__tracking_color}}." 88
+endif
+if config__chatty = 1
+    overhead "[ lumberjack, on ]" 290
+endif
+
 # ####################################################################################
 # # MAIN LOOP
 # ####################################################################################
@@ -414,12 +427,6 @@ while not dead
     if pvp
         overhead "[ script, blocked ]" 254
         stop
-    endif
-
-    # Schedule slow checks without running optional inventory work ahead of recovery or harvest.
-    @setvar! var__housekeeping_pass 0
-    if timer "timer__housekeeping" >= cooldown__housekeeping
-        @setvar! var__housekeeping_pass 1
     endif
 
     # ################################################################################
@@ -601,209 +608,219 @@ while not dead
     endif
 
     # ####################################################################################
-    # # AUTO RECALL
+    # # RECALL
     # ####################################################################################
-    # This entire path is skipped when automatic Recall is disabled.
-    if config__auto_recall = 1
-        if var__recall_sent = 0
-            # Reuse housekeeping passes for slow checks. No separate Recall scan timer.
-            if var__housekeeping_pass = 1
-                if var__recall_needed = 0 and config__recall_on_detection = 1 and config__use_tracking = 1
-                    @setvar! var__tracking_hunting_active 0
-                    if var__tracking_filter_confirmed = 1 and findbuff "tracking"
-                        @setvar! var__tracking_hunting_active 1
-                    endif
+    # The slow checks (book, Tracking buff, weight) run every cooldown__recall_check.
+    @setvar! var__recall_check_due 0
+    if timer "timer__recall_check" >= cooldown__recall_check
+        @setvar! var__recall_check_due 1
+        settimer "timer__recall_check" 0
+    endif
 
-                    if var__tracking_hunting_active = 0 and timer "timer__message" >= cooldown__message
-                        overhead "[ track, check ]" 255
+    if var__recall_sent = 0
+        if var__recall_check_due = 1
+            if var__recall_needed = 0 and config__recall_on_detection = 1
+                @setvar! var__tracking_hunting_active 0
+                if var__tracking_filter_confirmed = 1 and findbuff "tracking"
+                    @setvar! var__tracking_hunting_active 1
+                endif
+
+                if var__tracking_hunting_active = 0 and timer "timer__message" >= cooldown__message
+                    overhead "[ track, check ]" 255
+                    settimer "timer__message" 0
+                endif
+            endif
+
+            @setvar! var__recall_book_available 0
+            if findtype "runebook" backpack or findtype "runetome" backpack
+                @setvar! var__recall_book_available 1
+            elseif config__require_runebook = 1 and timer "timer__message" >= cooldown__message
+                overhead "[ runebook, out ]" 254
+                settimer "timer__message" 0
+            endif
+        endif
+
+        # Read Tracking before harvesting and inventory maintenance. Profile overheads display it.
+        if config__recall_on_detection = 1
+            if var__tracking_hunting_active = 1 and var__recall_needed = 0
+                if config__recall_at_any_distance = 1
+                    if insysmsg "Now tracking:" or insysmsg "Distance to destination:" or insysmsg "spaces to target"
+                        @setvar! var__recall_needed 1
+                    endif
+                else
+                    # Keep all 45 literal distance branches. No player find is needed.
+                    if insysmsg "Distance to destination: 45 steps" or insysmsg "(45 spaces to target)"
+                        @setvar! var__recall_needed 1
+                    elseif insysmsg "Distance to destination: 44 steps" or insysmsg "(44 spaces to target)"
+                        @setvar! var__recall_needed 1
+                    elseif insysmsg "Distance to destination: 43 steps" or insysmsg "(43 spaces to target)"
+                        @setvar! var__recall_needed 1
+                    elseif insysmsg "Distance to destination: 42 steps" or insysmsg "(42 spaces to target)"
+                        @setvar! var__recall_needed 1
+                    elseif insysmsg "Distance to destination: 41 steps" or insysmsg "(41 spaces to target)"
+                        @setvar! var__recall_needed 1
+                    elseif insysmsg "Distance to destination: 40 steps" or insysmsg "(40 spaces to target)"
+                        @setvar! var__recall_needed 1
+                    elseif insysmsg "Distance to destination: 39 steps" or insysmsg "(39 spaces to target)"
+                        @setvar! var__recall_needed 1
+                    elseif insysmsg "Distance to destination: 38 steps" or insysmsg "(38 spaces to target)"
+                        @setvar! var__recall_needed 1
+                    elseif insysmsg "Distance to destination: 37 steps" or insysmsg "(37 spaces to target)"
+                        @setvar! var__recall_needed 1
+                    elseif insysmsg "Distance to destination: 36 steps" or insysmsg "(36 spaces to target)"
+                        @setvar! var__recall_needed 1
+                    elseif insysmsg "Distance to destination: 35 steps" or insysmsg "(35 spaces to target)"
+                        @setvar! var__recall_needed 1
+                    elseif insysmsg "Distance to destination: 34 steps" or insysmsg "(34 spaces to target)"
+                        @setvar! var__recall_needed 1
+                    elseif insysmsg "Distance to destination: 33 steps" or insysmsg "(33 spaces to target)"
+                        @setvar! var__recall_needed 1
+                    elseif insysmsg "Distance to destination: 32 steps" or insysmsg "(32 spaces to target)"
+                        @setvar! var__recall_needed 1
+                    elseif insysmsg "Distance to destination: 31 steps" or insysmsg "(31 spaces to target)"
+                        @setvar! var__recall_needed 1
+                    elseif insysmsg "Distance to destination: 30 steps" or insysmsg "(30 spaces to target)"
+                        @setvar! var__recall_needed 1
+                    elseif insysmsg "Distance to destination: 29 steps" or insysmsg "(29 spaces to target)"
+                        @setvar! var__recall_needed 1
+                    elseif insysmsg "Distance to destination: 28 steps" or insysmsg "(28 spaces to target)"
+                        @setvar! var__recall_needed 1
+                    elseif insysmsg "Distance to destination: 27 steps" or insysmsg "(27 spaces to target)"
+                        @setvar! var__recall_needed 1
+                    elseif insysmsg "Distance to destination: 26 steps" or insysmsg "(26 spaces to target)"
+                        @setvar! var__recall_needed 1
+                    elseif insysmsg "Distance to destination: 25 steps" or insysmsg "(25 spaces to target)"
+                        @setvar! var__recall_needed 1
+                    elseif insysmsg "Distance to destination: 24 steps" or insysmsg "(24 spaces to target)"
+                        @setvar! var__recall_needed 1
+                    elseif insysmsg "Distance to destination: 23 steps" or insysmsg "(23 spaces to target)"
+                        @setvar! var__recall_needed 1
+                    elseif insysmsg "Distance to destination: 22 steps" or insysmsg "(22 spaces to target)"
+                        @setvar! var__recall_needed 1
+                    elseif insysmsg "Distance to destination: 21 steps" or insysmsg "(21 spaces to target)"
+                        @setvar! var__recall_needed 1
+                    elseif insysmsg "Distance to destination: 20 steps" or insysmsg "(20 spaces to target)"
+                        @setvar! var__recall_needed 1
+                    elseif insysmsg "Distance to destination: 19 steps" or insysmsg "(19 spaces to target)"
+                        @setvar! var__recall_needed 1
+                    elseif insysmsg "Distance to destination: 18 steps" or insysmsg "(18 spaces to target)"
+                        @setvar! var__recall_needed 1
+                    elseif insysmsg "Distance to destination: 17 steps" or insysmsg "(17 spaces to target)"
+                        @setvar! var__recall_needed 1
+                    elseif insysmsg "Distance to destination: 16 steps" or insysmsg "(16 spaces to target)"
+                        @setvar! var__recall_needed 1
+                    elseif insysmsg "Distance to destination: 15 steps" or insysmsg "(15 spaces to target)"
+                        @setvar! var__recall_needed 1
+                    elseif insysmsg "Distance to destination: 14 steps" or insysmsg "(14 spaces to target)"
+                        @setvar! var__recall_needed 1
+                    elseif insysmsg "Distance to destination: 13 steps" or insysmsg "(13 spaces to target)"
+                        @setvar! var__recall_needed 1
+                    elseif insysmsg "Distance to destination: 12 steps" or insysmsg "(12 spaces to target)"
+                        @setvar! var__recall_needed 1
+                    elseif insysmsg "Distance to destination: 11 steps" or insysmsg "(11 spaces to target)"
+                        @setvar! var__recall_needed 1
+                    elseif insysmsg "Distance to destination: 10 steps" or insysmsg "(10 spaces to target)"
+                        @setvar! var__recall_needed 1
+                    elseif insysmsg "Distance to destination: 9 steps" or insysmsg "(9 spaces to target)"
+                        @setvar! var__recall_needed 1
+                    elseif insysmsg "Distance to destination: 8 steps" or insysmsg "(8 spaces to target)"
+                        @setvar! var__recall_needed 1
+                    elseif insysmsg "Distance to destination: 7 steps" or insysmsg "(7 spaces to target)"
+                        @setvar! var__recall_needed 1
+                    elseif insysmsg "Distance to destination: 6 steps" or insysmsg "(6 spaces to target)"
+                        @setvar! var__recall_needed 1
+                    elseif insysmsg "Distance to destination: 5 steps" or insysmsg "(5 spaces to target)"
+                        @setvar! var__recall_needed 1
+                    elseif insysmsg "Distance to destination: 4 steps" or insysmsg "(4 spaces to target)"
+                        @setvar! var__recall_needed 1
+                    elseif insysmsg "Distance to destination: 3 steps" or insysmsg "(3 spaces to target)"
+                        @setvar! var__recall_needed 1
+                    elseif insysmsg "Distance to destination: 2 steps" or insysmsg "(2 spaces to target)"
+                        @setvar! var__recall_needed 1
+                    elseif insysmsg "Distance to destination: 1 steps" or insysmsg "(1 spaces to target)"
+                        @setvar! var__recall_needed 1
+                    endif
+                endif
+                if var__recall_needed = 1 and config__sysmsg = 1
+                    sysmsg "Recall trigger: Tracking report, configured color={{config__tracking_color}}." 88
+                endif
+            endif
+        endif
+
+        # Weight shares the check clock. Detection is always read first.
+        if var__recall_check_due = 1
+            if config__recall_on_weight = 1 and var__recall_needed = 0
+                if diffweight <= config__weight_remaining
+                    @setvar! var__recall_needed 1
+                    if config__sysmsg = 1
+                        sysmsg "Recall trigger: spare weight at or below {{config__weight_remaining}}." 88
+                    endif
+                    if timer "timer__message" >= cooldown__message
+                        overhead "[ weight, low ]" 254
                         settimer "timer__message" 0
                     endif
                 endif
-
-                @setvar! var__recall_book_available 0
-                if findtype "runebook" backpack or findtype "runetome" backpack
-                    @setvar! var__recall_book_available 1
-                elseif config__require_runebook = 1 and timer "timer__message" >= cooldown__message
-                    overhead "[ runebook, out ]" 254
-                    settimer "timer__message" 0
-                endif
             endif
+        endif
 
-            # Read Tracking before harvesting and inventory maintenance. Profile overheads display it.
-            if config__recall_on_detection = 1 and config__use_tracking = 1
-                if var__tracking_hunting_active = 1 and var__recall_needed = 0
-                    if config__recall_at_any_distance = 1
-                        if insysmsg "Now tracking:" or insysmsg "Distance to destination:" or insysmsg "spaces to target"
-                            @setvar! var__recall_needed 1
-                        endif
-                    else
-                        # Keep all 45 literal distance branches. No player find is needed.
-                        if insysmsg "Distance to destination: 45 steps" or insysmsg "(45 spaces to target)"
-                            @setvar! var__recall_needed 1
-                        elseif insysmsg "Distance to destination: 44 steps" or insysmsg "(44 spaces to target)"
-                            @setvar! var__recall_needed 1
-                        elseif insysmsg "Distance to destination: 43 steps" or insysmsg "(43 spaces to target)"
-                            @setvar! var__recall_needed 1
-                        elseif insysmsg "Distance to destination: 42 steps" or insysmsg "(42 spaces to target)"
-                            @setvar! var__recall_needed 1
-                        elseif insysmsg "Distance to destination: 41 steps" or insysmsg "(41 spaces to target)"
-                            @setvar! var__recall_needed 1
-                        elseif insysmsg "Distance to destination: 40 steps" or insysmsg "(40 spaces to target)"
-                            @setvar! var__recall_needed 1
-                        elseif insysmsg "Distance to destination: 39 steps" or insysmsg "(39 spaces to target)"
-                            @setvar! var__recall_needed 1
-                        elseif insysmsg "Distance to destination: 38 steps" or insysmsg "(38 spaces to target)"
-                            @setvar! var__recall_needed 1
-                        elseif insysmsg "Distance to destination: 37 steps" or insysmsg "(37 spaces to target)"
-                            @setvar! var__recall_needed 1
-                        elseif insysmsg "Distance to destination: 36 steps" or insysmsg "(36 spaces to target)"
-                            @setvar! var__recall_needed 1
-                        elseif insysmsg "Distance to destination: 35 steps" or insysmsg "(35 spaces to target)"
-                            @setvar! var__recall_needed 1
-                        elseif insysmsg "Distance to destination: 34 steps" or insysmsg "(34 spaces to target)"
-                            @setvar! var__recall_needed 1
-                        elseif insysmsg "Distance to destination: 33 steps" or insysmsg "(33 spaces to target)"
-                            @setvar! var__recall_needed 1
-                        elseif insysmsg "Distance to destination: 32 steps" or insysmsg "(32 spaces to target)"
-                            @setvar! var__recall_needed 1
-                        elseif insysmsg "Distance to destination: 31 steps" or insysmsg "(31 spaces to target)"
-                            @setvar! var__recall_needed 1
-                        elseif insysmsg "Distance to destination: 30 steps" or insysmsg "(30 spaces to target)"
-                            @setvar! var__recall_needed 1
-                        elseif insysmsg "Distance to destination: 29 steps" or insysmsg "(29 spaces to target)"
-                            @setvar! var__recall_needed 1
-                        elseif insysmsg "Distance to destination: 28 steps" or insysmsg "(28 spaces to target)"
-                            @setvar! var__recall_needed 1
-                        elseif insysmsg "Distance to destination: 27 steps" or insysmsg "(27 spaces to target)"
-                            @setvar! var__recall_needed 1
-                        elseif insysmsg "Distance to destination: 26 steps" or insysmsg "(26 spaces to target)"
-                            @setvar! var__recall_needed 1
-                        elseif insysmsg "Distance to destination: 25 steps" or insysmsg "(25 spaces to target)"
-                            @setvar! var__recall_needed 1
-                        elseif insysmsg "Distance to destination: 24 steps" or insysmsg "(24 spaces to target)"
-                            @setvar! var__recall_needed 1
-                        elseif insysmsg "Distance to destination: 23 steps" or insysmsg "(23 spaces to target)"
-                            @setvar! var__recall_needed 1
-                        elseif insysmsg "Distance to destination: 22 steps" or insysmsg "(22 spaces to target)"
-                            @setvar! var__recall_needed 1
-                        elseif insysmsg "Distance to destination: 21 steps" or insysmsg "(21 spaces to target)"
-                            @setvar! var__recall_needed 1
-                        elseif insysmsg "Distance to destination: 20 steps" or insysmsg "(20 spaces to target)"
-                            @setvar! var__recall_needed 1
-                        elseif insysmsg "Distance to destination: 19 steps" or insysmsg "(19 spaces to target)"
-                            @setvar! var__recall_needed 1
-                        elseif insysmsg "Distance to destination: 18 steps" or insysmsg "(18 spaces to target)"
-                            @setvar! var__recall_needed 1
-                        elseif insysmsg "Distance to destination: 17 steps" or insysmsg "(17 spaces to target)"
-                            @setvar! var__recall_needed 1
-                        elseif insysmsg "Distance to destination: 16 steps" or insysmsg "(16 spaces to target)"
-                            @setvar! var__recall_needed 1
-                        elseif insysmsg "Distance to destination: 15 steps" or insysmsg "(15 spaces to target)"
-                            @setvar! var__recall_needed 1
-                        elseif insysmsg "Distance to destination: 14 steps" or insysmsg "(14 spaces to target)"
-                            @setvar! var__recall_needed 1
-                        elseif insysmsg "Distance to destination: 13 steps" or insysmsg "(13 spaces to target)"
-                            @setvar! var__recall_needed 1
-                        elseif insysmsg "Distance to destination: 12 steps" or insysmsg "(12 spaces to target)"
-                            @setvar! var__recall_needed 1
-                        elseif insysmsg "Distance to destination: 11 steps" or insysmsg "(11 spaces to target)"
-                            @setvar! var__recall_needed 1
-                        elseif insysmsg "Distance to destination: 10 steps" or insysmsg "(10 spaces to target)"
-                            @setvar! var__recall_needed 1
-                        elseif insysmsg "Distance to destination: 9 steps" or insysmsg "(9 spaces to target)"
-                            @setvar! var__recall_needed 1
-                        elseif insysmsg "Distance to destination: 8 steps" or insysmsg "(8 spaces to target)"
-                            @setvar! var__recall_needed 1
-                        elseif insysmsg "Distance to destination: 7 steps" or insysmsg "(7 spaces to target)"
-                            @setvar! var__recall_needed 1
-                        elseif insysmsg "Distance to destination: 6 steps" or insysmsg "(6 spaces to target)"
-                            @setvar! var__recall_needed 1
-                        elseif insysmsg "Distance to destination: 5 steps" or insysmsg "(5 spaces to target)"
-                            @setvar! var__recall_needed 1
-                        elseif insysmsg "Distance to destination: 4 steps" or insysmsg "(4 spaces to target)"
-                            @setvar! var__recall_needed 1
-                        elseif insysmsg "Distance to destination: 3 steps" or insysmsg "(3 spaces to target)"
-                            @setvar! var__recall_needed 1
-                        elseif insysmsg "Distance to destination: 2 steps" or insysmsg "(2 spaces to target)"
-                            @setvar! var__recall_needed 1
-                        elseif insysmsg "Distance to destination: 1 steps" or insysmsg "(1 spaces to target)"
-                            @setvar! var__recall_needed 1
-                        endif
-                    endif
-                    if var__recall_needed = 1 and config__sysmsg = 1
-                        sysmsg "Recall trigger: Tracking report, configured color={{config__tracking_color}}." 88
-                    endif
-                endif
-            endif
+        # Keep gathering paused while waiting for mana, a book or free input.
+        if var__recall_needed = 1
+            # Heat of Battle is not a local gate. Let the server accept or refuse the request.
+            # Recall uses no combat preparation or Strength and Agility potions.
+            if mana >= config__mana_recall and not paralyzed and not warmode
+                if not hidden and not queued and not casting and not targetexists and cooldown "walk" = 0
+                    if var__recall_book_available = 1
+                        if findtype "runebook" backpack or findtype "runetome" backpack
+                            # Change Home to your rune name. This requests Recall, not Gate Travel.
+                            say "[RecallCharge Home"
+                            @setvar! var__recall_sent 1
 
-            # Weight shares housekeeping cadence too. Detection is always read first.
-            if var__housekeeping_pass = 1
-                if config__recall_on_weight = 1 and var__recall_needed = 0
-                    if diffweight <= config__weight_remaining
-                        @setvar! var__recall_needed 1
-                        if config__sysmsg = 1
-                            sysmsg "Recall trigger: spare weight at or below {{config__weight_remaining}}." 88
-                        endif
-                        if timer "timer__message" >= cooldown__message
-                            overhead "[ weight, low ]" 254
-                            settimer "timer__message" 0
-                        endif
-                    endif
-                endif
-            endif
-
-            # Keep gathering paused while waiting for mana, a book or free input.
-            if var__recall_needed = 1
-                # Heat of Battle is not a local gate. Let the server accept or refuse the request.
-                # Recall uses no combat preparation or Strength and Agility potions.
-                if mana >= config__mana_recall and not paralyzed and not warmode
-                    if not hidden and not queued and not casting and not targetexists and cooldown "walk" = 0
-                        if var__recall_book_available = 1
-                            if findtype "runebook" backpack or findtype "runetome" backpack
-                                # Change Home to your rune name. This requests Recall, not Gate Travel.
-                                say "[RecallCharge Home"
-                                @setvar! var__recall_sent 1
-
-                                if config__chatty = 1
-                                    overhead "[ recall, on ]" 290
-                                endif
-
-                                wait wait__short
-                            else
-                                # A removed book invalidates the cache. Wait for housekeeping to search again.
-                                @setvar! var__recall_book_available 0
+                            if config__chatty = 1
+                                overhead "[ recall, on ]" 290
                             endif
-                        endif
 
-                        if var__recall_book_available = 0 and timer "timer__message" >= cooldown__message
-                            overhead "[ runebook, out ]" 254
-                            settimer "timer__message" 0
+                            wait wait__short
+                        else
+                            # A removed book invalidates the cache. Wait for the next check to search again.
+                            @setvar! var__recall_book_available 0
                         endif
                     endif
-                elseif mana < config__mana_recall and timer "timer__message" >= cooldown__message
-                    overhead "[ mana, low ]" 254
-                    settimer "timer__message" 0
+
+                    if var__recall_book_available = 0 and timer "timer__message" >= cooldown__message
+                        overhead "[ runebook, out ]" 254
+                        settimer "timer__message" 0
+                    endif
                 endif
+            elseif mana < config__mana_recall and timer "timer__message" >= cooldown__message
+                overhead "[ mana, low ]" 254
+                settimer "timer__message" 0
             endif
-        else
-            # One request per Play. Recovery keeps running, but harvest and repeat Recall stay paused.
-            # Only an actual refusal gets a result notice. Silence or elapsed time does not prove arrival.
-            if insysmsg "Magical travel is not allowed in this location." or insysmsg "Magical travel from inside a dungeon is only possible near golden moongates." or insysmsg "You do not have access to travel inside this house."
-                overhead "[ recall, blocked ]" 254
-            endif
+        endif
+    else
+        # One request per Play. Recovery keeps running, but harvest and repeat Recall stay paused.
+        # Only an actual refusal gets a result notice. Silence or elapsed time does not prove arrival.
+        if insysmsg "Magical travel is not allowed in this location." or insysmsg "Magical travel from inside a dungeon is only possible near golden moongates." or insysmsg "You do not have access to travel inside this house."
+            overhead "[ recall, blocked ]" 254
         endif
     endif
 
-    # A latched Recall keeps the cast window: the self buffs stand down until the script restarts.
+    # A latched Recall keeps the cast window and stops gathering until the script restarts.
+    # Gathering also waits for a required book, and for Tracking to hunt when detection is on.
+    @setvar! var__hold_gathering 0
     if var__recall_needed = 1
         @setvar! var__hold_casts 1
+        @setvar! var__hold_gathering 1
+    elseif config__require_runebook = 1 and var__recall_book_available = 0
+        @setvar! var__hold_gathering 1
+    elseif config__recall_on_detection = 1 and var__tracking_hunting_active = 0
+        @setvar! var__hold_gathering 1
     endif
 
     # ################################################################################
     # # REAGENTS
     # ################################################################################
-    # First in the pass, so every cast block below reads fresh flags. On the interval, or at once
-    # after a refusal for reagents, so a stale flag cannot send the same doomed cast every pass.
+    # On the interval, or at once after a refusal for reagents, so a stale flag cannot send the
+    # same doomed cast every pass.
     if config__use_magery = 1
         if timer "timer__reagents" >= cooldown__reagents or insysmsg "More reagents are needed"
             settimer "timer__reagents" 0
@@ -864,8 +881,8 @@ while not dead
         settimer "timer__harvest" 0
     endif
 
-    # Equip independently of book, Hunting and weight readiness. Only a Recall decision pauses both.
-    if var__recall_needed = 0 and diffhits < config__heal_hits and not poisoned and not paralyzed and not warmode and timer "timer__harvest" >= var__harvest_retry
+    # Equip independently of spare weight. var__hold_gathering pauses both equip and harvest.
+    if var__hold_gathering = 0 and diffhits < config__heal_hits and not poisoned and not paralyzed and not warmode and timer "timer__harvest" >= var__harvest_retry
         if not hidden and not queued and not casting and not targetexists and cooldown "walk" = 0
             settimer "timer__harvest" 0
             @setvar! var__harvest_retry cooldown__harvest_retry
@@ -906,14 +923,9 @@ while not dead
                 endif
 
                 # A slot-to-serial match proves this selected tool is actually in lefthand.
-                # One guard chain preserves book/Hunting bypasses without mixing and/or.
                 # Recheck input after tool discovery. Do not add a separate ready state.
                 if var__my_hatchet != alias__equipped_hatchet or diffweight <= 0 or hidden or queued or casting or targetexists or warmode
                     # The hand, spare weight or player input is not ready for harvesting.
-                elseif config__auto_recall != 0 and config__require_runebook != 0 and var__recall_book_available != 1
-                    # Automatic Recall requires a carried book only when require_runebook is on.
-                elseif config__auto_recall != 0 and config__recall_on_detection != 0 and config__use_tracking != 0 and var__tracking_hunting_active != 1
-                    # Hunting is required only when all three detection switches are on.
                 else
                     hotkey "Use item in hand"
                     waitfortarget wait__harvest_target
@@ -996,110 +1008,103 @@ while not dead
         endif
     endif
 
-    # ####################################################################################
-    # # HOUSEKEEPING
-    # ####################################################################################
-    # Slow inventory reads share the housekeeping clock. Food and lumber skip optional work once a
-    # Recall decision is latched.
-    if var__housekeeping_pass = 1
-        settimer "timer__housekeeping" 0
-
-        # FOOD: skip optional work once a Recall decision is latched.
-        if var__recall_needed = 0 and diffhits < config__light_hits
-            if timer "timer__food" >= cooldown__food
-                if not poisoned and not warmode and not findbuff "Food Satisfaction"
-                    if not hidden and not queued and not casting and not targetexists
-                        settimer "timer__food" 0
-                        if findtype tray backpack as alias__food
-                            dclick alias__food
-                            wait wait__short
-                        endif
-                    endif
-                endif
+    # ################################################################################
+    # # FOOD
+    # ################################################################################
+    # Looked at once a minute. The buff lasts far longer.
+    if timer "timer__food" >= cooldown__food and not findbuff "Food Satisfaction"
+        if not hidden and not queued and not casting and not targetexists
+            settimer "timer__food" 0
+            if findtype tray backpack as alias__food
+                dclick alias__food
+                wait wait__short
             endif
         endif
+    endif
 
-        # LUMBER: try each selected stack once, with no snapshots or foreach iterator.
-        # Bound scans by the existing timer. A failed conversion/drop waits for the next interval.
-        if config__pack_lumber = 1 and var__recall_needed = 0 and timer "timer__pack_lumber" >= cooldown__pack_lumber
-            if diffhits < config__light_hits and not poisoned and not paralyzed and not warmode
-                if not hidden and not queued and not casting and not targetexists
-                    settimer "timer__pack_lumber" 0
-                    if find global__my_looting_pouch backpack
-                        if config__sysmsg = 1
-                            sysmsg "Lumber pack BEGIN: convert Logs, then move Boards." 88
+    # ####################################################################################
+    # # LUMBER
+    # ####################################################################################
+    # Try each selected stack once, with no snapshots or foreach iterator.
+    # Bound scans by the existing timer. A failed conversion/drop waits for the next interval.
+    if var__hold_gathering = 0 and timer "timer__pack_lumber" >= cooldown__pack_lumber
+        if diffhits < config__light_hits and not poisoned and not paralyzed and not warmode
+            if not hidden and not queued and not casting and not targetexists
+                settimer "timer__pack_lumber" 0
+                if find global__my_looting_pouch backpack
+                    if config__sysmsg = 1
+                        sysmsg "Lumber pack BEGIN: convert Logs, then move Boards." 88
+                    endif
+                    dclick global__my_looting_pouch
+                    wait wait__lumber_item
+
+                    # Two phases share one body: Logs first, then current Boards.
+                    # Both scans end by their conditions. Each phase has its own time budget.
+                    # Do not reuse pre-conversion serials after conversion or stack merging.
+                    for 2
+                        if index = 0
+                            @setvar! var__lumber_graphic 7133
+                        else
+                            @setvar! var__lumber_graphic 7127
                         endif
-                        dclick global__my_looting_pouch
-                        wait wait__lumber_item
+                        settimer "timer__pack_lumber" 0
+                        @clearignore
 
-                        # Two phases share one body: Logs first, then current Boards.
-                        # Both scans end by their conditions. Each phase has its own time budget.
-                        # Do not reuse pre-conversion serials after conversion or stack merging.
-                        for 2
-                            if index = 0
-                                @setvar! var__lumber_graphic 7133
-                            else
-                                @setvar! var__lumber_graphic 7127
+                        # End loops by their conditions. No break skips an if scope or resets the outer for.
+                        # Settle the pouch/previous-phase queue within this phase's existing budget.
+                        while queued and timer "timer__pack_lumber" < wait__lumber_batch and not dead and not pvp and diffhits < config__light_hits and not poisoned and not paralyzed and not warmode and not hidden and not casting and not targetexists
+                            wait wait__poll
+                        endwhile
+
+                        # No hue filter. Search current inventory after each conversion or move.
+                        # The timer advances even when ignore cannot advance a failed/packed stack.
+                        while timer "timer__pack_lumber" < wait__lumber_batch and not queued and not dead and not pvp and diffhits < config__light_hits and not poisoned and not paralyzed and not warmode and not hidden and not casting and not targetexists and find global__my_looting_pouch backpack and findtype var__lumber_graphic backpack as alias__lumber_stack
+                            if var__lumber_graphic = 7133
+                                if config__sysmsg = 1
+                                    sysmsg "Lumber convert: serial={{alias__lumber_stack}}." 88
+                                endif
+                                dclick alias__lumber_stack
+                                wait wait__lumber_item
+                            elseif find alias__lumber_stack global__my_looting_pouch
+                                # Recursive backpack searches can return Boards already in the pouch.
+                                if config__sysmsg = 1
+                                    sysmsg "Lumber skip: serial={{alias__lumber_stack}}, already in pouch." 88
+                                endif
+                            elseif find global__my_looting_pouch backpack
+                                if config__sysmsg = 1
+                                    sysmsg "Lumber move request: serial={{alias__lumber_stack}}, pouch={{global__my_looting_pouch}}." 88
+                                endif
+                                # Complete lift/drop together. Do not leave the item held during a wait.
+                                lift alias__lumber_stack 60000
+                                drop global__my_looting_pouch -1 -1
+                                wait wait__lumber_item
                             endif
-                            settimer "timer__pack_lumber" 0
-                            @clearignore
+                            # Check container membership before ignore, which can hide it from find.
+                            # Skip this selected serial only for this phase, including failed requests.
+                            @ignore alias__lumber_stack
 
-                            # End loops by their conditions. No break skips an if scope or resets the outer for.
-                            # Settle the pouch/previous-phase queue within this phase's existing budget.
+                            # A pending item queue pauses the next search, without leaving its loop scope.
                             while queued and timer "timer__pack_lumber" < wait__lumber_batch and not dead and not pvp and diffhits < config__light_hits and not poisoned and not paralyzed and not warmode and not hidden and not casting and not targetexists
                                 wait wait__poll
                             endwhile
-
-                            # No hue filter. Search current inventory after each conversion or move.
-                            # The timer advances even when ignore cannot advance a failed/packed stack.
-                            while timer "timer__pack_lumber" < wait__lumber_batch and not queued and not dead and not pvp and diffhits < config__light_hits and not poisoned and not paralyzed and not warmode and not hidden and not casting and not targetexists and find global__my_looting_pouch backpack and findtype var__lumber_graphic backpack as alias__lumber_stack
-                                if var__lumber_graphic = 7133
-                                    if config__sysmsg = 1
-                                        sysmsg "Lumber convert: serial={{alias__lumber_stack}}." 88
-                                    endif
-                                    dclick alias__lumber_stack
-                                    wait wait__lumber_item
-                                elseif find alias__lumber_stack global__my_looting_pouch
-                                    # Recursive backpack searches can return Boards already in the pouch.
-                                    if config__sysmsg = 1
-                                        sysmsg "Lumber skip: serial={{alias__lumber_stack}}, already in pouch." 88
-                                    endif
-                                elseif find global__my_looting_pouch backpack
-                                    if config__sysmsg = 1
-                                        sysmsg "Lumber move request: serial={{alias__lumber_stack}}, pouch={{global__my_looting_pouch}}." 88
-                                    endif
-                                    # Complete lift/drop together. Do not leave the item held during a wait.
-                                    lift alias__lumber_stack 60000
-                                    drop global__my_looting_pouch -1 -1
-                                    wait wait__lumber_item
-                                endif
-                                # Check container membership before ignore, which can hide it from find.
-                                # Skip this selected serial only for this phase, including failed requests.
-                                @ignore alias__lumber_stack
-
-                                # A pending item queue pauses the next search, without leaving its loop scope.
-                                while queued and timer "timer__pack_lumber" < wait__lumber_batch and not dead and not pvp and diffhits < config__light_hits and not poisoned and not paralyzed and not warmode and not hidden and not casting and not targetexists
-                                    wait wait__poll
-                                endwhile
-                            endwhile
-                            @clearignore
-                        endfor
-                        if config__sysmsg = 1
-                            sysmsg "Lumber pack END: returning to recovery and harvest checks." 88
-                            if queued
-                                sysmsg "Lumber pack: item queue still active. Harvest waits for queued=0." 88
-                            endif
-                            if targetexists
-                                sysmsg "Lumber pack: target cursor active. Harvest leaves it to the player." 88
-                            endif
+                        endwhile
+                        @clearignore
+                    endfor
+                    if config__sysmsg = 1
+                        sysmsg "Lumber pack END: returning to recovery and harvest checks." 88
+                        if queued
+                            sysmsg "Lumber pack: item queue still active. Harvest waits for queued=0." 88
                         endif
-                    elseif timer "timer__message" >= cooldown__message
-                        overhead "[ loot pouch, out ]" 254
-                        settimer "timer__message" 0
+                        if targetexists
+                            sysmsg "Lumber pack: target cursor active. Harvest leaves it to the player." 88
+                        endif
                     endif
-                    # The next interval starts after this batch, including a missing-pouch attempt.
-                    settimer "timer__pack_lumber" 0
+                elseif timer "timer__message" >= cooldown__message
+                    overhead "[ loot pouch, out ]" 254
+                    settimer "timer__message" 0
                 endif
+                # The next interval starts after this batch, including a missing-pouch attempt.
+                settimer "timer__pack_lumber" 0
             endif
         endif
     endif
