@@ -743,6 +743,10 @@ lumberjack-enhanced를 Play한 뒤에는 그쪽으로 돌아와야 한다. 아�
 <tr><td>ID 불가로 일찍 끝날 때</td><td>ID 스킬·완드가 없어 <code>Jase says: Not able to ID items..</code>가 뜰 때도 같은 루프로 돌아와야 한다</td></tr>
 <tr><td>등록 전</td><td>클라이언트를 켠 뒤 루프를 한 번도 Play하지 않고 recycle을 돌리면 아무 스크립트도 돌지 않아야 한다</td></tr>
 <tr><td>pvp 중</td><td>pvp 중 recycle을 돌리면 마지막 사냥·채집 루프로 돌아간다. pvp로 돌아오길 바라면 기록한다</td></tr>
+<tr><td>다시 쓴 recycle</td><td>2026-10-10 저장소 규칙으로 다시 썼다 (변수 이름·오버헤드·대기 값·시작 4줄). 분류는 그대로여야 한다.
+Journal에 <code>Recycle check: …</code>가 아이템마다, 저장할 때 <code>[ item, saving ]</code>과 <code>Recycle save: …</code>가 남고, 나머지는 분해된다.
+링메일 fortification·hardening·guarding·defense 스위치가 이제 먹고, studded 방어구는 studded 보관함으로 간다 (지금은 둘 다 루트 파우치).
+재질을 못 읽은 방어구는 루트 파우치로 간다. 재활용 도구가 없을 때도 루프로 돌아와야 한다</td></tr>
 </tbody>
 </table>
 </main>
