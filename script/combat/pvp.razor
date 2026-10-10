@@ -219,8 +219,9 @@
 #
 #   config__use_bless, config__use_arch_protection
 #      1 keeps Bless on yourself, and Arch Protection on you and the followers around you,
-#      while no enemy is engaged (var__fighting 0) and warmode is off. Both open a cursor,
-#      answered with yourself, so they never take a cast from a fight.
+#      while no enemy is engaged (var__fighting 0) and warmode is off. Both open a cursor
+#      answered with yourself, Bless a beneficial one and Arch Protection a neutral one, so
+#      they never take a cast from a fight.
 #
 #   config__mana_bless, config__mana_arch_protection
 #      Minimum current mana to start Bless and Arch Protection.
@@ -982,6 +983,10 @@ while not dead
                                 endif
                                 wait wait__poll
                             endfor
+                        elseif targetexists
+                            # Not the cursor this spell opens. Left open it would hold every block.
+                            hotkey "Cancel Current Target"
+                            wait wait__short
                         endif
                     elseif config__use_arch_protection = 1 and var__fighting = 0 and not warmode and var__regs_arch_protection = 1 and mana >= config__mana_arch_protection and not findbuff "Protection"
                         cast "Arch Protection"
@@ -1009,7 +1014,7 @@ while not dead
                             wait wait__poll
                         endfor
 
-                        if targetexists "beneficial"
+                        if targetexists "neutral"
                             target self
                             for 10
                                 if findbuff "Protection"
@@ -1017,6 +1022,10 @@ while not dead
                                 endif
                                 wait wait__poll
                             endfor
+                        elseif targetexists
+                            # Not the cursor this spell opens. Left open it would hold every block.
+                            hotkey "Cancel Current Target"
+                            wait wait__short
                         endif
                     endif
                 endif

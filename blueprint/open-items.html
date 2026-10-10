@@ -728,7 +728,7 @@ v5는 가벼운 Heal 에이전트를 <code>config__use_light_heal</code>로 켜�
 <code>[ vet, on ]</code>부터 <code>[ vet, done ]</code>까지는 다시 쓰지 않아야 하고, 끝나면 바로 다음 시도가 나간다.
 아무도 다치지 않았으면 <code>You or your nearby followers do not require healing.</code>이 약 2초마다 한 번 남아야 한다. 더 잦거나 더 뜸하면 기록한다.
 치료 중 키트가 끊기면 실패. 거절 때 키트가 줄지 않는지, 키트 시간이 실제로 5초인지, 죽은 펫 부활 시도도 기록한다. 없으면 <code>[ vet kit, out ]</code></td></tr>
-<tr><td>Bless·Arch Protection</td><td>교전 중이 아니고 (전투 대상이 10칸 밖이거나 없음) 워모드가 꺼져 있을 때 <code>Cunning</code>·<code>Protection</code> 아이콘이 없으면 이로운 커서에 자기 자신을 찍고
+<tr><td>Bless·Arch Protection</td><td>교전 중이 아니고 (전투 대상이 10칸 밖이거나 없음) 워모드가 꺼져 있을 때 <code>Cunning</code>·<code>Protection</code> 아이콘이 없으면 커서 (Bless는 beneficial, Arch Protection은 neutral)에 자기 자신을 찍고
 <code>Buff: Bless</code>·<code>Buff: Arch Protection</code>이 남아야 한다. 아이콘이 뜬 뒤 다음 패스에서 같은 주문을 다시 시전하지 않아야 한다.
 2분 뒤 아이콘이 사라지면 다시 시전하는지, 펫도 Arch Protection을 받는지 펫 상태에서 확인한다</td></tr>
 <tr><td>Bless와 스탯 포션</td><td><code>config__str_potion</code>·<code>config__dex_potion</code>을 내 기본 힘·민첩 + 20으로 맞춘다 (기본값 120·45는 이 템플릿의 STR 100·DEX 25·INT 100 기준).
