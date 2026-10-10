@@ -1,0 +1,54 @@
+# ----------------------------------------------------------------------------------------
+# Eats a Magic Mushroom at low mana, and makes more with Create Food at high mana.
+#
+# @ hotkeys Eat Magic Mushroom
+# ----------------------------------------------------------------------------------------
+
+
+# ----------------------------------------------------------------------------------------
+# @ config
+#
+#   config__mushroom_eat_mana
+#      Mana at or below which a mushroom is eaten.
+#
+#   config__mushroom_create_mana
+#      Mana at or above which Create Food makes more. Create Food T3 returns 25 mana on a
+#      60 second cooldown.
+#
+#   config__mushroom_min_count
+#      Mushrooms kept in the backpack: Create Food runs only below this.
+# ----------------------------------------------------------------------------------------
+@setvar! config__mushroom_eat_mana 55
+@setvar! config__mushroom_create_mana 70
+@setvar! config__mushroom_min_count 2
+
+
+# ----------------------------------------------------------------------------------------
+# @ loop
+# ----------------------------------------------------------------------------------------
+    # ------------------------------------------------------------------------------------
+    # MUSHROOM
+    #
+    # Meant for the walk, outside the fight group, so the 60 second cooldown burns then
+    # rather than during a fight where the cast would compete with the spell rotation. The
+    # whole block either eats or casts, so the walk guard rides on the act window line.
+    # ------------------------------------------------------------------------------------
+    if mana <= config__mushroom_eat_mana and not targetexists and not casting and cooldown "walk" = 0 and not findbuff 'Magic Mushroom Cooldown' and findtype "mushroom" backpack
+        hotkey 'Eat Magic Mushroom'
+        wait wait__short
+    elseif mana >= config__mushroom_create_mana and var__regs_create_food = 1 and not warmode and not targetexists and not casting and cooldown "walk" = 0 and counttype "mushroom" backpack < config__mushroom_min_count
+        cast 'Create Food'
+        wait wait__short
+
+        for 60
+            if not casting
+                break
+            endif
+
+            if insysmsg "Your concentration is disturbed, thus ruining thy spell."
+                break
+            endif
+
+            wait wait__poll
+        endfor
+    endif

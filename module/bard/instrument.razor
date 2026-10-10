@@ -1,0 +1,147 @@
+# ----------------------------------------------------------------------------------------
+# Finds the instrument before the loop and keeps track of it while the loop runs.
+# ----------------------------------------------------------------------------------------
+
+
+# ----------------------------------------------------------------------------------------
+# @ config
+#
+#   config__use_magic_instrument
+#      Magic instrument mode. 1 reads labels and holds out for a supremely or exceedingly
+#      prefix, 0 takes the first instrument found and skips getlabel, which is the cheaper
+#      path when the shelf only stocks crafted instruments.
+# ----------------------------------------------------------------------------------------
+@setvar! config__use_magic_instrument 1
+
+
+# ----------------------------------------------------------------------------------------
+# @ wait
+#
+#   wait__bard_target
+#      How long a bard skill cursor gets before the block gives up on it. A skill cursor
+#      is instant, so this is only spent in full on a failure. Read by bard/disco,
+#      bard/peace and bard/song.
+#
+#   wait__instrument_pick
+#      The pause after the manual instrument pick, so the target lands.
+#
+#   interval__instrument_check
+#      How often the backpack is checked for the instrument. It only leaves on a break or
+#      a steal.
+# ----------------------------------------------------------------------------------------
+@setvar! wait__bard_target 1000
+@setvar! wait__instrument_pick 750
+@setvar! interval__instrument_check 30000
+
+
+# ----------------------------------------------------------------------------------------
+# @ timer
+# ----------------------------------------------------------------------------------------
+timer__instrument_check interval__instrument_check
+
+
+# ----------------------------------------------------------------------------------------
+# @ state
+#
+#   var__my_instrument
+#      The instrument the bard skills play, kept across Plays. 0 when none.
+#
+#   var__instrument_ok
+#      1 while the instrument was in the backpack at the last check. The bard blocks test
+#      it with not warmode and var__my_instrument.
+# ----------------------------------------------------------------------------------------
+if not varexist var__my_instrument
+    @setvar! var__my_instrument 0
+endif
+@setvar! var__instrument_ok 0
+
+
+# ----------------------------------------------------------------------------------------
+# @ setup
+# ----------------------------------------------------------------------------------------
+# Only auto detect when the cached instrument is no longer in the backpack, so a pass
+# that already holds a good serial costs one find and nothing else.
+if not find var__my_instrument backpack
+    @setvar! var__my_instrument 0
+
+    if config__use_magic_instrument = 1
+        while findtype 3740|3742|3762|3763|10245|20006|20008|20010|20012|20014|20016 backpack as alias__found_magic_instrument
+            getlabel alias__found_magic_instrument label__found_magic_instrument
+
+            if "supremely" in label__found_magic_instrument or "exceedingly" in label__found_magic_instrument
+                @setvar! var__my_instrument alias__found_magic_instrument
+                break
+            endif
+
+            @ignore alias__found_magic_instrument
+        endwhile
+
+        @clearignore
+    elseif findtype 3740|3742|3762|3763|10245|20006|20008|20010|20012|20014|20016 backpack as alias__found_craft_instrument
+        @setvar! var__my_instrument alias__found_craft_instrument
+    endif
+endif
+
+# If auto detect found nothing, ask for a manual pick exactly once. A barding script with
+# no instrument has nothing to do, so a failed pick stops rather than limping on.
+if not find var__my_instrument backpack
+    overhead "[ inst, pick ]" 255
+    @setvar! var__my_instrument
+    wait wait__instrument_pick
+
+    if find var__my_instrument backpack as alias__picked_instrument
+        getlabel alias__picked_instrument label__picked_instrument
+
+        if "flute" in label__picked_instrument or "drums" in label__picked_instrument or "harp" in label__picked_instrument or "lute" in label__picked_instrument or "tambourine" in label__picked_instrument or "gemshorn" in label__picked_instrument or "hurdy" in label__picked_instrument or "psaltery" in label__picked_instrument or "sackbut" in label__picked_instrument or "shawm" in label__picked_instrument or "vielle" in label__picked_instrument
+            overhead "[ inst, {{label__picked_instrument}} ]" 255
+        else
+            @setvar! var__my_instrument 0
+            overhead "[ inst, wrong ]" 254
+            stop
+        endif
+    else
+        @setvar! var__my_instrument 0
+        overhead "[ inst, out ]" 254
+        stop
+    endif
+endif
+
+
+# ----------------------------------------------------------------------------------------
+# @ loop
+# ----------------------------------------------------------------------------------------
+    # ------------------------------------------------------------------------------------
+    # INSTRUMENT
+    #
+    # Mid run recovery is auto detect only. A manual pick would block the loop on a cursor
+    # the player is not looking at, in the middle of a fight.
+    #
+    # Whether the instrument is still in the backpack is looked at every thirty seconds,
+    # not every pass. The bard blocks test not warmode, var__instrument_ok and
+    # var__my_instrument themselves. A bard block that finds the instrument gone clears
+    # var__my_instrument on the spot, which stands them down at once, clock or no clock.
+    # ------------------------------------------------------------------------------------
+    if var__my_instrument = 0
+        if not targetexists and not casting
+            if findtype 3740|3742|3762|3763|10245|20006|20008|20010|20012|20014|20016 backpack as alias__spare_instrument
+                @setvar! var__my_instrument alias__spare_instrument
+                @setvar! var__instrument_ok 1
+
+                if config__chatty = 1
+                    overhead "[ inst, set ]" 290
+                endif
+            elseif timer "timer__message" >= interval__message
+                overhead "[ inst, out ]" 254
+                settimer "timer__message" 0
+            endif
+        endif
+    endif
+
+    if timer "timer__instrument_check" >= interval__instrument_check
+        settimer "timer__instrument_check" 0
+        @setvar! var__instrument_ok 0
+
+        if find var__my_instrument backpack
+            @setvar! var__instrument_ok 1
+        endif
+    endif

@@ -1,0 +1,58 @@
+# ----------------------------------------------------------------------------------------
+# Opens the necro hotbar when it is missing, looked for every 30 seconds.
+# ----------------------------------------------------------------------------------------
+
+
+# ----------------------------------------------------------------------------------------
+# @ wait
+#
+#   interval__hotbar_check
+#      How often the hotbar is looked for, and so how long a lost one waits. It only
+#      closes on a death, a relog or a stray click, and while it is closed every ability
+#      parks.
+#
+#   wait__hotbar_gump
+#      How long the hotbar gump may take to open.
+# ----------------------------------------------------------------------------------------
+@setvar! interval__hotbar_check 30000
+@setvar! wait__hotbar_gump 1000
+
+
+# ----------------------------------------------------------------------------------------
+# @ timer
+#
+#   timer__hotbar_check
+#      Ready on the first pass, so the hotbar is opened at once when it is missing.
+# ----------------------------------------------------------------------------------------
+timer__hotbar_check interval__hotbar_check
+
+
+# ----------------------------------------------------------------------------------------
+# @ loop
+# ----------------------------------------------------------------------------------------
+    # ------------------------------------------------------------------------------------
+    # NECRO HOTBAR
+    #
+    # The hotbar gump is the source of truth for the Unholy Symbol count the necro stage
+    # reads. One block covers both the first open and any later loss, because the timer
+    # starts expired. It is looked for every thirty seconds, the clock leading because
+    # skipping the gump lookup is the point. The clock only restarts once it has looked,
+    # so a missing hotbar behind an open cursor is tried again on the next pass.
+    # ------------------------------------------------------------------------------------
+    if timer "timer__hotbar_check" >= interval__hotbar_check
+        if skill "Necromancy" > 0 and not gumpexists 622436516
+            if not targetexists and not casting
+                settimer "timer__hotbar_check" 0
+
+                if findtype 'necromancer book' backpack
+                    yell '[necromancyhotbar'
+                    waitforgump 622436516 wait__hotbar_gump
+                elseif timer "timer__message" >= interval__message
+                    overhead "[ necro book, out ]" 254
+                    settimer "timer__message" 0
+                endif
+            endif
+        else
+            settimer "timer__hotbar_check" 0
+        endif
+    endif

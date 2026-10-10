@@ -162,7 +162,7 @@
 <li><strong>핫키로 돌리면 클라이언트를 껐다 켠다. 리로드로는 절대 안 된다.</strong> 리로드는 기존 객체를 교체하지 않고 <strong>새 객체를 목록에 덧붙인다.</strong>
 프로필에는 바인딩이 객체가 아니라 이름 (<code>Play Script: hotkey\dress</code>)으로 저장돼 있어서, 키를 누르면 같은 이름 중 <strong>맨 앞의 옛 객체</strong>가 잡힌다.</li>
 <li><strong>Scripts 탭의 Play 버튼으로 돌리면 리로드로 충분하다.</strong> Scripts 탭을 다시 열거나 우클릭 → Reload all scripts를 한다. 반복 테스트는 이쪽으로 한다.</li>
-<li><strong>조립한 루프</strong> (<code>script/combat/pvp</code>, <code>script/combat/dexxer-basic</code>, <code>script/gather/*</code>)는 모듈과 레시피를 고치고 <code>util/build-scripts.py</code>로 다시 만든 뒤 위와 같이 반영한다.
+<li><strong>조립한 루프</strong> (<code>script/combat/*</code>, <code>script/gather/*</code>)는 모듈과 레시피를 고치고 <code>util/build-scripts.py</code>로 다시 만든 뒤 위와 같이 반영한다.
 Razor 편집기에서 고치면 다음 조립이 덮어쓴다 (<a href="modules.html#07">modules.html</a> 07절).</li>
 <li><strong>Razor 편집기에 직접 붙여넣으면</strong> 기존 객체의 본문이 바뀌므로 핫키도 새 본문을 쓴다. 다만 그 순간부터 <strong>Razor가 그 파일의 주인</strong>이 되니,
 외부 편집기로 고치는 것과 섞지 않는다 (04.B절).</li>

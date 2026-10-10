@@ -1,0 +1,98 @@
+# ----------------------------------------------------------------------------------------
+# One bard song per walk pass, Discordance, Peacemaking and Provocation in turn.
+#
+# @ hotkeys Cancel Current Target
+# ----------------------------------------------------------------------------------------
+
+
+# ----------------------------------------------------------------------------------------
+# @ state
+#
+#   var__song_next
+#      Which song plays next: 1 discordance, 2 peacemaking, 3 provocation. Literal values,
+#      since Razor has no arithmetic.
+#
+#   var__song_after
+#      Scratch: the song after the one just played.
+# ----------------------------------------------------------------------------------------
+if not varexist var__song_next
+    @setvar! var__song_next 1
+endif
+@setvar! var__song_after 0
+
+
+# ----------------------------------------------------------------------------------------
+# @ loop
+# ----------------------------------------------------------------------------------------
+    # ------------------------------------------------------------------------------------
+    # BARD SONG
+    #
+    # Three 15 minute AoE buffs, each worth 8.5% at this Effective Barding, landing on the
+    # player and every follower in range. Sung on the walk between pulls, never in a
+    # fight: while engaged, Discordance and Peacemaking keep Music busy so a song rarely
+    # gets a window, and playing an instrument interrupts a spell already in flight.
+    #
+    # Singing on the walk is what removes follower tracking from this script. A resummoned
+    # creature picks the songs up on the next walk, so nothing has to notice that it died.
+    #
+    # findbuff is deliberately NOT the gate. The buffs run 15 minutes, so a findbuff test
+    # would be true almost always and the refresh would never fire. The gate is the song
+    # cooldown plus the slot each song borrows.
+    #
+    # A branch only advances var__song_next once the cursor was actually delivered, so a
+    # song that could not go out, for any reason, is retried next pass instead of being
+    # skipped.
+    #
+    # The chain only picks the skill and the song after it, the three share the rest.
+    # Right before the backpack is targeted, lasttarget is read once more: a hostile the
+    # player has just picked would be lost to the backpack, the way a green capper was on
+    # 2026-09-29. Then the song stands down, cancels its cursor and leaves lasttarget for
+    # the next pass.
+    # ------------------------------------------------------------------------------------
+    if cooldown "song" = 0 and cooldown "music" = 0 and not warmode and var__instrument_ok = 1 and var__my_instrument != 0 and not targetexists and not casting
+        @setvar! var__song_after 0
+
+        if var__song_next = 1 and skill "Discordance" > 0 and cooldown "disco" = 0
+            useskill 'Discordance'
+            @setvar! var__song_after 2
+        elseif var__song_next = 2 and skill "Peacemaking" > 0 and cooldown "peace/provo" = 0
+            useskill 'Peacemaking'
+            @setvar! var__song_after 3
+        elseif var__song_next = 3 and skill "Provocation" > 0 and cooldown "peace/provo" = 0
+            useskill 'Provocation'
+            @setvar! var__song_after 1
+        endif
+
+        if var__song_after != 0
+            waitfortarget wait__bard_target
+
+            if insysmsg "What instrument shall you play"
+                target var__my_instrument
+                waitfortarget wait__bard_target
+
+                if insysmsg "That is not a musical instrument"
+                    @setvar! var__my_instrument 0
+                endif
+            endif
+
+            if targetexists
+                @setvar! var__keep_lasttarget 0
+
+                if find lasttarget ground -1 -1 config__acquire_range as alias__fresh_target
+                    if not dead alias__fresh_target and var__combat_target != alias__fresh_target
+                        if noto alias__fresh_target = "hostile" or noto alias__fresh_target = "criminal" or noto alias__fresh_target = "enemy" or noto alias__fresh_target = "murderer"
+                            @setvar! var__keep_lasttarget 1
+                        endif
+                    endif
+                endif
+
+                if var__keep_lasttarget = 1
+                    hotkey "Cancel Current Target"
+                    wait wait__short
+                else
+                    target backpack
+                    @setvar! var__song_next var__song_after
+                endif
+            endif
+        endif
+    endif

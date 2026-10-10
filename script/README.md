@@ -2,7 +2,7 @@
 
 Grouped by what a script does. Folders say *what*, file names say *which*.
 
-`combat/pvp.razor`, `combat/dexxer-basic.razor` and every `gather/` loop are generated: edit `module/` and `recipe/` at the repo root and run
+Every `combat/` and `gather/` loop is generated: edit `module/` and `recipe/` at the repo root and run
 `python3 util/build-scripts.py`. The design is [blueprint/modules.html](../blueprint/modules.html).
 
 ```
@@ -22,11 +22,13 @@ Combat loops are named after the template (`dexxer-basic`), variants get a suffi
 
 ## Combat loops
 
-| Script                | Template                                                                                     |
-|-----------------------|----------------------------------------------------------------------------------------------|
-| `bard-necro-enhanced` | Discord / Peace / Provo + Necromancy summons + Spirit Speak, with the Grimoire proc rotation |
-| `pvp`                | Shared field PvP self sustain with Magery, bandage, potion and swing-based weapon settings; all offense stays manual |
-| `dexxer-basic`        | Minimal dexxer sustain: bandages, heal, cure and Refresh potions, pouch, gold drop, food. Built from `recipe/dexxer-basic-recipe.razor` |
+| Script                | Template                                                                                                             |
+|-----------------------|----------------------------------------------------------------------------------------------------------------------|
+| `bard-necro-enhanced` | Discord / Peace / Provo + Necromancy summons + Spirit Speak, with the Grimoire proc rotation                         |
+| `pvp`                 | Shared field PvP self sustain with Magery, bandage, potion and swing-based weapon settings. All offense stays manual |
+| `dexxer-basic`        | Minimal dexxer sustain: bandages, heal, cure and Refresh potions, pouch, gold drop, food                             |
+
+Each one is built from `recipe/<script>-recipe.razor`.
 
 Not in use and moved to `archive/` on 2026-10-10: `tamer-mage-enhanced` (tamer mage with veterinary supplies),
 `bard-mace`, `bard-throwing`, `hally-mage`, `backstab-mugging`, and the old `lumberjack` and `mining` gather loops.

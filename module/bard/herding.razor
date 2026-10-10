@@ -1,0 +1,18 @@
+# ----------------------------------------------------------------------------------------
+# Sets the shepherd's crook active once, before the loop.
+# Without Herding it does nothing.
+# ----------------------------------------------------------------------------------------
+
+
+# ----------------------------------------------------------------------------------------
+# @ setup
+# ----------------------------------------------------------------------------------------
+# A double click sets the crook as the active one, and it only has to be in the backpack.
+# The wiki gives it no duration, so this runs once here and never in the loop. Setting an
+# already active crook again is harmless, which is why there is no "is it already" check.
+if findtype "shepherd's crook" backpack as alias__crook
+    dclick alias__crook
+    wait wait__short
+else
+    overhead "[ crook, out ]" 254
+endif

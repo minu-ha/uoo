@@ -1,0 +1,176 @@
+# ----------------------------------------------------------------------------------------
+# Reads the Unholy Symbol count off the necro hotbar into a list the abilities compare.
+# ----------------------------------------------------------------------------------------
+
+
+# ----------------------------------------------------------------------------------------
+# @ wait
+#
+#   wait__message
+#      How long an ability gets to answer before its reply is read. One round trip plus
+#      the server's turn. A reply that arrives late is not lost: the next pass fires again
+#      and reads the cooldown refusal instead.
+#
+#   wait__ability_target
+#      How long the cursor of Poison Strike or Vampiric Embrace may take.
+#
+#   interval__necro_action
+#      The retry window the Unholy Symbol abilities share. The game refuses with a
+#      cooldown line of its own, so this only stops asking again every pass while that
+#      runs.
+# ----------------------------------------------------------------------------------------
+@setvar! wait__message 400
+@setvar! wait__ability_target 1000
+@setvar! interval__necro_action 30500
+
+
+# ----------------------------------------------------------------------------------------
+# @ state
+#
+#   var__symbols_listed
+#      The reading the list was last filled from. 99 matches no reading, so the first pass
+#      fills the list whatever a previous run left in it.
+#
+#   var__symbols_spent
+#      Scratch: 1 once a necro ability spent symbols on this pass. Poison Strike sits that
+#      pass out, since the list is only rebuilt on the next one.
+# ----------------------------------------------------------------------------------------
+@setvar! var__symbols_listed 99
+@setvar! var__symbols_spent 0
+
+
+# ----------------------------------------------------------------------------------------
+# @ setup
+# ----------------------------------------------------------------------------------------
+if not listexists 'list__necro_symbols'
+    createlist 'list__necro_symbols'
+endif
+
+
+# ----------------------------------------------------------------------------------------
+# @ loop
+# ----------------------------------------------------------------------------------------
+    # ------------------------------------------------------------------------------------
+    # UNHOLY SYMBOLS
+    #
+    # The count is read off the necro hotbar gump, which prints them as "<have>/<max>".
+    # ingump matches a substring, so the chain runs from the top down: "10/" is checked
+    # before the single digits, and none of "1/" to "9/" occurs inside "10/10", so each
+    # line only ever sees the count it names. Ten is the ceiling: the bank is Effective
+    # Necromancy / 10 and this character sits at 100. Should the hotbar ever show more
+    # than ten, add the higher readings above the 10/ line, or a two digit reading falls
+    # into "1/". A closed gump reads as zero, which parks every ability until necro/hotbar
+    # reopens it. An elseif chain is evaluated in a single tick, whatever its length.
+    #
+    # The gates compare against the list, list 'x' >= n being the one size comparison a
+    # script variable takes part in. Each reading refills the list only when it differs
+    # from the last fill: at ten symbols the old refill on every pass was some twenty
+    # statements, this is two, the chain and the inner if. The fill is a literal for count
+    # per reading because a for count cannot be a variable.
+    # ------------------------------------------------------------------------------------
+    if ingump "10/" 622436516
+        if var__symbols_listed != 10
+            clearlist 'list__necro_symbols'
+
+            for 10
+                pushlist 'list__necro_symbols' '1' 'back'
+            endfor
+
+            @setvar! var__symbols_listed 10
+        endif
+    elseif ingump "9/" 622436516
+        if var__symbols_listed != 9
+            clearlist 'list__necro_symbols'
+
+            for 9
+                pushlist 'list__necro_symbols' '1' 'back'
+            endfor
+
+            @setvar! var__symbols_listed 9
+        endif
+    elseif ingump "8/" 622436516
+        if var__symbols_listed != 8
+            clearlist 'list__necro_symbols'
+
+            for 8
+                pushlist 'list__necro_symbols' '1' 'back'
+            endfor
+
+            @setvar! var__symbols_listed 8
+        endif
+    elseif ingump "7/" 622436516
+        if var__symbols_listed != 7
+            clearlist 'list__necro_symbols'
+
+            for 7
+                pushlist 'list__necro_symbols' '1' 'back'
+            endfor
+
+            @setvar! var__symbols_listed 7
+        endif
+    elseif ingump "6/" 622436516
+        if var__symbols_listed != 6
+            clearlist 'list__necro_symbols'
+
+            for 6
+                pushlist 'list__necro_symbols' '1' 'back'
+            endfor
+
+            @setvar! var__symbols_listed 6
+        endif
+    elseif ingump "5/" 622436516
+        if var__symbols_listed != 5
+            clearlist 'list__necro_symbols'
+
+            for 5
+                pushlist 'list__necro_symbols' '1' 'back'
+            endfor
+
+            @setvar! var__symbols_listed 5
+        endif
+    elseif ingump "4/" 622436516
+        if var__symbols_listed != 4
+            clearlist 'list__necro_symbols'
+
+            for 4
+                pushlist 'list__necro_symbols' '1' 'back'
+            endfor
+
+            @setvar! var__symbols_listed 4
+        endif
+    elseif ingump "3/" 622436516
+        if var__symbols_listed != 3
+            clearlist 'list__necro_symbols'
+
+            for 3
+                pushlist 'list__necro_symbols' '1' 'back'
+            endfor
+
+            @setvar! var__symbols_listed 3
+        endif
+    elseif ingump "2/" 622436516
+        if var__symbols_listed != 2
+            clearlist 'list__necro_symbols'
+
+            for 2
+                pushlist 'list__necro_symbols' '1' 'back'
+            endfor
+
+            @setvar! var__symbols_listed 2
+        endif
+    elseif ingump "1/" 622436516
+        if var__symbols_listed != 1
+            clearlist 'list__necro_symbols'
+
+            for 1
+                pushlist 'list__necro_symbols' '1' 'back'
+            endfor
+
+            @setvar! var__symbols_listed 1
+        endif
+    else
+        if var__symbols_listed != 0
+            clearlist 'list__necro_symbols'
+            @setvar! var__symbols_listed 0
+        endif
+    endif

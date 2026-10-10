@@ -1,0 +1,114 @@
+# ----------------------------------------------------------------------------------------
+# Discordance once per target, read off its label, then left alone for 30 seconds.
+#
+# @ hotkeys Cancel Current Target
+# ----------------------------------------------------------------------------------------
+
+
+# ----------------------------------------------------------------------------------------
+# @ wait
+#
+#   interval__disco_seen
+#      How long a target is left alone once its label has shown discord. Discordance runs
+#      about two minutes.
+# ----------------------------------------------------------------------------------------
+@setvar! interval__disco_seen 30000
+
+
+# ----------------------------------------------------------------------------------------
+# @ timer
+# ----------------------------------------------------------------------------------------
+timer__disco_seen 0
+
+
+# ----------------------------------------------------------------------------------------
+# @ state
+#
+#   var__disco_seen
+#      The target last seen discorded, 0 when none. Empty at every start.
+# ----------------------------------------------------------------------------------------
+@setvar! var__disco_seen 0
+
+
+# ----------------------------------------------------------------------------------------
+# @ loop
+# ----------------------------------------------------------------------------------------
+    # ------------------------------------------------------------------------------------
+    # DISCO
+    #
+    # Discordance runs about two minutes and does not break, so it is applied once per
+    # target and then left alone. It goes before Peace because Ensemble wants Discord AND
+    # Peace on the same creature, and the one that does not break is worth landing first.
+    # bard-mace leads with Peace instead, and for a dexxer that is right: Peace is what
+    # stops the mob hitting the player in melee. Here the followers hold the mob and the
+    # player is ten tiles back, so the debuff outranks the pacify. Skill is 80 on both, so
+    # the odds are the same either way and the order is only about which effect is worth
+    # more.
+    #
+    # Music is shared with bard/peace, so whichever of the two fires first stands the
+    # other down until the next pass. That is the arbitration, no extra state needed.
+    #
+    # warmode is the manual control window, tested on the gate line with the instrument. A
+    # target whose label already shows discord is remembered in var__disco_seen and
+    # forgotten once interval__disco_seen has run, instead of a find and a getlabel a
+    # pass.
+    # ------------------------------------------------------------------------------------
+    # Forget the target seen discorded, so its label is read again.
+    if timer "timer__disco_seen" >= interval__disco_seen
+        @setvar! var__disco_seen 0
+    endif
+
+    if var__combat_target != var__disco_seen and cooldown "disco" = 0 and cooldown "music" = 0 and skill "Discordance" > 0 and not warmode and var__instrument_ok = 1 and var__my_instrument != 0 and not targetexists and not casting
+        if find var__combat_target ground -1 -1 config__target_range as alias__disco_target
+            getlabel alias__disco_target label__disco_target
+
+            if "discord" in label__disco_target
+                @setvar! var__disco_seen var__combat_target
+                settimer "timer__disco_seen" 0
+            else
+                useskill 'Discordance'
+                waitfortarget wait__bard_target
+
+                # Answered once, before the delivery loop. Razor asks for an
+                # instrument only when its cached one is gone, and answering it
+                # makes the skill open the real target cursor, so the wait is
+                # simply repeated. replay is documented as restarting the whole
+                # script from the top, which would re-run the entire setup.
+                if insysmsg "What instrument shall you play"
+                    target var__my_instrument
+                    waitfortarget wait__bard_target
+
+                    if insysmsg "That is not a musical instrument"
+                        @setvar! var__my_instrument 0
+                    endif
+                endif
+
+                if find lasttarget ground -1 -1 config__acquire_range as alias__fresh_target
+                    if not dead alias__fresh_target and var__combat_target != alias__fresh_target
+                        if noto alias__fresh_target = "hostile" or noto alias__fresh_target = "criminal" or noto alias__fresh_target = "enemy" or noto alias__fresh_target = "murderer"
+                            @setvar! var__combat_target alias__fresh_target
+                            settimer "timer__target_grace" 0
+
+                            if find var__combat_target ground -1 -1 config__target_range as alias__disco_target
+                                if config__chatty = 1
+                                    overhead "[ target, set ]" 1288 var__combat_target
+                                endif
+                            endif
+                        endif
+                    endif
+                endif
+
+                while targetexists
+                    if dead alias__disco_target or var__combat_target != alias__disco_target
+                        hotkey "Cancel Current Target"
+                        wait wait__short
+                    else
+                        target alias__disco_target
+                        wait wait__short
+                    endif
+                endwhile
+
+                wait wait__short
+            endif
+        endif
+    endif

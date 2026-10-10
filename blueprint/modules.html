@@ -33,7 +33,7 @@
 <tr><td><a href="#09">09</a></td><td>아직 옮기지 않은 것</td></tr>
 </tbody>
 </table>
-<p>인게임 확인 항목은 <a href="open-items.html">open-items.html</a> 09절 (lumberjack-enhanced), 10절 (pvp), 11절 (skinning-enhanced)에 있다.</p>
+<p>인게임 확인 항목은 <a href="open-items.html">open-items.html</a> 09절 (lumberjack-enhanced), 10절 (pvp), 11절 (skinning-enhanced), 14절 (bard-necro-enhanced)에 있다.</p>
 
 <h2 id="01" data-part="설계">01 왜 모듈인가</h2>
 <p><strong>같은 블록이 루프마다 복사돼 있었다.</strong> 2026-10-09 스탯 포션 판정을 바꾸는 데 스크립트 8개를 고쳤고,
@@ -69,10 +69,18 @@
 </thead>
 <tbody>
 <tr><td><code>module/base.razor</code></td><td>모든 루프의 뼈대</td><td>공용 설정, 표준 대기, 경고 간격, 블록끼리의 신호, 구조적 PvP 정지, 시작 4줄, 패스 끝 대기 (06절)</td></tr>
-<tr><td><code>module/recovery/</code></td><td>살아남기</td><td><code>pouch</code> (마비), <code>cure</code>, <code>heal</code>, <code>bandage</code>, <code>light-heal</code>, <code>refresh</code>,
-그리고 이 주문들과 버프가 읽는 시약 표시 <code>reagents</code></td></tr>
+<tr><td><code>module/recovery/</code></td><td>살아남기</td><td><code>pouch</code> (마비), <code>cure</code>, <code>heal</code>, <code>bandage</code>, <code>light-heal</code>, <code>refresh</code></td></tr>
+<tr><td><code>module/magery/</code></td><td>공격 주문과 시약</td>
+<td><code>reagents</code> (모든 마법 블록이 읽는 시약 표시와 서클별 마나), <code>opener</code> (Mana Drain, Curse), <code>proc-core</code> (Grimoire 프록 넷),
+<code>filler</code> (Energy Bolt), <code>spell-siphon</code> (자기에게 Magic Arrow)</td></tr>
 <tr><td><code>module/buff/</code></td><td>버프 아이콘 유지</td>
-<td><code>spells</code> (Reactive Armor, Magic Reflection), <code>potions</code> (Strength, Agility, Magic Resist), <code>food</code> (Food Satisfaction)</td></tr>
+<td><code>spells</code> (Reactive Armor, Magic Reflection), <code>potions</code> (Strength, Agility, Magic Resist), <code>food</code> (Food Satisfaction),
+<code>mushroom</code> (Magic Mushroom 먹기와 Create Food)</td></tr>
+<tr><td><code>module/bard/</code></td><td>바드 스킬</td>
+<td><code>instrument</code> (악기 찾기와 점검), <code>herding</code> (목동 지팡이), <code>disco</code>, <code>peace</code>, <code>song</code> (이동 중 노래 셋을 차례로)</td></tr>
+<tr><td><code>module/necro/</code></td><td>네크로 핫바와 소환수</td>
+<td><code>symbols</code> (Unholy Symbol 수 읽기), <code>hotbar</code> (핫바 열기), <code>summon-names</code> (소환수 이름 바꾸기), <code>burst</code> (Blood Oath, Corpse Skin, Evil Omen),
+<code>poison-strike</code>, <code>vampiric-embrace</code></td></tr>
 <tr><td><code>module/fight/</code></td><td>근접 전투 보조</td>
 <td><code>target</code> (기억한 적), <code>weapon-swap</code> (pvp 무기 슬롯), <code>axe</code>, <code>sword-codex</code>, <code>parry-codex</code>, <code>weapon-ability</code></td></tr>
 <tr><td><code>module/gather/</code></td><td>채집</td><td><code>lumberjacking</code> (Smart Harvest), <code>skinning</code> (칼질)</td></tr>
@@ -80,7 +88,7 @@
 <tr><td><code>module/escape/</code></td><td>PK 피하기</td><td><code>tracking</code> (헌트 필터 설정), <code>recall</code> (자동 리콜 한 번)</td></tr>
 <tr><td><code>recipe/&lt;루프&gt;-recipe.razor</code></td><td>루프 하나</td><td>헤더, 도는 순서대로 적은 블록과 그 밑에 붙인 설정 변경, 이 루프만의 준비 (03절)</td></tr>
 <tr><td><code>util/build-scripts.py</code></td><td>조립기</td><td>결과물을 만들고 레시피의 블록 칸을 정리한다. <code>--settings</code>, <code>--new-module</code>, <code>--check</code> (05절)</td></tr>
-<tr><td><code>script/combat/pvp.razor</code>, <code>script/combat/dexxer-basic.razor</code>, <code>script/gather/*.razor</code></td><td>결과물</td><td>직접 고치지 않는다</td></tr>
+<tr><td><code>script/combat/*.razor</code>, <code>script/gather/*.razor</code></td><td>결과물</td><td>직접 고치지 않는다</td></tr>
 </tbody>
 </table>
 <p>레시피 이름에 <code>-recipe</code>를 붙이는 것은 편집기 탭에서 결과물과 헷갈리지 않게 하려는 것이고, <code>.razor</code>는 하이라이팅을 받으려는 것이다.
@@ -171,8 +179,7 @@
 @setvar! config__emergency_hits 45</code></pre>
 <p>결과물의 CONFIG도 모듈마다 같은 모양으로 나오고, 레시피가 바꾼 설정 밑에는 <code>&gt; This loop: …</code>와 이유가 붙는다.</p>
 <p>블록 순서는 루프 안 순서다. <code>insysmsg</code>는 맞은 줄과 그보다 오래된 줄을 함께 소비하므로 Journal을 읽는 블록끼리는 순서가 중요하다.
-lumberjack-enhanced는 Tracking 줄을 먼저 읽도록 <code>recovery/reagents</code>를 <code>escape/recall</code> 뒤에, skinning-enhanced는 칼질 응답 뒤에 둔다.</p>
-
+lumberjack-enhanced는 Tracking 줄을 먼저 읽도록 <code>magery/reagents</code>를 <code>escape/recall</code> 뒤에, skinning-enhanced는 칼질 응답 뒤에 둔다.</p>
 <p><strong>그룹은 블록 여러 개를 한 조건 밑에 묶는다.</strong> 블록마다 같은 조건을 따로 물으면 그 조건이 거짓인 패스도 블록 수만큼 문장 값을 낸다
 (<a href="razor.html#06">razor.html</a> 06절). 묶으면 한 번만 묻는다. 그룹 줄은 블록 상자 사이에 쓰고, 조립기가 <code>=</code> 상자로 정리한다.</p>
 <table>
@@ -516,10 +523,50 @@ pvp 결과물에는 시작 4줄이 <code>if config__clear_at_start = 1</code> �
 </tbody>
 </table>
 
+<h3 id="08.D">08.D bard-necro-enhanced</h3>
+<p>같은 날 <code>combat/bard-necro-enhanced</code>도 <code>recipe/bard-necro-enhanced-recipe.razor</code>로 옮겼다. 이 루프는 하우스키핑 틱과 교전·이동 분기로
+패스를 나누어서 블록을 그대로 늘어놓을 수 없었다. 그 구조는 레시피 그룹 (03절)으로 옮겼다.
+생존 네 블록은 <code># @ when paralyzed or poisoned or diffhits &gt;= config__light_hits</code>, 하우스키핑은 <code># @ every interval__housekeeping</code>,
+교전과 이동은 <code># @ when var__fighting = 1</code>과 <code># @ otherwise</code>다.</p>
+<ul>
+<li>바드·네크로·공격 주문 블록은 새 모듈 16개로 옮겼다 (02절의 <code>bard/</code>, <code>necro/</code>, <code>magery/</code>, <code>buff/mushroom</code>). 코드는 원본과 같고 이름만 지금 규칙을 따른다.
+<code>cooldown__</code> 간격은 <code>interval__</code>, <code>wait__target</code>은 바드의 <code>wait__bard_target</code>과 네크로의 <code>wait__ability_target</code>,
+<code>wait__long</code>은 <code>wait__instrument_pick</code>, 핫바 대기는 <code>wait__hotbar_gump</code>가 됐다.</li>
+<li>생존·전투 대상·시약·음식·스탯 포션·골드·Refresh·셀프 버프는 다른 루프와 같은 공용 모듈이다. 원본에만 있던 동작은 공용 모듈의 설정으로 더했다
+(<code>settle_first</code>, <code>recover_in_warmode</code>, heal pot 바 시작).</li>
+<li>Herding은 꺼져 있었으므로 <code>bard/herding</code>은 만들기만 하고 레시피에 넣지 않았다. 켜고 끄는 설정 <code>use_herding</code>과 <code>name_summons</code>는 없앴다.
+소환수 이름 목록은 레시피 setup이 채운다.</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>무엇</th>
+<th>전</th>
+<th>지금</th>
+</tr>
+</thead>
+<tbody>
+<tr><td>힐 간격</td><td>두 힐 사이 1.2초, Greater Heal 재시도 2.5초 타이머</td><td>없앴다. 힐 포션은 heal pot 바와 라벨로, Greater Heal은 그 패스에 포션이 나가지 않았을 때 (<code>recovery/heal</code>)</td></tr>
+<tr><td>독에 걸린 채 다쳤을 때</td><td>Smart Heal/Cure가 독이든 HP든 맡았다</td><td>큐어가 먼저다. 힐 포션과 Greater Heal은 독이 풀릴 때까지 기다린다</td></tr>
+<tr><td>가벼운 Heal</td><td>잃은 HP 15 초과 35 미만</td><td>15 이상, 위 한계 없음 (<code>recovery/light-heal</code>)</td></tr>
+<tr><td>셀프 버프</td><td>잃은 HP와 상관없이 시전</td><td>잃은 HP 35 이상이면 시작하지 않고 시전 중이면 끊는다 (<code>buff_max_loss</code>)</td></tr>
+<tr><td>Spell Siphon</td><td>RA·Reflect와 한 <code>elseif</code> 사슬의 셋째 갈래</td><td>따로 된 블록. 그 패스에 <code>buff/spells</code>가 시전했으면 (<code>var__buff_cast</code>) 쉬어서 순서는 같다</td></tr>
+<tr><td>스탯 포션</td><td>10초마다 셋을 보고, 없으면 경고</td><td>하우스키핑 5초 안에서 포션마다 5초 재시도. 없어도 경고하지 않는다</td></tr>
+<tr><td>Refresh</td><td>없으면 경고</td><td>경고하지 않는다</td></tr>
+<tr><td>골드</td><td>하우스키핑마다 무게 밑으로 내려갈 때까지 반복</td><td>하우스키핑마다 한 번 (<code>pack/gold-drop</code>)</td></tr>
+<tr><td>음식</td><td>워모드와 상관없이</td><td>워모드에서 쉰다 (<code>warmode_is_manual</code> 1)</td></tr>
+<tr><td>시약 읽기</td><td>30초마다</td><td>10초마다 (<code>interval__reagents</code>)</td></tr>
+<tr><td>경고 간격</td><td>2초</td><td>3초 (base의 <code>interval__message</code>)</td></tr>
+<tr><td>전투 대상</td><td>lasttarget이 무엇이든 받았다</td><td>모바일 serial만 받는다 (<code>fight/target</code>)</td></tr>
+<tr><td>Disco가 기억한 대상</td><td>하우스키핑에서 30초 뒤 잊었다</td><td>교전 패스마다 <code>bard/disco</code> 첫머리에서 본다. 교전 패스에 문장이 하나 는다</td></tr>
+<tr><td>패스</td><td>시작에 queued·시전 대기</td><td>같다 (<code>settle_first</code> 1). 끝에 <code>wait wait__poll</code> 0.1초가 붙고, 구조적 PvP에서 멈춘다 (base)</td></tr>
+<tr><td>Journal</td><td>쓰지 않았다</td><td>다른 루프처럼 <code>config__sysmsg</code> 1로 진단 줄을 쓴다</td></tr>
+</tbody>
+</table>
+<p>인게임 확인 항목은 <a href="open-items.html#14">open-items.html</a> 14절에 더했다.</p>
+
 <h2 id="09">09 아직 옮기지 않은 것</h2>
 <ul>
-<li><code>combat/bard-necro-enhanced</code>: 하우스키핑 틱, 교전과 이동으로 패스를 나누는 구조, 조건 순서 규칙이 다른 루프와 달라 손으로 쓴 그대로 둔다.
-모듈을 쓰게 하려면 그 구조부터 바꿔야 해서 따로 정한다.</li>
 <li><code>script/archive/</code>: 쓰지 않는 스크립트라 옮기지 않는다.</li>
 </ul>
 </main>

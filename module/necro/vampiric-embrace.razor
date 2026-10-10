@@ -1,0 +1,97 @@
+# ----------------------------------------------------------------------------------------
+# Vampiric Embrace from a walk surplus of Unholy Symbols, near a corpse.
+#
+# @ hotkeys Vampiric Embrace, Cancel Current Target, Target Self
+# ----------------------------------------------------------------------------------------
+
+
+# ----------------------------------------------------------------------------------------
+# @ config
+#
+#   config__symbols_vampiric_embrace
+#      Unholy Symbols banked before Vampiric Embrace may fire: its 3 plus the 6 the fight
+#      abilities need. Walk only, so it competes with nothing else.
+# ----------------------------------------------------------------------------------------
+@setvar! config__symbols_vampiric_embrace 9
+
+
+# ----------------------------------------------------------------------------------------
+# @ wait
+#
+#   interval__embrace_miss
+#      How long Vampiric Embrace waits after "You do not see any corpses near that
+#      location." Nothing was spent, so it is a short pause while the player walks on.
+# ----------------------------------------------------------------------------------------
+@setvar! interval__embrace_miss 5000
+
+
+# ----------------------------------------------------------------------------------------
+# @ timer
+#
+#   timer__vampiric_embrace, timer__embrace_miss
+#      Ready on the first pass.
+# ----------------------------------------------------------------------------------------
+timer__vampiric_embrace interval__necro_action
+timer__embrace_miss interval__embrace_miss
+
+
+# ----------------------------------------------------------------------------------------
+# @ loop
+# ----------------------------------------------------------------------------------------
+    # ------------------------------------------------------------------------------------
+    # VAMPIRIC EMBRACE
+    #
+    # Vampiric Embrace heals the undead followers off a corpse. Target an enemy or
+    # yourself and it searches the surrounding area for one, so the cursor is answered
+    # with self. Walk only, when a corpse is what is left of the last pull, and the corpse
+    # check keeps it from pressing for nothing. The wiki gives no radius for that search,
+    # so a corpse inside the eight tiles looked at here can still be out of reach. That
+    # refusal spends nothing, so it only sits out interval__embrace_miss.
+    #
+    # A cooldown refusal restarts the window instead: the script cannot read the game's
+    # own cooldown, and the refusal nearly always answers a use whose success line came in
+    # late, so a full window from there is about right. It is read on both sides of the
+    # cursor wait, in case it comes back instead of the cursor. Before self is targeted,
+    # lasttarget is read once more, the way bard/song does, so a hostile just picked is
+    # not lost.
+    # ------------------------------------------------------------------------------------
+    if timer "timer__vampiric_embrace" >= interval__necro_action and timer "timer__embrace_miss" >= interval__embrace_miss and followers > 0 and not warmode and list 'list__necro_symbols' >= config__symbols_vampiric_embrace and not targetexists and not casting
+        if findtype 8198 ground -1 -1 8
+            hotkey 'Vampiric Embrace'
+            waitfortarget wait__ability_target
+
+            if targetexists
+                @setvar! var__keep_lasttarget 0
+
+                if find lasttarget ground -1 -1 config__acquire_range as alias__fresh_target
+                    if not dead alias__fresh_target and var__combat_target != alias__fresh_target
+                        if noto alias__fresh_target = "hostile" or noto alias__fresh_target = "criminal" or noto alias__fresh_target = "enemy" or noto alias__fresh_target = "murderer"
+                            @setvar! var__keep_lasttarget 1
+                        endif
+                    endif
+                endif
+
+                if var__keep_lasttarget = 1
+                    hotkey "Cancel Current Target"
+                    wait wait__short
+                else
+                    hotkey 'Target Self'
+                    wait wait__message
+
+                    if insysmsg "unholy symbols remaining"
+                        settimer "timer__vampiric_embrace" 0
+
+                        if config__chatty = 1
+                            overhead "[ vampiric embrace ]" 219
+                        endif
+                    elseif insysmsg "seconds before you may use that ability again."
+                        settimer "timer__vampiric_embrace" 0
+                    elseif insysmsg "You do not see any corpses near that location."
+                        settimer "timer__embrace_miss" 0
+                    endif
+                endif
+            elseif insysmsg "seconds before you may use that ability again."
+                settimer "timer__vampiric_embrace" 0
+            endif
+        endif
+    endif

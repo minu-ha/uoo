@@ -1,0 +1,323 @@
+# Recipe for script/combat/bard-necro-enhanced.razor. Build it with: python3 util/build-scripts.py
+# Every setting of this loop: python3 util/build-scripts.py --settings recipe/bard-necro-enhanced-recipe.razor
+# @ output script/combat/bard-necro-enhanced.razor
+
+
+# ========================================================================================
+# @ header
+# ========================================================================================
+
+# Bard Necro Enhanced: sustain, bard control, necro burst, opener and damage rotation.
+# Design, cooldown model and every barding number: blueprint/bard-necro-handbook.html
+# (design in part 5, mechanics in part 2).
+# Needs: Discordance, Peacemaking and Provocation trained (the song round robin parks on a
+# missing one), an instrument in the backpack, a necromancer book, and reagents.
+# The hotbar's own Auto-Renew must be OFF for every ability this loop drives: it spends
+# the same symbols, cheapest first.
+# cooldowns.xml carries every bar this loop reads: music, song, disco, peace/provo, magic
+# arrow, harm, fireball, lightning, heal pot, reflect and walk. The names are lowercase
+# and the glossary is blueprint/overheads.html.
+# A fight is a hostile inside target_range. In a fight: Discordance, Peacemaking, the
+# necro burst, the opener, the proc core, the filler and Poison Strike. On the walk: the
+# mushroom, the self buffs, Spell Siphon, the bard song and Vampiric Embrace.
+# Warmode is the player's manual window: our casts, the bard skills, the self buffs,
+# Create Food, Corpse Skin and Evil Omen stand down. Cures, heals, potions, the mushroom
+# and Blood Oath keep running.
+# Herding is off: the slot went to Resisting Spells on 2026-09-27. Add bard/herding to the
+# blocks when it comes back.
+
+
+# ========================================================================================
+# @ blocks
+#
+#   One box per block, in the order the blocks run, base first. The builder writes the box.
+#   Yours are the "> " lines in it (a note on the block, or under a setting the reason for
+#   its value) and the @setvar! lines under it. Write a new @setvar! line under any box, its
+#   reason as a "#" line right above it: the builder moves both to the box it belongs to.
+# ========================================================================================
+
+# ----------------------------------------------------------------------------------------
+# @ use base
+#
+#   The frame of every loop. Every recipe lists it first.
+#
+#   warmode_is_manual (default 0)
+#      Whose warmode it is.
+#        0  ours: our casts ignore it
+#        1  the player's manual control window: our casts and the food stand down while it
+#           is on. Potions and bandages still go out
+#      Read by recovery/cure, recovery/heal, recovery/light-heal, buff/food, buff/spells.
+#      > The player casts by hand in warmode: our casts, buffs and food stand down then.
+#
+#   recover_in_warmode (default 0)
+#      With warmode_is_manual 1, what the recovery casts (cure, heal, light Heal) do in
+#      warmode.
+#        0  stand down with the rest
+#        1  keep going, so only the other casts wait for the player
+#      Read by recovery/cure, recovery/heal, recovery/light-heal.
+#      > What keeps the character alive keeps running in warmode.
+#
+#   use_bandages (default 1)
+#      1 uses bandages. At 0 recovery/light-heal stands in.
+#      Read by recovery/light-heal.
+#      > No bandages in this loop: the light Heal agent stands in for them.
+#
+#   settle_first (default 0)
+#      What a pass does first.
+#        0  reads the state at once. Potions still go out while a spell is casting
+#        1  waits for the item queue and any cast to finish
+#      > Anything already in flight finishes before the pass reads state.
+# ----------------------------------------------------------------------------------------
+@setvar! config__warmode_is_manual 1
+@setvar! config__recover_in_warmode 1
+@setvar! config__use_bandages 0
+@setvar! config__settle_first 1
+
+# ========================================================================================
+# @ when paralyzed or poisoned or diffhits >= config__light_hits
+# ========================================================================================
+
+# ----------------------------------------------------------------------------------------
+# @ use recovery/pouch
+#
+#   The trapped pouch while paralyzed, the one thing that can act then.
+# ----------------------------------------------------------------------------------------
+
+# ----------------------------------------------------------------------------------------
+# @ use recovery/cure
+#
+#   Cure potion first, then the Smart Heal/Cure agent when none is carried.
+# ----------------------------------------------------------------------------------------
+
+# ----------------------------------------------------------------------------------------
+# @ use recovery/heal
+#
+#   Heal potion at heal_hits, else Greater Heal at emergency_hits.
+# ----------------------------------------------------------------------------------------
+
+# ----------------------------------------------------------------------------------------
+# @ use recovery/light-heal
+#
+#   The light Heal agent: the bandage stand-in, or beside them with use_light_heal 1.
+# ----------------------------------------------------------------------------------------
+
+# ========================================================================================
+# @ end
+# ========================================================================================
+
+# ----------------------------------------------------------------------------------------
+# @ use fight/target
+#
+#   Remembers the picked enemy and sets var__fighting while it is in reach.
+#
+#   acquire_range (default 12)
+#      How far the enemy you pick is taken up from, and kept while it stays. The pets
+#      often open on a mob past target_range, and a song or self cast would otherwise
+#      move lasttarget off it before it comes in reach.
+#      Also read by bard/disco, bard/peace, magery/opener, magery/proc-core,
+#         magery/filler, necro/poison-strike, magery/spell-siphon, bard/song,
+#         necro/vampiric-embrace.
+#      > The whole screen: the pets often open on a mob well past target_range.
+#
+#   target_range (default 12)
+#      How far the remembered enemy may be and still count as a fight (var__fighting 1).
+#      Not above acquire_range.
+#      Also read by bard/disco, bard/peace, magery/opener, magery/proc-core,
+#         magery/filler, necro/poison-strike.
+#      > The bard and spell stages engage inside this range.
+#
+#   target_grace (default 1200)
+#      How long, in ms, a remembered enemy that left acquire_range is kept.
+#      > A target that left the screen is dropped half a second later.
+# ----------------------------------------------------------------------------------------
+@setvar! config__acquire_range 18
+@setvar! config__target_range 10
+@setvar! config__target_grace 500
+
+# ----------------------------------------------------------------------------------------
+# @ use magery/reagents
+#
+#   Reagent flags for the Magery casts, the mana per circle and the shared cast settings.
+# ----------------------------------------------------------------------------------------
+
+# ----------------------------------------------------------------------------------------
+# @ use necro/symbols
+#
+#   Reads the Unholy Symbol count off the necro hotbar into a list the abilities compare.
+# ----------------------------------------------------------------------------------------
+
+# ========================================================================================
+# @ every interval__housekeeping
+# ========================================================================================
+
+# ----------------------------------------------------------------------------------------
+# @ use bard/instrument
+#
+#   Finds the instrument before the loop and keeps track of it while the loop runs.
+# ----------------------------------------------------------------------------------------
+
+# ----------------------------------------------------------------------------------------
+# @ use recovery/refresh
+#
+#   Total Refresh at or below refresh_stam.
+#
+#   refresh_stam (default 15)
+#      Current stamina at or below this drinks a Refresh.
+#      > Only a nearly empty stamina bar is worth a Refresh here.
+# ----------------------------------------------------------------------------------------
+@setvar! config__refresh_stam 4
+
+# ----------------------------------------------------------------------------------------
+# @ use buff/food
+#
+#   Eats from a tray while Food Satisfaction is missing, looked at once a minute.
+# ----------------------------------------------------------------------------------------
+
+# ----------------------------------------------------------------------------------------
+# @ use necro/hotbar
+#
+#   Opens the necro hotbar when it is missing, looked for every 30 seconds.
+# ----------------------------------------------------------------------------------------
+
+# ----------------------------------------------------------------------------------------
+# @ use buff/potions
+#
+#   Strength and Agility by stat value, Magic Resist by its icon, while fighting.
+#
+#   dex_potion (default 100)
+#      DEX with the Greater Agility potion on: your base plus 20. Below it the potion is
+#      drunk, and 0 turns it off. Bless and the Agility spell show the same icon, as for
+#      STR.
+#      > Base DEX plus 20 with the Greater Agility potion.
+# ----------------------------------------------------------------------------------------
+@setvar! config__dex_potion 120
+
+# ----------------------------------------------------------------------------------------
+# @ use necro/summon-names
+#
+#   Renames fresh summons, in order, to lookalikes of the character's name.
+# ----------------------------------------------------------------------------------------
+
+# ----------------------------------------------------------------------------------------
+# @ use pack/gold-drop
+#
+#   Drops gold at your feet while over max weight, one drop per pass.
+#
+#   gold_drop_amount (default 2000)
+#      Gold dropped per pass while over max weight. Gold is cheaper than the leather.
+#      > Weight only changes on a pickup: one smaller lift per housekeeping tick.
+# ----------------------------------------------------------------------------------------
+@setvar! config__gold_drop_amount 1000
+
+# ========================================================================================
+# @ end
+# ========================================================================================
+
+# ========================================================================================
+# @ when var__fighting = 1
+# ========================================================================================
+
+# ----------------------------------------------------------------------------------------
+# @ use bard/disco
+#
+#   Discordance once per target, read off its label, then left alone for 30 seconds.
+# ----------------------------------------------------------------------------------------
+
+# ----------------------------------------------------------------------------------------
+# @ use bard/peace
+#
+#   Peacemaking kept up on the target, waiting out a pacify or a barding break.
+# ----------------------------------------------------------------------------------------
+
+# ----------------------------------------------------------------------------------------
+# @ use necro/burst
+#
+#   Blood Oath, Corpse Skin and Evil Omen in value order, one per pass.
+# ----------------------------------------------------------------------------------------
+
+# ----------------------------------------------------------------------------------------
+# @ use magery/opener
+#
+#   Mana Drain then Curse, once per target, for their Grimoire riders.
+# ----------------------------------------------------------------------------------------
+
+# ----------------------------------------------------------------------------------------
+# @ use magery/proc-core
+#
+#   The four Grimoire proc spells, each on its own bar, cheapest first.
+# ----------------------------------------------------------------------------------------
+
+# ----------------------------------------------------------------------------------------
+# @ use magery/filler
+#
+#   Energy Bolt between the procs, while mana stays above the floor.
+# ----------------------------------------------------------------------------------------
+
+# ----------------------------------------------------------------------------------------
+# @ use necro/poison-strike
+#
+#   Poison Strike once the proc core is spent, while Corpse Skin is up.
+# ----------------------------------------------------------------------------------------
+
+# ========================================================================================
+# @ otherwise
+# ========================================================================================
+
+# ----------------------------------------------------------------------------------------
+# @ use buff/mushroom
+#
+#   Eats a Magic Mushroom at low mana, and makes more with Create Food at high mana.
+# ----------------------------------------------------------------------------------------
+
+# ----------------------------------------------------------------------------------------
+# @ use buff/spells
+#
+#   Reactive Armor, then Magic Reflection, whenever one is missing.
+# ----------------------------------------------------------------------------------------
+
+# ----------------------------------------------------------------------------------------
+# @ use magery/spell-siphon
+#
+#   A Magic Arrow on self for the Spell Siphon buff, never with Magic Reflection up.
+# ----------------------------------------------------------------------------------------
+
+# ----------------------------------------------------------------------------------------
+# @ use bard/song
+#
+#   One bard song per walk pass, Discordance, Peacemaking and Provocation in turn.
+# ----------------------------------------------------------------------------------------
+
+# ----------------------------------------------------------------------------------------
+# @ use necro/vampiric-embrace
+#
+#   Vampiric Embrace from a walk surplus of Unholy Symbols, near a corpse.
+# ----------------------------------------------------------------------------------------
+
+# ========================================================================================
+# @ end
+# ========================================================================================
+
+
+# ========================================================================================
+# @ setup
+# ========================================================================================
+
+# necro/summon-names renames fresh summons to these lookalikes of the character's name, in
+# order. A list, because a variable cannot hold a word. The server refuses digits. Rebuilt
+# on every start, so an edit here is what the block reads.
+clearlist 'list__summon_names'
+pushlist 'list__summon_names' 'nomeehei'
+pushlist 'list__summon_names' 'nomeehel'
+pushlist 'list__summon_names' 'nomeeheh'
+
+# loot/recycle runs the hotkey named in this list when it finishes or gives up. A list, because
+# a variable cannot hold a word (blueprint/razor.html part 3). It lasts until the client closes.
+if not listexists 'list__resume_script'
+    createlist 'list__resume_script'
+endif
+clearlist 'list__resume_script'
+pushlist 'list__resume_script' 'Play Script: combat\bard-necro-enhanced'
+
+if config__chatty = 1
+    overhead "[ bard necro, on ]" 290
+endif

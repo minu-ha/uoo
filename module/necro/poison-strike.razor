@@ -1,0 +1,100 @@
+# ----------------------------------------------------------------------------------------
+# Poison Strike once the proc core is spent, while Corpse Skin is up.
+#
+# @ hotkeys Poison Strike, Cancel Current Target
+# ----------------------------------------------------------------------------------------
+
+
+# ----------------------------------------------------------------------------------------
+# @ config
+#
+#   config__symbols_poison_strike
+#      Unholy Symbols banked before Poison Strike may fire: its cost.
+# ----------------------------------------------------------------------------------------
+@setvar! config__symbols_poison_strike 1
+
+
+# ----------------------------------------------------------------------------------------
+# @ timer
+#
+#   timer__poison_strike
+#      Ready on the first pass.
+# ----------------------------------------------------------------------------------------
+timer__poison_strike interval__necro_action
+
+
+# ----------------------------------------------------------------------------------------
+# @ loop
+# ----------------------------------------------------------------------------------------
+    # ------------------------------------------------------------------------------------
+    # POISON STRIKE
+    #
+    # One symbol to resolve the disease Corpse Skin has been layering on the target: up to
+    # eight ticks land at once instead of over the next thirty seconds. On a mob about to
+    # die that is damage that would otherwise have gone with it. It sits at the bottom of
+    # the symbol ladder and only fires while Corpse Skin is actually up.
+    #
+    # It goes once the proc core is spent, var__procs_done, and last in the pass, behind
+    # the filler. Every damaging spell leaves one disease, so when the pass that spends
+    # the core also has the mana for a bolt, the strike pops four procs and a bolt instead
+    # of four. Below the filler floor there is no bolt coming, and it pops the four rather
+    # than wait. var__proc_target holds it off a mob picked up while the bars are still
+    # running from the last one: no proc has reached that mob yet, so the strike waits
+    # until the next cycle has gone out there.
+    #
+    # A target with nothing on it refuses the strike without spending it. Clearing
+    # var__proc_target then makes it wait for the next proc to reach that mob, rather than
+    # pressing again every pass or sitting out the full window. A cooldown refusal
+    # restarts the window, read on both sides of the cursor wait in case it comes back
+    # instead of the cursor.
+    # ------------------------------------------------------------------------------------
+    if timer "timer__poison_strike" >= interval__necro_action and var__procs_done = 1 and var__opener_done = 1 and var__proc_target = var__combat_target and var__symbols_spent = 0 and timer "timer__corpse_skin" < interval__necro_action and not warmode and list 'list__necro_symbols' >= config__symbols_poison_strike and not targetexists and not casting
+        if find var__combat_target ground -1 -1 config__target_range as alias__strike_target
+            # A bolt from the filler hits 0.5 seconds after its target and brings
+            # its disease then (blueprint/pvp.html part 5). wait__cast covered 0.3 of
+            # that and this covers the rest, so on a quick connection the strike
+            # does not land ahead of the bolt.
+            wait wait__short
+            hotkey 'Poison Strike'
+            waitfortarget wait__ability_target
+
+            if targetexists
+                if find lasttarget ground -1 -1 config__acquire_range as alias__fresh_target
+                    if not dead alias__fresh_target and var__combat_target != alias__fresh_target
+                        if noto alias__fresh_target = "hostile" or noto alias__fresh_target = "criminal" or noto alias__fresh_target = "enemy" or noto alias__fresh_target = "murderer"
+                            @setvar! var__combat_target alias__fresh_target
+                            settimer "timer__target_grace" 0
+
+                            if find var__combat_target ground -1 -1 config__target_range as alias__strike_target
+                                if config__chatty = 1
+                                    overhead "[ target, set ]" 1288 var__combat_target
+                                endif
+                            endif
+                        endif
+                    endif
+                endif
+
+                if var__combat_target != alias__strike_target
+                    hotkey "Cancel Current Target"
+                    wait wait__short
+                else
+                    target alias__strike_target
+                    wait wait__message
+
+                    if insysmsg "unholy symbols remaining"
+                        settimer "timer__poison_strike" 0
+
+                        if config__chatty = 1
+                            overhead "[ poison strike ]" 219
+                        endif
+                    elseif insysmsg "seconds before you may use that ability again."
+                        settimer "timer__poison_strike" 0
+                    elseif insysmsg "You do not have a poison or disease effect on that target."
+                        @setvar! var__proc_target 0
+                    endif
+                endif
+            elseif insysmsg "seconds before you may use that ability again."
+                settimer "timer__poison_strike" 0
+            endif
+        endif
+    endif

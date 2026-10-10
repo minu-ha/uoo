@@ -369,7 +369,7 @@ v10은 오른손 제어를 추가하지 않고 실제 왼손과 캐시 serial을
 <tr>
 <td>커서 없는 시전 (힐 에이전트, Create Food, 자기 버프)을 <code>not casting</code> 먼저 보며 폴링</td>
 <td>끊기는 순간 <code>casting</code>이 풀려 끊김 줄을 안 읽고 나간다 (2026-09-29). 다음 커서 폴링이 그 줄을 제 것으로 읽고 첫 바퀴에 나가 커서가 남는다</td>
-<td>커서 폴링이 시작되기 전에 끊김 줄을 한 번 읽어 비운다 (<code>bard-necro-enhanced.razor</code> OPENER 첫머리, SELF BUFFS의 Spell Siphon 앞)</td>
+<td>커서 폴링이 시작되기 전에 끊김 줄을 한 번 읽어 비운다 (<code>magery/opener</code> 첫머리, <code>magery/spell-siphon</code> 앞)</td>
 </tr>
 <tr>
 <td>Smart Heal · Greater Heal 에이전트가 치유할 게 없을 때</td>
@@ -518,11 +518,11 @@ alt 바디 findtype과 여러 거리에서의 반복 결과는 확인되지 않�
 <tbody>
 <tr>
 <td><code>not inlist '리스트' &lt;serial 변수&gt;</code></td>
-<td><code>bard-necro-enhanced.razor</code> OPENER</td>
+<td><code>magery/opener</code></td>
 </tr>
 <tr>
 <td><code>list__magic_drained_targets</code> + <code>list__magic_cursed_targets</code> 2단 오프닝</td>
-<td><code>bard-necro-enhanced.razor</code> OPENER</td>
+<td><code>magery/opener</code></td>
 </tr>
 <tr>
 <td><code>createlist</code> / <code>removelist</code> / <code>clearlist</code> / <code>pushlist</code></td>
@@ -531,12 +531,12 @@ alt 바디 findtype과 여러 거리에서의 반복 결과는 확인되지 않�
 <tr>
 <td><code>pushlist '리스트' '단어'</code> + <code>foreach x in 리스트</code> + <code>index = &lt;변수&gt;</code> + <code>@rename &lt;serial 변수&gt; x</code>
 -- 단어를 문자열 인자로 넘기기</td>
-<td><code>bard-necro-enhanced.razor</code> CONFIG와 SUMMON NAMES. 2026-09-28 프로브: 항목이 글자 그대로 읽히고 <code>rename</code>이 받는다.
+<td><code>bard-necro-enhanced</code> 레시피 setup과 <code>necro/summon-names</code>. 2026-09-28 프로브: 항목이 글자 그대로 읽히고 <code>rename</code>이 받는다.
 <code>rename</code>은 위키에 있고, CE는 <code>CanRename</code>인 펫에만 보낸다</td>
 </tr>
 <tr>
 <td><code>ingump "10/"</code> … <code>"1/"</code> 큰 수부터 내려오는 사슬로 숫자 읽기</td>
-<td><code>bard-necro-enhanced.razor</code> PASS FLAGS의 심볼 수. <code>ingump</code>는 부분 문자열 매칭이라 큰 수부터 본다. 갈래마다 리터럴 <code>for N</code>으로 리스트를 채운다</td>
+<td><code>necro/symbols</code>의 심볼 수. <code>ingump</code>는 부분 문자열 매칭이라 큰 수부터 본다. 갈래마다 리터럴 <code>for N</code>으로 리스트를 채운다</td>
 </tr>
 <tr>
 <td><code>findbuff "song of discordance"</code></td>
@@ -544,23 +544,23 @@ alt 바디 findtype과 여러 거리에서의 반복 결과는 확인되지 않�
 </tr>
 <tr>
 <td><code>cooldown "magic arrow" = 0</code></td>
-<td><code>bard-necro-enhanced.razor</code> PROC CORE. 항목은 <code>cooldowns.xml</code>에 있다</td>
+<td><code>magery/proc-core</code>. 항목은 <code>cooldowns.xml</code>에 있다</td>
 </tr>
 <tr>
 <td><code>while findtype … backpack as</code> + <code>@ignore</code></td>
-<td><code>bard-necro-enhanced.razor</code> INSTRUMENT</td>
+<td><code>bard/instrument</code></td>
 </tr>
 <tr>
 <td><code>findtype 24|158|… ground -1 -1 &lt;range&gt; as</code> -- 바디 번호로 모빌 찾기</td>
-<td><code>bard-necro-enhanced.razor</code> SUMMON NAMES, 구식 <code>bard-necro</code> PROVO FOLLOWER CACHE (git 이력)</td>
+<td><code>necro/summon-names</code>, 구식 <code>bard-necro</code> PROVO FOLLOWER CACHE (git 이력)</td>
 </tr>
 <tr>
 <td><code>find &lt;변수&gt; ground -1 -1 &lt;range&gt; as</code> + <code>dead</code>로 슬롯 비우기</td>
-<td><code>bard-necro-enhanced.razor</code> SUMMON NAMES, 구식 <code>bard-necro</code> PROVO FOLLOWER CACHE (git 이력)</td>
+<td><code>necro/summon-names</code>, 구식 <code>bard-necro</code> PROVO FOLLOWER CACHE (git 이력)</td>
 </tr>
 <tr>
 <td><code>not dead X and noto X != "hostile" …</code></td>
-<td><code>bard-necro-enhanced.razor</code> SUMMON NAMES</td>
+<td><code>necro/summon-names</code></td>
 </tr>
 <tr>
 <td><code>useskill</code> → <code>waitfortarget</code> → <code>target backpack</code></td>
@@ -568,29 +568,29 @@ alt 바디 findtype과 여러 거리에서의 반복 결과는 확인되지 않�
 </tr>
 <tr>
 <td><code>for 60</code> + <code>break</code>로 커서 폴링</td>
-<td><code>bard-necro-enhanced.razor</code> OPENER, PROC CORE. 레퍼런스 <code>auto-mage.razor:1160</code>은 저장소에 없다</td>
+<td><code>magery/opener</code>, <code>magery/proc-core</code>. 레퍼런스 <code>auto-mage.razor:1160</code>은 저장소에 없다</td>
 </tr>
 <tr>
 <td><code>hotkey 'Vampiric Embrace'</code> + <code>hotkey 'Target Self'</code></td>
-<td><code>bard-necro-enhanced.razor</code> VAMPIRIC EMBRACE. 위키: 자신을 타겟하면 주변 시체를 자동 탐색 (인게임 확인됨 2026-09-25)</td>
+<td><code>necro/vampiric-embrace</code>. 위키: 자신을 타겟하면 주변 시체를 자동 탐색 (인게임 확인됨 2026-09-25)</td>
 </tr>
 <tr>
 <td><code>hotkey 'Drink Heal'</code> 등 포션 핫키</td>
-<td><code>bard-necro-enhanced.razor</code> HEAL. 이름은 Razor 핫키 목록 Potions 항목 그대로</td>
+<td><code>recovery/heal</code>. 이름은 Razor 핫키 목록 Potions 항목 그대로</td>
 </tr>
 <tr>
 <td><code>hotkey "&gt; Interrupt"</code></td>
-<td><code>bard-necro-enhanced.razor</code>의 커서 폴링. 제 시전을 끊고 긴급 힐로 넘어간다. 같은 핫키가 휠 아래에도 물려 있다 (<a href="hotkeys.html">hotkeys.html</a>)</td>
+<td><code>magery/opener</code>·<code>proc-core</code>·<code>filler</code>의 커서 폴링. 제 시전을 끊고 긴급 힐로 넘어간다. 같은 핫키가 휠 아래에도 물려 있다 (<a href="hotkeys.html">hotkeys.html</a>)</td>
 </tr>
 <tr>
 <td><code>stop</code></td>
-<td><code>bard-necro-enhanced.razor</code> INSTRUMENT</td>
+<td><code>bard/instrument</code></td>
 </tr>
 </tbody>
 </table>
 
 <h4>타겟 주문의 모양</h4>
-<p><code>bard-necro-enhanced.razor</code>의 OPENER와 PROC CORE가 타겟 주문마다 쓰는 모양이다.</p>
+<p><code>magery/opener</code>와 <code>magery/proc-core</code>가 타겟 주문마다 쓰는 모양이다.</p>
 <ol>
 <li>패스의 첫 커서 폴링보다 먼저 남은 끊김 줄을 한 번 읽어 비운다.</li>
 <li>대상을 <code>find … as</code>로 찾은 블록 안에서 <code>cast</code>한다. alias는 그 블록 밖에서 읽지 못하므로 <code>target</code>까지 전부 안에 둔다.</li>
@@ -619,7 +619,7 @@ Bard Necro의 네크로가 한 번도 안 나가던 원인이다. 수를 세려�
 <code>while</code> 조건에도 변수 크기 비교는 쓰지 않는다 (선례 없음).</li>
 <li><strong><code>as</code> alias를 묶은 블록 밖에서 읽기.</strong> <code>if findtype … as alias__x</code> / <code>endif</code> 뒤에서 <code>alias__x</code>를 읽으면
 <code>4294967295</code>가 되어 <code>noto</code>가 <code>Mobile … not found</code>를 낸다. 안에서 <code>@setvar! var__x alias__x</code>로 복사해 나온다.
-<code>bard-necro-enhanced.razor</code>의 alias가 전부 블록 안에서만 쓰이는 이유다.</li>
+모듈의 alias가 전부 블록 안에서만 쓰이는 이유다.</li>
 <li><strong>단어를 변수에 담기.</strong> <code>@setvar! var__x nomeeheh</code>는 따옴표가 있든 없든 <code>4294967295</code>로 읽힌다 (2026-09-28 프로브.
 숫자 <code>5000</code>은 <code>5000</code>, <code>0x622396</code>은 10진수 <code>6431638</code>). 변수는 숫자와 serial 전용이다. 그래서 <code>rename &lt;serial&gt; &lt;변수&gt;</code>는
 서버에 쓰레기 이름이 가서 <code>That name is unacceptable.</code>이 된다. 단어는 리스트에 담아 <code>foreach</code>로 꺼낸다. serial 쪽은 변수여도 된다.</li>

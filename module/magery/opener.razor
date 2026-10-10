@@ -1,0 +1,213 @@
+# ----------------------------------------------------------------------------------------
+# Mana Drain then Curse, once per target, for their Grimoire riders.
+#
+# @ hotkeys > Interrupt, Cancel Current Target
+# ----------------------------------------------------------------------------------------
+
+
+# ----------------------------------------------------------------------------------------
+# @ wait
+#
+#   interval__magic_window
+#      How long the two target scoped Grimoire riders last. The debuff icon runs two
+#      minutes, the +30% damage and refund only 60 seconds, so this is a timer and not a
+#      label read.
+# ----------------------------------------------------------------------------------------
+@setvar! interval__magic_window 60000
+
+
+# ----------------------------------------------------------------------------------------
+# @ timer
+#
+#   timer__magic_window
+#      Ready on the first pass.
+# ----------------------------------------------------------------------------------------
+timer__magic_window interval__magic_window
+
+
+# ----------------------------------------------------------------------------------------
+# @ state
+#
+#   var__opener_done
+#      1 once the target carries Curse, or no Curse reagents are left. The proc core and
+#      the filler wait for it.
+# ----------------------------------------------------------------------------------------
+@setvar! var__opener_done 0
+
+
+# ----------------------------------------------------------------------------------------
+# @ setup
+# ----------------------------------------------------------------------------------------
+if not listexists 'list__magic_drained_targets'
+    createlist 'list__magic_drained_targets'
+endif
+if not listexists 'list__magic_cursed_targets'
+    createlist 'list__magic_cursed_targets'
+endif
+
+
+# ----------------------------------------------------------------------------------------
+# @ loop
+# ----------------------------------------------------------------------------------------
+    # ------------------------------------------------------------------------------------
+    # OPENER
+    #
+    # Mana Drain then Curse, once per target.
+    #
+    # Both spells carry a Grimoire rider that is scoped to the creature they were cast on:
+    # Curse gives every spell of ours +30% against that target for 60 seconds, Mana Drain
+    # gives a 30% refund chance on hostile spells against it. Neither follows to the next
+    # mob, which is why membership is tracked per target and not as a global stage.
+    #
+    # Two lists, so the branch itself is the state. A target that was retargeted mid fight
+    # answers correctly with no extra bookkeeping.
+    #
+    # First, any disturb line nobody read is read off here, so the cursor polls from here
+    # to magery/filler only ever see their own.
+    # ------------------------------------------------------------------------------------
+    # The Grimoire riders on Curse and Mana Drain run 60 seconds while the debuff icon runs
+    # two minutes, so the lists have to expire on a clock rather than on the icon. Sweeping
+    # both at once re-opens on a target that was done seconds ago, which costs 22 mana now
+    # and then. Per target timestamps would need arithmetic, which Razor does not have.
+    if timer "timer__magic_window" >= interval__magic_window
+        clearlist 'list__magic_drained_targets'
+        clearlist 'list__magic_cursed_targets'
+        settimer "timer__magic_window" 0
+    endif
+
+    if insysmsg "Your concentration is disturbed, thus ruining thy spell."
+        # consumed, nothing else to do
+    endif
+
+    if not inlist 'list__magic_drained_targets' var__combat_target and var__regs_mana_drain = 1 and mana >= config__mana_4th and not warmode and not targetexists and not casting and cooldown "walk" = 0
+        if find var__combat_target ground -1 -1 config__target_range as alias__opener_target
+            cast 'Mana Drain'
+
+            for 60
+                if targetexists
+                    break
+                endif
+
+                if insysmsg "Your concentration is disturbed, thus ruining thy spell."
+                    break
+                endif
+
+                if config__interrupt_to_heal = 1 and diffhits >= config__emergency_hits
+                    if config__chatty = 1
+                        overhead "[ drain, cut ]" 254
+                    endif
+
+                    hotkey "> Interrupt"
+                    break
+                endif
+
+                wait wait__poll
+            endfor
+
+            if targetexists
+                if find lasttarget ground -1 -1 config__acquire_range as alias__fresh_target
+                    if not dead alias__fresh_target and var__combat_target != alias__fresh_target
+                        if noto alias__fresh_target = "hostile" or noto alias__fresh_target = "criminal" or noto alias__fresh_target = "enemy" or noto alias__fresh_target = "murderer"
+                            @setvar! var__combat_target alias__fresh_target
+                            settimer "timer__target_grace" 0
+
+                            if find var__combat_target ground -1 -1 config__target_range as alias__opener_target
+                                if config__chatty = 1
+                                    overhead "[ target, set ]" 1288 var__combat_target
+                                endif
+                            endif
+                        endif
+                    endif
+                endif
+
+                if dead alias__opener_target or var__combat_target != alias__opener_target
+                    hotkey "Cancel Current Target"
+                    wait wait__short
+                else
+                    target alias__opener_target
+                    wait wait__cast
+
+                    if insysmsg "cannot be seen"
+                        # not delivered, so the target stays off the list
+                    else
+                        pushlist 'list__magic_drained_targets' var__combat_target
+
+                    endif
+                endif
+            endif
+        endif
+    elseif not inlist 'list__magic_cursed_targets' var__combat_target and var__regs_curse = 1 and mana >= config__mana_4th and not warmode and not targetexists and not casting and cooldown "walk" = 0
+        if find var__combat_target ground -1 -1 config__target_range as alias__opener_target
+            cast 'Curse'
+
+            for 60
+                if targetexists
+                    break
+                endif
+
+                if insysmsg "Your concentration is disturbed, thus ruining thy spell."
+                    break
+                endif
+
+                if config__interrupt_to_heal = 1 and diffhits >= config__emergency_hits
+                    if config__chatty = 1
+                        overhead "[ curse, cut ]" 254
+                    endif
+
+                    hotkey "> Interrupt"
+                    break
+                endif
+
+                wait wait__poll
+            endfor
+
+            if targetexists
+                if find lasttarget ground -1 -1 config__acquire_range as alias__fresh_target
+                    if not dead alias__fresh_target and var__combat_target != alias__fresh_target
+                        if noto alias__fresh_target = "hostile" or noto alias__fresh_target = "criminal" or noto alias__fresh_target = "enemy" or noto alias__fresh_target = "murderer"
+                            @setvar! var__combat_target alias__fresh_target
+                            settimer "timer__target_grace" 0
+
+                            if find var__combat_target ground -1 -1 config__target_range as alias__opener_target
+                                if config__chatty = 1
+                                    overhead "[ target, set ]" 1288 var__combat_target
+                                endif
+                            endif
+                        endif
+                    endif
+                endif
+
+                if dead alias__opener_target or var__combat_target != alias__opener_target
+                    hotkey "Cancel Current Target"
+                    wait wait__short
+                else
+                    target alias__opener_target
+                    wait wait__cast
+
+                    if insysmsg "cannot be seen"
+                        # not delivered, so the target stays off the list
+                    else
+                        pushlist 'list__magic_cursed_targets' var__combat_target
+                        settimer "timer__magic_window" 0
+
+                    endif
+                endif
+            endif
+        endif
+    endif
+
+    # The rotation waits for Curse, because everything after it is worth 30% more once it
+    # has landed. The one thing it does not wait for is a reagent that is not coming back
+    # until the next restock: with no Curse reagents the damage goes out without the rider
+    # rather than the script standing still in front of a live target.
+    #
+    # Low mana is deliberately NOT an escape. It regenerates, the followers carry the fight
+    # meanwhile, and every point dribbled into an uncursed Magic Arrow is a point the next
+    # opener does not have. Waiting for 22 mana and casting with the rider is the better trade.
+    if inlist 'list__magic_cursed_targets' var__combat_target
+        @setvar! var__opener_done 1
+    elseif var__regs_curse = 0
+        @setvar! var__opener_done 1
+    else
+        @setvar! var__opener_done 0
+    endif

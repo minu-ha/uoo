@@ -152,7 +152,7 @@
 <td>버프 없는 STR·DEX가 얼마인가. 기준선은 그 값 + 20이다 (<a href="pvp.html#09.D">pvp.html</a> 09.D절).
 120·120은 예전 임계값 100·100에서 기본 100·100으로 짐작했고, pvp는 벌목·skinning 템플릿의 100·80을 따랐다.
 pvp는 summoner 프로필에서도 쓰니 그 캐릭터의 기본값이 다르면 실행 전에 바꾼다.
-선이 높으면 포션이 도는 동안 5초 (bard-necro는 10초)마다 거절될 마시기가 나가고, 낮으면 포션을 아예 마시지 않는다</td>
+선이 높으면 포션이 도는 동안 5초마다 거절될 마시기가 나가고, 낮으면 포션을 아예 마시지 않는다</td>
 </tr>
 <tr>
 <td>Lyric 방어구 무시 42.5%</td>
@@ -765,6 +765,21 @@ lumberjack-enhanced를 Play한 뒤에는 그쪽으로 돌아와야 한다. 아�
 Journal에 <code>Recycle check: …</code>가 아이템마다, 저장할 때 <code>[ item, saving ]</code>과 <code>Recycle save: …</code>가 남고, 나머지는 분해된다.
 링메일 fortification·hardening·guarding·defense 스위치가 이제 먹고, studded 방어구는 studded 보관함으로 간다 (지금은 둘 다 루트 파우치).
 재질을 못 읽은 방어구는 루트 파우치로 간다. 재활용 도구가 없을 때도 루프로 돌아와야 한다</td></tr>
+</tbody>
+</table>
+<h2 id="14" data-part="사냥">14 bard-necro-enhanced 인게임 확인</h2>
+<p>2026-10-10 <code>combat/bard-necro-enhanced</code>를 레시피로 조립하게 바꿨다. 바드·네크로·공격 주문 블록의 코드는 그대로지만,
+생존·포션·버프·골드는 공용 모듈로 바뀌었고 하우스키핑과 교전·이동 분기는 레시피 그룹이 만든다. 바뀐 동작은 <a href="modules.html#08.D">modules.html</a> 08.D절에 있다.</p>
+<table>
+<thead><tr><th>남은 항목</th><th>확인할 것</th></tr></thead>
+<tbody>
+<tr><td>시작</td><td>Play하면 악기를 찾고 (없으면 <code>[ inst, pick ]</code>), <code>[ bard necro, on ]</code>이 뜬다. 소환수 이름이 예전처럼 바뀌는지 본다</td></tr>
+<tr><td>교전과 이동</td><td>적을 찍으면 10칸 안에서 Disco·Peace·네크로 버스트·오프너·프록이 예전 순서로 나가고, 적이 없으면 버섯·RA·Reflect·Spell Siphon·노래·Vampiric Embrace가 돈다</td></tr>
+<tr><td>Spell Siphon 순서</td><td>RA와 Reflect가 빠진 채 이동하면 RA, Reflect가 먼저 서고 Siphon Magic Arrow는 그다음 패스에 나가야 한다</td></tr>
+<tr><td>독과 힐</td><td>독에 걸린 채 다치면 큐어가 먼저 나가고 힐 포션·Greater Heal은 독이 풀린 뒤에 나간다. 예전보다 위험하게 느껴지면 기록한다</td></tr>
+<tr><td>셀프 버프 끊기</td><td>잃은 HP 35 이상에서 RA·Reflect 시전이 끊기는 것이 거슬리면 레시피에서 <code>buff_max_loss</code>를 올린다</td></tr>
+<tr><td>Journal</td><td><code>config__sysmsg</code> 1로 에이전트·버프·골드·전투 대상 줄이 남는다. 너무 많으면 레시피에서 0으로 둔다</td></tr>
+<tr><td>패스 속도</td><td>패스 끝 0.1초 대기와 시약 10초 읽기가 붙었다. 교전 반응이 눈에 띄게 늦으면 기록한다</td></tr>
 </tbody>
 </table>
 </main>

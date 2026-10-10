@@ -1,0 +1,101 @@
+# ----------------------------------------------------------------------------------------
+# Peacemaking kept up on the target, waiting out a pacify or a barding break.
+#
+# @ hotkeys Cancel Current Target
+# ----------------------------------------------------------------------------------------
+
+
+# ----------------------------------------------------------------------------------------
+# @ wait
+#
+#   interval__peace_seen
+#      How long the label is left unread once it has shown pacified or a barding break.
+#      Two seconds is the gap between the 10 second slot and the 12 second pacify.
+# ----------------------------------------------------------------------------------------
+@setvar! interval__peace_seen 2000
+
+
+# ----------------------------------------------------------------------------------------
+# @ timer
+#
+#   timer__peace_seen
+#      Ready on the first pass.
+# ----------------------------------------------------------------------------------------
+timer__peace_seen interval__peace_seen
+
+
+# ----------------------------------------------------------------------------------------
+# @ loop
+# ----------------------------------------------------------------------------------------
+    # ------------------------------------------------------------------------------------
+    # PEACE
+    #
+    # The other half of the Ensemble condition, and unlike Discordance it is short. At
+    # difficulty 300 and up the duration formula floors at 15 x Musicianship / 100, which
+    # is 12 seconds here, against a 10 second slot cooldown. So it is re-applied
+    # continuously rather than once per target: let it lapse and Ensemble and Virtuoso go
+    # dark with it.
+    #
+    # A pacified creature does not attack, and taking damage does NOT break that. Only a
+    # barding break does, and while one is running neither Peace nor Provocation can land
+    # on that creature, which is why a broken target is left alone until it clears.
+    #
+    # Either label is then waited out on interval__peace_seen instead of a find and a
+    # getlabel on every pass. A barding break runs 40 seconds, so it is read every two
+    # seconds rather than on every pass, and Peace lands at most two seconds after it
+    # clears.
+    # ------------------------------------------------------------------------------------
+    if timer "timer__peace_seen" >= interval__peace_seen and cooldown "peace/provo" = 0 and cooldown "music" = 0 and skill "Peacemaking" > 0 and not warmode and var__instrument_ok = 1 and var__my_instrument != 0 and not targetexists and not casting
+        if find var__combat_target ground -1 -1 config__target_range as alias__peace_target
+            getlabel alias__peace_target label__peace_target
+
+            if "pacified" in label__peace_target or "barding break" in label__peace_target
+                settimer "timer__target_grace" 0
+                settimer "timer__peace_seen" 0
+            else
+                useskill 'Peacemaking'
+                waitfortarget wait__bard_target
+
+                # Answered once, before the delivery loop. Razor asks for an
+                # instrument only when its cached one is gone, and answering it
+                # makes the skill open the real target cursor, so the wait is
+                # simply repeated. replay is documented as restarting the whole
+                # script from the top, which would re-run the entire setup.
+                if insysmsg "What instrument shall you play"
+                    target var__my_instrument
+                    waitfortarget wait__bard_target
+
+                    if insysmsg "That is not a musical instrument"
+                        @setvar! var__my_instrument 0
+                    endif
+                endif
+
+                if find lasttarget ground -1 -1 config__acquire_range as alias__fresh_target
+                    if not dead alias__fresh_target and var__combat_target != alias__fresh_target
+                        if noto alias__fresh_target = "hostile" or noto alias__fresh_target = "criminal" or noto alias__fresh_target = "enemy" or noto alias__fresh_target = "murderer"
+                            @setvar! var__combat_target alias__fresh_target
+                            settimer "timer__target_grace" 0
+
+                            if find var__combat_target ground -1 -1 config__target_range as alias__peace_target
+                                if config__chatty = 1
+                                    overhead "[ target, set ]" 1288 var__combat_target
+                                endif
+                            endif
+                        endif
+                    endif
+                endif
+
+                while targetexists
+                    if dead alias__peace_target or var__combat_target != alias__peace_target
+                        hotkey "Cancel Current Target"
+                        wait wait__short
+                    else
+                        target alias__peace_target
+                        wait wait__short
+                    endif
+                endwhile
+
+                wait wait__short
+            endif
+        endif
+    endif
