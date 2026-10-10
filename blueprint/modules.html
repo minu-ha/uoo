@@ -609,6 +609,30 @@ pvp 결과물에는 시작 4줄이 <code>if config__clear_at_start = 1</code> �
 </table>
 <p>인게임 확인 항목은 <a href="open-items.html#12">open-items.html</a> 12절에 있다.</p>
 
+<h3 id="08.F">08.F 마무리 점검에서 합친 모듈</h3>
+<p>같은 날 모든 루프를 옮긴 뒤 다시 보니, 따로 쓸 수 없거나 너무 작아 모듈을 나눈 값이 없는 것이 넷 있었다. 합쳐서 모듈이 43개에서 38개가 됐다.
+결과물의 코드는 Spell Siphon 말고는 같다.</p>
+<table>
+<thead>
+<tr>
+<th>합친 것</th>
+<th>된 것</th>
+<th>왜</th>
+</tr>
+</thead>
+<tbody>
+<tr><td><code>necro/hotbar</code></td><td><code>necro/symbols</code></td><td>같은 gump를 열고 읽는 한 가지 일이다. 핫바 확인을 심볼 사슬의 마지막 갈래 (수를 못 읽었을 때) 안에 두어,
+수를 읽는 패스는 문장을 하나도 더 쓰지 않는다. 전에는 하우스키핑 5초마다 한 줄이었다</td></tr>
+<tr><td><code>magery/spell-siphon</code></td><td><code>buff/spells</code>의 마지막 갈래 (<code>use_spell_siphon</code>)</td><td>RA·Reflect 뒤에 서려고 <code>var__buff_cast</code> 플래그를 주고받았는데,
+<code>elseif</code> 사슬 하나면 순서가 저절로 지켜진다. 플래그와 패스마다의 한 줄이 없어졌다. 한 시간에 한 번 나가는 화살이라 자기를 찍기 전에 lasttarget을 다시 읽지 않는다</td></tr>
+<tr><td><code>recovery/pouch</code></td><td><code>recovery/cure</code></td><td>코드 9줄이고 모든 레시피에서 cure 바로 앞에 붙어 있었다. 마비면 파우치, 아니면 독을 본다 (<code>if</code> / <code>elseif</code>)</td></tr>
+<tr><td><code>magery/opener</code>, <code>proc-core</code>, <code>filler</code></td><td><code>magery/rotation</code></td><td>프록은 Curse를 (<code>var__opener_done</code>), Energy Bolt는 프록을 (<code>var__procs_done</code>) 기다려서
+하나만 쓸 수 없다. 단계마다 배너는 그대로 두었다 (조립기가 한 블록의 배너를 모두 그룹 깊이에 맞춘다)</td></tr>
+</tbody>
+</table>
+<p>합치지 않은 것도 적어 둔다. <code>fight/axe</code>와 <code>fight/weapon-swap</code>은 비슷해 보이지만, 앞의 것은 2초 시계로 빈 손만 보고 뒤의 것은 패스마다 두 손을 읽는 PvP용이라 비용이 다르다.
+<code>bard/disco</code>와 <code>bard/peace</code>, 두 codex는 서로 주고받는 것이 없는 독립 블록이다. <code>recovery/refresh</code>와 <code>buff/food</code>는 작지만 맡는 일이 다르다.</p>
+
 <h2 id="09">09 아직 옮기지 않은 것</h2>
 <ul>
 <li><code>script/archive/</code>: 쓰지 않는 스크립트라 옮기지 않는다.</li>
