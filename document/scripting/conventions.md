@@ -253,7 +253,7 @@ endif
 
 `setvar 이름` → 타겟 커서, 찍은 대상의 serial을 프로필 script variable로 저장.
 
-### <a id="03.D"></a>03.D varexist는 선언 여부만 본다
+### <a id="03.D"></a>03.D varexist는 선언 여부만 확인
 
 - `varexist`는 값의 정확성을 보지 않음. 잘못 타겟한 값도 참 → 영영 안 고쳐짐
 - 그 물건 앞에 서 있는 게 확실한 스크립트: `find`로 실재까지 확인, 없으면 지우고 다시 물음(`script/restock/loadout.razor`)

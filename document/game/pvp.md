@@ -79,7 +79,7 @@ order: 10
 | 파랑 공격으로 Criminal | **2분.** Criminal 타이머와 같음 |
 | 모든 경우 | 최대 **5분** |
 
-### <a id="01.C"></a>01.C 던전에서는 Golden Moongate 곁에서만 리콜된다
+### <a id="01.C"></a>01.C 던전 리콜은 Golden Moongate 곁에서만
 
 **던전 안 리콜은 Golden Moongate 8타일 안에서만.** Heat of Battle이 켜져 있으면 그곳에서도 리콜, 게이트, 문게이트 불가.
 
@@ -442,7 +442,7 @@ TK 쿨다운 제약은 2020-09-28 패치 원문에만, 현재 위키에는 없�
 
 > "Players must have at least 80 Magery skill and at least 80 Meditation or 80 Eval Int skill to benefit from the Wizard's Grimoire" -- Wizard's Grimoire
 
-### <a id="05.A"></a>05.A Reflect 제거와 인터럽트를 헷갈리지 않는다
+### <a id="05.A"></a>05.A Reflect 제거와 인터럽트의 구분
 
 05절 Reflection 규칙상 Inscription이 있는 상대는 첫 주문 뒤에도 Reflect 유지 가능.
 **Magic Arrow 한 번만으로 마나가 많이 드는 Explosion을 바로 던지지 않음.**
@@ -687,7 +687,7 @@ TK 쿨다운 제약은 2020-09-28 패치 원문에만, 현재 위키에는 없�
 
 ## <a id="06"></a>06 소환수로 싸울 때
 
-### <a id="06.A"></a>06.A PvM에서 받던 강화가 빠진다
+### <a id="06.A"></a>06.A PvM 강화 미적용
 
 **"소환수는 PvP에서 약하다"의 근거: PvM 강화가 PvP에서 빠짐.**
 
