@@ -132,19 +132,25 @@ def banner(name):
 
 
 def block_banner(lines, source, depth=0):
-    """A block in the loop starts with its "-" banner. Inside a group it moves in by four
-    spaces a level, its rules shortened and its text refilled to keep the width, and the file
-    it came from goes on the right of the title line."""
+    """A block in the loop starts with its "-" banner, and a block with steps has one more
+    banner per step. Inside a group they move in by four spaces a level, their rules
+    shortened and their text refilled to keep the width, and the file the block came from
+    goes on the right of the first title line."""
     lines = [(' ' * 4 * depth + l) if l.strip() else l for l in lines]
     indent = lines[0][:len(lines[0]) - len(lines[0].lstrip())]
     rule = indent + '# ' + '-' * (WIDTH - len(indent) - 2)
-    closing = next(i for i in range(2, len(lines)) if BLOCK_RULE.match(lines[i]))
-    if depth:
-        lines = lines[:2] + refill(lines[2:closing], indent) + lines[closing:]
-        closing = next(i for i in range(2, len(lines)) if BLOCK_RULE.match(lines[i]))
+    title_line = re.compile(re.escape(indent) + r"# [A-Z][A-Z0-9 /&,.'()+:-]*$")
+    starts = [i for i in range(len(lines) - 1)
+              if BLOCK_RULE.match(lines[i]) and lines[i].startswith(indent + '#') and title_line.match(lines[i + 1].rstrip())]
+    starts = sorted(set([0] + starts))
+    for start in reversed(starts):
+        closing = next(i for i in range(start + 2, len(lines)) if BLOCK_RULE.match(lines[i]))
+        if depth:
+            lines = lines[:start + 2] + refill(lines[start + 2:closing], indent) + lines[closing:]
+            closing = next(i for i in range(start + 2, len(lines)) if BLOCK_RULE.match(lines[i]))
+        lines[start] = lines[closing] = rule
     title = lines[1].rstrip()
     lines[1] = title + ' ' * max(2, WIDTH - len(title) - len(source)) + source
-    lines[0] = lines[closing] = rule
     return lines
 
 
