@@ -24,7 +24,7 @@
 <tbody>
 <tr><td><a href="#01">01</a></td><td>왜 모듈로 나누나. 왜 게임 안에서 이어 달리지 않나</td></tr>
 <tr><td><a href="#02">02</a></td><td>어느 폴더에 무엇이 있나</td></tr>
-<tr><td><a href="#03">03</a></td><td>레시피는 어떻게 생겼고, 블록 상자에는 무엇이 들어가나</td></tr>
+<tr><td><a href="#03">03</a></td><td>레시피는 어떻게 생겼고, 블록 상자에는 무엇이 들어가나. 블록 여러 개를 한 조건으로 묶으려면</td></tr>
 <tr><td><a href="#04">04</a></td><td>모듈 파일 하나는 어떻게 생겼나</td></tr>
 <tr><td><a href="#05">05</a></td><td>조립기는 무엇을 만들고 무엇을 막나</td></tr>
 <tr><td><a href="#06">06</a></td><td>base에는 무엇이 있고, 블록끼리 무엇을 주고받나</td></tr>
@@ -88,7 +88,7 @@
 
 <h2 id="03" data-part="형식">03 레시피</h2>
 <p>레시피와 모듈은 모두 <strong>상자</strong>로 짠다. 상자는 <code>-</code>로 그은 줄 두 개 사이에 <code># @</code> 줄, 빈 <code>#</code> 줄, 그 뒤를 설명하는 <code>#</code> 줄을 넣고,
-상자 밑에 그 설명을 받는 줄을 빈 줄 없이 이어 붙인 것이다. 레시피의 큰 칸 네 개만 <code>=</code>로 긋는다. 상자와 상자 사이는 빈 줄로 띄운다.
+상자 밑에 그 설명을 받는 줄을 빈 줄 없이 이어 붙인 것이다. 레시피의 큰 칸 네 개와 그룹 줄 (아래)만 <code>=</code>로 긋는다. 상자와 상자 사이는 빈 줄로 띄운다.
 <code># @</code> 줄은 조립기가 읽는 지시이고, Razor에서는 주석이다.</p>
 <table>
 <thead>
@@ -172,6 +172,51 @@
 <p>결과물의 CONFIG도 모듈마다 같은 모양으로 나오고, 레시피가 바꾼 설정 밑에는 <code>&gt; This loop: …</code>와 이유가 붙는다.</p>
 <p>블록 순서는 루프 안 순서다. <code>insysmsg</code>는 맞은 줄과 그보다 오래된 줄을 함께 소비하므로 Journal을 읽는 블록끼리는 순서가 중요하다.
 lumberjack-enhanced는 Tracking 줄을 먼저 읽도록 <code>recovery/reagents</code>를 <code>escape/recall</code> 뒤에, skinning-enhanced는 칼질 응답 뒤에 둔다.</p>
+
+<p><strong>그룹은 블록 여러 개를 한 조건 밑에 묶는다.</strong> 블록마다 같은 조건을 따로 물으면 그 조건이 거짓인 패스도 블록 수만큼 문장 값을 낸다
+(<a href="razor.html#06">razor.html</a> 06절). 묶으면 한 번만 묻는다. 그룹 줄은 블록 상자 사이에 쓰고, 조립기가 <code>=</code> 상자로 정리한다.</p>
+<table>
+<thead>
+<tr>
+<th>줄</th>
+<th>결과물</th>
+</tr>
+</thead>
+<tbody>
+<tr><td><code># @ when 조건</code></td><td><code>if 조건</code>. 조건은 Razor 그대로 쓴다. 괄호가 없으니 and와 or를 섞지 않는다 (<a href="razor.html#03">razor.html</a> 03절)</td></tr>
+<tr><td><code># @ otherwise</code></td><td><code>else</code>. <code>when</code> 안에서 한 번 쓴다</td></tr>
+<tr><td><code># @ every interval__이름</code></td><td><code>if timer "timer__이름" &gt;= interval__이름</code>과 <code>settimer "timer__이름" 0</code>.
+시계 <code>timer__이름</code>은 조립기가 TIMER에 만들고, 첫 패스에 준비돼 있다</td></tr>
+<tr><td><code># @ end</code></td><td><code>endif</code>. 가장 안쪽의 열린 그룹을 닫는다</td></tr>
+</tbody>
+</table>
+<ul>
+<li>그룹 안의 블록은 한 단계마다 네 칸 들어가고, 배너 글은 줄어든 폭에 맞춰 다시 감긴다. 그룹 안에 그룹을 둘 수 있다.</li>
+<li>그룹이 막는 것은 블록의 loop 부분뿐이다. 선언과 setup은 그룹과 상관없이 늘 나간다. base의 <code>end</code>는 그룹 밖 맨 끝이다.</li>
+<li>조건과 <code>every</code>에 쓴 이름도 블록 코드처럼 주인 모듈을 찾는다. <code>interval__housekeeping</code>은 base의 것이다.</li>
+<li>블록 안의 시계와 그룹의 시계는 겹친다. <code>every interval__housekeeping</code> 안의 <code>buff/food</code>는 5초마다 자기 60초 타이머를 본다.</li>
+</ul>
+<pre><code># ========================================================================================
+# @ when var__fighting = 1
+# ========================================================================================
+
+# ----------------------------------------------------------------------------------------
+# @ use bard/disco
+#
+#   Discordance once per target, read off its label, then left alone for 30 seconds.
+# ----------------------------------------------------------------------------------------
+
+...
+
+# ========================================================================================
+# @ otherwise
+# ========================================================================================
+
+...
+
+# ========================================================================================
+# @ end
+# ========================================================================================</code></pre>
 
 <h2 id="04">04 모듈</h2>
 <p>모든 모듈이 같은 모양이다. 맨 위 상자에 블록이 하는 일과 <code># @ hotkeys</code>, 그 밑으로 칸마다 상자 하나다. 쓸 것이 없는 칸은 뺀다.
@@ -266,7 +311,7 @@ lumberjack-enhanced는 Tracking 줄을 먼저 읽도록 <code>recovery/reagents<
 <ol>
 <li>헤더: 레시피 헤더 → 블록들이 선언한 핫키를 모은 <code>Hotkeys:</code> 줄 → "Generated from recipe/… by util/build-scripts.py" 줄.</li>
 <li>CONFIG → WAIT AND COOLDOWN → TIMER → STATE → setup → MAIN LOOP (<code>while not dead</code>, 블록마다의 <code>loop</code>, base의 <code>end</code>, <code>endwhile</code>).
-자리마다 base가 먼저, 블록이 레시피 순서대로, 레시피가 마지막이다. 레시피의 STATE가 뒤에 오므로 모듈 상태에 다른 시작값을 줄 수 있다 (pvp의 <code>var__fighting 1</code>).</li>
+자리마다 base가 먼저, 블록이 레시피 순서대로, 레시피가 마지막이다. 그룹은 loop 안에서 <code>if</code>·<code>else</code>·<code>endif</code>가 되고, <code># @ every</code>의 시계는 TIMER 끝에 레시피 몫으로 나온다. 레시피의 STATE가 뒤에 오므로 모듈 상태에 다른 시작값을 줄 수 있다 (pvp의 <code>var__fighting 1</code>).</li>
 <li>큰 칸 (CONFIG 등)은 conventions의 배너 모양이다 (<a href="conventions.html#02.B">conventions.html</a> 02.B절). 그 안의 조각은
 모듈과 같은 상자로 나온다. 상자 첫 줄이 어느 파일에서 왔는지 (<code># module/recovery/heal.razor</code>), 그 밑이 설명이고, 값은 상자 밑이다. loop 안의 블록은 배너 위에 <code># module/…razor</code> 한 줄이 붙는다.
 TIMER는 timer마다 <code>createtimer</code>와 첫 <code>settimer</code>를 붙여 쓴다.</li>
@@ -281,6 +326,7 @@ TIMER는 timer마다 <code>createtimer</code>와 첫 <code>settimer</code>를 �
 <li>두 모듈이 같은 이름을 선언한다. 칸에 다른 접두의 이름이 있다. 블록이 <code>config__</code>에 값을 넣는다.</li>
 <li>결과물 주석에 <code>;</code>이 있다 (<a href="razor.html#03">razor.html</a> 03절).</li>
 <li>모듈 첫 줄 요약이 86자를 넘는다. 레시피 상자에 한 줄로 보여야 한다.</li>
+<li>그룹 줄이 짝이 맞지 않는다: <code>when</code> 밖의 <code>otherwise</code>, 열린 그룹이 없는 <code>end</code>, 닫지 않은 그룹, <code># @ use base</code> 앞의 그룹, 조건이나 이름이 빠진 <code>when</code>·<code>every</code>.</li>
 </ul></li>
 <li>줄 끝은 CRLF로 쓴다 (<code>.gitattributes</code>). 바뀐 결과물과 레시피만 다시 쓴다.</li>
 <li><code>util/check.sh</code>를 인자 없이 돌리면 끝에 <code>util/build-scripts.py --check</code>도 돈다. 누가 결과물을 직접 고쳤거나, 모듈 설명을 고치고 조립하지 않았으면 여기서 잡힌다.</li>
