@@ -1,8 +1,11 @@
+# ----------------------------------------------------------------------------------------
 # Before the loop: reuses a confirmed Tracking hunt colour, or sets the filter once.
 # The profile displays the server's Tracking messages. escape/recall reads them.
+# ----------------------------------------------------------------------------------------
 
 
-#@ config --------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------------------
+#@ config
 #   config__tracking_color
 #      Hunt filter.
 #        1  red: murderers
@@ -12,17 +15,21 @@
 #
 #   config__show_tracking
 #      1 leaves the Tracking window open after setup.
+# ----------------------------------------------------------------------------------------
 @setvar! config__tracking_color 1
 @setvar! config__show_tracking 0
 
 
-#@ wait ----------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------------------
+#@ wait
 #   wait__tracking_gump
 #      How long the Tracking window may take to open.
+# ----------------------------------------------------------------------------------------
 @setvar! wait__tracking_gump 1000
 
 
-#@ state ---------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------------------
+#@ state
 #   var__tracking_setup_color
 #      Last color confirmed in this client session. It survives Stop and Play only while
 #      Hunting stays active. After a manual filter change, turn Hunting off before Play so
@@ -38,6 +45,7 @@
 #   var__tracking_button_answered
 #      Temporary button-response flag. Wait for each response before cycling the next
 #      filter.
+# ----------------------------------------------------------------------------------------
 if not varexist var__tracking_setup_color
     @setvar! var__tracking_setup_color 0
 endif
@@ -46,10 +54,10 @@ endif
 @setvar! var__tracking_button_answered 0
 
 
-#@ setup ---------------------------------------------------------------------------------
-# ####################################################################################
+# ----------------------------------------------------------------------------------------
+#@ setup
+# ----------------------------------------------------------------------------------------
 # # TRACKING SETUP
-# ####################################################################################
 # Reuse the color verified by this script while Hunting remains active.
 # A buff alone does not identify the filter. A first run checks the current window instead.
 if skill "Tracking" > 0

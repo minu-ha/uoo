@@ -1,8 +1,11 @@
+# ----------------------------------------------------------------------------------------
 # Strength and Agility by stat value, Magic Resist by its icon, while fighting.
 #@ hotkeys Drink Strength, Drink Agility, Drink Magic Resist
+# ----------------------------------------------------------------------------------------
 
 
-#@ config --------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------------------
+#@ config
 #   config__use_resist_potion
 #      1 keeps the Magic Resist potion up.
 #
@@ -15,26 +18,33 @@
 #      DEX with the Greater Agility potion on: your base plus 20. Below it the potion is
 #      drunk, and 0 turns it off. Bless and the Agility spell show the same icon, as for
 #      STR.
+# ----------------------------------------------------------------------------------------
 @setvar! config__use_resist_potion 1
 @setvar! config__str_potion 120
 @setvar! config__dex_potion 100
 
 
-#@ wait ----------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------------------
+#@ wait
 #   cooldown__stat_potion
 #      A Strength or Agility potion is tried once per window. The stat arrives a round
 #      trip after the drink, and a Curse, Weaken or Clumsy can hold it under the line
 #      while the potion still runs: without the window that refused drink would go out
 #      every pass. An empty bag is looked up at the same pace.
+# ----------------------------------------------------------------------------------------
 @setvar! cooldown__stat_potion 5000
 
 
-#@ timer ---------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------------------
+#@ timer
+# ----------------------------------------------------------------------------------------
 timer__str_potion cooldown__stat_potion
 timer__agi_potion cooldown__stat_potion
 
 
-#@ loop ----------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------------------
+#@ loop
+# ----------------------------------------------------------------------------------------
     # ################################################################################
     # # STAT POTIONS
     # ################################################################################

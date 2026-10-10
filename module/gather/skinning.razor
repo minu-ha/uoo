@@ -1,17 +1,22 @@
+# ----------------------------------------------------------------------------------------
 # Forensic Evaluation carving of corpses within 2 tiles, between fights.
 #@ hotkeys Cancel Current Target
+# ----------------------------------------------------------------------------------------
 
 
-#@ config --------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------------------
+#@ config
 #   config__skin_unowned
 #      Which corpses within 2 tiles get carved.
 #        0  grey corpses only, through Smart Harvest on self
 #        1  every creature corpse, by targeting each one. Player remains are never targeted.
 #           Where the server refuses this as a criminal action, grey corpses only for 5 minutes
+# ----------------------------------------------------------------------------------------
 @setvar! config__skin_unowned 1
 
 
-#@ wait ----------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------------------
+#@ wait
 #   wait__carve_target
 #      The knife cursor must arrive inside this block. A late cursor would block every
 #      input guard.
@@ -25,18 +30,22 @@
 #
 #   cooldown__grey_only
 #      After a criminal action refusal, carve grey corpses only for 5 minutes.
+# ----------------------------------------------------------------------------------------
 @setvar! wait__carve_target 2000
 @setvar! wait__carve_reply 1500
 @setvar! cooldown__carve 700
 @setvar! cooldown__grey_only 300000
 
 
-#@ timer ---------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------------------
+#@ timer
+# ----------------------------------------------------------------------------------------
 timer__carve cooldown__carve
 timer__grey_only cooldown__grey_only
 
 
-#@ state ---------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------------------
+#@ state
 #   var__pick_during_carve
 #      Scratch: 1 when a Z pick arrived while the knife cursor was up.
 #
@@ -61,6 +70,7 @@ timer__grey_only cooldown__grey_only
 #   var__my_knife
 #      Selected knife serial, reused across Stop and Play. 0 means rediscover from the
 #      backpack.
+# ----------------------------------------------------------------------------------------
 @setvar! var__pick_during_carve 0
 @setvar! var__carve_direct 0
 @setvar! var__corpse_ok 0
@@ -72,7 +82,9 @@ if not varexist var__my_knife
 endif
 
 
-#@ loop ----------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------------------
+#@ loop
+# ----------------------------------------------------------------------------------------
     # ################################################################################
     # # SKINNING
     # ################################################################################

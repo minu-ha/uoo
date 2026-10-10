@@ -1,7 +1,10 @@
+# ----------------------------------------------------------------------------------------
 # Codex of swords: Warrior, Defensive while hurt, and the finisher.
+# ----------------------------------------------------------------------------------------
 
 
-#@ config --------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------------------
+#@ config
 #   config__sword_stance_main
 #      Stance held outside the Defensive window, by codex slot in wiki order.
 #        1  Aggressive
@@ -22,28 +25,34 @@
 #   config__defensive_leave_diff
 #      Missing hit points below which Defensive lets go. Below the enter line, so the
 #      stance cannot flap while bandages tick.
+# ----------------------------------------------------------------------------------------
 @setvar! config__sword_stance_main 4
 @setvar! config__sword_finisher_main 2
 @setvar! config__defensive_enter_diff 60
 @setvar! config__defensive_leave_diff 48
 
 
-#@ wait ----------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------------------
+#@ wait
 #   cooldown__sword_retry
 #      A failed stance switch is tried again after this.
 #
 #   cooldown__sword_resync
 #      The stance cache is dropped this often, so a stance changed by hand is picked up.
+# ----------------------------------------------------------------------------------------
 @setvar! cooldown__sword_retry 3000
 @setvar! cooldown__sword_resync 30000
 
 
-#@ timer ---------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------------------
+#@ timer
+# ----------------------------------------------------------------------------------------
 timer__sword_retry cooldown__sword_retry
 timer__sword_resync 0
 
 
-#@ state ---------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------------------
+#@ state
 #   var__sword_want, var__sword_active
 #      Sword stance cache. 0 means unknown, which forces a codex label read on the first
 #      pass.
@@ -58,6 +67,7 @@ timer__sword_resync 0
 #   var__sword_finisher_state
 #      Scratch: 0 neither finisher named, 1 wanted finisher active, 2 the other one
 #      active.
+# ----------------------------------------------------------------------------------------
 @setvar! var__sword_want config__sword_stance_main
 @setvar! var__sword_active 0
 @setvar! var__sword_disabled 0
@@ -65,7 +75,9 @@ timer__sword_resync 0
 @setvar! var__sword_finisher_state 0
 
 
-#@ loop ----------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------------------
+#@ loop
+# ----------------------------------------------------------------------------------------
     # ################################################################################
     # # SWORD CODEX
     # ################################################################################

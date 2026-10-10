@@ -10,37 +10,38 @@
     util/build-scripts.py --new-module <folder>/<name>
                                                   write an empty module to fill in
 
-A "#@" line opens a part and runs on as a rule: "====" for the parts of a recipe, "----" for a
-block of a recipe and a section of a module. The "#" lines under it explain the lines that follow.
+Both kinds of file are made of boxes: a rule, the "#@" line and the "#" lines explaining what
+follows, a rule, then the lines it explains, joined up. Rules are "-", and "=" for the four parts
+of a recipe.
 
 Module: module/<folder>/<name>.razor, called <folder>/<name>. One block of a loop, the folder
 says what it looks after. module/base.razor is the frame of every loop.
     head                 what the block does (the first line is the summary), "#@ hotkeys A, B"
-    #@ config ---        "#   name" and "#      what it does" for each config__ setting, then the
-                         @setvar! lines with the defaults, joined up
-    #@ wait ---          wait__ and cooldown__ values, the same in every loop, written the same way
-    #@ timer ---         one "timer__x <start>" line per timer, the start a cooldown__ name or 0.
+    #@ config box        "#   name" and "#      what it does" for each config__ setting, then under
+                         the box the @setvar! lines with the defaults, joined up
+    #@ wait box          wait__ and cooldown__ values, the same in every loop, written the same way
+    #@ timer box         one "timer__x <start>" line per timer, the start a cooldown__ name or 0.
                          Describing them is optional
-    #@ state ---         var__ state, written the same way. Guards (if not varexist) may wrap them
-    #@ setup, loop, end  code. end is base only
-Every name a section declares is described above it, and each name belongs to one module.
+    #@ state box         var__ state, written the same way. Guards (if not varexist) may wrap them
+    #@ setup, loop, end  code under a box with only the "#@" line. end is base only
+Every name a section declares is described in its box, and each name belongs to one module.
 A block may use the names of any module the loop has. The builder works out which those are.
 
 Recipe: recipe/<loop>-recipe.razor, one loop.
     #@ output            the loop file it builds, before the first part
-    #@ header ===        the comment block at the top of the loop
-    #@ blocks ===        one "#@ use <module> ---" per block, in the order they run, base first.
-                         Under it the builder writes the module's summary and the settings this
-                         loop changes (what each does, its default, the other blocks that read
+    #@ header box        the comment block at the top of the loop
+    #@ blocks box        one box per block, in the order they run, base first: the
+                         "#@ use <module>" line, then the builder writes the module's summary and
+                         the settings this loop changes (what each does, its default, the other blocks that read
                          it). The reader writes "> " lines (a note on the block, or under a
-                         setting the reason for its value) and the @setvar! lines. A "#" line
-                         right above an @setvar! line is its reason
-    #@ state ===         loop-only state, or another start value for a module's state (optional)
-    #@ setup ===         loop-only setup: loot pouch, resume list, loaded message (optional)
+                         setting the reason for its value) and, under the box, the @setvar!
+                         lines. A "#" line right above an @setvar! line is its reason
+    #@ state box         loop-only state, or another start value for a module's state (optional)
+    #@ setup box         loop-only setup: loot pouch, resume list, loaded message (optional)
 
 Output: header with Hotkeys and Generated lines, CONFIG, WAIT AND COOLDOWN, TIMER, STATE,
 setup, MAIN LOOP. Each part takes base first, then the blocks in order, then the recipe, each
-piece under a line naming the file it came from. CRLF line ends. Needs only the Python standard library.
+piece under a box naming the file it came from. CRLF line ends. Needs only the Python standard library.
 """
 import pathlib
 import re
@@ -54,6 +55,8 @@ MODULE_SECTIONS = ['config', 'wait', 'timer', 'state', 'setup', 'loop', 'end']
 RECIPE_SECTIONS = ['header', 'blocks', 'state', 'setup']
 DECLARES = {'config': ('config__',), 'wait': ('wait__', 'cooldown__'), 'timer': ('timer__',), 'state': ('var__',)}
 WIDTH = 90
+BOX = '# ' + '-' * (WIDTH - 2)
+PART = '# ' + '=' * (WIDTH - 2)
 SECTION = re.compile(r'^#@\s*([a-z]+)\s*[-=]*\s*$')
 RULE_LINE = re.compile(r'^#\s*[-=#]{8,}\s*$')
 NAME = re.compile(r'\b(?:config|wait|cooldown|timer|var)__[A-Za-z0-9_]+')
@@ -67,10 +70,10 @@ BOX_SETTING = re.compile(r'^#\s+([a-z0-9_]+) \(default ')
 TEXT = '#      '
 INDENT = '    '
 BLOCKS_GUIDE = [
-    '#   One "#@ use" line per block, in the order the blocks run, base first. The builder writes',
-    '#   the lines under it. Yours are the "> " lines (a note on the block, or under a setting the',
-    '#   reason for its value) and the @setvar! lines. Write a new @setvar! line under any block,',
-    '#   its reason as a "#" line right above it: the builder moves both to the block it belongs to.',
+    '#   One box per block, in the order the blocks run, base first. The builder writes the box.',
+    '#   Yours are the "> " lines in it (a note on the block, or under a setting the reason for',
+    '#   its value) and the @setvar! lines under it. Write a new @setvar! line under any box, its',
+    '#   reason as a "#" line right above it: the builder moves both to the box it belongs to.',
 ]
 
 
@@ -119,17 +122,14 @@ def comment_text(line):
     return text[1:] if text.startswith(' ') else text
 
 
-def ruled(text, char='-', width=WIDTH):
-    return text + ' ' + char * max(4, width - len(text) - 1)
-
-
 def banner(name):
     line = '# ' + '#' * 84
     return [line, '# # ' + name, line]
 
 
 def parse(path, kind):
-    """Directives, notes and section lines. Rule lines only shape the file and are dropped."""
+    """Directives, notes and section lines. Rule lines only shape the file and are dropped,
+    except under a recipe's #@ blocks, where the rule under a #@ use line closes its box."""
     allowed = MODULE_SECTIONS if kind == 'module' else RECIPE_SECTIONS
     unit = {'path': path, 'notes': [], 'hotkeys': [], 'output': None, 'blocks': [], 'sections': {}}
     current = None
@@ -155,10 +155,10 @@ def parse(path, kind):
                 raise BuildError('%s: a recipe has no #@ config. A setting goes under the #@ use line of its block' % where)
             else:
                 raise BuildError('%s: unknown or misplaced directive: %s' % (where, line.strip()))
-        elif RULE_LINE.match(line):
-            continue
         elif kind == 'recipe' and current == 'blocks':
             unit['blocks'].append(('line', number, line))
+        elif RULE_LINE.match(line):
+            continue
         elif current is None:
             unit['notes'].append(line)
         else:
@@ -295,9 +295,9 @@ def load_modules():
 
 def read_blocks(recipe, name):
     """#@ blocks as entries and the settings written under them: config__ name -> value, reason
-    lines, line number. Under a #@ use line the builder's lines run to the first blank line or
-    @setvar! line. Of those only the "> " lines are the reader's: a note on the block, or under a
-    setting the reason for its value. A comment right above an @setvar! line is a reason too."""
+    lines, line number. Each block is a box: a rule, the #@ use line, the builder's lines, a rule,
+    then the @setvar! lines. In the box only the "> " lines are the reader's: a note on the block,
+    or under a setting the reason for its value. A comment right above an @setvar! line is a reason too."""
     entries, over, reasons, pending = [], {}, {}, []
     box, setting = False, None
 
@@ -317,7 +317,7 @@ def read_blocks(recipe, name):
             continue
         _, number, line = item
         text = line.strip()
-        if not text:
+        if not text or RULE_LINE.match(text):
             settle()
             box = False
             continue
@@ -438,7 +438,7 @@ def block_lines(loop, modules, entry):
     it, then the @setvar! lines of those settings."""
     module, over = modules[entry['ident']], loop['over']
     changed = [s for s in module['settings'] if s['name'] in over]
-    out = [ruled('#@ use ' + entry['ident'])] + wrapped(module['description'][0])
+    out = [BOX, '#@ use ' + entry['ident']] + wrapped(module['description'][0])
     if 'setup' in module['sections'] and 'loop' not in module['sections']:
         out.append('#   Runs once, before the loop.')
     out += ['#   > ' + n for n in entry['notes']]
@@ -450,12 +450,12 @@ def block_lines(loop, modules, entry):
         if read_by(loop, setting['name']):
             out += wrapped(read_by(loop, setting['name']), TEXT, TEXT + '   ')
         out += [TEXT + '> ' + n for n in value['notes']]
-    return out + ['@setvar! %s %s' % (s['name'], over[s['name']]['value']) for s in changed]
+    return out + [BOX] + ['@setvar! %s %s' % (s['name'], over[s['name']]['value']) for s in changed]
 
 
 def recipe_text(loop, modules):
-    """The recipe as the builder writes it back: notes, output, then each part under its
-    "====" line, every block under its "----" line with each change under the block it belongs to."""
+    """The recipe as the builder writes it back: notes, output, then each part in a "=" box,
+    every block in a "-" box with each change under the box of the block it belongs to."""
     recipe = loop['recipe']
     out = trim(recipe['notes']) + ['#@ output ' + recipe['output']]
     blocks = [block_lines(loop, modules, e) for e in loop['entries']]
@@ -469,11 +469,10 @@ def recipe_text(loop, modules):
     for section in RECIPE_SECTIONS:
         if section not in recipe['sections']:
             continue
-        out += ['', '', ruled('#@ ' + section, '=')]
         if section == 'blocks':
-            out += BLOCKS_GUIDE + [''] + join(blocks)
+            out += ['', '', PART, '#@ blocks'] + BLOCKS_GUIDE + [PART, ''] + join(blocks)
         else:
-            out += [''] + trim(lines_of(recipe, section))
+            out += ['', '', PART, '#@ ' + section, PART, ''] + trim(lines_of(recipe, section))
     return text_of(out)
 
 
@@ -494,6 +493,11 @@ def entry_lines(entries, notes_of=lambda entry: []):
     return out
 
 
+def source_box(source, lines=()):
+    """The box over a piece of the loop: where it came from, and what its names are."""
+    return [BOX, '# ' + source] + (['#'] + list(lines) if lines else []) + [BOX]
+
+
 def config_part(loop, module):
     """A module's settings in CONFIG, with this loop's values and the reasons for them."""
     over = loop['over']
@@ -512,7 +516,7 @@ def config_part(loop, module):
     for line in module['code']['config']:
         name = SETVAR.match(line).group(1)
         values.append('@setvar! %s %s' % (name, over[name]['value']) if name in over else line)
-    return [ruled('# ' + module_path(module['ident']))] + entry_lines(module['entries']['config'], notes_of) + values
+    return source_box(module_path(module['ident']), entry_lines(module['entries']['config'], notes_of)) + values
 
 
 def timer_lines(unit):
@@ -538,9 +542,9 @@ def build(path, modules, owner):
                 continue
             code = timer_lines(unit) if section == 'timer' else trim(unit['code'][section])
             if code:
-                found.append([ruled('# ' + source)] + entry_lines(unit['entries'][section]) + code)
+                found.append(source_box(source, entry_lines(unit['entries'][section])) + code)
         if with_recipe and trim(lines_of(recipe, section)):
-            found.append([ruled('# ' + name)] + trim(lines_of(recipe, section)))
+            found.append(source_box(name) + trim(lines_of(recipe, section)))
         return found
 
     def code_parts(section, indent=''):
@@ -550,7 +554,7 @@ def build(path, modules, owner):
                 continue
             lines = trim(lines_of(unit, section))
             if lines:
-                found.append([indent + ('# ' + source if indent else ruled('# ' + source))] + lines)
+                found.append(([indent + '# ' + source] if indent else source_box(source)) + lines)
         return found
 
     out = trim(lines_of(recipe, 'header'))
@@ -609,20 +613,26 @@ def settings_text(path, modules, owner):
     return '\n'.join(out)
 
 
-TEMPLATE = """# One line on what this block does. It shows in --settings and in the recipes that use it.
+TEMPLATE = """{box}
+# One line on what this block does. It shows in --settings and in the recipes that use it.
 # More lines when the block needs them: what it waits for, why it works this way.
 #@ hotkeys
+{box}
 
 
-{config}
+{box}
+#@ config
 #   config__{snake}_example
-#      What this setting changes. Each name a section declares is described above it.
+#      What this setting changes. Each name a section declares is described in its box.
 #        0  what 0 does
 #        1  what 1 does
+{box}
 @setvar! config__{snake}_example 1
 
 
-{loop}
+{box}
+#@ loop
+{box}
     # ################################################################################
     # # {title}
     # ################################################################################
@@ -638,8 +648,7 @@ def new_module(ident):
     if path.exists():
         raise BuildError('%s already exists' % rel(path))
     name = ident.split('/')[1]
-    text = TEMPLATE.format(config=ruled('#@ config'), loop=ruled('#@ loop'),
-                           snake=name.replace('-', '_'), title=name.replace('-', ' ').upper())
+    text = TEMPLATE.format(box=BOX, snake=name.replace('-', '_'), title=name.replace('-', ' ').upper())
     path.write_bytes(text_of(text.rstrip('\n').split('\n')).encode())
     print('wrote %s. Add "#@ use %s" to the recipe that runs it.' % (rel(path), ident))
 

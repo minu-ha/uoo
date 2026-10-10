@@ -1,23 +1,30 @@
+# ----------------------------------------------------------------------------------------
 # Reagent flags for the Magery casts, read on a clock and right after a refusal.
 # The flags cover Cure, Heal, Greater Heal and the two buffs. insysmsg consumes older
 # journal lines too, so the recipe puts this block after any other block that reads the
 # journal.
+# ----------------------------------------------------------------------------------------
 
 
-#@ wait ----------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------------------
+#@ wait
 #   cooldown__reagents
 #      Reagent read interval. Five lookups each time. A refill counts within this, and
 #      running out is caught at once by the refusal line.
+# ----------------------------------------------------------------------------------------
 @setvar! cooldown__reagents 10000
 
 
-#@ timer ---------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------------------
+#@ timer
 #   timer__reagents
 #      Ready on the first pass, so reagents are read before the first cast.
+# ----------------------------------------------------------------------------------------
 timer__reagents cooldown__reagents
 
 
-#@ state ---------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------------------
+#@ state
 #   var__regs_cure, var__regs_heal, var__regs_greater_heal, var__regs_reactive_armor,
 #   var__regs_magic_reflect
 #      Reagent flags, written only by REAGENTS. 1 when every reagent of that spell was
@@ -30,6 +37,7 @@ timer__reagents cooldown__reagents
 #
 #   var__has_garlic, var__has_ginseng, var__has_mandrake, var__has_ash, var__has_silk
 #      Scratch: 1 when that reagent was found on the last read.
+# ----------------------------------------------------------------------------------------
 @setvar! var__regs_cure 0
 @setvar! var__regs_heal 0
 @setvar! var__regs_greater_heal 0
@@ -42,7 +50,9 @@ timer__reagents cooldown__reagents
 @setvar! var__has_silk 0
 
 
-#@ loop ----------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------------------
+#@ loop
+# ----------------------------------------------------------------------------------------
     # ################################################################################
     # # REAGENTS
     # ################################################################################

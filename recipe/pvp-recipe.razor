@@ -3,7 +3,9 @@
 #@ output script/combat/pvp.razor
 
 
-#@ header ================================================================================
+# ========================================================================================
+#@ header
+# ========================================================================================
 
 # Shared field PvP self-sustain: instant items first, healing agents, PvP buffs kept up, swing based weapon swap.
 # Needs: the heal pot and reflect bars, and a swing N bar (WeaponSwing type) for each enabled weapon slot.
@@ -32,13 +34,16 @@
 #   blocks read the flags. Potions are looked up only inside a block that already needs one.
 
 
-#@ blocks ================================================================================
-#   One "#@ use" line per block, in the order the blocks run, base first. The builder writes
-#   the lines under it. Yours are the "> " lines (a note on the block, or under a setting the
-#   reason for its value) and the @setvar! lines. Write a new @setvar! line under any block,
-#   its reason as a "#" line right above it: the builder moves both to the block it belongs to.
+# ========================================================================================
+#@ blocks
+#   One box per block, in the order the blocks run, base first. The builder writes the box.
+#   Yours are the "> " lines in it (a note on the block, or under a setting the reason for
+#   its value) and the @setvar! lines under it. Write a new @setvar! line under any box, its
+#   reason as a "#" line right above it: the builder moves both to the box it belongs to.
+# ========================================================================================
 
-#@ use base ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------------------
+#@ use base
 #   The frame of every loop. Every recipe lists it first.
 #
 #   clear_at_start (default 1)
@@ -53,31 +58,47 @@
 #        1  wait while the walk bar runs, so a step does not break the cast
 #      Read by recovery/cure, recovery/heal, recovery/light-heal, buff/spells.
 #      > pvp casts while walking: in a fight there is no better moment to wait for.
+# ----------------------------------------------------------------------------------------
 @setvar! config__clear_at_start 0
 @setvar! config__walk_guard 0
 
-#@ use recovery/reagents -----------------------------------------------------------------
+# ----------------------------------------------------------------------------------------
+#@ use recovery/reagents
 #   Reagent flags for the Magery casts, read on a clock and right after a refusal.
+# ----------------------------------------------------------------------------------------
 
-#@ use recovery/pouch --------------------------------------------------------------------
+# ----------------------------------------------------------------------------------------
+#@ use recovery/pouch
 #   The trapped pouch while paralyzed, the one thing that can act then.
+# ----------------------------------------------------------------------------------------
 
-#@ use recovery/cure ---------------------------------------------------------------------
+# ----------------------------------------------------------------------------------------
+#@ use recovery/cure
 #   Cure potion first, then the Smart Heal/Cure agent when none is carried.
+# ----------------------------------------------------------------------------------------
 
-#@ use recovery/heal ---------------------------------------------------------------------
+# ----------------------------------------------------------------------------------------
+#@ use recovery/heal
 #   Heal potion at heal_hits, else Greater Heal at emergency_hits.
+# ----------------------------------------------------------------------------------------
 
-#@ use recovery/bandage ------------------------------------------------------------------
+# ----------------------------------------------------------------------------------------
+#@ use recovery/bandage
 #   Self bandage while hurt or poisoned, never over a running one.
+# ----------------------------------------------------------------------------------------
 
-#@ use recovery/light-heal ---------------------------------------------------------------
+# ----------------------------------------------------------------------------------------
+#@ use recovery/light-heal
 #   The light Heal agent: the bandage stand-in, or beside them with use_light_heal 1.
+# ----------------------------------------------------------------------------------------
 
-#@ use recovery/refresh ------------------------------------------------------------------
+# ----------------------------------------------------------------------------------------
+#@ use recovery/refresh
 #   Total Refresh at or below refresh_stam.
+# ----------------------------------------------------------------------------------------
 
-#@ use buff/potions ----------------------------------------------------------------------
+# ----------------------------------------------------------------------------------------
+#@ use buff/potions
 #   Strength and Agility by stat value, Magic Resist by its icon, while fighting.
 #
 #   str_potion (default 120, the same value)
@@ -85,27 +106,36 @@
 #      drunk, and 0 turns it off. Bless and the Strength spell, ours or an ally's, show
 #      the same icon as the potion but add less than its 20, so the stat tells them apart.
 #      > The loop is shared, so set this for the character that runs it.
+# ----------------------------------------------------------------------------------------
 @setvar! config__str_potion 120
 
-#@ use buff/spells -----------------------------------------------------------------------
+# ----------------------------------------------------------------------------------------
+#@ use buff/spells
 #   Reactive Armor, then Magic Reflection, whenever one is missing.
 #
 #   buff_max_loss (default 35, the same value)
 #      Missing hit points at which buffs are not started, and cut mid cast.
 #      > Keep this equal to config__emergency_hits.
+# ----------------------------------------------------------------------------------------
 @setvar! config__buff_max_loss 35
 
-#@ use fight/weapon-swap -----------------------------------------------------------------
+# ----------------------------------------------------------------------------------------
+#@ use fight/weapon-swap
 #   Four weapon slots, each on its own swing bar. Arms the slot whose swing is ready.
+# ----------------------------------------------------------------------------------------
 
 
-#@ state =================================================================================
+# ========================================================================================
+#@ state
+# ========================================================================================
 
 # pvp is always in a fight, so the stat potions are kept up the whole time.
 @setvar! var__fighting 1
 
 
-#@ setup =================================================================================
+# ========================================================================================
+#@ setup
+# ========================================================================================
 
 overhead "[ pvp, on ]" 290
 if config__sysmsg = 1

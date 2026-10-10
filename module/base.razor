@@ -1,11 +1,14 @@
+# ----------------------------------------------------------------------------------------
 # The frame of every loop. Every recipe lists it first.
 # It holds the settings several blocks share, the standard waits, the warning spacing, the
 # signals blocks pass each other, the structured-PvP stop, the start lines and the wait at
 # the end of every pass. The signals in its state keep their value unless the loop has a
 # block that sets them.
+# ----------------------------------------------------------------------------------------
 
 
-#@ config --------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------------------
+#@ config
 #   config__chatty
 #      1 shows the optional overheads. Warnings show either way.
 #
@@ -34,6 +37,7 @@
 #        0  ours: our casts ignore it
 #        1  the player's manual control window: our casts and the food stand down while it
 #           is on. Potions and bandages still go out
+# ----------------------------------------------------------------------------------------
 @setvar! config__chatty 1
 @setvar! config__sysmsg 1
 @setvar! config__clear_at_start 1
@@ -43,7 +47,8 @@
 @setvar! config__warmode_is_manual 0
 
 
-#@ wait ----------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------------------
+#@ wait
 #   wait__poll
 #      The poll inside a wait.
 #
@@ -52,18 +57,22 @@
 #
 #   cooldown__message
 #      Spacing for repeated warnings. Without it an empty potion bag shouts every pass.
+# ----------------------------------------------------------------------------------------
 @setvar! wait__poll 100
 @setvar! wait__short 200
 @setvar! cooldown__message 3000
 
 
-#@ timer ---------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------------------
+#@ timer
 #   timer__message
 #      Ready on the first pass, so the first warning shows at once.
+# ----------------------------------------------------------------------------------------
 timer__message cooldown__message
 
 
-#@ state ---------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------------------
+#@ state
 #   var__fighting
 #      1 while an enemy is engaged. buff/potions drinks only then. fight/target sets it
 #      every pass, and the pvp recipe keeps it at 1.
@@ -74,12 +83,15 @@ timer__message cooldown__message
 #
 #   var__hold_gathering
 #      1 while gathering and its packing wait. escape/recall sets it.
+# ----------------------------------------------------------------------------------------
 @setvar! var__fighting 0
 @setvar! var__hold_casts 0
 @setvar! var__hold_gathering 0
 
 
-#@ setup ---------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------------------
+#@ setup
+# ----------------------------------------------------------------------------------------
 # The pvp expression means the structured-PvP restrictions, where these loops may not run.
 if pvp
     overhead "[ script, blocked ]" 254
@@ -94,7 +106,9 @@ if config__clear_at_start = 1
 endif
 
 
-#@ loop ----------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------------------
+#@ loop
+# ----------------------------------------------------------------------------------------
     # The pvp expression means structured-PvP restrictions, not a field PK encounter.
     if pvp
         overhead "[ script, blocked ]" 254
@@ -102,5 +116,7 @@ endif
     endif
 
 
-#@ end -----------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------------------
+#@ end
+# ----------------------------------------------------------------------------------------
     wait wait__poll

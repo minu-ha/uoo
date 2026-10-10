@@ -23,7 +23,9 @@
 # # CONFIG
 # ####################################################################################
 
-# module/base.razor ----------------------------------------------------------------------
+# ----------------------------------------------------------------------------------------
+# module/base.razor
+#
 #   config__chatty
 #      1 shows the optional overheads. Warnings show either way.
 #
@@ -54,6 +56,7 @@
 #           is on. Potions and bandages still go out
 #      > This loop: config__warmode_is_manual 1 (default 0).
 #      > Warmode is the player's: recovery casts and buffs stand down, potions still go out.
+# ----------------------------------------------------------------------------------------
 @setvar! config__chatty 1
 @setvar! config__sysmsg 1
 @setvar! config__clear_at_start 1
@@ -63,7 +66,9 @@
 @setvar! config__warmode_is_manual 1
 
 
-# module/escape/tracking.razor -----------------------------------------------------------
+# ----------------------------------------------------------------------------------------
+# module/escape/tracking.razor
+#
 #   config__tracking_color
 #      Hunt filter.
 #        1  red: murderers
@@ -73,17 +78,23 @@
 #
 #   config__show_tracking
 #      1 leaves the Tracking window open after setup.
+# ----------------------------------------------------------------------------------------
 @setvar! config__tracking_color 1
 @setvar! config__show_tracking 0
 
 
-# module/recovery/cure.razor -------------------------------------------------------------
+# ----------------------------------------------------------------------------------------
+# module/recovery/cure.razor
+#
 #   config__mana_cure
 #      Minimum current mana for the Cure agent.
+# ----------------------------------------------------------------------------------------
 @setvar! config__mana_cure 6
 
 
-# module/recovery/heal.razor -------------------------------------------------------------
+# ----------------------------------------------------------------------------------------
+# module/recovery/heal.razor
+#
 #   config__heal_hits
 #      Missing hit points (not percent) that drink a heal potion.
 #
@@ -96,23 +107,29 @@
 #   config__mana_greater_heal
 #      Minimum current mana for Greater Heal. It keeps no reserve: 31 always leaves 20
 #      mana for an attack or Teleport.
+# ----------------------------------------------------------------------------------------
 @setvar! config__heal_hits 35
 @setvar! config__emergency_hits 45
 @setvar! config__mana_greater_heal 11
 
 
-# module/recovery/bandage.razor ----------------------------------------------------------
+# ----------------------------------------------------------------------------------------
+# module/recovery/bandage.razor
+#
 #   config__use_bandages
 #      1 uses bandages. At 0 recovery/light-heal stands in.
 #
 #   config__heal_skill_min
 #      Healing must be above this to bandage. At or below it recovery/light-heal stands
 #      in.
+# ----------------------------------------------------------------------------------------
 @setvar! config__use_bandages 1
 @setvar! config__heal_skill_min 0
 
 
-# module/recovery/light-heal.razor -------------------------------------------------------
+# ----------------------------------------------------------------------------------------
+# module/recovery/light-heal.razor
+#
 #   config__use_light_heal
 #      When the light Heal goes.
 #        0  only while no bandage can run: use_bandages 0, Healing at or below heal_skill_min,
@@ -124,18 +141,24 @@
 #
 #   config__mana_heal
 #      Minimum current mana for the light Heal.
+# ----------------------------------------------------------------------------------------
 @setvar! config__use_light_heal 0
 @setvar! config__light_hits 15
 @setvar! config__mana_heal 4
 
 
-# module/recovery/refresh.razor ----------------------------------------------------------
+# ----------------------------------------------------------------------------------------
+# module/recovery/refresh.razor
+#
 #   config__refresh_stam
 #      Current stamina at or below this drinks a Refresh.
+# ----------------------------------------------------------------------------------------
 @setvar! config__refresh_stam 15
 
 
-# module/escape/recall.razor -------------------------------------------------------------
+# ----------------------------------------------------------------------------------------
+# module/escape/recall.razor
+#
 #   config__recall_on_detection
 #      1 recalls on a Tracking report within 1 through 45 steps. Needs escape/tracking
 #      hunting.
@@ -154,6 +177,7 @@
 #
 #   config__mana_recall
 #      Minimum mana to send RecallCharge.
+# ----------------------------------------------------------------------------------------
 @setvar! config__recall_on_detection 1
 @setvar! config__recall_at_any_distance 0
 @setvar! config__recall_on_weight 1
@@ -162,7 +186,9 @@
 @setvar! config__mana_recall 11
 
 
-# module/buff/spells.razor ---------------------------------------------------------------
+# ----------------------------------------------------------------------------------------
+# module/buff/spells.razor
+#
 #   config__use_reactive_armor
 #      1 keeps Reactive Armor up.
 #
@@ -190,6 +216,7 @@
 #        1  yes
 #      > This loop: config__buff_when_poisoned 0 (default 1).
 #      > The cure goes first: no buffs while poisoned.
+# ----------------------------------------------------------------------------------------
 @setvar! config__use_reactive_armor 1
 @setvar! config__use_magic_reflect 1
 @setvar! config__mana_reactive_armor 24
@@ -202,7 +229,9 @@
 # # WAIT AND COOLDOWN
 # ####################################################################################
 
-# module/base.razor ----------------------------------------------------------------------
+# ----------------------------------------------------------------------------------------
+# module/base.razor
+#
 #   wait__poll
 #      The poll inside a wait.
 #
@@ -211,31 +240,43 @@
 #
 #   cooldown__message
 #      Spacing for repeated warnings. Without it an empty potion bag shouts every pass.
+# ----------------------------------------------------------------------------------------
 @setvar! wait__poll 100
 @setvar! wait__short 200
 @setvar! cooldown__message 3000
 
 
-# module/escape/tracking.razor -----------------------------------------------------------
+# ----------------------------------------------------------------------------------------
+# module/escape/tracking.razor
+#
 #   wait__tracking_gump
 #      How long the Tracking window may take to open.
+# ----------------------------------------------------------------------------------------
 @setvar! wait__tracking_gump 1000
 
 
-# module/escape/recall.razor -------------------------------------------------------------
+# ----------------------------------------------------------------------------------------
+# module/escape/recall.razor
+#
 #   cooldown__recall_check
 #      The book, Tracking buff and weight checks run on this clock.
+# ----------------------------------------------------------------------------------------
 @setvar! cooldown__recall_check 5000
 
 
-# module/recovery/reagents.razor ---------------------------------------------------------
+# ----------------------------------------------------------------------------------------
+# module/recovery/reagents.razor
+#
 #   cooldown__reagents
 #      Reagent read interval. Five lookups each time. A refill counts within this, and
 #      running out is caught at once by the refusal line.
+# ----------------------------------------------------------------------------------------
 @setvar! cooldown__reagents 10000
 
 
-# module/gather/lumberjacking.razor ------------------------------------------------------
+# ----------------------------------------------------------------------------------------
+# module/gather/lumberjacking.razor
+#
 #   wait__harvest_target
 #      Wait for the hand tool cursor in the same block before any other automatic action.
 #
@@ -247,19 +288,25 @@
 #
 #   cooldown__harvest_out_retry
 #      Retry after "You do not see any harvestable resources nearby".
+# ----------------------------------------------------------------------------------------
 @setvar! wait__harvest_target 3000
 @setvar! wait__equip 1000
 @setvar! cooldown__harvest_retry 4000
 @setvar! cooldown__harvest_out_retry 2000
 
 
-# module/buff/food.razor -----------------------------------------------------------------
+# ----------------------------------------------------------------------------------------
+# module/buff/food.razor
+#
 #   cooldown__food
 #      The buff lasts far longer than this.
+# ----------------------------------------------------------------------------------------
 @setvar! cooldown__food 60000
 
 
-# module/pack/lumber.razor ---------------------------------------------------------------
+# ----------------------------------------------------------------------------------------
+# module/pack/lumber.razor
+#
 #   wait__lumber_item
 #      Allow inventory updates after conversion, opening the pouch and drag/drop.
 #
@@ -269,6 +316,7 @@
 #
 #   cooldown__pack_lumber
 #      120000 = 2 minutes. Use 180000 for 3 minutes.
+# ----------------------------------------------------------------------------------------
 @setvar! wait__lumber_item 500
 @setvar! wait__lumber_batch 2500
 @setvar! cooldown__pack_lumber 120000
@@ -278,48 +326,63 @@
 # # TIMER
 # ####################################################################################
 
-# module/base.razor ----------------------------------------------------------------------
+# ----------------------------------------------------------------------------------------
+# module/base.razor
+#
 #   timer__message
 #      Ready on the first pass, so the first warning shows at once.
+# ----------------------------------------------------------------------------------------
 if not timerexists "timer__message"
     createtimer "timer__message"
 endif
 settimer "timer__message" cooldown__message
 
 
-# module/escape/recall.razor -------------------------------------------------------------
+# ----------------------------------------------------------------------------------------
+# module/escape/recall.razor
+# ----------------------------------------------------------------------------------------
 if not timerexists "timer__recall_check"
     createtimer "timer__recall_check"
 endif
 settimer "timer__recall_check" cooldown__recall_check
 
 
-# module/recovery/reagents.razor ---------------------------------------------------------
+# ----------------------------------------------------------------------------------------
+# module/recovery/reagents.razor
+#
 #   timer__reagents
 #      Ready on the first pass, so reagents are read before the first cast.
+# ----------------------------------------------------------------------------------------
 if not timerexists "timer__reagents"
     createtimer "timer__reagents"
 endif
 settimer "timer__reagents" cooldown__reagents
 
 
-# module/gather/lumberjacking.razor ------------------------------------------------------
+# ----------------------------------------------------------------------------------------
+# module/gather/lumberjacking.razor
+# ----------------------------------------------------------------------------------------
 if not timerexists "timer__harvest"
     createtimer "timer__harvest"
 endif
 settimer "timer__harvest" cooldown__harvest_retry
 
 
-# module/buff/food.razor -----------------------------------------------------------------
+# ----------------------------------------------------------------------------------------
+# module/buff/food.razor
+# ----------------------------------------------------------------------------------------
 if not timerexists "timer__food"
     createtimer "timer__food"
 endif
 settimer "timer__food" cooldown__food
 
 
-# module/pack/lumber.razor ---------------------------------------------------------------
+# ----------------------------------------------------------------------------------------
+# module/pack/lumber.razor
+#
 #   timer__pack_lumber
 #      Packing waits one full interval.
+# ----------------------------------------------------------------------------------------
 if not timerexists "timer__pack_lumber"
     createtimer "timer__pack_lumber"
 endif
@@ -330,7 +393,9 @@ settimer "timer__pack_lumber" 0
 # # STATE
 # ####################################################################################
 
-# module/base.razor ----------------------------------------------------------------------
+# ----------------------------------------------------------------------------------------
+# module/base.razor
+#
 #   var__fighting
 #      1 while an enemy is engaged. buff/potions drinks only then. fight/target sets it
 #      every pass, and the pvp recipe keeps it at 1.
@@ -341,12 +406,15 @@ settimer "timer__pack_lumber" 0
 #
 #   var__hold_gathering
 #      1 while gathering and its packing wait. escape/recall sets it.
+# ----------------------------------------------------------------------------------------
 @setvar! var__fighting 0
 @setvar! var__hold_casts 0
 @setvar! var__hold_gathering 0
 
 
-# module/escape/tracking.razor -----------------------------------------------------------
+# ----------------------------------------------------------------------------------------
+# module/escape/tracking.razor
+#
 #   var__tracking_setup_color
 #      Last color confirmed in this client session. It survives Stop and Play only while
 #      Hunting stays active. After a manual filter change, turn Hunting off before Play so
@@ -362,6 +430,7 @@ settimer "timer__pack_lumber" 0
 #   var__tracking_button_answered
 #      Temporary button-response flag. Wait for each response before cycling the next
 #      filter.
+# ----------------------------------------------------------------------------------------
 if not varexist var__tracking_setup_color
     @setvar! var__tracking_setup_color 0
 endif
@@ -370,19 +439,27 @@ endif
 @setvar! var__tracking_button_answered 0
 
 
-# module/recovery/heal.razor -------------------------------------------------------------
+# ----------------------------------------------------------------------------------------
+# module/recovery/heal.razor
+#
 #   var__heal_potion_out
 #      Scratch: 1 once a heal potion went out on this pass.
+# ----------------------------------------------------------------------------------------
 @setvar! var__heal_potion_out 0
 
 
-# module/recovery/light-heal.razor -------------------------------------------------------
+# ----------------------------------------------------------------------------------------
+# module/recovery/light-heal.razor
+#
 #   var__light_heal_due
 #      Scratch: 1 when the light Heal goes on this pass.
+# ----------------------------------------------------------------------------------------
 @setvar! var__light_heal_due 0
 
 
-# module/escape/recall.razor -------------------------------------------------------------
+# ----------------------------------------------------------------------------------------
+# module/escape/recall.razor
+#
 #   var__recall_needed
 #      Recall decision: 0 keep gathering, 1 stop optional work and attempt Recall when
 #      input is free. Detection or low spare weight sets this to 1. Only restarting the
@@ -400,13 +477,16 @@ endif
 #
 #   var__recall_check_due
 #      Scratch: 1 when the slow checks are due on this pass.
+# ----------------------------------------------------------------------------------------
 @setvar! var__recall_needed 0
 @setvar! var__recall_sent 0
 @setvar! var__recall_book_available 0
 @setvar! var__recall_check_due 0
 
 
-# module/recovery/reagents.razor ---------------------------------------------------------
+# ----------------------------------------------------------------------------------------
+# module/recovery/reagents.razor
+#
 #   var__regs_cure, var__regs_heal, var__regs_greater_heal, var__regs_reactive_armor,
 #   var__regs_magic_reflect
 #      Reagent flags, written only by REAGENTS. 1 when every reagent of that spell was
@@ -419,6 +499,7 @@ endif
 #
 #   var__has_garlic, var__has_ginseng, var__has_mandrake, var__has_ash, var__has_silk
 #      Scratch: 1 when that reagent was found on the last read.
+# ----------------------------------------------------------------------------------------
 @setvar! var__regs_cure 0
 @setvar! var__regs_heal 0
 @setvar! var__regs_greater_heal 0
@@ -431,7 +512,9 @@ endif
 @setvar! var__has_silk 0
 
 
-# module/gather/lumberjacking.razor ------------------------------------------------------
+# ----------------------------------------------------------------------------------------
+# module/gather/lumberjacking.razor
+#
 #   var__harvest_retry
 #      Delay for the next tool attempt, in ms. Resource exhaustion selects the shorter
 #      retry. Each attempt restores the normal interval. Reuse timer__harvest without
@@ -441,20 +524,26 @@ endif
 #      Selected Hatchet serial, reused across Stop and Play in this client session. 0
 #      means no tool selected yet. Backpack discovery is used only when this cached tool
 #      is missing.
+# ----------------------------------------------------------------------------------------
 @setvar! var__harvest_retry cooldown__harvest_retry
 if not varexist var__my_hatchet
     @setvar! var__my_hatchet 0
 endif
 
 
-# module/pack/lumber.razor ---------------------------------------------------------------
+# ----------------------------------------------------------------------------------------
+# module/pack/lumber.razor
+#
 #   var__lumber_graphic
 #      Scratch graphic for the two lumber passes: 7133 Logs, then 7127 Boards. No
 #      persistent batch stage.
+# ----------------------------------------------------------------------------------------
 @setvar! var__lumber_graphic 0
 
 
-# module/base.razor ----------------------------------------------------------------------
+# ----------------------------------------------------------------------------------------
+# module/base.razor
+# ----------------------------------------------------------------------------------------
 # The pvp expression means the structured-PvP restrictions, where these loops may not run.
 if pvp
     overhead "[ script, blocked ]" 254
@@ -469,7 +558,9 @@ if config__clear_at_start = 1
 endif
 
 
-# module/escape/tracking.razor -----------------------------------------------------------
+# ----------------------------------------------------------------------------------------
+# module/escape/tracking.razor
+# ----------------------------------------------------------------------------------------
 # # TRACKING SETUP
 # Reuse the color verified by this script while Hunting remains active.
 # A buff alone does not identify the filter. A first run checks the current window instead.
@@ -590,7 +681,9 @@ if skill "Tracking" > 0
 endif
 
 
-# recipe/lumberjack-enhanced-recipe.razor ------------------------------------------------
+# ----------------------------------------------------------------------------------------
+# recipe/lumberjack-enhanced-recipe.razor
+# ----------------------------------------------------------------------------------------
 # pack/lumber moves Boards into this pouch. restock/loadout picks it, this asks when it is missing.
 if not varexist global__my_looting_pouch or not find global__my_looting_pouch backpack
     overhead "[ loot pouch, pick ]" 255
