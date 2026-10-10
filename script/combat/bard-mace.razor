@@ -227,6 +227,15 @@ if not find var__my_instrument backpack
     endif
 endif
 
+# loot/recycle runs the hotkey named here when it finishes or gives up, through the list its
+# author reads, jaseowns_PreviousScript. A list, because a variable cannot hold a word
+# (blueprint/razor.html part 3). It lasts until the client closes.
+if not listexists 'jaseowns_PreviousScript'
+    createlist 'jaseowns_PreviousScript'
+endif
+clearlist 'jaseowns_PreviousScript'
+pushlist 'jaseowns_PreviousScript' 'Play Script: combat\bard-mace'
+
 # ####################################################################################
 # # MAIN LOOP
 # ####################################################################################

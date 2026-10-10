@@ -726,4 +726,22 @@ Create Food가 실제로 버섯을 만드는지 (Grimoire 단계) 확인한다</
 <tr><td>이동 가드</td><td>bard-necro-enhanced처럼 시전 블록은 <code>walk</code> 바가 돌 때 기다린다. 걷는 동안 회복 에이전트가 늦으면 기록한다. 포션은 걷는 중에도 나간다</td></tr>
 </tbody>
 </table>
+<h2 id="13" data-part="도구">13 recycle 복귀 인게임 확인</h2>
+<p>2026-10-10 <code>loot/recycle</code>이 끝나면 마지막으로 Play한 사냥·채집 루프를 다시 켜게 했다. 전에는 마지막 줄의 <code>script "…"</code>를 루프를 바꿀 때마다 손으로 고쳤다.
+recycle (Jaseowns 작성)에는 이미 같은 장치가 있다. 아이템 ID를 못 해 일찍 끝날 때 <code>jaseowns_PreviousScript</code> 리스트의 항목을 <code>hotkey</code>로 실행한다.
+원작자 저장소에는 이 리스트를 읽는 스크립트만 있고 채우는 스크립트는 없어, 쓰는 사람이 채운다.
+그래서 bard-mace·bard-throwing·bard-necro-enhanced·tamer-mage-enhanced·skinning-enhanced·lumberjack-enhanced가 Play할 때 자기 핫키 이름을 이 리스트에 넣고,
+recycle 마지막 줄도 같은 모양으로 바꿨다. pvp는 싸울 때만 켜므로 등록하지 않는다.</p>
+<p>핫키 이름은 프로필 xml이 F1을 저장한 모양 <code>Play Script: gather\skinning-enhanced</code>를 따랐다. <code>hotkey</code>가 이 이름으로 스크립트를 켜는지,
+따옴표 안의 <code>\</code>가 그대로 넘어가는지는 아직 확인되지 않았다. 변수는 단어를 <code>4294967295</code>로 읽으므로 (<a href="razor.html#03">razor.html</a> 03절) 리스트에 넣는다.</p>
+<table>
+<thead><tr><th>남은 항목</th><th>확인할 것</th></tr></thead>
+<tbody>
+<tr><td>복귀</td><td>skinning-enhanced를 Play한 뒤 F3 recycle을 돌리면 끝나고 <code>Skinning enhanced v10 loaded</code>가 다시 떠야 한다.
+lumberjack-enhanced를 Play한 뒤에는 그쪽으로 돌아와야 한다. 아무것도 안 돌면 핫키 이름 모양이 다른 것이니 Razor Hotkeys 탭의 스크립트 이름을 기록한다</td></tr>
+<tr><td>ID 불가로 일찍 끝날 때</td><td>ID 스킬·완드가 없어 <code>Jase says: Not able to ID items..</code>가 뜰 때도 같은 루프로 돌아와야 한다</td></tr>
+<tr><td>등록 전</td><td>클라이언트를 켠 뒤 루프를 한 번도 Play하지 않고 recycle을 돌리면 아무 스크립트도 돌지 않아야 한다</td></tr>
+<tr><td>pvp 중</td><td>pvp 중 recycle을 돌리면 마지막 사냥·채집 루프로 돌아간다. pvp로 돌아오길 바라면 기록한다</td></tr>
+</tbody>
+</table>
 </main>

@@ -120,6 +120,17 @@ It ignores only pouch stacks and never clears the list, so carved corpses stay s
 Meet a PK with `combat/pvp` (F4).
 Design notes and in-game checks are in [blueprint/open-items.html](../blueprint/open-items.html#11) part 11.
 
+## Returning to the loop
+
+`loot/recycle` (by Jaseowns) already returns to a previous script when it cannot identify items: it runs every hotkey
+named in the list `jaseowns_PreviousScript`. Its last line now does the same, so it no longer names a loop.
+The farming loops fill that list at Play with their own Razor hotkey name, the one the profile stores
+(`Play Script: gather\skinning-enhanced`): `bard-mace`, `bard-throwing`, `bard-necro-enhanced`, `tamer-mage-enhanced`,
+`skinning-enhanced` and `lumberjack-enhanced`. The list keeps the author's name instead of a `list__` prefix, because
+recycle reads it. It is a list because a variable reads a word back as 4294967295 (blueprint/razor.html part 3).
+It lasts until the client closes, and with nothing registered recycle just ends. `combat/pvp` does not register,
+so recycling during a fight returns to the farming loop.
+
 ## Loadout tools
 
 In [restock/loadout.razor](restock/loadout.razor), `config__use_sewing_kit_and_id_wand` controls both tools together.

@@ -1850,4 +1850,9 @@ if jase_AutoDropScrolls = 1 and findtype 3827 backpack 0 as jaseowns_DropItem
     wait 650
 endif
 
-script "skinning-enhanced"
+# Return to the loop that registered itself, the same way the item ID checks above give up.
+if listexists jaseowns_PreviousScript
+    foreach myScript in jaseowns_PreviousScript
+        hotkey myScript
+    endfor
+endif
