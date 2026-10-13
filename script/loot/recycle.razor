@@ -2,7 +2,7 @@
 # Needs: Item Identification or the single item ID wand (20496), and a tinker tool, sewing kit or saw.
 # Based on "Item Recycle while Farming" by Jaseowns (outlands.uorazorscripts.com), 6/01/2026, which added
 # dual wield and throwing items. Rewritten to the repo conventions on 2026-10-10.
-# Saved items go to the loot pouch (a pouch of hue 38, else a plain pouch), or to the backpack without one.
+# Saved items go to the loadout looting pouch, else a plain pouch, or to the backpack without one.
 # When it finishes or gives up it runs the hotkey in list__resume_script (script/README.md).
 
 clearall
@@ -107,12 +107,17 @@ clearignore
 # ========================================================================================
 # STATE
 # ========================================================================================
-# The loot pouch: a pouch of hue 38 first, then a plain pouch, else the backpack.
+# The loot pouch: the loadout looting pouch while it is in the backpack, else a plain pouch
+# (hue 0), else the backpack. A pouch of hue 38 is a trapped pouch (script/restock/loadout.razor)
+# and never takes loot.
 @setvar! var__save_container backpack
-if findtype "pouch" backpack 38 as alias__loot_pouch
+if findtype 3705 backpack 0 as alias__loot_pouch
     @setvar! var__save_container alias__loot_pouch
-elseif findtype "pouch" backpack 0 as alias__loot_pouch
-    @setvar! var__save_container alias__loot_pouch
+endif
+if varexist global__my_looting_pouch
+    if find global__my_looting_pouch backpack
+        @setvar! var__save_container global__my_looting_pouch
+    endif
 endif
 
 # Where each kind is saved. All go to the loot pouch. Point one at another container to split them.

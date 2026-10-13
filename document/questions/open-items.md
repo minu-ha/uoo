@@ -800,6 +800,8 @@ order: 10
 - Journal에 아이템마다 `Recycle check: …`. 저장 시 `[ item, saving ]`과 `Recycle save: …`, 나머지는 분해
 - 링메일의 fortification, hardening, guarding, defense 스위치가 이제 동작, studded 방어구는 studded 보관함으로(지금은 둘 다 루트 파우치)
 - 재질을 못 읽은 방어구는 루트 파우치로. 재활용 도구가 없을 때도 루프로 복귀
+- 2026-10-13 저장 위치 수정. 원작부터 hue 38 파우치를 먼저 골라 트랩 파우치로 들어감(사용자 보고).
+  이제 loadout의 `global__my_looting_pouch`, 없으면 hue 0 파우치, 없으면 백팩. 저장한 아이템이 루팅 파우치에 들어가야 함
 
 ## <a id="14"></a>14 bard-necro-enhanced 인게임 확인
 
