@@ -604,7 +604,9 @@ clearlist 'list__named_summons'
 # word, and foreach hands an entry to rename as it is. Rebuilt on every start. Each name is
 # at least two letters away from every word of the stock names. The server answered "That
 # name is unacceptable." to "mummy" and also to "wytch", one letter off "witch", but took
-# "mumi" (2026-10-10). RunUO's name check also refuses words such as "mage".
+# "mumi" (2026-10-10). It also refused "wicca", two letters off "witch" like "mumi" is off
+# "mummy" (2026-10-13), for a reason not known, so a new name stays clear of real words
+# too. RunUO's name check also refuses words such as "mage".
 if not listexists 'list__summon_kinds'
     createlist 'list__summon_kinds'
 endif
@@ -614,7 +616,7 @@ pushlist 'list__summon_kinds' 'majik'
 pushlist 'list__summon_kinds' 'leech'
 pushlist 'list__summon_kinds' 'mumi'
 pushlist 'list__summon_kinds' 'vampa'
-pushlist 'list__summon_kinds' 'wicca'
+pushlist 'list__summon_kinds' 'wichy'
 pushlist 'list__summon_kinds' 'zomz'
 pushlist 'list__summon_kinds' 'spook'
 pushlist 'list__summon_kinds' 'skelz'

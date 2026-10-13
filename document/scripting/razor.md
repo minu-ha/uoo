@@ -94,7 +94,7 @@ Razor CE에 없거나 CE보다 넓어진 것. 존재 여부만 기록, 인자 �
 | 산술(`@setvar! var__n var__n + 1`) | 선례 없음, 안 받는다고 판단 | `counttype`으로 다시 읽기, 리스트 길이 |
 | `as` alias를 묶은 `if`, `while` 블록 밖에서 읽기 | `4294967295`, `noto`가 `Mobile … not found` | 블록 안에서 `@setvar! var__x alias__x`로 복사 |
 | 단어를 변수에 담기 | 따옴표와 무관하게 `4294967295`. `rename`에 주면 `That name is unacceptable.` | `pushlist` 항목은 글자 유지. `foreach x in list__y`로 꺼내 문자열 인자로. 그 밖의 문자열은 `getlabel` 결과뿐 |
-| 몬스터 종류 단어, 한 글자만 바꾼 것을 펫 이름으로(`mummy`, `wytch`) | `That name is unacceptable.` (인게임 확인됨 2026-10-10) | 두 글자 이상 다르게(`mumi`는 받아짐). RunUO 계열은 `mage` 같은 단어도 막음(`necro/summon-names`) |
+| 몬스터 종류 단어, 한 글자만 바꾼 것을 펫 이름으로(`mummy`, `wytch`) | `That name is unacceptable.` (인게임 확인됨 2026-10-10) | 두 글자 이상 다르게(`mumi`는 받아짐), 실제 낱말도 피함(`wicca`는 두 글자 차이인데 거절, 인게임 확인됨 2026-10-13). RunUO 계열은 `mage` 같은 단어도 막음(`necro/summon-names`) |
 | 숫자(serial)를 펫 이름으로 | `That name is unacceptable.` | 글자 이름만 |
 | 값을 넣지 않은 변수 | 빈 값 → 조건이 조용히 안 맞음 | `util/check.sh`가 `config__` `wait__` `interval__` `cooldown__` `var__` `alias__` `label__` 접두 검사. `timer__` `list__` `global__` 접두와 접두 없는 이름은 못 잡음 |
 | `varexist`로 값 확인 | 선언 여부만 봄. 잘못 타겟한 값도 참 → 영영 안 고쳐짐 | 대상 앞이 확실한 곳에서만 `find`로 확인([Conventions](conventions.md#03.D) 03.D절) |

@@ -817,6 +817,7 @@ order: 10
 - 기록(2026-10-10): 종류를 읽은 판(`[ name, mummy ]`)은 서버가 `That name is unacceptable.`로 거절.
   종류 단어를 피한 철자로 바꾸자 `mumi`는 수락, `wytch`는 거절. 한 글자 차이도 막는 것으로 보고 모든 이름을 두 글자 이상 떨어뜨림(`leech`, `vampa`, `wicca` 등).
   새 이름의 수락 여부 확인
+- 기록(2026-10-13): `wicca`도 거절 → `wichy`로 교체. `wichy`와 나머지 이름의 수락 여부 확인
 
 #### Rag Witch 바디
 
