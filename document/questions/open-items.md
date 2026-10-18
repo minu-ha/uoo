@@ -839,10 +839,12 @@ order: 10
 - 레시피에서 잠시 `summon_refresh`를 60000으로 → 이동 중 1분 뒤 `wichy release`, 다시 소환. 확인 뒤 600000으로
 - Bloodmoss를 빼 둠 → VS 심볼을 쓰지 않음
 - 손으로 Alt+1 → 루프는 그 버프가 꺼질 때까지 소환하지 않음
-- 교전 중 마나 20\~64에서 소환수가 죽음 → 심볼 6까지 Blood Oath 등 정지 → `[ vengeful spirit ]`, `[ wither ]`, 소환이 한 패스에. Journal `Summon: cast kind 2, wither state 2.`
-- 둘 다 죽고 마나가 낮음 → 첫째만 Wither로, 둘째는 마나 65나 30초 뒤 다음 Wither
-- Wither가 안 나가면 Razor 핫키 이름 `Wither` 확인
-- Wither 마나가 다른 주문에 먼저 쓰였을 때의 마나 부족 문장 기록. 루프는 RunUO의 `Insufficient mana`로 읽음
+- 교전 중 마나 20\~64에서 소환수가 죽음 → 심볼 6까지 Blood Oath 등 정지 → `[ wither ]`, `[ vengeful spirit ]`, 소환이 한 패스에. Journal `Summon: cast kind 2, wither state 2.`
+- 둘 다 죽고 마나가 낮음 → 첫째는 바로, 둘째는 약 30초 뒤 다음 Wither. 그동안 Blood Oath는 은행이 찰 때만
+- 루프는 Wither와 VS를 0.4초 간격으로 누름. 둘 다 들어가는지. 손으로 확인한 것은 Wither → VS 순서뿐
+- `[ wither, miss ]`가 30초마다 반복되면 Razor 핫키 이름 `Wither` 확인
+- Razor의 `mana` 값에 Wither 마나가 들어가는지. 들어가면 로테이션이 공격 주문을 헛시전할 수 있음
+- 소환 중 긴급 끊기 → 힐 → 재시도에서, 힐이 Wither 마나를 먹어 재시도가 실패하는지. 실패하면 마나 부족 문장도 기록
 - 맨 엘리멘탈이 한 번이라도 나오면 기록. 시작 마감 23초가 길다는 뜻
 
 #### 교전과 이동
