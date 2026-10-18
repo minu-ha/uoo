@@ -13,8 +13,8 @@
 	<property name="SortCounters" type="System.Boolean">True</property>
 	<property name="QueueActions" type="System.Boolean">False</property>
 	<property name="QueueTargets" type="System.Boolean">False</property>
-	<property name="WindowX" type="System.Int32">2567</property>
-	<property name="WindowY" type="System.Int32">1725</property>
+	<property name="WindowX" type="System.Int32">2560</property>
+	<property name="WindowY" type="System.Int32">1759</property>
 	<property name="CountStealthSteps" type="System.Boolean">True</property>
 	<property name="SysColor" type="System.Int32">68</property>
 	<property name="WarningColor" type="System.Int32">37</property>
@@ -27,8 +27,8 @@
 	<property name="ImageFormat" type="System.String">jpg</property>
 	<property name="UndressConflicts" type="System.Boolean">True</property>
 	<property name="Systray" type="System.Boolean">False</property>
-	<property name="RazorWidth" type="System.Int32">1275</property>
-	<property name="RazorHeight" type="System.Int32">769</property>
+	<property name="RazorWidth" type="System.Int32">1125</property>
+	<property name="RazorHeight" type="System.Int32">791</property>
 	<property name="SellAgentMax" type="System.Int32">99</property>
 	<property name="SkillListCol" type="System.Int32">1</property>
 	<property name="SkillListAsc" type="System.Boolean">True</property>
@@ -502,7 +502,7 @@
 		<scriptvariable serial="0x7D0" name="var_global_waiting_target_time" />
 		<scriptvariable serial="0x450581D2" name="var_my_barrel_container" />
 		<scriptvariable serial="0x45147618" name="var_my_runebook_container" />
-		<scriptvariable serial="0x488AC23E" name="var_my_furniture_container" />
+		<scriptvariable serial="0x488AC23E" name="global__my_furniture_container" />
 		<scriptvariable serial="0x49C8351F" name="var_my_resource_stockpile" />
 		<scriptvariable serial="0x462490DB" name="var_my_magic_item_recycler" />
 		<scriptvariable serial="0x439B7713" name="var_my_repair_bench" />
@@ -537,7 +537,6 @@
 		<scriptvariable serial="0x488E31CA" name="var_my_loot_container" />
 		<scriptvariable serial="0x73CD0282" name="var_my_distribution_container" />
 		<scriptvariable serial="0x0" name="is_stealth" />
-		<scriptvariable serial="0x488AC23E" name="global__my_furniture_container" />
 		<scriptvariable serial="0x45147DD7" name="global__my_supply_box" />
 		<scriptvariable serial="0x45147618" name="global__my_recall_scroll_container" />
 		<scriptvariable serial="0x0" name="global__my_recall_scroll" />
@@ -546,7 +545,7 @@
 		<scriptvariable serial="0x439B7713" name="global__my_repair_bench" />
 		<scriptvariable serial="0x41FCEC56" name="global__my_storage_shelf" />
 		<scriptvariable serial="0x462490DB" name="global__my_magic_item_recycler" />
-		<scriptvariable serial="0x423F00C6" name="global__my_looting_pouch" />
+		<scriptvariable serial="0x446CD9CA" name="global__my_looting_pouch" />
 		<scriptvariable serial="0x73CD0282" name="global__my_distribution_container" />
 		<scriptvariable serial="0x488E31CA" name="global__my_loot_container" />
 	</scriptvariables>

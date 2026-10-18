@@ -73,11 +73,15 @@
 		<gump type="15" x="1821" y="1351" serial="0" frozen="False" id="38" rel_x="1821" rel_y="1351" />
 		<gump type="15" x="1821" y="1395" serial="0" frozen="False" id="39" rel_x="1821" rel_y="1395" />
 	</anchored_group_gump>
-	<gump />
+	<anchored_group_gump count="2">
+		<primary_gump />
+		<gump rel_x="120" rel_y="0" />
+	</anchored_group_gump>
 	<gump type="20" x="2438" y="6" serial="0" frozen="False" minimized="True" />
 	<gump type="9" x="1348" y="1134" serial="1467299" frozen="False" isminimized="False" />
-	<gump type="5" x="787" y="7" serial="0" frozen="False" />
 	<gump type="2" x="1083" y="1170" serial="1192877008" frozen="False" graphic="60" isminimized="False" iscarried="True" />
+	<gump type="10" x="100" y="100" serial="0" frozen="False" isminimized="False" height="772" />
+	<gump type="5" x="787" y="7" serial="0" frozen="False" />
 	<gump type="3" x="2025" y="1148" serial="0" frozen="False" rows="6" columns="11" rectsize="48">
 		<controls>
 			<control graphic="3852" hue="0" key="49" mousebutton="0" alt="False" ctrl="False" shift="True" />
