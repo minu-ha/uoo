@@ -881,7 +881,8 @@ order: 10
 
 ## <a id="15"></a>15 loadout, regear, aspect 인게임 확인
 
-2026-10-19 추가. 같은 날 loadout, regear(옛 dress), aspect를 모듈과 일회성 레시피로 옮김([Modules](../scripting/modules.md#03.A) 03.A절).
+2026-10-19 추가. 같은 날 loadout과 regear(옛 dress)를 모듈과 일회성 레시피로 옮김([Modules](../scripting/modules.md#03.A) 03.A절).
+옛 `hotkey/aspect`는 지움. 두 루틴 안의 `gear/aspect` 블록이 대신함.
 regear는 먼저 힐(`recovery/heal-first`), 옷(`gear/dress`, `gear/cosmetic`), 정리(`pack/pouches`, `pack/sorting`), aspect(`gear/aspect`) 순서.
 loadout과 regear는 같은 `gear/aspect` 블록을 씀. 동작 설명은 각 모듈 머리 주석.
 
@@ -908,7 +909,7 @@ loadout과 regear는 같은 `gear/aspect` 블록을 씀. 동작 설명은 각 �
 
 - 죽고 시체를 먹은 뒤 regear → 옷을 다 입고 정리한 뒤 `[AspectSpellbook Eldritch`, `[AspectArmor Lyric`을 말함 → `[ aspect, on ]` 둘, Essence 10 감소
 - `[ aspect, miss ]`: 이름에 aspect가 안 돌아옴. Essence 부족, 명령 거절, 또는 1초(`wait__aspect`) 안에 이름이 안 바뀜. 서버 응답 문장 기록
-- `[ aspect, out ]`: 이번 Razor 세션에 기억한 aspect가 없음. 손으로 한 번 켜고 loadout이나 `hotkey/aspect`를 돌리면 기억
+- `[ aspect, out ]`: 이번 Razor 세션에 기억한 aspect가 없음. 손으로 한 번 켜고 loadout이나 regear를 돌리면 기억
 - 방어구는 머리, 목, 장갑, 팔, 몸통, 다리 순서로 처음 보이는 aspect를 읽음. 옷(튜닉, 바디스)의 aspect는 안 읽음. 다른 aspect가 섞여 있으면 기록
 
 #### 먼저 힐

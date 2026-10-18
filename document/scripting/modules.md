@@ -75,7 +75,7 @@ order: 30
 | `module/gear/` | 입은 장비 | `dress`(부위 기록, 사망 뒤 다시 입기), `cosmetic`(Razor `cosmetic` 목록 입히기), `aspect`(aspect 기억과 다시 켜기) |
 | `recipe/<루프>-recipe.razor` | 루프나 루틴 하나 | 헤더, 도는 순서의 블록과 그 밑의 설정 변경, 이 루프만의 준비(03절) |
 | `util/build-scripts.mjs` | 조립기 | 결과물 생성, 레시피 블록 칸 정리. `--settings`, `--new-module`, `--check`(05절) |
-| `script/combat/*.razor`, `script/gather/*.razor`, `script/restock/loadout.razor`, `script/hotkey/regear.razor`, `script/hotkey/aspect.razor` | 결과물. 머리에 `Generated from` 줄 | 직접 수정 금지 |
+| `script/combat/*.razor`, `script/gather/*.razor`, `script/restock/loadout.razor`, `script/hotkey/regear.razor` | 결과물. 머리에 `Generated from` 줄 | 직접 수정 금지 |
 
 - 레시피 이름의 `-recipe`: 편집기 탭에서 결과물과 구분. 확장자 `.razor`: 하이라이팅
 - `module/`, `recipe/`는 저장소 루트. `script/`는 Razor Scripts 폴더에 링크 → 그 안에 두면 조각 파일이 스크립트 목록에 떠서 혼자 실행될 수 있음
