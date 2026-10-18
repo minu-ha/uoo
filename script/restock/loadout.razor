@@ -1,5 +1,7 @@
-# Loadout: the house run before a trip. Deposits, repairs, restocks, sorts the backpack and records the suit.
-# Needs: the house containers within 2 tiles (each asked for once), a supply pouch and a loot bag in the backpack.
+# Loadout: the house run before a trip. Deposits, repairs, restocks, sorts the backpack and
+# records the suit and the aspects.
+# Needs: the house containers within 2 tiles (each asked for once), a supply pouch and a
+# loot bag in the backpack.
 # hotkey/regear puts the recorded suit and aspects back on after a death.
 # Hotkeys: Cancel Current Target.
 # Generated from recipe/loadout-recipe.razor by util/build-scripts.mjs. Edit module/ and recipe/, not this file.
@@ -43,6 +45,12 @@
 # module/restock/instrument.razor
 # ----------------------------------------------------------------------------------------
 @setvar! config__carry_magic_instrument 1
+
+
+# ----------------------------------------------------------------------------------------
+# module/pack/pouches.razor
+# ----------------------------------------------------------------------------------------
+@setvar! config__pouches_ask 1
 
 
 # ----------------------------------------------------------------------------------------
@@ -266,8 +274,8 @@ endif
 # ----------------------------------------------------------------------------------------
 # module/restock/house.razor
 # ----------------------------------------------------------------------------------------
-# Personal containers you walk up to.
-# Personal containers, kept in your Razor profile so no serial sits in this shared file.
+# Personal containers you walk up to, kept in your Razor profile so no serial sits in this
+# shared file.
 #
 # varexist only reports that a name was declared, not that the serial still resolves, so a
 # container targeted by mistake would stay wrong forever. These sit on the floor, so find
@@ -301,16 +309,18 @@ if config__use_furniture_container = 1
 endif
 
 dclick global__my_supply_box
-wait wait__short
+
+# Long enough for the furniture contents to arrive. A find below that looks too early
+# misses a container that is there, drops its saved serial and asks for it again.
+wait wait__long
 
 
-# Containers inside the furniture, and what each one does.
-# CONTAINERS INSIDE THE FURNITURE
-# Asked for only now, because with config__use_furniture_container on they cannot be
-# targeted until the furniture above has been opened.
+# Containers inside the furniture. Asked for only now, because with
+# config__use_furniture_container on they cannot be targeted until the furniture above has
+# been opened.
 #
-# Each one ends up as a var__has_ flag so the work sections below do not have to repeat
-# the furniture branch. Missing gear then skips its own section instead of stopping the run.
+# Each one ends up as a var__has_ flag so the work below does not have to repeat the
+# furniture branch. Missing gear then skips its own part instead of stopping the run.
 
 @setvar! var__has_bank_deposit_safe 0
 
@@ -432,15 +442,18 @@ else
     endif
 endif
 
-# Bank Deposit safe
-# Every one of these blocks waits with waitfortarget, never with a plain wait. A fixed sleep
-# is not long enough for the server to answer: the cursor turns up after the block has moved
-# on, and then the next block's waitfortarget picks up that stale cursor instead of its own.
-# That is what kept breaking the storage shelf restock.
+# The work, one container at a time.
 #
-# One rule, applied everywhere: a block clears up after itself. It answers its own cursor and
-# closes its own gump before it ends, so the block after it does not have to defend against
-# anything. That is why none of these start with a cancel or a gumpclose.
+# Every part waits with waitfortarget, never with a plain wait. A fixed sleep is not long
+# enough for the server to answer: the cursor turns up after the part has moved on, and
+# then the next part's waitfortarget picks up that stale cursor instead of its own. That is
+# what kept breaking the storage shelf restock.
+#
+# One rule, applied everywhere: a part clears up after itself. It answers its own cursor
+# and closes its own gump before it ends, so the part after it does not have to defend
+# against anything. That is why none of these start with a cancel or a gumpclose.
+
+# Bank deposit safe.
 if var__has_bank_deposit_safe = 1 and findtype 3821 backpack
     overhead "[ bank safe, on ]" 290
     menu global__my_bank_deposit_safe 0
@@ -457,12 +470,11 @@ if var__has_bank_deposit_safe = 1 and findtype 3821 backpack
     wait wait__short
 endif
 
-# Resource stockpile
-# This is the block that was leaking a cursor. Its prompt,
+# Resource stockpile. This is the part that was leaking a cursor. Its prompt,
 #   "Where do you wish to restock this from? You may target yourself, a container, ..."
 # was still up when the storage shelf asked its own question, so the shelf's answer went to
 # this one and the shelf restock never ran. target self was already here, but it does not
-# always take, and the block had nothing to clean up after itself.
+# always take, and the part had nothing to clean up after itself.
 if var__has_resource_stockpile = 1
     overhead "[ stockpile, on ]" 290
     menu global__my_resource_stockpile 0
@@ -479,7 +491,7 @@ if var__has_resource_stockpile = 1
     wait wait__short
 endif
 
-# Repair bench
+# Repair bench.
 if var__has_repair_bench = 1
     dclick global__my_repair_bench
     wait wait__repair
@@ -492,12 +504,10 @@ if var__has_repair_bench = 1
     endif
 endif
 
-# Magic item recycler
-# The recycler takes no target. It acts on the backpack straight away.
+# Magic item recycler. It takes no target and acts on the backpack straight away.
 #
 # If this prompts for a target, the variable is pointing at the Magic Item Vault instead of
 # the recycler. Run  unsetvar global__my_magic_item_recycler  and rerun to retarget it.
-
 if var__has_magic_item_recycler = 1
     overhead "[ recycler, on ]" 290
 
@@ -510,14 +520,14 @@ if var__has_magic_item_recycler = 1
     wait wait__short
 endif
 
-# Storage shelf restock
-# Restock puts things in, Resupply takes things out. Two menu entries, 0 and 1, and both are
-# needed: crafted gear and anything looted goes into the shelf before the loadout comes back
-# out. Restock belongs here with the deposits, Resupply runs later with the withdrawals.
+# Storage shelf restock. Restock puts things in, Resupply takes things out. Two menu
+# entries, 0 and 1, and both are needed: crafted gear and anything looted goes into the
+# shelf before the loadout comes back out. Restock belongs here with the deposits,
+# Resupply runs after it with the withdrawals.
 #
 # Restock asks what to take from and self is the answer. The two targetexists checks are not
 # the same test: the first answers the prompt, the second catches an answer that was refused
-# and left the cursor up. Nothing cancels before the menu, because every block above already
+# and left the cursor up. Nothing cancels before the menu, because every part above already
 # clears up after itself.
 #
 # No waitforgump. Restock reports "N items were added" without the shelf gump necessarily
@@ -540,11 +550,10 @@ if var__has_storage_shelf = 1
     gumpclose
 endif
 
-# Storage shelf resupply
-# The withdrawal half, and the short one: resupply raises no cursor and answers at once.
-# It used to wait on a target anyway, on the theory that the wait kept the restock above from
-# colliding with it. That was wrong. The run was dying on an undeclared wait__long, and the
-# context menu left on screen was the symptom, not the cause.
+# Storage shelf resupply. The withdrawal half, and the short one: resupply raises no cursor
+# and answers at once. It used to wait on a target anyway, on the theory that the wait kept
+# the restock above from colliding with it. That was wrong. The run was dying on an
+# undeclared wait__long, and the context menu left on screen was the symptom, not the cause.
 if var__has_storage_shelf = 1
     overhead "[ shelf, resupply ]" 290
     menu global__my_storage_shelf 1
@@ -563,9 +572,9 @@ endif
 # Runs kept stacking duplicates before, because the old check stopped at the first hit and
 # never looked at what else was already in the bag.
 #
-# Extras go to the supply box rather than the shelf because the shelf restock already ran,
-# back with the deposits. Anything left in the bag from here on stays in the bag, so this
-# pass has to put it somewhere itself.
+# Extras go to the supply box rather than the shelf because restock/house already ran the
+# shelf restock with the deposits. Anything left in the bag from here on stays in the bag,
+# so this block has to put it somewhere itself.
 #
 # This also replaced the Restock 10 agent, which only carried the sewing kit, so the
 # identification wand was checked for and then never actually fetched.
@@ -648,9 +657,9 @@ endif
 #   #hurdy-gurdy 20008    #lute 3763        #psaltery 20010   #sackbut 20012
 #   #shawm 20014          #tambourine 3742  #vielle 20016
 #
-# Only magic instruments are handled here. A crafted one belongs to the storage shelf: the
-# restock above puts it away and the resupply brings it back, so this section leaves every
-# crafted instrument exactly where it is and only counts the magic ones.
+# Only magic instruments are handled here. A crafted one belongs to the storage shelf:
+# restock/house puts it away and brings it back with the shelf restock and resupply, so
+# this block leaves every crafted instrument where it is and only counts the magic ones.
 #
 # Exactly one magic instrument is carried. The first one found stays, any further copy goes
 # back to the supply box, and only if none was carried is one fetched. The combat scripts
@@ -712,16 +721,17 @@ endif
 # module/pack/pouches.razor
 # ----------------------------------------------------------------------------------------
 # Two containers, so one grab off a corpse does not take everything. Both are kept in your
-# Razor profile like the containers above.
+# Razor profile like the house containers of restock/house.
 #
-#   supply pouch  global__my_supply_pouch, a plain pouch (3705, hue 0). The supplies the
-#                 sorting below puts away, and what loot/recycle keeps
+#   supply pouch  global__my_supply_pouch, a plain pouch (3705, hue 0). The supplies
+#                 pack/sorting puts away, and what loot/recycle keeps
 #   loot bag      global__my_loot_bag, a bag (3702). Raw loot only: the leather and the
 #                 boards pack/leather and pack/lumber gather, and the dagger
 #
-# Each is found by itself when the backpack holds exactly one of its kind, and asked for
-# otherwise. Until 2026-10-19 one pouch did both jobs as global__my_looting_pouch. That
-# pouch is the supply pouch now, so the old name is dropped once the new one is set.
+# Each is found by itself when the backpack holds exactly one of its kind, and otherwise
+# asked for, or left unset with config__pouches_ask 0. Until 2026-10-19 one pouch did
+# both jobs as global__my_looting_pouch. That pouch is the supply pouch now, so the old
+# name is dropped once the new one is set.
 if not varexist global__my_supply_pouch or not find global__my_supply_pouch backpack
     unsetvar global__my_supply_pouch
 
@@ -730,9 +740,11 @@ if not varexist global__my_supply_pouch or not find global__my_supply_pouch back
         if config__chatty = 1
             overhead "[ supplies, set ]" 290
         endif
-    else
+    elseif config__pouches_ask = 1
         overhead "[ supplies, pick ]" 255
         setvar global__my_supply_pouch
+    else
+        overhead "[ supplies, out ]" 254
     endif
 endif
 
@@ -748,9 +760,11 @@ if not varexist global__my_loot_bag or not find global__my_loot_bag backpack
         if config__chatty = 1
             overhead "[ loot bag, set ]" 290
         endif
-    else
+    elseif config__pouches_ask = 1
         overhead "[ loot bag, pick ]" 255
         setvar global__my_loot_bag
+    else
+        overhead "[ loot bag, out ]" 254
     endif
 endif
 
@@ -779,7 +793,7 @@ endif
 #   #potion satchel          "alchemists satchel"    31262
 #
 # Placement. drop takes literal coordinates, so the numbers are inline, but they only appear
-# in this section. They are gump pixels, not grid cells, so nudge them if items overlap.
+# in this block. They are gump pixels, not grid cells, so nudge them if items overlap.
 #
 #   backpack 0 200        the two satchels, bottom left, first
 #   backpack 0 200        the supply pouch, on the satchels
@@ -834,7 +848,8 @@ if findtype 31262 backpack as alias__found_alchemists_satchel
 endif
 
 # 2. the supply pouch, then the loot bag, on the satchels. Each moved by serial, reopened.
-if find global__my_supply_pouch backpack
+# Either can be missing after a death, already reported by pack/pouches, and is skipped.
+if varexist global__my_supply_pouch and find global__my_supply_pouch backpack
     lift global__my_supply_pouch
     wait wait__short
     drop backpack 0 200
@@ -846,7 +861,7 @@ if find global__my_supply_pouch backpack
     wait wait__short
 endif
 
-if find global__my_loot_bag backpack
+if varexist global__my_loot_bag and find global__my_loot_bag backpack
     lift global__my_loot_bag
     wait wait__short
     drop backpack 0 200
@@ -927,44 +942,47 @@ while findtype 3705 backpack 38 as alias__found_trap_pouch
     @ignore alias__found_trap_pouch
 endwhile
 
-# 4. everything else. Collected first, because the walk below moves items out of the
-#    backpack and a findtype loop cannot be trusted while its own source is changing.
-removelist sorting_item_list
-createlist sorting_item_list
+# 4. everything else, into the supply pouch. Collected first, because the walk below moves
+#    items out of the backpack and a findtype loop cannot be trusted while its own source
+#    is changing. Without a supply pouch the kit stays loose in the backpack.
+if varexist global__my_supply_pouch and find global__my_supply_pouch backpack
+    removelist sorting_item_list
+    createlist sorting_item_list
 
-while findtype 3740|3742|3762|3763|10245|20006|20008|20010|20012|20014|20016|20496|3997|3922|3617|2726|3998|3999|3553|11552|11564|52149|5370|28879|28880|28881|28883|28885|28886|28888|29773|29774|29012 backpack as alias__found_item
-    pushlist sorting_item_list alias__found_item
-    @ignore alias__found_item
-endwhile
+    while findtype 3740|3742|3762|3763|10245|20006|20008|20010|20012|20014|20016|20496|3997|3922|3617|2726|3998|3999|3553|11552|11564|52149|5370|28879|28880|28881|28883|28885|28886|28888|29773|29774|29012 backpack as alias__found_item
+        pushlist sorting_item_list alias__found_item
+        @ignore alias__found_item
+    endwhile
 
-clearignore
+    clearignore
 
-foreach alias__sorting_item in sorting_item_list
-    getlabel alias__sorting_item label__sorting_item
+    foreach alias__sorting_item in sorting_item_list
+        getlabel alias__sorting_item label__sorting_item
 
-    if config__chatty = 1
-        overhead "[ sort, {{label__sorting_item}} ]" 290
-    endif
+        if config__chatty = 1
+            overhead "[ sort, {{label__sorting_item}} ]" 290
+        endif
 
-    lift alias__sorting_item 1000
-    wait wait__short
+        lift alias__sorting_item 1000
+        wait wait__short
 
-    if "dagger" in label__sorting_item
-        if find global__my_loot_bag backpack
-            drop global__my_loot_bag 0 0
+        if "dagger" in label__sorting_item
+            if varexist global__my_loot_bag and find global__my_loot_bag backpack
+                drop global__my_loot_bag 0 0
+            else
+                drop global__my_supply_pouch 0 0
+            endif
+        elseif "item identification wand" in label__sorting_item or "sewing kit" in label__sorting_item
+            drop global__my_supply_pouch 130 0
+        elseif "flute" in label__sorting_item or "drum" in label__sorting_item or "harp" in label__sorting_item or "lute" in label__sorting_item or "tambourine" in label__sorting_item or "gemshorn" in label__sorting_item or "hurdy" in label__sorting_item or "psaltery" in label__sorting_item or "sackbut" in label__sorting_item or "shawm" in label__sorting_item or "vielle" in label__sorting_item
+            drop global__my_supply_pouch 130 80
         else
             drop global__my_supply_pouch 0 0
         endif
-    elseif "item identification wand" in label__sorting_item or "sewing kit" in label__sorting_item
-        drop global__my_supply_pouch 130 0
-    elseif "flute" in label__sorting_item or "drum" in label__sorting_item or "harp" in label__sorting_item or "lute" in label__sorting_item or "tambourine" in label__sorting_item or "gemshorn" in label__sorting_item or "hurdy" in label__sorting_item or "psaltery" in label__sorting_item or "sackbut" in label__sorting_item or "shawm" in label__sorting_item or "vielle" in label__sorting_item
-        drop global__my_supply_pouch 130 80
-    else
-        drop global__my_supply_pouch 0 0
-    endif
 
-    wait wait__short
-endfor
+        wait wait__short
+    endfor
+endif
 
 
 # ----------------------------------------------------------------------------------------
@@ -1503,10 +1521,17 @@ if config__use_runebook_refill = 1
     clearsysmsg
     cleardragdrop
     clearignore
-    if findtype 8012 global__my_recall_scroll_container as alias__found_recall_scroll
-        setvar! global__my_recall_scroll alias__found_recall_scroll
+
+    # The box contents arrive a moment after the dclick, later still right after a recall,
+    # so one look 200 ms in could call a full box empty. Looked at for up to 2 seconds.
+    for 10
+        if findtype 8012 global__my_recall_scroll_container as alias__found_recall_scroll
+            setvar! global__my_recall_scroll alias__found_recall_scroll
+            break
+        endif
+
         wait wait__short
-    endif
+    endfor
 
     if global__my_recall_scroll = 0
         overhead "[ recall scroll, out ]" 254
@@ -1515,7 +1540,7 @@ if config__use_runebook_refill = 1
 
     # Backpack
     while var__runebook_scrolls_out = 0 and findtype "runetome|runebook" backpack as alias__found_runetome
-        getlabel global__my_recall_scroll label__found_runetome
+        getlabel alias__found_runetome label__found_runetome
         overhead "[ scroll, {{label__found_runetome}} ]" 290
 
         lift global__my_recall_scroll 6000
@@ -1531,7 +1556,7 @@ if config__use_runebook_refill = 1
 
     # Nearby tomes
     while var__runebook_scrolls_out = 0 and findtype "runetome|runebook" ground -1 -1 2 as alias__found_runetome
-        getlabel global__my_recall_scroll label__found_runetome
+        getlabel alias__found_runetome label__found_runetome
         overhead "[ scroll, {{label__found_runetome}} ]" 290
 
         lift global__my_recall_scroll 6000
@@ -1548,7 +1573,7 @@ if config__use_runebook_refill = 1
     # Nearby chests
     while var__runebook_scrolls_out = 0 and findtype 47202|62764|2473|3710|41451|41452|3646|3647|3644|3645|41449|41450|29832|29833|2472|29077|29078|2475|3648|3649|3708|3650|3651|41453|41454|2474|3709|3650|3651|41455|41456|29086|29087 true as alias__found_container
         while var__runebook_scrolls_out = 0 and findtype "runetome|runebook" alias__found_container as alias__found_runetome
-            getlabel global__my_recall_scroll label__found_runetome
+            getlabel alias__found_runetome label__found_runetome
             overhead "[ scroll, {{label__found_runetome}} ]" 290
 
             lift global__my_recall_scroll 60000

@@ -895,6 +895,9 @@ loadout과 regear는 같은 `gear/aspect` 블록을 씀. 동작 설명은 각 �
 - loadout이 Play 때 `[ script, blocked ]`는 구조적 PvP에서만. 시작 4줄(clearall 등)은 전과 같음
 - loadout에서 귀환 스크롤이 떨어져도 aspect까지 돌아야 함. 전에는 `stop`으로 끝남
 - `config__use_runebook_refill` 0이면 스크롤 상자를 묻지 않음
+- 귀환 직후 loadout에서도 룬북 리필이 돌아야 함. 상자를 연 뒤 스크롤이 보일 때까지 최대 2초 기다림. 전에는 0.2초 만에 `[ recall scroll, out ]`이 뜰 수 있었음
+- 룬북마다 `[ scroll, <룬북 이름> ]`. 전에는 룬북 대신 스크롤 이름
+- 가구와 보급 상자를 연 뒤 0.6초(`wait__long`) 기다림. 금고, 저장소, 수리대, 선반, 리사이클러를 다시 묻지 않아야 함. 다시 물으면 이 대기를 늘림
 
 #### 기억
 
@@ -918,4 +921,5 @@ loadout과 regear는 같은 `gear/aspect` 블록을 씀. 동작 설명은 각 �
 #### 정리
 
 - regear 뒤 백팩 왼쪽 아래에 새첼, 보급 파우치, 루팅 백, 트랩 파우치가 loadout 때처럼 쌓이고, 보급품이 보급 파우치로 들어가야 함
-- 시체에서 루팅 백을 못 가져왔으면 `[ loot bag, pick ]`. Esc로 넘어가도 됨
+- 시체에서 보급 파우치나 루팅 백을 못 가져왔으면 묻지 않고 `[ supplies, out ]`, `[ loot bag, out ]`(`pouches_ask` 0)
+- 보급 파우치가 없으면 보급품은 백팩에 그대로, aspect까지 계속. 다음 loadout에서 새 파우치를 고름

@@ -1,5 +1,8 @@
-# Regear: after a death and a looted corpse, heals, puts the suit back on, sorts the backpack and turns the aspects on.
-# Needs: restock/loadout run once this Razor session, it records the suit and the aspects. Arcane Essence for the aspects.
+# Regear: after a death and a looted corpse, heals, puts the suit back on, sorts the
+# backpack and turns the aspects on.
+# Needs: restock/loadout run once this Razor session, it records the suit and the aspects.
+# The supply pouch and the loot bag back in the backpack, else the kit stays loose.
+# Arcane Essence for the aspects, 5 each.
 # Hotkeys: Bandage Self, Drink Heal, > Greater Heal/Cure Self, Cancel Current Target.
 # Generated from recipe/regear-recipe.razor by util/build-scripts.mjs. Edit module/ and recipe/, not this file.
 
@@ -35,6 +38,12 @@
 # module/gear/dress.razor
 # ----------------------------------------------------------------------------------------
 @setvar! config__dress_restore 1
+
+
+# ----------------------------------------------------------------------------------------
+# module/pack/pouches.razor
+# ----------------------------------------------------------------------------------------
+@setvar! config__pouches_ask 0
 
 
 # ========================================================================================
@@ -808,16 +817,17 @@ dress 'cosmetic'
 # module/pack/pouches.razor
 # ----------------------------------------------------------------------------------------
 # Two containers, so one grab off a corpse does not take everything. Both are kept in your
-# Razor profile like the containers above.
+# Razor profile like the house containers of restock/house.
 #
-#   supply pouch  global__my_supply_pouch, a plain pouch (3705, hue 0). The supplies the
-#                 sorting below puts away, and what loot/recycle keeps
+#   supply pouch  global__my_supply_pouch, a plain pouch (3705, hue 0). The supplies
+#                 pack/sorting puts away, and what loot/recycle keeps
 #   loot bag      global__my_loot_bag, a bag (3702). Raw loot only: the leather and the
 #                 boards pack/leather and pack/lumber gather, and the dagger
 #
-# Each is found by itself when the backpack holds exactly one of its kind, and asked for
-# otherwise. Until 2026-10-19 one pouch did both jobs as global__my_looting_pouch. That
-# pouch is the supply pouch now, so the old name is dropped once the new one is set.
+# Each is found by itself when the backpack holds exactly one of its kind, and otherwise
+# asked for, or left unset with config__pouches_ask 0. Until 2026-10-19 one pouch did
+# both jobs as global__my_looting_pouch. That pouch is the supply pouch now, so the old
+# name is dropped once the new one is set.
 if not varexist global__my_supply_pouch or not find global__my_supply_pouch backpack
     unsetvar global__my_supply_pouch
 
@@ -826,9 +836,11 @@ if not varexist global__my_supply_pouch or not find global__my_supply_pouch back
         if config__chatty = 1
             overhead "[ supplies, set ]" 290
         endif
-    else
+    elseif config__pouches_ask = 1
         overhead "[ supplies, pick ]" 255
         setvar global__my_supply_pouch
+    else
+        overhead "[ supplies, out ]" 254
     endif
 endif
 
@@ -844,9 +856,11 @@ if not varexist global__my_loot_bag or not find global__my_loot_bag backpack
         if config__chatty = 1
             overhead "[ loot bag, set ]" 290
         endif
-    else
+    elseif config__pouches_ask = 1
         overhead "[ loot bag, pick ]" 255
         setvar global__my_loot_bag
+    else
+        overhead "[ loot bag, out ]" 254
     endif
 endif
 
@@ -875,7 +889,7 @@ endif
 #   #potion satchel          "alchemists satchel"    31262
 #
 # Placement. drop takes literal coordinates, so the numbers are inline, but they only appear
-# in this section. They are gump pixels, not grid cells, so nudge them if items overlap.
+# in this block. They are gump pixels, not grid cells, so nudge them if items overlap.
 #
 #   backpack 0 200        the two satchels, bottom left, first
 #   backpack 0 200        the supply pouch, on the satchels
@@ -930,7 +944,8 @@ if findtype 31262 backpack as alias__found_alchemists_satchel
 endif
 
 # 2. the supply pouch, then the loot bag, on the satchels. Each moved by serial, reopened.
-if find global__my_supply_pouch backpack
+# Either can be missing after a death, already reported by pack/pouches, and is skipped.
+if varexist global__my_supply_pouch and find global__my_supply_pouch backpack
     lift global__my_supply_pouch
     wait wait__short
     drop backpack 0 200
@@ -942,7 +957,7 @@ if find global__my_supply_pouch backpack
     wait wait__short
 endif
 
-if find global__my_loot_bag backpack
+if varexist global__my_loot_bag and find global__my_loot_bag backpack
     lift global__my_loot_bag
     wait wait__short
     drop backpack 0 200
@@ -1023,44 +1038,47 @@ while findtype 3705 backpack 38 as alias__found_trap_pouch
     @ignore alias__found_trap_pouch
 endwhile
 
-# 4. everything else. Collected first, because the walk below moves items out of the
-#    backpack and a findtype loop cannot be trusted while its own source is changing.
-removelist sorting_item_list
-createlist sorting_item_list
+# 4. everything else, into the supply pouch. Collected first, because the walk below moves
+#    items out of the backpack and a findtype loop cannot be trusted while its own source
+#    is changing. Without a supply pouch the kit stays loose in the backpack.
+if varexist global__my_supply_pouch and find global__my_supply_pouch backpack
+    removelist sorting_item_list
+    createlist sorting_item_list
 
-while findtype 3740|3742|3762|3763|10245|20006|20008|20010|20012|20014|20016|20496|3997|3922|3617|2726|3998|3999|3553|11552|11564|52149|5370|28879|28880|28881|28883|28885|28886|28888|29773|29774|29012 backpack as alias__found_item
-    pushlist sorting_item_list alias__found_item
-    @ignore alias__found_item
-endwhile
+    while findtype 3740|3742|3762|3763|10245|20006|20008|20010|20012|20014|20016|20496|3997|3922|3617|2726|3998|3999|3553|11552|11564|52149|5370|28879|28880|28881|28883|28885|28886|28888|29773|29774|29012 backpack as alias__found_item
+        pushlist sorting_item_list alias__found_item
+        @ignore alias__found_item
+    endwhile
 
-clearignore
+    clearignore
 
-foreach alias__sorting_item in sorting_item_list
-    getlabel alias__sorting_item label__sorting_item
+    foreach alias__sorting_item in sorting_item_list
+        getlabel alias__sorting_item label__sorting_item
 
-    if config__chatty = 1
-        overhead "[ sort, {{label__sorting_item}} ]" 290
-    endif
+        if config__chatty = 1
+            overhead "[ sort, {{label__sorting_item}} ]" 290
+        endif
 
-    lift alias__sorting_item 1000
-    wait wait__short
+        lift alias__sorting_item 1000
+        wait wait__short
 
-    if "dagger" in label__sorting_item
-        if find global__my_loot_bag backpack
-            drop global__my_loot_bag 0 0
+        if "dagger" in label__sorting_item
+            if varexist global__my_loot_bag and find global__my_loot_bag backpack
+                drop global__my_loot_bag 0 0
+            else
+                drop global__my_supply_pouch 0 0
+            endif
+        elseif "item identification wand" in label__sorting_item or "sewing kit" in label__sorting_item
+            drop global__my_supply_pouch 130 0
+        elseif "flute" in label__sorting_item or "drum" in label__sorting_item or "harp" in label__sorting_item or "lute" in label__sorting_item or "tambourine" in label__sorting_item or "gemshorn" in label__sorting_item or "hurdy" in label__sorting_item or "psaltery" in label__sorting_item or "sackbut" in label__sorting_item or "shawm" in label__sorting_item or "vielle" in label__sorting_item
+            drop global__my_supply_pouch 130 80
         else
             drop global__my_supply_pouch 0 0
         endif
-    elseif "item identification wand" in label__sorting_item or "sewing kit" in label__sorting_item
-        drop global__my_supply_pouch 130 0
-    elseif "flute" in label__sorting_item or "drum" in label__sorting_item or "harp" in label__sorting_item or "lute" in label__sorting_item or "tambourine" in label__sorting_item or "gemshorn" in label__sorting_item or "hurdy" in label__sorting_item or "psaltery" in label__sorting_item or "sackbut" in label__sorting_item or "shawm" in label__sorting_item or "vielle" in label__sorting_item
-        drop global__my_supply_pouch 130 80
-    else
-        drop global__my_supply_pouch 0 0
-    endif
 
-    wait wait__short
-endfor
+        wait wait__short
+    endfor
+endif
 
 
 # ----------------------------------------------------------------------------------------

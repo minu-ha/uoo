@@ -8,8 +8,11 @@
 # @ header
 # ========================================================================================
 
-# Regear: after a death and a looted corpse, heals, puts the suit back on, sorts the backpack and turns the aspects on.
-# Needs: restock/loadout run once this Razor session, it records the suit and the aspects. Arcane Essence for the aspects.
+# Regear: after a death and a looted corpse, heals, puts the suit back on, sorts the
+# backpack and turns the aspects on.
+# Needs: restock/loadout run once this Razor session, it records the suit and the aspects.
+# The supply pouch and the loot bag back in the backpack, else the kit stays loose.
+# Arcane Essence for the aspects, 5 each.
 
 
 # ========================================================================================
@@ -56,7 +59,14 @@
 # @ use pack/pouches
 #
 #   Picks the supply pouch and the loot bag, by itself when the backpack has one of each.
+#
+#   pouches_ask (default 1)
+#      What happens when one of the two cannot be found by itself.
+#        1  asks for it with a cursor
+#        0  leaves it unset and says so with an out, so no cursor holds the run
+#      > Not asked for after a death: one that did not come back from the corpse is gone.
 # ----------------------------------------------------------------------------------------
+@setvar! config__pouches_ask 0
 
 # ----------------------------------------------------------------------------------------
 # @ use pack/sorting
