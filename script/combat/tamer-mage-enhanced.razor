@@ -338,7 +338,6 @@ endif
 # ----------------------------------------------------------------------------------------
 # module/base.razor
 # ----------------------------------------------------------------------------------------
-# The pvp expression means the structured-PvP restrictions, where these loops may not run.
 if pvp
     overhead "[ script, blocked ]" 254
     stop
@@ -355,8 +354,6 @@ endif
 # ----------------------------------------------------------------------------------------
 # module/escape/tracking.razor
 # ----------------------------------------------------------------------------------------
-# Reuse the color verified by this script while Hunting remains active.
-# A buff alone does not identify the filter. A first run checks the current window instead.
 if skill "Tracking" > 0
     if findbuff "tracking" and var__tracking_setup_color = config__tracking_color
         @setvar! var__tracking_filter_confirmed 1
@@ -367,7 +364,6 @@ if skill "Tracking" > 0
             waitforgump 4267467659 wait__tracking_gump
 
             if gumpexists 4267467659
-                # Do not cycle past an already correct filter. The window displays the selected type.
                 if config__tracking_color = 1 and ingump "Murderer Players" 4267467659
                     @setvar! var__tracking_filter_confirmed 1
                 elseif config__tracking_color = 2 and ingump "Criminal Players" 4267467659
@@ -379,7 +375,6 @@ if skill "Tracking" > 0
                 endif
 
                 if var__tracking_filter_confirmed = 0
-                    # An active hunt must stop before cycling through animals and other player colors.
                     if findbuff "tracking"
                         gumpresponse 6 4267467659
                         wait wait__short
@@ -391,10 +386,8 @@ if skill "Tracking" > 0
                         endfor
                     endif
 
-                    # Discard the old target and old filter replies only while setting up.
                     clearsysmsg
                     if not findbuff "tracking" and gumpexists 4267467659
-                        # Button 8 cycles ten hunt filters. Bound the attempt to one complete rotation.
                         for 10
                             if diffhits >= config__heal_hits or poisoned or warmode or hidden or queued or casting or targetexists
                                 break
@@ -404,7 +397,6 @@ if skill "Tracking" > 0
                             endif
                             gumpresponse 8 4267467659
                             @setvar! var__tracking_button_answered 0
-                            # Only one selection is outstanding. Do not outrun a delayed server response.
                             for 60
                                 if diffhits >= config__heal_hits or poisoned or warmode or hidden or queued or casting or targetexists
                                     break
@@ -448,7 +440,6 @@ if skill "Tracking" > 0
                 endif
 
                 if var__tracking_filter_confirmed = 1 and gumpexists 4267467659 and diffhits < config__heal_hits and not poisoned and not warmode and not hidden and not queued and not casting and not targetexists
-                    # Setup reports belong to the old/intermediate filter, never to Recall detection.
                     clearsysmsg
                     if not findbuff "tracking"
                         gumpresponse 6 4267467659
@@ -477,8 +468,6 @@ endif
 # ----------------------------------------------------------------------------------------
 # recipe/tamer-mage-enhanced-recipe.razor
 # ----------------------------------------------------------------------------------------
-# loot/recycle runs the hotkey named in this list when it finishes or gives up. A list, because
-# a variable cannot hold a word (document/scripting/razor.md part 3). It lasts until the client closes.
 if not listexists 'list__resume_script'
     createlist 'list__resume_script'
 endif
@@ -658,7 +647,6 @@ while not dead
                             wait wait__poll
                         endfor
 
-                        # The agent leaves its beneficial cursor up when there is nothing left to heal.
                         if targetexists "beneficial" and diffhits = 0
                             hotkey "Cancel Current Target"
                             wait wait__short
@@ -709,13 +697,11 @@ while not dead
                     wait wait__poll
                 endfor
 
-                # Nothing was applied. A hurt pass tries again at once, the pets after the wait.
                 if var__vet_running = 0
                     @setvar! var__vet_wait interval__vet_refused
                     settimer "timer__vet_kit" 0
                 endif
             else
-                # Out of supplies. Looked up again after the same wait, or at once when hurt.
                 @setvar! var__vet_wait interval__vet_refused
                 if timer "timer__message" >= interval__message
                     overhead "[ vet kit, out ]" 254
@@ -957,7 +943,6 @@ while not dead
                                 wait wait__poll
                             endfor
                         elseif targetexists
-                            # Not the cursor this spell opens. Left open it would hold every block.
                             hotkey "Cancel Current Target"
                             wait wait__short
                         endif
@@ -995,12 +980,10 @@ while not dead
                                 wait wait__poll
                             endfor
                         elseif targetexists
-                            # Not the cursor this spell opens. Left open it would hold every block.
                             hotkey "Cancel Current Target"
                             wait wait__short
                         endif
                     elseif config__use_spell_siphon = 1 and not warmode and var__regs_magic_arrow = 1 and mana >= config__mana_spell_siphon and not findbuff "Spell Siphon" and not findbuff "Magic Reflection"
-                        # A disturb line an earlier cast left is read off first, so the poll sees only its own.
                         if insysmsg "Your concentration is disturbed, thus ruining thy spell."
                             # consumed, nothing else to do
                         endif
@@ -1032,7 +1015,6 @@ while not dead
                             hotkey 'Target Self'
                             wait wait__cast
                         elseif targetexists
-                            # Not the cursor this spell opens. Left open it would hold every block.
                             hotkey "Cancel Current Target"
                             wait wait__short
                         endif

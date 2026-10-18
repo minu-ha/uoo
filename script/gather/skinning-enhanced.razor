@@ -468,7 +468,6 @@ endif
 # ----------------------------------------------------------------------------------------
 # module/base.razor
 # ----------------------------------------------------------------------------------------
-# The pvp expression means the structured-PvP restrictions, where these loops may not run.
 if pvp
     overhead "[ script, blocked ]" 254
     stop
@@ -485,14 +484,11 @@ endif
 # ----------------------------------------------------------------------------------------
 # recipe/skinning-enhanced-recipe.razor
 # ----------------------------------------------------------------------------------------
-# pack/leather moves leather into this bag. restock/loadout picks it, this asks when it is missing.
 if not varexist global__my_loot_bag or not find global__my_loot_bag backpack
     overhead "[ loot bag, pick ]" 255
     setvar global__my_loot_bag
 endif
 
-# loot/recycle runs the hotkey named in this list when it finishes or gives up. A list, because
-# a variable cannot hold a word (document/scripting/razor.md part 3). It lasts until the client closes.
 if not listexists 'list__resume_script'
     createlist 'list__resume_script'
 endif
@@ -656,7 +652,6 @@ while not dead
                             wait wait__poll
                         endfor
 
-                        # The agent leaves its beneficial cursor up when there is nothing left to heal.
                         if targetexists "beneficial" and diffhits = 0
                             hotkey "Cancel Current Target"
                             wait wait__short
@@ -746,8 +741,6 @@ while not dead
                 endif
 
                 if find var__my_weapon backpack as alias__weapon_to_equip
-                    # lift waits for the held item. The retry timer spaces the next hand check,
-                    # so a refused equip after a disarm does not stall recovery.
                     lift alias__weapon_to_equip
                     drop self lefthand
                     if config__sysmsg = 1
@@ -763,7 +756,6 @@ while not dead
             if var__my_weapon != alias__equipped_weapon
                 settimer "timer__equip" 0
                 getlabel alias__equipped_weapon label__hand_weapon
-                # item-list names the type "two handed axe" and archive/hally-mage reads "two-handed axe".
                 if "two-handed axe" in label__hand_weapon or "two handed axe" in label__hand_weapon or "Two-Handed Axe" in label__hand_weapon or "Two Handed Axe" in label__hand_weapon
                     @setvar! var__my_weapon alias__equipped_weapon
                     if config__sysmsg = 1
@@ -849,8 +841,6 @@ while not dead
             if findtype 11890 backpack as alias__sword_codex
                 getlabel alias__sword_codex label__sword_codex
 
-                # All five names are tested. Finding none means the label does not carry the
-                # stance, and blind switching would risk toggling the active stance off.
                 if "Warrior" in label__sword_codex
                     @setvar! var__sword_active 4
                 elseif "Defensive" in label__sword_codex
@@ -869,14 +859,6 @@ while not dead
                     endif
                 endif
 
-                # FINISHER: one finisher triggers once per creature at its health threshold.
-                # The chance is 10% plus 10% scaled by Anatomy, so 18% at Anatomy 80.
-                # Execute deals 600% at once. Its bleed resolve adds little with rare specials.
-                # Bleed Out spreads 800% over time, and a creature at the threshold usually dies
-                # before that resolves. The selection persists per character, so it is checked
-                # once per Play. Only a label that names the other finisher is switched. No name
-                # means none is selected or the label does not show it, and a blind command could
-                # toggle it off.
                 if var__sword_disabled = 0 and var__sword_finisher_checked = 0 and config__sword_finisher_main != 0
                     @setvar! var__sword_finisher_checked 1
                     @setvar! var__sword_finisher_state 0
@@ -903,7 +885,6 @@ while not dead
                         if config__sysmsg = 1
                             sysmsg "Sword finisher switch: slot {{config__sword_finisher_main}}." 88
                         endif
-                        # Keep the finisher and stance commands apart.
                         wait wait__short
                         if config__chatty = 1
                             if config__sword_finisher_main = 2
@@ -937,8 +918,6 @@ while not dead
                         say "[SwordsStance5"
                     endif
 
-                    # Assume it took. Saying it again before the label catches up would risk
-                    # toggling the stance straight back off.
                     @setvar! var__sword_active var__sword_want
                     settimer "timer__sword_resync" 0
 
@@ -1002,7 +981,6 @@ while not dead
                     endif
                 endif
 
-                # FINISHER: checked once per Play, only when the label proved it carries the stance.
                 if var__parry_disabled = 0 and var__parry_finisher_checked = 0 and config__parry_finisher_main != 0
                     @setvar! var__parry_finisher_checked 1
                     @setvar! var__parry_finisher_state 0
@@ -1029,7 +1007,6 @@ while not dead
                         if config__sysmsg = 1
                             sysmsg "Parry finisher switch: slot {{config__parry_finisher_main}}." 88
                         endif
-                        # Keep the finisher and stance commands apart.
                         wait wait__short
                         if config__chatty = 1
                             if config__parry_finisher_main = 1
@@ -1063,7 +1040,6 @@ while not dead
                         say "[ShieldsStance5"
                     endif
 
-                    # Assume it took, as in SWORD CODEX.
                     @setvar! var__parry_active var__parry_want
                     settimer "timer__parry_resync" 0
 
@@ -1204,7 +1180,6 @@ while not dead
                                 wait wait__poll
                             endfor
                         elseif targetexists
-                            # Not the cursor this spell opens. Left open it would hold every block.
                             hotkey "Cancel Current Target"
                             wait wait__short
                         endif
@@ -1242,12 +1217,10 @@ while not dead
                                 wait wait__poll
                             endfor
                         elseif targetexists
-                            # Not the cursor this spell opens. Left open it would hold every block.
                             hotkey "Cancel Current Target"
                             wait wait__short
                         endif
                     elseif config__use_spell_siphon = 1 and not warmode and var__regs_magic_arrow = 1 and mana >= config__mana_spell_siphon and not findbuff "Spell Siphon" and not findbuff "Magic Reflection"
-                        # A disturb line an earlier cast left is read off first, so the poll sees only its own.
                         if insysmsg "Your concentration is disturbed, thus ruining thy spell."
                             # consumed, nothing else to do
                         endif
@@ -1279,7 +1252,6 @@ while not dead
                             hotkey 'Target Self'
                             wait wait__cast
                         elseif targetexists
-                            # Not the cursor this spell opens. Left open it would hold every block.
                             hotkey "Cancel Current Target"
                             wait wait__short
                         endif
@@ -1338,8 +1310,6 @@ while not dead
                     waitfortarget wait__carve_target
 
                     if targetexists "neutral" and not hidden
-                        # No enemy was remembered when this block started, so a live enemy in lasttarget
-                        # now is a Z pressed during the cursor wait.
                         @setvar! var__pick_during_carve 0
                         if find lasttarget ground -1 -1 config__acquire_range as alias__fresh_target
                             @setvar! var__fresh_serial alias__fresh_target
@@ -1355,7 +1325,6 @@ while not dead
                         endif
 
                         if var__pick_during_carve = 1
-                            # Leave lasttarget on the new enemy. The corpse is tried again after the fight.
                             hotkey "Cancel Current Target"
                             if config__sysmsg = 1
                                 sysmsg "Carve cancelled: an enemy was picked during the knife cursor." 88
@@ -1366,11 +1335,6 @@ while not dead
                             if config__sysmsg = 1
                                 sysmsg "Carve request: corpse={{alias__corpse}}." 88
                             endif
-                            # Read the reply, without break. The criminal lines come first so a later
-                            # match cannot clear them before they are seen. Replies (in-game 2026-10-07):
-                            #   1 "You carve materials from the corpse." or "That corpse has already been carved."
-                            #   2 "That is too far away." or "You must wait to perform another action."
-                            #   3 a criminal act or a criminal action refusal
                             @setvar! var__carve_reply 0
                             settimer "timer__carve" 0
                             while var__carve_reply = 0 and timer "timer__carve" < wait__carve_reply
@@ -1394,8 +1358,6 @@ while not dead
                                 endif
                             endwhile
 
-                            # A miss gets one more request, so a step closer can still carve it.
-                            # Everything else, and a second miss, ignores the corpse.
                             if var__carve_reply = 2 and var__carve_retry != alias__corpse
                                 @setvar! var__carve_retry alias__corpse
                             else
@@ -1421,7 +1383,6 @@ while not dead
                             if config__sysmsg = 1
                                 sysmsg "Carve request: Smart Harvest." 88
                             endif
-                            # Condition-terminated wait, without break.
                             @setvar! var__carve_reply 0
                             settimer "timer__carve" 0
                             while var__carve_reply = 0 and timer "timer__carve" < wait__carve_reply
@@ -1434,7 +1395,6 @@ while not dead
                                 endif
                             endwhile
 
-                            # Nothing grey is left here. Bounded sweep, no break.
                             if var__carve_reply = 2
                                 for 10
                                     if findtype 8198 ground -1 -1 2 as alias__carved_corpse
@@ -1618,7 +1578,6 @@ while not dead
                         if find alias__leather_stack global__my_loot_bag
                             @ignore alias__leather_stack
                         else
-                            # Complete lift/drop together. Do not leave the item held during a wait.
                             if config__sysmsg = 1
                                 sysmsg "Leather move request: serial={{alias__leather_stack}}." 88
                             endif
@@ -1638,7 +1597,6 @@ while not dead
                     overhead "[ loot bag, out ]" 254
                     settimer "timer__message" 0
                 endif
-                # The next interval starts after this pass, including a missing-bag attempt.
                 settimer "timer__pack_leather" 0
             endif
         endif

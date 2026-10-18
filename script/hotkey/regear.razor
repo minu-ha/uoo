@@ -223,7 +223,6 @@ endif
 # ----------------------------------------------------------------------------------------
 # module/base.razor
 # ----------------------------------------------------------------------------------------
-# The pvp expression means the structured-PvP restrictions, where these loops may not run.
 if pvp
     overhead "[ script, blocked ]" 254
     stop
@@ -253,7 +252,6 @@ while diffhits > config__heal_first_until and timer "timer__heal_first" < wait__
         wait wait__short
     endif
 
-    # A carried potion keeps the round going while it waits out its own cooldown.
     if config__use_potions = 1 and not targetexists and findtype "Yellow Potion" self as alias__heal_first_potion
         @setvar! var__heal_first_can 1
         getlabel alias__heal_first_potion label__heal_first_potion
@@ -265,7 +263,6 @@ while diffhits > config__heal_first_until and timer "timer__heal_first" < wait__
         endif
     endif
 
-    # The refusal of a cast that just ended. Without reagents it would only fail again.
     if insysmsg "More reagents are needed"
         @setvar! var__heal_first_no_greater_heal 1
     endif
@@ -276,7 +273,6 @@ while diffhits > config__heal_first_until and timer "timer__heal_first" < wait__
         wait wait__short
     endif
 
-    # Nothing to heal with any more: the clock is run out, which ends the round.
     if var__heal_first_can = 0
         settimer "timer__heal_first" wait__heal_first
     endif
@@ -284,7 +280,6 @@ while diffhits > config__heal_first_until and timer "timer__heal_first" < wait__
     wait wait__short
 endwhile
 
-# The agent leaves its cursor up when there is nothing left to heal.
 if targetexists "beneficial"
     hotkey "Cancel Current Target"
     wait wait__short
@@ -294,7 +289,6 @@ endif
 # ----------------------------------------------------------------------------------------
 # module/gear/dress.razor
 # ----------------------------------------------------------------------------------------
-# Hands. First, so a weapon is back in hand before the rest of the suit.
 if findlayer self righthand as alias__dress_item
     @setvar! var__right_hand alias__dress_item
 
@@ -355,7 +349,6 @@ elseif config__dress_restore = 1
     endif
 endif
 
-# Head and neck.
 if findlayer self head as alias__dress_item
     @setvar! var__head alias__dress_item
 
@@ -436,7 +429,6 @@ elseif config__dress_restore = 1
     endif
 endif
 
-# Torso, from the skin out.
 if findlayer self shirt as alias__dress_item
     @setvar! var__shirt alias__dress_item
 
@@ -537,7 +529,6 @@ elseif config__dress_restore = 1
     endif
 endif
 
-# Arms and jewelry.
 if findlayer self arms as alias__dress_item
     @setvar! var__arms alias__dress_item
 
@@ -638,7 +629,6 @@ elseif config__dress_restore = 1
     endif
 endif
 
-# Legs and feet, from the skin out, then the shoes.
 if findlayer self waist as alias__dress_item
     @setvar! var__waist alias__dress_item
 
@@ -739,7 +729,6 @@ elseif config__dress_restore = 1
     endif
 endif
 
-# Back.
 if findlayer self cloak as alias__dress_item
     @setvar! var__cloak alias__dress_item
 
@@ -816,18 +805,6 @@ dress 'cosmetic'
 # ----------------------------------------------------------------------------------------
 # module/pack/pouches.razor
 # ----------------------------------------------------------------------------------------
-# Two containers, so one grab off a corpse does not take everything. Both are kept in your
-# Razor profile like the house containers of restock/house.
-#
-#   supply pouch  global__my_supply_pouch, a plain pouch (3705, hue 0). The supplies
-#                 pack/sorting puts away, and what loot/recycle keeps
-#   loot bag      global__my_loot_bag, a bag (3702). Raw loot only: the leather and the
-#                 boards pack/leather and pack/lumber gather, and the dagger
-#
-# Each is found by itself when the backpack holds exactly one of its kind, and otherwise
-# asked for, or left unset with config__pouches_ask 0. Until 2026-10-19 one pouch did
-# both jobs as global__my_looting_pouch. That pouch is the supply pouch now, so the old
-# name is dropped once the new one is set.
 if not varexist global__my_supply_pouch or not find global__my_supply_pouch backpack
     unsetvar global__my_supply_pouch
 
@@ -868,57 +845,9 @@ endif
 # ----------------------------------------------------------------------------------------
 # module/pack/sorting.razor
 # ----------------------------------------------------------------------------------------
-# Everything the backpack should hold, and where it goes. Format matches document/game/item-list.md.
-#
-#   #bandage                 "clean bandage%s%"      3617
-#   #adventure pack          "adventure pack"        2726
-#   #dagger                  "dagger"                3922
-#   #pouch                   "pouch"                 3705   (hue 0 plain, hue 38 trapped)
-#   #bag                     "bag"                   3702   (the loot bag)
-#   #scissors                "scissors"              3998|3999
-#   #kindling                "kindling"              3553
-#   #skinning knife          "Elven Spellblade"      11552|11564
-#   #smoke bomb              "bombs"                 52149
-#   #adventurers rope        "rope"                  5370   (hue 2799)
-#   #delectable food                                 28879|28880|28881|28883|28885|28886|28888|29773|29774
-#   #magic mushroom          "mushroom"              29012
-#   #sewing kit              "sewing kit"            3997
-#   #item identification wand "wand"                 20496
-#   #instruments                                     3740|3742|3762|3763|10245|20006|20008|20010|20012|20014|20016
-#   #reagent satchel         "reagent satchel"       30765
-#   #potion satchel          "alchemists satchel"    31262
-#
-# Placement. drop takes literal coordinates, so the numbers are inline, but they only appear
-# in this block. They are gump pixels, not grid cells, so nudge them if items overlap.
-#
-#   backpack 0 200        the two satchels, bottom left, first
-#   backpack 0 200        the supply pouch, on the satchels
-#   backpack 0 200        the loot bag, on the supply pouch
-#   backpack 0..20 200    the trapped pouches, on top of all of it, five pixels apart
-#   pouch    0 0          every supply not named below, the scissors among them
-#   pouch    130 0        identification wand, sewing kit
-#   pouch    130 80       the instrument
-#   pouch    0 80         what loot/recycle keeps, placed by that script
-#   bag      0 0          the dagger
-#
-# Order matters. Moving a pouch closes it, and a closed container does not report what is
-# inside: the counters for the cure and heal potions in there read zero until it is opened
-# again, and a combat script that believes it has no cure potion will not drink one. Leaving
-# the contents loose in the backpack would count fine and lose them to the first thief, so
-# the pouch is moved and reopened before anything gets sorted into it.
-#
-# The satchels sit in the backpack itself, not in the pouch: a pouch that gets closed by
-# accident and reopened does not reopen what is nested in it, and the reagent and potion
-# counters go dark until each satchel is opened by hand. In the backpack they stay open.
-# Everything worth stealing is stacked on one spot, satchels first, the supply pouch and
-# the loot bag on them, the trapped pouches on top: a thief has to put the cursor on the
-# thing, and what is under the cursor there is always a trapped pouch. The pouch and the
-# bag are opened by serial and filled by serial, so being covered costs nothing. On a
-# corpse the stack is gone and the split is what is left: the bag only holds raw loot.
 cleardragdrop
 clearignore
 
-# 1. the satchels, bottom left of the backpack. Reopened for the same counting reason.
 if findtype 30765 backpack as alias__found_reagent_satchel
     lift alias__found_reagent_satchel
     wait wait__short
@@ -943,8 +872,6 @@ if findtype 31262 backpack as alias__found_alchemists_satchel
     wait wait__short
 endif
 
-# 2. the supply pouch, then the loot bag, on the satchels. Each moved by serial, reopened.
-# Either can be missing after a death, already reported by pack/pouches, and is skipped.
 if varexist global__my_supply_pouch and find global__my_supply_pouch backpack
     lift global__my_supply_pouch
     wait wait__short
@@ -969,9 +896,6 @@ if varexist global__my_loot_bag and find global__my_loot_bag backpack
     wait wait__short
 endif
 
-# 3. the trapped pouches, on top of the satchels, the supply pouch and the loot bag, five
-# pixels apart. drop takes literal coordinates, so five blocks instead of a loop. Not
-# reopened on purpose, nothing reads inside them. Any sixth pouch lands with the fifth.
 if findtype 3705 backpack 38 as alias__found_trap_pouch
     lift alias__found_trap_pouch
     wait wait__short
@@ -1038,9 +962,6 @@ while findtype 3705 backpack 38 as alias__found_trap_pouch
     @ignore alias__found_trap_pouch
 endwhile
 
-# 4. everything else, into the supply pouch. Collected first, because the walk below moves
-#    items out of the backpack and a findtype loop cannot be trusted while its own source
-#    is changing. Without a supply pouch the kit stays loose in the backpack.
 if varexist global__my_supply_pouch and find global__my_supply_pouch backpack
     removelist sorting_item_list
     createlist sorting_item_list
@@ -1084,13 +1005,10 @@ endif
 # ----------------------------------------------------------------------------------------
 # module/gear/aspect.razor
 # ----------------------------------------------------------------------------------------
-# Whatever was still moving items has to finish before the names are read.
 while queued
     wait wait__short
 endwhile
 
-# The held item. The right hand holds a one-handed weapon or the spellbook, the left a
-# two-handed weapon.
 if findlayer self righthand as alias__aspect_item
     @setvar! var__aspect_hand_item alias__aspect_item
 elseif findlayer self lefthand as alias__aspect_item
@@ -1104,8 +1022,6 @@ if var__aspect_hand_item != 0
     endif
 endif
 
-# The armor. The first piece worn is kept for the check after an activation. The first one
-# that shows an aspect is the one read.
 if findlayer self head as alias__aspect_item
     @setvar! var__aspect_armor_piece alias__aspect_item
     getlabel alias__aspect_item label__aspect_armor
@@ -1174,8 +1090,6 @@ if var__aspect_armor_item = 0
     endif
 endif
 
-# Read the aspects: one pass for the held item, one for the armor, through the same chain.
-# 99 when the name shows no aspect, or nothing is there to read.
 for 2
     @setvar! var__aspect_found 99
     @setvar! var__aspect_item 0
@@ -1249,8 +1163,6 @@ for 2
     endif
 endfor
 
-# Remember or restore. A shown aspect is remembered. A lost one is turned back on when one
-# is remembered, and a warning asks for it to be turned on by hand once when none is.
 for 2
     @setvar! var__aspect_type 0
     @setvar! var__aspect_kind 99
@@ -1503,7 +1415,6 @@ for 2
 
         wait wait__aspect
 
-        # The name shows the aspect again once it took.
         if index = 0
             getlabel var__aspect_hand_item label__aspect_read
         else

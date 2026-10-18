@@ -261,14 +261,12 @@ endif
 # ----------------------------------------------------------------------------------------
 # recipe/pvp-recipe.razor
 # ----------------------------------------------------------------------------------------
-# pvp is always in a fight, so the stat potions are kept up the whole time.
 @setvar! var__fighting 1
 
 
 # ----------------------------------------------------------------------------------------
 # module/base.razor
 # ----------------------------------------------------------------------------------------
-# The pvp expression means the structured-PvP restrictions, where these loops may not run.
 if pvp
     overhead "[ script, blocked ]" 254
     stop
@@ -513,7 +511,6 @@ while not dead
                             wait wait__poll
                         endfor
 
-                        # The agent leaves its beneficial cursor up when there is nothing left to heal.
                         if targetexists "beneficial" and diffhits = 0
                             hotkey "Cancel Current Target"
                             wait wait__short
@@ -703,7 +700,6 @@ while not dead
                                 wait wait__poll
                             endfor
                         elseif targetexists
-                            # Not the cursor this spell opens. Left open it would hold every block.
                             hotkey "Cancel Current Target"
                             wait wait__short
                         endif
@@ -741,12 +737,10 @@ while not dead
                                 wait wait__poll
                             endfor
                         elseif targetexists
-                            # Not the cursor this spell opens. Left open it would hold every block.
                             hotkey "Cancel Current Target"
                             wait wait__short
                         endif
                     elseif config__use_spell_siphon = 1 and not warmode and var__regs_magic_arrow = 1 and mana >= config__mana_spell_siphon and not findbuff "Spell Siphon" and not findbuff "Magic Reflection"
-                        # A disturb line an earlier cast left is read off first, so the poll sees only its own.
                         if insysmsg "Your concentration is disturbed, thus ruining thy spell."
                             # consumed, nothing else to do
                         endif
@@ -778,7 +772,6 @@ while not dead
                             hotkey 'Target Self'
                             wait wait__cast
                         elseif targetexists
-                            # Not the cursor this spell opens. Left open it would hold every block.
                             hotkey "Cancel Current Target"
                             wait wait__short
                         endif
@@ -842,7 +835,6 @@ while not dead
                     endif
                     wait wait__short
                 else
-                    # Gone from hand and pack: search again next pass.
                     @setvar! var__weapon_armed_graphic 0
                     if lhandempty and rhandempty and timer "timer__message" >= interval__message
                         overhead "[ weapon, out ]" 254

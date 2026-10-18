@@ -200,7 +200,6 @@ settimer "timer__scavenger_clear" 0
 # ----------------------------------------------------------------------------------------
 # module/base.razor
 # ----------------------------------------------------------------------------------------
-# The pvp expression means the structured-PvP restrictions, where these loops may not run.
 if pvp
     overhead "[ script, blocked ]" 254
     stop
@@ -217,13 +216,10 @@ endif
 # ----------------------------------------------------------------------------------------
 # recipe/dexxer-basic-recipe.razor
 # ----------------------------------------------------------------------------------------
-# The codex hotbar, opened once when it is not up.
 if not gumpexists 2016719803
     say "[codexhotbar"
 endif
 
-# loot/recycle runs the hotkey named in this list when it finishes or gives up. A list, because
-# a variable cannot hold a word (document/scripting/razor.md part 3). It lasts until the client closes.
 if not listexists 'list__resume_script'
     createlist 'list__resume_script'
 endif
@@ -453,7 +449,6 @@ while not dead
                             wait wait__poll
                         endfor
 
-                        # The agent leaves its beneficial cursor up when there is nothing left to heal.
                         if targetexists "beneficial" and diffhits = 0
                             hotkey "Cancel Current Target"
                             wait wait__short

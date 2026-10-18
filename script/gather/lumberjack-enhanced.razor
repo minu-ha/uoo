@@ -336,7 +336,6 @@ endif
 # ----------------------------------------------------------------------------------------
 # module/base.razor
 # ----------------------------------------------------------------------------------------
-# The pvp expression means the structured-PvP restrictions, where these loops may not run.
 if pvp
     overhead "[ script, blocked ]" 254
     stop
@@ -353,8 +352,6 @@ endif
 # ----------------------------------------------------------------------------------------
 # module/escape/tracking.razor
 # ----------------------------------------------------------------------------------------
-# Reuse the color verified by this script while Hunting remains active.
-# A buff alone does not identify the filter. A first run checks the current window instead.
 if skill "Tracking" > 0
     if findbuff "tracking" and var__tracking_setup_color = config__tracking_color
         @setvar! var__tracking_filter_confirmed 1
@@ -365,7 +362,6 @@ if skill "Tracking" > 0
             waitforgump 4267467659 wait__tracking_gump
 
             if gumpexists 4267467659
-                # Do not cycle past an already correct filter. The window displays the selected type.
                 if config__tracking_color = 1 and ingump "Murderer Players" 4267467659
                     @setvar! var__tracking_filter_confirmed 1
                 elseif config__tracking_color = 2 and ingump "Criminal Players" 4267467659
@@ -377,7 +373,6 @@ if skill "Tracking" > 0
                 endif
 
                 if var__tracking_filter_confirmed = 0
-                    # An active hunt must stop before cycling through animals and other player colors.
                     if findbuff "tracking"
                         gumpresponse 6 4267467659
                         wait wait__short
@@ -389,10 +384,8 @@ if skill "Tracking" > 0
                         endfor
                     endif
 
-                    # Discard the old target and old filter replies only while setting up.
                     clearsysmsg
                     if not findbuff "tracking" and gumpexists 4267467659
-                        # Button 8 cycles ten hunt filters. Bound the attempt to one complete rotation.
                         for 10
                             if diffhits >= config__heal_hits or poisoned or warmode or hidden or queued or casting or targetexists
                                 break
@@ -402,7 +395,6 @@ if skill "Tracking" > 0
                             endif
                             gumpresponse 8 4267467659
                             @setvar! var__tracking_button_answered 0
-                            # Only one selection is outstanding. Do not outrun a delayed server response.
                             for 60
                                 if diffhits >= config__heal_hits or poisoned or warmode or hidden or queued or casting or targetexists
                                     break
@@ -446,7 +438,6 @@ if skill "Tracking" > 0
                 endif
 
                 if var__tracking_filter_confirmed = 1 and gumpexists 4267467659 and diffhits < config__heal_hits and not poisoned and not warmode and not hidden and not queued and not casting and not targetexists
-                    # Setup reports belong to the old/intermediate filter, never to Recall detection.
                     clearsysmsg
                     if not findbuff "tracking"
                         gumpresponse 6 4267467659
@@ -475,14 +466,11 @@ endif
 # ----------------------------------------------------------------------------------------
 # recipe/lumberjack-enhanced-recipe.razor
 # ----------------------------------------------------------------------------------------
-# pack/lumber moves Boards into this bag. restock/loadout picks it, this asks when it is missing.
 if not varexist global__my_loot_bag or not find global__my_loot_bag backpack
     overhead "[ loot bag, pick ]" 255
     setvar global__my_loot_bag
 endif
 
-# loot/recycle runs the hotkey named in this list when it finishes or gives up. A list, because
-# a variable cannot hold a word (document/scripting/razor.md part 3). It lasts until the client closes.
 if not listexists 'list__resume_script'
     createlist 'list__resume_script'
 endif
@@ -618,7 +606,6 @@ while not dead
                             wait wait__poll
                         endfor
 
-                        # The agent leaves its beneficial cursor up when there is nothing left to heal.
                         if targetexists "beneficial" and diffhits = 0
                             hotkey "Cancel Current Target"
                             wait wait__short
@@ -713,7 +700,6 @@ while not dead
             endif
         endif
 
-        # Read Tracking before harvesting and inventory maintenance. Profile overheads display it.
         if config__recall_on_detection = 1
             if var__tracking_hunting_active = 1 and var__recall_needed = 0
                 if config__recall_at_any_distance = 1
@@ -721,7 +707,6 @@ while not dead
                         @setvar! var__recall_needed 1
                     endif
                 else
-                    # Keep all 45 literal distance branches. No player find is needed.
                     if insysmsg "Distance to destination: 45 steps" or insysmsg "(45 spaces to target)"
                         @setvar! var__recall_needed 1
                     elseif insysmsg "Distance to destination: 44 steps" or insysmsg "(44 spaces to target)"
@@ -820,7 +805,6 @@ while not dead
             endif
         endif
 
-        # Weight shares the check clock. Detection is always read first.
         if var__recall_check_due = 1
             if config__recall_on_weight = 1 and var__recall_needed = 0
                 if diffweight <= config__weight_remaining
@@ -836,15 +820,11 @@ while not dead
             endif
         endif
 
-        # Keep gathering paused while waiting for mana, a book or free input.
         if var__recall_needed = 1
-            # Heat of Battle is not a local gate. Let the server accept or refuse the request.
-            # Recall uses no combat preparation or Strength and Agility potions.
             if mana >= config__mana_recall and not paralyzed and not warmode
                 if not hidden and not queued and not casting and not targetexists and cooldown "walk" = 0
                     if var__recall_book_available = 1
                         if findtype "runebook" backpack or findtype "runetome" backpack
-                            # Change Home to your rune name. This requests Recall, not Gate Travel.
                             say "[RecallCharge Home"
                             @setvar! var__recall_sent 1
 
@@ -854,7 +834,6 @@ while not dead
 
                             wait wait__short
                         else
-                            # A removed book invalidates the cache. Wait for the next check to search again.
                             @setvar! var__recall_book_available 0
                         endif
                     endif
@@ -870,16 +849,11 @@ while not dead
             endif
         endif
     else
-        # One request per Play. Recovery keeps running, but harvest and repeat Recall stay paused.
-        # Only an actual refusal gets a result notice. Silence or elapsed time does not prove arrival.
         if insysmsg "Magical travel is not allowed in this location." or insysmsg "Magical travel from inside a dungeon is only possible near golden moongates." or insysmsg "You do not have access to travel inside this house."
             overhead "[ recall, blocked ]" 254
         endif
     endif
 
-    # A latched Recall keeps the cast window and stops gathering until the script restarts.
-    # Gathering also waits for a required book and, when detection is on and the character has
-    # Tracking, for the hunt.
     @setvar! var__hold_gathering 0
     if var__recall_needed = 1
         @setvar! var__hold_casts 1
@@ -1015,13 +989,11 @@ while not dead
         settimer "timer__harvest" 0
     endif
 
-    # Equip independently of spare weight. var__hold_gathering pauses both equip and harvest.
     if var__hold_gathering = 0 and diffhits < config__heal_hits and not poisoned and not paralyzed and not warmode and timer "timer__harvest" >= var__harvest_retry
         if not hidden and not queued and not casting and not targetexists and cooldown "walk" = 0
             settimer "timer__harvest" 0
             @setvar! var__harvest_retry interval__harvest_retry
 
-            # Follow archive/bard-mace: an empty left hand needs equipment, regardless of type-search results.
             if lhandempty
                 if not find var__my_hatchet backpack
                     @setvar! var__my_hatchet 0
@@ -1031,7 +1003,6 @@ while not dead
                 endif
 
                 if find var__my_hatchet backpack as alias__hatchet_to_equip
-                    # lift waits for the held item. Do not infer equipped state from this request.
                     lift alias__hatchet_to_equip
                     drop self lefthand
                     if config__sysmsg = 1
@@ -1043,28 +1014,23 @@ while not dead
                     settimer "timer__message" 0
                 endif
             elseif findlayer self lefthand as alias__equipped_hatchet
-                # Adopt an already held Hatchet once, including replacement tools with a new serial.
                 if var__my_hatchet != alias__equipped_hatchet
                     getlabel alias__equipped_hatchet label__hand_tool
                     if "hatchet" in label__hand_tool or "Hatchet" in label__hand_tool
                         @setvar! var__my_hatchet alias__equipped_hatchet
                     elseif not hidden and not queued and not casting and not targetexists and not warmode
-                        # Clear only a different left-hand tool. The next attempt equips our Hatchet.
                         lift alias__equipped_hatchet
                         drop backpack
                         wait wait__short
                     endif
                 endif
 
-                # A slot-to-serial match proves this selected tool is actually in lefthand.
-                # Recheck input after tool discovery. Do not add a separate ready state.
                 if var__my_hatchet != alias__equipped_hatchet or diffweight <= 0 or hidden or queued or casting or targetexists or warmode
                     # The hand, spare weight or player input is not ready for harvesting.
                 else
                     hotkey "Use item in hand"
                     waitfortarget wait__harvest_target
 
-                    # The tool queue can still be pending. A neutral cursor is ready to answer.
                     if targetexists "neutral" and not hidden and not casting and not warmode
                         target self
                         wait wait__short
@@ -1164,7 +1130,6 @@ while not dead
                                 wait wait__poll
                             endfor
                         elseif targetexists
-                            # Not the cursor this spell opens. Left open it would hold every block.
                             hotkey "Cancel Current Target"
                             wait wait__short
                         endif
@@ -1202,12 +1167,10 @@ while not dead
                                 wait wait__poll
                             endfor
                         elseif targetexists
-                            # Not the cursor this spell opens. Left open it would hold every block.
                             hotkey "Cancel Current Target"
                             wait wait__short
                         endif
                     elseif config__use_spell_siphon = 1 and not warmode and var__regs_magic_arrow = 1 and mana >= config__mana_spell_siphon and not findbuff "Spell Siphon" and not findbuff "Magic Reflection"
-                        # A disturb line an earlier cast left is read off first, so the poll sees only its own.
                         if insysmsg "Your concentration is disturbed, thus ruining thy spell."
                             # consumed, nothing else to do
                         endif
@@ -1239,7 +1202,6 @@ while not dead
                             hotkey 'Target Self'
                             wait wait__cast
                         elseif targetexists
-                            # Not the cursor this spell opens. Left open it would hold every block.
                             hotkey "Cancel Current Target"
                             wait wait__short
                         endif
@@ -1278,9 +1240,6 @@ while not dead
                     dclick global__my_loot_bag
                     wait wait__lumber_item
 
-                    # Two phases share one body: Logs first, then current Boards.
-                    # Both scans end by their conditions. Each phase has its own time budget.
-                    # Do not reuse pre-conversion serials after conversion or stack merging.
                     for 2
                         if index = 0
                             @setvar! var__lumber_graphic 7133
@@ -1290,14 +1249,10 @@ while not dead
                         settimer "timer__pack_lumber" 0
                         @clearignore
 
-                        # End loops by their conditions. No break skips an if scope or resets the outer for.
-                        # Settle the bag/previous-phase queue within this phase's existing budget.
                         while queued and timer "timer__pack_lumber" < wait__lumber_batch and not dead and not pvp and diffhits < config__light_hits and not poisoned and not paralyzed and not warmode and not hidden and not casting and not targetexists
                             wait wait__poll
                         endwhile
 
-                        # No hue filter. Search current inventory after each conversion or move.
-                        # The timer advances even when ignore cannot advance a failed/packed stack.
                         while timer "timer__pack_lumber" < wait__lumber_batch and not queued and not dead and not pvp and diffhits < config__light_hits and not poisoned and not paralyzed and not warmode and not hidden and not casting and not targetexists and find global__my_loot_bag backpack and findtype var__lumber_graphic backpack as alias__lumber_stack
                             if var__lumber_graphic = 7133
                                 if config__sysmsg = 1
@@ -1306,7 +1261,6 @@ while not dead
                                 dclick alias__lumber_stack
                                 wait wait__lumber_item
                             elseif find alias__lumber_stack global__my_loot_bag
-                                # Recursive backpack searches can return Boards already in the bag.
                                 if config__sysmsg = 1
                                     sysmsg "Lumber skip: serial={{alias__lumber_stack}}, already in bag." 88
                                 endif
@@ -1314,16 +1268,12 @@ while not dead
                                 if config__sysmsg = 1
                                     sysmsg "Lumber move request: serial={{alias__lumber_stack}}, bag={{global__my_loot_bag}}." 88
                                 endif
-                                # Complete lift/drop together. Do not leave the item held during a wait.
                                 lift alias__lumber_stack 60000
                                 drop global__my_loot_bag -1 -1
                                 wait wait__lumber_item
                             endif
-                            # Check container membership before ignore, which can hide it from find.
-                            # Skip this selected serial only for this phase, including failed requests.
                             @ignore alias__lumber_stack
 
-                            # A pending item queue pauses the next search, without leaving its loop scope.
                             while queued and timer "timer__pack_lumber" < wait__lumber_batch and not dead and not pvp and diffhits < config__light_hits and not poisoned and not paralyzed and not warmode and not hidden and not casting and not targetexists
                                 wait wait__poll
                             endwhile
@@ -1343,7 +1293,6 @@ while not dead
                     overhead "[ loot bag, out ]" 254
                     settimer "timer__message" 0
                 endif
-                # The next interval starts after this batch, including a missing-bag attempt.
                 settimer "timer__pack_lumber" 0
             endif
         endif

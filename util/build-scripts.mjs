@@ -18,7 +18,8 @@
  *     # @ state box          var__ state, written the same way. Guards (if not varexist) may wrap them
  *     # @ setup, loop, end   code under a box with only the "# @" line. end is base only. A loop or
  *                            end block starts with its "-" banner: the title, what it does, a rule.
- *                            The built loop keeps the rules and the title, with the module path
+ *                            The built loop keeps the rules and the title, with the module path,
+ *                            and no comment between the code lines but the one a branch is made of
  * Every name a section declares is described in its box, and each name belongs to one module.
  * A block may use the names of any module the loop has. The builder works out which those are.
  *
@@ -74,6 +75,8 @@ const FULL_NAME = /^(?:config|wait|interval|cooldown|timer|var)__[A-Za-z0-9_]+$/
 const SETVAR = /^\s*@?setvar!?\s+(\S+)\s*(.*)$/;
 const TIMER = /^(timer__[A-Za-z0-9_]+)\s+(0|(?:interval|cooldown|wait|config)__[A-Za-z0-9_]+)$/;
 const GUARD = /^\s*(if not varexist var__[A-Za-z0-9_]+|endif)\s*$/;
+const OPENER = /^\s*(?:if|elseif|else|while|for|foreach)\b/;
+const CLOSER = /^\s*(?:elseif|else|endif|endwhile|endfor)\b/;
 const DESC_NAMES = /^# {3}(\S.*)$/;
 const DESC_TEXT = /^# {6}(.*)$/;
 const BOX_SETTING = /^#\s+([a-z0-9_]+) \(default /;
@@ -141,11 +144,36 @@ const commentText = (line) => {
 const banner = (name) => [PART, `# ${name}`, PART];
 
 /**
+ * Code without its comments: what a line does and why is written in the module. A comment
+ * that is all a branch holds stays, so no branch is left empty (an "if insysmsg" that only
+ * reads a line off). A blank line goes when it only framed a comment: after another blank,
+ * at the top of a branch, or right before its end.
+ */
+const withoutComments = (lines, kept = () => false) => {
+    const code = lines.filter((line, i) => {
+        if (!line.trim().startsWith("#") || kept(i)) return true;
+        const before = lines.slice(0, i).findLast(isCode);
+        const after = lines.slice(i + 1).find(isCode);
+        return Boolean(before && after && OPENER.test(before) && CLOSER.test(after));
+    });
+    const out = [];
+    code.forEach((line, i) => {
+        if (!line.trim()) {
+            const before = out.at(-1);
+            const after = code.slice(i + 1).find((next) => next.trim()) ?? "";
+            if (!before?.trim() || OPENER.test(before) || CLOSER.test(after)) return;
+        }
+        out.push(line);
+    });
+    return trimLines(out);
+};
+
+/**
  * A block in the loop starts with its "-" banner, and a block with steps has one more
  * banner per step. The built loop keeps only the rules and the title of each, with the file
- * the block came from on the right of the first title: what the block does is written in
- * that file. Inside a group the block moves in by four spaces a level and its rules are
- * shortened to keep the width.
+ * the block came from on the right of the first title, and the code without its comments:
+ * what the block does is written in that file. Inside a group the block moves in by four
+ * spaces a level and its rules are shortened to keep the width.
  */
 const blockBanner = (blockLines, source, depth = 0) => {
     const lines = blockLines.map((line) => (line.trim() ? " ".repeat(4 * depth) + line : line));
@@ -159,17 +187,27 @@ const blockBanner = (blockLines, source, depth = 0) => {
             starts.add(i);
         }
     }
-    for (const start of [...starts].sort((a, b) => b - a)) {
+    // Each banner becomes a rule, its title and a rule, the only comments that stay.
+    const folded = [];
+    const titles = new Set();
+    for (let start = 0; start < lines.length; start += 1) {
+        if (!starts.has(start)) {
+            folded.push(lines[start]);
+            continue;
+        }
         let closing = start + 2;
         while (closing < lines.length && !BLOCK_RULE.test(lines[closing])) closing += 1;
         if (closing === lines.length) {
             throw new BuildError(`${source}: the banner at "${lines[start + 1].trim()}" has no closing rule`);
         }
-        lines.splice(start, closing - start + 1, rule, lines[start + 1].trimEnd(), rule);
+        titles.add(folded.length).add(folded.length + 1).add(folded.length + 2);
+        folded.push(rule, lines[start + 1].trimEnd(), rule);
+        start = closing;
     }
-    const title = lines[1].trimEnd();
-    lines[1] = title + " ".repeat(Math.max(2, WIDTH - charCount(title) - charCount(source))) + source;
-    return lines;
+    const code = withoutComments(folded, (i) => titles.has(i));
+    const title = code[1].trimEnd();
+    code[1] = title + " ".repeat(Math.max(2, WIDTH - charCount(title) - charCount(source))) + source;
+    return code;
 };
 
 /**
@@ -746,7 +784,7 @@ const build = (path, modules, owner) => {
             const code = section === "timer" ? timerLines(unit) : trimLines(unit.code[section]);
             if (code.length) found.push([...sourceBox(source), ...code]);
         }
-        const own = trimLines(linesOf(recipe, section));
+        const own = withoutComments(linesOf(recipe, section));
         if (withRecipe && own.length) found.push([...sourceBox(name), ...own]);
         if (section === "timer" && loop.clocks.length) {
             found.push([...sourceBox(name), ...timerLines({code: {timer: loop.clocks.map((clock) => clock.join(" "))}})]);
@@ -793,7 +831,7 @@ const build = (path, modules, owner) => {
     };
 
     const setupParts = [...units, [name, recipe]]
-        .map(([source, unit]) => [source, trimLines(linesOf(unit, "setup"))])
+        .map(([source, unit]) => [source, withoutComments(linesOf(unit, "setup"))])
         .filter(([, lines]) => lines.length)
         .map(([source, lines]) => [...sourceBox(source), ...lines]);
 
