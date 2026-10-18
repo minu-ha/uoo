@@ -736,7 +736,10 @@ endfor
 # ========================================================================================
 # Records what is worn, nothing else. Putting it back on is script/hotkey/dress.razor's job.
 #
-# One block per layer findlayer accepts, so nothing is addressed by item graphic any more.
+# One block per equipment layer findlayer accepts, so nothing is addressed by item
+# graphic any more. The paperdoll slots Outlands added on top have no findlayer name, so
+# they are not recorded here. A Razor Arm/Dress list can hold them:
+# document/scripting/razor.md part 2.
 # The old version equipped a few items by graphic and sent three of them to the pants layer,
 # which only holds one thing: the quiver, the short pipe and the wizard satchel were
 # overwriting each other. hair and facialhair are left out, they are not equipment.

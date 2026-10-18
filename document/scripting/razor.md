@@ -63,6 +63,31 @@ Razor CE에 없거나 CE보다 넓어진 것. 존재 여부만 기록, 인자 �
 
 이 절은 문서로 확인한 문법과 설계상 제한. 새 실행 선례나 포션 복구 성공의 증명 아님.
 
+### <a id="02.B"></a>02.B findlayer의 레이어
+
+> "The valid layers are:" -- 위키 Razor Scripting, `findlayer`
+
+`righthand` `lefthand` `shoes` `pants` `shirt` `head` `gloves` `ring` `talisman` `neck` `hair` `waist` `innertorso` `bracelet` `face`
+`facialhair` `middletorso` `earrings` `arms` `cloak` `backpack` `outertorso` `outerlegs` `innerlegs` `onehandedsecondary` `quiver` `outerbody`
+
+- 27개. 장비는 `hair`, `facialhair`를 뺀 25개 → `hotkey/dress`와 `restock/loadout`이 모두 다룸
+- **Outlands가 더한 페이퍼돌 부위는 `findlayer` 이름이 없음 → 레이어로 훑는 스크립트는 못 봄**
+- Razor의 Arm/Dress 목록은 담음. Add Current로 gold rim glasses(Eyewear), gravediggers lantern, tidal tomb travel pack이 목록에 들어감. 인게임 확인됨 2026-10-18
+  - 목록은 아이템 serial을 담음 → 장비를 바꾸면 Razor 화면에서 다시 담아야 함. 목록을 고치는 스크립트 명령은 없음([Razor CE 명령](https://www.razorce.com/guide/commands/))
+  - 실행은 스크립트로 가능: CE 문법 `dress ('name of dress list')`, 또는 Hot Keys의 `Dress: <목록>`을 `hotkey`로. 이 포크에서는 확인되지 않았다
+  - 그 목록의 Dress가 이 부위 아이템을 실제로 다시 입히는지도 확인되지 않았다
+
+[Outlands Drip](https://outlandsdrip.com/)의 부위와 대응. 부위 이름은 2026-10-18 사이트 번들에서 읽음.
+
+| Drip 묶음 | `findlayer` 이름이 있는 부위 | 이름이 없는 부위 |
+| --- | --- | --- |
+| Armor | Legs `innerlegs`, Arms `arms`, Chest `innertorso`, Gloves `gloves`, Neck `neck`, Helm `head` | Cosmetic Legs, Cosmetic Arms, Cosmetic Chest |
+| Clothing | Cloak `cloak`, Shirt `shirt`, Pants `pants`, Shoes `shoes`, Middle Torso `middletorso`, Outer Legs `outerlegs`, Outer Torso `outertorso`, Waist `waist`, Outer Body `outerbody`, Face `face` | Undergarment, Outer Cloak, Underarms, Underlegs, Outer Arms, Outer Waist, Hip, Shoulder |
+| Accessories | 1H Secondary `onehandedsecondary`, Talisman `talisman`, Earrings `earrings`, Bracelet `bracelet`, Quiver `quiver`, One-Handed `righthand` | 2H Secondary, Eyewear, Back, Back Secondary, Backworn, Necklace |
+| 화면의 세 묶음 밖 | Ring `ring`, 양손 무기와 방패 `lefthand`, 백팩 `backpack` | Light Source, 문신 여섯(몸, 양팔, 양다리, 얼굴) |
+
+- Drip의 Neck은 고짓 같은 목 방어구. 목걸이는 따로 Necklace 부위
+
 ::part[함정과 선례]
 
 ## <a id="03"></a>03 확인된 함정

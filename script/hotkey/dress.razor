@@ -2,17 +2,37 @@
 # Original credit for the concept to Demlar
 # Needs: script/restock/loadout.razor run once this session, it records what to put back on
 
-# One block per layer findlayer accepts, the same list script/restock/loadout.razor records.
-# A layer that still holds something is recorded. A layer that is empty gets its remembered
-# item back. Nothing is addressed by item graphic: the old version equipped seven items that
-# way and forced three of them onto the pants layer, which holds one thing, so the quiver,
-# the short pipe and the wizard satchel overwrote each other. A layer sweep cannot get that
-# wrong, because the layer an item was recorded from is the layer it goes back to.
+# One block per equipment layer, the same list script/restock/loadout.razor records. A
+# layer that still holds something is recorded. A layer that is empty gets its remembered
+# item back. Nothing is addressed by item graphic: the old version equipped seven items
+# that way and forced three of them onto the pants layer, which holds one thing, so the
+# quiver, the short pipe and the wizard satchel overwrote each other. A layer sweep
+# cannot get that wrong, because the layer an item was recorded from is the layer it goes
+# back to.
 #
-# hair and facialhair are left out, they are not equipment.
-@setvar! wait__short 300
+# findlayer takes 27 layers and every one that holds equipment is here, 25: hair and
+# facialhair are not equipment. The paperdoll slots Outlands added on top, eyewear,
+# backworn, outer cloak, necklace, the cosmetic armor and the rest, have no findlayer
+# name, so this sweep cannot see them. A Razor Arm/Dress list can hold them. The list and
+# the slots: document/scripting/razor.md part 2.
+
+
+# ========================================================================================
+# CONFIG
+# ========================================================================================
 @setvar! config__chatty 1
 
+
+# ========================================================================================
+# WAIT AND COOLDOWN
+# ========================================================================================
+@setvar! wait__short 300
+
+
+# ========================================================================================
+# HANDS
+# ========================================================================================
+# First, so a weapon is back in hand before the rest of the suit.
 if findlayer self righthand as item
     @setvar! var__right_hand item
 
@@ -79,6 +99,10 @@ else
     endif
 endif
 
+
+# ========================================================================================
+# HEAD AND NECK
+# ========================================================================================
 if findlayer self head as item
     @setvar! var__head item
 
@@ -167,6 +191,11 @@ else
     endif
 endif
 
+
+# ========================================================================================
+# TORSO
+# ========================================================================================
+# From the skin out.
 if findlayer self shirt as item
     @setvar! var__shirt item
 
@@ -255,6 +284,32 @@ else
     endif
 endif
 
+if findlayer self outerbody as item
+    @setvar! var__outer_body item
+
+    if config__chatty = 1
+        getlabel item label__outer_body
+        overhead "[ outer body, {{label__outer_body}} ]" 290
+    endif
+else
+    if varexist var__outer_body
+        if find var__outer_body backpack
+            lift var__outer_body
+            drop self outerbody
+            wait wait__short
+
+            if config__chatty = 1
+                getlabel var__outer_body label__outer_body
+                overhead "[ worn, {{label__outer_body}} ]" 290
+            endif
+        endif
+    endif
+endif
+
+
+# ========================================================================================
+# ARMS AND JEWELRY
+# ========================================================================================
 if findlayer self arms as item
     @setvar! var__arms item
 
@@ -343,6 +398,33 @@ else
     endif
 endif
 
+if findlayer self talisman as item
+    @setvar! var__talisman item
+
+    if config__chatty = 1
+        getlabel item label__talisman
+        overhead "[ talisman, {{label__talisman}} ]" 290
+    endif
+else
+    if varexist var__talisman
+        if find var__talisman backpack
+            lift var__talisman
+            drop self talisman
+            wait wait__short
+
+            if config__chatty = 1
+                getlabel var__talisman label__talisman
+                overhead "[ worn, {{label__talisman}} ]" 290
+            endif
+        endif
+    endif
+endif
+
+
+# ========================================================================================
+# LEGS AND FEET
+# ========================================================================================
+# From the skin out, then the shoes.
 if findlayer self waist as item
     @setvar! var__waist item
 
@@ -453,6 +535,10 @@ else
     endif
 endif
 
+
+# ========================================================================================
+# BACK
+# ========================================================================================
 if findlayer self cloak as item
     @setvar! var__cloak item
 
@@ -475,28 +561,6 @@ else
     endif
 endif
 
-if findlayer self talisman as item
-    @setvar! var__talisman item
-
-    if config__chatty = 1
-        getlabel item label__talisman
-        overhead "[ talisman, {{label__talisman}} ]" 290
-    endif
-else
-    if varexist var__talisman
-        if find var__talisman backpack
-            lift var__talisman
-            drop self talisman
-            wait wait__short
-
-            if config__chatty = 1
-                getlabel var__talisman label__talisman
-                overhead "[ worn, {{label__talisman}} ]" 290
-            endif
-        endif
-    endif
-endif
-
 if findlayer self quiver as item
     @setvar! var__quiver item
 
@@ -514,28 +578,6 @@ else
             if config__chatty = 1
                 getlabel var__quiver label__quiver
                 overhead "[ worn, {{label__quiver}} ]" 290
-            endif
-        endif
-    endif
-endif
-
-if findlayer self outerbody as item
-    @setvar! var__outer_body item
-
-    if config__chatty = 1
-        getlabel item label__outer_body
-        overhead "[ outer body, {{label__outer_body}} ]" 290
-    endif
-else
-    if varexist var__outer_body
-        if find var__outer_body backpack
-            lift var__outer_body
-            drop self outerbody
-            wait wait__short
-
-            if config__chatty = 1
-                getlabel var__outer_body label__outer_body
-                overhead "[ worn, {{label__outer_body}} ]" 290
             endif
         endif
     endif
