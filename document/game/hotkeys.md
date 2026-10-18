@@ -54,10 +54,10 @@ order: 20
 | 무수정 | **Smart Heal/Cure** | 시그니처 ① | 시그니처 ② | 시그니처 ③ | Explosion | Energy Bolt | Paralyze | Night Sight |
 | Shift | — | — | — | — | — | — | — | — |
 | Ctrl | **Greater Heal** (커서 → 펫, 동료) | 힐 포션 | 큐어 포션 | 리프 포션 | 힘 포션 | 민 포션 | 레지 포션 | — |
-| Alt | — | **Vengeful Spirit** | Fire El → Lich | Water El → Rag Witch | Earth El → Mummy | Daemon → Vampire | Summon Creature | dress |
+| Alt | — | **Vengeful Spirit** | Fire El → Lich | Water El → Rag Witch | Earth El → Mummy | Daemon → Vampire | Summon Creature | regear |
 
 - Alt 줄 → 뒤 이름: Vengeful Spirit(`Alt+1`)을 켜고 부를 때 나오는 언데드([Bard Necro](../templates/bard-necro.md#03.C) 03.C절)
-- Alt 줄: 템플릿이 쓰는 소환만(03절). 예외 `Alt+0` dress, 자주 안 눌러 줄 끝에 둠
+- Alt 줄: 템플릿이 쓰는 소환만(03절). 예외 `Alt+0` regear(사망 뒤 장비 다시 갖추기, 옛 dress), 자주 안 눌러 줄 끝에 둠
 - 빈 `7`\~`9`는 표에서 제외
 
 ### <a id="01.C"></a>01.C 윗줄
@@ -123,7 +123,7 @@ order: 20
 | 무수정 | 손에 익어야 하는 것 | 이동, 타겟, 펫, 핵심 콤보, 도주, 긴급 |
 | Shift | 밖으로 던지는 것 | 윗줄 공격 주문 6, 아랫줄 교전(summoner는 플레이어 순환, basic은 햄스트링과 디스암) |
 | Ctrl | 나와 내 편에 좋은 것 | 숫자줄 포션 6, 윗줄 버프 4와 펫 큐어와 동료 부활, 아랫줄 필드와 유틸 4, `` ` `` 펫 힐 |
-| Alt | 소환만 | `1` VS → `2`\~`6`. 예외 `0` dress 하나(01.B절). 전투 밖에서 천천히 |
+| Alt | 소환만 | `1` VS → `2`\~`6`. 예외 `0` regear 하나(01.B절). 전투 밖에서 천천히 |
 
 ### <a id="02.B"></a>02.B Mac에서 막히는 키
 

@@ -61,7 +61,7 @@ order: 10
 | 폴더 | 언제 | 파일명 규칙 | 예 |
 | --- | --- | --- | --- |
 | `script/combat/` | 사냥 중 계속 도는 메인 루프 | `<템플릿>[-<변형>]` | `bard-necro-enhanced`, `pvp` |
-| `script/hotkey/` | 키에 물린 단발 매크로 | `<동작>[-<대상>]`. 무기 바꾸기는 `weapon-<무기>` | `weapon-katana`, `cancel-target`, `dress`, `moongate` |
+| `script/hotkey/` | 키에 물린 단발 매크로 | `<동작>[-<대상>]`. 무기 바꾸기는 `weapon-<무기>` | `weapon-katana`, `cancel-target`, `regear`, `moongate` |
 | `script/debug/` | 진단, 동작 시험용 단발 스크립트. 필요하면 핫키 | `<검사>[-<대상>]` | `dump-label`, `debug-target-find`, `debug-target-state`, `test-telekinesis-var` |
 | `script/train/` | 스킬 훈련 | `<스킬>` | `magery`, `carto` |
 | `script/gather/` | 채집 루프 | `<채집>` | `lumberjack-enhanced`, `skinning-enhanced` |
@@ -233,7 +233,7 @@ VS Code: `util/razor-syntax` 폴더를 확장으로 추가.
 ### <a id="03.B"></a>03.B 세션 값과 영속 값
 
 - 세션 값: `global__` 외 모든 변수. `@setvar!`로 넣음
-  - 스크립트가 끝나도 클라이언트 종료까지 남음, 다른 스크립트도 읽음. 예: `restock/loadout`이 적은 `var__right_hand`를 `hotkey/dress`가 읽음
+  - 스크립트가 끝나도 클라이언트 종료까지 남음, 다른 스크립트도 읽음. 예: `restock/loadout`이 적은 `var__right_hand`를 `hotkey/regear`가 읽음
   - 타이머와 리스트도 실행 종료 후 남음
 - 영속 값: `global__`뿐. `setvar`로 넣음. 프로필에 저장, 클라이언트 재시작 후에도 남음
 - **`global__` 이름 변경 → 프로필의 기존 항목과 연결 끊김.** 이름이 곧 키 → 전부 다시 타겟, 프로필에는 옛 항목이 고아로 남음.

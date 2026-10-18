@@ -1,0 +1,1496 @@
+# Regear: after a death and a looted corpse, heals, puts the suit back on, sorts the backpack and turns the aspects on.
+# Needs: restock/loadout run once this Razor session, it records the suit and the aspects. Arcane Essence for the aspects.
+# Hotkeys: Drink Heal, > Greater Heal/Cure Self, Cancel Current Target, Bandage Self.
+# Generated from recipe/regear-recipe.razor by util/build-scripts.mjs. Edit module/ and recipe/, not this file.
+
+
+# ========================================================================================
+# CONFIG
+# ========================================================================================
+
+# ----------------------------------------------------------------------------------------
+# module/base.razor
+# ----------------------------------------------------------------------------------------
+@setvar! config__chatty 1
+@setvar! config__sysmsg 1
+@setvar! config__clear_at_start 1
+@setvar! config__use_magery 1
+@setvar! config__use_potions 1
+@setvar! config__walk_guard 1
+@setvar! config__warmode_is_manual 0
+@setvar! config__recover_in_warmode 0
+@setvar! config__use_bandages 1
+@setvar! config__heal_skill_min 0
+@setvar! config__settle_first 0
+
+
+# ----------------------------------------------------------------------------------------
+# module/recovery/heal-first.razor
+# ----------------------------------------------------------------------------------------
+@setvar! config__heal_first_hits 30
+@setvar! config__heal_first_mana 11
+
+
+# ----------------------------------------------------------------------------------------
+# module/gear/dress.razor
+# ----------------------------------------------------------------------------------------
+@setvar! config__dress_restore 1
+
+
+# ========================================================================================
+# WAIT AND COOLDOWN
+# ========================================================================================
+
+# ----------------------------------------------------------------------------------------
+# module/base.razor
+# ----------------------------------------------------------------------------------------
+@setvar! wait__poll 100
+@setvar! wait__short 200
+@setvar! interval__message 3000
+@setvar! interval__housekeeping 5000
+
+
+# ----------------------------------------------------------------------------------------
+# module/recovery/heal-first.razor
+# ----------------------------------------------------------------------------------------
+@setvar! wait__heal_first 10000
+
+
+# ----------------------------------------------------------------------------------------
+# module/gear/dress.razor
+# ----------------------------------------------------------------------------------------
+@setvar! wait__dress 300
+
+
+# ----------------------------------------------------------------------------------------
+# module/gear/aspect.razor
+# ----------------------------------------------------------------------------------------
+@setvar! wait__aspect 1000
+
+
+# ========================================================================================
+# TIMER
+# ========================================================================================
+
+# ----------------------------------------------------------------------------------------
+# module/base.razor
+# ----------------------------------------------------------------------------------------
+if not timerexists "timer__message"
+    createtimer "timer__message"
+endif
+settimer "timer__message" interval__message
+
+
+# ----------------------------------------------------------------------------------------
+# module/recovery/heal-first.razor
+# ----------------------------------------------------------------------------------------
+if not timerexists "timer__heal_first"
+    createtimer "timer__heal_first"
+endif
+settimer "timer__heal_first" 0
+
+
+# ========================================================================================
+# STATE
+# ========================================================================================
+
+# ----------------------------------------------------------------------------------------
+# module/base.razor
+# ----------------------------------------------------------------------------------------
+@setvar! var__fighting 0
+@setvar! var__hold_casts 0
+@setvar! var__hold_gathering 0
+@setvar! var__hold_symbols 0
+
+
+# ----------------------------------------------------------------------------------------
+# module/recovery/heal-first.razor
+# ----------------------------------------------------------------------------------------
+@setvar! var__heal_first_no_greater_heal 0
+@setvar! var__heal_first_drank 0
+
+
+# ----------------------------------------------------------------------------------------
+# module/gear/dress.razor
+# ----------------------------------------------------------------------------------------
+if not varexist var__right_hand
+    @setvar! var__right_hand 0
+endif
+if not varexist var__left_hand
+    @setvar! var__left_hand 0
+endif
+if not varexist var__one_handed_secondary
+    @setvar! var__one_handed_secondary 0
+endif
+if not varexist var__head
+    @setvar! var__head 0
+endif
+if not varexist var__neck
+    @setvar! var__neck 0
+endif
+if not varexist var__earrings
+    @setvar! var__earrings 0
+endif
+if not varexist var__face
+    @setvar! var__face 0
+endif
+if not varexist var__shirt
+    @setvar! var__shirt 0
+endif
+if not varexist var__inner_torso
+    @setvar! var__inner_torso 0
+endif
+if not varexist var__middle_torso
+    @setvar! var__middle_torso 0
+endif
+if not varexist var__outer_torso
+    @setvar! var__outer_torso 0
+endif
+if not varexist var__outer_body
+    @setvar! var__outer_body 0
+endif
+if not varexist var__arms
+    @setvar! var__arms 0
+endif
+if not varexist var__gloves
+    @setvar! var__gloves 0
+endif
+if not varexist var__ring
+    @setvar! var__ring 0
+endif
+if not varexist var__bracelet
+    @setvar! var__bracelet 0
+endif
+if not varexist var__talisman
+    @setvar! var__talisman 0
+endif
+if not varexist var__waist
+    @setvar! var__waist 0
+endif
+if not varexist var__pants
+    @setvar! var__pants 0
+endif
+if not varexist var__inner_legs
+    @setvar! var__inner_legs 0
+endif
+if not varexist var__outer_legs
+    @setvar! var__outer_legs 0
+endif
+if not varexist var__shoes
+    @setvar! var__shoes 0
+endif
+if not varexist var__cloak
+    @setvar! var__cloak 0
+endif
+if not varexist var__quiver
+    @setvar! var__quiver 0
+endif
+if not varexist var__backpack
+    @setvar! var__backpack 0
+endif
+
+
+# ----------------------------------------------------------------------------------------
+# module/gear/aspect.razor
+# ----------------------------------------------------------------------------------------
+if not varexist var__aspect_hand
+    @setvar! var__aspect_hand 99
+endif
+if not varexist var__aspect_armor
+    @setvar! var__aspect_armor 99
+endif
+@setvar! var__aspect_hand_item 0
+@setvar! var__aspect_armor_item 0
+@setvar! var__aspect_armor_piece 0
+@setvar! var__aspect_item 0
+@setvar! var__aspect_book 0
+@setvar! var__aspect_found 99
+@setvar! var__aspect_hand_found 99
+@setvar! var__aspect_armor_found 99
+@setvar! var__aspect_kind 99
+@setvar! var__aspect_type 0
+
+
+# ----------------------------------------------------------------------------------------
+# module/base.razor
+# ----------------------------------------------------------------------------------------
+# The pvp expression means the structured-PvP restrictions, where these loops may not run.
+if pvp
+    overhead "[ script, blocked ]" 254
+    stop
+endif
+
+if config__clear_at_start = 1
+    clearall
+    clearsysmsg
+    cleardragdrop
+    clearignore
+endif
+
+
+# ----------------------------------------------------------------------------------------
+# module/recovery/heal-first.razor
+# ----------------------------------------------------------------------------------------
+while diffhits >= config__heal_first_hits and timer "timer__heal_first" < wait__heal_first and not dead and not bandaging
+    @setvar! var__heal_first_drank 0
+
+    if not targetexists and findtype "Yellow Potion" self as alias__heal_first_potion
+        getlabel alias__heal_first_potion label__heal_first_potion
+        if "next usable" in label__heal_first_potion
+            # Still on its own cooldown.
+        else
+            hotkey "Drink Heal"
+            @setvar! var__heal_first_drank 1
+        endif
+    endif
+
+    if var__heal_first_drank = 0 and var__heal_first_no_greater_heal = 0 and skill "Magery" >= 50 and mana >= config__heal_first_mana and not casting and not targetexists
+        hotkey "> Greater Heal/Cure Self"
+        wait wait__short
+
+        while casting and timer "timer__heal_first" < wait__heal_first
+            wait wait__short
+        endwhile
+
+        # Without the reagents it would only fail again.
+        if insysmsg "More reagents are needed"
+            @setvar! var__heal_first_no_greater_heal 1
+        endif
+
+        # The agent leaves its cursor up when there is nothing left to heal.
+        if targetexists "beneficial" and diffhits = 0
+            hotkey "Cancel Current Target"
+        endif
+    elseif var__heal_first_drank = 0 and skill "Healing" > 0 and not targetexists and findtype 3617 backpack
+        hotkey "Bandage Self"
+    endif
+
+    wait wait__short
+endwhile
+
+
+# ----------------------------------------------------------------------------------------
+# module/gear/dress.razor
+# ----------------------------------------------------------------------------------------
+# Hands. First, so a weapon is back in hand before the rest of the suit.
+if findlayer self righthand as alias__dress_item
+    @setvar! var__right_hand alias__dress_item
+
+    if config__chatty = 1
+        getlabel alias__dress_item label__right_hand
+        overhead "[ right hand, {{label__right_hand}} ]" 290
+    endif
+elseif config__dress_restore = 1
+    if find var__right_hand backpack
+        lift var__right_hand
+        drop self righthand
+        wait wait__dress
+
+        if config__chatty = 1
+            getlabel var__right_hand label__right_hand
+            overhead "[ worn, {{label__right_hand}} ]" 290
+        endif
+    endif
+endif
+
+if findlayer self lefthand as alias__dress_item
+    @setvar! var__left_hand alias__dress_item
+
+    if config__chatty = 1
+        getlabel alias__dress_item label__left_hand
+        overhead "[ left hand, {{label__left_hand}} ]" 290
+    endif
+elseif config__dress_restore = 1
+    if find var__left_hand backpack
+        lift var__left_hand
+        drop self lefthand
+        wait wait__dress
+
+        if config__chatty = 1
+            getlabel var__left_hand label__left_hand
+            overhead "[ worn, {{label__left_hand}} ]" 290
+        endif
+    endif
+endif
+
+if findlayer self onehandedsecondary as alias__dress_item
+    @setvar! var__one_handed_secondary alias__dress_item
+
+    if config__chatty = 1
+        getlabel alias__dress_item label__one_handed_secondary
+        overhead "[ secondary, {{label__one_handed_secondary}} ]" 290
+    endif
+elseif config__dress_restore = 1
+    if find var__one_handed_secondary backpack
+        lift var__one_handed_secondary
+        drop self onehandedsecondary
+        wait wait__dress
+
+        if config__chatty = 1
+            getlabel var__one_handed_secondary label__one_handed_secondary
+            overhead "[ worn, {{label__one_handed_secondary}} ]" 290
+        endif
+    endif
+endif
+
+# Head and neck.
+if findlayer self head as alias__dress_item
+    @setvar! var__head alias__dress_item
+
+    if config__chatty = 1
+        getlabel alias__dress_item label__head
+        overhead "[ head, {{label__head}} ]" 290
+    endif
+elseif config__dress_restore = 1
+    if find var__head backpack
+        lift var__head
+        drop self head
+        wait wait__dress
+
+        if config__chatty = 1
+            getlabel var__head label__head
+            overhead "[ worn, {{label__head}} ]" 290
+        endif
+    endif
+endif
+
+if findlayer self neck as alias__dress_item
+    @setvar! var__neck alias__dress_item
+
+    if config__chatty = 1
+        getlabel alias__dress_item label__neck
+        overhead "[ neck, {{label__neck}} ]" 290
+    endif
+elseif config__dress_restore = 1
+    if find var__neck backpack
+        lift var__neck
+        drop self neck
+        wait wait__dress
+
+        if config__chatty = 1
+            getlabel var__neck label__neck
+            overhead "[ worn, {{label__neck}} ]" 290
+        endif
+    endif
+endif
+
+if findlayer self earrings as alias__dress_item
+    @setvar! var__earrings alias__dress_item
+
+    if config__chatty = 1
+        getlabel alias__dress_item label__earrings
+        overhead "[ earrings, {{label__earrings}} ]" 290
+    endif
+elseif config__dress_restore = 1
+    if find var__earrings backpack
+        lift var__earrings
+        drop self earrings
+        wait wait__dress
+
+        if config__chatty = 1
+            getlabel var__earrings label__earrings
+            overhead "[ worn, {{label__earrings}} ]" 290
+        endif
+    endif
+endif
+
+if findlayer self face as alias__dress_item
+    @setvar! var__face alias__dress_item
+
+    if config__chatty = 1
+        getlabel alias__dress_item label__face
+        overhead "[ face, {{label__face}} ]" 290
+    endif
+elseif config__dress_restore = 1
+    if find var__face backpack
+        lift var__face
+        drop self face
+        wait wait__dress
+
+        if config__chatty = 1
+            getlabel var__face label__face
+            overhead "[ worn, {{label__face}} ]" 290
+        endif
+    endif
+endif
+
+# Torso, from the skin out.
+if findlayer self shirt as alias__dress_item
+    @setvar! var__shirt alias__dress_item
+
+    if config__chatty = 1
+        getlabel alias__dress_item label__shirt
+        overhead "[ shirt, {{label__shirt}} ]" 290
+    endif
+elseif config__dress_restore = 1
+    if find var__shirt backpack
+        lift var__shirt
+        drop self shirt
+        wait wait__dress
+
+        if config__chatty = 1
+            getlabel var__shirt label__shirt
+            overhead "[ worn, {{label__shirt}} ]" 290
+        endif
+    endif
+endif
+
+if findlayer self innertorso as alias__dress_item
+    @setvar! var__inner_torso alias__dress_item
+
+    if config__chatty = 1
+        getlabel alias__dress_item label__inner_torso
+        overhead "[ inner torso, {{label__inner_torso}} ]" 290
+    endif
+elseif config__dress_restore = 1
+    if find var__inner_torso backpack
+        lift var__inner_torso
+        drop self innertorso
+        wait wait__dress
+
+        if config__chatty = 1
+            getlabel var__inner_torso label__inner_torso
+            overhead "[ worn, {{label__inner_torso}} ]" 290
+        endif
+    endif
+endif
+
+if findlayer self middletorso as alias__dress_item
+    @setvar! var__middle_torso alias__dress_item
+
+    if config__chatty = 1
+        getlabel alias__dress_item label__middle_torso
+        overhead "[ middle torso, {{label__middle_torso}} ]" 290
+    endif
+elseif config__dress_restore = 1
+    if find var__middle_torso backpack
+        lift var__middle_torso
+        drop self middletorso
+        wait wait__dress
+
+        if config__chatty = 1
+            getlabel var__middle_torso label__middle_torso
+            overhead "[ worn, {{label__middle_torso}} ]" 290
+        endif
+    endif
+endif
+
+if findlayer self outertorso as alias__dress_item
+    @setvar! var__outer_torso alias__dress_item
+
+    if config__chatty = 1
+        getlabel alias__dress_item label__outer_torso
+        overhead "[ outer torso, {{label__outer_torso}} ]" 290
+    endif
+elseif config__dress_restore = 1
+    if find var__outer_torso backpack
+        lift var__outer_torso
+        drop self outertorso
+        wait wait__dress
+
+        if config__chatty = 1
+            getlabel var__outer_torso label__outer_torso
+            overhead "[ worn, {{label__outer_torso}} ]" 290
+        endif
+    endif
+endif
+
+if findlayer self outerbody as alias__dress_item
+    @setvar! var__outer_body alias__dress_item
+
+    if config__chatty = 1
+        getlabel alias__dress_item label__outer_body
+        overhead "[ outer body, {{label__outer_body}} ]" 290
+    endif
+elseif config__dress_restore = 1
+    if find var__outer_body backpack
+        lift var__outer_body
+        drop self outerbody
+        wait wait__dress
+
+        if config__chatty = 1
+            getlabel var__outer_body label__outer_body
+            overhead "[ worn, {{label__outer_body}} ]" 290
+        endif
+    endif
+endif
+
+# Arms and jewelry.
+if findlayer self arms as alias__dress_item
+    @setvar! var__arms alias__dress_item
+
+    if config__chatty = 1
+        getlabel alias__dress_item label__arms
+        overhead "[ arms, {{label__arms}} ]" 290
+    endif
+elseif config__dress_restore = 1
+    if find var__arms backpack
+        lift var__arms
+        drop self arms
+        wait wait__dress
+
+        if config__chatty = 1
+            getlabel var__arms label__arms
+            overhead "[ worn, {{label__arms}} ]" 290
+        endif
+    endif
+endif
+
+if findlayer self gloves as alias__dress_item
+    @setvar! var__gloves alias__dress_item
+
+    if config__chatty = 1
+        getlabel alias__dress_item label__gloves
+        overhead "[ gloves, {{label__gloves}} ]" 290
+    endif
+elseif config__dress_restore = 1
+    if find var__gloves backpack
+        lift var__gloves
+        drop self gloves
+        wait wait__dress
+
+        if config__chatty = 1
+            getlabel var__gloves label__gloves
+            overhead "[ worn, {{label__gloves}} ]" 290
+        endif
+    endif
+endif
+
+if findlayer self ring as alias__dress_item
+    @setvar! var__ring alias__dress_item
+
+    if config__chatty = 1
+        getlabel alias__dress_item label__ring
+        overhead "[ ring, {{label__ring}} ]" 290
+    endif
+elseif config__dress_restore = 1
+    if find var__ring backpack
+        lift var__ring
+        drop self ring
+        wait wait__dress
+
+        if config__chatty = 1
+            getlabel var__ring label__ring
+            overhead "[ worn, {{label__ring}} ]" 290
+        endif
+    endif
+endif
+
+if findlayer self bracelet as alias__dress_item
+    @setvar! var__bracelet alias__dress_item
+
+    if config__chatty = 1
+        getlabel alias__dress_item label__bracelet
+        overhead "[ bracelet, {{label__bracelet}} ]" 290
+    endif
+elseif config__dress_restore = 1
+    if find var__bracelet backpack
+        lift var__bracelet
+        drop self bracelet
+        wait wait__dress
+
+        if config__chatty = 1
+            getlabel var__bracelet label__bracelet
+            overhead "[ worn, {{label__bracelet}} ]" 290
+        endif
+    endif
+endif
+
+if findlayer self talisman as alias__dress_item
+    @setvar! var__talisman alias__dress_item
+
+    if config__chatty = 1
+        getlabel alias__dress_item label__talisman
+        overhead "[ talisman, {{label__talisman}} ]" 290
+    endif
+elseif config__dress_restore = 1
+    if find var__talisman backpack
+        lift var__talisman
+        drop self talisman
+        wait wait__dress
+
+        if config__chatty = 1
+            getlabel var__talisman label__talisman
+            overhead "[ worn, {{label__talisman}} ]" 290
+        endif
+    endif
+endif
+
+# Legs and feet, from the skin out, then the shoes.
+if findlayer self waist as alias__dress_item
+    @setvar! var__waist alias__dress_item
+
+    if config__chatty = 1
+        getlabel alias__dress_item label__waist
+        overhead "[ waist, {{label__waist}} ]" 290
+    endif
+elseif config__dress_restore = 1
+    if find var__waist backpack
+        lift var__waist
+        drop self waist
+        wait wait__dress
+
+        if config__chatty = 1
+            getlabel var__waist label__waist
+            overhead "[ worn, {{label__waist}} ]" 290
+        endif
+    endif
+endif
+
+if findlayer self pants as alias__dress_item
+    @setvar! var__pants alias__dress_item
+
+    if config__chatty = 1
+        getlabel alias__dress_item label__pants
+        overhead "[ pants, {{label__pants}} ]" 290
+    endif
+elseif config__dress_restore = 1
+    if find var__pants backpack
+        lift var__pants
+        drop self pants
+        wait wait__dress
+
+        if config__chatty = 1
+            getlabel var__pants label__pants
+            overhead "[ worn, {{label__pants}} ]" 290
+        endif
+    endif
+endif
+
+if findlayer self innerlegs as alias__dress_item
+    @setvar! var__inner_legs alias__dress_item
+
+    if config__chatty = 1
+        getlabel alias__dress_item label__inner_legs
+        overhead "[ inner legs, {{label__inner_legs}} ]" 290
+    endif
+elseif config__dress_restore = 1
+    if find var__inner_legs backpack
+        lift var__inner_legs
+        drop self innerlegs
+        wait wait__dress
+
+        if config__chatty = 1
+            getlabel var__inner_legs label__inner_legs
+            overhead "[ worn, {{label__inner_legs}} ]" 290
+        endif
+    endif
+endif
+
+if findlayer self outerlegs as alias__dress_item
+    @setvar! var__outer_legs alias__dress_item
+
+    if config__chatty = 1
+        getlabel alias__dress_item label__outer_legs
+        overhead "[ outer legs, {{label__outer_legs}} ]" 290
+    endif
+elseif config__dress_restore = 1
+    if find var__outer_legs backpack
+        lift var__outer_legs
+        drop self outerlegs
+        wait wait__dress
+
+        if config__chatty = 1
+            getlabel var__outer_legs label__outer_legs
+            overhead "[ worn, {{label__outer_legs}} ]" 290
+        endif
+    endif
+endif
+
+if findlayer self shoes as alias__dress_item
+    @setvar! var__shoes alias__dress_item
+
+    if config__chatty = 1
+        getlabel alias__dress_item label__shoes
+        overhead "[ shoes, {{label__shoes}} ]" 290
+    endif
+elseif config__dress_restore = 1
+    if find var__shoes backpack
+        lift var__shoes
+        drop self shoes
+        wait wait__dress
+
+        if config__chatty = 1
+            getlabel var__shoes label__shoes
+            overhead "[ worn, {{label__shoes}} ]" 290
+        endif
+    endif
+endif
+
+# Back.
+if findlayer self cloak as alias__dress_item
+    @setvar! var__cloak alias__dress_item
+
+    if config__chatty = 1
+        getlabel alias__dress_item label__cloak
+        overhead "[ cloak, {{label__cloak}} ]" 290
+    endif
+elseif config__dress_restore = 1
+    if find var__cloak backpack
+        lift var__cloak
+        drop self cloak
+        wait wait__dress
+
+        if config__chatty = 1
+            getlabel var__cloak label__cloak
+            overhead "[ worn, {{label__cloak}} ]" 290
+        endif
+    endif
+endif
+
+if findlayer self quiver as alias__dress_item
+    @setvar! var__quiver alias__dress_item
+
+    if config__chatty = 1
+        getlabel alias__dress_item label__quiver
+        overhead "[ quiver, {{label__quiver}} ]" 290
+    endif
+elseif config__dress_restore = 1
+    if find var__quiver backpack
+        lift var__quiver
+        drop self quiver
+        wait wait__dress
+
+        if config__chatty = 1
+            getlabel var__quiver label__quiver
+            overhead "[ worn, {{label__quiver}} ]" 290
+        endif
+    endif
+endif
+
+if findlayer self backpack as alias__dress_item
+    @setvar! var__backpack alias__dress_item
+
+    if config__chatty = 1
+        getlabel alias__dress_item label__backpack
+        overhead "[ backpack, {{label__backpack}} ]" 290
+    endif
+elseif config__dress_restore = 1
+    if find var__backpack backpack
+        lift var__backpack
+        drop self backpack
+        wait wait__dress
+
+        if config__chatty = 1
+            getlabel var__backpack label__backpack
+            overhead "[ worn, {{label__backpack}} ]" 290
+        endif
+    endif
+endif
+
+if config__dress_restore = 1
+    overhead "[ dress, done ]" 290
+else
+    overhead "[ dress, set ]" 290
+endif
+
+
+# ----------------------------------------------------------------------------------------
+# module/gear/cosmetic.razor
+# ----------------------------------------------------------------------------------------
+dress 'cosmetic'
+
+
+# ----------------------------------------------------------------------------------------
+# module/pack/pouches.razor
+# ----------------------------------------------------------------------------------------
+# Two containers, so one grab off a corpse does not take everything. Both are kept in your
+# Razor profile like the containers above.
+#
+#   supply pouch  global__my_supply_pouch, a plain pouch (3705, hue 0). The supplies the
+#                 sorting below puts away, and what loot/recycle keeps
+#   loot bag      global__my_loot_bag, a bag (3702). Raw loot only: the leather and the
+#                 boards pack/leather and pack/lumber gather, and the dagger
+#
+# Each is found by itself when the backpack holds exactly one of its kind, and asked for
+# otherwise. Until 2026-10-19 one pouch did both jobs as global__my_looting_pouch. That
+# pouch is the supply pouch now, so the old name is dropped once the new one is set.
+if not varexist global__my_supply_pouch or not find global__my_supply_pouch backpack
+    unsetvar global__my_supply_pouch
+
+    if counttype 3705 backpack 0 = 1 and findtype 3705 backpack 0 as alias__found_pouch
+        setvar global__my_supply_pouch alias__found_pouch
+        if config__chatty = 1
+            overhead "[ supplies, set ]" 290
+        endif
+    else
+        overhead "[ supplies, pick ]" 255
+        setvar global__my_supply_pouch
+    endif
+endif
+
+if varexist global__my_supply_pouch and varexist global__my_looting_pouch
+    unsetvar global__my_looting_pouch
+endif
+
+if not varexist global__my_loot_bag or not find global__my_loot_bag backpack
+    unsetvar global__my_loot_bag
+
+    if counttype 3702 backpack = 1 and findtype 3702 backpack as alias__found_bag
+        setvar global__my_loot_bag alias__found_bag
+        if config__chatty = 1
+            overhead "[ loot bag, set ]" 290
+        endif
+    else
+        overhead "[ loot bag, pick ]" 255
+        setvar global__my_loot_bag
+    endif
+endif
+
+
+# ----------------------------------------------------------------------------------------
+# module/pack/sorting.razor
+# ----------------------------------------------------------------------------------------
+# Everything the backpack should hold, and where it goes. Format matches document/game/item-list.md.
+#
+#   #bandage                 "clean bandage%s%"      3617
+#   #adventure pack          "adventure pack"        2726
+#   #dagger                  "dagger"                3922
+#   #pouch                   "pouch"                 3705   (hue 0 plain, hue 38 trapped)
+#   #bag                     "bag"                   3702   (the loot bag)
+#   #scissors                "scissors"              3998|3999
+#   #kindling                "kindling"              3553
+#   #skinning knife          "Elven Spellblade"      11552|11564
+#   #smoke bomb              "bombs"                 52149
+#   #adventurers rope        "rope"                  5370   (hue 2799)
+#   #delectable food                                 28879|28880|28881|28883|28885|28886|28888|29773|29774
+#   #magic mushroom          "mushroom"              29012
+#   #sewing kit              "sewing kit"            3997
+#   #item identification wand "wand"                 20496
+#   #instruments                                     3740|3742|3762|3763|10245|20006|20008|20010|20012|20014|20016
+#   #reagent satchel         "reagent satchel"       30765
+#   #potion satchel          "alchemists satchel"    31262
+#
+# Placement. drop takes literal coordinates, so the numbers are inline, but they only appear
+# in this section. They are gump pixels, not grid cells, so nudge them if items overlap.
+#
+#   backpack 0 200        the two satchels, bottom left, first
+#   backpack 0 200        the supply pouch, on the satchels
+#   backpack 0 200        the loot bag, on the supply pouch
+#   backpack 0..20 200    the trapped pouches, on top of all of it, five pixels apart
+#   pouch    0 0          every supply not named below, the scissors among them
+#   pouch    130 0        identification wand, sewing kit
+#   pouch    130 80       the instrument
+#   pouch    0 80         what loot/recycle keeps, placed by that script
+#   bag      0 0          the dagger
+#
+# Order matters. Moving a pouch closes it, and a closed container does not report what is
+# inside: the counters for the cure and heal potions in there read zero until it is opened
+# again, and a combat script that believes it has no cure potion will not drink one. Leaving
+# the contents loose in the backpack would count fine and lose them to the first thief, so
+# the pouch is moved and reopened before anything gets sorted into it.
+#
+# The satchels sit in the backpack itself, not in the pouch: a pouch that gets closed by
+# accident and reopened does not reopen what is nested in it, and the reagent and potion
+# counters go dark until each satchel is opened by hand. In the backpack they stay open.
+# Everything worth stealing is stacked on one spot, satchels first, the supply pouch and
+# the loot bag on them, the trapped pouches on top: a thief has to put the cursor on the
+# thing, and what is under the cursor there is always a trapped pouch. The pouch and the
+# bag are opened by serial and filled by serial, so being covered costs nothing. On a
+# corpse the stack is gone and the split is what is left: the bag only holds raw loot.
+cleardragdrop
+clearignore
+
+# 1. the satchels, bottom left of the backpack. Reopened for the same counting reason.
+if findtype 30765 backpack as alias__found_reagent_satchel
+    lift alias__found_reagent_satchel
+    wait wait__short
+    drop backpack 0 200
+    wait wait__short
+    if config__chatty = 1
+        overhead "[ reg satchel, moved ]" 290
+    endif
+    dclick alias__found_reagent_satchel
+    wait wait__short
+endif
+
+if findtype 31262 backpack as alias__found_alchemists_satchel
+    lift alias__found_alchemists_satchel
+    wait wait__short
+    drop backpack 0 200
+    wait wait__short
+    if config__chatty = 1
+        overhead "[ alch satchel, moved ]" 290
+    endif
+    dclick alias__found_alchemists_satchel
+    wait wait__short
+endif
+
+# 2. the supply pouch, then the loot bag, on the satchels. Each moved by serial, reopened.
+if find global__my_supply_pouch backpack
+    lift global__my_supply_pouch
+    wait wait__short
+    drop backpack 0 200
+    wait wait__short
+    if config__chatty = 1
+        overhead "[ supplies, moved ]" 290
+    endif
+    dclick global__my_supply_pouch
+    wait wait__short
+endif
+
+if find global__my_loot_bag backpack
+    lift global__my_loot_bag
+    wait wait__short
+    drop backpack 0 200
+    wait wait__short
+    if config__chatty = 1
+        overhead "[ loot bag, moved ]" 290
+    endif
+    dclick global__my_loot_bag
+    wait wait__short
+endif
+
+# 3. the trapped pouches, on top of the satchels, the supply pouch and the loot bag, five
+# pixels apart. drop takes literal coordinates, so five blocks instead of a loop. Not
+# reopened on purpose, nothing reads inside them. Any sixth pouch lands with the fifth.
+if findtype 3705 backpack 38 as alias__found_trap_pouch
+    lift alias__found_trap_pouch
+    wait wait__short
+    drop backpack 0 200
+    wait wait__short
+    if config__chatty = 1
+        overhead "[ trapped pouch, moved ]" 290
+    endif
+    @ignore alias__found_trap_pouch
+endif
+
+if findtype 3705 backpack 38 as alias__found_trap_pouch
+    lift alias__found_trap_pouch
+    wait wait__short
+    drop backpack 5 200
+    wait wait__short
+    if config__chatty = 1
+        overhead "[ trapped pouch, moved ]" 290
+    endif
+    @ignore alias__found_trap_pouch
+endif
+
+if findtype 3705 backpack 38 as alias__found_trap_pouch
+    lift alias__found_trap_pouch
+    wait wait__short
+    drop backpack 10 200
+    wait wait__short
+    if config__chatty = 1
+        overhead "[ trapped pouch, moved ]" 290
+    endif
+    @ignore alias__found_trap_pouch
+endif
+
+if findtype 3705 backpack 38 as alias__found_trap_pouch
+    lift alias__found_trap_pouch
+    wait wait__short
+    drop backpack 15 200
+    wait wait__short
+    if config__chatty = 1
+        overhead "[ trapped pouch, moved ]" 290
+    endif
+    @ignore alias__found_trap_pouch
+endif
+
+if findtype 3705 backpack 38 as alias__found_trap_pouch
+    lift alias__found_trap_pouch
+    wait wait__short
+    drop backpack 20 200
+    wait wait__short
+    if config__chatty = 1
+        overhead "[ trapped pouch, moved ]" 290
+    endif
+    @ignore alias__found_trap_pouch
+endif
+
+while findtype 3705 backpack 38 as alias__found_trap_pouch
+    lift alias__found_trap_pouch
+    wait wait__short
+    drop backpack 20 200
+    wait wait__short
+    if config__chatty = 1
+        overhead "[ trapped pouch, moved ]" 290
+    endif
+    @ignore alias__found_trap_pouch
+endwhile
+
+# 4. everything else. Collected first, because the walk below moves items out of the
+#    backpack and a findtype loop cannot be trusted while its own source is changing.
+removelist sorting_item_list
+createlist sorting_item_list
+
+while findtype 3740|3742|3762|3763|10245|20006|20008|20010|20012|20014|20016|20496|3997|3922|3617|2726|3998|3999|3553|11552|11564|52149|5370|28879|28880|28881|28883|28885|28886|28888|29773|29774|29012 backpack as alias__found_item
+    pushlist sorting_item_list alias__found_item
+    @ignore alias__found_item
+endwhile
+
+clearignore
+
+foreach alias__sorting_item in sorting_item_list
+    getlabel alias__sorting_item label__sorting_item
+
+    if config__chatty = 1
+        overhead "[ sort, {{label__sorting_item}} ]" 290
+    endif
+
+    lift alias__sorting_item 1000
+    wait wait__short
+
+    if "dagger" in label__sorting_item
+        if find global__my_loot_bag backpack
+            drop global__my_loot_bag 0 0
+        else
+            drop global__my_supply_pouch 0 0
+        endif
+    elseif "item identification wand" in label__sorting_item or "sewing kit" in label__sorting_item
+        drop global__my_supply_pouch 130 0
+    elseif "flute" in label__sorting_item or "drum" in label__sorting_item or "harp" in label__sorting_item or "lute" in label__sorting_item or "tambourine" in label__sorting_item or "gemshorn" in label__sorting_item or "hurdy" in label__sorting_item or "psaltery" in label__sorting_item or "sackbut" in label__sorting_item or "shawm" in label__sorting_item or "vielle" in label__sorting_item
+        drop global__my_supply_pouch 130 80
+    else
+        drop global__my_supply_pouch 0 0
+    endif
+
+    wait wait__short
+endfor
+
+
+# ----------------------------------------------------------------------------------------
+# module/gear/aspect.razor
+# ----------------------------------------------------------------------------------------
+# Whatever was still moving items has to finish before the names are read.
+while queued
+    wait wait__short
+endwhile
+
+# The held item. The right hand holds a one-handed weapon or the spellbook, the left a
+# two-handed weapon.
+if findlayer self righthand as alias__aspect_item
+    @setvar! var__aspect_hand_item alias__aspect_item
+elseif findlayer self lefthand as alias__aspect_item
+    @setvar! var__aspect_hand_item alias__aspect_item
+endif
+
+if var__aspect_hand_item != 0
+    getlabel var__aspect_hand_item label__aspect_hand
+    if "spellbook" in label__aspect_hand
+        @setvar! var__aspect_book 1
+    endif
+endif
+
+# The armor. The first piece worn is kept for the check after an activation. The first one
+# that shows an aspect is the one read.
+if findlayer self head as alias__aspect_item
+    @setvar! var__aspect_armor_piece alias__aspect_item
+    getlabel alias__aspect_item label__aspect_armor
+    if "aspect" in label__aspect_armor
+        @setvar! var__aspect_armor_item alias__aspect_item
+    endif
+endif
+
+if var__aspect_armor_item = 0
+    if findlayer self neck as alias__aspect_item
+        if var__aspect_armor_piece = 0
+            @setvar! var__aspect_armor_piece alias__aspect_item
+        endif
+        getlabel alias__aspect_item label__aspect_armor
+        if "aspect" in label__aspect_armor
+            @setvar! var__aspect_armor_item alias__aspect_item
+        endif
+    endif
+endif
+
+if var__aspect_armor_item = 0
+    if findlayer self gloves as alias__aspect_item
+        if var__aspect_armor_piece = 0
+            @setvar! var__aspect_armor_piece alias__aspect_item
+        endif
+        getlabel alias__aspect_item label__aspect_armor
+        if "aspect" in label__aspect_armor
+            @setvar! var__aspect_armor_item alias__aspect_item
+        endif
+    endif
+endif
+
+if var__aspect_armor_item = 0
+    if findlayer self arms as alias__aspect_item
+        if var__aspect_armor_piece = 0
+            @setvar! var__aspect_armor_piece alias__aspect_item
+        endif
+        getlabel alias__aspect_item label__aspect_armor
+        if "aspect" in label__aspect_armor
+            @setvar! var__aspect_armor_item alias__aspect_item
+        endif
+    endif
+endif
+
+if var__aspect_armor_item = 0
+    if findlayer self innertorso as alias__aspect_item
+        if var__aspect_armor_piece = 0
+            @setvar! var__aspect_armor_piece alias__aspect_item
+        endif
+        getlabel alias__aspect_item label__aspect_armor
+        if "aspect" in label__aspect_armor
+            @setvar! var__aspect_armor_item alias__aspect_item
+        endif
+    endif
+endif
+
+if var__aspect_armor_item = 0
+    if findlayer self innerlegs as alias__aspect_item
+        if var__aspect_armor_piece = 0
+            @setvar! var__aspect_armor_piece alias__aspect_item
+        endif
+        getlabel alias__aspect_item label__aspect_armor
+        if "aspect" in label__aspect_armor
+            @setvar! var__aspect_armor_item alias__aspect_item
+        endif
+    endif
+endif
+
+# Read the aspects: one pass for the held item, one for the armor, through the same chain.
+# 99 when the name shows no aspect, or nothing is there to read.
+for 2
+    @setvar! var__aspect_found 99
+    @setvar! var__aspect_item 0
+
+    if index = 0
+        @setvar! var__aspect_item var__aspect_hand_item
+    else
+        @setvar! var__aspect_item var__aspect_armor_item
+    endif
+
+    if var__aspect_item != 0
+        getlabel var__aspect_item label__aspect_read
+
+        if "agorawave aspect" in label__aspect_read
+            @setvar! var__aspect_found 0
+        elseif "air aspect" in label__aspect_read
+            @setvar! var__aspect_found 1
+        elseif "arcane aspect" in label__aspect_read
+            @setvar! var__aspect_found 2
+        elseif "artisan aspect" in label__aspect_read
+            @setvar! var__aspect_found 3
+        elseif "blood aspect" in label__aspect_read
+            @setvar! var__aspect_found 4
+        elseif "command aspect" in label__aspect_read
+            @setvar! var__aspect_found 5
+        elseif "death aspect" in label__aspect_read
+            @setvar! var__aspect_found 6
+        elseif "discipline aspect" in label__aspect_read
+            @setvar! var__aspect_found 7
+        elseif "earth aspect" in label__aspect_read
+            @setvar! var__aspect_found 8
+        elseif "eldritch aspect" in label__aspect_read
+            @setvar! var__aspect_found 9
+        elseif "fire aspect" in label__aspect_read
+            @setvar! var__aspect_found 10
+        elseif "fortune aspect" in label__aspect_read
+            @setvar! var__aspect_found 11
+        elseif "frost aspect" in label__aspect_read
+            @setvar! var__aspect_found 12
+        elseif "gadget aspect" in label__aspect_read
+            @setvar! var__aspect_found 13
+        elseif "harvest aspect" in label__aspect_read
+            @setvar! var__aspect_found 14
+        elseif "holy aspect" in label__aspect_read
+            @setvar! var__aspect_found 15
+        elseif "lightning aspect" in label__aspect_read
+            @setvar! var__aspect_found 16
+        elseif "lyric aspect" in label__aspect_read
+            @setvar! var__aspect_found 17
+        elseif "madness aspect" in label__aspect_read
+            @setvar! var__aspect_found 18
+        elseif "poison aspect" in label__aspect_read
+            @setvar! var__aspect_found 19
+        elseif "shadow aspect" in label__aspect_read
+            @setvar! var__aspect_found 20
+        elseif "temporal aspect" in label__aspect_read
+            @setvar! var__aspect_found 21
+        elseif "void aspect" in label__aspect_read
+            @setvar! var__aspect_found 22
+        elseif "war aspect" in label__aspect_read
+            @setvar! var__aspect_found 23
+        elseif "water aspect" in label__aspect_read
+            @setvar! var__aspect_found 24
+        endif
+    endif
+
+    if index = 0
+        @setvar! var__aspect_hand_found var__aspect_found
+    else
+        @setvar! var__aspect_armor_found var__aspect_found
+    endif
+endfor
+
+# Remember or restore. A shown aspect is remembered. A lost one is turned back on when one
+# is remembered, and a warning asks for it to be turned on by hand once when none is.
+for 2
+    @setvar! var__aspect_type 0
+    @setvar! var__aspect_kind 99
+
+    if index = 0
+        if var__aspect_hand_item != 0
+            if var__aspect_hand_found != 99
+                @setvar! var__aspect_hand var__aspect_hand_found
+                if config__sysmsg = 1
+                    sysmsg "Aspect: held item shows aspect {{var__aspect_hand_found}}, remembered." 88
+                endif
+            elseif var__aspect_hand != 99
+                @setvar! var__aspect_kind var__aspect_hand
+                @setvar! var__aspect_type 1
+                if var__aspect_book = 1
+                    @setvar! var__aspect_type 2
+                endif
+            else
+                overhead "[ aspect, out ]" 254
+                if config__sysmsg = 1
+                    sysmsg "Aspect: none remembered for the held item. Turn it on by hand once." 88
+                endif
+            endif
+        endif
+    else
+        if var__aspect_armor_piece != 0
+            if var__aspect_armor_found != 99
+                @setvar! var__aspect_armor var__aspect_armor_found
+                if config__sysmsg = 1
+                    sysmsg "Aspect: armor shows aspect {{var__aspect_armor_found}}, remembered." 88
+                endif
+            elseif var__aspect_armor != 99
+                @setvar! var__aspect_kind var__aspect_armor
+                @setvar! var__aspect_type 3
+            else
+                overhead "[ aspect, out ]" 254
+                if config__sysmsg = 1
+                    sysmsg "Aspect: none remembered for the armor. Turn it on by hand once." 88
+                endif
+            endif
+        endif
+    endif
+
+    if var__aspect_type != 0
+        if config__sysmsg = 1
+            sysmsg "Aspect: turning on aspect {{var__aspect_kind}}, command type {{var__aspect_type}}." 88
+        endif
+
+        if var__aspect_kind = 0
+            if var__aspect_type = 1
+                say "[AspectWeapon Agorawave"
+            elseif var__aspect_type = 2
+                say "[AspectSpellbook Agorawave"
+            else
+                say "[AspectArmor Agorawave"
+            endif
+        elseif var__aspect_kind = 1
+            if var__aspect_type = 1
+                say "[AspectWeapon Air"
+            elseif var__aspect_type = 2
+                say "[AspectSpellbook Air"
+            else
+                say "[AspectArmor Air"
+            endif
+        elseif var__aspect_kind = 2
+            if var__aspect_type = 1
+                say "[AspectWeapon Arcane"
+            elseif var__aspect_type = 2
+                say "[AspectSpellbook Arcane"
+            else
+                say "[AspectArmor Arcane"
+            endif
+        elseif var__aspect_kind = 3
+            if var__aspect_type = 1
+                say "[AspectWeapon Artisan"
+            elseif var__aspect_type = 2
+                say "[AspectSpellbook Artisan"
+            else
+                say "[AspectArmor Artisan"
+            endif
+        elseif var__aspect_kind = 4
+            if var__aspect_type = 1
+                say "[AspectWeapon Blood"
+            elseif var__aspect_type = 2
+                say "[AspectSpellbook Blood"
+            else
+                say "[AspectArmor Blood"
+            endif
+        elseif var__aspect_kind = 5
+            if var__aspect_type = 1
+                say "[AspectWeapon Command"
+            elseif var__aspect_type = 2
+                say "[AspectSpellbook Command"
+            else
+                say "[AspectArmor Command"
+            endif
+        elseif var__aspect_kind = 6
+            if var__aspect_type = 1
+                say "[AspectWeapon Death"
+            elseif var__aspect_type = 2
+                say "[AspectSpellbook Death"
+            else
+                say "[AspectArmor Death"
+            endif
+        elseif var__aspect_kind = 7
+            if var__aspect_type = 1
+                say "[AspectWeapon Discipline"
+            elseif var__aspect_type = 2
+                say "[AspectSpellbook Discipline"
+            else
+                say "[AspectArmor Discipline"
+            endif
+        elseif var__aspect_kind = 8
+            if var__aspect_type = 1
+                say "[AspectWeapon Earth"
+            elseif var__aspect_type = 2
+                say "[AspectSpellbook Earth"
+            else
+                say "[AspectArmor Earth"
+            endif
+        elseif var__aspect_kind = 9
+            if var__aspect_type = 1
+                say "[AspectWeapon Eldritch"
+            elseif var__aspect_type = 2
+                say "[AspectSpellbook Eldritch"
+            else
+                say "[AspectArmor Eldritch"
+            endif
+        elseif var__aspect_kind = 10
+            if var__aspect_type = 1
+                say "[AspectWeapon Fire"
+            elseif var__aspect_type = 2
+                say "[AspectSpellbook Fire"
+            else
+                say "[AspectArmor Fire"
+            endif
+        elseif var__aspect_kind = 11
+            if var__aspect_type = 1
+                say "[AspectWeapon Fortune"
+            elseif var__aspect_type = 2
+                say "[AspectSpellbook Fortune"
+            else
+                say "[AspectArmor Fortune"
+            endif
+        elseif var__aspect_kind = 12
+            if var__aspect_type = 1
+                say "[AspectWeapon Frost"
+            elseif var__aspect_type = 2
+                say "[AspectSpellbook Frost"
+            else
+                say "[AspectArmor Frost"
+            endif
+        elseif var__aspect_kind = 13
+            if var__aspect_type = 1
+                say "[AspectWeapon Gadget"
+            elseif var__aspect_type = 2
+                say "[AspectSpellbook Gadget"
+            else
+                say "[AspectArmor Gadget"
+            endif
+        elseif var__aspect_kind = 14
+            if var__aspect_type = 1
+                say "[AspectWeapon Harvest"
+            elseif var__aspect_type = 2
+                say "[AspectSpellbook Harvest"
+            else
+                say "[AspectArmor Harvest"
+            endif
+        elseif var__aspect_kind = 15
+            if var__aspect_type = 1
+                say "[AspectWeapon Holy"
+            elseif var__aspect_type = 2
+                say "[AspectSpellbook Holy"
+            else
+                say "[AspectArmor Holy"
+            endif
+        elseif var__aspect_kind = 16
+            if var__aspect_type = 1
+                say "[AspectWeapon Lightning"
+            elseif var__aspect_type = 2
+                say "[AspectSpellbook Lightning"
+            else
+                say "[AspectArmor Lightning"
+            endif
+        elseif var__aspect_kind = 17
+            if var__aspect_type = 1
+                say "[AspectWeapon Lyric"
+            elseif var__aspect_type = 2
+                say "[AspectSpellbook Lyric"
+            else
+                say "[AspectArmor Lyric"
+            endif
+        elseif var__aspect_kind = 18
+            if var__aspect_type = 1
+                say "[AspectWeapon Madness"
+            elseif var__aspect_type = 2
+                say "[AspectSpellbook Madness"
+            else
+                say "[AspectArmor Madness"
+            endif
+        elseif var__aspect_kind = 19
+            if var__aspect_type = 1
+                say "[AspectWeapon Poison"
+            elseif var__aspect_type = 2
+                say "[AspectSpellbook Poison"
+            else
+                say "[AspectArmor Poison"
+            endif
+        elseif var__aspect_kind = 20
+            if var__aspect_type = 1
+                say "[AspectWeapon Shadow"
+            elseif var__aspect_type = 2
+                say "[AspectSpellbook Shadow"
+            else
+                say "[AspectArmor Shadow"
+            endif
+        elseif var__aspect_kind = 21
+            if var__aspect_type = 1
+                say "[AspectWeapon Temporal"
+            elseif var__aspect_type = 2
+                say "[AspectSpellbook Temporal"
+            else
+                say "[AspectArmor Temporal"
+            endif
+        elseif var__aspect_kind = 22
+            if var__aspect_type = 1
+                say "[AspectWeapon Void"
+            elseif var__aspect_type = 2
+                say "[AspectSpellbook Void"
+            else
+                say "[AspectArmor Void"
+            endif
+        elseif var__aspect_kind = 23
+            if var__aspect_type = 1
+                say "[AspectWeapon War"
+            elseif var__aspect_type = 2
+                say "[AspectSpellbook War"
+            else
+                say "[AspectArmor War"
+            endif
+        elseif var__aspect_kind = 24
+            if var__aspect_type = 1
+                say "[AspectWeapon Water"
+            elseif var__aspect_type = 2
+                say "[AspectSpellbook Water"
+            else
+                say "[AspectArmor Water"
+            endif
+        endif
+
+        wait wait__aspect
+
+        # The name shows the aspect again once it took.
+        if index = 0
+            getlabel var__aspect_hand_item label__aspect_read
+        else
+            getlabel var__aspect_armor_piece label__aspect_read
+        endif
+
+        if "aspect" in label__aspect_read
+            if config__chatty = 1
+                overhead "[ aspect, on ]" 269
+            endif
+        else
+            overhead "[ aspect, miss ]" 254
+        endif
+    endif
+endfor
+
+
+# ----------------------------------------------------------------------------------------
+# recipe/regear-recipe.razor
+# ----------------------------------------------------------------------------------------
+overhead "[ regear, done ]" 290

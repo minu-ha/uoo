@@ -1,81 +1,121 @@
-# Records the aspect on the held weapon or spellbook and on the worn armor, and turns a
-# lost one back on.
-# Needs: 5 Arcane Essence per activation. script/restock/loadout.razor and
-# script/hotkey/dress.razor run this at their end when their config__use_aspect is 1. It
-# also runs on its own.
-
-# Activated gear loses its aspect when you die, and its name loses the "<name> aspect"
-# words with it (user check, 2026-10-19). So each run reads the names first. A name that
-# still carries an aspect is remembered and costs nothing. One that lost it gets the
-# remembered aspect back through [AspectWeapon, [AspectSpellbook or [AspectArmor (wiki
-# Commands), which apply to what is held and to the armor worn. Remembered in
-# var__aspect_hand and var__aspect_armor for the Razor session, like the dress recording,
-# so each character keeps its own: run loadout once with the aspect on, and a death later
-# is covered.
-#
-# A word cannot sit in a variable, so the aspect is a number, the order of the wiki's
-# Aspect Mastery list, and every command is a literal in its own branch.
-#
-#   0 Agorawave   5 Command      10 Fire        15 Holy        20 Shadow
-#   1 Air         6 Death        11 Fortune     16 Lightning   21 Temporal
-#   2 Arcane      7 Discipline   12 Frost       17 Lyric       22 Void
-#   3 Artisan     8 Earth        13 Gadget      18 Madness     23 War
-#   4 Blood       9 Eldritch     14 Harvest     19 Poison      24 Water
-#
-# The armor is read off the first armor layer that shows an aspect, head, neck, gloves,
-# arms, inner torso, inner legs in that order, and judged lost when none of them shows
-# one. The names are matched in lower case, the way Razor shows them. The layers:
-# document/scripting/razor.md part 2.
+# Aspect: remembers the aspects on the held item and the armor, and turns a lost one back on.
+# Needs: Arcane Essence, 5 per activation. restock/loadout and hotkey/regear run the same block.
+# Generated from recipe/aspect-recipe.razor by util/build-scripts.mjs. Edit module/ and recipe/, not this file.
 
 
 # ========================================================================================
 # CONFIG
 # ========================================================================================
+
+# ----------------------------------------------------------------------------------------
+# module/base.razor
+# ----------------------------------------------------------------------------------------
 @setvar! config__chatty 1
 @setvar! config__sysmsg 1
+@setvar! config__clear_at_start 1
+@setvar! config__use_magery 1
+@setvar! config__use_potions 1
+@setvar! config__walk_guard 1
+@setvar! config__warmode_is_manual 0
+@setvar! config__recover_in_warmode 0
+@setvar! config__use_bandages 1
+@setvar! config__heal_skill_min 0
+@setvar! config__settle_first 0
 
 
 # ========================================================================================
 # WAIT AND COOLDOWN
 # ========================================================================================
-# How long an activation gets before the name is read again.
-@setvar! wait__aspect 1000
-# The pause while a dress or a loadout finishes moving items.
+
+# ----------------------------------------------------------------------------------------
+# module/base.razor
+# ----------------------------------------------------------------------------------------
+@setvar! wait__poll 100
 @setvar! wait__short 200
+@setvar! interval__message 3000
+@setvar! interval__housekeeping 5000
+
+
+# ----------------------------------------------------------------------------------------
+# module/gear/aspect.razor
+# ----------------------------------------------------------------------------------------
+@setvar! wait__aspect 1000
+
+
+# ========================================================================================
+# TIMER
+# ========================================================================================
+
+# ----------------------------------------------------------------------------------------
+# module/base.razor
+# ----------------------------------------------------------------------------------------
+if not timerexists "timer__message"
+    createtimer "timer__message"
+endif
+settimer "timer__message" interval__message
 
 
 # ========================================================================================
 # STATE
 # ========================================================================================
-# The remembered aspects, 99 for none yet. Kept across runs for the Razor session.
+
+# ----------------------------------------------------------------------------------------
+# module/base.razor
+# ----------------------------------------------------------------------------------------
+@setvar! var__fighting 0
+@setvar! var__hold_casts 0
+@setvar! var__hold_gathering 0
+@setvar! var__hold_symbols 0
+
+
+# ----------------------------------------------------------------------------------------
+# module/gear/aspect.razor
+# ----------------------------------------------------------------------------------------
 if not varexist var__aspect_hand
     @setvar! var__aspect_hand 99
 endif
 if not varexist var__aspect_armor
     @setvar! var__aspect_armor 99
 endif
-
-# Scratch for one run.
 @setvar! var__aspect_hand_item 0
-@setvar! var__aspect_book 0
 @setvar! var__aspect_armor_item 0
 @setvar! var__aspect_armor_piece 0
+@setvar! var__aspect_item 0
+@setvar! var__aspect_book 0
 @setvar! var__aspect_found 99
-@setvar! var__aspect_kind 99
-@setvar! var__aspect_type 0
 @setvar! var__aspect_hand_found 99
 @setvar! var__aspect_armor_found 99
+@setvar! var__aspect_kind 99
+@setvar! var__aspect_type 0
 
 
-# ========================================================================================
-# HELD ITEM
-# ========================================================================================
-# A dress or a loadout may still be moving items. Their names are read once that is done.
+# ----------------------------------------------------------------------------------------
+# module/base.razor
+# ----------------------------------------------------------------------------------------
+# The pvp expression means the structured-PvP restrictions, where these loops may not run.
+if pvp
+    overhead "[ script, blocked ]" 254
+    stop
+endif
+
+if config__clear_at_start = 1
+    clearall
+    clearsysmsg
+    cleardragdrop
+    clearignore
+endif
+
+
+# ----------------------------------------------------------------------------------------
+# module/gear/aspect.razor
+# ----------------------------------------------------------------------------------------
+# Whatever was still moving items has to finish before the names are read.
 while queued
     wait wait__short
 endwhile
 
-# The right hand holds a one-handed weapon or the spellbook, the left a two-handed weapon.
+# The held item. The right hand holds a one-handed weapon or the spellbook, the left a
+# two-handed weapon.
 if findlayer self righthand as alias__aspect_item
     @setvar! var__aspect_hand_item alias__aspect_item
 elseif findlayer self lefthand as alias__aspect_item
@@ -89,12 +129,8 @@ if var__aspect_hand_item != 0
     endif
 endif
 
-
-# ========================================================================================
-# ARMOR
-# ========================================================================================
-# The first armor piece worn is kept for the check after an activation. The first one that
-# shows an aspect is the one read.
+# The armor. The first piece worn is kept for the check after an activation. The first one
+# that shows an aspect is the one read.
 if findlayer self head as alias__aspect_item
     @setvar! var__aspect_armor_piece alias__aspect_item
     getlabel alias__aspect_item label__aspect_armor
@@ -163,12 +199,8 @@ if var__aspect_armor_item = 0
     endif
 endif
 
-
-# ========================================================================================
-# READ THE ASPECTS
-# ========================================================================================
-# One pass for the held item, one for the armor, through the same chain. 99 when the name
-# shows no aspect, or nothing is there to read.
+# Read the aspects: one pass for the held item, one for the armor, through the same chain.
+# 99 when the name shows no aspect, or nothing is there to read.
 for 2
     @setvar! var__aspect_found 99
     @setvar! var__aspect_item 0
@@ -242,13 +274,8 @@ for 2
     endif
 endfor
 
-
-# ========================================================================================
-# REMEMBER OR RESTORE
-# ========================================================================================
-# A shown aspect is remembered. A lost one is turned back on when one is remembered, and a
-# warning asks for it to be turned on by hand once when none is. var__aspect_type picks
-# the command for the chain below: 1 weapon, 2 spellbook, 3 armor.
+# Remember or restore. A shown aspect is remembered. A lost one is turned back on when one
+# is remembered, and a warning asks for it to be turned on by hand once when none is.
 for 2
     @setvar! var__aspect_type 0
     @setvar! var__aspect_kind 99

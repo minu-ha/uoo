@@ -1,0 +1,14 @@
+# ----------------------------------------------------------------------------------------
+# Puts on the paperdoll slots findlayer cannot name, from the Razor list named cosmetic.
+# Eyewear, back, the two-handed secondary and the rest have no findlayer name
+# (document/scripting/razor.md part 2), so gear/dress cannot see them. Every profile keeps
+# an Arm/Dress list named cosmetic with those items only, added by hand in Razor: gear/dress
+# covers the rest, and an older piece left in the list would swap back over a newer one. A
+# profile without the list passes this line with no error.
+# ----------------------------------------------------------------------------------------
+
+
+# ----------------------------------------------------------------------------------------
+# @ setup
+# ----------------------------------------------------------------------------------------
+dress 'cosmetic'

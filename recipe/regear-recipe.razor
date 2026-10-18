@@ -1,0 +1,78 @@
+# Recipe for script/hotkey/regear.razor. Build it with: node util/build-scripts.mjs
+# Every setting of this routine: node util/build-scripts.mjs --settings recipe/regear-recipe.razor
+# @ output script/hotkey/regear.razor
+# @ once
+
+
+# ========================================================================================
+# @ header
+# ========================================================================================
+
+# Regear: after a death and a looted corpse, heals, puts the suit back on, sorts the backpack and turns the aspects on.
+# Needs: restock/loadout run once this Razor session, it records the suit and the aspects. Arcane Essence for the aspects.
+
+
+# ========================================================================================
+# @ blocks
+#
+#   One box per block, in the order the blocks run, base first. The builder writes the box.
+#   Yours are the "> " lines in it (a note on the block, or under a setting the reason for
+#   its value) and the @setvar! lines under it. Write a new @setvar! line under any box, its
+#   reason as a "#" line right above it: the builder moves both to the box it belongs to.
+# ========================================================================================
+
+# ----------------------------------------------------------------------------------------
+# @ use base
+#
+#   The frame of every loop and routine. Every recipe lists it first.
+# ----------------------------------------------------------------------------------------
+
+# ----------------------------------------------------------------------------------------
+# @ use recovery/heal-first
+#
+#   Heals first when hurt: a heal potion, then Greater Heal, then a bandage.
+# ----------------------------------------------------------------------------------------
+
+# ----------------------------------------------------------------------------------------
+# @ use gear/dress
+#
+#   Records what is worn on each equipment layer, and with dress_restore puts it back on.
+#
+#   dress_restore (default 0)
+#      What an empty layer gets.
+#        0  nothing: record only, the way restock/loadout runs it at home
+#        1  its recorded item back out of the backpack, after a death
+#      > The suit goes back on: this runs after a death.
+# ----------------------------------------------------------------------------------------
+@setvar! config__dress_restore 1
+
+# ----------------------------------------------------------------------------------------
+# @ use gear/cosmetic
+#
+#   Puts on the paperdoll slots findlayer cannot name, from the Razor list named cosmetic.
+# ----------------------------------------------------------------------------------------
+
+# ----------------------------------------------------------------------------------------
+# @ use pack/pouches
+#
+#   Picks the supply pouch and the loot bag, by itself when the backpack has one of each.
+# ----------------------------------------------------------------------------------------
+
+# ----------------------------------------------------------------------------------------
+# @ use pack/sorting
+#
+#   Stacks the satchels, pouch, bag and trapped pouches, then sorts the kit into them.
+# ----------------------------------------------------------------------------------------
+
+# ----------------------------------------------------------------------------------------
+# @ use gear/aspect
+#
+#   Remembers the aspects on the held item and the armor, and turns a lost one back on.
+# ----------------------------------------------------------------------------------------
+
+
+# ========================================================================================
+# @ setup
+# ========================================================================================
+
+overhead "[ regear, done ]" 290

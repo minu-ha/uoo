@@ -70,14 +70,14 @@ Razor CE에 없거나 CE보다 넓어진 것. 존재 여부만 기록, 인자 �
 `righthand` `lefthand` `shoes` `pants` `shirt` `head` `gloves` `ring` `talisman` `neck` `hair` `waist` `innertorso` `bracelet` `face`
 `facialhair` `middletorso` `earrings` `arms` `cloak` `backpack` `outertorso` `outerlegs` `innerlegs` `onehandedsecondary` `quiver` `outerbody`
 
-- 27개. 장비는 `hair`, `facialhair`를 뺀 25개 → `hotkey/dress`와 `restock/loadout`이 모두 다룸
+- 27개. 장비는 `hair`, `facialhair`를 뺀 25개 → `gear/dress` 블록이 모두 다룸(`restock/loadout`, `hotkey/regear`)
 - **Outlands가 더한 페이퍼돌 부위는 `findlayer` 이름이 없음 → 레이어로 훑는 스크립트는 못 봄**
 - Razor의 Arm/Dress 목록은 담음. Add Current로 gold rim glasses(Eyewear), gravediggers lantern, tidal tomb travel pack이 목록에 들어감. 인게임 확인됨 2026-10-18
   - 목록은 아이템 serial을 담음 → 장비를 바꾸면 Razor 화면에서 다시 담아야 함. 목록을 고치는 스크립트 명령은 없음([Razor CE 명령](https://www.razorce.com/guide/commands/))
   - 실행은 스크립트로: CE 문법 `dress ('name of dress list')`. 목록이 없는 프로필에서는 오류 없이 지나감(사용자 확인)
   - 그 목록의 Dress가 이 부위 아이템을 실제로 다시 입히는지는 확인되지 않았다
 - **이 저장소의 방식**: 모든 프로필에 Arm/Dress 목록 `cosmetic`. 이름 없는 부위의 아이템만 손으로 담음
-  - `hotkey/dress`가 레이어 25개를 훑은 뒤 마지막에 `dress 'cosmetic'`
+  - `hotkey/regear`가 레이어 25개를 다시 입힌 뒤 `gear/cosmetic` 블록에서 `dress 'cosmetic'`
   - 일반 부위를 담지 않는 이유: 장비를 바꾼 뒤 목록에 남은 옛 장비가 백팩에 있으면, 켜져 있는 Auto-move conflicts가 새 장비를 벗기고 옛것을 입힘
   - 2026-10-18 `summoner`의 목록 `nomeehej` 16개 중 이름 없는 부위 셋만 남겨 `cosmetic`으로: tidal tomb travel pack with bedroll(Back), gold rim glasses(Eyewear), gravediggers lantern(2H Secondary). `default`는 빈 목록. 부위는 Drip 데이터 기준
 
@@ -305,7 +305,7 @@ Razor CE에 없거나 CE보다 넓어진 것. 존재 여부만 기록, 인자 �
 | `hotkey 'Drink Heal'` 같은 포션 핫키 | `recovery/heal`. 이름은 Razor 핫키 목록의 Potions 항목 그대로 |
 | `hotkey "> Interrupt"` | `magery/rotation`, `magery/flamestrike`의 커서 폴링. 제 시전을 끊고 긴급 힐로. 같은 핫키가 휠 아래에도 있음([Hotkeys](../game/hotkeys.md)) |
 | `stop` | `bard/instrument` |
-| `hotkey 'Play Script: <폴더>\<이름>'`으로 다른 스크립트 켜기. 지금 스크립트는 거기서 끝남 | `loot/recycle`의 루프 복귀, `hotkey/dress`와 `restock/loadout`의 `hotkey/aspect` 넘김. 인게임 확인됨 2026-10-19 |
+| `hotkey 'Play Script: <폴더>\<이름>'`으로 다른 스크립트 켜기. 지금 스크립트는 거기서 끝남 | `loot/recycle`의 루프 복귀. 인게임 확인됨 2026-10-19. 루틴끼리 공유할 동작은 넘기지 말고 블록으로(Modules 03.A절) |
 | `targetexists "beneficial"`, `"neutral"`, `"harmful"`로 커서 종류 구분 | `buff/spells`. Bless는 beneficial, Arch Protection은 **neutral**(사용자 확인 2026-10-10. 처음 tamer 스크립트는 beneficial로 잘못 읽어 커서가 남음). Flamestrike는 harmful(`magery/flamestrike`), 손 도구와 칼은 neutral(`gather/*`). 기대와 다른 커서는 취소 → 다른 블록 차단 방지 |
 
 #### 타겟 주문의 모양
