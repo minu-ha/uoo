@@ -1,6 +1,6 @@
 # Regear: after a death and a looted corpse, heals, puts the suit back on, sorts the backpack and turns the aspects on.
 # Needs: restock/loadout run once this Razor session, it records the suit and the aspects. Arcane Essence for the aspects.
-# Hotkeys: Drink Heal, > Greater Heal/Cure Self, Cancel Current Target, Bandage Self.
+# Hotkeys: Bandage Self, Drink Heal, > Greater Heal/Cure Self, Cancel Current Target.
 # Generated from recipe/regear-recipe.razor by util/build-scripts.mjs. Edit module/ and recipe/, not this file.
 
 
@@ -27,7 +27,7 @@
 # ----------------------------------------------------------------------------------------
 # module/recovery/heal-first.razor
 # ----------------------------------------------------------------------------------------
-@setvar! config__heal_first_hits 30
+@setvar! config__heal_first_until 0
 @setvar! config__heal_first_mana 11
 
 
@@ -53,7 +53,7 @@
 # ----------------------------------------------------------------------------------------
 # module/recovery/heal-first.razor
 # ----------------------------------------------------------------------------------------
-@setvar! wait__heal_first 10000
+@setvar! wait__heal_first 20000
 
 
 # ----------------------------------------------------------------------------------------
@@ -107,7 +107,7 @@ settimer "timer__heal_first" 0
 # module/recovery/heal-first.razor
 # ----------------------------------------------------------------------------------------
 @setvar! var__heal_first_no_greater_heal 0
-@setvar! var__heal_first_drank 0
+@setvar! var__heal_first_can 0
 
 
 # ----------------------------------------------------------------------------------------
@@ -231,42 +231,55 @@ endif
 # ----------------------------------------------------------------------------------------
 # module/recovery/heal-first.razor
 # ----------------------------------------------------------------------------------------
-while diffhits >= config__heal_first_hits and timer "timer__heal_first" < wait__heal_first and not dead and not bandaging
-    @setvar! var__heal_first_drank 0
+while diffhits > config__heal_first_until and timer "timer__heal_first" < wait__heal_first and not dead
+    @setvar! var__heal_first_can 0
 
-    if not targetexists and findtype "Yellow Potion" self as alias__heal_first_potion
+    if bandaging or casting
+        @setvar! var__heal_first_can 1
+    endif
+
+    if config__use_bandages = 1 and not bandaging and not paralyzed and not targetexists and skill "Healing" > config__heal_skill_min and findtype 3617 self
+        hotkey "Bandage Self"
+        @setvar! var__heal_first_can 1
+        wait wait__short
+    endif
+
+    # A carried potion keeps the round going while it waits out its own cooldown.
+    if config__use_potions = 1 and not targetexists and findtype "Yellow Potion" self as alias__heal_first_potion
+        @setvar! var__heal_first_can 1
         getlabel alias__heal_first_potion label__heal_first_potion
         if "next usable" in label__heal_first_potion
             # Still on its own cooldown.
         else
             hotkey "Drink Heal"
-            @setvar! var__heal_first_drank 1
+            wait wait__short
         endif
     endif
 
-    if var__heal_first_drank = 0 and var__heal_first_no_greater_heal = 0 and skill "Magery" >= 50 and mana >= config__heal_first_mana and not casting and not targetexists
+    # The refusal of a cast that just ended. Without reagents it would only fail again.
+    if insysmsg "More reagents are needed"
+        @setvar! var__heal_first_no_greater_heal 1
+    endif
+
+    if config__use_magery = 1 and var__heal_first_no_greater_heal = 0 and skill "Magery" >= 50 and mana >= config__heal_first_mana and not casting and not targetexists
         hotkey "> Greater Heal/Cure Self"
+        @setvar! var__heal_first_can 1
         wait wait__short
+    endif
 
-        while casting and timer "timer__heal_first" < wait__heal_first
-            wait wait__short
-        endwhile
-
-        # Without the reagents it would only fail again.
-        if insysmsg "More reagents are needed"
-            @setvar! var__heal_first_no_greater_heal 1
-        endif
-
-        # The agent leaves its cursor up when there is nothing left to heal.
-        if targetexists "beneficial" and diffhits = 0
-            hotkey "Cancel Current Target"
-        endif
-    elseif var__heal_first_drank = 0 and skill "Healing" > 0 and not targetexists and findtype 3617 backpack
-        hotkey "Bandage Self"
+    # Nothing to heal with any more: the clock is run out, which ends the round.
+    if var__heal_first_can = 0
+        settimer "timer__heal_first" wait__heal_first
     endif
 
     wait wait__short
 endwhile
+
+# The agent leaves its cursor up when there is nothing left to heal.
+if targetexists "beneficial"
+    hotkey "Cancel Current Target"
+    wait wait__short
+endif
 
 
 # ----------------------------------------------------------------------------------------

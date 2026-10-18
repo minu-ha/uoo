@@ -1,23 +1,27 @@
 # ----------------------------------------------------------------------------------------
-# Heals first when hurt: a heal potion, then Greater Heal, then a bandage.
-# For a routine that starts hurt, hotkey/regear after a resurrection. The hotkeys and
-# checks of recovery/heal and recovery/bandage. A running bandage ends this part, it heals
-# on while the rest runs. wait__heal_first ends it too, so nothing missing holds it up.
+# Heals to full first: a bandage, a heal potion and Greater Heal, each whenever free.
+# For a routine that starts hurt, hotkey/regear after a resurrection. They stack: a
+# bandage runs while a potion goes down and Greater Heal is cast, and each goes again as
+# soon as it can, until the loss is at heal_first_until. The hotkeys and checks of
+# recovery/heal and recovery/bandage, and the same base switches: use_bandages,
+# heal_skill_min, use_potions and use_magery. So a character without Magery, or without
+# the mana, heals with bandages and potions. It ends early when nothing is left to heal
+# with, and at wait__heal_first in any case, so nothing missing holds the routine up.
 #
-# @ hotkeys Drink Heal, > Greater Heal/Cure Self, Cancel Current Target, Bandage Self
+# @ hotkeys Bandage Self, Drink Heal, > Greater Heal/Cure Self, Cancel Current Target
 # ----------------------------------------------------------------------------------------
 
 
 # ----------------------------------------------------------------------------------------
 # @ config
 #
-#   config__heal_first_hits
-#      Missing hit points at or above which the routine heals first.
+#   config__heal_first_until
+#      Missing hit points at which the healing stops. 0 heals to full.
 #
 #   config__heal_first_mana
 #      Mana Greater Heal needs, as config__mana_greater_heal in recovery/heal.
 # ----------------------------------------------------------------------------------------
-@setvar! config__heal_first_hits 30
+@setvar! config__heal_first_until 0
 @setvar! config__heal_first_mana 11
 
 
@@ -25,9 +29,10 @@
 # @ wait
 #
 #   wait__heal_first
-#      How long the heal may take before the routine goes on regardless.
+#      How long the healing may take before the routine goes on regardless. A bandage
+#      still running then heals on while the rest runs.
 # ----------------------------------------------------------------------------------------
-@setvar! wait__heal_first 10000
+@setvar! wait__heal_first 20000
 
 
 # ----------------------------------------------------------------------------------------
@@ -45,49 +50,63 @@ timer__heal_first 0
 #   var__heal_first_no_greater_heal
 #      Scratch: 1 once Greater Heal was refused for reagents, so it is not tried again.
 #
-#   var__heal_first_drank
-#      Scratch: 1 when a heal potion went out on this round.
+#   var__heal_first_can
+#      Scratch: 1 while something still heals or can: a bandage or a cast running, a heal
+#      potion carried, or one of them going out on this round.
 # ----------------------------------------------------------------------------------------
 @setvar! var__heal_first_no_greater_heal 0
-@setvar! var__heal_first_drank 0
+@setvar! var__heal_first_can 0
 
 
 # ----------------------------------------------------------------------------------------
 # @ setup
 # ----------------------------------------------------------------------------------------
-while diffhits >= config__heal_first_hits and timer "timer__heal_first" < wait__heal_first and not dead and not bandaging
-    @setvar! var__heal_first_drank 0
+while diffhits > config__heal_first_until and timer "timer__heal_first" < wait__heal_first and not dead
+    @setvar! var__heal_first_can 0
 
-    if not targetexists and findtype "Yellow Potion" self as alias__heal_first_potion
+    if bandaging or casting
+        @setvar! var__heal_first_can 1
+    endif
+
+    if config__use_bandages = 1 and not bandaging and not paralyzed and not targetexists and skill "Healing" > config__heal_skill_min and findtype 3617 self
+        hotkey "Bandage Self"
+        @setvar! var__heal_first_can 1
+        wait wait__short
+    endif
+
+    # A carried potion keeps the round going while it waits out its own cooldown.
+    if config__use_potions = 1 and not targetexists and findtype "Yellow Potion" self as alias__heal_first_potion
+        @setvar! var__heal_first_can 1
         getlabel alias__heal_first_potion label__heal_first_potion
         if "next usable" in label__heal_first_potion
             # Still on its own cooldown.
         else
             hotkey "Drink Heal"
-            @setvar! var__heal_first_drank 1
+            wait wait__short
         endif
     endif
 
-    if var__heal_first_drank = 0 and var__heal_first_no_greater_heal = 0 and skill "Magery" >= 50 and mana >= config__heal_first_mana and not casting and not targetexists
+    # The refusal of a cast that just ended. Without reagents it would only fail again.
+    if insysmsg "More reagents are needed"
+        @setvar! var__heal_first_no_greater_heal 1
+    endif
+
+    if config__use_magery = 1 and var__heal_first_no_greater_heal = 0 and skill "Magery" >= 50 and mana >= config__heal_first_mana and not casting and not targetexists
         hotkey "> Greater Heal/Cure Self"
+        @setvar! var__heal_first_can 1
         wait wait__short
+    endif
 
-        while casting and timer "timer__heal_first" < wait__heal_first
-            wait wait__short
-        endwhile
-
-        # Without the reagents it would only fail again.
-        if insysmsg "More reagents are needed"
-            @setvar! var__heal_first_no_greater_heal 1
-        endif
-
-        # The agent leaves its cursor up when there is nothing left to heal.
-        if targetexists "beneficial" and diffhits = 0
-            hotkey "Cancel Current Target"
-        endif
-    elseif var__heal_first_drank = 0 and skill "Healing" > 0 and not targetexists and findtype 3617 backpack
-        hotkey "Bandage Self"
+    # Nothing to heal with any more: the clock is run out, which ends the round.
+    if var__heal_first_can = 0
+        settimer "timer__heal_first" wait__heal_first
     endif
 
     wait wait__short
 endwhile
+
+# The agent leaves its cursor up when there is nothing left to heal.
+if targetexists "beneficial"
+    hotkey "Cancel Current Target"
+    wait wait__short
+endif

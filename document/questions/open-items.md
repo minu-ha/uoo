@@ -910,8 +910,10 @@ loadout과 regear는 같은 `gear/aspect` 블록을 씀. 동작 설명은 각 �
 
 #### 먼저 힐
 
-- 잃은 HP 30 이상으로 regear → 힐 포션, 없으면 Greater Heal, 없으면 붕대 순서. 붕대가 감기기 시작하면 바로 옷 입기로
-- 10초(`wait__heal_first`) 안에 못 채우면 그대로 옷 입기. 시약이 없으면 Greater Heal은 한 번만 시도
+- 다친 채 regear → 붕대, 힐 포션, Greater Heal을 각자 쓸 수 있을 때마다 겹쳐 써서 HP 가득(`heal_first_until` 0)까지
+- Magery가 없거나 마나가 모자라면 붕대와 포션만. 포션이 쿨다운 중이면 기다림
+- 쓸 것이 하나도 없으면 바로 옷 입기로. 20초(`wait__heal_first`) 안에 못 채워도 옷 입기로, 감던 붕대는 계속
+- 시약이 없으면 Greater Heal은 한 번만 시도. 끝나고 남은 Greater Heal 커서는 취소
 
 #### 정리
 
