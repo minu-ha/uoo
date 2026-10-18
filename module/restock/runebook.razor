@@ -1,7 +1,8 @@
 # ----------------------------------------------------------------------------------------
 # Refills the runebooks and runetomes within reach with recall scrolls from the box.
 # The backpack first, then the tomes on the floor, then the books in the chests nearby.
-# Running out of scrolls ends this part only, so the blocks after it still run.
+# Running out of scrolls ends this part only, so the blocks after it still run. At the end
+# it shows once what is left in the box.
 # ----------------------------------------------------------------------------------------
 
 
@@ -111,6 +112,26 @@ if config__use_runebook_refill = 1
 
         @ignore alias__found_container
     endwhile
+
+    # What is left, once, after the last book. A stack a book did not use up drops back
+    # into the box, and its label carries the count. Looked for up to 2 seconds while it
+    # drops back, the way the box was looked into above.
+    if var__runebook_scrolls_out = 0
+        for 10
+            if find global__my_recall_scroll global__my_recall_scroll_container
+                break
+            endif
+
+            wait wait__short
+        endfor
+
+        if find global__my_recall_scroll global__my_recall_scroll_container
+            getlabel global__my_recall_scroll label__recall_scroll_left
+            overhead "[ recall scroll, {{label__recall_scroll_left}} ]" 290
+        else
+            overhead "[ recall scroll, out ]" 254
+        endif
+    endif
 
     cleardragdrop
     clearignore

@@ -1423,6 +1423,23 @@ if config__use_runebook_refill = 1
         @ignore alias__found_container
     endwhile
 
+    if var__runebook_scrolls_out = 0
+        for 10
+            if find global__my_recall_scroll global__my_recall_scroll_container
+                break
+            endif
+
+            wait wait__short
+        endfor
+
+        if find global__my_recall_scroll global__my_recall_scroll_container
+            getlabel global__my_recall_scroll label__recall_scroll_left
+            overhead "[ recall scroll, {{label__recall_scroll_left}} ]" 290
+        else
+            overhead "[ recall scroll, out ]" 254
+        endif
+    endif
+
     cleardragdrop
     clearignore
 endif
