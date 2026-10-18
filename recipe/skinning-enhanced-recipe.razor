@@ -9,7 +9,7 @@
 
 # Dungeon Two-Handed Axe melee with Magery self support, combat potions, sword codex control and corpse skinning.
 # Needs: a Two-Handed Axe, a skinning knife, codices of swords and parrying, bandages, potions and reagents.
-# Optional: the loadout looting pouch.
+# Optional: the loadout loot bag.
 # Template: Forensic Evaluation 120, Swordsmanship 100, Tactics 100, Magery, Resisting Spells, Parrying, Anatomy, Healing 80.
 # Optional cooldown bars: heal pot, walk, reflect. A missing bar reads 0 and cannot hold a cast back.
 # Melee stays manual (Z then V). The script never attacks and never picks a target.
@@ -184,7 +184,7 @@
 # ----------------------------------------------------------------------------------------
 # @ use pack/leather
 #
-#   Moves carried leather into the loot pouch every 2 minutes, between fights.
+#   Moves carried leather into the loot bag every 2 minutes, between fights.
 # ----------------------------------------------------------------------------------------
 
 
@@ -192,10 +192,10 @@
 # @ setup
 # ========================================================================================
 
-# pack/leather moves leather into this pouch. restock/loadout picks it, this asks when it is missing.
-if not varexist global__my_looting_pouch or not find global__my_looting_pouch backpack
-    overhead "[ loot pouch, pick ]" 255
-    setvar global__my_looting_pouch
+# pack/leather moves leather into this bag. restock/loadout picks it, this asks when it is missing.
+if not varexist global__my_loot_bag or not find global__my_loot_bag backpack
+    overhead "[ loot bag, pick ]" 255
+    setvar global__my_loot_bag
 endif
 
 # loot/recycle runs the hotkey named in this list when it finishes or gives up. A list, because

@@ -159,6 +159,8 @@ flowchart TD
 | explosion 포션 | `explo pot` |
 | 달라붙은 폭발 포션. 나에게든 상대에게든 | `bomb` |
 | trapped pouch | `pouch` |
+| 보급 파우치(`global__my_supply_pouch`) | `supplies` |
+| 루팅 백(`global__my_loot_bag`) | `loot bag` |
 | smoke bomb | `smoke` |
 | reagent satchel | `reg satchel` |
 | alchemists satchel | `alch satchel` |

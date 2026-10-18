@@ -2,7 +2,7 @@
 # Needs: Item Identification or the single item ID wand (20496), and a tinker tool, sewing kit or saw.
 # Based on "Item Recycle while Farming" by Jaseowns (outlands.uorazorscripts.com), 6/01/2026, which added
 # dual wield and throwing items. Rewritten to the repo conventions on 2026-10-10.
-# Saved items go to the loadout looting pouch, else a plain pouch, or to the backpack without one.
+# Saved items go to the bottom left of the loadout supply pouch, else a plain pouch or the pack.
 # When it finishes or gives up it runs the hotkey in list__resume_script (script/README.md).
 
 clearall
@@ -107,20 +107,23 @@ clearignore
 # ========================================================================================
 # STATE
 # ========================================================================================
-# The loot pouch: the loadout looting pouch while it is in the backpack, else a plain pouch
-# (hue 0), else the backpack. A pouch of hue 38 is a trapped pouch (script/restock/loadout.razor)
-# and never takes loot.
+# Where saved items go: the loadout supply pouch while it is in the backpack, else a plain
+# pouch (hue 0), else the backpack. A pouch of hue 38 is a trapped pouch and never takes
+# them. The loot bag holds only raw loot, so a looter who takes it does not get these as
+# well (script/restock/loadout.razor). Each save drops at 0 80, the bottom left of the
+# pouch: loadout keeps the supplies at the top left (0 0), the tools at 130 0 and the
+# instrument at 130 80, so the saved items gather on their own.
 @setvar! var__save_container backpack
-if findtype 3705 backpack 0 as alias__loot_pouch
-    @setvar! var__save_container alias__loot_pouch
+if findtype 3705 backpack 0 as alias__supply_pouch
+    @setvar! var__save_container alias__supply_pouch
 endif
-if varexist global__my_looting_pouch
-    if find global__my_looting_pouch backpack
-        @setvar! var__save_container global__my_looting_pouch
+if varexist global__my_supply_pouch
+    if find global__my_supply_pouch backpack
+        @setvar! var__save_container global__my_supply_pouch
     endif
 endif
 
-# Where each kind is saved. All go to the loot pouch. Point one at another container to split them.
+# Where each kind is saved. All go to the supply pouch. Point one elsewhere to split them.
 @setvar! var__staff_storage var__save_container
 @setvar! var__dual_wield_storage var__save_container
 @setvar! var__throwing_storage var__save_container
@@ -276,7 +279,7 @@ while findtype 31017|31019|31021|31023|31025|31027|31029|31031|31033|31035|31037
             sysmsg "Recycle save: {{label__item}}" 88
         endif
         lift alias__item
-        drop var__staff_storage 0 0 0
+        drop var__staff_storage 0 80 0
         wait wait__item
         @ignore alias__item
     endif
@@ -376,7 +379,7 @@ while findtype "dual wield tracker knife|duel wield katana|dual wield norse axe|
             sysmsg "Recycle save: {{label__item}}" 88
         endif
         lift alias__item
-        drop var__dual_wield_storage 0 0 0
+        drop var__dual_wield_storage 0 80 0
         wait wait__item
         @ignore alias__item
     endif
@@ -476,7 +479,7 @@ while findtype "chakram|francisca|hurlbat|javelin|throwing knife|throwing star|6
             sysmsg "Recycle save: {{label__item}}" 88
         endif
         lift alias__item
-        drop var__throwing_storage 0 0 0
+        drop var__throwing_storage 0 80 0
         wait wait__item
         @ignore alias__item
     endif
@@ -576,7 +579,7 @@ while findtype 3909|3911|3913|3915|3917|3934|3937|5046|5049|5115|5119|5182|5185|
             sysmsg "Recycle save: {{label__item}}" 88
         endif
         lift alias__item
-        drop var__swords_storage 0 0 0
+        drop var__swords_storage 0 80 0
         wait wait__item
         @ignore alias__item
     endif
@@ -678,7 +681,7 @@ while findtype 3568|3713|3721|3932|5040|5044|5112|5127|5177|5179|5181|30991|3099
             sysmsg "Recycle save: {{label__item}}" 88
         endif
         lift alias__item
-        drop var__macing_storage 0 0 0
+        drop var__macing_storage 0 80 0
         wait wait__item
         @ignore alias__item
     endif
@@ -782,7 +785,7 @@ while findtype 31172|31169|3719|3922|3938|5121|5123|5125|30989|30992|30996|30997
             sysmsg "Recycle save: {{label__item}}" 88
         endif
         lift alias__item
-        drop var__fencing_storage 0 0 0
+        drop var__fencing_storage 0 80 0
         wait wait__item
         @ignore alias__item
     endif
@@ -886,7 +889,7 @@ while findtype 3920|5042|5117|30990|30993|30994|30995|31184|31186 var__source_co
             sysmsg "Recycle save: {{label__item}}" 88
         endif
         lift alias__item
-        drop var__archery_storage 0 0 0
+        drop var__archery_storage 0 80 0
         wait wait__item
         @ignore alias__item
     endif
@@ -970,7 +973,7 @@ while findtype 7026|7027|7029|7031|7033|7034|7035|7107|7109|31002|31130 var__sou
             sysmsg "Recycle save: {{label__item}}" 88
         endif
         lift alias__item
-        drop var__shield_storage 0 0 0
+        drop var__shield_storage 0 80 0
         wait wait__item
         @ignore alias__item
     endif
@@ -1074,7 +1077,7 @@ while findtype 3570|3571|3572|3573|3834 var__source_container as alias__item
             sysmsg "Recycle save: {{label__item}}" 88
         endif
         lift alias__item
-        drop var__mage_storage 0 0 0
+        drop var__mage_storage 0 80 0
         wait wait__item
         @ignore alias__item
     endif
@@ -1178,7 +1181,7 @@ while findtype 22187|31141|31142 var__source_container as alias__item
             sysmsg "Recycle save: {{label__item}}" 88
         endif
         lift alias__item
-        drop var__wrestling_storage 0 0 0
+        drop var__wrestling_storage 0 80 0
         wait wait__item
         @ignore alias__item
     endif
@@ -1282,7 +1285,7 @@ while findtype 3740|3742|3762|3763|10245|20006|20008|20010|20012|20014|20016 var
             sysmsg "Recycle save: {{label__item}}" 88
         endif
         lift alias__item
-        drop var__music_storage 0 0 0
+        drop var__music_storage 0 80 0
         wait wait__item
         @ignore alias__item
     endif
@@ -1364,7 +1367,7 @@ while findtype 5061|5063|5070|5074|5075|7169|7175|7177|7179|7610|31191 var__sour
         if config__sysmsg = 1
             sysmsg "Recycle save: {{label__item}}" 88
         endif
-        # Armor goes by its material. Anything else stays in the loot pouch.
+        # Armor goes by its material. Anything else stays in the supply pouch.
         @setvar! var__save_to var__save_container
         if "plate" in label__item
             @setvar! var__save_to var__plate_storage
@@ -1380,7 +1383,7 @@ while findtype 5061|5063|5070|5074|5075|7169|7175|7177|7179|7610|31191 var__sour
             @setvar! var__save_to var__leather_storage
         endif
         lift alias__item
-        drop var__save_to 0 0 0
+        drop var__save_to 0 80 0
         wait wait__item
         @ignore alias__item
     endif
@@ -1458,7 +1461,7 @@ while findtype 5078|5201|5203|5204|5205|5207|7177|31003|31004 var__source_contai
         if config__sysmsg = 1
             sysmsg "Recycle save: {{label__item}}" 88
         endif
-        # Armor goes by its material. Anything else stays in the loot pouch.
+        # Armor goes by its material. Anything else stays in the supply pouch.
         @setvar! var__save_to var__save_container
         if "plate" in label__item
             @setvar! var__save_to var__plate_storage
@@ -1474,7 +1477,7 @@ while findtype 5078|5201|5203|5204|5205|5207|7177|31003|31004 var__source_contai
             @setvar! var__save_to var__leather_storage
         endif
         lift alias__item
-        drop var__save_to 0 0 0
+        drop var__save_to 0 80 0
         wait wait__item
         @ignore alias__item
     endif
@@ -1552,7 +1555,7 @@ while findtype 5076|5078|5085|5089|5090|7170|7177|7181|7610|31011|31012 var__sou
         if config__sysmsg = 1
             sysmsg "Recycle save: {{label__item}}" 88
         endif
-        # Armor goes by its material. Anything else stays in the loot pouch.
+        # Armor goes by its material. Anything else stays in the supply pouch.
         @setvar! var__save_to var__save_container
         if "plate" in label__item
             @setvar! var__save_to var__plate_storage
@@ -1568,7 +1571,7 @@ while findtype 5076|5078|5085|5089|5090|7170|7177|7181|7610|31011|31012 var__sou
             @setvar! var__save_to var__leather_storage
         endif
         lift alias__item
-        drop var__save_to 0 0 0
+        drop var__save_to 0 80 0
         wait wait__item
         @ignore alias__item
     endif
@@ -1646,7 +1649,7 @@ while findtype 5078|5101|5103|5105|5106|5131|7177|7947|31009|31010 var__source_c
         if config__sysmsg = 1
             sysmsg "Recycle save: {{label__item}}" 88
         endif
-        # Armor goes by its material. Anything else stays in the loot pouch.
+        # Armor goes by its material. Anything else stays in the supply pouch.
         @setvar! var__save_to var__save_container
         if "plate" in label__item
             @setvar! var__save_to var__plate_storage
@@ -1662,7 +1665,7 @@ while findtype 5078|5101|5103|5105|5106|5131|7177|7947|31009|31010 var__source_c
             @setvar! var__save_to var__leather_storage
         endif
         lift alias__item
-        drop var__save_to 0 0 0
+        drop var__save_to 0 80 0
         wait wait__item
         @ignore alias__item
     endif
@@ -1740,7 +1743,7 @@ while findtype 5056|5059|5060|5063|5103|5106|7177|31005|31006|31007|31015 var__s
         if config__sysmsg = 1
             sysmsg "Recycle save: {{label__item}}" 88
         endif
-        # Armor goes by its material. Anything else stays in the loot pouch.
+        # Armor goes by its material. Anything else stays in the supply pouch.
         @setvar! var__save_to var__save_container
         if "plate" in label__item
             @setvar! var__save_to var__plate_storage
@@ -1756,7 +1759,7 @@ while findtype 5056|5059|5060|5063|5103|5106|7177|31005|31006|31007|31015 var__s
             @setvar! var__save_to var__leather_storage
         endif
         lift alias__item
-        drop var__save_to 0 0 0
+        drop var__save_to 0 80 0
         wait wait__item
         @ignore alias__item
     endif
@@ -1834,7 +1837,7 @@ while findtype 5129|5132|5135|5138|5139|5142|5143|5144|5146|7173|7177|31008 var_
         if config__sysmsg = 1
             sysmsg "Recycle save: {{label__item}}" 88
         endif
-        # Armor goes by its material. Anything else stays in the loot pouch.
+        # Armor goes by its material. Anything else stays in the supply pouch.
         @setvar! var__save_to var__save_container
         if "plate" in label__item
             @setvar! var__save_to var__plate_storage
@@ -1850,7 +1853,7 @@ while findtype 5129|5132|5135|5138|5139|5142|5143|5144|5146|7173|7177|31008 var_
             @setvar! var__save_to var__leather_storage
         endif
         lift alias__item
-        drop var__save_to 0 0 0
+        drop var__save_to 0 80 0
         wait wait__item
         @ignore alias__item
     endif
@@ -1928,7 +1931,7 @@ while findtype 5056|5059|5060|5061|5063|5070|5074|5075|5076|5078|5085|5089|5090|
         if config__sysmsg = 1
             sysmsg "Recycle save: {{label__item}}" 88
         endif
-        # Armor goes by its material. Anything else stays in the loot pouch.
+        # Armor goes by its material. Anything else stays in the supply pouch.
         @setvar! var__save_to var__save_container
         if "plate" in label__item
             @setvar! var__save_to var__plate_storage
@@ -1944,7 +1947,7 @@ while findtype 5056|5059|5060|5061|5063|5070|5074|5075|5076|5078|5085|5089|5090|
             @setvar! var__save_to var__leather_storage
         endif
         lift alias__item
-        drop var__save_to 0 0 0
+        drop var__save_to 0 80 0
         wait wait__item
         @ignore alias__item
     endif

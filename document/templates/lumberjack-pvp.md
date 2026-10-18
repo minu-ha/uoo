@@ -539,8 +539,9 @@ Hatchet은 [공식 무기 표](https://wiki.uooutlands.com/Template:SwordsWeapon
   시작 마나는 레시피의 `config__mana_reactive_armor`, `config__mana_magic_reflect`.
   준비 버프 뒤에도 GH와 Teleport 마나 예산 20을 남기려는 값. 근거는 [Item list](../game/item-list.md#19) 19절과 이 문서 04절
 - **`config__use_potions`**: 1. 독, 피해, 스태미나에 Cure, Heal, Refresh 포션. 리콜 준비용 Strength와 Agility 포션과 그 옵션은 삭제
-- **`pack/lumber` 블록**(v17까지 `config__pack_lumber`): 레시피의 `#@ use pack/lumber`. Logs 가공과 Boards 파우치 이동을 한 묶음으로.
-  빼고 조립하면 정리 없음. `loadout`에서 고른 `global__my_looting_pouch` 재사용, 없거나 백팩에 없으면 시작 시 파우치 선택.
+- **`pack/lumber` 블록**(v17까지 `config__pack_lumber`): 레시피의 `#@ use pack/lumber`. Logs 가공과 Boards 루팅 백 이동을 한 묶음으로.
+  빼고 조립하면 정리 없음. `loadout`에서 고른 `global__my_loot_bag` 재사용, 없거나 백팩에 없으면 시작 시 루팅 백 선택.
+  2026-10-19까지는 보급품과 같은 파우치(`global__my_looting_pouch`). 나눈 이유와 배치는 [loadout](https://github.com/minu-ha/uoo/blob/master/script/restock/loadout.razor)의 Supply pouch and loot bag 구간
   Logs 7133, Boards 7127은 [Item list](../game/item-list.md#15) 15절 값, 색 구분 없음.
   가공은 [공식 Lumberjacking 문서](https://wiki.uooutlands.com/Lumberjacking)의 Logs 더블클릭 경로
 
@@ -610,8 +611,8 @@ Hatchet은 [공식 무기 표](https://wiki.uooutlands.com/Template:SwordsWeapon
   v18부터 housekeeping 대기 없이 패스마다 이 타이머 확인. 첫 정리도 이 주기가 지난 뒤.
   입력이 비고 회복이 필요 없을 때 시작, 묶음마다 사용이나 이동 뒤 500ms 대기.
   작업 중에는 같은 타이머로 단계별 시간 계산, 정리 완료 시 0으로 되돌려 다음 2분 계산.
-  가공이나 이동에 실패한 묶음과 남은 묶음은 다음 주기에 재시도. 파우치가 없을 때도 이 주기로 제한
-- **`wait__lumber_batch`, `var__lumber_graphic`, `global__my_looting_pouch`**: 요청 사이마다 확인하는 단계별 작업 예산 2500ms, 지금 검색하는 graphic, 로드아웃과 공유하는 영속 파우치
+  가공이나 이동에 실패한 묶음과 남은 묶음은 다음 주기에 재시도. 루팅 백이 없을 때도 이 주기로 제한
+- **`wait__lumber_batch`, `var__lumber_graphic`, `global__my_loot_bag`**: 요청 사이마다 확인하는 단계별 작업 예산 2500ms, 지금 검색하는 graphic, 로드아웃과 공유하는 영속 루팅 백
   - graphic 순서 7133 Logs, 7127 Boards, 색 필터 없음. `findtype graphic backpack`에서 hue를 빼므로 같은 graphic의 모든 목재 색이 대상
   - 검색은 시간, 입력, 대상 존재 조건으로 끝나는 `while`. `for 2`는 가공과 이동 두 단계를 같은 본문으로 처리.
     `for`가 `while`보다 빠르다는 뜻 아님. 임시 스택 목록과 `foreach`는 삭제
@@ -699,8 +700,8 @@ END 뒤에도 채집이 보류되면 큐와 커서 안내, 리콜과 책과 Hunt
    명령의 뜻은 [공식 Commands 문서](https://wiki.uooutlands.com/Commands)의 RecallCharge 항목
 3. Hatchet, 붕대, 시약, 포션 준비, 이 캐릭터에서 다음 핫키 동작 확인.
    `Use item in hand`, `Bandage Self`, 각 Drink 핫키, `> Smart Heal/Cure Self`, `> Greater Heal/Cure Self`, `> Interrupt`, `Cancel Current Target`
-4. 백팩 안에 파우치 준비. 파우치 미지정이거나 백팩에 없으면 시작 시 `[ loot pouch, pick ]`, 한 번 선택.
-   이미 `loadout`으로 정했으면 그 값 사용. 실행 중 파우치가 없으면 `[ loot pouch, out ]` 후 정리 건너뜀
+4. 백팩 안에 루팅 백(bag 3702) 준비. 미지정이거나 백팩에 없으면 시작 시 `[ loot bag, pick ]`, 한 번 선택.
+   이미 `loadout`으로 정했으면 그 값 사용. 실행 중 루팅 백이 없으면 `[ loot bag, out ]` 후 정리 건너뜀
 5. 이 캐릭터의 `heal pot`, `walk`, `reflect` 바 확인.
    없는 바는 0으로 보임 → 이동 차단과 Reflect 재시전 제한 미준수. 설정 변경은 별도 작업
 

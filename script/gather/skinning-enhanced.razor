@@ -1,6 +1,6 @@
 # Dungeon Two-Handed Axe melee with Magery self support, combat potions, sword codex control and corpse skinning.
 # Needs: a Two-Handed Axe, a skinning knife, codices of swords and parrying, bandages, potions and reagents.
-# Optional: the loadout looting pouch.
+# Optional: the loadout loot bag.
 # Template: Forensic Evaluation 120, Swordsmanship 100, Tactics 100, Magery, Resisting Spells, Parrying, Anatomy, Healing 80.
 # Optional cooldown bars: heal pot, walk, reflect. A missing bar reads 0 and cannot hold a cast back.
 # Melee stays manual (Z then V). The script never attacks and never picks a target.
@@ -485,10 +485,10 @@ endif
 # ----------------------------------------------------------------------------------------
 # recipe/skinning-enhanced-recipe.razor
 # ----------------------------------------------------------------------------------------
-# pack/leather moves leather into this pouch. restock/loadout picks it, this asks when it is missing.
-if not varexist global__my_looting_pouch or not find global__my_looting_pouch backpack
-    overhead "[ loot pouch, pick ]" 255
-    setvar global__my_looting_pouch
+# pack/leather moves leather into this bag. restock/loadout picks it, this asks when it is missing.
+if not varexist global__my_loot_bag or not find global__my_loot_bag backpack
+    overhead "[ loot bag, pick ]" 255
+    setvar global__my_loot_bag
 endif
 
 # loot/recycle runs the hotkey named in this list when it finishes or gives up. A list, because
@@ -1602,11 +1602,11 @@ while not dead
         if diffhits < config__heal_hits and not poisoned and not paralyzed
             if not hidden and not queued and not casting and not targetexists
                 settimer "timer__pack_leather" 0
-                if find global__my_looting_pouch backpack
+                if find global__my_loot_bag backpack
                     if config__sysmsg = 1
                         sysmsg "Leather pack BEGIN." 88
                     endif
-                    dclick global__my_looting_pouch
+                    dclick global__my_loot_bag
                     wait wait__pack_item
                     settimer "timer__pack_leather" 0
 
@@ -1614,8 +1614,8 @@ while not dead
                         wait wait__poll
                     endwhile
 
-                    while timer "timer__pack_leather" < wait__pack_batch and not queued and not dead and not pvp and diffhits < config__heal_hits and not poisoned and not paralyzed and not hidden and not casting and not targetexists and find global__my_looting_pouch backpack and findtype 4225 backpack as alias__leather_stack
-                        if find alias__leather_stack global__my_looting_pouch
+                    while timer "timer__pack_leather" < wait__pack_batch and not queued and not dead and not pvp and diffhits < config__heal_hits and not poisoned and not paralyzed and not hidden and not casting and not targetexists and find global__my_loot_bag backpack and findtype 4225 backpack as alias__leather_stack
+                        if find alias__leather_stack global__my_loot_bag
                             @ignore alias__leather_stack
                         else
                             # Complete lift/drop together. Do not leave the item held during a wait.
@@ -1623,7 +1623,7 @@ while not dead
                                 sysmsg "Leather move request: serial={{alias__leather_stack}}." 88
                             endif
                             lift alias__leather_stack 60000
-                            drop global__my_looting_pouch -1 -1
+                            drop global__my_loot_bag -1 -1
                             wait wait__pack_item
                         endif
 
@@ -1635,10 +1635,10 @@ while not dead
                         sysmsg "Leather pack END." 88
                     endif
                 elseif timer "timer__message" >= interval__message
-                    overhead "[ loot pouch, out ]" 254
+                    overhead "[ loot bag, out ]" 254
                     settimer "timer__message" 0
                 endif
-                # The next interval starts after this pass, including a missing-pouch attempt.
+                # The next interval starts after this pass, including a missing-bag attempt.
                 settimer "timer__pack_leather" 0
             endif
         endif

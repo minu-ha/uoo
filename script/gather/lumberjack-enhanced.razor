@@ -1,7 +1,7 @@
 # Lumberjack gathering with self recovery, independent Tracking setup and one automatic Recall attempt.
 # Needs: One Hatchet, bandages, reagents, recovery and harvest hotkeys. Automatic Recall needs a charged book with a Home rune.
 # Tracking reuses a confirmed, active hunt color. Gathering waits for it, for a carried book and for a due Recall.
-# Every 2 minutes Logs of all wood colors become Boards and go into the loadout looting pouch.
+# Every 2 minutes Logs of all wood colors become Boards and go into the loadout loot bag.
 # For Tracking-triggered Recall, set Hunt Frequency to Always Get Closest in the Tracking window.
 # Design and in-game checks: document/templates/lumberjack-pvp.md part 8.
 # Optional cooldown bars: heal pot, walk, reflect. A missing walk or reflect bar cannot
@@ -475,10 +475,10 @@ endif
 # ----------------------------------------------------------------------------------------
 # recipe/lumberjack-enhanced-recipe.razor
 # ----------------------------------------------------------------------------------------
-# pack/lumber moves Boards into this pouch. restock/loadout picks it, this asks when it is missing.
-if not varexist global__my_looting_pouch or not find global__my_looting_pouch backpack
-    overhead "[ loot pouch, pick ]" 255
-    setvar global__my_looting_pouch
+# pack/lumber moves Boards into this bag. restock/loadout picks it, this asks when it is missing.
+if not varexist global__my_loot_bag or not find global__my_loot_bag backpack
+    overhead "[ loot bag, pick ]" 255
+    setvar global__my_loot_bag
 endif
 
 # loot/recycle runs the hotkey named in this list when it finishes or gives up. A list, because
@@ -1271,11 +1271,11 @@ while not dead
         if diffhits < config__light_hits and not poisoned and not paralyzed and not warmode
             if not hidden and not queued and not casting and not targetexists
                 settimer "timer__pack_lumber" 0
-                if find global__my_looting_pouch backpack
+                if find global__my_loot_bag backpack
                     if config__sysmsg = 1
                         sysmsg "Lumber pack BEGIN: convert Logs, then move Boards." 88
                     endif
-                    dclick global__my_looting_pouch
+                    dclick global__my_loot_bag
                     wait wait__lumber_item
 
                     # Two phases share one body: Logs first, then current Boards.
@@ -1291,32 +1291,32 @@ while not dead
                         @clearignore
 
                         # End loops by their conditions. No break skips an if scope or resets the outer for.
-                        # Settle the pouch/previous-phase queue within this phase's existing budget.
+                        # Settle the bag/previous-phase queue within this phase's existing budget.
                         while queued and timer "timer__pack_lumber" < wait__lumber_batch and not dead and not pvp and diffhits < config__light_hits and not poisoned and not paralyzed and not warmode and not hidden and not casting and not targetexists
                             wait wait__poll
                         endwhile
 
                         # No hue filter. Search current inventory after each conversion or move.
                         # The timer advances even when ignore cannot advance a failed/packed stack.
-                        while timer "timer__pack_lumber" < wait__lumber_batch and not queued and not dead and not pvp and diffhits < config__light_hits and not poisoned and not paralyzed and not warmode and not hidden and not casting and not targetexists and find global__my_looting_pouch backpack and findtype var__lumber_graphic backpack as alias__lumber_stack
+                        while timer "timer__pack_lumber" < wait__lumber_batch and not queued and not dead and not pvp and diffhits < config__light_hits and not poisoned and not paralyzed and not warmode and not hidden and not casting and not targetexists and find global__my_loot_bag backpack and findtype var__lumber_graphic backpack as alias__lumber_stack
                             if var__lumber_graphic = 7133
                                 if config__sysmsg = 1
                                     sysmsg "Lumber convert: serial={{alias__lumber_stack}}." 88
                                 endif
                                 dclick alias__lumber_stack
                                 wait wait__lumber_item
-                            elseif find alias__lumber_stack global__my_looting_pouch
-                                # Recursive backpack searches can return Boards already in the pouch.
+                            elseif find alias__lumber_stack global__my_loot_bag
+                                # Recursive backpack searches can return Boards already in the bag.
                                 if config__sysmsg = 1
-                                    sysmsg "Lumber skip: serial={{alias__lumber_stack}}, already in pouch." 88
+                                    sysmsg "Lumber skip: serial={{alias__lumber_stack}}, already in bag." 88
                                 endif
-                            elseif find global__my_looting_pouch backpack
+                            elseif find global__my_loot_bag backpack
                                 if config__sysmsg = 1
-                                    sysmsg "Lumber move request: serial={{alias__lumber_stack}}, pouch={{global__my_looting_pouch}}." 88
+                                    sysmsg "Lumber move request: serial={{alias__lumber_stack}}, bag={{global__my_loot_bag}}." 88
                                 endif
                                 # Complete lift/drop together. Do not leave the item held during a wait.
                                 lift alias__lumber_stack 60000
-                                drop global__my_looting_pouch -1 -1
+                                drop global__my_loot_bag -1 -1
                                 wait wait__lumber_item
                             endif
                             # Check container membership before ignore, which can hide it from find.
@@ -1340,10 +1340,10 @@ while not dead
                         endif
                     endif
                 elseif timer "timer__message" >= interval__message
-                    overhead "[ loot pouch, out ]" 254
+                    overhead "[ loot bag, out ]" 254
                     settimer "timer__message" 0
                 endif
-                # The next interval starts after this batch, including a missing-pouch attempt.
+                # The next interval starts after this batch, including a missing-bag attempt.
                 settimer "timer__pack_lumber" 0
             endif
         endif

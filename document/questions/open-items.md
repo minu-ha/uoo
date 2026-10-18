@@ -55,9 +55,9 @@ order: 10
 | --- | --- | --- |
 | 22자 상한([Overheads](../scripting/overheads.md#02) 02절) | 프로필의 `[ magic arrow, target ]` 23자. loadout의 `[ trapped pouch, moved ]` 24자, `[ alch satchel, moved ]` 23자 | 줄일까. `magic arrow`를 줄이지 않는 규칙과 충돌 |
 | 대상 위 줄은 1288([Overheads](../scripting/overheads.md#01.C) 01.C절) | moongate의 `[ moongate, set ]`은 290으로 게이트 위, archive/backstab-mugging의 `[ range, out ]`은 254로 lasttarget 위 | 1288로 바꿀까, 예외로 적을까 |
-| 한 대상에 한 낱말([Overheads](../scripting/overheads.md#04) 04절) | loadout의 `[ pouch, moved ]`는 looting pouch 줄인데 글로서리의 `pouch`는 트랩 파우치(`loot pouch`가 맞음). 프로필 `[ omen, target ]`과 스크립트 `[ evil omen ]`, train/herding의 `[ herding, done ]`과 글로서리 `herd`, 바 `cannons`와 `[ cannon, out ]`도 불일치 | 어느 쪽으로 맞출까 |
+| 한 대상에 한 낱말([Overheads](../scripting/overheads.md#04) 04절) | 프로필 `[ omen, target ]`과 스크립트 `[ evil omen ]`, train/herding의 `[ herding, done ]`과 글로서리 `herd`, 바 `cannons`와 `[ cannon, out ]`도 불일치 | 어느 쪽으로 맞출까 |
 | 대상만 쓰는 줄 = 시전 알림([Overheads](../scripting/overheads.md#05) 05절) | 프로필의 `[ swing ]`(290)은 대상만인데 시전 알림 아님 | `[ swing, on ]`처럼 상태를 붙일까 |
-| 고르라는 줄은 `pick` 255 | refill-runebook의 `[ chest, set ]`, loadout의 `[ loot pouch, set ]`은 고르게 하는 줄인데 `set` 290 | `pick` 255로 바꿀까 |
+| 고르라는 줄은 `pick` 255 | refill-runebook의 `[ chest, set ]`은 고르게 하는 줄인데 `set` 290 | `pick` 255로 바꿀까 |
 | 글로서리 낱말 | `gheal` `invis` `tp`를 쓰는 줄 없음 | 예약어로 둘까, 지울까 |
 
 ## <a id="03"></a>03 캐릭터와 핫키
@@ -802,6 +802,8 @@ order: 10
 - 재질을 못 읽은 방어구는 루트 파우치로. 재활용 도구가 없을 때도 루프로 복귀
 - 2026-10-13 저장 위치 수정. 원작부터 hue 38 파우치를 먼저 골라 트랩 파우치로 들어감(사용자 보고).
   이제 loadout의 `global__my_looting_pouch`, 없으면 hue 0 파우치, 없으면 백팩. 저장한 아이템이 루팅 파우치에 들어가야 함
+- 2026-10-19 저장 위치를 보급 파우치(`global__my_supply_pouch`)의 왼쪽 아래(`0 80`)로. 루팅 백은 날것의 루팅만.
+  저장한 아이템이 보급 파우치 왼쪽 아래에 모이고, 왼쪽 위 보급품과 섞이지 않아야 함
 
 ## <a id="14"></a>14 bard-necro-enhanced 인게임 확인
 

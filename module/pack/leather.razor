@@ -1,7 +1,6 @@
 # ----------------------------------------------------------------------------------------
-# Moves carried leather into the loot pouch every 2 minutes, between fights.
-# The pouch is global__my_looting_pouch, picked by restock/loadout or by the recipe's
-# setup.
+# Moves carried leather into the loot bag every 2 minutes, between fights.
+# The bag is global__my_loot_bag, picked by restock/loadout or by the recipe's setup.
 # ----------------------------------------------------------------------------------------
 
 
@@ -9,7 +8,7 @@
 # @ wait
 #
 #   wait__pack_item
-#      Allow inventory updates after opening the pouch and each drag/drop.
+#      Allow inventory updates after opening the bag and each drag/drop.
 #
 #   wait__pack_batch
 #      Request budget for one packing pass. Leftover leather waits for the next interval.
@@ -39,8 +38,8 @@ timer__pack_leather 0
     #
     # Same shape as the Boards pass in pack/lumber. No hue filter, so colored leather
     # moves too. Only between fights. Recursive backpack searches can return leather
-    # already in the pouch, so membership is checked before ignore, and only pouch stacks
-    # are ignored. No clearignore here: the list also holds the carved corpses. A refused
+    # already in the bag, so membership is checked before ignore, and only bag stacks are
+    # ignored. No clearignore here: the list also holds the carved corpses. A refused
     # move is found again and retried until the pass budget runs out, then on the next
     # interval.
     # ------------------------------------------------------------------------------------
@@ -48,11 +47,11 @@ timer__pack_leather 0
         if diffhits < config__heal_hits and not poisoned and not paralyzed
             if not hidden and not queued and not casting and not targetexists
                 settimer "timer__pack_leather" 0
-                if find global__my_looting_pouch backpack
+                if find global__my_loot_bag backpack
                     if config__sysmsg = 1
                         sysmsg "Leather pack BEGIN." 88
                     endif
-                    dclick global__my_looting_pouch
+                    dclick global__my_loot_bag
                     wait wait__pack_item
                     settimer "timer__pack_leather" 0
 
@@ -60,8 +59,8 @@ timer__pack_leather 0
                         wait wait__poll
                     endwhile
 
-                    while timer "timer__pack_leather" < wait__pack_batch and not queued and not dead and not pvp and diffhits < config__heal_hits and not poisoned and not paralyzed and not hidden and not casting and not targetexists and find global__my_looting_pouch backpack and findtype 4225 backpack as alias__leather_stack
-                        if find alias__leather_stack global__my_looting_pouch
+                    while timer "timer__pack_leather" < wait__pack_batch and not queued and not dead and not pvp and diffhits < config__heal_hits and not poisoned and not paralyzed and not hidden and not casting and not targetexists and find global__my_loot_bag backpack and findtype 4225 backpack as alias__leather_stack
+                        if find alias__leather_stack global__my_loot_bag
                             @ignore alias__leather_stack
                         else
                             # Complete lift/drop together. Do not leave the item held during a wait.
@@ -69,7 +68,7 @@ timer__pack_leather 0
                                 sysmsg "Leather move request: serial={{alias__leather_stack}}." 88
                             endif
                             lift alias__leather_stack 60000
-                            drop global__my_looting_pouch -1 -1
+                            drop global__my_loot_bag -1 -1
                             wait wait__pack_item
                         endif
 
@@ -81,10 +80,10 @@ timer__pack_leather 0
                         sysmsg "Leather pack END." 88
                     endif
                 elseif timer "timer__message" >= interval__message
-                    overhead "[ loot pouch, out ]" 254
+                    overhead "[ loot bag, out ]" 254
                     settimer "timer__message" 0
                 endif
-                # The next interval starts after this pass, including a missing-pouch attempt.
+                # The next interval starts after this pass, including a missing-bag attempt.
                 settimer "timer__pack_leather" 0
             endif
         endif

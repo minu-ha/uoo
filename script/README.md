@@ -57,8 +57,8 @@ Smart Harvest, the self buffs, food and lumber packing. Settings, in-game checks
 - Smart Harvest equips the cached Hatchet into an empty left hand, then runs Use item in hand and target self in
   one block. "No harvestable resources nearby" retries in 2 seconds, anything else in 4. The server's 60-second
   delay after travel still applies.
-- Every 2 minutes Logs become Boards and Boards go into the loadout looting pouch (`pack/lumber`), with a
-  2.5-second budget per phase. A pouch is asked for at Play when none is set.
+- Every 2 minutes Logs become Boards and Boards go into the loadout loot bag (`pack/lumber`), with a
+  2.5-second budget per phase. A bag is asked for at Play when none is set.
 - Warmode and any cursor belong to the player: recovery casts, buffs, food and gathering stand down while either
   is up. Potions and bandages still go out.
 - To fight a PK, switch to [combat/pvp.razor](combat/pvp.razor) with its own hotkey
@@ -82,8 +82,8 @@ and `setlasttarget` cannot restore it in this client. A Z pick made during the k
 The sword codex holds Warrior, Defensive while hurt, the Execute finisher and the Chop ability, none of which rely on weapon specials.
 The parry codex holds Bulwark for now (Testudo once its ranks catch up) and the Last Stand finisher,
 and Warding while poisoned, bleeding or diseased away from melee. Carving results and the Sanctuary refusal are profile overheads.
-`pack/leather` moves carried leather into the loadout looting pouch every 2 minutes between fights.
-It ignores only pouch stacks and never clears the list, so carved corpses stay skipped.
+`pack/leather` moves carried leather into the loadout loot bag every 2 minutes between fights.
+It ignores only bag stacks and never clears the list, so carved corpses stay skipped.
 Meet a PK with `combat/pvp` (F4).
 Design notes and in-game checks are in [document/questions/open-items.md](../document/questions/open-items.md#11) part 11.
 
