@@ -1171,8 +1171,8 @@ while not dead
         if followers > 0
             @setvar! var__fresh_summon 0
 
-            # Bodies. Lich 24 and ancient mummy 158 read off >info, vampire thrall 722 and rag
-            # witch 740 from the old bard-necro follower cache, and the Summon Creature undead
+            # Bodies. Lich 24, ancient mummy 158 and rag witch 740 read off >info, vampire
+            # thrall 722 from the old bard-necro follower cache, and the Summon Creature undead
             # pool as far as the stock client art goes, zombie 3, ghost 26, skeleton 50, 56, 57,
             # skeletal knight 147, skeletal mage 148, ghoul 153, rotting corpse 155. Skeletal
             # Fiend, skeletal marksman and rotting flesh are Outlands bodies: read theirs with
@@ -1236,32 +1236,6 @@ while not dead
             endwhile
 
             @clearignore
-
-            # The rag witch's body number is not confirmed: 740 came from an old script and no
-            # rag witch was found by it (2026-10-10). So when the bodies give nothing, it is also
-            # looked up by its stock name, which findtype matches as well. Once >info gives its
-            # body, add that to the line above and drop this walk.
-            if var__fresh_summon = 0
-                while findtype "a rag witch" ground -1 -1 config__summon_range as alias__fresh_summon
-                    @setvar! var__summon_seen alias__fresh_summon
-
-                    if not inlist 'list__named_summons' var__summon_seen
-                        if not dead alias__fresh_summon and noto alias__fresh_summon != "hostile" and noto alias__fresh_summon != "criminal" and noto alias__fresh_summon != "enemy" and noto alias__fresh_summon != "murderer" and noto alias__fresh_summon != "innocent"
-                            @setvar! var__fresh_summon alias__fresh_summon
-                            @setvar! var__summon_kind 5
-
-                            if config__sysmsg = 1
-                                sysmsg "Summon name: a rag witch found by its name, not its body. Read its body with >info." 88
-                            endif
-                            break
-                        endif
-                    endif
-
-                    @ignore alias__fresh_summon
-                endwhile
-
-                @clearignore
-            endif
 
             if var__fresh_summon != 0
                 pushlist 'list__named_summons' var__fresh_summon

@@ -826,7 +826,7 @@ PK를 만나도 조합 유지, 사냥하던 그대로 싸움(06.D절). 조합별
 | Lich | 24 | 0 | `>info` |
 | Ancient Mummy | 158 | 2340 | `>info` |
 | Vampire Thrall | 722 |   | 구식 `bard-necro` 팔로워 캐시 |
-| Rag Witch | 740 (의심) |   | 구식 `bard-necro` 팔로워 캐시. 2026-10-10 이 번호로 rag witch를 찾지 못해 이름 미변경 → 기본 이름 `a rag witch`로도 검색. `>info`로 바디를 읽어 수정 |
+| Rag Witch | 740 | 2669 | `>info`, 인게임 확인됨 2026-10-18. 2026-10-10 이름이 안 바뀐 원인은 바디가 아님 → 이름 검색 우회 삭제 |
 | Summon Creature 풀의 표준 언데드 | 3 26 50 56 57 147 148 153 155 |   | 표준 클라이언트 아트(zombie, ghost, skeleton, skeletal knight, skeletal mage, ghoul, rotting corpse) |
 | Skeletal Fiend, 그리고 Summon Creature 풀의 skeletal marksman과 rotting flesh | 모름 |   | Outlands 바디. 나오면 `>info`로 확인(07절) |
 
@@ -1360,7 +1360,7 @@ endif
   - 공통 PvP 자기관리도 시약 캐시 사용. 읽는 시약과 주기는 [PvP](../game/pvp.md#05.E) 05.E절
 - **소환수 이름.** `necro/summon-names` 블록은 하우스키핑 틱(5초)마다 한 번
   - 매치를 훑는 `findtype`은 매치 수보다 한 번 더 호출, 아직 이름이 없는 내 소환수마다 `getlabel` 하나
-  - 새 소환수를 못 찾으면 기본 이름 `a rag witch`로 한 번 더 훑음(04.G절). 매 패스가 아니라 이 정도는 유지
+  - 2026-10-18 Rag Witch 바디 740 확인으로 기본 이름 `a rag witch` 재검색 삭제(04.G절)
 - **교전과 이동 분기**(2026-09-29, 2026-10-10부터 레시피 그룹). 모든 패스가 지나는 블록(생존, 타겟 캐시, 시약, 심볼, 하우스키핑) 뒤에서,
   `# @ when var__fighting = 1` 그룹이 교전 여부를 한 번만 판정
   - 교전 쪽: 디스코, 피스, 네크로 버스트, 오프닝, 프록 코어, 필러, Poison Strike. 이동 쪽(`# @ otherwise`): 자기 버프, Spell Siphon, 송, Vampiric Embrace

@@ -821,12 +821,10 @@ order: 10
   새 이름의 수락 여부 확인
 - 기록(2026-10-13): `wicca`도 거절 → `wichy`로 교체. `wichy`와 나머지 이름의 수락 여부 확인
 
-#### Rag Witch 바디
+#### 소환수 바디
 
-- `mumi`는 바뀌었지만 rag witch는 안 바뀜(2026-10-10). 바디 번호 740이 틀린 것으로 보고 기본 이름 `a rag witch`로도 검색.
-  다음 판은 rag witch를 찾아 이름을 붙이려 함(`wytch`는 거절)
-- Journal에 `a rag witch found by its name, not its body`가 뜨면 그 rag witch에 `>info`로 Body 번호 확인 후 전달. 그 번호를 바디 목록에 넣고 이름 검색 삭제
-- Vampire Thrall 722도 같은 출처라 확인되지 않았다
+- Rag Witch 740은 인게임 확인됨 2026-10-18. 기본 이름 `a rag witch` 재검색 삭제 → 새 rag witch가 5초 안에 `wichy`가 되는지 확인
+- Vampire Thrall 722는 구식 캐시가 출처라 확인되지 않았다. 뽑으면 `>info`
 
 #### 교전과 이동
 
