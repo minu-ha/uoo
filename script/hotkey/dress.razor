@@ -1,6 +1,8 @@
 # Dress Suite - Equip
 # Original credit for the concept to Demlar
 # Needs: script/restock/loadout.razor run once this session, it records what to put back on
+# With config__use_aspect it hands over to script/hotkey/aspect.razor at the end, so the
+# aspects a death took come back on.
 
 # One block per equipment layer, the same list script/restock/loadout.razor records. A
 # layer that still holds something is recorded. A layer that is empty gets its remembered
@@ -22,6 +24,10 @@
 # CONFIG
 # ========================================================================================
 @setvar! config__chatty 1
+
+# 1 hands over to script/hotkey/aspect.razor at the end. It turns the aspects a death took
+# back on, 5 Arcane Essence each.
+@setvar! config__use_aspect 1
 
 
 # ========================================================================================
@@ -618,3 +624,12 @@ endif
 dress 'cosmetic'
 
 overhead "[ dress, done ]" 290
+
+
+# ========================================================================================
+# ASPECT
+# ========================================================================================
+# Last, with the suit on. Running another script ends this one, so this is the final line.
+if config__use_aspect = 1
+    hotkey 'Play Script: hotkey\aspect'
+endif

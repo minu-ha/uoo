@@ -36,6 +36,7 @@ order: 10
 | [12](#12) | tamer-mage-enhanced 인게임 확인 |
 | [13](#13) | recycle의 루프 복귀 확인 |
 | [14](#14) | bard-necro-enhanced 인게임 확인 |
+| [15](#15) | loadout, dress, aspect 인게임 확인 |
 
 ::part[설정과 알림]
 
@@ -774,7 +775,7 @@ order: 10
 - bard-necro-enhanced, skinning-enhanced, lumberjack-enhanced, tamer-mage-enhanced, dexxer-basic이 Play할 때 자기 핫키 이름을 이 리스트에 추가.
   archive로 옮긴 bard-mace와 bard-throwing은 `Play Script: archive\…` 이름으로 추가. pvp는 싸울 때만 켜므로 제외
 - 핫키 이름은 프로필 xml이 F1을 저장한 모양 `Play Script: gather\skinning-enhanced`를 따름.
-  `hotkey`가 이 이름으로 스크립트를 켜는지, 따옴표 안의 `\`가 그대로 넘어가는지는 아직 확인되지 않았다
+  스크립트 안의 `hotkey 'Play Script: <폴더>\<이름>'`이 그 스크립트를 켬(사용자 확인). 인게임 확인됨 2026-10-19
 - 변수는 단어를 `4294967295`로 읽음([Razor](../scripting/razor.md#03) 03절) → 리스트 사용
 
 #### 복귀
@@ -877,3 +878,28 @@ order: 10
 #### 버섯
 
 - 교전 중에도 마나 55 이하이고 쿨다운이 끝났으면 먹음. Create Food는 이동 중에만
+
+## <a id="15"></a>15 loadout, dress, aspect 인게임 확인
+
+2026-10-19 추가. loadout과 dress가 끝에서 `hotkey/aspect`로 넘어감(`config__use_aspect` 1). 동작 설명은 각 스크립트 머리 주석.
+
+- aspect 근거: [Commands](https://wiki.uooutlands.com/Commands)의 `[AspectWeapon`, `[AspectSpellbook`, `[AspectArmor`.
+  [Aspect Mastery](https://wiki.uooutlands.com/Aspect_Mastery): 켤 때마다 Arcane Essence 5, 죽으면 장비의 aspect가 풀림
+- 죽으면 아이템 이름에서 `<name> aspect`도 사라짐(사용자 확인) → 살아 있을 때 이름에서 읽어 세션 변수에 기억, 죽은 뒤 그 이름으로 다시 켬
+
+#### 넘어가기
+
+- loadout과 dress 끝에서 `hotkey 'Play Script: hotkey\aspect'`. 이 방식으로 다른 스크립트가 켜지는 것은 인게임 확인됨 2026-10-19(13절)
+- 새 파일이라 Razor를 다시 켠 뒤 Scripts 탭에 `hotkey\aspect`가 보여야 함
+
+#### 기억
+
+- aspect가 켜진 채 loadout → Journal에 `Aspect: held item shows aspect 9, remembered.`(Eldritch 주문서), `Aspect: armor shows aspect 17, remembered.`(Lyric 방어구). Essence는 안 줄어야 함
+- 번호는 `hotkey/aspect` 머리 주석의 표. 다른 번호가 뜨면 그 이름 기록
+
+#### 다시 켜기
+
+- 죽고 시체를 먹은 뒤 dress → 옷을 다 입고 `[AspectSpellbook Eldritch`, `[AspectArmor Lyric`을 말함 → `[ aspect, on ]` 둘, Essence 10 감소
+- `[ aspect, miss ]`: 이름에 aspect가 안 돌아옴. Essence 부족, 명령 거절, 또는 1초(`wait__aspect`) 안에 이름이 안 바뀜. 서버 응답 문장 기록
+- `[ aspect, out ]`: 이번 Razor 세션에 기억한 aspect가 없음. 손으로 한 번 켜고 loadout이나 `hotkey/aspect`를 돌리면 기억
+- 방어구는 머리, 목, 장갑, 팔, 몸통, 다리 순서로 처음 보이는 aspect를 읽음. 옷(튜닉, 바디스)의 aspect는 안 읽음. 다른 aspect가 섞여 있으면 기록

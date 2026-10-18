@@ -42,6 +42,10 @@ clearignore
 # Everything a hand can touch is 2 tiles away at most, so that is the range every check uses.
 @setvar! config__reach 2
 
+# 1 hands over to script/hotkey/aspect.razor at the end. It remembers the aspects shown on
+# what is held and worn, and turns a lost one back on, 5 Arcane Essence each.
+@setvar! config__use_aspect 1
+
 # ========================================================================================
 # CONTAINERS YOU WALK UP TO
 # ========================================================================================
@@ -1083,4 +1087,9 @@ endwhile
 cleardragdrop
 clearignore
 overhead "[ loadout, done ]" 290
+
+# Running another script ends this one, so the aspect hand-off is the last thing done.
+if config__use_aspect = 1
+    hotkey 'Play Script: hotkey\aspect'
+endif
 stop

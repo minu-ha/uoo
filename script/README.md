@@ -7,7 +7,7 @@ Every `combat/` and `gather/` loop is generated: edit `module/` and `recipe/` at
 
 ```
 combat/    hunting loops per template, shared PvP self sustain
-hotkey/    one-shot macros bound to a key: weapon swaps, dress, cancel target, bard buffs, moongate
+hotkey/    one-shot macros bound to a key: weapon swaps, dress, aspect, cancel target, bard buffs, moongate
 debug/     diagnostics and test scripts: dump-label, target find/state probes, Telekinesis variable test
 train/     skill trainers
 gather/    lumberjacking, skinning

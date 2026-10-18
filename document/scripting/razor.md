@@ -305,6 +305,7 @@ Razor CE에 없거나 CE보다 넓어진 것. 존재 여부만 기록, 인자 �
 | `hotkey 'Drink Heal'` 같은 포션 핫키 | `recovery/heal`. 이름은 Razor 핫키 목록의 Potions 항목 그대로 |
 | `hotkey "> Interrupt"` | `magery/rotation`, `magery/flamestrike`의 커서 폴링. 제 시전을 끊고 긴급 힐로. 같은 핫키가 휠 아래에도 있음([Hotkeys](../game/hotkeys.md)) |
 | `stop` | `bard/instrument` |
+| `hotkey 'Play Script: <폴더>\<이름>'`으로 다른 스크립트 켜기. 지금 스크립트는 거기서 끝남 | `loot/recycle`의 루프 복귀, `hotkey/dress`와 `restock/loadout`의 `hotkey/aspect` 넘김. 인게임 확인됨 2026-10-19 |
 | `targetexists "beneficial"`, `"neutral"`, `"harmful"`로 커서 종류 구분 | `buff/spells`. Bless는 beneficial, Arch Protection은 **neutral**(사용자 확인 2026-10-10. 처음 tamer 스크립트는 beneficial로 잘못 읽어 커서가 남음). Flamestrike는 harmful(`magery/flamestrike`), 손 도구와 칼은 neutral(`gather/*`). 기대와 다른 커서는 취소 → 다른 블록 차단 방지 |
 
 #### 타겟 주문의 모양
