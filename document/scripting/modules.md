@@ -15,7 +15,7 @@ order: 30
 | --- | --- |
 | [01](#01) | 모듈로 나누는 이유, 게임 안에서 스크립트를 이어 달리지 않는 이유 |
 | [02](#02) | 폴더별 내용 |
-| [03](#03) | 레시피 모양, 블록 상자 내용, 블록 여러 개를 한 조건으로 묶는 그룹 |
+| [03](#03) | 레시피 모양, 일회성 레시피, 블록 상자 내용, 블록 여러 개를 한 조건으로 묶는 그룹 |
 | [04](#04) | 모듈 파일 하나의 모양 |
 | [05](#05) | 조립기가 만드는 것과 막는 것 |
 | [06](#06) | base 내용, 블록 사이에 주고받는 것 |
@@ -92,9 +92,19 @@ order: 30
 | --- | --- |
 | 맨 위의 `#` 주석 | 레시피를 고치는 사람용 메모. 결과물 제외 |
 | `# @ output script/<폴더>/<루프>.razor` | 결과물 경로. 첫 상자 앞 |
+| `# @ once` | 생략 가능. `# @ output` 바로 밑. 루프가 아닌 **일회성 스크립트**(loadout 같은 루틴). 아래 03.A절 |
 | `# @ header` 상자 | 밑에 결과물 맨 위 주석([Conventions](conventions.md#02.C) 02.C절). 핫키 줄은 조립기가 추가 |
 | `# @ blocks` 상자 | 안에 쓰는 법 네 줄(조립기가 씀). 밑에 블록마다 상자 하나, 도는 순서대로. 이 순서가 setup 순서. 첫 블록은 늘 `# @ use base` |
 | `# @ state`, `# @ setup` 상자 | 밑에 그 루프만의 상태와 루프 전 준비. 모듈 상태의 다른 시작값도. 생략 가능 |
+
+### <a id="03.A"></a>03.A 일회성 레시피, `# @ once`
+
+집에서 준비하는 loadout, 사망 뒤 장비를 다시 갖추는 regear처럼 한 번 돌고 끝나는 스크립트도 같은 모듈 형식으로 조립.
+
+- 결과물: CONFIG, WAIT AND COOLDOWN, TIMER, STATE, 그리고 블록들의 `# @ setup`을 레시피 순서대로. MAIN LOOP 없음
+- base도 첫 블록. 공용 설정, 기본 대기, PvP 정지, 시작 4줄은 그대로 쓰고 `loop`와 `end`만 빠짐
+- 블록은 `# @ setup`만. `# @ loop`가 있는 블록, `when`과 `every` 그룹은 조립 정지
+- 같은 블록을 여러 루틴이 함께 씀(정리, aspect 등) → 루틴끼리 코드를 복사하거나 스크립트를 넘겨 이어 달리지 않음
 
 **블록 하나 = 상자 하나.** 상자 안에 `# @ use` 줄과 설명, 상자 밑에 그 블록에서 바꾸는 설정의 `@setvar!` 줄.
 바꾸는 설정이 없는 블록도 상자로 → 모든 블록이 같은 자리에 같은 것을 보여 줌.
@@ -292,11 +302,12 @@ order: 30
 - `wait__`, `interval__`, `cooldown__`은 모든 루프가 같은 값. 루프마다 달라야 하면 `config__` 설정으로 이동
 - 블록 전체를 켜고 끄는 설정 없음. 레시피에 넣거나 빼면 됨. 설정은 블록 안의 선택에만(`use_resist_potion`, `skin_unowned` 등)
   - 예외 `use_bandages`: `recovery/light-heal`이 이 값을 보고 붕대 대신 나감
+  - 예외 일회성 레시피(03.A절): 모두가 결과물 하나를 같이 씀 → 사람마다 다른 선택(룬북 채우기, 악기 등)은 블록 안의 켜고 끄는 설정으로
 
 ## <a id="05"></a>05 조립 규칙
 
 1. **헤더**: 레시피 헤더 → 블록들이 선언한 핫키를 모은 `Hotkeys:` 줄 → "Generated from recipe/… by util/build-scripts.mjs" 줄
-2. **순서**: CONFIG, WAIT AND COOLDOWN, TIMER, STATE, setup, MAIN LOOP. MAIN LOOP는 `while not dead`, 블록별 `loop`, base의 `end`, `endwhile`
+2. **순서**: CONFIG, WAIT AND COOLDOWN, TIMER, STATE, setup, MAIN LOOP. MAIN LOOP는 `while not dead`, 블록별 `loop`, base의 `end`, `endwhile`. 일회성 레시피는 setup에서 끝(03.A절)
    - 자리마다 base 먼저, 블록은 레시피 순서, 레시피가 마지막
    - 그룹은 loop 안에서 `if`, `else`, `endif`. `# @ every`의 시계는 TIMER 끝에 레시피 몫으로
    - 레시피 STATE가 뒤 → 모듈 상태에 다른 시작값 가능(pvp의 `var__fighting 1`)

@@ -24,6 +24,9 @@
  *
  * Recipe: recipe/<loop>-recipe.razor, one loop.
  *     # @ output             the loop file it builds, before the first part
+ *     # @ once               optional, right after it: a routine that runs once, not a loop. Its
+ *                            blocks are setup only (base's loop and end are left out), no groups,
+ *                            and the output stops after setup
  *     # @ header box         the comment block at the top of the loop
  *     # @ blocks box         one box per block, in the order they run, base first: the
  *                            "# @ use <module>" line, then the builder writes the module's summary
@@ -35,7 +38,7 @@
  *     # @ setup box          loop-only setup: loot pouch, resume list, loaded message (optional)
  *
  * Output: header with Hotkeys and Generated lines, CONFIG, WAIT AND COOLDOWN, TIMER, STATE,
- * setup, MAIN LOOP. Each part takes base first, then the blocks in order, then the recipe, each
+ * setup, MAIN LOOP (not for a # @ once routine). Each part takes base first, then the blocks in order, then the recipe, each
  * piece under a box naming the file it came from. CRLF line ends. Needs only Node 22, no packages.
  */
 import {existsSync, readFileSync, readdirSync, realpathSync, statSync, writeFileSync} from "node:fs";
@@ -174,7 +177,7 @@ const blockBanner = (blockLines, source, depth = 0) => {
  */
 const parse = (path, kind) => {
     const allowed = kind === "module" ? MODULE_SECTIONS : RECIPE_SECTIONS;
-    const unit = {path, notes: [], hotkeys: [], output: null, blocks: [], sections: {}};
+    const unit = {path, notes: [], hotkeys: [], output: null, once: false, blocks: [], sections: {}};
     let current = null;
     readLines(path).forEach((line, index) => {
         const number = index + 1;
@@ -194,6 +197,8 @@ const parse = (path, kind) => {
                 unit.hotkeys.push(...words.slice(1).join(" ").split(",").map((hotkey) => hotkey.trim()).filter(Boolean));
             } else if (word === "output" && kind === "recipe" && current === null) {
                 unit.output = words.slice(1).join(" ");
+            } else if (word === "once" && kind === "recipe" && current === null && words.length === 1) {
+                unit.once = true;
             } else if (word === "use" && kind === "recipe" && current === "blocks" && words.length > 1) {
                 unit.blocks.push({type: "use", number, ident: words[1], note: stripDashes(words.slice(2).join(" "))});
             } else if (GROUPS.includes(word) && kind === "recipe" && current === "blocks") {
@@ -519,7 +524,14 @@ const prepare = (path, modules, owner) => {
         const where = `${name}:${entry.number}`;
         if (!modules.has(entry.ident)) throw new BuildError(`${where}: there is no ${modulePath(entry.ident)}`);
         if (order.includes(entry.ident)) throw new BuildError(`${where}: ${entry.ident} is listed twice`);
+        if (recipe.once && entry.ident !== BASE && Object.hasOwn(modules.get(entry.ident).sections, "loop")) {
+            throw new BuildError(`${where}: ${entry.ident} has a # @ loop, and a # @ once routine runs setup only`);
+        }
         order.push(entry.ident);
+    }
+    if (recipe.once) {
+        const group = layout.find((item) => item.kind !== "use");
+        if (group) throw new BuildError(`${name}:${group.number}: a # @ once routine has no groups, it runs once`);
     }
 
     const own = new Set();
@@ -641,7 +653,9 @@ const blockLines = (loop, modules, entry) => {
     const {over} = loop;
     const changed = module.settings.filter((setting) => over.has(setting.name));
     const out = [BOX, `# @ use ${entry.ident}`, "#", ...wrapped(module.description[0])];
-    if (Object.hasOwn(module.sections, "setup") && !Object.hasOwn(module.sections, "loop")) out.push("#   Runs once, before the loop.");
+    if (!loop.recipe.once && Object.hasOwn(module.sections, "setup") && !Object.hasOwn(module.sections, "loop")) {
+        out.push("#   Runs once, before the loop.");
+    }
     out.push(...entry.notes.map((note) => `#   > ${note}`));
     for (const setting of changed) {
         const value = over.get(setting.name);
@@ -661,7 +675,7 @@ const blockLines = (loop, modules, entry) => {
  */
 const recipeText = (loop, modules) => {
     const {recipe} = loop;
-    const out = [...trimLines(recipe.notes), `# @ output ${recipe.output}`];
+    const out = [...trimLines(recipe.notes), `# @ output ${recipe.output}`, ...(recipe.once ? ["# @ once"] : [])];
     const blocks = loop.entries.map((entry) => blockLines(loop, modules, entry));
     const parts = loop.layout.map((item) => (item.kind === "use"
         ? blocks[loop.entries.indexOf(item)]
@@ -810,7 +824,7 @@ const build = (path, modules, owner) => {
         if (lines.length) out.push("", "", ...banner(title), "", ...lines);
     }
     if (setupParts.length) out.push("", "", ...joinParts(setupParts, 2));
-    out.push("", "", ...banner("MAIN LOOP"), "while not dead", ...loopLines(), "endwhile");
+    if (!recipe.once) out.push("", "", ...banner("MAIN LOOP"), "while not dead", ...loopLines(), "endwhile");
 
     for (const line of out) {
         if (line.trim().startsWith("#") && line.includes(";")) {
