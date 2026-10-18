@@ -1,0 +1,358 @@
+# ----------------------------------------------------------------------------------------
+# Keeps two undead summons out through Vengeful Spirit, and replaces worn ones.
+# A missing summon is cast again in a fight or out of one. Out of a fight, a summon out
+# longer than config__summon_refresh is released by name and cast again: an undead
+# follower loses 1% of its health and max health every 10 seconds, and never recovers it.
+#
+# @ hotkeys Vengeful Spirit, > Interrupt
+# ----------------------------------------------------------------------------------------
+
+
+# ----------------------------------------------------------------------------------------
+# @ config
+#
+#   config__summon_first
+#      The summon that goes out first, by the spell cast under Vengeful Spirit. When the
+#      two differ, this one is looked for by its body to tell which is missing, so it
+#      cannot be 4, whose body is not known yet.
+#        1  Fire Elemental, a lich
+#        2  Water Elemental, a rag witch
+#        3  Earth Elemental, an ancient mummy
+#        4  Air Elemental, a skeletal fiend
+#        5  Summon Daemon, a vampire thrall
+#
+#   config__summon_second
+#      The other summon, numbered as config__summon_first. The same number as the first
+#      keeps two of a kind.
+#
+#   config__summon_followers
+#      The followers count with both summons out. Each of the five takes two slots.
+#
+#   config__summon_refresh
+#      How long, in ms, a summon stays out before it is released and cast again, out of
+#      a fight. 0 turns it off. A skeletal fiend has no name to release it by, so it
+#      stays.
+#
+#   config__symbols_vengeful_spirit
+#      Unholy Symbols banked before Vengeful Spirit may fire: its own 1.
+# ----------------------------------------------------------------------------------------
+@setvar! config__summon_first 1
+@setvar! config__summon_second 1
+@setvar! config__summon_followers 4
+@setvar! config__summon_refresh 0
+@setvar! config__symbols_vengeful_spirit 1
+
+
+# ----------------------------------------------------------------------------------------
+# @ wait
+#
+#   interval__summon_cast_by
+#      How long after Vengeful Spirit a summon may still start. Vengeful Spirit runs 30
+#      seconds and the summon has to land inside it, so this leaves the 6 second cast and
+#      a second to spare. Spirit Pact shortens the cast, but is not counted on.
+#
+#   interval__vengeful_miss
+#      How long Vengeful Spirit waits after a press that neither answered nor showed the
+#      buff.
+#
+#   interval__summon_refused
+#      How long the block rests after "You have too many followers to cast that spell."
+# ----------------------------------------------------------------------------------------
+@setvar! interval__summon_cast_by 23000
+@setvar! interval__vengeful_miss 5000
+@setvar! interval__summon_refused 30000
+
+
+# ----------------------------------------------------------------------------------------
+# @ timer
+#
+#   timer__vengeful_spirit
+#      Since our own Vengeful Spirit landed. Starts past interval__necro_action, so the
+#      first pass may press it.
+#
+#   timer__vengeful_miss, timer__summon_refused
+#      Ready on the first pass.
+#
+#   timer__summon_age_first, timer__summon_age_second
+#      How long each summon has been out. Zero at every start, so the first refresh comes
+#      one full config__summon_refresh after Play.
+# ----------------------------------------------------------------------------------------
+timer__vengeful_spirit interval__necro_action
+timer__vengeful_miss interval__vengeful_miss
+timer__summon_refused interval__summon_refused
+timer__summon_age_first 0
+timer__summon_age_second 0
+
+
+# ----------------------------------------------------------------------------------------
+# @ state
+#
+#   var__summon_refresh
+#      config__summon_refresh as the clocks compare it. A day when that is 0, so no clock
+#      reaches it and the gate stays one line.
+#
+#   var__vengeful_state
+#      Scratch: what Vengeful Spirit allows on this pass.
+#        0  nothing: on cooldown, or a window this block did not open
+#        1  press it
+#        2  our window is open and a summon may still start
+#
+#   var__summon_pick
+#      Scratch: the summon to cast, as a config__summon_first value.
+#
+#   var__summon_slot
+#      Scratch: whose clock the cast restarts. 1 the first, 2 the second, 0 neither.
+#
+#   var__summon_found
+#      Scratch: 1 once an own summon of the first kind was found.
+#
+#   var__summon_cast
+#      Scratch: 1 once a summon cast went out on this pass.
+#
+#   var__summon_cut
+#      Scratch: 1 once the cast in flight was cut for a heal.
+#
+#   var__summon_release
+#      Scratch: the summon to release, as a config__summon_first value.
+# ----------------------------------------------------------------------------------------
+@setvar! var__summon_refresh 0
+@setvar! var__vengeful_state 0
+@setvar! var__summon_pick 0
+@setvar! var__summon_slot 0
+@setvar! var__summon_found 0
+@setvar! var__summon_cast 0
+@setvar! var__summon_cut 0
+@setvar! var__summon_release 0
+
+
+# ----------------------------------------------------------------------------------------
+# @ setup
+# ----------------------------------------------------------------------------------------
+if config__summon_refresh = 0
+    @setvar! var__summon_refresh 86400000
+else
+    @setvar! var__summon_refresh config__summon_refresh
+endif
+
+
+# ----------------------------------------------------------------------------------------
+# @ loop
+# ----------------------------------------------------------------------------------------
+    # ------------------------------------------------------------------------------------
+    # RESUMMON
+    #
+    # An undead summon needs Vengeful Spirit first: for 30 seconds every summon spell
+    # makes an undead follower instead. So a missing summon takes two passes, Vengeful
+    # Spirit and then the cast, and a second missing one is cast in the same window. The
+    # summon lands when the cast ends, so a cast only starts while the window still covers
+    # it (interval__summon_cast_by). Our own press starts the window clock, and the buff
+    # confirms the window is up. A buff this block did not raise, a press by hand, leaves
+    # no clock to trust, so the block lets it run out and raises its own.
+    #
+    # It runs in a fight too: the summons hold the line, so a loss is filled at once. The
+    # cast is six seconds and is polled here rather than left to the next pass start, so
+    # an emergency can cut it for a heal. Warmode and the walk bar hold it like any cast.
+    #
+    # When the two summons differ, the first kind is looked for by body among our own
+    # followers, which read friend. Found, the second is the one missing. The bodies are
+    # the ones necro/summon-names walks.
+    #
+    # Out of a fight, a summon out longer than config__summon_refresh is released by the
+    # name necro/summon-names gave it, and the cast above fills its place. One at a time,
+    # and only while Vengeful Spirit can follow at once. A released summon vanishes. On a
+    # pass with both summons out and none due, all of this is one line.
+    # ------------------------------------------------------------------------------------
+    if followers < config__summon_followers or timer "timer__summon_age_first" >= var__summon_refresh or timer "timer__summon_age_second" >= var__summon_refresh
+        if followers < config__summon_followers or var__fighting = 0
+            if timer "timer__summon_refused" >= interval__summon_refused and config__use_magery = 1 and var__regs_summon = 1 and mana >= config__mana_8th and diffhits < config__emergency_hits and not paralyzed and not queued and not casting and not targetexists
+                if config__warmode_is_manual = 0 or not warmode
+                    if config__walk_guard = 0 or cooldown "walk" = 0
+                        @setvar! var__vengeful_state 0
+
+                        if findbuff "Vengeful Spirit"
+                            if timer "timer__vengeful_spirit" < interval__summon_cast_by
+                                @setvar! var__vengeful_state 2
+                            endif
+                        elseif timer "timer__vengeful_spirit" >= interval__necro_action and timer "timer__vengeful_miss" >= interval__vengeful_miss and list 'list__necro_symbols' >= config__symbols_vengeful_spirit
+                            @setvar! var__vengeful_state 1
+                        endif
+
+                        if followers < config__summon_followers
+                            if var__vengeful_state = 1
+                                hotkey 'Vengeful Spirit'
+                                wait wait__message
+
+                                if insysmsg "unholy symbols remaining" or findbuff "Vengeful Spirit"
+                                    settimer "timer__vengeful_spirit" 0
+
+                                    if config__chatty = 1
+                                        overhead "[ vengeful spirit ]" 219
+                                    endif
+                                else
+                                    settimer "timer__vengeful_miss" 0
+                                endif
+                            elseif var__vengeful_state = 2
+                                @setvar! var__summon_pick config__summon_first
+                                @setvar! var__summon_slot 1
+
+                                if config__summon_first = config__summon_second
+                                    # Two of a kind answer to one name and are released
+                                    # together, so they share one clock. Only the cast
+                                    # with neither out restarts it.
+                                    if followers > 0
+                                        @setvar! var__summon_slot 0
+                                    endif
+                                else
+                                    # Walk every match without break: this Razor hands
+                                    # back the same mobile on every call, and an ignored
+                                    # one is skipped until the list is emptied below.
+                                    @setvar! var__summon_found 0
+
+                                    if config__summon_first = 1
+                                        while findtype 24 ground -1 -1 config__summon_range as alias__own_summon
+                                            if not dead alias__own_summon and noto alias__own_summon != "hostile" and noto alias__own_summon != "criminal" and noto alias__own_summon != "enemy" and noto alias__own_summon != "murderer" and noto alias__own_summon != "innocent"
+                                                @setvar! var__summon_found 1
+                                            endif
+
+                                            @ignore alias__own_summon
+                                        endwhile
+                                    elseif config__summon_first = 2
+                                        while findtype 740 ground -1 -1 config__summon_range as alias__own_summon
+                                            if not dead alias__own_summon and noto alias__own_summon != "hostile" and noto alias__own_summon != "criminal" and noto alias__own_summon != "enemy" and noto alias__own_summon != "murderer" and noto alias__own_summon != "innocent"
+                                                @setvar! var__summon_found 1
+                                            endif
+
+                                            @ignore alias__own_summon
+                                        endwhile
+                                    elseif config__summon_first = 3
+                                        while findtype 158 ground -1 -1 config__summon_range as alias__own_summon
+                                            if not dead alias__own_summon and noto alias__own_summon != "hostile" and noto alias__own_summon != "criminal" and noto alias__own_summon != "enemy" and noto alias__own_summon != "murderer" and noto alias__own_summon != "innocent"
+                                                @setvar! var__summon_found 1
+                                            endif
+
+                                            @ignore alias__own_summon
+                                        endwhile
+                                    elseif config__summon_first = 5
+                                        while findtype 722 ground -1 -1 config__summon_range as alias__own_summon
+                                            if not dead alias__own_summon and noto alias__own_summon != "hostile" and noto alias__own_summon != "criminal" and noto alias__own_summon != "enemy" and noto alias__own_summon != "murderer" and noto alias__own_summon != "innocent"
+                                                @setvar! var__summon_found 1
+                                            endif
+
+                                            @ignore alias__own_summon
+                                        endwhile
+                                    endif
+
+                                    @clearignore
+
+                                    if var__summon_found = 1
+                                        @setvar! var__summon_pick config__summon_second
+                                        @setvar! var__summon_slot 2
+                                    endif
+                                endif
+
+                                @setvar! var__summon_cast 1
+
+                                if var__summon_pick = 1 and var__regs_summon_ash = 1
+                                    cast 'Fire Elemental'
+                                elseif var__summon_pick = 2
+                                    cast 'Water Elemental'
+                                elseif var__summon_pick = 3
+                                    cast 'Earth Elemental'
+                                elseif var__summon_pick = 4
+                                    cast 'Air Elemental'
+                                elseif var__summon_pick = 5 and var__regs_summon_ash = 1
+                                    cast 'Summon Daemon'
+                                else
+                                    @setvar! var__summon_cast 0
+                                endif
+
+                                if var__summon_cast = 1
+                                    if var__summon_slot = 1
+                                        settimer "timer__summon_age_first" 0
+
+                                        if config__summon_first = config__summon_second
+                                            settimer "timer__summon_age_second" 0
+                                        endif
+                                    elseif var__summon_slot = 2
+                                        settimer "timer__summon_age_second" 0
+                                    endif
+
+                                    if config__sysmsg = 1
+                                        sysmsg "Summon: cast kind {{var__summon_pick}}." 88
+                                    endif
+
+                                    wait wait__short
+                                    @setvar! var__summon_cut 0
+
+                                    while casting
+                                        if var__summon_cut = 0 and config__interrupt_to_heal = 1 and diffhits >= config__emergency_hits
+                                            hotkey "> Interrupt"
+                                            @setvar! var__summon_cut 1
+
+                                            if config__chatty = 1
+                                                overhead "[ summon, cut ]" 254
+                                            endif
+                                        endif
+
+                                        wait wait__poll
+                                    endwhile
+
+                                    # The refusal may trail the end of the cast.
+                                    wait wait__short
+
+                                    if insysmsg "You have too many followers to cast that spell."
+                                        settimer "timer__summon_refused" 0
+
+                                        if config__sysmsg = 1
+                                            sysmsg "Summon: too many followers, resting." 88
+                                        endif
+                                    elseif insysmsg "Your concentration is disturbed, thus ruining thy spell."
+                                        # Read here, so a later cursor poll does not take
+                                        # it for its own. The next pass casts again.
+                                    endif
+                                endif
+                            endif
+                        elseif var__fighting = 0 and var__vengeful_state != 0
+                            @setvar! var__summon_release 0
+
+                            if timer "timer__summon_age_first" >= var__summon_refresh
+                                @setvar! var__summon_release config__summon_first
+                                settimer "timer__summon_age_first" 0
+                            elseif timer "timer__summon_age_second" >= var__summon_refresh
+                                @setvar! var__summon_release config__summon_second
+                                settimer "timer__summon_age_second" 0
+                            endif
+
+                            # The names necro/summon-names gives (list__summon_kinds), as
+                            # literals since a word cannot pass through a variable. The
+                            # skeletal fiend has none yet, so it is never released.
+                            if var__summon_release = 1
+                                say "leech release"
+                            elseif var__summon_release = 2
+                                say "wichy release"
+                            elseif var__summon_release = 3
+                                say "mumi release"
+                            elseif var__summon_release = 5
+                                say "vampa release"
+                            endif
+
+                            if var__summon_release != 0 and var__summon_release != 4
+                                wait wait__message
+
+                                # Still all out: the summon was never renamed, or the
+                                # name was refused. Its clock already restarted, so the
+                                # next try is one config__summon_refresh away.
+                                if followers >= config__summon_followers
+                                    overhead "[ release, miss ]" 254
+
+                                    if config__sysmsg = 1
+                                        sysmsg "Summon: release of kind {{var__summon_release}} found no summon." 88
+                                    endif
+                                endif
+                            endif
+                        endif
+                    endif
+                endif
+            endif
+        endif
+    endif

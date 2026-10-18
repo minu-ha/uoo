@@ -477,6 +477,11 @@ findbuff "song of peacemaking"
 - **`followers`는 컨트롤 슬롯 수.** 위 소환수는 각 **2**, Summon Creature는 1(인게임 확인됨).
   Skeletal Husk는 위키 데이터상 1([PvP](../game/pvp.md#06.B) 06.B절)
 - Vengeful Spirit: 심볼 1개, 30초. 둘을 뽑으려면 30초 안에 VS, 소환, 소환
+- Vengeful Spirit은 누르면 즉시 켜짐. 버프 아이콘 `Vengeful Spirit`, 응답 `Unholy symbols remaining: 9/10`. 인게임 확인됨 2026-10-18
+- 소환에 커서 없음. 시전이 끝나면 바로 옆에 나옴. 인게임 확인됨 2026-10-18
+- 소환수는 시전이 끝날 때 생김 → 그때 VS가 꺼져 있으면 언데드가 아닌 맨 엘리멘탈이 나올 수 있음(사용자 경고). 루프의 시작 마감은 04.I절
+- 소환수 놓기: `<이름> release`라고 말하면 즉시 사라짐. 확인 gump 없음, 야생으로 남지 않음, Dismissive 마나 없음. 인게임 확인됨 2026-10-18
+- 팔로워가 꽉 찬 채 소환: 주문어 뒤에 `You have too many followers to cast that spell.` 인게임 확인됨 2026-10-18
 
 ### <a id="03.D"></a>03.D Unholy Symbol 경제
 
@@ -491,6 +496,7 @@ findbuff "song of peacemaking"
 | Evil Omen | 2 | `>= 4`. 서 있고 warmode가 아닐 때 | 없음. 위 둘이 30초에 6개를 다 씀 → 사실상 이동 중 잉여로만 |
 | Poison Strike | 1 | `>= 1`. Corpse Skin이 켜져 있고, 프록 코어와 필러 뒤 | 없음. 필러 자리, 위는 이미 사용 |
 | Vampiric Embrace | 3 | `>= 9`. 이동 중에만 | 6 |
+| Vengeful Spirit | 1 | `>= 1`. 소환수가 빠졌거나 교체할 때만(04.I절) | 없음. 소환수가 없으면 Blood Oath도 무의미 |
 
 - **Necro 100에서 실제로 도는 것은 Blood Oath와 Corpse Skin.** 30초에 6개 충전, 둘이 정확히 6개 사용
 - 셋 모두 4개에서 발동 → 체인 순서(Blood Oath, Corpse Skin, Evil Omen) = 우선순위
@@ -640,7 +646,8 @@ flowchart LR
   melee -- 아니요 --> witch("Rag Witch + Lich")
 ```
 
-PK를 만나도 조합 유지, 사냥하던 그대로 싸움(06.D절). 조합별 이유:
+PK를 만나도 조합 유지, 사냥하던 그대로 싸움(06.D절).
+**지금 쓰는 조합은 `Rag Witch + Mummy`**: 2026-10-18 사용자 결정, `necro/resummon`의 레시피 값(04.I절). 조합별 이유:
 
 | 상황 | 조합 |
 | --- | --- |
@@ -725,6 +732,16 @@ PK를 만나도 조합 유지, 사냥하던 그대로 싸움(06.D절). 조합별
 
 - **소환 주문 하나당 20포인트.** 그 주문으로 소환해 경험치를 쌓아 해금("Players can earn experience and unlock up to 20 Upgrade Points per Summon Spell")
 - 주력 소환수를 바꾸면 새 Tome은 처음부터. 티어 비용 누적 `T1=1 / T2=3 / T3=5` → 20점은 **T3 네 개**에 정확히 맞음
+
+모든 Tome에 같은 글로 있는 둘.
+
+> Spirit Pact: "Damage Dealt increased by (3% / 9% / 15%). Damage Resistance increased by (2% / 6% / 10%)."
+> "Casting Time of spell reduced by (0.5 / 1.5 / 2.5) seconds" -- 위키 Summoner's Tome
+
+> Dismissive: "Player receives (8 / 24 / 40) Mana when follower is dispelled or killed (must be within 18 tiles)" -- 위키 Summoner's Tome
+
+- Spirit Pact T3 → 소환 시전 6초에서 2.5초 감소. 루프의 시작 마감은 감소 없는 6초 기준(04.I절)
+- Dismissive는 교체용으로 불필요. 판단은 04.I절
 
 #### Fire Tome과 Lich, 가장 먼저
 
@@ -815,8 +832,9 @@ PK를 만나도 조합 유지, 사냥하던 그대로 싸움(06.D절). 조합별
 - `Revolution Song`(프로보한 몹이 `40/120/200%` 추가 피해)은 Provocation을 찍어 선택지에 포함. 단, 코덱스 20점 안에서 경쟁
 - Air Elemental(Skeletal Fiend)을 쓰려면 `SUMMON NAMES`에 바디 번호와 종류 이름 추가 필요.
   바디는 `findtype` 줄, 이름은 종류 표(04.H절). 지금 종류 표에 fiend 없음, 바디 번호도 모름(아래 표)
+  - `RESUMMON`도 같음. 바디가 생기면 첫째 칸 판정에, 이름이 생기면 교체의 `release` 갈래에 추가(04.I절)
 - **`bard-necro-enhanced`는 송을 위해 소환수를 추적하지 않음.** 송을 이동 중 계속 갱신 → 재소환 감지 불필요(05.G절 설계 결정).
-  소환수를 찾는 블록은 이름을 붙이는 `SUMMON NAMES` 하나뿐
+  소환수를 찾는 블록은 이름을 붙이는 `SUMMON NAMES`, 첫째 종류가 나와 있는지만 보는 `RESUMMON`(04.I절) 둘
 - **적 Lich와 내 Lich는 그래픽이 같음.** 소환수를 타입으로 찾는 코드를 새로 쓰면 `noto` 필터 필수. `fight/target`, `necro/summon-names` 모듈이 그 모양
 - **소환수 이름 자동 변경.** `SUMMON NAMES` 블록이 새 소환수를 종류를 알아볼 이름(`leech`, `mumi` 등)으로 변경. 설계와 실패 증상은 04.H절
 - **바디 번호(`>info`).** 내 소환수의 Notoriety는 2(friend)
@@ -895,7 +913,7 @@ PK를 만나도 조합 유지, 사냥하던 그대로 싸움(06.D절). 조합별
   - → 구식 `bard-necro` 팔로워 캐시처럼 `while findtype … as`로 돌며 리스트와 `noto` 검사, 아니면 `@ignore`
   - `endwhile` 뒤 `@clearignore`로 목록 비움. 한 틱 안에서 다 확인
   - 이름은 하우스키핑 틱(5초)마다 한 마리씩. 연달아 둘을 뽑아도 먼저 나온 쪽이 먼저. 둘째를 시전하는 6초 동안 첫째가 혼자 있음
-  - `@clearignore`는 이 5초 틱에서만, 루프의 다른 곳은 ignore 목록에 의존하지 않음
+  - `@clearignore`는 이 5초 틱과 `RESUMMON`의 첫째 종류 검색(04.I절)에서만. 둘 다 같은 틱 안에서 비움, 루프의 다른 곳은 ignore 목록에 의존하지 않음
 - 시전도 커서도 없음 → 교전 여부와 무관하게 동작. `followers > 0`일 때만
 
 #### 실패 증상
@@ -907,63 +925,98 @@ PK를 만나도 조합 유지, 사냥하던 그대로 싸움(06.D절). 조합별
 | 오버헤드가 아예 안 뜸 | 그 소환수의 바디 번호가 `findtype` 줄에 없거나, 라벨의 기본 이름이 종류 표에 없음. Journal에 `Summon name: no known kind in its label`이 뜨면 뒤의 라벨에서 이름을 읽어 표에 추가. 안 뜨면 `>info`로 바디 번호를 읽어 추가 |
 | 남의 소환수 머리 위에 `[ name, … ]` | 길드원이 언데드를 뽑은 경우. 이름은 안 바뀌고(`rename`은 내 펫에만), 그 serial은 리스트에 남아 재확인 안 함 |
 
-### <a id="04.I"></a>04.I 재소환, 설계만 하고 구현 보류
+### <a id="04.I"></a>04.I 재소환과 교체, RESUMMON 블록
 
-소환수가 죽으면 딜의 63%가 빠짐. 그러나 사실을 모아 보면 **자동화의 값이 생각보다 작음.**
+- 소환수 둘을 늘 내보냄. 빠지면 다시 뽑고, 오래된 것은 놓고 다시 뽑음
+- 블록은 [necro/resummon](https://github.com/minu-ha/uoo/blob/master/module/necro/resummon.razor). 설정의 뜻은 그 파일, 이 루프의 값은 레시피
+- 2026-10-18 사용자 요청으로 구현. 그전의 "수동 유지" 판단과 설계 메모는 git 이력
 
-#### 확정 사실(03.C절, 04.A절)
+#### 언제 도나
 
-- 언데드는 **Vengeful Spirit(심볼 1)을 켠 뒤** 소환. 주문별 언데드는 03.C절 표
-- 8서클 → **마나 50, 시전 6초**, Bloodmoss 필요
-- **10초마다 최대 체력 1%씩 감소.** 0은 안 되지만 결국 쓸모없음 → 재소환은 반응이 아닌 **주기적인 정비**
-- `followers`는 슬롯 수. Lich 2마리면 4
+- 레시피 자리: 버섯 뒤, 교전과 이동 분기 앞 → 두 분기 모두에서 먼저(05.A절)
+- 재소환은 교전 중에도. 소환수가 전선을 버팀 → 빠지면 바로 채움. 사용자 결정
+- 교체는 이동 중에만
+- 다른 시전과 같은 가드: 걷는 중(`walk_guard`), 워모드(수동 창), 커서, 시전 중이면 쉼
+- 마나 50(`config__mana_8th`), 시약(`var__regs_summon`), 잃은 HP가 `emergency_hits` 미만일 때만
+- 6초 시전은 블록 안에서 폴링, 긴급 HP면 `> Interrupt`와 `[ summon, cut ]`. 다음 패스 첫머리로 넘기면 `settle_first` 대기 동안 회복 블록도 멈춤
+- 둘 다 나와 있고 교체할 때가 아니면 게이트 한 줄(05.H절)
 
-#### 판단: 지금은 수동
+#### Vengeful Spirit 창
 
-| 근거 | 내용 |
+| 시점 | 무엇 |
 | --- | --- |
-| **한 세트가 VS, 6초, 6초, 심볼 1과 마나 100** | 교전 중에는 로테이션이 12초 정지, 긴급 힐이 끊으면 50씩 손실. 이동 중에는 서 있어야 해서(`cooldown "walk"`) 다음 몹 앞에 멈춘 순간에만 시전. 수동과 같은 타이밍 |
-| **무엇을 뽑을지는 상황이 결정** | 테이머와 둘이면 Lich 2, 솔플이면 Rag Witch + Lich, 고 MR이면 Mummy + Air. 스크립트는 파티 구성을 모름 |
-| **감소 속도가 결정을 사람에게 맡김** | 10초마다 남은 최대치의 1% 감소(복리, 관찰상 30분 뒤에도 남음). 반감 약 11.5분, 30분이면 16%, 0은 안 됨. 교체 시점은 남은 체력과 다음 몹을 보고 판단 → 임계값 하나로 대체 어려움 |
-| **없을 때의 뒷정리는 이미 자동** | 송은 다음 이동에서 재적용, Blood Oath와 Vampiric Embrace는 `followers > 0`이 아니면 정지. 본체 로테이션은 그대로 |
+| 0초 | VS. 응답 줄이나 버프 → `timer__vengeful_spirit` 0, `[ vengeful spirit ]` |
+| 약 0.5초 | 첫째 시전 시작 |
+| 약 7초 | 둘째 시전 시작 |
+| 23초 | 시작 마감(`interval__summon_cast_by`). VS 30초 - 시전 6초 - 여유 1초 |
+| 30초 | VS 끝 |
 
-구식 두 스크립트도 재소환 없음.
+- 소환수는 시전이 끝날 때 생김 → 끝나는 순간 VS가 켜져 있어야 함(03.C절)
+- 마감은 Spirit Pact의 시전 감소 없이 계산. Tome마다 찍었는지 모름(04.F절). 사용자 결정
+- 손해 없음: 둘 다 13초 전에 시작. 마감에 걸리는 것은 끊김이 반복될 때뿐 → 버프가 꺼진 뒤 다음 VS
+- 창이 열렸다는 판정: `findbuff "Vengeful Spirit"`, 그리고 우리 타이머가 마감 전. 둘 다
+- 손으로 켠 VS(Alt+1)는 우리 타이머가 모름 → 남은 시간을 모르니 시전 안 함. 꺼진 뒤 루프가 다시 켬
+- VS 누르는 조건: 버프 꺼짐, 타이머 30.5초 이상(`interval__necro_action`), 심볼 1 이상. 마나와 시약은 바깥 게이트 → 심볼만 날리지 않음
+- 누른 뒤 응답도 버프도 없으면 5초 뒤 재시도(`interval__vengeful_miss`)
 
-#### 나중에 넣는다면 이 모양
+#### 무엇을 뽑나
 
-- 이동 블록 안, `BARD SONG` 앞. 아래 코드 주석은 버섯이 이동 블록 안에 있던 때의 것. 버섯은 2026-10-10부터 분기 앞
-- VS를 먼저 켜고 30초 안에 소환
-- 소환 종류는 숫자 config. 변수는 단어를 못 담아([Razor](../scripting/razor.md#03) 03절) 주문 이름을 변수에 둘 수 없음 → 갈래마다 리터럴 `cast`
+| 값 | 주문 | 언데드 | 바디 | 이름 |
+| --- | --- | --- | --- | --- |
+| 1 | Fire Elemental | Lich | 24 | `leech` |
+| 2 | Water Elemental | Rag Witch | 740 | `wichy` |
+| 3 | Earth Elemental | Ancient Mummy | 158 | `mumi` |
+| 4 | Air Elemental | Skeletal Fiend | 모름 | 없음 |
+| 5 | Summon Daemon | Vampire Thrall | 722 | `vampa` |
 
-| 설정 | 값 | 뜻 |
+- 바디 출처는 04.G절, 이름은 04.H절
+- 같은 종류 둘: 판정 없이 그 주문
+- 다르면 첫째 종류만 바디로 찾음(`noto` 필터). 있으면 둘째, 없으면 첫째
+- 레시피 값 `summon_first 2`, `summon_second 3`: 둘 다 없으면 Rag Witch부터. 탱커가 먼저 섬(04.E절)
+- Air는 바디를 몰라 첫째 불가. 둘째에 둠
+- serial을 기억하는 방식은 안 씀. 재시작 뒤 이미 이름 바뀐 소환수(`wichy`, `mumi`)는 라벨로 종류를 못 읽음. 바디는 재시작과 이름에 무관
+- 알려진 오판
+  - 첫째가 18칸(`config__summon_range`) 밖이면 없는 것으로 보고 같은 종류를 하나 더
+  - 근처 길드원의 같은 종류 소환수는 friend라 내 것으로 봄
+
+#### 교체, 10분
+
+- 언데드는 10초마다 최대 체력 1% 감소(04.A절). 10분이면 약 55%, 15분 41%, 20분 30%
+- 체력바로는 판단 불가: 줄어드는 것은 최대 체력 → 현재와 최대의 비율인 체력바는 가득 찬 채
+- → 나온 시간으로 판단. 칸마다 시계(`timer__summon_age_first`, `timer__summon_age_second`), 그 칸의 시전을 시작할 때 0
+- 레시피 값 `summon_refresh` 600000, 10분. 사용자 결정
+- 조건: 교전 아님, 둘 다 나와 있음, VS를 곧 쓸 수 있음(쿨이 끝났거나 우리 창이 마감 전). 놓으면 바로 채울 수 있을 때만
+- 동작: 시계가 넘은 칸 하나를 `say "wichy release"`처럼 이름으로 놓음 → `followers` 감소 → 재소환이 채움
+- 둘 다 오래되면 한 VS 창 안에서 차례로. 첫째를 놓고 채운 뒤 둘째
+- 이름은 갈래마다 리터럴. 변수로 단어를 못 넘김([Razor](../scripting/razor.md#03) 03절)
+- 한계
+  - 같은 종류 둘은 이름이 같아 함께 놓임. 시계 하나, 둘 다 없을 때 뽑으면 0 → 오래된 쪽 기준으로 둘을 함께 교체
+  - Play 때 시계는 0 → 첫 교체는 Play 뒤 10분. 손으로 뽑은 소환수는 시계가 모름
+  - Skeletal Fiend는 이름이 없어 교체 안 됨
+
+**교체는 release. Dismissive는 불필요.** Dismissive 원문은 04.F절.
+
+| 놓는 방법 | 소환수 하나당 실제 마나 | 대가 |
 | --- | --- | --- |
-| `config__resummon` | 0 | 기본은 꺼짐 |
-| `config__summon_kind` | 1 | 1 Fire Elemental (Lich), 2 Water Elemental (Rag Witch), 3 Earth Elemental (Mummy) |
-| `config__followers_want` | 4 | 슬롯 수. Lich 2마리 |
-| `config__mana_8th` | 50 | 8서클 소환 마나 |
+| release, 말하기 | 재소환 50 | 없음. 즉시, 커서와 시약 없음. Dismissive 마나 없음(03.C절) |
+| Dispel + Dismissive T3 | 20 - 40 + 50 = 30 | 시전 1.75초, 커서로 소환수 지정, 시약 셋, Tome마다 5포인트 |
+| Mass Dispel + Dismissive T3 | 둘에 40 - 80 + 100 = 60 | 주변의 모든 소환수를 맞힘. 남의 것도 → 위험 |
 
-```
-# RESUMMON: walk branch, after MUSHROOM and before BARD SONG
-if config__resummon = 1 and followers < config__followers_want and var__regs_summon = 1 and mana >= config__mana_8th and not warmode and not targetexists and not casting and cooldown "walk" = 0
-    if timer "timer__vengeful_spirit" >= interval__vengeful_spirit
-        yell '[VengefulSpirit'
-    elseif config__summon_kind = 1
-        cast 'Fire Elemental'
-    elseif config__summon_kind = 2
-        cast 'Water Elemental'
-    elseif config__summon_kind = 3
-        cast 'Earth Elemental'
-    endif
-endif
-```
+- Dispel로 아끼는 마나: 둘, 10분에 40 → 초당 0.07. 교전 소모 초당 2.7\~4.0(05.D절)의 1/40
+- Dismissive의 값은 교전 중 죽을 때의 40 회수. 그때 재소환이 실제 10 → 소환수가 자주 죽는 사냥터면 고려, 아니면 전투 T3
+- Dispel 마나 20, 시전 1.75초, Mass Dispel 마나 40, 시전 2초: [Item list](../game/item-list.md#19) 19절
 
-- VS는 켜짐 문장을 읽은 뒤 `timer__vengeful_spirit`을 0(`interval__vengeful_spirit`은 30초)
-- 소환에 커서가 뜬다면 다른 주문처럼 폴링해서 찍음. 단, 6초 시전을 덮어야 함.
-  지금 `for 60`은 6서클 1.75초를 넉넉히 덮는 값(스크립트 `wait__poll` 주석) → 소환에는 훨씬 큰 횟수 필요. 필요한 횟수는 확인되지 않았다
-- 시약은 `magery/reagents` 리프레시에 Bloodmoss 읽기 하나와 `var__regs_summon` 하나 추가.
-  Fire Elemental 시약은 bloodmoss, mandrake, silk, ash. 지금은 Bloodmoss를 안 읽음
-- Vengeful Spirit은 채팅 명령 `[VengefulSpirit`이나 Razor 핫키(`L:1060522`)로. 둘 다 가능
-- 남은 질문: **소환 커서가 지점을 찍는 것인지 자동 배치인지.** 확인되지 않았다
+#### 실패 증상
+
+| 증상 | 뜻 |
+| --- | --- |
+| 소환수가 빠지면 `[ vengeful spirit ]`, 소환 주문어, 5초 안에 `[ name, wichy ]` | 정상 |
+| `[ vengeful spirit ]`가 안 뜸 | 마나 50 미만, Bloodmoss 없음, 심볼 0, 워모드, 걷는 중. 모두 아니면 Razor 핫키 이름 `Vengeful Spirit` 확인 |
+| VS는 뜨는데 소환이 안 나감 | 버프 이름 불일치로 창을 못 읽음. Journal에 `Summon: cast kind …` 줄이 없으면 이쪽 |
+| 같은 종류가 둘 나옴 | 첫째 종류를 바디로 못 찾음. 그 소환수의 `>info`로 바디와 Notoriety 확인 |
+| 언데드 대신 맨 엘리멘탈 | 시전이 끝날 때 VS가 꺼짐. 마감 23초를 줄임 |
+| `[ release, miss ]` | 이름이 안 붙었거나 거절됨. 다음 시도는 10분 뒤 |
+| Journal `Summon: too many followers, resting.` | `config__summon_followers`가 실제와 다르거나 다른 팔로워가 있음. 30초 쉼 |
 
 ::part[설계]
 
@@ -995,7 +1048,7 @@ endif
 | 읽기만(타겟 캐시, 패스 플래그) | 없음 |
 
 - 걸으며 시전하면 걸음에 끊김, 포션은 걸으며 마셔도 됨 → `cooldown "walk"`는 시전 블록에만
-- 루프가 스스로 여는 시전과 커서는 `not warmode`도 확인. 공격 주문, 바드 스킬과 송, 자기 버프, Create Food, Corpse Skin, Evil Omen, Poison Strike, Vampiric Embrace
+- 루프가 스스로 여는 시전과 커서는 `not warmode`도 확인. 공격 주문, 바드 스킬과 송, 자기 버프, Create Food, 소환, Corpse Skin, Evil Omen, Poison Strike, Vampiric Embrace
 - warmode = 수동 모드 → 이 블록들 정지. 큐어, 힐, 포션, 버섯 먹기, Blood Oath는 계속
 - 게이트 접기(05.H절) 이후 이 가드는 따로 한 줄을 쓰지 않고 각 블록 조건 줄 끝에 붙음
 
@@ -1003,12 +1056,13 @@ endif
 
 ```mermaid
 flowchart TD
-  drain("드레인<br>큐와 시전이 빌 때까지") --> survive("생존<br>마비, 독, HP") --> cache("타겟 캐시") --> flags("패스 플래그") --> house("하우스키핑<br>5초마다") --> mush("버섯") --> engaged{"교전 중인가"}
+  drain("드레인<br>큐와 시전이 빌 때까지") --> survive("생존<br>마비, 독, HP") --> cache("타겟 캐시") --> flags("패스 플래그") --> house("하우스키핑<br>5초마다")
+  house --> mush("버섯") --> resummon("재소환<br>빠진 소환수, 교체") --> engaged{"교전 중인가"}
   engaged -- 예 --> combat("교전 블록 일곱")
   engaged -- 아니요 --> walk("이동 블록 셋")
 ```
 
-위 여섯 블록은 모든 패스가 통과, 교전 여부는 그 뒤에 한 번만. 교전 패스는 이동 블록을, 이동 패스는 교전 블록을 보지 않음.
+위 일곱 블록은 모든 패스가 통과, 교전 여부는 그 뒤에 한 번만. 교전 패스는 이동 블록을, 이동 패스는 교전 블록을 보지 않음.
 
 | 블록 | 게이트 | 비고 |
 | --- | --- | --- |
@@ -1017,10 +1071,11 @@ flowchart TD
 | 타겟 캐시 | `lasttarget`과 `noto`, 화면 거리 | 18칸(`config__acquire_range`) 안에서 받아 두고 10칸(`config__target_range`) 안에서 교전. 송과 자기 대상 주문은 lasttarget을 덮어쓰기 전에 재확인 |
 | 패스 플래그 | `timer "timer__reagents"` 10초, 또는 시약 부족 문장 | 시약과 주문 플래그 생성(`magery/reagents`, 아래). 심볼 수를 읽는 `ingump` 사슬은 게이트 없이 매 패스(05.H절). 심볼을 못 읽으면 `necro/symbols`가 30초에 한 번 핫바 재오픈 |
 | 하우스키핑 | `# @ every interval__housekeeping` 5초 | 악기 회수, 리프레시 포션, 소환수 이름, 골드는 틱마다. 악기 확인(30초), 음식(60초), 스탯 포션(5초, 교전 중에만)은 자기 시계. 디스코 건 대상은 `bard/disco`가 교전 패스마다 30초 뒤 잊음(05.H절) |
+| 재소환 | `followers < config__summon_followers` 또는 교체 시계 | 교전 중에도 빠진 소환수를 바로 채움. 교체는 이동 중에만. 설계는 04.I절 |
 | 교전 중인가 | `var__fighting = 1`(레시피 그룹) | 한 번만 판정. 그 아래 블록은 재판정 안 함 |
 
 - **`magery/reagents`의 시약 플래그는 10초에 한 번**(`timer__reagents`)
-- 시약 일곱 종을 `findtype`으로 한 번씩 찾아 `var__has_*`에 저장, 주문 플래그 13개는 그 일곱의 비교로 생성
+- 시약 여덟 종을 `findtype`으로 한 번씩 찾아 `var__has_*`에 저장, 주문 플래그 18개는 그 여덟의 비교로 생성
 - 매 패스 `findtype` 19\~32번에서 이렇게 감소(05.H절)
 
 #### 교전 블록
@@ -1108,6 +1163,7 @@ flowchart TD
 | 네크로 핫바 | 루프 안의 `UNHOLY SYMBOLS`(`necro/symbols`)가 심볼 수를 못 읽은 첫 패스에 오픈. 타이머가 만료 상태로 시작 |
 | 시계 | 하우스키핑, 핫바, 음식, 스탯 포션, 악기 확인, 피스 확인, 시약 리프레시 시계를 만료 상태로 → 첫 패스가 모두 확인 |
 | 소환수 이름 | 시작마다 `list__summon_kinds` 재작성, 이미 이름 붙인 serial을 담은 `list__named_summons`는 비움(`necro/summon-names` setup) |
+| 재소환 | VS 시계는 만료 상태 → 첫 패스부터 누를 수 있음. 교체 시계 둘은 0 → 첫 교체는 Play 뒤 10분(`necro/resummon`, 04.I절) |
 
 ### <a id="05.C"></a>05.C 자원
 
@@ -1117,8 +1173,8 @@ flowchart TD
 | `cooldown "disco"` | Disco | 혼자 쓰는 슬롯 5초 |
 | `cooldown "peace/provo"` | Peace와 Provo | **공유 슬롯 10초.** 합친 항목 하나 |
 | `cooldown "song"` | 세 곡 전체 | **별도 계열. `cooldown "music"`이 아님.** 세 곡 공유 |
-| Unholy Symbol | Blood Oath (4), Corpse Skin (2), Evil Omen (2), Poison Strike (1), Vampiric Embrace (3) | 5초에 1개, 최대 Effective Necro / 10 = **10** |
-| 마나 | 버프, 오프닝, 프록 코어, 필러 | 메디가 없어 가장 빡빡함 |
+| Unholy Symbol | Blood Oath (4), Corpse Skin (2), Evil Omen (2), Poison Strike (1), Vampiric Embrace (3), Vengeful Spirit (1) | 5초에 1개, 최대 Effective Necro / 10 = **10** |
+| 마나 | 버프, 오프닝, 프록 코어, 필러, 소환(50) | 메디가 없어 가장 빡빡함 |
 
 **자원은 따로지만 행동 슬롯은 하나.** 교전 블록 하나의 모양(프록 코어의 Harm).
 
@@ -1295,7 +1351,7 @@ endif
 
 ### <a id="05.G"></a>05.G 설계 결정
 
-**재소환을 감지하지 않음. 이동 중 송을 계속 갱신.**
+**송은 재소환을 감지하지 않음. 이동 중 송을 계속 갱신.** 재소환 자체는 `necro/resummon`(04.I절).
 
 - 송 쿨은 약 11초뿐, 전투 사이클마다 10\~20초 이동 → 이동마다 라운드로빈으로 한 곡씩이면 **세 곡이 늘 새것**
 - 소환수를 언제 다시 뽑든 다음 이동 구간에서 버프 적용
@@ -1352,8 +1408,9 @@ endif
 측정값과 원칙은 [Razor](../scripting/razor.md#06) 06절. 원칙: 자주 안 바뀌는 상태는 타이머로 게이트, 흔한 경로가 밟는 줄 감소. 이 루프의 적용:
 
 - **시약 플래그.** 예전 PASS FLAGS는 시약 플래그 13개를 **매 패스** `findtype` 19\~32번으로 재확인, 패스마다 0.4 \~ 1.3초
-  - 지금은 `magery/reagents`가 `interval__reagents`(10초. 2026-10-10 전에는 30초)마다 시약 일곱 종을 한 번씩만 찾아 `var__has_*`에 저장
-  - 주문 플래그 13개는 그 일곱을 `=`로 비교해 생성 → 리프레시 한 번에 `findtype` 7번, 그 사이 패스는 타이머 비교 한 줄
+  - 지금은 `magery/reagents`가 `interval__reagents`(10초. 2026-10-10 전에는 30초)마다 시약 여덟 종을 한 번씩만 찾아 `var__has_*`에 저장.
+    여덟째 Bloodmoss는 2026-10-18 소환용으로 추가
+  - 주문 플래그 18개는 그 여덟을 `=`로 비교해 생성 → 리프레시 한 번에 `findtype` 8번, 그 사이 패스는 타이머 비교 한 줄
   - 시작 시 타이머 만료 → 첫 패스는 반드시 확인
   - 묵은 플래그의 대가는 시전 한 번의 거부. 거부 문장 `More reagents are needed for this spell.`(인게임 확인됨 2026-09-28)이 보이면 창을 기다리지 않고 다음 패스에 재확인
   - 이 처리가 없던 때는 창이 끝날 때까지 같은 주문을 패스마다 재시도. 시약은 대상을 찍을 때 검사 → 시도마다 시전 시간을 다 쓰고 실패(03.B절)
@@ -1361,10 +1418,13 @@ endif
 - **소환수 이름.** `necro/summon-names` 블록은 하우스키핑 틱(5초)마다 한 번
   - 매치를 훑는 `findtype`은 매치 수보다 한 번 더 호출, 아직 이름이 없는 내 소환수마다 `getlabel` 하나
   - 2026-10-18 Rag Witch 바디 740 확인으로 기본 이름 `a rag witch` 재검색 삭제(04.G절)
+- **재소환.** `necro/resummon`은 분기 앞, 둘 다 나와 있고 교체할 때가 아니면 게이트 한 줄
+  - 교전 중 교체 시계가 넘어도 두 번째 줄에서 멈춤. 교체는 이동 중에만
+  - 첫째 종류를 찾는 `findtype`은 시전 직전 한 번, 두 종류가 다를 때만
 - **교전과 이동 분기**(2026-09-29, 2026-10-10부터 레시피 그룹). 모든 패스가 지나는 블록(생존, 타겟 캐시, 시약, 심볼, 하우스키핑) 뒤에서,
   `# @ when var__fighting = 1` 그룹이 교전 여부를 한 번만 판정
   - 교전 쪽: 디스코, 피스, 네크로 버스트, 오프닝, 프록 코어, 필러, Poison Strike. 이동 쪽(`# @ otherwise`): 자기 버프, Spell Siphon, 송, Vampiric Embrace
-  - 버섯은 분기 앞. 스탯 포션은 하우스키핑 안에서 `var__fighting`을 직접 읽음
+  - 버섯과 재소환은 분기 앞. 스탯 포션은 하우스키핑 안에서 `var__fighting`을 직접 읽음
   - 이전에는 블록마다 교전 여부를 따로 확인 → 이동 패스도 디스코와 피스의 실패하는 `find`까지 밟음
 - **하우스키핑 틱**(2026-09-29). 매 패스 볼 필요 없는 확인을 5초 `# @ every interval__housekeeping` 그룹 하나에 모음
   - 패스는 그 게이트 한 줄만. 더 긴 주기는 안에서 자기 시계를 한 번 더 확인
@@ -1563,6 +1623,7 @@ Tracking 규칙은 [PvP](../game/pvp.md#10) 10절, Hunting 판정의 5초 스킬
 | Lightning 프록은 `Wizardry lightning activated.`와 힌더 줄 둘 다(2026-09-28) | 03.A절 |
 | 시약과 마나는 대상을 찍을 때 검사와 소모. 시약 부족 줄은 캐릭터 이름으로(2026-09-28) | 03.B절 |
 | Poison Strike의 질병 없음 문장, Vampiric Embrace의 시체 없음 문장(2026-09-28) | 03.D절 |
+| Rag Witch 바디 740. Vengeful Spirit 즉시 켜짐과 버프 이름, 소환에 커서 없음, release 즉시 사라짐, 팔로워 초과 문장. 인게임 확인됨 2026-10-18 | 03.C, 04.G절 |
 
 **남은 측정**
 

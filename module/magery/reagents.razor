@@ -16,6 +16,9 @@
 #        3rd  fireball
 #        4th  lightning, curse, mana drain
 #
+#   config__mana_8th
+#      Mana a summon needs before it is worth starting. Every 8th circle summon costs 50.
+#
 #   config__interrupt_to_heal
 #      An attack cast in flight when the loss reaches emergency_hits.
 #        0  finishes
@@ -25,6 +28,7 @@
 @setvar! config__mana_2nd 6
 @setvar! config__mana_3rd 9
 @setvar! config__mana_4th 11
+@setvar! config__mana_8th 50
 @setvar! config__interrupt_to_heal 1
 
 
@@ -55,9 +59,11 @@ timer__reagents interval__reagents
 # @ state
 #
 #   var__regs_cure, var__regs_heal, var__regs_greater_heal, var__regs_create_food,
-#   var__regs_reactive_armor, var__regs_magic_reflect, var__regs_magic_arrow, var__regs_harm,
-#   var__regs_fireball, var__regs_lightning, var__regs_curse, var__regs_mana_drain, var__regs_energy_bolt,
-#   var__regs_bless, var__regs_arch_protection, var__regs_flamestrike
+#   var__regs_reactive_armor, var__regs_magic_reflect, var__regs_magic_arrow,
+#   var__regs_harm, var__regs_fireball, var__regs_lightning, var__regs_curse,
+#   var__regs_mana_drain, var__regs_energy_bolt, var__regs_bless,
+#   var__regs_arch_protection, var__regs_flamestrike, var__regs_summon,
+#   var__regs_summon_ash
 #      1 when every reagent of that spell was found, written only by this block.
 #        cure            garlic 3972, ginseng 3973
 #        heal            garlic, ginseng, spider silk 3981
@@ -75,9 +81,13 @@ timer__reagents interval__reagents
 #        bless           garlic, mandrake root
 #        arch protection garlic, ginseng, mandrake root, sulfurous ash
 #        flamestrike     spider silk, sulfurous ash
+#        summon          bloodmoss 3963, mandrake root, spider silk. Water, Earth and Air
+#                        Elemental
+#        summon ash      bloodmoss, mandrake root, spider silk, sulfurous ash. Fire
+#                        Elemental and Summon Daemon
 #
-#   var__has_black_pearl, var__has_garlic, var__has_ginseng, var__has_mandrake,
-#   var__has_nightshade, var__has_ash, var__has_silk
+#   var__has_black_pearl, var__has_bloodmoss, var__has_garlic, var__has_ginseng,
+#   var__has_mandrake, var__has_nightshade, var__has_ash, var__has_silk
 #      Scratch: 1 when that reagent was found on the last read.
 # ----------------------------------------------------------------------------------------
 @setvar! var__regs_cure 0
@@ -96,7 +106,10 @@ timer__reagents interval__reagents
 @setvar! var__regs_bless 0
 @setvar! var__regs_arch_protection 0
 @setvar! var__regs_flamestrike 0
+@setvar! var__regs_summon 0
+@setvar! var__regs_summon_ash 0
 @setvar! var__has_black_pearl 0
+@setvar! var__has_bloodmoss 0
 @setvar! var__has_garlic 0
 @setvar! var__has_ginseng 0
 @setvar! var__has_mandrake 0
@@ -113,13 +126,14 @@ timer__reagents interval__reagents
     #
     # On the interval, or at once after a refusal for reagents, so a stale flag cannot
     # send the same doomed cast every pass. Each reagent is looked up once, and every
-    # spell flag comes from those seven with plain comparisons.
+    # spell flag comes from those eight with plain comparisons.
     # ------------------------------------------------------------------------------------
     if config__use_magery = 1
         if timer "timer__reagents" >= interval__reagents or insysmsg "More reagents are needed"
             settimer "timer__reagents" 0
 
             @setvar! var__has_black_pearl 0
+            @setvar! var__has_bloodmoss 0
             @setvar! var__has_garlic 0
             @setvar! var__has_ginseng 0
             @setvar! var__has_mandrake 0
@@ -129,6 +143,9 @@ timer__reagents interval__reagents
 
             if findtype 3962 self
                 @setvar! var__has_black_pearl 1
+            endif
+            if findtype 3963 self
+                @setvar! var__has_bloodmoss 1
             endif
             if findtype 3972 self
                 @setvar! var__has_garlic 1
@@ -165,6 +182,8 @@ timer__reagents interval__reagents
             @setvar! var__regs_bless 0
             @setvar! var__regs_arch_protection 0
             @setvar! var__regs_flamestrike 0
+            @setvar! var__regs_summon 0
+            @setvar! var__regs_summon_ash 0
 
             if var__has_garlic = 1 and var__has_ginseng = 1
                 @setvar! var__regs_cure 1
@@ -213,6 +232,12 @@ timer__reagents interval__reagents
             endif
             if var__has_silk = 1 and var__has_ash = 1
                 @setvar! var__regs_flamestrike 1
+            endif
+            if var__has_bloodmoss = 1 and var__has_mandrake = 1 and var__has_silk = 1
+                @setvar! var__regs_summon 1
+            endif
+            if var__has_bloodmoss = 1 and var__has_mandrake = 1 and var__has_silk = 1 and var__has_ash = 1
+                @setvar! var__regs_summon_ash 1
             endif
         endif
     endif

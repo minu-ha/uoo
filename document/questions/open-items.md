@@ -826,6 +826,20 @@ order: 10
 - Rag Witch 740은 인게임 확인됨 2026-10-18. 기본 이름 `a rag witch` 재검색 삭제 → 새 rag witch가 5초 안에 `wichy`가 되는지 확인
 - Vampire Thrall 722는 구식 캐시가 출처라 확인되지 않았다. 뽑으면 `>info`
 
+#### 재소환과 교체
+
+설계와 실패 증상은 [Bard Necro](../templates/bard-necro.md#04.I) 04.I절. 2026-10-18 추가.
+
+- 소환수 하나를 손으로 release → 서 있으면 `[ vengeful spirit ]`, Water Elemental 주문어, 5초 안에 `[ name, wichy ]`
+- `mumi`만 release → Earth Elemental이 나와야 함. Water Elemental이 나오면 바디 740 검색 실패
+- 둘 다 없음 → VS 한 번에 Rag Witch, Mummy 순서
+- 교전 중 소환수가 죽음 → 그 자리에서 VS와 소환. 소환 중 긴급 HP면 `[ summon, cut ]`과 힐
+- 워모드, 걷는 중에는 아무것도 안 나감
+- 레시피에서 잠시 `summon_refresh`를 60000으로 → 이동 중 1분 뒤 `wichy release`, 다시 소환. 확인 뒤 600000으로
+- Bloodmoss를 빼 둠 → VS 심볼을 쓰지 않음
+- 손으로 Alt+1 → 루프는 그 버프가 꺼질 때까지 소환하지 않음
+- 맨 엘리멘탈이 한 번이라도 나오면 기록. 시작 마감 23초가 길다는 뜻
+
 #### 교전과 이동
 
 - 적을 찍으면 10칸 안에서 Disco, Peace, 네크로 버스트, 오프너, 프록이 예전 순서로

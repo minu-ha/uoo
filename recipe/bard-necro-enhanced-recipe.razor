@@ -21,9 +21,11 @@
 # necro burst, the opener, the proc core, the filler and Poison Strike. On the walk: the
 # self buffs, Spell Siphon, the bard song and Vampiric Embrace. Mushrooms are eaten in
 # either, and Create Food makes more on the walk.
+# The two summons are kept out in either: Vengeful Spirit, then the missing one. On the
+# walk a summon out ten minutes is released by name and cast again.
 # Warmode is the player's manual window: our casts, the bard skills, the self buffs,
-# Create Food, Corpse Skin and Evil Omen stand down. Cures, heals, potions, the mushroom
-# and Blood Oath keep running.
+# Create Food, the summons, Corpse Skin and Evil Omen stand down. Cures, heals, potions,
+# the mushroom and Blood Oath keep running.
 # Herding is off: the slot went to Resisting Spells on 2026-09-27. Add tamer/herding to the
 # blocks when it comes back.
 
@@ -47,7 +49,8 @@
 #        0  ours: our casts ignore it
 #        1  the player's manual control window: our casts and the food stand down while it
 #           is on. Potions and bandages still go out
-#      Read by recovery/cure, recovery/heal, recovery/light-heal, buff/food, buff/spells.
+#      Read by recovery/cure, recovery/heal, recovery/light-heal, buff/food,
+#         necro/resummon, buff/spells.
 #      > The player casts by hand in warmode: our casts, buffs and food stand down then.
 #
 #   recover_in_warmode (default 0)
@@ -205,6 +208,37 @@
 #
 #   Eats a Magic Mushroom at low mana, and makes more with Create Food at high mana.
 # ----------------------------------------------------------------------------------------
+
+# ----------------------------------------------------------------------------------------
+# @ use necro/resummon
+#
+#   Keeps two undead summons out through Vengeful Spirit, and replaces worn ones.
+#
+#   summon_first (default 1)
+#      The summon that goes out first, by the spell cast under Vengeful Spirit. When the
+#      two differ, this one is looked for by its body to tell which is missing, so it
+#      cannot be 4, whose body is not known yet.
+#        1  Fire Elemental, a lich
+#        2  Water Elemental, a rag witch
+#        3  Earth Elemental, an ancient mummy
+#        4  Air Elemental, a skeletal fiend
+#        5  Summon Daemon, a vampire thrall
+#      > The user's pair, 2026-10-18. The rag witch tanks, so it goes first.
+#
+#   summon_second (default 1)
+#      The other summon, numbered as config__summon_first. The same number as the first
+#      keeps two of a kind.
+#      > The ancient mummy, the other half of the user's pair.
+#
+#   summon_refresh (default 0)
+#      How long, in ms, a summon stays out before it is released and cast again, out of
+#      a fight. 0 turns it off. A skeletal fiend has no name to release it by, so it
+#      stays.
+#      > Ten minutes leaves about 55% of max health: 1% every 10 seconds, compounding.
+# ----------------------------------------------------------------------------------------
+@setvar! config__summon_first 2
+@setvar! config__summon_second 3
+@setvar! config__summon_refresh 600000
 
 # ========================================================================================
 # @ when var__fighting = 1

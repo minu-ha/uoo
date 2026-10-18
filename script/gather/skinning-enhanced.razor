@@ -144,6 +144,7 @@
 @setvar! config__mana_2nd 6
 @setvar! config__mana_3rd 9
 @setvar! config__mana_4th 11
+@setvar! config__mana_8th 50
 @setvar! config__interrupt_to_heal 1
 
 
@@ -452,7 +453,10 @@ endif
 @setvar! var__regs_bless 0
 @setvar! var__regs_arch_protection 0
 @setvar! var__regs_flamestrike 0
+@setvar! var__regs_summon 0
+@setvar! var__regs_summon_ash 0
 @setvar! var__has_black_pearl 0
+@setvar! var__has_bloodmoss 0
 @setvar! var__has_garlic 0
 @setvar! var__has_ginseng 0
 @setvar! var__has_mandrake 0
@@ -1467,6 +1471,7 @@ while not dead
             settimer "timer__reagents" 0
 
             @setvar! var__has_black_pearl 0
+            @setvar! var__has_bloodmoss 0
             @setvar! var__has_garlic 0
             @setvar! var__has_ginseng 0
             @setvar! var__has_mandrake 0
@@ -1476,6 +1481,9 @@ while not dead
 
             if findtype 3962 self
                 @setvar! var__has_black_pearl 1
+            endif
+            if findtype 3963 self
+                @setvar! var__has_bloodmoss 1
             endif
             if findtype 3972 self
                 @setvar! var__has_garlic 1
@@ -1512,6 +1520,8 @@ while not dead
             @setvar! var__regs_bless 0
             @setvar! var__regs_arch_protection 0
             @setvar! var__regs_flamestrike 0
+            @setvar! var__regs_summon 0
+            @setvar! var__regs_summon_ash 0
 
             if var__has_garlic = 1 and var__has_ginseng = 1
                 @setvar! var__regs_cure 1
@@ -1560,6 +1570,12 @@ while not dead
             endif
             if var__has_silk = 1 and var__has_ash = 1
                 @setvar! var__regs_flamestrike 1
+            endif
+            if var__has_bloodmoss = 1 and var__has_mandrake = 1 and var__has_silk = 1
+                @setvar! var__regs_summon 1
+            endif
+            if var__has_bloodmoss = 1 and var__has_mandrake = 1 and var__has_silk = 1 and var__has_ash = 1
+                @setvar! var__regs_summon_ash 1
             endif
         endif
     endif

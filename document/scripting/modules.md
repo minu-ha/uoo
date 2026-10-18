@@ -65,7 +65,7 @@ order: 30
 | `module/magery/` | 공격 주문과 시약 | `reagents`(모든 마법 블록이 읽는 시약 표시와 서클별 마나), `rotation`(Mana Drain과 Curse, Grimoire 프록 넷, 그 사이 Energy Bolt), `flamestrike`(aspect 발동용) |
 | `module/buff/` | 버프 아이콘 유지 | `spells`(Reactive Armor, Magic Reflection, 설정에 따라 Bless, Arch Protection, Spell Siphon용 자기 Magic Arrow), `potions`(Strength, Agility, Magic Resist), `food`(Food Satisfaction), `mushroom`(Magic Mushroom 먹기와 Create Food) |
 | `module/bard/` | 바드 스킬 | `instrument`(악기 찾기와 점검), `disco`, `peace`, `song`(이동 중 노래 셋을 차례로) |
-| `module/necro/` | 네크로 핫바와 소환수 | `symbols`(핫바 열어 두기, Unholy Symbol 수 읽기), `summon-names`(소환수 이름 바꾸기), `burst`(Blood Oath, Corpse Skin, Evil Omen), `poison-strike`, `vampiric-embrace` |
+| `module/necro/` | 네크로 핫바와 소환수 | `symbols`(핫바 열어 두기, Unholy Symbol 수 읽기), `summon-names`(소환수 이름 바꾸기), `resummon`(Vengeful Spirit 뒤 빠진 소환수 재소환, 오래된 소환수 교체), `burst`(Blood Oath, Corpse Skin, Evil Omen), `poison-strike`, `vampiric-embrace` |
 | `module/tamer/` | 펫 스킬 | `herding`(목동 지팡이), `vet-kit`(나와 펫에게 수의사 키트) |
 | `module/fight/` | 근접 전투 보조 | `target`(기억한 적), `weapon-swap`(pvp 무기 슬롯), `axe`, `sword-codex`, `parry-codex`, `weapon-ability` |
 | `module/gather/` | 채집 | `lumberjacking`(Smart Harvest), `skinning`(칼질) |
@@ -349,15 +349,16 @@ order: 30
 
 신호가 아닌 이름은 주인 모듈이 레시피에 있어야 사용 가능 → 아래 블록은 주인 모듈과 함께. 조립기가 코드에서 확인하는 관계.
 
-- `magery/reagents`의 `var__regs_*`, 서클별 마나, `interrupt_to_heal`, `wait__cast` ← 회복 시전, `buff/spells`, `buff/mushroom`, 공격 주문(`magery/*`)
+- `magery/reagents`의 `var__regs_*`, 서클별 마나, `interrupt_to_heal`, `wait__cast` ← 회복 시전, `buff/spells`, `buff/mushroom`, 공격 주문(`magery/*`), `necro/resummon`
 - `recovery/heal`의 `config__heal_hits` ← 다쳤을 때 쉬는 블록(`gather/*`, `pack/leather`, `escape/tracking`)
-  - `emergency_hits` ← 시전 중에 끊는 공격 주문(`magery/*`). `recovery/light-heal`의 `light_hits` ← `pack/lumber`
+  - `emergency_hits` ← 시전 중에 끊는 공격 주문(`magery/*`), `necro/resummon`. `recovery/light-heal`의 `light_hits` ← `pack/lumber`
 - `fight/target`의 `var__combat_target`과 사거리 ← `fight/parry-codex`, `fight/weapon-ability`, `pack/leather`, 바드와 네크로와 공격 주문 블록
   - `var__keep_lasttarget` ← 자기나 백팩을 찍기 전 lasttarget을 재확인하는 블록(`bard/song`, `magery/flamestrike`, `necro/vampiric-embrace`)
   - `gather/skinning`은 칼 커서를 든 동안 고른 적을 여기에 기록
 - `escape/tracking`의 `var__tracking_*`와 `tracking_color` ← `escape/recall`
 - `bard/instrument`의 `var__my_instrument`, `var__instrument_ok`, `wait__bard_target` ← `bard/disco`, `bard/peace`, `bard/song`
 - `necro/symbols`의 `list__necro_symbols`, `var__symbols_spent`, `interval__necro_action`, `wait__message`, `wait__ability_target` ← 네크로 능력 블록
+- `necro/summon-names`의 `config__summon_range` ← `necro/resummon`. 교체가 summon-names의 이름으로 놓으므로 둘은 함께
 - `magery/rotation`의 순서 플래그 `var__opener_done`, `var__procs_done`, `var__proc_target` ← `necro/poison-strike`
 
 ::part[쓰는 법]
