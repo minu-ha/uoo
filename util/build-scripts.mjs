@@ -22,8 +22,8 @@
  * Every name a section declares is described in its box, and each name belongs to one module.
  * A block may use the names of any module the loop has. The builder works out which those are.
  *
- * Recipe: recipe/<loop>-recipe.razor, one loop.
- *     # @ output             the loop file it builds, before the first part
+ * Recipe: recipe/<script>-recipe.razor, one loop or routine.
+ *     # @ output             the script it builds, before the first part
  *     # @ once               optional, right after it: a routine that runs once, not a loop. Its
  *                            blocks are setup only (base's loop and end are left out), no groups,
  *                            and the output stops after setup
@@ -38,8 +38,9 @@
  *     # @ setup box          loop-only setup: loot pouch, resume list, loaded message (optional)
  *
  * Output: header with Hotkeys and Generated lines, CONFIG, WAIT AND COOLDOWN, TIMER, STATE,
- * setup, MAIN LOOP (not for a # @ once routine). Each part takes base first, then the blocks in order, then the recipe, each
- * piece under a box naming the file it came from. CRLF line ends. Needs only Node 22, no packages.
+ * setup, MAIN LOOP (not for a # @ once routine). Each part takes base first, then the blocks
+ * in order, then the recipe, each piece under a box naming the file it came from. CRLF line
+ * ends. Needs only Node 22, no packages.
  */
 import {existsSync, readFileSync, readdirSync, realpathSync, statSync, writeFileSync} from "node:fs";
 import {dirname, join, relative, resolve, sep} from "node:path";
@@ -602,7 +603,7 @@ const prepare = (path, modules, owner) => {
 const readBy = (loop, setting) => {
     const found = loop.readers.get(setting) ?? [];
     const others = found.filter((reader) => reader !== loop.owner.get(setting));
-    if (!found.length) return "No block of this loop reads it.";
+    if (!found.length) return "Nothing in this recipe reads it.";
     if (!others.length) return "";
     return `${others.length < found.length ? "Also read by " : "Read by "}${others.join(", ")}.`;
 };
