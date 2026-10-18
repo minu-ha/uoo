@@ -55,7 +55,7 @@ timer__embrace_miss interval__embrace_miss
     # lasttarget is read once more, the way bard/song does, so a hostile just picked is
     # not lost.
     # ------------------------------------------------------------------------------------
-    if timer "timer__vampiric_embrace" >= interval__necro_action and timer "timer__embrace_miss" >= interval__embrace_miss and followers > 0 and not warmode and list 'list__necro_symbols' >= config__symbols_vampiric_embrace and not targetexists and not casting
+    if timer "timer__vampiric_embrace" >= interval__necro_action and timer "timer__embrace_miss" >= interval__embrace_miss and followers > 0 and var__hold_symbols = 0 and not warmode and list 'list__necro_symbols' >= config__symbols_vampiric_embrace and not targetexists and not casting
         if findtype 8198 ground -1 -1 8
             hotkey 'Vampiric Embrace'
             waitfortarget wait__ability_target

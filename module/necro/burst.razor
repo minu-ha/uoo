@@ -49,8 +49,10 @@ timer__evil_omen interval__necro_action
     #                  self damage. Below Corpse Skin: smaller bonus with a cost attached
     #
     # Of the rest, Strangle (4) competes with Blood Oath for symbols and delays every hit
-    # by five seconds, Wither (5) buys mana only for spells that do no damage, and Pain
-    # Spike (5) wants a corpse next to the next mob. None earn a place here.
+    # by five seconds, and Pain Spike (5) wants a corpse next to the next mob. None earn a
+    # place here. Wither (5) buys mana only for spells that do no damage, which here means
+    # a summon, so necro/resummon presses it. While a summon waits for its symbols,
+    # var__hold_symbols keeps this whole chain off the bank.
     #
     # Corpse Skin and Evil Omen only pay off through the loop's own spells, and the loop
     # casts no damage spell while the player is walking or has taken over in warmode. So
@@ -65,7 +67,7 @@ timer__evil_omen interval__necro_action
     # list is only rebuilt on the next pass.
     @setvar! var__symbols_spent 0
 
-    if list 'list__necro_symbols' >= config__symbols_blood_oath and followers > 0 and timer "timer__blood_oath" >= interval__necro_action and not targetexists and not casting
+    if list 'list__necro_symbols' >= config__symbols_blood_oath and followers > 0 and var__hold_symbols = 0 and timer "timer__blood_oath" >= interval__necro_action and not targetexists and not casting
         hotkey 'Blood Oath'
         wait wait__message
 
@@ -79,7 +81,7 @@ timer__evil_omen interval__necro_action
         elseif insysmsg "seconds before you may use that ability again."
             settimer "timer__blood_oath" 0
         endif
-    elseif list 'list__necro_symbols' >= config__symbols_corpse_skin and not warmode and timer "timer__corpse_skin" >= interval__necro_action and cooldown "walk" = 0 and not targetexists and not casting
+    elseif list 'list__necro_symbols' >= config__symbols_corpse_skin and var__hold_symbols = 0 and not warmode and timer "timer__corpse_skin" >= interval__necro_action and cooldown "walk" = 0 and not targetexists and not casting
         hotkey 'Corpse Skin'
         wait wait__message
 
@@ -93,7 +95,7 @@ timer__evil_omen interval__necro_action
         elseif insysmsg "seconds before you may use that ability again."
             settimer "timer__corpse_skin" 0
         endif
-    elseif list 'list__necro_symbols' >= config__symbols_evil_omen and not warmode and timer "timer__evil_omen" >= interval__necro_action and cooldown "walk" = 0 and not targetexists and not casting
+    elseif list 'list__necro_symbols' >= config__symbols_evil_omen and var__hold_symbols = 0 and not warmode and timer "timer__evil_omen" >= interval__necro_action and cooldown "walk" = 0 and not targetexists and not casting
         hotkey 'Evil Omen'
         wait wait__message
 

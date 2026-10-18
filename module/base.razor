@@ -114,10 +114,15 @@ timer__message interval__message
 #
 #   var__hold_gathering
 #      1 while gathering and its packing wait. escape/recall sets it.
+#
+#   var__hold_symbols
+#      1 while a missing summon waits for the Unholy Symbols that Wither and Vengeful
+#      Spirit take. The other necro abilities stand down. necro/resummon sets it.
 # ----------------------------------------------------------------------------------------
 @setvar! var__fighting 0
 @setvar! var__hold_casts 0
 @setvar! var__hold_gathering 0
+@setvar! var__hold_symbols 0
 
 
 # ----------------------------------------------------------------------------------------

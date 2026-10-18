@@ -65,7 +65,7 @@ order: 30
 | `module/magery/` | 공격 주문과 시약 | `reagents`(모든 마법 블록이 읽는 시약 표시와 서클별 마나), `rotation`(Mana Drain과 Curse, Grimoire 프록 넷, 그 사이 Energy Bolt), `flamestrike`(aspect 발동용) |
 | `module/buff/` | 버프 아이콘 유지 | `spells`(Reactive Armor, Magic Reflection, 설정에 따라 Bless, Arch Protection, Spell Siphon용 자기 Magic Arrow), `potions`(Strength, Agility, Magic Resist), `food`(Food Satisfaction), `mushroom`(Magic Mushroom 먹기와 Create Food) |
 | `module/bard/` | 바드 스킬 | `instrument`(악기 찾기와 점검), `disco`, `peace`, `song`(이동 중 노래 셋을 차례로) |
-| `module/necro/` | 네크로 핫바와 소환수 | `symbols`(핫바 열어 두기, Unholy Symbol 수 읽기), `summon-names`(소환수 이름 바꾸기), `resummon`(Vengeful Spirit 뒤 빠진 소환수 재소환, 오래된 소환수 교체), `burst`(Blood Oath, Corpse Skin, Evil Omen), `poison-strike`, `vampiric-embrace` |
+| `module/necro/` | 네크로 핫바와 소환수 | `symbols`(핫바 열어 두기, Unholy Symbol 수 읽기), `summon-names`(소환수 이름 바꾸기), `resummon`(Vengeful Spirit 뒤 빠진 소환수 재소환, 마나가 낮으면 Wither, 오래된 소환수 교체), `burst`(Blood Oath, Corpse Skin, Evil Omen), `poison-strike`, `vampiric-embrace` |
 | `module/tamer/` | 펫 스킬 | `herding`(목동 지팡이), `vet-kit`(나와 펫에게 수의사 키트) |
 | `module/fight/` | 근접 전투 보조 | `target`(기억한 적), `weapon-swap`(pvp 무기 슬롯), `axe`, `sword-codex`, `parry-codex`, `weapon-ability` |
 | `module/gather/` | 채집 | `lumberjacking`(Smart Harvest), `skinning`(칼질) |
@@ -335,7 +335,7 @@ order: 30
 |   | `use_bandages`, `heal_skill_min`: 붕대 사용 여부. 못 쓰면 `recovery/light-heal`이 대신 | dexxer-basic, skinning-enhanced는 Healing 10 초과일 때만 붕대. bard-necro-enhanced는 붕대 안 씀 |
 |   | `settle_first`: 1이면 패스 첫머리에서 아이템 큐와 시전 종료 대기 | bard-necro-enhanced가 1 |
 | `# @ wait`, `# @ timer` | `wait__poll`, `wait__short`, 경고 간격 `interval__message`와 `timer__message`, 레시피 그룹 `# @ every`의 `interval__housekeeping` |   |
-| `# @ state` | 블록 사이 신호 세 개(아래 표) | pvp는 `var__fighting` 1 |
+| `# @ state` | 블록 사이 신호 넷(아래 표) | pvp는 `var__fighting` 1 |
 | `# @ setup`, `# @ loop`, `# @ end` | 구조적 PvP 정지(루프 앞, 패스 첫머리), 시작 4줄, `settle_first`, 패스 끝 `wait wait__poll` |   |
 
 **신호 = 쓰는 블록이 없어도 읽는 블록은 돌아야 하는 값.** base가 중립값으로 선언, 쓰는 블록이 있는 루프에서만 값이 바뀜.
@@ -346,6 +346,7 @@ order: 30
 | `var__fighting` | `fight/target`(기억한 적이 `target_range` 안이면 1), pvp 레시피(늘 1) | `buff/potions`, `buff/spells`의 Bless와 Arch Protection, `buff/mushroom`의 Create Food, `magery/flamestrike`, bard-necro-enhanced의 교전 그룹 |
 | `var__hold_casts` | `escape/recall`(리콜 결정 시 1) | `buff/spells`, `necro/resummon` |
 | `var__hold_gathering` | `escape/recall`(리콜 결정, 필요한 책 없음, 감지 리콜인데 Tracking이 사냥 중이 아니면 1) | `gather/lumberjacking`, `pack/lumber` |
+| `var__hold_symbols` | `necro/resummon`(소환수가 빠지고 마나 20\~64, VS와 Wither를 쓸 수 있으면 1) | `necro/burst`, `necro/poison-strike`, `necro/vampiric-embrace` |
 
 신호가 아닌 이름은 주인 모듈이 레시피에 있어야 사용 가능 → 아래 블록은 주인 모듈과 함께. 조립기가 코드에서 확인하는 관계.
 

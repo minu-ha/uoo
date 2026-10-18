@@ -496,7 +496,8 @@ findbuff "song of peacemaking"
 | Evil Omen | 2 | `>= 4`. 서 있고 warmode가 아닐 때 | 없음. 위 둘이 30초에 6개를 다 씀 → 사실상 이동 중 잉여로만 |
 | Poison Strike | 1 | `>= 1`. Corpse Skin이 켜져 있고, 프록 코어와 필러 뒤 | 없음. 필러 자리, 위는 이미 사용 |
 | Vampiric Embrace | 3 | `>= 9`. 이동 중에만 | 6 |
-| Vengeful Spirit | 1 | `>= 1`. 소환수가 빠졌거나 교체할 때만(04.I절) | 없음. 소환수가 없으면 Blood Oath도 무의미 |
+| Vengeful Spirit | 1 | `>= 1`. 소환수가 빠졌거나 교체할 때만(04.I절) | 없음. 빠진 소환수가 Blood Oath보다 큼 |
+| Wither | 5 | 소환수가 빠지고 마나 20\~64일 때만. VS와 함께 `>= 6`(04.I절) | 모으는 동안 위 능력 모두 정지(`var__hold_symbols`) |
 
 - **Necro 100에서 실제로 도는 것은 Blood Oath와 Corpse Skin.** 30초에 6개 충전, 둘이 정확히 6개 사용
 - 셋 모두 4개에서 발동 → 체인 순서(Blood Oath, Corpse Skin, Evil Omen) = 우선순위
@@ -525,6 +526,13 @@ findbuff "song of peacemaking"
 
 > "30 second cooldown in between uses of the same Necromancy ability" -- 위키 Necromancy
 
+> "Player takes 10 damage and for next 30 seconds gains (30 \* (Necromancy / 100)) mana"
+> "that can only be spent on non-damage causing spells" -- 위키 Necromancy, Wither
+
+- **Wither 마나로 소환 가능.** 마나 약 25에서 Wither → VS → Water Elemental 소환 성공. 인게임 확인됨 2026-10-18
+- Wither의 응답과 버프 아이콘은 VS와 같은 모양: `Unholy symbols remaining`, 버프 `Wither`. 인게임 확인됨 2026-10-18
+- Necro 100 → 마나 30. 50짜리 소환 하나분 → Wither 한 번에 소환 하나
+
 - **Poison Strike**: Corpse Skin의 질병 틱 최대 8개, 독 3개를 한 번에 터뜨림. 곧 죽을 몹에서 함께 사라질 딜을 회수. 마나가 안 들어 **필러 자리**
 - 질병은 공격 주문마다 하나 → **프록 코어 네 개와 필러 Energy Bolt 한 방 뒤에** 터뜨림(4 + 1 = 5개)
 - Magic Arrow 하나 뒤에 쓰면 쌓이던 스택 낭비. 순서 유지 방법은 05.A절
@@ -539,7 +547,8 @@ findbuff "song of peacemaking"
 | `You do not have a poison or disease effect on that target.` | Poison Strike. 대상에 독도 질병도 없음 | `var__proc_target`을 비우고, 다음 프록이 그 몹에 갈 때까지 대기 | 인게임 확인됨 2026-09-28 |
 | `You do not see any corpses near that location.` | Vampiric Embrace. 닿는 시체 없음 | `interval__embrace_miss`(5초) 뒤 재사용 | 인게임 확인됨 2026-09-28 |
 
-- **넣지 않은 것**: Strangle(4)은 Blood Oath와 심볼 경쟁, 모든 딜을 5초 늦춤. Wither(5)는 비공격 주문용 마나만. Pain Spike(5)는 **다음 몹 옆에** 시체 필요
+- **넣지 않은 것**: Strangle(4)은 Blood Oath와 심볼 경쟁, 모든 딜을 5초 늦춤. Pain Spike(5)는 **다음 몹 옆에** 시체 필요
+- Wither(5)는 비공격 주문용 마나만 → 소환에만 씀(04.I절)
 - **핫바의 Auto-Renew는 모두 끔.** 게임이 같은 심볼을 쓰고 우선순위가 <strong>"least expensive first"</strong>
   → 이 빌드와 정반대, Blood Oath가 맨 마지막
 - 핫바에서 심볼 수를 읽는 방법: 05.H절
@@ -937,7 +946,8 @@ PK를 만나도 조합 유지, 사냥하던 그대로 싸움(06.D절).
 - 재소환은 교전 중에도. 소환수가 전선을 버팀 → 빠지면 바로 채움. 사용자 결정
 - 교체는 기억한 적이 없을 때만(`var__combat_target` 0). 교전 판정 10칸보다 넓은 18칸 기준 → 소환수가 10칸 밖에서 싸우는 동안은 안 놓음
 - 다른 시전과 같은 가드: 걷는 중(`walk_guard`), 워모드(수동 창), 은신, 리콜 대기(`var__hold_casts`), 커서, 시전 중이면 쉼
-- 마나 50(`config__mana_8th`), 시약(`var__regs_summon`. Fire나 Daemon이 들면 ash까지 `var__regs_summon_ash`), 잃은 HP가 `emergency_hits` 미만일 때만
+- 마나 20(`config__summon_mana_wither`) 이상, 시약(`var__regs_summon`. Fire나 Daemon이 들면 ash까지 `var__regs_summon_ash`), 잃은 HP가 `emergency_hits` 미만일 때만.
+  마나 65 미만이면 Wither 경로(아래)
 - 6초 시전은 블록 안에서 폴링, 긴급 HP면 `> Interrupt`와 `[ summon, cut ]`. 다음 패스 첫머리로 넘기면 `settle_first` 대기 동안 회복 블록도 멈춤
 - 둘 다 나와 있고 교체할 때가 아니면 게이트 한 줄(05.H절)
 
@@ -962,6 +972,28 @@ PK를 만나도 조합 유지, 사냥하던 그대로 싸움(06.D절).
 - VS의 쿨 거절 줄과 앞선 능력의 낡은 응답 줄은 이 블록이 읽어 없앰 → `necro/burst`가 제 응답으로 오인하지 않음
 - 손으로 켠 VS(Alt+1)는 우리 타이머가 모름 → 남은 시간을 모르니 시전 안 함. 꺼진 뒤 루프가 다시 켬
 - VS 누르는 조건: 버프 꺼짐, 타이머 30.5초 이상(`interval__necro_action`), 심볼 1 이상. 마나와 시약은 바깥 게이트 → 심볼만 날리지 않음
+
+#### 마나와 Wither
+
+| 마나 | 소환 | 다른 네크로 능력 |
+| --- | --- | --- |
+| 65 이상(`config__summon_mana`) | VS → 소환 | 그대로 |
+| 20\~64 | VS와 Wither를 쓸 수 있으면 심볼 6을 모아 VS → Wither → 소환, 한 패스에 | **정지**(`var__hold_symbols`) |
+| 20 미만 | 안 함 | 그대로. 마나가 바닥이면 심볼만 드는 Blood Oath가 가장 나은 행동 |
+
+- 65: 2026-10-18 사용자 결정. 50에서 소환하면 그 뒤 주문이 하나도 안 나감
+- 20 = 소환 50 - Wither 30(Necro 100, 03.D절). 20을 65로 두면 Wither 꺼짐
+- Wither도 30초, 같은 시계 규칙: 누를 때 시작, 시작 마감 23초
+- 순서는 VS 먼저. VS가 안 들어가면 Wither를 안 누름 → 심볼 5를 지킴
+- **Wither 한 번 = 소환 하나.** 소환이 끝나면 `var__wither_used` 1 → 둘째는 마나 65나 다음 Wither
+- 시전 끊김, 긴급 끊기 → 마나 미소모, Wither 마나도 남음 → 다음 패스 재시도
+- 소환 뒤 `Insufficient mana` → 다른 비공격 주문(Greater Heal 등)이 Wither 마나를 먼저 쓴 것으로 보고 그 Wither는 끝. 문장은 RunUO 기준, 확인되지 않았다
+- 자해 10: 잃은 HP 25(`config__wither_max_loss`) 이상이면 안 누름. 이 루프의 `emergency_hits` 35에 닿아 소환이 끊기지 않게
+- **정지 범위**: Blood Oath, Corpse Skin, Evil Omen, Poison Strike, Vampiric Embrace
+  - VS와 Wither 중 하나라도 쿨이거나 남이 켠 것이면 정지 안 함 → 정지는 길어야 30초
+  - 정지는 걷기와 커서 가드보다 앞에서 판정 → 한 걸음에 은행을 내주지 않음
+- 정지의 손해와 이득: Blood Oath는 남은 소환수 하나에 +30%, 전체 약 +9.5%. 빠진 소환수는 전체 딜의 약 31%와 탱킹
+- 교체는 마나 65 이상일 때만 → 자발적인 교체에는 Wither를 안 씀
 
 #### 무엇을 뽑나
 
@@ -989,7 +1021,7 @@ PK를 만나도 조합 유지, 사냥하던 그대로 싸움(06.D절).
 - 체력바로는 판단 불가: 줄어드는 것은 최대 체력 → 현재와 최대의 비율인 체력바는 가득 찬 채
 - → 나온 시간으로 판단. 칸마다 시계(`timer__summon_age_first`, `timer__summon_age_second`), 그 칸의 시전을 시작할 때 0
 - 레시피 값 `summon_refresh` 600000, 10분. 사용자 결정
-- 조건: 기억한 적 없음, 둘 다 나와 있음, VS를 곧 쓸 수 있음. 놓으면 바로 채울 수 있을 때만
+- 조건: 기억한 적 없음, 둘 다 나와 있음, 마나 65 이상, VS를 곧 쓸 수 있음. 놓으면 바로 채울 수 있을 때만
   - VS 쿨이 끝났거나, 우리 창이 15초(`interval__summon_release_by`) 전
   - 15초: 놓은 뒤 다음 패스의 시전이 23초 마감 전에 시작하도록
 - 동작: 시계가 넘은 칸 하나를 `say "wichy release"`처럼 이름으로 놓음 → `followers` 감소 → 재소환이 채움
@@ -1019,7 +1051,10 @@ PK를 만나도 조합 유지, 사냥하던 그대로 싸움(06.D절).
 | 소환수가 빠지면 `[ vengeful spirit ]`, 소환 주문어, 5초 안에 `[ name, wichy ]` | 정상 |
 | `[ vengeful spirit ]`가 안 뜸 | 마나 50 미만, 시약 없음(Bloodmoss, Fire나 Daemon이면 ash), 심볼 0, 워모드, 걷는 중, 은신 |
 | Journal `Summon: Vengeful Spirit did not answer.` | 응답도 버프도 없음. 다음 누르기는 30초 뒤. 반복되면 Razor 핫키 이름 `Vengeful Spirit` 확인 |
-| 첫째만 나오고 둘째는 다음 VS에서 | 버프 이름 불일치로 창을 못 읽음. 첫째는 응답 줄만으로 나감 |
+| 첫째만 나오고 둘째는 다음 VS에서 | 마나 65 미만이면 정상(Wither 한 번 = 소환 하나). 65 이상인데 그러면 버프 이름 불일치로 창을 못 읽음 |
+| 소환수가 빠졌는데 Blood Oath도 안 나감 | Wither 경로가 심볼 6을 모으는 중. 길어야 30초 |
+| Journal `Summon: Wither did not answer.` | 응답도 버프도 없음. Razor 핫키 이름 `Wither` 확인 |
+| 마나 20\~64에서 소환 주문어 뒤 마나 부족 문장 | 다른 주문이 Wither 마나를 먼저 씀. 다음은 마나 65나 다음 Wither |
 | Play 때 `[ summon, wrong ]` | `summon_first`가 4. Air를 둘째로 |
 | 같은 종류가 둘 나옴 | 첫째 종류를 바디로 못 찾음. 그 소환수의 `>info`로 바디와 Notoriety 확인 |
 | 언데드 대신 맨 엘리멘탈 | 시전이 끝날 때 VS가 꺼짐. 마감 23초를 줄임 |
@@ -1171,7 +1206,7 @@ flowchart TD
 | 네크로 핫바 | 루프 안의 `UNHOLY SYMBOLS`(`necro/symbols`)가 심볼 수를 못 읽은 첫 패스에 오픈. 타이머가 만료 상태로 시작 |
 | 시계 | 하우스키핑, 핫바, 음식, 스탯 포션, 악기 확인, 피스 확인, 시약 리프레시 시계를 만료 상태로 → 첫 패스가 모두 확인 |
 | 소환수 이름 | 시작마다 `list__summon_kinds` 재작성, 이미 이름 붙인 serial을 담은 `list__named_summons`는 비움(`necro/summon-names` setup) |
-| 재소환 | VS 시계는 만료 상태 → 첫 패스부터 누를 수 있음. 교체 시계 둘은 0 → 첫 교체는 Play 뒤 10분(`necro/resummon`, 04.I절) |
+| 재소환 | VS와 Wither 시계는 만료 상태 → 첫 패스부터 누를 수 있음. 교체 시계 둘은 0 → 첫 교체는 Play 뒤 10분(`necro/resummon`, 04.I절) |
 
 ### <a id="05.C"></a>05.C 자원
 
@@ -1181,7 +1216,7 @@ flowchart TD
 | `cooldown "disco"` | Disco | 혼자 쓰는 슬롯 5초 |
 | `cooldown "peace/provo"` | Peace와 Provo | **공유 슬롯 10초.** 합친 항목 하나 |
 | `cooldown "song"` | 세 곡 전체 | **별도 계열. `cooldown "music"`이 아님.** 세 곡 공유 |
-| Unholy Symbol | Blood Oath (4), Corpse Skin (2), Evil Omen (2), Poison Strike (1), Vampiric Embrace (3), Vengeful Spirit (1) | 5초에 1개, 최대 Effective Necro / 10 = **10** |
+| Unholy Symbol | Blood Oath (4), Corpse Skin (2), Evil Omen (2), Poison Strike (1), Vampiric Embrace (3), Vengeful Spirit (1), Wither (5) | 5초에 1개, 최대 Effective Necro / 10 = **10** |
 | 마나 | 버프, 오프닝, 프록 코어, 필러, 소환(50) | 메디가 없어 가장 빡빡함 |
 
 **자원은 따로지만 행동 슬롯은 하나.** 교전 블록 하나의 모양(프록 코어의 Harm).
@@ -1633,6 +1668,7 @@ Tracking 규칙은 [PvP](../game/pvp.md#10) 10절, Hunting 판정의 5초 스킬
 | 시약과 마나는 대상을 찍을 때 검사와 소모. 시약 부족 줄은 캐릭터 이름으로(2026-09-28) | 03.B절 |
 | Poison Strike의 질병 없음 문장, Vampiric Embrace의 시체 없음 문장(2026-09-28) | 03.D절 |
 | Rag Witch 바디 740. Vengeful Spirit 즉시 켜짐과 버프 이름, 소환에 커서 없음, release 즉시 사라짐, 팔로워 초과 문장. 인게임 확인됨 2026-10-18 | 03.C, 04.G절 |
+| 소환이 Wither 마나로 시전됨. Wither의 응답과 버프는 VS와 같은 모양. 인게임 확인됨 2026-10-18 | 03.D절 |
 
 **남은 측정**
 

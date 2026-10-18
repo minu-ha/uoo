@@ -839,6 +839,10 @@ order: 10
 - 레시피에서 잠시 `summon_refresh`를 60000으로 → 이동 중 1분 뒤 `wichy release`, 다시 소환. 확인 뒤 600000으로
 - Bloodmoss를 빼 둠 → VS 심볼을 쓰지 않음
 - 손으로 Alt+1 → 루프는 그 버프가 꺼질 때까지 소환하지 않음
+- 교전 중 마나 20\~64에서 소환수가 죽음 → 심볼 6까지 Blood Oath 등 정지 → `[ vengeful spirit ]`, `[ wither ]`, 소환이 한 패스에. Journal `Summon: cast kind 2, wither state 2.`
+- 둘 다 죽고 마나가 낮음 → 첫째만 Wither로, 둘째는 마나 65나 30초 뒤 다음 Wither
+- Wither가 안 나가면 Razor 핫키 이름 `Wither` 확인
+- Wither 마나가 다른 주문에 먼저 쓰였을 때의 마나 부족 문장 기록. 루프는 RunUO의 `Insufficient mana`로 읽음
 - 맨 엘리멘탈이 한 번이라도 나오면 기록. 시작 마감 23초가 길다는 뜻
 
 #### 교전과 이동

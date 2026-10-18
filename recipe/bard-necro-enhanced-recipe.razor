@@ -233,7 +233,8 @@
 #   summon_refresh (default 0)
 #      How long, in ms, a summon stays out before it is released and cast again, while
 #      no enemy is remembered. 0 turns it off. A skeletal fiend has no name to release it
-#      by, so it stays.
+#      by, so it stays. A release waits for config__summon_mana, so Wither is never spent
+#      on one.
 #      > Ten minutes leaves about 55% of max health: 1% every 10 seconds, compounding.
 # ----------------------------------------------------------------------------------------
 @setvar! config__summon_first 2
