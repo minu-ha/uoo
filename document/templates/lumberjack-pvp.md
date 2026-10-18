@@ -541,7 +541,7 @@ Hatchet은 [공식 무기 표](https://wiki.uooutlands.com/Template:SwordsWeapon
 - **`config__use_potions`**: 1. 독, 피해, 스태미나에 Cure, Heal, Refresh 포션. 리콜 준비용 Strength와 Agility 포션과 그 옵션은 삭제
 - **`pack/lumber` 블록**(v17까지 `config__pack_lumber`): 레시피의 `#@ use pack/lumber`. Logs 가공과 Boards 루팅 백 이동을 한 묶음으로.
   빼고 조립하면 정리 없음. `loadout`에서 고른 `global__my_loot_bag` 재사용, 없거나 백팩에 없으면 시작 시 루팅 백 선택.
-  2026-10-19까지는 보급품과 같은 파우치(`global__my_looting_pouch`). 나눈 이유와 배치는 [loadout](https://github.com/minu-ha/uoo/blob/master/script/restock/loadout.razor)의 Supply pouch and loot bag 구간
+  2026-10-19까지는 보급품과 같은 파우치(`global__my_looting_pouch`). 나눈 이유는 [pack/pouches](https://github.com/minu-ha/uoo/blob/master/module/pack/pouches.razor), 배치는 [pack/sorting](https://github.com/minu-ha/uoo/blob/master/module/pack/sorting.razor)
   Logs 7133, Boards 7127은 [Item list](../game/item-list.md#15) 15절 값, 색 구분 없음.
   가공은 [공식 Lumberjacking 문서](https://wiki.uooutlands.com/Lumberjacking)의 Logs 더블클릭 경로
 

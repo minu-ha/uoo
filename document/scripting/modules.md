@@ -107,12 +107,15 @@ order: 30
 - base도 첫 블록. 공용 설정, 기본 대기, PvP 정지, 시작 4줄은 그대로 쓰고 `loop`와 `end`만 빠짐
 - 블록은 `# @ setup`만. `# @ loop`가 있는 블록, `when`과 `every` 그룹은 조립 정지
 - 같은 블록을 여러 루틴이 함께 씀(정리, aspect 등) → 루틴끼리 코드를 복사하거나 스크립트를 넘겨 이어 달리지 않음
+- 새 루틴 블록: `--new-module`의 틀은 루프용 → 만든 뒤 `# @ loop` 상자를 `# @ setup`으로 바꾸고 코드는 0칸 들여쓰기
+- 루틴과 루프는 Razor 세션 변수를 같이 씀. 루틴이 base 설정을 기본값으로 되돌려도 루프는 Play할 때 자기 값을 다시 씀.
+  루틴 사이에 남겨야 할 값(`gear/dress`의 부위, `gear/aspect`의 aspect)은 `if not varexist`로 감싼 상태
 
 **블록 하나 = 상자 하나.** 상자 안에 `# @ use` 줄과 설명, 상자 밑에 그 블록에서 바꾸는 설정의 `@setvar!` 줄.
 바꾸는 설정이 없는 블록도 상자로 → 모든 블록이 같은 자리에 같은 것을 보여 줌.
 
 - **상자 안은 조립기가 씀**
-  - 모듈의 한 줄 요약. 루프 앞에서 한 번만 도는 블록이면 `Runs once, before the loop.`
+  - 모듈의 한 줄 요약. 루프 앞에서 한 번만 도는 블록이면 `Runs once, before the loop.` 루틴에서는 안 붙음
   - 이 루프가 바꾸는 설정마다 이름과 기본값, 모듈의 설명, 그 설정을 함께 읽는 다른 블록
   - → 모듈 파일을 열지 않아도 블록이 하는 일이 보임
 - **사람이 쓰는 것은 세 가지**: `# @ use` 줄, `>` 줄, `@setvar!` 줄
@@ -135,7 +138,7 @@ order: 30
 # ----------------------------------------------------------------------------------------
 # @ use base
 #
-#   The frame of every loop. Every recipe lists it first.
+#   The frame of every loop and routine. Every recipe lists it first.
 #
 #   warmode_is_manual (default 0)
 #      Whose warmode it is.
@@ -193,7 +196,8 @@ order: 30
 - 그룹 안 블록은 단계마다 네 칸 들여쓰기, 배너 줄은 줄어든 폭에 맞춤. 그룹 중첩 가능
 - 그룹이 막는 것은 블록의 loop 부분뿐. 선언과 setup은 늘 나감. base의 `end`는 그룹 밖 맨 끝
 - 조건과 `every`의 이름도 블록 코드처럼 주인 모듈 탐색. `interval__housekeeping`은 base 소유
-- **회복 블록은 모든 레시피에서 한 그룹.** `recovery/cure`, `heal`, `bandage`, `light-heal`은 `# @ when paralyzed or poisoned or diffhits > 0` 안
+- **회복 블록은 모든 루프 레시피에서 한 그룹.** `recovery/cure`, `heal`, `bandage`, `light-heal`은 `# @ when paralyzed or poisoned or diffhits > 0` 안.
+  루틴은 그룹이 없음 → `recovery/heal-first`는 그룹 밖
   - 이 조건 = 네 블록의 동작 조건 합(붕대는 HP가 1만 줄어도 시작) → 레시피가 기준값을 어떻게 바꾸든 맞음
   - 다치지 않은 패스는 블록 수만큼이 아닌 한 줄만 밟음. `recovery/refresh`는 기력 기준 → 그룹 밖
 - 블록 안 시계와 그룹 시계는 겹침. 예: `every interval__housekeeping` 안의 `buff/food`는 5초마다 자기 60초 타이머 확인

@@ -36,7 +36,7 @@ order: 10
 | [12](#12) | tamer-mage-enhanced 인게임 확인 |
 | [13](#13) | recycle의 루프 복귀 확인 |
 | [14](#14) | bard-necro-enhanced 인게임 확인 |
-| [15](#15) | loadout, dress, aspect 인게임 확인 |
+| [15](#15) | loadout, regear, aspect 인게임 확인 |
 
 ::part[설정과 알림]
 
@@ -99,7 +99,7 @@ order: 10
 
 | 규칙 | 파일 | 정할 것 |
 | --- | --- | --- |
-| 헤더는 설명 한 줄과 `Needs:`([Conventions](../scripting/conventions.md#02.C) 02.C절) | archive의 bard-throwing, bard-mace: 배너 뒤 "Naming convention" 블록. bard-necro-enhanced: 배너 없이 설명 한 줄, 설계 문서 안내, Needs, 긴 메모. loadout: 헤더 없이 `clearall`로 시작 | 긴 루프의 헤더 모양 |
+| 헤더는 설명 한 줄과 `Needs:`([Conventions](../scripting/conventions.md#02.C) 02.C절) | archive의 bard-throwing, bard-mace: 배너 뒤 "Naming convention" 블록. bard-necro-enhanced: 배너 없이 설명 한 줄, 설계 문서 안내, Needs, 긴 메모 | 긴 루프의 헤더 모양 |
 | `cooldown` 명령은 기존 파일이 그 스타일일 때만([Conventions](../scripting/conventions.md#04) 04절) | archive의 bard-throwing이 `cooldown "ability"`로 게이트 | 규칙이 낡았나, 바 표시를 위한 의도인가 |
 | 같은 성격 3개 이상이면 폴더([Conventions](../scripting/conventions.md#01.C) 01.C절) | `gather/`, `restock/`은 2개씩 | 규칙 수정, 또는 폴더 병합 |
 | 시작 4줄([Conventions](../scripting/conventions.md#02.D) 02.D절) | loadout, claim-loot, share-loot: `clearall`, `clearsysmsg`, `cleardragdrop`, `clearignore` 순. archive의 bard-throwing, bard-mace: `clearsysmsg`, `clearall`, `clearignore`, `cleardragdrop` 순 | 순서가 중요한가 |

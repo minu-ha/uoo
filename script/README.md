@@ -2,8 +2,8 @@
 
 Grouped by what a script does. Folders say *what*, file names say *which*.
 
-Every `combat/` and `gather/` loop is generated: edit `module/` and `recipe/` at the repo root and run
-`node util/build-scripts.mjs`. The design is [document/scripting/modules.md](../document/scripting/modules.md).
+Every `combat/` and `gather/` loop is generated, and so are the routines `restock/loadout` and `hotkey/regear`:
+edit `module/` and `recipe/` at the repo root and run `node util/build-scripts.mjs`. The design is [document/scripting/modules.md](../document/scripting/modules.md).
 
 ```
 combat/    hunting loops per template, shared PvP self sustain
@@ -98,7 +98,7 @@ It is a list because a variable reads a word back as 4294967295 (document/script
 It lasts until the client closes, and with nothing registered recycle just ends. `combat/pvp` does not register,
 so recycling during a fight returns to the farming loop.
 
-## Loadout
+## Loadout and regear
 
 [restock/loadout.razor](restock/loadout.razor) is a routine built from `recipe/loadout-recipe.razor`: edit the modules
 and the recipe, then `pnpm build`. Its choices are settings of its blocks, listed by
@@ -107,7 +107,13 @@ and the recipe, then `pnpm build`. Its choices are settings of its blocks, liste
 - `config__use_sewing_kit_and_id_wand` (`restock/tools`) controls both tools together. `1` keeps one Sewing Kit and one
   ID Wand: duplicates go back to the supply box, and missing tools are fetched. `0` skips both. `pack/sorting` still
   arranges tools already in the backpack.
+- `config__carry_magic_instrument` (`restock/instrument`): `1` keeps exactly one magic instrument, `0` leaves
+  instruments alone.
 - `config__use_runebook_refill` (`restock/runebook`): `0` skips refilling runebooks, and the scroll box is not asked for.
+
+[hotkey/regear.razor](hotkey/regear.razor) (Alt+0), built from `recipe/regear-recipe.razor`, is for after a death:
+it heals to full, puts back on the suit loadout recorded, sorts the backpack and turns the aspects back on.
+A supply pouch or loot bag that did not come back from the corpse is reported, not asked for.
 
 ## Personal values never go into a script
 

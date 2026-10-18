@@ -94,7 +94,7 @@ order: 10
 
 ### <a id="02.A"></a>02.A 기준 파일
 
-- 사냥 루프와 채집 루프는 `module/`, `recipe/`로 조립([Modules](modules.md)). 결과물은 직접 수정 금지, 모듈과 레시피를 수정
+- 사냥 루프, 채집 루프, loadout 같은 루틴은 `module/`, `recipe/`로 조립([Modules](modules.md)). 결과물은 직접 수정 금지, 모듈과 레시피를 수정
 - 모양의 기준 파일: `script/gather/skinning-enhanced.razor`, `script/restock/loadout.razor`
 - 새 코드는 이 문서 규칙. 아직 옮기지 못한 파일은 그 파일의 스타일 유지
 
