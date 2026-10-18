@@ -74,8 +74,12 @@ Razor CE에 없거나 CE보다 넓어진 것. 존재 여부만 기록, 인자 �
 - **Outlands가 더한 페이퍼돌 부위는 `findlayer` 이름이 없음 → 레이어로 훑는 스크립트는 못 봄**
 - Razor의 Arm/Dress 목록은 담음. Add Current로 gold rim glasses(Eyewear), gravediggers lantern, tidal tomb travel pack이 목록에 들어감. 인게임 확인됨 2026-10-18
   - 목록은 아이템 serial을 담음 → 장비를 바꾸면 Razor 화면에서 다시 담아야 함. 목록을 고치는 스크립트 명령은 없음([Razor CE 명령](https://www.razorce.com/guide/commands/))
-  - 실행은 스크립트로 가능: CE 문법 `dress ('name of dress list')`, 또는 Hot Keys의 `Dress: <목록>`을 `hotkey`로. 이 포크에서는 확인되지 않았다
-  - 그 목록의 Dress가 이 부위 아이템을 실제로 다시 입히는지도 확인되지 않았다
+  - 실행은 스크립트로: CE 문법 `dress ('name of dress list')`. 목록이 없는 프로필에서는 오류 없이 지나감(사용자 확인)
+  - 그 목록의 Dress가 이 부위 아이템을 실제로 다시 입히는지는 확인되지 않았다
+- **이 저장소의 방식**: 모든 프로필에 Arm/Dress 목록 `cosmetic`. 이름 없는 부위의 아이템만 손으로 담음
+  - `hotkey/dress`가 레이어 25개를 훑은 뒤 마지막에 `dress 'cosmetic'`
+  - 일반 부위를 담지 않는 이유: 장비를 바꾼 뒤 목록에 남은 옛 장비가 백팩에 있으면, 켜져 있는 Auto-move conflicts가 새 장비를 벗기고 옛것을 입힘
+  - 2026-10-18 `summoner`의 목록 `nomeehej` 16개 중 이름 없는 부위 셋만 남겨 `cosmetic`으로: tidal tomb travel pack with bedroll(Back), gold rim glasses(Eyewear), gravediggers lantern(2H Secondary). `default`는 빈 목록. 부위는 Drip 데이터 기준
 
 [Outlands Drip](https://outlandsdrip.com/)의 부위와 대응. 부위 이름은 2026-10-18 사이트 번들에서 읽음.
 

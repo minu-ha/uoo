@@ -13,8 +13,9 @@
 # findlayer takes 27 layers and every one that holds equipment is here, 25: hair and
 # facialhair are not equipment. The paperdoll slots Outlands added on top, eyewear,
 # backworn, outer cloak, necklace, the cosmetic armor and the rest, have no findlayer
-# name, so this sweep cannot see them. A Razor Arm/Dress list can hold them. The list and
-# the slots: document/scripting/razor.md part 2.
+# name, so this sweep cannot see them. The COSMETIC section at the end puts them on from a
+# Razor Arm/Dress list instead. The layers and the slots: document/scripting/razor.md
+# part 2.
 
 
 # ========================================================================================
@@ -604,5 +605,16 @@ else
         endif
     endif
 endif
+
+
+# ========================================================================================
+# COSMETIC
+# ========================================================================================
+# The slots findlayer has no name for, eyewear, back, the two-handed secondary and the
+# rest, come from the Razor Arm/Dress list named cosmetic that every profile keeps. Its
+# items are added by hand in Razor, and it holds those slots only: the sweep above covers
+# the rest, and an older piece left in the list would swap back over a newer one. A
+# profile without the list passes this line with no error.
+dress 'cosmetic'
 
 overhead "[ dress, done ]" 290
