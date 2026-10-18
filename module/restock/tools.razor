@@ -1,0 +1,111 @@
+# ----------------------------------------------------------------------------------------
+# Carries exactly one sewing kit and one item identification wand from the supply box.
+# ----------------------------------------------------------------------------------------
+
+
+# ----------------------------------------------------------------------------------------
+# @ config
+#
+#   config__use_sewing_kit_and_id_wand
+#      1 keeps one Sewing Kit and one ID Wand from the supply box. 0 skips both tools
+#      here, including duplicate returns. pack/sorting still arranges tools already in the
+#      backpack.
+# ----------------------------------------------------------------------------------------
+@setvar! config__use_sewing_kit_and_id_wand 1
+
+
+# ----------------------------------------------------------------------------------------
+# @ state
+#
+#   var__kept_sewing_kit, var__kept_identification_wand
+#      Scratch: 1 once one is carried.
+# ----------------------------------------------------------------------------------------
+@setvar! var__kept_sewing_kit 0
+@setvar! var__kept_identification_wand 0
+
+
+# ----------------------------------------------------------------------------------------
+# @ setup
+# ----------------------------------------------------------------------------------------
+# 3997 sewing kit, 20496 item identification wand. Both live in the supply box.
+#
+# Exactly one of each is carried. The backpack is walked first: the first one found stays,
+# every further copy goes back to the supply box. Only if none was carried is one fetched.
+# Runs kept stacking duplicates before, because the old check stopped at the first hit and
+# never looked at what else was already in the bag.
+#
+# Extras go to the supply box rather than the shelf because the shelf restock already ran,
+# back with the deposits. Anything left in the bag from here on stays in the bag, so this
+# pass has to put it somewhere itself.
+#
+# This also replaced the Restock 10 agent, which only carried the sewing kit, so the
+# identification wand was checked for and then never actually fetched.
+if config__use_sewing_kit_and_id_wand = 1 and find global__my_supply_box ground -1 -1 config__reach
+    @setvar! var__kept_sewing_kit 0
+
+    while findtype 3997 backpack as alias__found_sewing_kit
+        if var__kept_sewing_kit = 0
+            @setvar! var__kept_sewing_kit 1
+        else
+            lift alias__found_sewing_kit 1
+            wait wait__short
+            drop global__my_supply_box
+            wait wait__short
+            if config__chatty = 1
+                overhead "[ sewing kit, back ]" 290
+            endif
+        endif
+
+        @ignore alias__found_sewing_kit
+    endwhile
+
+    clearignore
+
+    if var__kept_sewing_kit = 0
+        if findtype 3997 global__my_supply_box as alias__found_sewing_kit
+            lift alias__found_sewing_kit 1
+            wait wait__short
+            drop backpack
+            wait wait__short
+            if config__chatty = 1
+                overhead "[ sewing kit, take ]" 290
+            endif
+        else
+            overhead "[ sewing kit, out ]" 254
+        endif
+    endif
+
+    @setvar! var__kept_identification_wand 0
+
+    while findtype 20496 backpack as alias__found_identification_wand
+        if var__kept_identification_wand = 0
+            @setvar! var__kept_identification_wand 1
+        else
+            lift alias__found_identification_wand 1
+            wait wait__short
+            drop global__my_supply_box
+            wait wait__short
+            if config__chatty = 1
+                overhead "[ id wand, back ]" 290
+            endif
+        endif
+
+        @ignore alias__found_identification_wand
+    endwhile
+
+    clearignore
+
+    if var__kept_identification_wand = 0
+        if findtype 20496 global__my_supply_box as alias__found_identification_wand
+            lift alias__found_identification_wand 1
+            wait wait__short
+            drop backpack
+            wait wait__short
+            if config__chatty = 1
+                overhead "[ id wand, take ]" 290
+            endif
+        else
+            overhead "[ id wand, out ]" 254
+        endif
+    endif
+endif

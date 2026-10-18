@@ -30,7 +30,7 @@ Ultima Online Outlands용 Razor 스크립트 저장소.
 - `config/`는 게임 종료 상태에서만 수정 → [Workflow](document/working/workflow.md#04.C) 04.C절
 - 다른 사람의 `config/`는 손대지 않음. `settings.json` 커밋 금지 → [Conventions](document/scripting/conventions.md#01.D) 01.D절
 - 스크립트에 serial 숫자 직접 사용 금지 → [Conventions](document/scripting/conventions.md#03.C) 03.C절
-- 생성된 루프(`script/combat/*`, `script/gather/*`) 직접 수정 금지. `module/`, `recipe/` 수정 후 `pnpm build` → [Modules](document/scripting/modules.md#07) 07절
+- 조립한 스크립트(머리에 `Generated from` 줄. `script/combat/*`, `script/gather/*`, loadout 같은 루틴) 직접 수정 금지. `module/`, `recipe/` 수정 후 `pnpm build` → [Modules](document/scripting/modules.md#07) 07절
 - 같은 규칙이나 사실은 한 곳에만. 다른 곳은 링크 → [Writing](document/working/writing.md#08) 08절
 
 ## 2. 커밋

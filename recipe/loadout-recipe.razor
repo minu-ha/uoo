@@ -1,0 +1,84 @@
+# Recipe for script/restock/loadout.razor. Build it with: node util/build-scripts.mjs
+# Every setting of this routine: node util/build-scripts.mjs --settings recipe/loadout-recipe.razor
+# @ output script/restock/loadout.razor
+# @ once
+
+
+# ========================================================================================
+# @ header
+# ========================================================================================
+
+# Loadout: the house run before a trip. Deposits, repairs, restocks, sorts the backpack and records the suit.
+# Needs: the house containers within 2 tiles (each asked for once), a supply pouch and a loot bag in the backpack.
+# hotkey/regear puts the recorded suit and aspects back on after a death.
+
+
+# ========================================================================================
+# @ blocks
+#
+#   One box per block, in the order the blocks run, base first. The builder writes the box.
+#   Yours are the "> " lines in it (a note on the block, or under a setting the reason for
+#   its value) and the @setvar! lines under it. Write a new @setvar! line under any box, its
+#   reason as a "#" line right above it: the builder moves both to the box it belongs to.
+# ========================================================================================
+
+# ----------------------------------------------------------------------------------------
+# @ use base
+#
+#   The frame of every loop and routine. Every recipe lists it first.
+# ----------------------------------------------------------------------------------------
+
+# ----------------------------------------------------------------------------------------
+# @ use restock/house
+#
+#   Opens the house containers and runs the bank safe, stockpile, repair, recycler, shelf.
+# ----------------------------------------------------------------------------------------
+
+# ----------------------------------------------------------------------------------------
+# @ use restock/tools
+#
+#   Carries exactly one sewing kit and one item identification wand from the supply box.
+# ----------------------------------------------------------------------------------------
+
+# ----------------------------------------------------------------------------------------
+# @ use restock/instrument
+#
+#   Carries exactly one magic instrument, from the supply box when the backpack has none.
+# ----------------------------------------------------------------------------------------
+
+# ----------------------------------------------------------------------------------------
+# @ use pack/pouches
+#
+#   Picks the supply pouch and the loot bag, by itself when the backpack has one of each.
+# ----------------------------------------------------------------------------------------
+
+# ----------------------------------------------------------------------------------------
+# @ use pack/sorting
+#
+#   Stacks the satchels, pouch, bag and trapped pouches, then sorts the kit into them.
+# ----------------------------------------------------------------------------------------
+
+# ----------------------------------------------------------------------------------------
+# @ use gear/dress
+#
+#   Records what is worn on each equipment layer, and with dress_restore puts it back on.
+# ----------------------------------------------------------------------------------------
+
+# ----------------------------------------------------------------------------------------
+# @ use restock/runebook
+#
+#   Refills the runebooks and runetomes within reach with recall scrolls from the box.
+# ----------------------------------------------------------------------------------------
+
+# ----------------------------------------------------------------------------------------
+# @ use gear/aspect
+#
+#   Remembers the aspects on the held item and the armor, and turns a lost one back on.
+# ----------------------------------------------------------------------------------------
+
+
+# ========================================================================================
+# @ setup
+# ========================================================================================
+
+overhead "[ loadout, done ]" 290

@@ -33,7 +33,7 @@ order: 10
 | 폴더 | 내용 |
 | --- | --- |
 | `script/` | Razor 스크립트. 모두 공용 |
-| `module/`, `recipe/` | 한 벌만 둔 루프 블록, 루프마다 레시피 하나. `util/build-scripts.mjs`가 `script/combat/*`, `script/gather/*`로 조립([Modules](modules.md)) |
+| `module/`, `recipe/` | 한 벌만 둔 블록, 루프와 루틴마다 레시피 하나. `util/build-scripts.mjs`가 `script/combat/*`, `script/gather/*`와 loadout 같은 루틴으로 조립([Modules](modules.md)) |
 | `config/` | 사람마다 클라이언트 설정 원본 하나(`config/<이름>/`). 링크 방식과 파일별 설명은 [config/README.md](https://github.com/minu-ha/uoo/blob/master/config/README.md) |
 | `document/` | 설계 문서. 묶음마다 폴더 하나(`working/`, `scripting/`, `game/`, `templates/`, `questions/`). for-humanity 사이트로 읽음(`pnpm docs:dev`). 문서 목록은 [문서 홈](../README.md), 쓰는 법은 [Writing](../working/writing.md) |
 | `language/` | README 번역본. 규칙은 [Writing](../working/writing.md#07) 07절 |

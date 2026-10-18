@@ -1,0 +1,369 @@
+# ----------------------------------------------------------------------------------------
+# Opens the house containers and runs the bank safe, stockpile, repair, recycler, shelf.
+# The containers are kept in your Razor profile, asked for when one no longer resolves
+# within reach. Each container inside the furniture ends up as a var__has_ flag, so missing
+# gear skips its own part instead of stopping the run.
+#
+# @ hotkeys Cancel Current Target
+# ----------------------------------------------------------------------------------------
+
+
+# ----------------------------------------------------------------------------------------
+# @ config
+#
+#   config__use_furniture_container
+#      Where the stockpile, safe, bench, shelf and recycler stand.
+#        0  on the floor
+#        1  inside one furniture container
+#      Either way they must be within reach.
+#
+#   config__reach
+#      Everything a hand can touch is 2 tiles away at most, so that is the range every
+#      check uses.
+#
+#   config__recycle_unidentified_only
+#      What the magic item recycler takes.
+#        0  everything in the backpack. It also swallows the magic instrument and any
+#           identified gear you came home with
+#        1  unidentified items only: the loot you have not looked at yet, your kit stays
+# ----------------------------------------------------------------------------------------
+@setvar! config__use_furniture_container 1
+@setvar! config__reach 2
+@setvar! config__recycle_unidentified_only 1
+
+
+# ----------------------------------------------------------------------------------------
+# @ wait
+#
+#   wait__long
+#      Lets a menu entry finish its work.
+#
+#   wait__target
+#      Only ever spent in full when no cursor turns up at all.
+#
+#   wait__repair
+#      The repair bench answers with a message, not a cursor, and this has to be long
+#      enough for it to answer before insysmsg is read. Too short and the check falls
+#      through to the else, which then waits on a "Repaired" that is never coming.
+# ----------------------------------------------------------------------------------------
+@setvar! wait__long 600
+@setvar! wait__target 1200
+@setvar! wait__repair 2000
+
+
+# ----------------------------------------------------------------------------------------
+# @ state
+#
+#   var__has_bank_deposit_safe, var__has_resource_stockpile, var__has_repair_bench,
+#   var__has_storage_shelf, var__has_magic_item_recycler
+#      1 when that container was found this run.
+# ----------------------------------------------------------------------------------------
+@setvar! var__has_bank_deposit_safe 0
+@setvar! var__has_resource_stockpile 0
+@setvar! var__has_repair_bench 0
+@setvar! var__has_storage_shelf 0
+@setvar! var__has_magic_item_recycler 0
+
+
+# ----------------------------------------------------------------------------------------
+# @ setup
+# ----------------------------------------------------------------------------------------
+# Personal containers you walk up to.
+# Personal containers, kept in your Razor profile so no serial sits in this shared file.
+#
+# varexist only reports that a name was declared, not that the serial still resolves, so a
+# container targeted by mistake would stay wrong forever. These sit on the floor, so find
+# can check them for real: a serial that no longer resolves within reach is dropped and
+# asked for again.
+#
+# Asked for before the dclick below, because you can target something you can see.
+if config__use_furniture_container = 1
+    if not varexist global__my_furniture_container or not find global__my_furniture_container ground -1 -1 config__reach
+        unsetvar global__my_furniture_container
+        overhead "[ furniture, pick ]" 255
+        setvar global__my_furniture_container
+    endif
+endif
+
+if not varexist global__my_supply_box or not find global__my_supply_box ground -1 -1 config__reach
+    unsetvar global__my_supply_box
+    overhead "[ supply box, pick ]" 255
+    setvar global__my_supply_box
+endif
+
+while queued
+    wait wait__short
+endwhile
+
+
+# A container has to be open before anything can be taken from or put into it.
+if config__use_furniture_container = 1
+    dclick global__my_furniture_container
+    wait wait__short
+endif
+
+dclick global__my_supply_box
+wait wait__short
+
+
+# Containers inside the furniture, and what each one does.
+# ========================================================================================
+# CONTAINERS INSIDE THE FURNITURE
+# ========================================================================================
+# Asked for only now, because with config__use_furniture_container on they cannot be
+# targeted until the furniture above has been opened.
+#
+# Each one ends up as a var__has_ flag so the work sections below do not have to repeat
+# the furniture branch. Missing gear then skips its own section instead of stopping the run.
+
+@setvar! var__has_bank_deposit_safe 0
+
+if config__use_furniture_container = 1
+    if not varexist global__my_bank_deposit_safe or not find global__my_bank_deposit_safe global__my_furniture_container
+        unsetvar global__my_bank_deposit_safe
+        overhead "[ bank safe, pick ]" 255
+        setvar global__my_bank_deposit_safe
+    endif
+
+    if find global__my_bank_deposit_safe global__my_furniture_container
+        @setvar! var__has_bank_deposit_safe 1
+    endif
+else
+    if not varexist global__my_bank_deposit_safe or not find global__my_bank_deposit_safe ground -1 -1 config__reach
+        unsetvar global__my_bank_deposit_safe
+        overhead "[ bank safe, pick ]" 255
+        setvar global__my_bank_deposit_safe
+    endif
+
+    if find global__my_bank_deposit_safe ground -1 -1 config__reach
+        @setvar! var__has_bank_deposit_safe 1
+    endif
+endif
+
+@setvar! var__has_resource_stockpile 0
+
+if config__use_furniture_container = 1
+    if not varexist global__my_resource_stockpile or not find global__my_resource_stockpile global__my_furniture_container
+        unsetvar global__my_resource_stockpile
+        overhead "[ stockpile, pick ]" 255
+        setvar global__my_resource_stockpile
+    endif
+
+    if find global__my_resource_stockpile global__my_furniture_container
+        @setvar! var__has_resource_stockpile 1
+    endif
+else
+    if not varexist global__my_resource_stockpile or not find global__my_resource_stockpile ground -1 -1 config__reach
+        unsetvar global__my_resource_stockpile
+        overhead "[ stockpile, pick ]" 255
+        setvar global__my_resource_stockpile
+    endif
+
+    if find global__my_resource_stockpile ground -1 -1 config__reach
+        @setvar! var__has_resource_stockpile 1
+    endif
+endif
+
+@setvar! var__has_repair_bench 0
+
+if config__use_furniture_container = 1
+    if not varexist global__my_repair_bench or not find global__my_repair_bench global__my_furniture_container
+        unsetvar global__my_repair_bench
+        overhead "[ repair bench, pick ]" 255
+        setvar global__my_repair_bench
+    endif
+
+    if find global__my_repair_bench global__my_furniture_container
+        @setvar! var__has_repair_bench 1
+    endif
+else
+    if not varexist global__my_repair_bench or not find global__my_repair_bench ground -1 -1 config__reach
+        unsetvar global__my_repair_bench
+        overhead "[ repair bench, pick ]" 255
+        setvar global__my_repair_bench
+    endif
+
+    if find global__my_repair_bench ground -1 -1 config__reach
+        @setvar! var__has_repair_bench 1
+    endif
+endif
+
+@setvar! var__has_storage_shelf 0
+
+if config__use_furniture_container = 1
+    if not varexist global__my_storage_shelf or not find global__my_storage_shelf global__my_furniture_container
+        unsetvar global__my_storage_shelf
+        overhead "[ shelf, pick ]" 255
+        setvar global__my_storage_shelf
+    endif
+
+    if find global__my_storage_shelf global__my_furniture_container
+        @setvar! var__has_storage_shelf 1
+    endif
+else
+    if not varexist global__my_storage_shelf or not find global__my_storage_shelf ground -1 -1 config__reach
+        unsetvar global__my_storage_shelf
+        overhead "[ shelf, pick ]" 255
+        setvar global__my_storage_shelf
+    endif
+
+    if find global__my_storage_shelf ground -1 -1 config__reach
+        @setvar! var__has_storage_shelf 1
+    endif
+endif
+
+@setvar! var__has_magic_item_recycler 0
+
+if config__use_furniture_container = 1
+    if not varexist global__my_magic_item_recycler or not find global__my_magic_item_recycler global__my_furniture_container
+        unsetvar global__my_magic_item_recycler
+        overhead "[ recycler, pick ]" 255
+        setvar global__my_magic_item_recycler
+    endif
+
+    if find global__my_magic_item_recycler global__my_furniture_container
+        @setvar! var__has_magic_item_recycler 1
+    endif
+else
+    if not varexist global__my_magic_item_recycler or not find global__my_magic_item_recycler ground -1 -1 config__reach
+        unsetvar global__my_magic_item_recycler
+        overhead "[ recycler, pick ]" 255
+        setvar global__my_magic_item_recycler
+    endif
+
+    if find global__my_magic_item_recycler ground -1 -1 config__reach
+        @setvar! var__has_magic_item_recycler 1
+    endif
+endif
+
+# ========================================================================================
+# Bank Deposit safe
+# ========================================================================================
+# Every one of these blocks waits with waitfortarget, never with a plain wait. A fixed sleep
+# is not long enough for the server to answer: the cursor turns up after the block has moved
+# on, and then the next block's waitfortarget picks up that stale cursor instead of its own.
+# That is what kept breaking the storage shelf restock.
+#
+# One rule, applied everywhere: a block clears up after itself. It answers its own cursor and
+# closes its own gump before it ends, so the block after it does not have to defend against
+# anything. That is why none of these start with a cancel or a gumpclose.
+if var__has_bank_deposit_safe = 1 and findtype 3821 backpack
+    overhead "[ bank safe, on ]" 290
+    menu global__my_bank_deposit_safe 0
+    waitfortarget wait__target
+
+    if targetexists
+        target backpack
+    endif
+
+    if targetexists
+        hotkey "Cancel Current Target"
+    endif
+
+    wait wait__short
+endif
+
+# ========================================================================================
+# Resource stockpile
+# ========================================================================================
+# This is the block that was leaking a cursor. Its prompt,
+#   "Where do you wish to restock this from? You may target yourself, a container, ..."
+# was still up when the storage shelf asked its own question, so the shelf's answer went to
+# this one and the shelf restock never ran. target self was already here, but it does not
+# always take, and the block had nothing to clean up after itself.
+if var__has_resource_stockpile = 1
+    overhead "[ stockpile, on ]" 290
+    menu global__my_resource_stockpile 0
+    waitfortarget wait__target
+
+    if targetexists
+        target self
+    endif
+
+    if targetexists
+        hotkey "Cancel Current Target"
+    endif
+
+    wait wait__short
+endif
+
+# ========================================================================================
+# Repair bench
+# ========================================================================================
+if var__has_repair_bench = 1
+    dclick global__my_repair_bench
+    wait wait__repair
+
+    if insysmsg "You do not have any items equipped or in your backpack in need of repairs."
+        overhead "[ repair bench, skip ]" 290
+    else
+        overhead "[ repair bench, on ]" 290
+        waitforsysmsg "Repaired"
+    endif
+endif
+
+# ========================================================================================
+# Magic item recycler
+# ========================================================================================
+# The recycler takes no target. It acts on the backpack straight away.
+#
+# If this prompts for a target, the variable is pointing at the Magic Item Vault instead of
+# the recycler. Run  unsetvar global__my_magic_item_recycler  and rerun to retarget it.
+
+if var__has_magic_item_recycler = 1
+    overhead "[ recycler, on ]" 290
+
+    if config__recycle_unidentified_only = 1
+        menu global__my_magic_item_recycler 1
+    else
+        menu global__my_magic_item_recycler 0
+    endif
+
+    wait wait__short
+endif
+
+# ========================================================================================
+# Storage shelf restock
+# ========================================================================================
+# Restock puts things in, Resupply takes things out. Two menu entries, 0 and 1, and both are
+# needed: crafted gear and anything looted goes into the shelf before the loadout comes back
+# out. Restock belongs here with the deposits, Resupply runs later with the withdrawals.
+#
+# Restock asks what to take from and self is the answer. The two targetexists checks are not
+# the same test: the first answers the prompt, the second catches an answer that was refused
+# and left the cursor up. Nothing cancels before the menu, because every block above already
+# clears up after itself.
+#
+# No waitforgump. Restock reports "N items were added" without the shelf gump necessarily
+# opening, so waiting on that gump ended the run right here. The gumpclose at the end covers
+# the times it does open.
+if var__has_storage_shelf = 1
+    overhead "[ shelf, restock ]" 290
+    menu global__my_storage_shelf 0
+    waitfortarget wait__target
+
+    if targetexists
+        target self
+    endif
+
+    if targetexists
+        hotkey "Cancel Current Target"
+    endif
+
+    wait wait__long
+    gumpclose
+endif
+
+# ========================================================================================
+# Storage shelf resupply
+# ========================================================================================
+# The withdrawal half, and the short one: resupply raises no cursor and answers at once.
+# It used to wait on a target anyway, on the theory that the wait kept the restock above from
+# colliding with it. That was wrong. The run was dying on an undeclared wait__long, and the
+# context menu left on screen was the symptom, not the cause.
+if var__has_storage_shelf = 1
+    overhead "[ shelf, resupply ]" 290
+    menu global__my_storage_shelf 1
+    wait wait__short
+    gumpclose
+endif

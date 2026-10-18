@@ -98,11 +98,16 @@ It is a list because a variable reads a word back as 4294967295 (document/script
 It lasts until the client closes, and with nothing registered recycle just ends. `combat/pvp` does not register,
 so recycling during a fight returns to the farming loop.
 
-## Loadout tools
+## Loadout
 
-In [restock/loadout.razor](restock/loadout.razor), `config__use_sewing_kit_and_id_wand` controls both tools together.
-Set it to `1` to keep one Sewing Kit and one ID Wand: duplicates go back to the supply box, and missing tools are fetched.
-Set it to `0` to skip both duplicate returns and fetching. Sorting still arranges tools already in the backpack.
+[restock/loadout.razor](restock/loadout.razor) is a routine built from `recipe/loadout-recipe.razor`: edit the modules
+and the recipe, then `pnpm build`. Its choices are settings of its blocks, listed by
+`node util/build-scripts.mjs --settings recipe/loadout-recipe.razor`.
+
+- `config__use_sewing_kit_and_id_wand` (`restock/tools`) controls both tools together. `1` keeps one Sewing Kit and one
+  ID Wand: duplicates go back to the supply box, and missing tools are fetched. `0` skips both. `pack/sorting` still
+  arranges tools already in the backpack.
+- `config__use_runebook_refill` (`restock/runebook`): `0` skips refilling runebooks, and the scroll box is not asked for.
 
 ## Personal values never go into a script
 

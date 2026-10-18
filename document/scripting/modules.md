@@ -60,7 +60,7 @@ order: 30
 
 | 자리 | 맡는 것 | 모듈 |
 | --- | --- | --- |
-| `module/base.razor` | 모든 루프의 뼈대 | 공용 설정, 표준 대기, 경고 간격, 블록 사이 신호, 구조적 PvP 정지, 시작 4줄, 패스 끝 대기(06절) |
+| `module/base.razor` | 모든 루프와 루틴의 뼈대 | 공용 설정, 표준 대기, 경고 간격, 블록 사이 신호, 구조적 PvP 정지, 시작 4줄, 패스 끝 대기(06절) |
 | `module/recovery/` | 살아남기 | `cure`(마비면 파우치, 독이면 포션이나 에이전트), `heal`, `bandage`, `light-heal`, `refresh` |
 | `module/magery/` | 공격 주문과 시약 | `reagents`(모든 마법 블록이 읽는 시약 표시와 서클별 마나), `rotation`(Mana Drain과 Curse, Grimoire 프록 넷, 그 사이 Energy Bolt), `flamestrike`(aspect 발동용) |
 | `module/buff/` | 버프 아이콘 유지 | `spells`(Reactive Armor, Magic Reflection, 설정에 따라 Bless, Arch Protection, Spell Siphon용 자기 Magic Arrow), `potions`(Strength, Agility, Magic Resist), `food`(Food Satisfaction), `mushroom`(Magic Mushroom 먹기와 Create Food) |
@@ -69,11 +69,13 @@ order: 30
 | `module/tamer/` | 펫 스킬 | `herding`(목동 지팡이), `vet-kit`(나와 펫에게 수의사 키트) |
 | `module/fight/` | 근접 전투 보조 | `target`(기억한 적), `weapon-swap`(pvp 무기 슬롯), `axe`, `sword-codex`, `parry-codex`, `weapon-ability` |
 | `module/gather/` | 채집 | `lumberjacking`(Smart Harvest), `skinning`(칼질) |
-| `module/pack/` | 무게와 루트 파우치 | `gold-drop`, `leather`, `lumber`(Logs → Boards → 파우치), `scavenger`(스캐빈저 캐시 비우기) |
+| `module/pack/` | 무게, 보급 파우치와 루팅 백 | `gold-drop`, `leather`(가죽 → 루팅 백), `lumber`(Logs → Boards → 루팅 백), `scavenger`(스캐빈저 캐시 비우기), `pouches`(보급 파우치와 루팅 백 지정), `sorting`(백팩 왼쪽 아래 더미와 파우치 안 정리) |
 | `module/escape/` | PK 피하기 | `tracking`(헌트 필터 설정과 Hunting 점검), `recall`(자동 리콜 한 번) |
-| `recipe/<루프>-recipe.razor` | 루프 하나 | 헤더, 도는 순서의 블록과 그 밑의 설정 변경, 이 루프만의 준비(03절) |
+| `module/restock/` | 집에서 하는 준비 | `house`(집 컨테이너, 금고, 비축함, 수리대, 재활용기, 선반), `tools`(바느질 키트와 감정 지팡이), `instrument`(마법 악기 하나), `runebook`(룬북 채우기) |
+| `module/gear/` | 입은 장비 | `dress`(부위 기록, 사망 뒤 다시 입기), `aspect`(aspect 기억과 다시 켜기) |
+| `recipe/<루프>-recipe.razor` | 루프나 루틴 하나 | 헤더, 도는 순서의 블록과 그 밑의 설정 변경, 이 루프만의 준비(03절) |
 | `util/build-scripts.mjs` | 조립기 | 결과물 생성, 레시피 블록 칸 정리. `--settings`, `--new-module`, `--check`(05절) |
-| `script/combat/*.razor`, `script/gather/*.razor` | 결과물 | 직접 수정 금지 |
+| `script/combat/*.razor`, `script/gather/*.razor`, `script/restock/loadout.razor` | 결과물. 머리에 `Generated from` 줄 | 직접 수정 금지 |
 
 - 레시피 이름의 `-recipe`: 편집기 탭에서 결과물과 구분. 확장자 `.razor`: 하이라이팅
 - `module/`, `recipe/`는 저장소 루트. `script/`는 Razor Scripts 폴더에 링크 → 그 안에 두면 조각 파일이 스크립트 목록에 떠서 혼자 실행될 수 있음

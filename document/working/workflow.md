@@ -105,7 +105,7 @@ flowchart LR
 - **핫키 실행 → 클라이언트 재시작. 리로드로는 반영 불가.** 리로드는 기존 객체를 바꾸지 않고 새 객체를 목록에 덧붙임.
   프로필의 바인딩은 객체가 아닌 이름(`Play Script: hotkey\dress`) → 키를 누르면 같은 이름 중 맨 앞의 옛 객체 실행
 - **Scripts 탭 Play 버튼 실행 → 리로드로 충분.** Scripts 탭을 다시 열거나 우클릭 → Reload all scripts. 반복 시험은 이쪽
-- **조립한 루프**(`script/combat/*`, `script/gather/*`): 모듈과 레시피 수정 → `pnpm build` → 위와 같이 반영.
+- **조립한 스크립트**(머리에 `Generated from` 줄. 루프와 loadout 같은 루틴): 모듈과 레시피 수정 → `pnpm build` → 위와 같이 반영.
   Razor 편집기에서 고치면 다음 조립이 덮어씀([Modules](../scripting/modules.md#07) 07절)
 - **Razor 편집기에 붙여넣기 → 기존 객체 본문 교체, 핫키도 새 본문.** 단, 그때부터 Razor가 파일의 주인. 외부 편집기 수정과 섞지 않음(04.B절)
 

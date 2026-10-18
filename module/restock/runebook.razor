@@ -1,0 +1,110 @@
+# ----------------------------------------------------------------------------------------
+# Refills the runebooks and runetomes within reach with recall scrolls from the box.
+# The backpack first, then the tomes on the floor, then the books in the chests nearby.
+# Running out of scrolls ends this part only, so the blocks after it still run.
+# ----------------------------------------------------------------------------------------
+
+
+# ----------------------------------------------------------------------------------------
+# @ config
+#
+#   config__use_runebook_refill
+#      1 refills the runebooks. 0 skips this part, the scroll box is not even asked for.
+# ----------------------------------------------------------------------------------------
+@setvar! config__use_runebook_refill 1
+
+
+# ----------------------------------------------------------------------------------------
+# @ state
+#
+#   var__runebook_scrolls_out
+#      Scratch: 1 once the scroll box has no recall scroll left to take.
+# ----------------------------------------------------------------------------------------
+@setvar! var__runebook_scrolls_out 0
+
+
+# ----------------------------------------------------------------------------------------
+# @ setup
+# ----------------------------------------------------------------------------------------
+if config__use_runebook_refill = 1
+    # The scroll box is kept in your Razor profile like the containers of restock/house,
+    # and asked for again when it no longer resolves within reach.
+    if not varexist global__my_recall_scroll_container or not find global__my_recall_scroll_container ground -1 -1 config__reach
+        unsetvar global__my_recall_scroll_container
+        overhead "[ scroll box, pick ]" 255
+        setvar global__my_recall_scroll_container
+    endif
+
+    setvar global__my_recall_scroll 0
+
+    dclick global__my_recall_scroll_container
+    wait wait__short
+
+    clearsysmsg
+    cleardragdrop
+    clearignore
+    if findtype 8012 global__my_recall_scroll_container as alias__found_recall_scroll
+        setvar! global__my_recall_scroll alias__found_recall_scroll
+        wait wait__short
+    endif
+
+    if global__my_recall_scroll = 0
+        overhead "[ recall scroll, out ]" 254
+        @setvar! var__runebook_scrolls_out 1
+    endif
+
+    # Backpack
+    while var__runebook_scrolls_out = 0 and findtype "runetome|runebook" backpack as alias__found_runetome
+        getlabel global__my_recall_scroll label__found_runetome
+        overhead "[ scroll, {{label__found_runetome}} ]" 290
+
+        lift global__my_recall_scroll 6000
+        if insysmsg 'not found or out of range'
+            overhead "[ recall scroll, out ]" 254
+            @setvar! var__runebook_scrolls_out 1
+        else
+            drop alias__found_runetome
+        endif
+
+        @ignore alias__found_runetome
+    endwhile
+
+    # Nearby tomes
+    while var__runebook_scrolls_out = 0 and findtype "runetome|runebook" ground -1 -1 2 as alias__found_runetome
+        getlabel global__my_recall_scroll label__found_runetome
+        overhead "[ scroll, {{label__found_runetome}} ]" 290
+
+        lift global__my_recall_scroll 6000
+        if insysmsg 'not found or out of range'
+            overhead "[ recall scroll, out ]" 254
+            @setvar! var__runebook_scrolls_out 1
+        else
+            drop alias__found_runetome
+        endif
+
+        @ignore alias__found_runetome
+    endwhile
+
+    # Nearby chests
+    while var__runebook_scrolls_out = 0 and findtype 47202|62764|2473|3710|41451|41452|3646|3647|3644|3645|41449|41450|29832|29833|2472|29077|29078|2475|3648|3649|3708|3650|3651|41453|41454|2474|3709|3650|3651|41455|41456|29086|29087 true as alias__found_container
+        while var__runebook_scrolls_out = 0 and findtype "runetome|runebook" alias__found_container as alias__found_runetome
+            getlabel global__my_recall_scroll label__found_runetome
+            overhead "[ scroll, {{label__found_runetome}} ]" 290
+
+            lift global__my_recall_scroll 60000
+            if insysmsg 'not found or out of range'
+                overhead "[ recall scroll, out ]" 254
+                @setvar! var__runebook_scrolls_out 1
+            else
+                drop alias__found_runetome
+            endif
+
+            @ignore alias__found_runetome
+        endwhile
+
+        @ignore alias__found_container
+    endwhile
+
+    cleardragdrop
+    clearignore
+endif

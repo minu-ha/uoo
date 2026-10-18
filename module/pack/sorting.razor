@@ -1,0 +1,215 @@
+# ----------------------------------------------------------------------------------------
+# Stacks the satchels, pouch, bag and trapped pouches, then sorts the kit into them.
+# ----------------------------------------------------------------------------------------
+
+
+# ----------------------------------------------------------------------------------------
+# @ setup
+# ----------------------------------------------------------------------------------------
+# Everything the backpack should hold, and where it goes. Format matches document/game/item-list.md.
+#
+#   #bandage                 "clean bandage%s%"      3617
+#   #adventure pack          "adventure pack"        2726
+#   #dagger                  "dagger"                3922
+#   #pouch                   "pouch"                 3705   (hue 0 plain, hue 38 trapped)
+#   #bag                     "bag"                   3702   (the loot bag)
+#   #scissors                "scissors"              3998|3999
+#   #kindling                "kindling"              3553
+#   #skinning knife          "Elven Spellblade"      11552|11564
+#   #smoke bomb              "bombs"                 52149
+#   #adventurers rope        "rope"                  5370   (hue 2799)
+#   #delectable food                                 28879|28880|28881|28883|28885|28886|28888|29773|29774
+#   #magic mushroom          "mushroom"              29012
+#   #sewing kit              "sewing kit"            3997
+#   #item identification wand "wand"                 20496
+#   #instruments                                     3740|3742|3762|3763|10245|20006|20008|20010|20012|20014|20016
+#   #reagent satchel         "reagent satchel"       30765
+#   #potion satchel          "alchemists satchel"    31262
+#
+# Placement. drop takes literal coordinates, so the numbers are inline, but they only appear
+# in this section. They are gump pixels, not grid cells, so nudge them if items overlap.
+#
+#   backpack 0 200        the two satchels, bottom left, first
+#   backpack 0 200        the supply pouch, on the satchels
+#   backpack 0 200        the loot bag, on the supply pouch
+#   backpack 0..20 200    the trapped pouches, on top of all of it, five pixels apart
+#   pouch    0 0          every supply not named below, the scissors among them
+#   pouch    130 0        identification wand, sewing kit
+#   pouch    130 80       the instrument
+#   pouch    0 80         what loot/recycle keeps, placed by that script
+#   bag      0 0          the dagger
+#
+# Order matters. Moving a pouch closes it, and a closed container does not report what is
+# inside: the counters for the cure and heal potions in there read zero until it is opened
+# again, and a combat script that believes it has no cure potion will not drink one. Leaving
+# the contents loose in the backpack would count fine and lose them to the first thief, so
+# the pouch is moved and reopened before anything gets sorted into it.
+#
+# The satchels sit in the backpack itself, not in the pouch: a pouch that gets closed by
+# accident and reopened does not reopen what is nested in it, and the reagent and potion
+# counters go dark until each satchel is opened by hand. In the backpack they stay open.
+# Everything worth stealing is stacked on one spot, satchels first, the supply pouch and
+# the loot bag on them, the trapped pouches on top: a thief has to put the cursor on the
+# thing, and what is under the cursor there is always a trapped pouch. The pouch and the
+# bag are opened by serial and filled by serial, so being covered costs nothing. On a
+# corpse the stack is gone and the split is what is left: the bag only holds raw loot.
+cleardragdrop
+clearignore
+
+# 1. the satchels, bottom left of the backpack. Reopened for the same counting reason.
+if findtype 30765 backpack as alias__found_reagent_satchel
+    lift alias__found_reagent_satchel
+    wait wait__short
+    drop backpack 0 200
+    wait wait__short
+    if config__chatty = 1
+        overhead "[ reg satchel, moved ]" 290
+    endif
+    dclick alias__found_reagent_satchel
+    wait wait__short
+endif
+
+if findtype 31262 backpack as alias__found_alchemists_satchel
+    lift alias__found_alchemists_satchel
+    wait wait__short
+    drop backpack 0 200
+    wait wait__short
+    if config__chatty = 1
+        overhead "[ alch satchel, moved ]" 290
+    endif
+    dclick alias__found_alchemists_satchel
+    wait wait__short
+endif
+
+# 2. the supply pouch, then the loot bag, on the satchels. Each moved by serial, reopened.
+if find global__my_supply_pouch backpack
+    lift global__my_supply_pouch
+    wait wait__short
+    drop backpack 0 200
+    wait wait__short
+    if config__chatty = 1
+        overhead "[ supplies, moved ]" 290
+    endif
+    dclick global__my_supply_pouch
+    wait wait__short
+endif
+
+if find global__my_loot_bag backpack
+    lift global__my_loot_bag
+    wait wait__short
+    drop backpack 0 200
+    wait wait__short
+    if config__chatty = 1
+        overhead "[ loot bag, moved ]" 290
+    endif
+    dclick global__my_loot_bag
+    wait wait__short
+endif
+
+# 3. the trapped pouches, on top of the satchels, the supply pouch and the loot bag, five
+# pixels apart. drop takes literal coordinates, so five blocks instead of a loop. Not
+# reopened on purpose, nothing reads inside them. Any sixth pouch lands with the fifth.
+if findtype 3705 backpack 38 as alias__found_trap_pouch
+    lift alias__found_trap_pouch
+    wait wait__short
+    drop backpack 0 200
+    wait wait__short
+    if config__chatty = 1
+        overhead "[ trapped pouch, moved ]" 290
+    endif
+    @ignore alias__found_trap_pouch
+endif
+
+if findtype 3705 backpack 38 as alias__found_trap_pouch
+    lift alias__found_trap_pouch
+    wait wait__short
+    drop backpack 5 200
+    wait wait__short
+    if config__chatty = 1
+        overhead "[ trapped pouch, moved ]" 290
+    endif
+    @ignore alias__found_trap_pouch
+endif
+
+if findtype 3705 backpack 38 as alias__found_trap_pouch
+    lift alias__found_trap_pouch
+    wait wait__short
+    drop backpack 10 200
+    wait wait__short
+    if config__chatty = 1
+        overhead "[ trapped pouch, moved ]" 290
+    endif
+    @ignore alias__found_trap_pouch
+endif
+
+if findtype 3705 backpack 38 as alias__found_trap_pouch
+    lift alias__found_trap_pouch
+    wait wait__short
+    drop backpack 15 200
+    wait wait__short
+    if config__chatty = 1
+        overhead "[ trapped pouch, moved ]" 290
+    endif
+    @ignore alias__found_trap_pouch
+endif
+
+if findtype 3705 backpack 38 as alias__found_trap_pouch
+    lift alias__found_trap_pouch
+    wait wait__short
+    drop backpack 20 200
+    wait wait__short
+    if config__chatty = 1
+        overhead "[ trapped pouch, moved ]" 290
+    endif
+    @ignore alias__found_trap_pouch
+endif
+
+while findtype 3705 backpack 38 as alias__found_trap_pouch
+    lift alias__found_trap_pouch
+    wait wait__short
+    drop backpack 20 200
+    wait wait__short
+    if config__chatty = 1
+        overhead "[ trapped pouch, moved ]" 290
+    endif
+    @ignore alias__found_trap_pouch
+endwhile
+
+# 4. everything else. Collected first, because the walk below moves items out of the
+#    backpack and a findtype loop cannot be trusted while its own source is changing.
+removelist sorting_item_list
+createlist sorting_item_list
+
+while findtype 3740|3742|3762|3763|10245|20006|20008|20010|20012|20014|20016|20496|3997|3922|3617|2726|3998|3999|3553|11552|11564|52149|5370|28879|28880|28881|28883|28885|28886|28888|29773|29774|29012 backpack as alias__found_item
+    pushlist sorting_item_list alias__found_item
+    @ignore alias__found_item
+endwhile
+
+clearignore
+
+foreach alias__sorting_item in sorting_item_list
+    getlabel alias__sorting_item label__sorting_item
+
+    if config__chatty = 1
+        overhead "[ sort, {{label__sorting_item}} ]" 290
+    endif
+
+    lift alias__sorting_item 1000
+    wait wait__short
+
+    if "dagger" in label__sorting_item
+        if find global__my_loot_bag backpack
+            drop global__my_loot_bag 0 0
+        else
+            drop global__my_supply_pouch 0 0
+        endif
+    elseif "item identification wand" in label__sorting_item or "sewing kit" in label__sorting_item
+        drop global__my_supply_pouch 130 0
+    elseif "flute" in label__sorting_item or "drum" in label__sorting_item or "harp" in label__sorting_item or "lute" in label__sorting_item or "tambourine" in label__sorting_item or "gemshorn" in label__sorting_item or "hurdy" in label__sorting_item or "psaltery" in label__sorting_item or "sackbut" in label__sorting_item or "shawm" in label__sorting_item or "vielle" in label__sorting_item
+        drop global__my_supply_pouch 130 80
+    else
+        drop global__my_supply_pouch 0 0
+    endif
+
+    wait wait__short
+endfor
