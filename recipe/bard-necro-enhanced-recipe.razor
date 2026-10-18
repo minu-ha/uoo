@@ -217,7 +217,7 @@
 #   summon_first (default 1)
 #      The summon that goes out first, by the spell cast under Vengeful Spirit. When the
 #      two differ, this one is looked for by its body to tell which is missing, so it
-#      cannot be 4, whose body is not known yet.
+#      cannot be 4, whose body is not known yet. Play warns when it is.
 #        1  Fire Elemental, a lich
 #        2  Water Elemental, a rag witch
 #        3  Earth Elemental, an ancient mummy
@@ -231,9 +231,9 @@
 #      > The ancient mummy, the other half of the user's pair.
 #
 #   summon_refresh (default 0)
-#      How long, in ms, a summon stays out before it is released and cast again, out of
-#      a fight. 0 turns it off. A skeletal fiend has no name to release it by, so it
-#      stays.
+#      How long, in ms, a summon stays out before it is released and cast again, while
+#      no enemy is remembered. 0 turns it off. A skeletal fiend has no name to release it
+#      by, so it stays.
 #      > Ten minutes leaves about 55% of max health: 1% every 10 seconds, compounding.
 # ----------------------------------------------------------------------------------------
 @setvar! config__summon_first 2

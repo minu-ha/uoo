@@ -833,7 +833,8 @@ order: 10
 - 소환수 하나를 손으로 release → 서 있으면 `[ vengeful spirit ]`, Water Elemental 주문어, 5초 안에 `[ name, wichy ]`
 - `mumi`만 release → Earth Elemental이 나와야 함. Water Elemental이 나오면 바디 740 검색 실패
 - 둘 다 없음 → VS 한 번에 Rag Witch, Mummy 순서
-- 교전 중 소환수가 죽음 → 그 자리에서 VS와 소환. 소환 중 긴급 HP면 `[ summon, cut ]`과 힐
+- 교전 중 소환수가 죽음 → 그 자리에서 VS와 소환. VS와 첫 시전이 한 패스에 붙어 나감. 소환 중 긴급 HP면 `[ summon, cut ]`과 힐
+- 교체 시계가 넘었어도 소환수가 10\~18칸의 몹과 싸우는 동안은 안 놓음
 - 워모드, 걷는 중에는 아무것도 안 나감
 - 레시피에서 잠시 `summon_refresh`를 60000으로 → 이동 중 1분 뒤 `wichy release`, 다시 소환. 확인 뒤 600000으로
 - Bloodmoss를 빼 둠 → VS 심볼을 쓰지 않음

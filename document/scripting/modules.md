@@ -344,7 +344,7 @@ order: 30
 | 신호 | 쓰는 곳 | 읽는 곳 |
 | --- | --- | --- |
 | `var__fighting` | `fight/target`(기억한 적이 `target_range` 안이면 1), pvp 레시피(늘 1) | `buff/potions`, `buff/spells`의 Bless와 Arch Protection, `buff/mushroom`의 Create Food, `magery/flamestrike`, bard-necro-enhanced의 교전 그룹 |
-| `var__hold_casts` | `escape/recall`(리콜 결정 시 1) | `buff/spells` |
+| `var__hold_casts` | `escape/recall`(리콜 결정 시 1) | `buff/spells`, `necro/resummon` |
 | `var__hold_gathering` | `escape/recall`(리콜 결정, 필요한 책 없음, 감지 리콜인데 Tracking이 사냥 중이 아니면 1) | `gather/lumberjacking`, `pack/lumber` |
 
 신호가 아닌 이름은 주인 모듈이 레시피에 있어야 사용 가능 → 아래 블록은 주인 모듈과 함께. 조립기가 코드에서 확인하는 관계.
@@ -358,6 +358,7 @@ order: 30
 - `escape/tracking`의 `var__tracking_*`와 `tracking_color` ← `escape/recall`
 - `bard/instrument`의 `var__my_instrument`, `var__instrument_ok`, `wait__bard_target` ← `bard/disco`, `bard/peace`, `bard/song`
 - `necro/symbols`의 `list__necro_symbols`, `var__symbols_spent`, `interval__necro_action`, `wait__message`, `wait__ability_target` ← 네크로 능력 블록
+  - `var__symbols_listed` ← `necro/resummon`. VS를 쓴 패스에 리스트를 비우고 다시 읽게 함
 - `necro/summon-names`의 `config__summon_range` ← `necro/resummon`. 교체가 summon-names의 이름으로 놓으므로 둘은 함께
 - `magery/rotation`의 순서 플래그 `var__opener_done`, `var__procs_done`, `var__proc_target` ← `necro/poison-strike`
 
