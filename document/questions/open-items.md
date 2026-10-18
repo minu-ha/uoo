@@ -881,7 +881,7 @@ order: 10
 
 ## <a id="15"></a>15 loadout, dress, aspect 인게임 확인
 
-2026-10-19 추가. loadout과 dress가 끝에서 `hotkey/aspect`로 넘어감(`config__use_aspect` 1). 동작 설명은 각 스크립트 머리 주석.
+2026-10-19 추가. dress가 먼저 힐, loadout과 dress가 끝에서 `hotkey/aspect`로 넘어감(`config__use_aspect` 1). 동작 설명은 각 스크립트 머리 주석.
 
 - aspect 근거: [Commands](https://wiki.uooutlands.com/Commands)의 `[AspectWeapon`, `[AspectSpellbook`, `[AspectArmor`.
   [Aspect Mastery](https://wiki.uooutlands.com/Aspect_Mastery): 켤 때마다 Arcane Essence 5, 죽으면 장비의 aspect가 풀림
@@ -903,3 +903,8 @@ order: 10
 - `[ aspect, miss ]`: 이름에 aspect가 안 돌아옴. Essence 부족, 명령 거절, 또는 1초(`wait__aspect`) 안에 이름이 안 바뀜. 서버 응답 문장 기록
 - `[ aspect, out ]`: 이번 Razor 세션에 기억한 aspect가 없음. 손으로 한 번 켜고 loadout이나 `hotkey/aspect`를 돌리면 기억
 - 방어구는 머리, 목, 장갑, 팔, 몸통, 다리 순서로 처음 보이는 aspect를 읽음. 옷(튜닉, 바디스)의 aspect는 안 읽음. 다른 aspect가 섞여 있으면 기록
+
+#### 먼저 힐
+
+- 잃은 HP 30 이상으로 dress → 힐 포션, 없으면 Greater Heal, 없으면 붕대 순서. 붕대가 감기기 시작하면 바로 옷 입기로
+- 10초(`wait__dress_heal`) 안에 못 채우면 그대로 옷 입기. 시약이 없으면 Greater Heal은 한 번만 시도

@@ -1,8 +1,8 @@
 # Dress Suite - Equip
 # Original credit for the concept to Demlar
 # Needs: script/restock/loadout.razor run once this session, it records what to put back on
-# With config__use_aspect it hands over to script/hotkey/aspect.razor at the end, so the
-# aspects a death took come back on.
+# Heals first when hurt, and with config__use_aspect hands over to
+# script/hotkey/aspect.razor at the end, so the aspects a death took come back on.
 
 # One block per equipment layer, the same list script/restock/loadout.razor records. A
 # layer that still holds something is recorded. A layer that is empty gets its remembered
@@ -25,6 +25,13 @@
 # ========================================================================================
 @setvar! config__chatty 1
 
+# Missing hit points at or above which the dress heals first. A dress usually follows a
+# resurrection and a looted corpse, so health is low.
+@setvar! config__dress_heal_hits 30
+
+# Mana Greater Heal needs, as in module/recovery/heal.razor.
+@setvar! config__dress_heal_mana 11
+
 # 1 hands over to script/hotkey/aspect.razor at the end. It turns the aspects a death took
 # back on, 5 Arcane Essence each.
 @setvar! config__use_aspect 1
@@ -34,6 +41,66 @@
 # WAIT AND COOLDOWN
 # ========================================================================================
 @setvar! wait__short 300
+
+# How long the heal may take before the suit goes on regardless.
+@setvar! wait__dress_heal 10000
+
+
+# ========================================================================================
+# TIMER
+# ========================================================================================
+if not timerexists "timer__dress_heal"
+    createtimer "timer__dress_heal"
+endif
+
+settimer "timer__dress_heal" 0
+
+
+# ========================================================================================
+# HEAL FIRST
+# ========================================================================================
+# A heal potion first, it is instant, then Greater Heal through the Razor agent, then a
+# bandage, with the hotkeys and checks of module/recovery/heal.razor and bandage.razor. A
+# running bandage ends this part, it heals on while the suit goes on. wait__dress_heal
+# ends it too, so nothing missing can hold the dress up.
+@setvar! var__dress_no_greater_heal 0
+
+while diffhits >= config__dress_heal_hits and timer "timer__dress_heal" < wait__dress_heal and not dead and not bandaging
+    @setvar! var__dress_drank 0
+
+    if not targetexists and findtype "Yellow Potion" self as alias__dress_heal_potion
+        getlabel alias__dress_heal_potion label__dress_heal_potion
+        if "next usable" in label__dress_heal_potion
+            # Still on its own cooldown.
+        else
+            hotkey "Drink Heal"
+            @setvar! var__dress_drank 1
+        endif
+    endif
+
+    if var__dress_drank = 0 and var__dress_no_greater_heal = 0 and skill "Magery" >= 50 and mana >= config__dress_heal_mana and not casting and not targetexists
+        hotkey "> Greater Heal/Cure Self"
+        wait wait__short
+
+        while casting and timer "timer__dress_heal" < wait__dress_heal
+            wait wait__short
+        endwhile
+
+        # Without the reagents it would only fail again.
+        if insysmsg "More reagents are needed"
+            @setvar! var__dress_no_greater_heal 1
+        endif
+
+        # The agent leaves its cursor up when there is nothing left to heal.
+        if targetexists "beneficial" and diffhits = 0
+            hotkey "Cancel Current Target"
+        endif
+    elseif var__dress_drank = 0 and skill "Healing" > 0 and not targetexists and findtype 3617 backpack
+        hotkey "Bandage Self"
+    endif
+
+    wait wait__short
+endwhile
 
 
 # ========================================================================================
