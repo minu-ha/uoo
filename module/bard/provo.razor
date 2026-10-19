@@ -107,8 +107,10 @@ createlist 'list__provo_never'
     # Peace or Provocation.
     #
     # The first enemy is targeted, then the second, and each goes into var__target_hold
-    # just before: the last one targeted is not always the current target, and a refused
-    # first target leaves lastharmful on that one, so no block takes either for a pick.
+    # just before. The Provocation cursor is harmful (user check, 2026-10-20), so the
+    # second one ends up in lastharmful, and a refused first target leaves it on the
+    # first, while the current target is a third. No block takes either for a pick, and
+    # the next spell at the current target moves lastharmful back to it.
     # The Journal lines this reads are read off first, so a line left over from a cast
     # cannot pass for this answer. The answers are the lines other Outlands bard scripts
     # read, and "fail to incite anger" is the one cooldowns.xml and the profile key on.
