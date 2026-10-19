@@ -892,65 +892,45 @@ if varexist global__my_loot_bag and find global__my_loot_bag backpack
     wait wait__short
 endif
 
-if findtype 3705 backpack 38 as alias__found_trap_pouch
-    lift alias__found_trap_pouch
-    wait wait__short
-    drop backpack 0 200
-    wait wait__short
-    if config__chatty = 1
-        overhead "[ trapped pouch, moved ]" 290
-    endif
-    @ignore alias__found_trap_pouch
-endif
+for 10
+    if findtype 3705 backpack 38 as alias__found_trap_pouch
+        lift alias__found_trap_pouch
+        wait wait__short
 
-if findtype 3705 backpack 38 as alias__found_trap_pouch
-    lift alias__found_trap_pouch
-    wait wait__short
-    drop backpack 5 200
-    wait wait__short
-    if config__chatty = 1
-        overhead "[ trapped pouch, moved ]" 290
-    endif
-    @ignore alias__found_trap_pouch
-endif
+        if index = 0
+            drop backpack 44 200
+        elseif index = 1
+            drop backpack 52 200
+        elseif index = 2
+            drop backpack 60 200
+        elseif index = 3
+            drop backpack 68 200
+        elseif index = 4
+            drop backpack 76 200
+        elseif index = 5
+            drop backpack 48 130
+        elseif index = 6
+            drop backpack 56 130
+        elseif index = 7
+            drop backpack 64 130
+        elseif index = 8
+            drop backpack 72 130
+        elseif index = 9
+            drop backpack 80 130
+        endif
 
-if findtype 3705 backpack 38 as alias__found_trap_pouch
-    lift alias__found_trap_pouch
-    wait wait__short
-    drop backpack 10 200
-    wait wait__short
-    if config__chatty = 1
-        overhead "[ trapped pouch, moved ]" 290
+        wait wait__short
+        if config__chatty = 1
+            overhead "[ trapped pouch, moved ]" 290
+        endif
+        @ignore alias__found_trap_pouch
     endif
-    @ignore alias__found_trap_pouch
-endif
-
-if findtype 3705 backpack 38 as alias__found_trap_pouch
-    lift alias__found_trap_pouch
-    wait wait__short
-    drop backpack 15 200
-    wait wait__short
-    if config__chatty = 1
-        overhead "[ trapped pouch, moved ]" 290
-    endif
-    @ignore alias__found_trap_pouch
-endif
-
-if findtype 3705 backpack 38 as alias__found_trap_pouch
-    lift alias__found_trap_pouch
-    wait wait__short
-    drop backpack 20 200
-    wait wait__short
-    if config__chatty = 1
-        overhead "[ trapped pouch, moved ]" 290
-    endif
-    @ignore alias__found_trap_pouch
-endif
+endfor
 
 while findtype 3705 backpack 38 as alias__found_trap_pouch
     lift alias__found_trap_pouch
     wait wait__short
-    drop backpack 20 200
+    drop backpack 80 130
     wait wait__short
     if config__chatty = 1
         overhead "[ trapped pouch, moved ]" 290

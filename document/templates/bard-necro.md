@@ -1699,7 +1699,7 @@ Tracking 규칙은 [PvP](../game/pvp.md#10) 10절, Hunting 판정의 5초 스킬
 | SELF BUFFS. 몹이 없고 서 있을 때(`var__fighting = 0`, `cooldown "walk" = 0`) Reactive Armor와 Magic Reflection 시전 | 사냥 사이에 버프바에 둘이 붙고, 붙어 있는 동안 재시전 없음. 리플렉트가 소모되면 `[ reflect, off ]`와 30초 `reflect` 바, 바가 꺼진 뒤 다음 정지 때 재시전 | 매 패스 재시전. `findbuff` 이름 불일치 |
 | 시약 10초 리프레시. 부족 문장이 보이면 즉시 재확인(2026-09-28, 그때는 30초) | 시약이 떨어지면 헛시전 한 번 뒤 그 주문을 건너뛰고 나머지 진행. 다시 채우면 최대 10초 안에 재개 | 같은 주문의 헛시전 반복 → 캐릭터 이름으로 뜬 이 줄을 `insysmsg`가 못 읽음 |
 | SUMMON NAMES 종류 이름(2026-10-10) | 소환수마다 `[ name, leech ]`처럼 종류 이름이 뜨고 네임태그 변경. 2026-10-10 `mumi`는 수락, `wytch`는 거절되어 이름 재작성. 2026-10-13 `wicca`도 거절 → `wichy`. 나머지 이름의 수락 여부는 아직 확인되지 않았다 | 04.H절 실패 증상 표 |
-| loadout 배치(2026-10-19 좌하단으로) | 좌하단 한 자리에 새첼 둘, 보급 파우치, 루팅 백, 트랩 파우치 5개(x 0\~20) 순서로 쌓이고 트랩 파우치가 맨 위. 단검은 루팅 백, 가위는 보급 파우치 | 무엇이 삐져나오거나 트랩 파우치가 가려짐. `module/pack/sorting.razor`의 좌표만 조정(`y 200`, `x 0~20`은 감으로 잡은 값) |
+| loadout 배치(2026-10-19 좌하단으로) | 좌하단 한 자리에 새첼 둘, 보급 파우치, 루팅 백 순서로 쌓임. 트랩 파우치 다섯은 그 위 아래 줄에 퍼지고(x 44\~76), 여섯째부터 열째는 한 줄 위(y 130). 단검은 루팅 백, 가위는 보급 파우치 | 루팅 백이 트랩 파우치 사이로 삐져나오거나 트랩 파우치가 가려짐. 트랩 파우치 좌표는 2026-10-19 임시값, `module/pack/sorting.razor`에서 조정 |
 | Poison Strike와 Energy Bolt는 프록 코어 뒤(2026-09-28) | Curse 뒤 네 프록이 이어서 나가고, 바 넷이 다 뜬 뒤 Energy Bolt 한 방, 그다음 `[ poison strike ]`. 몹을 바꾸면 그 몹에 프록이 간 뒤에만 | Curse나 첫 프록 바로 뒤에 `[ poison strike ]`나 Energy Bolt. 한 프록만 반복되면 그 바의 트리거 확인(03.A절) |
 | 네크로 능력을 Razor 핫키로 복구(2026-09-28) | `[ blood oath ]` `[ corpse skin ]` `[ evil omen ]` `[ poison strike ]`가 전처럼 뜸 | 능력이 안 나가면 Razor 핫키 목록의 이름 확인 |
 | Corpse Skin과 Evil Omen은 서 있고 warmode가 아닐 때만(2026-09-28) | 교전 중 걷는 동안과 warmode에서는 둘이 안 나가고 `[ blood oath ]`만. 멈추면 프록 앞에 시전 | 걷는 중이나 warmode에서 `[ corpse skin ]`이나 `[ evil omen ]` |
