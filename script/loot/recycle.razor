@@ -149,9 +149,12 @@ endif
 #   save_item     1 when the item carries a kept property
 #   recycle_item  1 until the item goes to identification instead
 #   save_to       armor: the container its material goes to
+#   armor_type    armor: its material by label, 1 leather, 2 studded, 3 bone, 4 ringmail,
+#                 5 chainmail, 6 platemail, 0 none named
 @setvar! var__save_item 0
 @setvar! var__recycle_item 0
 @setvar! var__save_to 0
+@setvar! var__armor_type 0
 
 # ========================================================================================
 # TOOLS
@@ -1318,578 +1321,17 @@ endwhile
 # ========================================================================================
 # ARMOR
 # ========================================================================================
-# Each type reads its own protection switches. Leather first.
+# One pass over every armor graphic. A piece has two graphics, one per facing, and some
+# turn into another type's graphic when turned: a studded, ring, chain or plate skirt into
+# a leather skirt, a studded cap into a leather cap, chain arms and gloves into ringmail
+# ones (document/game/item-list.md, Armor). So the graphic cannot tell the type: the
+# material in the label picks both the protection switches and the storage. The helms
+# whose label names no material go by their list, bascinet, close helm and norse helm to
+# platemail and the orc helm to ringmail. Anything else unnamed reads the general
+# switches.
 #
-# A piece has two graphics, one per facing, and some turn into another type's graphic when
-# turned: a studded, ring, chain or plate skirt into a leather skirt, a studded cap into a
-# leather cap, chain arms and gloves into ringmail ones. So each list carries both facings
-# and the borrowed ones. The lists missed the second facing until 2026-10-19
-# (document/game/item-list.md, Armor), and such a piece stayed in the backpack.
-
-while findtype 5061|5062|5063|5067|5068|5069|5070|5074|5075|7168|7169|7174|7175|7176|7177|7178|7179|7609|7610|31174|31191 var__source_container as alias__item
-    getlabel alias__item label__item
-    if config__sysmsg = 1
-        sysmsg "Recycle check: {{label__item}}" 88
-    endif
-    @setvar! var__save_item 0
-    @setvar! var__recycle_item 1
-
-    if config__save_invulnerability_leather = 1 and "invulnerability" in label__item
-        @setvar! var__save_item 1
-    elseif config__save_fortification_leather = 1 and "fortification" in label__item
-        @setvar! var__save_item 1
-    elseif config__save_hardening_leather = 1 and "hardening" in label__item
-        @setvar! var__save_item 1
-    elseif config__save_guarding_leather = 1 and "guarding" in label__item
-        @setvar! var__save_item 1
-    elseif config__save_defense_leather = 1 and "defense" in label__item
-        @setvar! var__save_item 1
-    endif
-
-    if "unidentified" in label__item
-        if skill "Item Identification" = 120
-            useskill "itemId"
-            waitfortarget wait__target
-            target var__source_container
-            wait wait__item_id
-            @setvar! var__recycle_item 0
-        elseif findtype 20496 backpack as alias__id_wand
-            dclick alias__id_wand
-            waitfortarget wait__target
-            target alias__item
-            @setvar! var__recycle_item 0
-        elseif skill "Item Identification" >= config__min_item_id_skill
-            useskill "itemId"
-            waitfortarget wait__target
-            target alias__item
-            wait wait__item_id
-            @setvar! var__recycle_item 0
-        endif
-    endif
-
-    if var__save_item = 1
-        if config__chatty = 1
-            overhead "[ item, saving ]" 290
-        endif
-        if config__sysmsg = 1
-            sysmsg "Recycle save: {{label__item}}" 88
-        endif
-        # Armor goes by its material. Anything else stays in the supply pouch.
-        @setvar! var__save_to var__save_container
-        if "plate" in label__item
-            @setvar! var__save_to var__plate_storage
-        elseif "chain" in label__item
-            @setvar! var__save_to var__chainmail_storage
-        elseif "ring" in label__item
-            @setvar! var__save_to var__ringmail_storage
-        elseif "bone" in label__item
-            @setvar! var__save_to var__bone_storage
-        elseif "studded" in label__item
-            @setvar! var__save_to var__studded_storage
-        elseif "leather" in label__item
-            @setvar! var__save_to var__leather_storage
-        endif
-        lift alias__item
-        drop var__save_to 130 200 0
-        wait wait__item
-        @ignore alias__item
-    endif
-
-    if var__recycle_item = 1
-        if find alias__item backpack
-            if config__save_exceptional = 1 and "exceptional" in label__item
-                # Exceptional craft is kept.
-            elseif "aspect" in label__item
-                # Aspect items are kept.
-            else
-                if not gumpexists 949095101
-                    if findtype 4032|3997|7864|4148|4136 backpack as alias__recycle_tool
-                        dclick alias__recycle_tool
-                        waitforgump 949095101 wait__gump
-                    endif
-                endif
-                if gumpexists 949095101
-                    gumpresponse 3 949095101
-                    waitfortarget wait__target
-                    target alias__item
-                endif
-            endif
-        endif
-        @ignore alias__item
-    endif
-endwhile
-
-# Bone.
-while findtype 5078|5198|5199|5200|5201|5202|5203|5204|5205|5206|5207|7176|7177|31003|31004 var__source_container as alias__item
-    getlabel alias__item label__item
-    if config__sysmsg = 1
-        sysmsg "Recycle check: {{label__item}}" 88
-    endif
-    @setvar! var__save_item 0
-    @setvar! var__recycle_item 1
-
-    if config__save_invulnerability_bone_armor = 1 and "invulnerability" in label__item
-        @setvar! var__save_item 1
-    elseif config__save_fortification_bone_armor = 1 and "fortification" in label__item
-        @setvar! var__save_item 1
-    elseif config__save_hardening_bone_armor = 1 and "hardening" in label__item
-        @setvar! var__save_item 1
-    elseif config__save_guarding_bone_armor = 1 and "guarding" in label__item
-        @setvar! var__save_item 1
-    elseif config__save_defense_bone_armor = 1 and "defense" in label__item
-        @setvar! var__save_item 1
-    endif
-
-    if "unidentified" in label__item
-        if skill "Item Identification" = 120
-            useskill "itemId"
-            waitfortarget wait__target
-            target var__source_container
-            wait wait__item_id
-            @setvar! var__recycle_item 0
-        elseif findtype 20496 backpack as alias__id_wand
-            dclick alias__id_wand
-            waitfortarget wait__target
-            target alias__item
-            @setvar! var__recycle_item 0
-        elseif skill "Item Identification" >= config__min_item_id_skill
-            useskill "itemId"
-            waitfortarget wait__target
-            target alias__item
-            wait wait__item_id
-            @setvar! var__recycle_item 0
-        endif
-    endif
-
-    if var__save_item = 1
-        if config__chatty = 1
-            overhead "[ item, saving ]" 290
-        endif
-        if config__sysmsg = 1
-            sysmsg "Recycle save: {{label__item}}" 88
-        endif
-        # Armor goes by its material. Anything else stays in the supply pouch.
-        @setvar! var__save_to var__save_container
-        if "plate" in label__item
-            @setvar! var__save_to var__plate_storage
-        elseif "chain" in label__item
-            @setvar! var__save_to var__chainmail_storage
-        elseif "ring" in label__item
-            @setvar! var__save_to var__ringmail_storage
-        elseif "bone" in label__item
-            @setvar! var__save_to var__bone_storage
-        elseif "studded" in label__item
-            @setvar! var__save_to var__studded_storage
-        elseif "leather" in label__item
-            @setvar! var__save_to var__leather_storage
-        endif
-        lift alias__item
-        drop var__save_to 130 200 0
-        wait wait__item
-        @ignore alias__item
-    endif
-
-    if var__recycle_item = 1
-        if find alias__item backpack
-            if config__save_exceptional = 1 and "exceptional" in label__item
-                # Exceptional craft is kept.
-            elseif "aspect" in label__item
-                # Aspect items are kept.
-            else
-                if not gumpexists 949095101
-                    if findtype 4032|3997|7864|4148|4136 backpack as alias__recycle_tool
-                        dclick alias__recycle_tool
-                        waitforgump 949095101 wait__gump
-                    endif
-                endif
-                if gumpexists 949095101
-                    gumpresponse 3 949095101
-                    waitfortarget wait__target
-                    target alias__item
-                endif
-            endif
-        endif
-        @ignore alias__item
-    endif
-endwhile
-
-# Studded leather.
-while findtype 5076|5077|5078|5082|5083|5084|5085|5089|5090|7170|7171|7176|7177|7180|7181|7609|7610|31011|31012 var__source_container as alias__item
-    getlabel alias__item label__item
-    if config__sysmsg = 1
-        sysmsg "Recycle check: {{label__item}}" 88
-    endif
-    @setvar! var__save_item 0
-    @setvar! var__recycle_item 1
-
-    if config__save_invulnerability_studded_leather = 1 and "invulnerability" in label__item
-        @setvar! var__save_item 1
-    elseif config__save_fortification_studded_leather = 1 and "fortification" in label__item
-        @setvar! var__save_item 1
-    elseif config__save_hardening_studded_leather = 1 and "hardening" in label__item
-        @setvar! var__save_item 1
-    elseif config__save_guarding_studded_leather = 1 and "guarding" in label__item
-        @setvar! var__save_item 1
-    elseif config__save_defense_studded_leather = 1 and "defense" in label__item
-        @setvar! var__save_item 1
-    endif
-
-    if "unidentified" in label__item
-        if skill "Item Identification" = 120
-            useskill "itemId"
-            waitfortarget wait__target
-            target var__source_container
-            wait wait__item_id
-            @setvar! var__recycle_item 0
-        elseif findtype 20496 backpack as alias__id_wand
-            dclick alias__id_wand
-            waitfortarget wait__target
-            target alias__item
-            @setvar! var__recycle_item 0
-        elseif skill "Item Identification" >= config__min_item_id_skill
-            useskill "itemId"
-            waitfortarget wait__target
-            target alias__item
-            wait wait__item_id
-            @setvar! var__recycle_item 0
-        endif
-    endif
-
-    if var__save_item = 1
-        if config__chatty = 1
-            overhead "[ item, saving ]" 290
-        endif
-        if config__sysmsg = 1
-            sysmsg "Recycle save: {{label__item}}" 88
-        endif
-        # Armor goes by its material. Anything else stays in the supply pouch.
-        @setvar! var__save_to var__save_container
-        if "plate" in label__item
-            @setvar! var__save_to var__plate_storage
-        elseif "chain" in label__item
-            @setvar! var__save_to var__chainmail_storage
-        elseif "ring" in label__item
-            @setvar! var__save_to var__ringmail_storage
-        elseif "bone" in label__item
-            @setvar! var__save_to var__bone_storage
-        elseif "studded" in label__item
-            @setvar! var__save_to var__studded_storage
-        elseif "leather" in label__item
-            @setvar! var__save_to var__leather_storage
-        endif
-        lift alias__item
-        drop var__save_to 130 200 0
-        wait wait__item
-        @ignore alias__item
-    endif
-
-    if var__recycle_item = 1
-        if find alias__item backpack
-            if config__save_exceptional = 1 and "exceptional" in label__item
-                # Exceptional craft is kept.
-            elseif "aspect" in label__item
-                # Aspect items are kept.
-            else
-                if not gumpexists 949095101
-                    if findtype 4032|3997|7864|4148|4136 backpack as alias__recycle_tool
-                        dclick alias__recycle_tool
-                        waitforgump 949095101 wait__gump
-                    endif
-                endif
-                if gumpexists 949095101
-                    gumpresponse 3 949095101
-                    waitfortarget wait__target
-                    target alias__item
-                endif
-            endif
-        endif
-        @ignore alias__item
-    endif
-endwhile
-
-# Ringmail.
-while findtype 5078|5099|5100|5101|5102|5103|5104|5105|5106|5131|7176|7177|7947|31009|31010 var__source_container as alias__item
-    getlabel alias__item label__item
-    if config__sysmsg = 1
-        sysmsg "Recycle check: {{label__item}}" 88
-    endif
-    @setvar! var__save_item 0
-    @setvar! var__recycle_item 1
-
-    if config__save_invulnerability_ringmail = 1 and "invulnerability" in label__item
-        @setvar! var__save_item 1
-    elseif config__save_fortification_ringmail = 1 and "fortification" in label__item
-        @setvar! var__save_item 1
-    elseif config__save_hardening_ringmail = 1 and "hardening" in label__item
-        @setvar! var__save_item 1
-    elseif config__save_guarding_ringmail = 1 and "guarding" in label__item
-        @setvar! var__save_item 1
-    elseif config__save_defense_ringmail = 1 and "defense" in label__item
-        @setvar! var__save_item 1
-    endif
-
-    if "unidentified" in label__item
-        if skill "Item Identification" = 120
-            useskill "itemId"
-            waitfortarget wait__target
-            target var__source_container
-            wait wait__item_id
-            @setvar! var__recycle_item 0
-        elseif findtype 20496 backpack as alias__id_wand
-            dclick alias__id_wand
-            waitfortarget wait__target
-            target alias__item
-            @setvar! var__recycle_item 0
-        elseif skill "Item Identification" >= config__min_item_id_skill
-            useskill "itemId"
-            waitfortarget wait__target
-            target alias__item
-            wait wait__item_id
-            @setvar! var__recycle_item 0
-        endif
-    endif
-
-    if var__save_item = 1
-        if config__chatty = 1
-            overhead "[ item, saving ]" 290
-        endif
-        if config__sysmsg = 1
-            sysmsg "Recycle save: {{label__item}}" 88
-        endif
-        # Armor goes by its material. Anything else stays in the supply pouch.
-        @setvar! var__save_to var__save_container
-        if "plate" in label__item
-            @setvar! var__save_to var__plate_storage
-        elseif "chain" in label__item
-            @setvar! var__save_to var__chainmail_storage
-        elseif "ring" in label__item
-            @setvar! var__save_to var__ringmail_storage
-        elseif "bone" in label__item
-            @setvar! var__save_to var__bone_storage
-        elseif "studded" in label__item
-            @setvar! var__save_to var__studded_storage
-        elseif "leather" in label__item
-            @setvar! var__save_to var__leather_storage
-        endif
-        lift alias__item
-        drop var__save_to 130 200 0
-        wait wait__item
-        @ignore alias__item
-    endif
-
-    if var__recycle_item = 1
-        if find alias__item backpack
-            if config__save_exceptional = 1 and "exceptional" in label__item
-                # Exceptional craft is kept.
-            elseif "aspect" in label__item
-                # Aspect items are kept.
-            else
-                if not gumpexists 949095101
-                    if findtype 4032|3997|7864|4148|4136 backpack as alias__recycle_tool
-                        dclick alias__recycle_tool
-                        waitforgump 949095101 wait__gump
-                    endif
-                endif
-                if gumpexists 949095101
-                    gumpresponse 3 949095101
-                    waitfortarget wait__target
-                    target alias__item
-                endif
-            endif
-        endif
-        @ignore alias__item
-    endif
-endwhile
-
-# Chainmail.
-while findtype 5051|5054|5055|5056|5059|5060|5063|5099|5102|5103|5106|7176|7177|31005|31006|31007|31015 var__source_container as alias__item
-    getlabel alias__item label__item
-    if config__sysmsg = 1
-        sysmsg "Recycle check: {{label__item}}" 88
-    endif
-    @setvar! var__save_item 0
-    @setvar! var__recycle_item 1
-
-    if config__save_invulnerability_chainmail = 1 and "invulnerability" in label__item
-        @setvar! var__save_item 1
-    elseif config__save_fortification_chainmail = 1 and "fortification" in label__item
-        @setvar! var__save_item 1
-    elseif config__save_hardening_chainmail = 1 and "hardening" in label__item
-        @setvar! var__save_item 1
-    elseif config__save_guarding_chainmail = 1 and "guarding" in label__item
-        @setvar! var__save_item 1
-    elseif config__save_defense_chainmail = 1 and "defense" in label__item
-        @setvar! var__save_item 1
-    endif
-
-    if "unidentified" in label__item
-        if skill "Item Identification" = 120
-            useskill "itemId"
-            waitfortarget wait__target
-            target var__source_container
-            wait wait__item_id
-            @setvar! var__recycle_item 0
-        elseif findtype 20496 backpack as alias__id_wand
-            dclick alias__id_wand
-            waitfortarget wait__target
-            target alias__item
-            @setvar! var__recycle_item 0
-        elseif skill "Item Identification" >= config__min_item_id_skill
-            useskill "itemId"
-            waitfortarget wait__target
-            target alias__item
-            wait wait__item_id
-            @setvar! var__recycle_item 0
-        endif
-    endif
-
-    if var__save_item = 1
-        if config__chatty = 1
-            overhead "[ item, saving ]" 290
-        endif
-        if config__sysmsg = 1
-            sysmsg "Recycle save: {{label__item}}" 88
-        endif
-        # Armor goes by its material. Anything else stays in the supply pouch.
-        @setvar! var__save_to var__save_container
-        if "plate" in label__item
-            @setvar! var__save_to var__plate_storage
-        elseif "chain" in label__item
-            @setvar! var__save_to var__chainmail_storage
-        elseif "ring" in label__item
-            @setvar! var__save_to var__ringmail_storage
-        elseif "bone" in label__item
-            @setvar! var__save_to var__bone_storage
-        elseif "studded" in label__item
-            @setvar! var__save_to var__studded_storage
-        elseif "leather" in label__item
-            @setvar! var__save_to var__leather_storage
-        endif
-        lift alias__item
-        drop var__save_to 130 200 0
-        wait wait__item
-        @ignore alias__item
-    endif
-
-    if var__recycle_item = 1
-        if find alias__item backpack
-            if config__save_exceptional = 1 and "exceptional" in label__item
-                # Exceptional craft is kept.
-            elseif "aspect" in label__item
-                # Aspect items are kept.
-            else
-                if not gumpexists 949095101
-                    if findtype 4032|3997|7864|4148|4136 backpack as alias__recycle_tool
-                        dclick alias__recycle_tool
-                        waitforgump 949095101 wait__gump
-                    endif
-                endif
-                if gumpexists 949095101
-                    gumpresponse 3 949095101
-                    waitfortarget wait__target
-                    target alias__item
-                endif
-            endif
-        endif
-        @ignore alias__item
-    endif
-endwhile
-
-# Platemail.
-while findtype 5129|5132|5135|5136|5137|5138|5139|5140|5141|5142|5143|5144|5146|7172|7173|7176|7177|31008 var__source_container as alias__item
-    getlabel alias__item label__item
-    if config__sysmsg = 1
-        sysmsg "Recycle check: {{label__item}}" 88
-    endif
-    @setvar! var__save_item 0
-    @setvar! var__recycle_item 1
-
-    if config__save_invulnerability_platemail = 1 and "invulnerability" in label__item
-        @setvar! var__save_item 1
-    elseif config__save_fortification_platemail = 1 and "fortification" in label__item
-        @setvar! var__save_item 1
-    elseif config__save_hardening_platemail = 1 and "hardening" in label__item
-        @setvar! var__save_item 1
-    elseif config__save_guarding_platemail = 1 and "guarding" in label__item
-        @setvar! var__save_item 1
-    elseif config__save_defense_platemail = 1 and "defense" in label__item
-        @setvar! var__save_item 1
-    endif
-
-    if "unidentified" in label__item
-        if skill "Item Identification" = 120
-            useskill "itemId"
-            waitfortarget wait__target
-            target var__source_container
-            wait wait__item_id
-            @setvar! var__recycle_item 0
-        elseif findtype 20496 backpack as alias__id_wand
-            dclick alias__id_wand
-            waitfortarget wait__target
-            target alias__item
-            @setvar! var__recycle_item 0
-        elseif skill "Item Identification" >= config__min_item_id_skill
-            useskill "itemId"
-            waitfortarget wait__target
-            target alias__item
-            wait wait__item_id
-            @setvar! var__recycle_item 0
-        endif
-    endif
-
-    if var__save_item = 1
-        if config__chatty = 1
-            overhead "[ item, saving ]" 290
-        endif
-        if config__sysmsg = 1
-            sysmsg "Recycle save: {{label__item}}" 88
-        endif
-        # Armor goes by its material. Anything else stays in the supply pouch.
-        @setvar! var__save_to var__save_container
-        if "plate" in label__item
-            @setvar! var__save_to var__plate_storage
-        elseif "chain" in label__item
-            @setvar! var__save_to var__chainmail_storage
-        elseif "ring" in label__item
-            @setvar! var__save_to var__ringmail_storage
-        elseif "bone" in label__item
-            @setvar! var__save_to var__bone_storage
-        elseif "studded" in label__item
-            @setvar! var__save_to var__studded_storage
-        elseif "leather" in label__item
-            @setvar! var__save_to var__leather_storage
-        endif
-        lift alias__item
-        drop var__save_to 130 200 0
-        wait wait__item
-        @ignore alias__item
-    endif
-
-    if var__recycle_item = 1
-        if find alias__item backpack
-            if config__save_exceptional = 1 and "exceptional" in label__item
-                # Exceptional craft is kept.
-            elseif "aspect" in label__item
-                # Aspect items are kept.
-            else
-                if not gumpexists 949095101
-                    if findtype 4032|3997|7864|4148|4136 backpack as alias__recycle_tool
-                        dclick alias__recycle_tool
-                        waitforgump 949095101 wait__gump
-                    endif
-                endif
-                if gumpexists 949095101
-                    gumpresponse 3 949095101
-                    waitfortarget wait__target
-                    target alias__item
-                endif
-            endif
-        endif
-        @ignore alias__item
-    endif
-endwhile
-
-# Any armor the types above missed.
+# Until 2026-10-19 one loop per type took the pieces by graphic, so a turned chain glove
+# was judged by the ringmail switches and recycled, and most second facings were missed.
 while findtype 5051|5054|5055|5056|5059|5060|5061|5062|5063|5067|5068|5069|5070|5074|5075|5076|5077|5078|5082|5083|5084|5085|5089|5090|5099|5100|5101|5102|5103|5104|5105|5106|5129|5131|5132|5135|5136|5137|5138|5139|5140|5141|5142|5143|5144|5146|5198|5199|5200|5201|5202|5203|5204|5205|5206|5207|7168|7169|7170|7171|7172|7173|7174|7175|7176|7177|7178|7179|7180|7181|7609|7610|7947|31003|31004|31005|31006|31007|31008|31009|31010|31011|31012|31015|31174|31191 var__source_container as alias__item
     getlabel alias__item label__item
     if config__sysmsg = 1
@@ -1898,16 +1340,109 @@ while findtype 5051|5054|5055|5056|5059|5060|5061|5062|5063|5067|5068|5069|5070|
     @setvar! var__save_item 0
     @setvar! var__recycle_item 1
 
-    if config__save_invulnerability = 1 and "invulnerability" in label__item
-        @setvar! var__save_item 1
-    elseif config__save_fortification = 1 and "fortification" in label__item
-        @setvar! var__save_item 1
-    elseif config__save_hardening = 1 and "hardening" in label__item
-        @setvar! var__save_item 1
-    elseif config__save_guarding = 1 and "guarding" in label__item
-        @setvar! var__save_item 1
-    elseif config__save_defense = 1 and "defense" in label__item
-        @setvar! var__save_item 1
+    @setvar! var__armor_type 0
+    if "plate" in label__item
+        @setvar! var__armor_type 6
+    elseif "chain" in label__item
+        @setvar! var__armor_type 5
+    elseif "ring" in label__item
+        @setvar! var__armor_type 4
+    elseif "bone" in label__item
+        @setvar! var__armor_type 3
+    elseif "studded" in label__item
+        @setvar! var__armor_type 2
+    elseif "leather" in label__item
+        @setvar! var__armor_type 1
+    elseif "bascinet" in label__item or "close helm" in label__item or "norse helm" in label__item
+        @setvar! var__armor_type 6
+    elseif "orc helm" in label__item
+        @setvar! var__armor_type 4
+    endif
+
+    if var__armor_type = 1
+        if config__save_invulnerability_leather = 1 and "invulnerability" in label__item
+            @setvar! var__save_item 1
+        elseif config__save_fortification_leather = 1 and "fortification" in label__item
+            @setvar! var__save_item 1
+        elseif config__save_hardening_leather = 1 and "hardening" in label__item
+            @setvar! var__save_item 1
+        elseif config__save_guarding_leather = 1 and "guarding" in label__item
+            @setvar! var__save_item 1
+        elseif config__save_defense_leather = 1 and "defense" in label__item
+            @setvar! var__save_item 1
+        endif
+    elseif var__armor_type = 2
+        if config__save_invulnerability_studded_leather = 1 and "invulnerability" in label__item
+            @setvar! var__save_item 1
+        elseif config__save_fortification_studded_leather = 1 and "fortification" in label__item
+            @setvar! var__save_item 1
+        elseif config__save_hardening_studded_leather = 1 and "hardening" in label__item
+            @setvar! var__save_item 1
+        elseif config__save_guarding_studded_leather = 1 and "guarding" in label__item
+            @setvar! var__save_item 1
+        elseif config__save_defense_studded_leather = 1 and "defense" in label__item
+            @setvar! var__save_item 1
+        endif
+    elseif var__armor_type = 3
+        if config__save_invulnerability_bone_armor = 1 and "invulnerability" in label__item
+            @setvar! var__save_item 1
+        elseif config__save_fortification_bone_armor = 1 and "fortification" in label__item
+            @setvar! var__save_item 1
+        elseif config__save_hardening_bone_armor = 1 and "hardening" in label__item
+            @setvar! var__save_item 1
+        elseif config__save_guarding_bone_armor = 1 and "guarding" in label__item
+            @setvar! var__save_item 1
+        elseif config__save_defense_bone_armor = 1 and "defense" in label__item
+            @setvar! var__save_item 1
+        endif
+    elseif var__armor_type = 4
+        if config__save_invulnerability_ringmail = 1 and "invulnerability" in label__item
+            @setvar! var__save_item 1
+        elseif config__save_fortification_ringmail = 1 and "fortification" in label__item
+            @setvar! var__save_item 1
+        elseif config__save_hardening_ringmail = 1 and "hardening" in label__item
+            @setvar! var__save_item 1
+        elseif config__save_guarding_ringmail = 1 and "guarding" in label__item
+            @setvar! var__save_item 1
+        elseif config__save_defense_ringmail = 1 and "defense" in label__item
+            @setvar! var__save_item 1
+        endif
+    elseif var__armor_type = 5
+        if config__save_invulnerability_chainmail = 1 and "invulnerability" in label__item
+            @setvar! var__save_item 1
+        elseif config__save_fortification_chainmail = 1 and "fortification" in label__item
+            @setvar! var__save_item 1
+        elseif config__save_hardening_chainmail = 1 and "hardening" in label__item
+            @setvar! var__save_item 1
+        elseif config__save_guarding_chainmail = 1 and "guarding" in label__item
+            @setvar! var__save_item 1
+        elseif config__save_defense_chainmail = 1 and "defense" in label__item
+            @setvar! var__save_item 1
+        endif
+    elseif var__armor_type = 6
+        if config__save_invulnerability_platemail = 1 and "invulnerability" in label__item
+            @setvar! var__save_item 1
+        elseif config__save_fortification_platemail = 1 and "fortification" in label__item
+            @setvar! var__save_item 1
+        elseif config__save_hardening_platemail = 1 and "hardening" in label__item
+            @setvar! var__save_item 1
+        elseif config__save_guarding_platemail = 1 and "guarding" in label__item
+            @setvar! var__save_item 1
+        elseif config__save_defense_platemail = 1 and "defense" in label__item
+            @setvar! var__save_item 1
+        endif
+    else
+        if config__save_invulnerability = 1 and "invulnerability" in label__item
+            @setvar! var__save_item 1
+        elseif config__save_fortification = 1 and "fortification" in label__item
+            @setvar! var__save_item 1
+        elseif config__save_hardening = 1 and "hardening" in label__item
+            @setvar! var__save_item 1
+        elseif config__save_guarding = 1 and "guarding" in label__item
+            @setvar! var__save_item 1
+        elseif config__save_defense = 1 and "defense" in label__item
+            @setvar! var__save_item 1
+        endif
     endif
 
     if "unidentified" in label__item
@@ -1940,17 +1475,17 @@ while findtype 5051|5054|5055|5056|5059|5060|5061|5062|5063|5067|5068|5069|5070|
         endif
         # Armor goes by its material. Anything else stays in the supply pouch.
         @setvar! var__save_to var__save_container
-        if "plate" in label__item
+        if var__armor_type = 6
             @setvar! var__save_to var__plate_storage
-        elseif "chain" in label__item
+        elseif var__armor_type = 5
             @setvar! var__save_to var__chainmail_storage
-        elseif "ring" in label__item
+        elseif var__armor_type = 4
             @setvar! var__save_to var__ringmail_storage
-        elseif "bone" in label__item
+        elseif var__armor_type = 3
             @setvar! var__save_to var__bone_storage
-        elseif "studded" in label__item
+        elseif var__armor_type = 2
             @setvar! var__save_to var__studded_storage
-        elseif "leather" in label__item
+        elseif var__armor_type = 1
             @setvar! var__save_to var__leather_storage
         endif
         lift alias__item
