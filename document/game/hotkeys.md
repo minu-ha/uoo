@@ -91,12 +91,13 @@ order: 20
 | --- | --- | --- | --- | --- | --- | --- |
 | 무수정 (summoner) | **All Kill** (커서) | All Follow Me | All Guard Me | **가장 가까운 몹 타겟** | moongate | home |
 | 무수정 (basic) | **가장 가까운 몹 타겟** | 이전 플레이어 | 다음 플레이어 | **Attack Last Target** | moongate | home |
-| Shift (summoner) | — | 이전 플레이어 | 다음 플레이어 | Attack Last Target | — | — |
+| Shift (summoner) | 다음 몹 | 이전 플레이어 | 다음 플레이어 | Attack Last Target | — | — |
 | Shift (basic) | 햄스트링 토글 (예정) | 디스암 토글 (예정) | — | — | — | — |
 | Ctrl | Wall of Stone | Dispel Field | Invisibility | Reveal | — | — |
 | Alt | — | — | — | — | — | — |
 
 - summoner: `Z` → All Kill 커서, `V` → 그 커서를 가장 가까운 몹으로 채움. 커서가 없으면 `V`는 라타 지정만
+- summoner `Shift+Z`: 다음 몹을 라타로(Next Non-Friendly Monster Target, 2026-10-20). 커서 없이 순환 → 루프의 커서와 안 부딪힘
 - basic: `Z`로 라타 지정, `V`로 공격. PvP는 `X`나 `C`로 플레이어 지정 → `V`
 - 플레이어 순환: summoner `Shift+X/C`, basic 무수정 `X/C`. 키 하나에 바인딩 하나 → summoner는 무수정 `X`, `C`를 펫 명령에 씀
 - summoner Follow `X`, Guard `C`. `C`는 가장 자주 누르는 `V` 옆 → 오입력 잦음.
@@ -162,6 +163,7 @@ Ctrl = Cmd, Alt = Option(01절) → macOS가 먼저 가져가는 키 있음.
 | 소환 | `Alt+1` → `Alt+2` → `Alt+2`, 솔플은 `Alt+1` → `Alt+3` → `Alt+2` | Vengeful Spirit 켠 뒤 듀오는 Lich 둘, 솔플은 Rag Witch와 Lich([Bard Necro](../templates/bard-necro.md#04.B) 04.B절). bard-necro-enhanced가 돌면 루프가 대신 소환([Bard Necro](../templates/bard-necro.md#04.I) 04.I절) |
 | PvE 공격 | `Z` → `V` | 가장 가까운 몹 공격. summoner는 펫이, basic은 내가(01.E절) |
 | PvE 주문 | `V`(summoner)로 라타 → `1 E` `2 E` → `4 E` `5 E` | `1`, `2`는 시그니처 칸(03절) |
+| 몹 여럿(summoner) | `Tab` → `Shift+Z` 여러 번 → 칠 몹에서 멈춤 → `Tab` | 지나간 몹마다 bard-necro-enhanced의 프로보 목록에 들어감. 워모드 중이라 사이에 주문이 안 나감 |
 | PvP 시작 | `F4` | 전투 루프 정지, PvP 루프 시작. 펫 공격은 루프가 15초마다 `all kill`. 복귀는 `F1` |
 | PvP 타겟 | `Q`, summoner는 `Shift+X/C`, basic은 `X/C` | 라타 하나만 공격. 가장 가까운 플레이어 타겟은 서버가 막음 → 플레이어는 순환으로만 지정 |
 | PvP 주문 | 라타를 잡고 → `6 E` → `4 E` `5 E` |   |
@@ -192,6 +194,7 @@ Ctrl = Cmd, Alt = Option(01절) → macOS가 먼저 가져가는 키 있음.
 | 1332 | Cancel Current Target | 1391 | > Smart Heal/Cure Self |
 | 1395 | Attack Last Target | 1994 | > Interrupt |
 | 2013 | Target Closest Non-Friendly Monster | 2022, 2024, 2026 | All Follow Me, All Guard Me, All Kill |
+| 2083 | Next Non-Friendly Monster Target | — | — |
 | 2052, 2055 | Next Friendly Player Target, Previous Friendly Player Target | 2054, 2057 | Next Non-Friendly Player Target, Previous Non-Friendly Player Target |
 | 2101 | > Stop Current Script | 2527 | Pouch |
 | 1044060 + 스킬번호 | 스킬 사용(Disco 1044075, Peace 1044069, Hiding 1044081, Provo 1044082, Meditation 1044106) | 1060522 | Vengeful Spirit. Razor Hotkeys 탭에서 건 번호. 손으로 넣은 2124는 종료 시 버려짐 |
