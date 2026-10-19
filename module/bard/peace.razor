@@ -30,11 +30,10 @@ timer__peace_seen interval__peace_seen
     # ------------------------------------------------------------------------------------
     # PEACE
     #
-    # The other half of the Ensemble condition, and unlike Discordance it is short. At
-    # difficulty 300 and up the duration formula floors at 15 x Musicianship / 100, which
-    # is 12 seconds here, against a 10 second slot cooldown. So it is re-applied
-    # continuously rather than once per target: let it lapse and Ensemble and Virtuoso go
-    # dark with it.
+    # The other half of the Ensemble condition, and unlike Discordance it can run out:
+    # 51 seconds at difficulty 300 here (Bard Necro part 2). So it is put back on as soon
+    # as the label stops showing it, rather than once per target: let it lapse and
+    # Ensemble and Virtuoso go dark with it.
     #
     # A pacified creature does not attack, and taking damage does NOT break that. Only a
     # barding break does, and while one is running neither Peace nor Provocation can land

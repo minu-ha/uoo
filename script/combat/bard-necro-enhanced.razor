@@ -601,8 +601,9 @@ endif
 # ----------------------------------------------------------------------------------------
 # module/bard/provo.razor
 # ----------------------------------------------------------------------------------------
-@setvar! var__provo_partner 0
-@setvar! var__provo_last_target 0
+@setvar! var__provo_first 0
+@setvar! var__provo_second 0
+@setvar! var__provo_skip 0
 @setvar! var__provo_answer 0
 
 
@@ -756,6 +757,17 @@ if config__summon_first = 4 and config__summon_second != 4
     if config__sysmsg = 1
         sysmsg "Summon: summon_first 4 has no known body. Put the fiend second." 88
     endif
+endif
+
+
+# ----------------------------------------------------------------------------------------
+# module/bard/provo.razor
+# ----------------------------------------------------------------------------------------
+if not listexists 'list__provo_known'
+    createlist 'list__provo_known'
+endif
+if not listexists 'list__provo_never'
+    createlist 'list__provo_never'
 endif
 
 
@@ -1757,81 +1769,122 @@ while not dead
     # ------------------------------------------------------------------------------------
     # PROVOKE                                                      module/bard/provo.razor
     # ------------------------------------------------------------------------------------
-    if var__combat_target != var__provo_last_target
-        if var__provo_last_target != 0 and var__combat_target != 0
-            @setvar! var__provo_partner var__provo_last_target
+    if var__combat_target != 0
+        if not inlist 'list__provo_known' var__combat_target
+            pushlist 'list__provo_known' var__combat_target
         endif
-        @setvar! var__provo_last_target var__combat_target
     endif
 
-    if config__use_provo = 1 and var__fighting = 1 and var__provo_partner != 0 and var__provo_partner != var__combat_target and timer "timer__provo_seen" >= interval__provo_seen and timer "timer__provo_retry" >= interval__provo_retry and cooldown "peace/provo" = 0 and cooldown "music" = 0 and skill "Provocation" > 0 and not warmode and var__instrument_ok = 1 and var__my_instrument != 0 and not targetexists and not casting
-        if find var__provo_partner ground -1 -1 config__target_range as alias__provo_partner
-            if dead alias__provo_partner
-                @setvar! var__provo_partner 0
-            elseif find var__combat_target ground -1 -1 config__target_range as alias__provo_target
-                getlabel alias__provo_partner label__provo_partner
-                getlabel alias__provo_target label__provo_target
+    if config__use_provo = 1 and var__fighting = 1 and timer "timer__provo_seen" >= interval__provo_seen and timer "timer__provo_retry" >= interval__provo_retry and cooldown "peace/provo" = 0 and cooldown "music" = 0 and skill "Provocation" > 0 and not warmode and var__instrument_ok = 1 and var__my_instrument != 0 and not targetexists and not casting
+        settimer "timer__provo_seen" 0
+        @setvar! var__provo_first 0
+        @setvar! var__provo_second 0
+        removelist 'list__provo_keep'
+        createlist 'list__provo_keep'
 
-                if "provoked" in label__provo_partner or "barding break" in label__provo_partner or "provoked" in label__provo_target or "barding break" in label__provo_target
-                    settimer "timer__provo_seen" 0
-                else
-                    useskill 'Provocation'
-                    waitfortarget wait__bard_target
+        foreach provo_mob in list__provo_known
+            if find provo_mob ground -1 -1 config__acquire_range as alias__provo_mob
+                if not dead alias__provo_mob
+                    pushlist 'list__provo_keep' provo_mob
 
-                    if insysmsg "What instrument shall you play"
-                        target var__my_instrument
-                        waitfortarget wait__bard_target
+                    if var__provo_second = 0 and provo_mob != var__combat_target and provo_mob != var__provo_skip
+                        if not inlist 'list__provo_never' provo_mob
+                            if find provo_mob ground -1 -1 config__target_range as alias__provo_near
+                                getlabel alias__provo_near label__provo_mob
 
-                        if insysmsg "That is not a musical instrument"
-                            @setvar! var__my_instrument 0
-                        endif
-                    endif
-
-                    if targetexists
-                        @setvar! var__target_hold var__provo_partner
-                        target alias__provo_partner
-                        waitfortarget wait__bard_target
-                    endif
-
-                    if targetexists
-                        target alias__provo_target
-                        wait wait__short
-                    endif
-
-                    if targetexists
-                        hotkey "Cancel Current Target"
-                        wait wait__short
-                    endif
-
-                    @setvar! var__provo_answer 0
-                    for 5
-                        if var__provo_answer = 0
-                            if insysmsg "play successfully, provoking"
-                                @setvar! var__provo_answer 1
-                            elseif insysmsg "You fail to incite" or insysmsg "too far away" or insysmsg "Target cannot be seen" or insysmsg "You must wait a few moments"
-                                @setvar! var__provo_answer 2
-                            elseif insysmsg "incite that"
-                                @setvar! var__provo_answer 3
-                            else
-                                wait wait__short
+                                if "provoked" in label__provo_mob or "barding break" in label__provo_mob
+                                    # Busy, or cannot take one now.
+                                elseif var__provo_first = 0
+                                    @setvar! var__provo_first provo_mob
+                                else
+                                    @setvar! var__provo_second provo_mob
+                                endif
                             endif
-                        endif
-                    endfor
-
-                    if var__provo_answer = 1
-                        settimer "timer__provo_seen" 0
-                    elseif var__provo_answer = 2
-                        settimer "timer__provo_retry" 0
-                    elseif var__provo_answer = 3
-                        @setvar! var__provo_partner 0
-                        if config__chatty = 1
-                            overhead "[ provo, wrong ]" 254
                         endif
                     endif
                 endif
             endif
-        elseif not find var__provo_partner ground -1 -1 config__acquire_range
-            @setvar! var__provo_partner 0
+        endfor
+
+        clearlist 'list__provo_known'
+        foreach provo_mob in list__provo_keep
+            pushlist 'list__provo_known' provo_mob
+        endfor
+
+        @setvar! var__provo_skip 0
+
+        if var__provo_first != 0 and var__provo_second = 0
+            if not inlist 'list__provo_never' var__combat_target
+                if find var__combat_target ground -1 -1 config__target_range as alias__provo_target
+                    getlabel alias__provo_target label__provo_target
+
+                    if "provoked" in label__provo_target or "barding break" in label__provo_target
+                        # Taken too. The lone one waits for the next free enemy.
+                    else
+                        @setvar! var__provo_second var__combat_target
+                    endif
+                endif
+            endif
+        endif
+
+        if var__provo_second != 0
+            useskill 'Provocation'
+            waitfortarget wait__bard_target
+
+            if insysmsg "What instrument shall you play"
+                target var__my_instrument
+                waitfortarget wait__bard_target
+
+                if insysmsg "That is not a musical instrument"
+                    @setvar! var__my_instrument 0
+                endif
+            endif
+
+            if targetexists
+                @setvar! var__target_hold var__provo_first
+                target var__provo_first
+                waitfortarget wait__bard_target
+            endif
+
+            if targetexists
+                @setvar! var__target_hold var__provo_second
+                target var__provo_second
+                wait wait__short
+            endif
+
+            if targetexists
+                hotkey "Cancel Current Target"
+                wait wait__short
+            endif
+
+            @setvar! var__provo_answer 0
+            for 5
+                if var__provo_answer = 0
+                    if insysmsg "play successfully, provoking"
+                        @setvar! var__provo_answer 1
+                    elseif insysmsg "You fail to incite" or insysmsg "You must wait a few moments"
+                        @setvar! var__provo_answer 2
+                    elseif insysmsg "too far away" or insysmsg "Target cannot be seen"
+                        @setvar! var__provo_answer 3
+                    elseif insysmsg "incite that"
+                        @setvar! var__provo_answer 4
+                    else
+                        wait wait__short
+                    endif
+                endif
+            endfor
+
+            if var__provo_answer = 2
+                settimer "timer__provo_retry" 0
+            elseif var__provo_answer = 3
+                @setvar! var__provo_skip var__provo_first
+                settimer "timer__provo_retry" 0
+            elseif var__provo_answer = 4
+                pushlist 'list__provo_never' var__provo_first
+                if config__chatty = 1
+                    overhead "[ provo, wrong ]" 254
+                endif
+            endif
         endif
     endif
 

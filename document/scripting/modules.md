@@ -64,7 +64,7 @@ order: 30
 | `module/recovery/` | 살아남기 | `cure`(마비면 파우치, 독이면 포션이나 에이전트), `heal`, `bandage`, `light-heal`, `refresh`, `heal-first`(루틴 시작에 먼저 힐) |
 | `module/magery/` | 공격 주문과 시약 | `reagents`(모든 마법 블록이 읽는 시약 표시와 서클별 마나), `rotation`(Mana Drain과 Curse, Grimoire 프록 넷, 그 사이 Energy Bolt), `flamestrike`(aspect 발동용) |
 | `module/buff/` | 버프 아이콘 유지 | `spells`(Reactive Armor, Magic Reflection, 설정에 따라 Bless, Arch Protection, Spell Siphon용 자기 Magic Arrow), `potions`(Strength, Agility, Magic Resist), `food`(Food Satisfaction), `mushroom`(Magic Mushroom 먹기와 Create Food) |
-| `module/bard/` | 바드 스킬 | `instrument`(악기 찾기와 점검), `disco`, `peace`, `provo`(대상을 바꾸면 직전 대상을 새 대상에게 프로보), `song`(이동 중 노래 셋을 차례로) |
+| `module/bard/` | 바드 스킬 | `instrument`(악기 찾기와 점검), `disco`, `peace`, `provo`(고른 적 가운데 풀린 둘씩 서로에게 프로보), `song`(이동 중 노래 셋을 차례로) |
 | `module/necro/` | 네크로 핫바와 소환수 | `symbols`(핫바 열어 두기, Unholy Symbol 수 읽기), `summon-names`(소환수 이름 바꾸기), `resummon`(Vengeful Spirit 뒤 빠진 소환수 재소환, 마나가 낮으면 Wither, 오래된 소환수 교체), `burst`(Blood Oath, Corpse Skin, Evil Omen), `poison-strike`, `vampiric-embrace` |
 | `module/tamer/` | 펫 스킬 | `herding`(목동 지팡이), `vet-kit`(나와 펫에게 수의사 키트) |
 | `module/fight/` | 근접 전투 보조 | `target`(기억한 적), `weapon-swap`(pvp 무기 슬롯), `axe`, `sword-codex`, `parry-codex`, `weapon-ability` |
