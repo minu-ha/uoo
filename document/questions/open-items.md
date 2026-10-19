@@ -859,11 +859,9 @@ order: 10
 #### 프로보와 마지막 대상(2026-10-20)
 
 - 몹 셋 이상을 Shift+Z로 한 번씩 찍어 두면 지금 대상이 아닌 둘씩 프로보, 지금 대상은 피스. 풀리거나 한쪽이 죽으면 남은 몹끼리 다시 짝
-- Shift+Z가 `lastharmful`도 바꾸는지(`debug/probe-last-targets`). V와 Q는 확인됨
 - 몹 라벨의 글자가 정확히 `provoked`인지(`in`은 대소문자 구별). 다르면 짝 판정이 늘 비어 있음
 - 거절 문장 `incite that`과 실패 문장 `fail to incite anger`가 실제로 뜨는지. 모르는 문장이 뜨면 그 몹은 한 판 건너뜀
 - 지금 대상이 죽은 뒤 마지막으로 프로보한 몹으로 루프가 넘어가는지(`var__target_hold`가 풀림)
-- Peacemaking 지속: 프로필 Barding 화면에서 종류를 Peacemaking으로 바꿔 읽기. Provocation은 51초(Bard Necro 01.D). 피스가 훨씬 짧으면 프로보가 쿨다운 칸을 먼저 가져가 피스가 끊길 수 있음
 
 #### Spell Siphon 순서
 
