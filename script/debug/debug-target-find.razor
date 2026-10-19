@@ -24,7 +24,7 @@ sysmsg "F context: pvp=0, ignore list cleared. Remain still until F END." 90
 
 @unsetvar! var__probe_find_target
 if config__probe_find_use_last_target = 1
-    @setvar! var__probe_find_target lasttarget
+    @setvar! var__probe_find_target lastharmful
 else
     overhead "[ target, pick ]" 255
     setvar! var__probe_find_target
@@ -40,7 +40,7 @@ if var__probe_find_target = 0
 endif
 
 @setvar! var__probe_find_copy var__probe_find_target
-@setvar! var__probe_find_q lasttarget
+@setvar! var__probe_find_q lastharmful
 @setvar! var__probe_find_self self
 @setvar! var__probe_find_backpack backpack
 @setvar! var__probe_find_result 0
@@ -48,7 +48,7 @@ endif
 @setvar! var__probe_find_match 0
 @setvar! var__probe_find_limited 0
 sysmsg "F context: selected={{var__probe_find_target}}, session_copy={{var__probe_find_copy}}" 90
-sysmsg "F context: lasttarget={{var__probe_find_q}}, self={{var__probe_find_self}}, backpack={{var__probe_find_backpack}}" 90
+sysmsg "F context: lastharmful={{var__probe_find_q}}, self={{var__probe_find_self}}, backpack={{var__probe_find_backpack}}" 90
 
 sysmsg "F00 BEGIN find backpack" 90
 if find backpack
@@ -139,17 +139,17 @@ else
     sysmsg "F10 FALSE" 53
 endif
 
-# Compare lasttarget only when it names the same object, so another target cannot pass for it.
-@setvar! var__probe_find_q lasttarget
+# Compare lastharmful only when it names the same object, so another target cannot pass for it.
+@setvar! var__probe_find_q lastharmful
 if var__probe_find_q = var__probe_find_target
-    sysmsg "F11 BEGIN find lasttarget ground -1 -1 18" 90
-    if find lasttarget ground -1 -1 18
+    sysmsg "F11 BEGIN find lastharmful ground -1 -1 18" 90
+    if find lastharmful ground -1 -1 18
         sysmsg "F11 TRUE" 90
     else
         sysmsg "F11 FALSE" 53
     endif
 else
-    sysmsg "F11 SKIP: lasttarget and selected serial differ. Choose this target with Q and repeat." 53
+    sysmsg "F11 SKIP: lastharmful and selected serial differ. Choose this target with Q and repeat." 53
 endif
 
 # Controlled ignore test. A failed baseline cannot demonstrate that ignore works.

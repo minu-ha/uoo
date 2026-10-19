@@ -1,5 +1,5 @@
 # Inspect target state, variable comparisons and the current combat readiness gates.
-# Needs: target previously chosen with Q/Last Target, unrestricted PvP context.
+# Needs: target previously chosen with Q (Set Last Target (Harmful)), unrestricted PvP.
 # Each G/S step prints BEGIN and its returned value. Keep any Razor warning between them.
 # A warning such as Cannot check death status means UNKNOWN, even if the expression returns 0.
 # No spells, attacks, pet commands, clearsysmsg, clearall or ignore changes.
@@ -7,7 +7,7 @@
 # Use the default Q mode to inspect a running cast or held cursor without cancelling it.
 # getlabel is last, so a blocked or failing label request cannot hide the earlier results.
 
-# 1 reads Q/Last Target without opening a cursor. 0 prompts for a fresh target when idle.
+# 1 reads the Q pick (lastharmful) without opening a cursor. 0 prompts for a fresh target.
 @setvar! config__probe_state_use_last_target 1
 
 sysmsg "TARGET STATE PROBE v1 loaded" 90
@@ -78,7 +78,7 @@ sysmsg "G05 RETURN teleki_me_bar={{var__probe_state_tk_me}}, teleki_target_bar={
 
 @unsetvar! var__probe_state_target
 if config__probe_state_use_last_target = 1
-    @setvar! var__probe_state_target lasttarget
+    @setvar! var__probe_state_target lastharmful
 else
     if casting or targetexists
         sysmsg "S STOP: cast/cursor already active. Use Q mode to inspect without replacing it." 53
@@ -97,11 +97,11 @@ if var__probe_state_target = 0
 endif
 @setvar! var__probe_state_copy var__probe_state_target
 @setvar! var__probe_state_self self
-@setvar! var__probe_state_q lasttarget
+@setvar! var__probe_state_q lastharmful
 @setvar! var__probe_state_return 0
 @setvar! var__probe_state_noto 0
 @setvar! var__probe_state_layer 0
-sysmsg "S context: selected={{var__probe_state_target}}, session_copy={{var__probe_state_copy}}, lasttarget={{var__probe_state_q}}, self={{var__probe_state_self}}" 90
+sysmsg "S context: selected={{var__probe_state_target}}, session_copy={{var__probe_state_copy}}, lastharmful={{var__probe_state_q}}, self={{var__probe_state_self}}" 90
 
 sysmsg "S01 BEGIN dead (self)" 90
 @setvar! var__probe_state_return 0
