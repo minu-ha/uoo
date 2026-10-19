@@ -1779,7 +1779,7 @@ while not dead
         settimer "timer__provo_retry" interval__provo_retry
     endif
 
-    if var__fighting = 1 and timer "timer__provo_seen" >= interval__provo_seen and timer "timer__provo_retry" >= interval__provo_retry and cooldown "peace/provo" = 0 and cooldown "music" = 0 and skill "Provocation" > 0 and not warmode and var__instrument_ok = 1 and var__my_instrument != 0 and not targetexists and not casting
+    if var__fighting = 1 and list 'list__provo_known' >= 2 and timer "timer__provo_seen" >= interval__provo_seen and timer "timer__provo_retry" >= interval__provo_retry and cooldown "peace/provo" = 0 and cooldown "music" = 0 and skill "Provocation" > 0 and not warmode and var__instrument_ok = 1 and var__my_instrument != 0 and not targetexists and not casting
         settimer "timer__provo_seen" 0
         @setvar! var__provo_first 0
         @setvar! var__provo_second 0
