@@ -66,7 +66,7 @@ order: 10
 | `script/train/` | 스킬 훈련 | `<스킬>` | `magery`, `carto` |
 | `script/gather/` | 채집 루프 | `<채집>` | `lumberjack-enhanced`, `skinning-enhanced` |
 | `script/loot/` | 주워 온 것 정리, 분해 | `<동사>-<대상>` | `recycle`, `claim-loot`, `bank-pouch` |
-| `script/restock/` | 나가기 전 준비. 로드아웃, 리필 | `<동사>-<대상>` | `loadout`, `refill-runebook` |
+| `script/restock/` | 나가기 전 준비. 로드아웃 | `<동사>-<대상>` | `loadout` |
 | `script/archive/` | 쓰지 않는 스크립트. 핫키 없음, 수정 없음, `util/check.sh` 제외. 다시 쓰려면 원래 폴더로 이동 | 원래 이름 그대로 | `bard-mace`, `hally-mage`, `lumberjack` |
 | `script/shelf/` | outlandsbutler.com이 만든 Storage Shelf 로드아웃 | `<템플릿>` | `bard-dexxer`, `sailing` |
 
