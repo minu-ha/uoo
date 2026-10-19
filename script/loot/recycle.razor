@@ -206,7 +206,8 @@ endif
 # ITEMS
 # ========================================================================================
 # Each kind is checked in turn: a kept property saves the item, an unidentified one is sent to
-# identification and seen again next run, the rest is recycled. Exceptional and aspect items stay.
+# identification and checked again once it reads identified, the rest is recycled.
+# Exceptional and aspect items stay.
 # Hue 0 spellbooks (3834) and daggers (3922) are left alone.
 while findtype 3834|3922 var__source_container 0 as alias__item
     @ignore alias__item
@@ -272,6 +273,16 @@ while findtype 31017|31019|31021|31023|31025|31027|31029|31031|31033|31035|31037
             target alias__item
             wait wait__item_id
             @setvar! var__recycle_item 0
+        endif
+
+        # Read again: one identified now is checked on the next pass of this loop, one that
+        # is still not is left for the next run, so a spent wand cannot hold the loop.
+        if var__recycle_item = 0
+            wait wait__item
+            getlabel alias__item label__item
+            if "unidentified" in label__item
+                @ignore alias__item
+            endif
         endif
     endif
 
@@ -373,6 +384,16 @@ while findtype "dual wield tracker knife|duel wield katana|dual wield norse axe|
             wait wait__item_id
             @setvar! var__recycle_item 0
         endif
+
+        # Read again: one identified now is checked on the next pass of this loop, one that
+        # is still not is left for the next run, so a spent wand cannot hold the loop.
+        if var__recycle_item = 0
+            wait wait__item
+            getlabel alias__item label__item
+            if "unidentified" in label__item
+                @ignore alias__item
+            endif
+        endif
     endif
 
     if var__save_item = 1
@@ -473,6 +494,16 @@ while findtype "chakram|francisca|hurlbat|javelin|throwing knife|throwing star|6
             wait wait__item_id
             @setvar! var__recycle_item 0
         endif
+
+        # Read again: one identified now is checked on the next pass of this loop, one that
+        # is still not is left for the next run, so a spent wand cannot hold the loop.
+        if var__recycle_item = 0
+            wait wait__item
+            getlabel alias__item label__item
+            if "unidentified" in label__item
+                @ignore alias__item
+            endif
+        endif
     endif
 
     if var__save_item = 1
@@ -572,6 +603,16 @@ while findtype 3909|3911|3913|3915|3917|3934|3937|5046|5049|5115|5119|5182|5185|
             target alias__item
             wait wait__item_id
             @setvar! var__recycle_item 0
+        endif
+
+        # Read again: one identified now is checked on the next pass of this loop, one that
+        # is still not is left for the next run, so a spent wand cannot hold the loop.
+        if var__recycle_item = 0
+            wait wait__item
+            getlabel alias__item label__item
+            if "unidentified" in label__item
+                @ignore alias__item
+            endif
         endif
     endif
 
@@ -674,6 +715,16 @@ while findtype 3568|3713|3721|3932|5040|5044|5112|5127|5177|5179|5181|30991|3099
             target alias__item
             wait wait__item_id
             @setvar! var__recycle_item 0
+        endif
+
+        # Read again: one identified now is checked on the next pass of this loop, one that
+        # is still not is left for the next run, so a spent wand cannot hold the loop.
+        if var__recycle_item = 0
+            wait wait__item
+            getlabel alias__item label__item
+            if "unidentified" in label__item
+                @ignore alias__item
+            endif
         endif
     endif
 
@@ -779,6 +830,16 @@ while findtype 31172|31169|3719|3922|3938|5121|5123|5125|30989|30992|30996|30997
             wait wait__item_id
             @setvar! var__recycle_item 0
         endif
+
+        # Read again: one identified now is checked on the next pass of this loop, one that
+        # is still not is left for the next run, so a spent wand cannot hold the loop.
+        if var__recycle_item = 0
+            wait wait__item
+            getlabel alias__item label__item
+            if "unidentified" in label__item
+                @ignore alias__item
+            endif
+        endif
     endif
 
     if var__save_item = 1
@@ -883,6 +944,16 @@ while findtype 3920|5042|5117|30990|30993|30994|30995|31184|31186 var__source_co
             wait wait__item_id
             @setvar! var__recycle_item 0
         endif
+
+        # Read again: one identified now is checked on the next pass of this loop, one that
+        # is still not is left for the next run, so a spent wand cannot hold the loop.
+        if var__recycle_item = 0
+            wait wait__item
+            getlabel alias__item label__item
+            if "unidentified" in label__item
+                @ignore alias__item
+            endif
+        endif
     endif
 
     if var__save_item = 1
@@ -966,6 +1037,16 @@ while findtype 7026|7027|7029|7031|7033|7034|7035|7107|7109|31002|31130 var__sou
             target alias__item
             wait wait__item_id
             @setvar! var__recycle_item 0
+        endif
+
+        # Read again: one identified now is checked on the next pass of this loop, one that
+        # is still not is left for the next run, so a spent wand cannot hold the loop.
+        if var__recycle_item = 0
+            wait wait__item
+            getlabel alias__item label__item
+            if "unidentified" in label__item
+                @ignore alias__item
+            endif
         endif
     endif
 
@@ -1071,6 +1152,16 @@ while findtype 3570|3571|3572|3573|3834 var__source_container as alias__item
             wait wait__item_id
             @setvar! var__recycle_item 0
         endif
+
+        # Read again: one identified now is checked on the next pass of this loop, one that
+        # is still not is left for the next run, so a spent wand cannot hold the loop.
+        if var__recycle_item = 0
+            wait wait__item
+            getlabel alias__item label__item
+            if "unidentified" in label__item
+                @ignore alias__item
+            endif
+        endif
     endif
 
     if var__save_item = 1
@@ -1175,6 +1266,16 @@ while findtype 22187|31141|31142 var__source_container as alias__item
             wait wait__item_id
             @setvar! var__recycle_item 0
         endif
+
+        # Read again: one identified now is checked on the next pass of this loop, one that
+        # is still not is left for the next run, so a spent wand cannot hold the loop.
+        if var__recycle_item = 0
+            wait wait__item
+            getlabel alias__item label__item
+            if "unidentified" in label__item
+                @ignore alias__item
+            endif
+        endif
     endif
 
     if var__save_item = 1
@@ -1278,6 +1379,16 @@ while findtype 3740|3742|3762|3763|10245|20006|20008|20010|20012|20014|20016 var
             target alias__item
             wait wait__item_id
             @setvar! var__recycle_item 0
+        endif
+
+        # Read again: one identified now is checked on the next pass of this loop, one that
+        # is still not is left for the next run, so a spent wand cannot hold the loop.
+        if var__recycle_item = 0
+            wait wait__item
+            getlabel alias__item label__item
+            if "unidentified" in label__item
+                @ignore alias__item
+            endif
         endif
     endif
 
@@ -1463,6 +1574,16 @@ while findtype 5051|5054|5055|5056|5059|5060|5061|5062|5063|5067|5068|5069|5070|
             target alias__item
             wait wait__item_id
             @setvar! var__recycle_item 0
+        endif
+
+        # Read again: one identified now is checked on the next pass of this loop, one that
+        # is still not is left for the next run, so a spent wand cannot hold the loop.
+        if var__recycle_item = 0
+            wait wait__item
+            getlabel alias__item label__item
+            if "unidentified" in label__item
+                @ignore alias__item
+            endif
         endif
     endif
 
