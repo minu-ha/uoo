@@ -287,9 +287,11 @@ endif
 if not varexist var__combat_target
     @setvar! var__combat_target 0
 endif
+if not varexist var__target_hold
+    @setvar! var__target_hold 0
+endif
 @setvar! var__fresh_serial 0
 @setvar! var__keep_lasttarget 0
-@setvar! var__target_hold 0
 
 
 # ----------------------------------------------------------------------------------------
@@ -553,8 +555,10 @@ while not dead
         settimer "timer__target_grace" 0
         if dead alias__stored_target
             @setvar! var__combat_target 0
+            @setvar! var__target_hold 0
         elseif noto alias__stored_target != "hostile" and noto alias__stored_target != "criminal" and noto alias__stored_target != "enemy" and noto alias__stored_target != "murderer"
             @setvar! var__combat_target 0
+            @setvar! var__target_hold 0
         else
             @setvar! var__fighting 1
         endif
@@ -562,9 +566,11 @@ while not dead
         settimer "timer__target_grace" 0
         if dead alias__stored_target
             @setvar! var__combat_target 0
+            @setvar! var__target_hold 0
         endif
     elseif timer "timer__target_grace" >= config__target_grace
         @setvar! var__combat_target 0
+        @setvar! var__target_hold 0
     endif
 
     if paralyzed or poisoned or diffhits > 0

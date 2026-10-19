@@ -144,12 +144,6 @@
 
 
 # ----------------------------------------------------------------------------------------
-# module/bard/provo.razor
-# ----------------------------------------------------------------------------------------
-@setvar! config__use_provo 1
-
-
-# ----------------------------------------------------------------------------------------
 # module/necro/burst.razor
 # ----------------------------------------------------------------------------------------
 @setvar! config__symbols_blood_oath 4
@@ -517,9 +511,11 @@ settimer "timer__housekeeping" interval__housekeeping
 if not varexist var__combat_target
     @setvar! var__combat_target 0
 endif
+if not varexist var__target_hold
+    @setvar! var__target_hold 0
+endif
 @setvar! var__fresh_serial 0
 @setvar! var__keep_lasttarget 0
-@setvar! var__target_hold 0
 
 
 # ----------------------------------------------------------------------------------------
@@ -604,6 +600,7 @@ endif
 @setvar! var__provo_first 0
 @setvar! var__provo_second 0
 @setvar! var__provo_skip 0
+@setvar! var__provo_dropped 0
 @setvar! var__provo_answer 0
 
 
@@ -766,9 +763,11 @@ endif
 if not listexists 'list__provo_known'
     createlist 'list__provo_known'
 endif
-if not listexists 'list__provo_never'
-    createlist 'list__provo_never'
+if not listexists 'list__provo_keep'
+    createlist 'list__provo_keep'
 endif
+removelist 'list__provo_never'
+createlist 'list__provo_never'
 
 
 # ----------------------------------------------------------------------------------------
@@ -986,8 +985,10 @@ while not dead
         settimer "timer__target_grace" 0
         if dead alias__stored_target
             @setvar! var__combat_target 0
+            @setvar! var__target_hold 0
         elseif noto alias__stored_target != "hostile" and noto alias__stored_target != "criminal" and noto alias__stored_target != "enemy" and noto alias__stored_target != "murderer"
             @setvar! var__combat_target 0
+            @setvar! var__target_hold 0
         else
             @setvar! var__fighting 1
         endif
@@ -995,9 +996,11 @@ while not dead
         settimer "timer__target_grace" 0
         if dead alias__stored_target
             @setvar! var__combat_target 0
+            @setvar! var__target_hold 0
         endif
     elseif timer "timer__target_grace" >= config__target_grace
         @setvar! var__combat_target 0
+        @setvar! var__target_hold 0
     endif
 
     # ------------------------------------------------------------------------------------
@@ -1769,22 +1772,24 @@ while not dead
     # ------------------------------------------------------------------------------------
     # PROVOKE                                                      module/bard/provo.razor
     # ------------------------------------------------------------------------------------
-    if var__combat_target != 0
-        if not inlist 'list__provo_known' var__combat_target
-            pushlist 'list__provo_known' var__combat_target
-        endif
+    if var__combat_target != 0 and not inlist 'list__provo_known' var__combat_target
+        pushlist 'list__provo_known' var__combat_target
+        settimer "timer__provo_seen" interval__provo_seen
+        settimer "timer__provo_retry" interval__provo_retry
     endif
 
-    if config__use_provo = 1 and var__fighting = 1 and timer "timer__provo_seen" >= interval__provo_seen and timer "timer__provo_retry" >= interval__provo_retry and cooldown "peace/provo" = 0 and cooldown "music" = 0 and skill "Provocation" > 0 and not warmode and var__instrument_ok = 1 and var__my_instrument != 0 and not targetexists and not casting
+    if var__fighting = 1 and timer "timer__provo_seen" >= interval__provo_seen and timer "timer__provo_retry" >= interval__provo_retry and cooldown "peace/provo" = 0 and cooldown "music" = 0 and skill "Provocation" > 0 and not warmode and var__instrument_ok = 1 and var__my_instrument != 0 and not targetexists and not casting
         settimer "timer__provo_seen" 0
         @setvar! var__provo_first 0
         @setvar! var__provo_second 0
-        removelist 'list__provo_keep'
-        createlist 'list__provo_keep'
+        @setvar! var__provo_dropped 0
+        clearlist 'list__provo_keep'
 
         foreach provo_mob in list__provo_known
             if find provo_mob ground -1 -1 config__acquire_range as alias__provo_mob
-                if not dead alias__provo_mob
+                if dead alias__provo_mob
+                    @setvar! var__provo_dropped 1
+                else
                     pushlist 'list__provo_keep' provo_mob
 
                     if var__provo_second = 0 and provo_mob != var__combat_target and provo_mob != var__provo_skip
@@ -1803,13 +1808,17 @@ while not dead
                         endif
                     endif
                 endif
+            else
+                @setvar! var__provo_dropped 1
             endif
         endfor
 
-        clearlist 'list__provo_known'
-        foreach provo_mob in list__provo_keep
-            pushlist 'list__provo_known' provo_mob
-        endfor
+        if var__provo_dropped = 1
+            clearlist 'list__provo_known'
+            foreach provo_mob in list__provo_keep
+                pushlist 'list__provo_known' provo_mob
+            endfor
+        endif
 
         @setvar! var__provo_skip 0
 
@@ -1827,7 +1836,22 @@ while not dead
             endif
         endif
 
-        if var__provo_second != 0
+        if var__provo_second = 0
+            settimer "timer__provo_retry" 0
+        else
+            if insysmsg "play successfully, provoking"
+                # Read off, with the three below, before this round's answer.
+            endif
+            if insysmsg "too far away"
+                # Read off.
+            endif
+            if insysmsg "Target cannot be seen"
+                # Read off.
+            endif
+            if insysmsg "You must wait a few moments"
+                # Read off.
+            endif
+
             useskill 'Provocation'
             waitfortarget wait__bard_target
 
@@ -1862,28 +1886,28 @@ while not dead
                 if var__provo_answer = 0
                     if insysmsg "play successfully, provoking"
                         @setvar! var__provo_answer 1
-                    elseif insysmsg "You fail to incite" or insysmsg "You must wait a few moments"
+                    elseif insysmsg "fail to incite anger"
                         @setvar! var__provo_answer 2
                     elseif insysmsg "too far away" or insysmsg "Target cannot be seen"
                         @setvar! var__provo_answer 3
                     elseif insysmsg "incite that"
                         @setvar! var__provo_answer 4
+                    elseif insysmsg "You must wait a few moments"
+                        @setvar! var__provo_answer 5
                     else
                         wait wait__short
                     endif
                 endif
             endfor
 
-            if var__provo_answer = 2
+            if var__provo_answer = 4
+                pushlist 'list__provo_never' var__provo_first
+                overhead "[ provo, wrong ]" 1288 var__provo_first
+            elseif var__provo_answer = 5
                 settimer "timer__provo_retry" 0
-            elseif var__provo_answer = 3
+            elseif var__provo_answer = 3 or var__provo_answer = 0
                 @setvar! var__provo_skip var__provo_first
                 settimer "timer__provo_retry" 0
-            elseif var__provo_answer = 4
-                pushlist 'list__provo_never' var__provo_first
-                if config__chatty = 1
-                    overhead "[ provo, wrong ]" 254
-                endif
             endif
         endif
     endif

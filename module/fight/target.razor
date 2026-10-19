@@ -46,15 +46,20 @@ timer__target_grace config__target_grace
 #      in lastharmful, so it leaves the cursor and the enemy to the player.
 #
 #   var__target_hold
-#      An enemy a block targeted for its own use, the bard/provo partner. While
-#      lastharmful still shows it, it is not taken for a pick. 0 when none.
+#      An enemy a block targeted for its own use, such as the second one bard/provo
+#      targets. While lastharmful still shows it, it is not taken for a pick. Cleared
+#      when the remembered enemy is dropped: lastharmful counts again, so the loop moves
+#      on to the held one if it is still a live enemy, and a pick of it registers. Kept
+#      across Plays, like the enemy itself. 0 when none.
 # ----------------------------------------------------------------------------------------
 if not varexist var__combat_target
     @setvar! var__combat_target 0
 endif
+if not varexist var__target_hold
+    @setvar! var__target_hold 0
+endif
 @setvar! var__fresh_serial 0
 @setvar! var__keep_lasttarget 0
-@setvar! var__target_hold 0
 
 
 # ----------------------------------------------------------------------------------------
@@ -107,8 +112,10 @@ endif
         settimer "timer__target_grace" 0
         if dead alias__stored_target
             @setvar! var__combat_target 0
+            @setvar! var__target_hold 0
         elseif noto alias__stored_target != "hostile" and noto alias__stored_target != "criminal" and noto alias__stored_target != "enemy" and noto alias__stored_target != "murderer"
             @setvar! var__combat_target 0
+            @setvar! var__target_hold 0
         else
             @setvar! var__fighting 1
         endif
@@ -116,7 +123,9 @@ endif
         settimer "timer__target_grace" 0
         if dead alias__stored_target
             @setvar! var__combat_target 0
+            @setvar! var__target_hold 0
         endif
     elseif timer "timer__target_grace" >= config__target_grace
         @setvar! var__combat_target 0
+        @setvar! var__target_hold 0
     endif

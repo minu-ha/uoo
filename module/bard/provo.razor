@@ -7,33 +7,24 @@
 # to death is paired again from whatever is free, with no limit on the number of pairs.
 # The spells and the other bard skills stay on your current target. There is no search
 # for enemies you never picked: Razor has no expression that finds an enemy, and the
-# Next Monster Target hotkeys move the last target, which fight/target takes for a pick.
+# Next Monster Target hotkeys move lastharmful, which fight/target takes for a pick.
+# Leave the block out of the recipe to stop provoking.
 #
 # @ hotkeys Cancel Current Target
 # ----------------------------------------------------------------------------------------
 
 
 # ----------------------------------------------------------------------------------------
-# @ config
-#
-#   config__use_provo
-#      1 provokes the enemies you picked onto each other. 0 never provokes. They have to
-#      be inside config__target_range, the reach of every bard skill here.
-# ----------------------------------------------------------------------------------------
-@setvar! config__use_provo 1
-
-
-# ----------------------------------------------------------------------------------------
 # @ wait
 #
 #   interval__provo_seen
-#      How often the pool is looked over, the same two seconds bard/peace reads its
-#      labels on.
+#      How often the pool is looked over while pairs are being made, the same two
+#      seconds bard/peace reads its labels on.
 #
 #   interval__provo_retry
-#      How long a provocation that failed, or could not reach the pair, waits before the
-#      next try. Five seconds is the skill cooldown after a failure (wiki, Bard Necro
-#      part 2).
+#      How long the next round waits after one that found nothing to provoke, or could
+#      not reach its pair. A new pick cuts it short. A plain failure needs no wait of its
+#      own: "fail to incite anger" starts the 5 second peace/provo bar (cooldowns.xml).
 # ----------------------------------------------------------------------------------------
 @setvar! interval__provo_seen 2000
 @setvar! interval__provo_retry 5000
@@ -58,30 +49,36 @@ timer__provo_retry interval__provo_retry
 #
 #   var__provo_skip
 #      An enemy left out of the next round because the last provocation could not reach
-#      it, so another pair gets the try. 0 when none.
+#      it, or got an answer this block does not know, so another pair gets the try.
+#
+#   var__provo_dropped
+#      Scratch: 1 when the round found an enemy dead or gone, so the pool is rebuilt.
 #
 #   var__provo_answer
-#      Scratch: what the server answered, 0 nothing yet, 1 provoked, 2 try again later,
-#      3 out of reach, 4 the first one cannot be provoked.
+#      Scratch: what the server answered, 0 nothing known, 1 provoked, 2 failed, 3 out of
+#      reach, 4 the first one cannot be provoked, 5 the slot was not free yet.
 # ----------------------------------------------------------------------------------------
 @setvar! var__provo_first 0
 @setvar! var__provo_second 0
 @setvar! var__provo_skip 0
+@setvar! var__provo_dropped 0
 @setvar! var__provo_answer 0
 
 
 # ----------------------------------------------------------------------------------------
 # @ setup
 # ----------------------------------------------------------------------------------------
-# The pool, and the enemies that refused a provocation outright. Kept across Plays, so a
-# loop that recycle restarts still knows the fight. Dead and far ones leave on the next
-# round.
+# The pool is kept across Plays, so a loop that recycle restarts still knows the fight.
+# Dead and far ones leave on the next round. The enemies that refused a provocation
+# outright get a new chance on every Play, in case the refusal was a passing one.
 if not listexists 'list__provo_known'
     createlist 'list__provo_known'
 endif
-if not listexists 'list__provo_never'
-    createlist 'list__provo_never'
+if not listexists 'list__provo_keep'
+    createlist 'list__provo_keep'
 endif
+removelist 'list__provo_never'
+createlist 'list__provo_never'
 
 
 # ----------------------------------------------------------------------------------------
@@ -91,44 +88,47 @@ endif
     # PROVOKE
     #
     # Runs on every pass, outside the fight group, so every pick joins the pool even when
-    # it is still out of reach. The pool is rebuilt on each round: an enemy that died, or
-    # left config__acquire_range, is dropped.
+    # it is still out of reach. A new pick also cuts the wait short, so it is provoked
+    # within a pass. An enemy that died, or left config__acquire_range, is dropped from
+    # the pool on the next round.
     #
-    # The order is the order you picked them in, the current target last, used only for
-    # an odd one out: two free enemies away from it fight each other while it keeps its
-    # Peace. With three, A and B provoked and C your target, A and B are provoked again
-    # when it runs out and C stays pacified. A pacified creature can still be provoked:
-    # the first test provoked A out of its Peace (user check, 2026-10-20).
+    # Pairs follow the pool order, which is the order the enemies were first picked. The
+    # current target is skipped in that walk and only takes a lone free one: two free
+    # enemies away from it fight each other while it keeps its Peace. With three, A and B
+    # provoked and C your target, A and B are provoked again when it runs out and C stays
+    # pacified. A pacified creature can still be provoked (Bard Necro 02.P).
     #
     # Peace and Provocation share one server slot (Bard Necro part 2), so this goes
-    # before bard/peace in the pass and takes the slot whenever a pair is free. One lasts
-    # 51 seconds here (Bard Necro part 2), so the 10 second slot has room for several
-    # pairs and the Peace. bard/peace leaves a provoked target alone, and Ensemble still
-    # counts it: its condition is Discord and Peace or Provocation.
+    # before bard/peace and bard/disco in the pass and takes the slot, and Music, whenever
+    # a pair is free. A provocation lasts 51 seconds here (Bard Necro 01.D), so a pair
+    # takes the slot about once a minute. bard/peace leaves a provoked target alone, and
+    # Ensemble still counts it: its condition is Discord and Peace or Provocation.
     #
     # The first enemy is targeted, then the second, and each goes into var__target_hold
     # just before: the last one targeted is not always the current target, and a refused
-    # first target leaves the last target on that one, so no block takes either for a
-    # pick.
-    # The answers are the lines other Outlands bard scripts read. The success line also
-    # raises the peace/provo bar and the profile's [ provo, target ] overhead.
+    # first target leaves lastharmful on that one, so no block takes either for a pick.
+    # The Journal lines this reads are read off first, so a line left over from a cast
+    # cannot pass for this answer. The answers are the lines other Outlands bard scripts
+    # read, and "fail to incite anger" is the one cooldowns.xml and the profile key on.
     # ------------------------------------------------------------------------------------
-    if var__combat_target != 0
-        if not inlist 'list__provo_known' var__combat_target
-            pushlist 'list__provo_known' var__combat_target
-        endif
+    if var__combat_target != 0 and not inlist 'list__provo_known' var__combat_target
+        pushlist 'list__provo_known' var__combat_target
+        settimer "timer__provo_seen" interval__provo_seen
+        settimer "timer__provo_retry" interval__provo_retry
     endif
 
-    if config__use_provo = 1 and var__fighting = 1 and timer "timer__provo_seen" >= interval__provo_seen and timer "timer__provo_retry" >= interval__provo_retry and cooldown "peace/provo" = 0 and cooldown "music" = 0 and skill "Provocation" > 0 and not warmode and var__instrument_ok = 1 and var__my_instrument != 0 and not targetexists and not casting
+    if var__fighting = 1 and timer "timer__provo_seen" >= interval__provo_seen and timer "timer__provo_retry" >= interval__provo_retry and cooldown "peace/provo" = 0 and cooldown "music" = 0 and skill "Provocation" > 0 and not warmode and var__instrument_ok = 1 and var__my_instrument != 0 and not targetexists and not casting
         settimer "timer__provo_seen" 0
         @setvar! var__provo_first 0
         @setvar! var__provo_second 0
-        removelist 'list__provo_keep'
-        createlist 'list__provo_keep'
+        @setvar! var__provo_dropped 0
+        clearlist 'list__provo_keep'
 
         foreach provo_mob in list__provo_known
             if find provo_mob ground -1 -1 config__acquire_range as alias__provo_mob
-                if not dead alias__provo_mob
+                if dead alias__provo_mob
+                    @setvar! var__provo_dropped 1
+                else
                     pushlist 'list__provo_keep' provo_mob
 
                     if var__provo_second = 0 and provo_mob != var__combat_target and provo_mob != var__provo_skip
@@ -147,13 +147,17 @@ endif
                         endif
                     endif
                 endif
+            else
+                @setvar! var__provo_dropped 1
             endif
         endfor
 
-        clearlist 'list__provo_known'
-        foreach provo_mob in list__provo_keep
-            pushlist 'list__provo_known' provo_mob
-        endfor
+        if var__provo_dropped = 1
+            clearlist 'list__provo_known'
+            foreach provo_mob in list__provo_keep
+                pushlist 'list__provo_known' provo_mob
+            endfor
+        endif
 
         @setvar! var__provo_skip 0
 
@@ -172,7 +176,23 @@ endif
             endif
         endif
 
-        if var__provo_second != 0
+        if var__provo_second = 0
+            # Nothing to provoke: look again in five seconds, or at the next pick.
+            settimer "timer__provo_retry" 0
+        else
+            if insysmsg "play successfully, provoking"
+                # Read off, with the three below, before this round's answer.
+            endif
+            if insysmsg "too far away"
+                # Read off.
+            endif
+            if insysmsg "Target cannot be seen"
+                # Read off.
+            endif
+            if insysmsg "You must wait a few moments"
+                # Read off.
+            endif
+
             useskill 'Provocation'
             waitfortarget wait__bard_target
 
@@ -210,28 +230,31 @@ endif
                 if var__provo_answer = 0
                     if insysmsg "play successfully, provoking"
                         @setvar! var__provo_answer 1
-                    elseif insysmsg "You fail to incite" or insysmsg "You must wait a few moments"
+                    elseif insysmsg "fail to incite anger"
                         @setvar! var__provo_answer 2
                     elseif insysmsg "too far away" or insysmsg "Target cannot be seen"
                         @setvar! var__provo_answer 3
                     elseif insysmsg "incite that"
                         @setvar! var__provo_answer 4
+                    elseif insysmsg "You must wait a few moments"
+                        @setvar! var__provo_answer 5
                     else
                         wait wait__short
                     endif
                 endif
             endfor
 
-            if var__provo_answer = 2
+            # Provoked and failed are both held by the peace/provo bar. The rest wait, and
+            # an answer this block does not know, or none, leaves the first one out next
+            # time, so one refusal cannot hold every round.
+            if var__provo_answer = 4
+                pushlist 'list__provo_never' var__provo_first
+                overhead "[ provo, wrong ]" 1288 var__provo_first
+            elseif var__provo_answer = 5
                 settimer "timer__provo_retry" 0
-            elseif var__provo_answer = 3
+            elseif var__provo_answer = 3 or var__provo_answer = 0
                 @setvar! var__provo_skip var__provo_first
                 settimer "timer__provo_retry" 0
-            elseif var__provo_answer = 4
-                pushlist 'list__provo_never' var__provo_first
-                if config__chatty = 1
-                    overhead "[ provo, wrong ]" 254
-                endif
             endif
         endif
     endif
