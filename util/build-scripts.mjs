@@ -1,14 +1,15 @@
 #!/usr/bin/env node
 /**
- * Assemble Razor loops from module/ and recipe/ (design: document/scripting/modules.md).
+ * Assemble Razor loops and once-only routines from module/ and recipe/ (design:
+ * document/scripting/modules.md).
  * Usage: the USAGE lines below, also printed on a wrong flag.
  *
  * Both kinds of file are made of boxes: a rule, the "# @" line, a blank "#" line and the "#" lines
  * explaining what follows, a rule, then the lines it explains, joined up. Rules are "-", and "=" for
  * the four parts of a recipe. "#@" still reads as "# @".
  *
- * Module: module/<folder>/<name>.razor, called <folder>/<name>. One block of a loop, the folder
- * says what it looks after. module/base.razor is the frame of every loop.
+ * Module: module/<folder>/<name>.razor, called <folder>/<name>. One block of a loop or routine,
+ * the folder says what it looks after. module/base.razor is the frame of every one.
  *     head box               what the block does (the first line is the summary), "# @ hotkeys A, B"
  *     # @ config box         "#   name" and "#      what it does" for each config__ setting, then
  *                            under the box the @setvar! lines with the defaults, joined up
@@ -18,8 +19,9 @@
  *     # @ state box          var__ state, written the same way. Guards (if not varexist) may wrap them
  *     # @ setup, loop, end   code under a box with only the "# @" line. end is base only. A loop or
  *                            end block starts with its "-" banner: the title, what it does, a rule.
- *                            The built loop keeps the rules and the title, with the module path,
- *                            and no comment between the code lines but the one a branch is made of
+ *                            The built loop keeps the rules and the title, with the module path.
+ *                            Setup, loop, end and the recipe's state and setup keep no comment
+ *                            between code lines but the one a branch is made of
  * Every name a section declares is described in its box, and each name belongs to one module.
  * A block may use the names of any module the loop has. The builder works out which those are.
  *
@@ -146,8 +148,8 @@ const banner = (name) => [PART, `# ${name}`, PART];
 /**
  * Code without its comments: what a line does and why is written in the module. A comment
  * that is all a branch holds stays, so no branch is left empty (an "if insysmsg" that only
- * reads a line off). A blank line goes when it only framed a comment: after another blank,
- * at the top of a branch, or right before its end.
+ * reads a line off). Blank lines are tidied with them: never two in a row, none at the top
+ * of a branch or right before its end.
  */
 const withoutComments = (lines, kept = () => false) => {
     const code = lines.filter((line, i) => {
