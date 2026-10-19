@@ -358,7 +358,7 @@ flowchart TD
   - `while` 조건에도 변수 크기 비교 금지(선례 없음)
 - **`as` alias를 묶은 블록 밖에서 읽기**: `if findtype … as alias__x`와 `endif` 뒤에서 `alias__x`를 읽으면 `4294967295`, `noto`가 `Mobile … not found`
   - 블록 안에서 `@setvar! var__x alias__x`로 복사. 모듈의 alias가 모두 블록 안에서만 쓰이는 이유
-- **`getlabel` 라벨을 블록 밖에서 읽기**: `if findlayer … as alias__x` 안에서 `getlabel alias__x label__y`, `endif` 뒤의 `sysmsg "… {{label__y}}"`가 `<not found>`(2026-10-19 `gear/aspect` 방어구 진단 줄의 Journal)
+- **`getlabel` 라벨을 블록 밖에서 읽기**: `if findlayer … as alias__x` 안에서 `getlabel alias__x label__y`, `endif` 뒤의 `sysmsg "… {{label__y}}"`가 `<not found>`(2026-10-19 `gear/aspect` 방어구 진단 줄의 Journal. 그 줄은 커밋 `dc675e2`, 블록은 그 뒤 다시 씀)
   - 같은 실행에서 `getlabel`과 같은 블록 안의 `sysmsg`는 손에 든 주문서 라벨을 그대로 찍음 → alias처럼 블록을 벗어나면 사라지는 것으로 판단
 - **단어를 변수에 담기**: `@setvar! var__x nomeeheh`는 따옴표 유무와 무관하게 `4294967295`(2026-09-28 프로브)
   - 숫자 `5000`은 `5000`, `0x622396`은 10진수 `6431638`. 변수에는 숫자와 serial만

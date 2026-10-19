@@ -225,7 +225,7 @@ VS Code: `util/razor-syntax` 폴더를 확장으로 추가.
 | `cooldown__` | Razor 쿨다운 바 길이(`cooldown "heal pot" cooldown__heal_potion`). 쿨다운 바에만 | 세션 |
 | `var__` | 스크립트가 든 상태 | 세션 |
 | `alias__` | `find`, `findtype`의 `as`로 묶은 결과. 블록 밖에서 쓰려면 `var__`로 옮김([Razor](razor.md#03) 03절) | 묶은 블록 안 |
-| `label__` | `getlabel` 결과 | 세션 |
+| `label__` | `getlabel` 결과. 블록 밖에서는 `<not found>`([Razor](razor.md#03) 03절) | `getlabel`을 부른 블록 안 |
 | `timer__` | `createtimer`, `settimer` 대상 | 세션 |
 | `list__` | `createlist`, `pushlist` 대상. `foreach x in list__y`의 루프 변수 `x`는 접두 없음 | 세션 |
 | `global__` | **프로필에 저장되는 값** | 영속 |

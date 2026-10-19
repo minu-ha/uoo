@@ -891,7 +891,6 @@ loadout과 regear는 같은 `gear/aspect` 블록을 씀. 동작 설명은 각 �
 
 - aspect 근거: [Aspect Mastery](https://wiki.uooutlands.com/Aspect_Mastery): 켤 때마다 Arcane Essence 5, 죽으면 장비의 aspect가 풀림
 - 같은 날 `gear/aspect`를 `[aspect` gump의 Activate 버튼으로 바꿈. 기억 없이 매번 누름. 버튼 번호와 이유는 `module/gear/aspect.razor` 머리 주석
-- gump의 무기 줄과 주문서 줄은 같은 aspect로 맞춰 둘 것. 누르는 줄은 `aspect_hand_row`(기본 주문서 줄)
 
 #### 새 스크립트
 
