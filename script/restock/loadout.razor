@@ -781,12 +781,7 @@ if varexist global__my_supply_pouch and find global__my_supply_pouch backpack
     endwhile
 
     while findtype 20496|3997 backpack as alias__found_item
-        if find alias__found_item global__my_supply_pouch
-            # Already in the supply pouch.
-        else
-            pushlist list__sorting_tool alias__found_item
-        endif
-
+        pushlist list__sorting_tool alias__found_item
         @ignore alias__found_item
     endwhile
 
@@ -797,8 +792,6 @@ if varexist global__my_supply_pouch and find global__my_supply_pouch backpack
             else
                 pushlist list__sorting_dagger alias__found_item
             endif
-        elseif find alias__found_item global__my_supply_pouch
-            # Already in the supply pouch, its place without a loot bag.
         else
             pushlist list__sorting_dagger alias__found_item
         endif
@@ -807,12 +800,7 @@ if varexist global__my_supply_pouch and find global__my_supply_pouch backpack
     endwhile
 
     while findtype 3617|2726|3998|3999|3553|11552|11564|52149|5370|28879|28880|28881|28883|28885|28886|28888|29773|29774|29012 backpack as alias__found_item
-        if find alias__found_item global__my_supply_pouch
-            # Already in the supply pouch.
-        else
-            pushlist list__sorting_item alias__found_item
-        endif
-
+        pushlist list__sorting_item alias__found_item
         @ignore alias__found_item
     endwhile
 
