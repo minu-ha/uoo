@@ -1,72 +1,68 @@
 # ----------------------------------------------------------------------------------------
-# Remembers the aspects on the held item and the armor, and turns a lost one back on.
+# Turns the aspects of the held item and the armor back on through the [aspect gump.
 # Activated gear loses its aspect when you die, and its name loses the "<name> aspect"
-# words with it (user check, 2026-10-19). So the names are read first. A name that still
-# carries an aspect is remembered and costs nothing. One that lost it gets the remembered
-# aspect back through [AspectWeapon, [AspectSpellbook or [AspectArmor (wiki Commands),
-# which apply to what is held and to the armor worn, 5 Arcane Essence each. Remembered for
-# the Razor session, like gear/dress, so each character keeps its own: run restock/loadout
-# once with the aspect on, and a death later is covered.
+# words with it (user check, 2026-10-19). So the names are read first, and only what lost
+# its aspect is activated, 5 Arcane Essence each. The gump rows are what the server keeps
+# for the character, so nothing is remembered here: the first run after a death or after a
+# client restart works as well.
 #
-# A word cannot sit in a variable, so the aspect is a number, the order of the wiki's
-# Aspect Mastery list, and every command is a literal in its own branch.
+# The weapon row and the spellbook row share one active aspect: activating either turns
+# every weapon and spellbook to it (user check, 2026-10-19). Neither the item in hand nor
+# the skills tell which one a character wants, hybrids carry both. So set both rows to the
+# same aspect, and aspect_hand_row picks the one pressed.
 #
-#   0 Agorawave   5 Command      10 Fire        15 Holy        20 Shadow
-#   1 Air         6 Death        11 Fortune     16 Lightning   21 Temporal
-#   2 Arcane      7 Discipline   12 Frost       17 Lyric       22 Void
-#   3 Artisan     8 Earth        13 Gadget      18 Madness     23 War
-#   4 Blood       9 Eldritch     14 Harvest     19 Poison      24 Water
+# Gump 2424293173, Activate buttons 8 weapon, 13 spellbook, 17 armor, each pressed twice
+# the way the screen needs it (Razor recording, user check 2026-10-19). Button 102 leaves
+# the unlocked list for the rows, after the "Dress Suite - Aspect" script by thisideasucks
+# on outlands.uorazorscripts.com.
 #
-# The armor is read off the first armor layer that shows an aspect, head, neck, gloves,
-# arms, inner torso, inner legs in that order, and judged lost when none of them shows
-# one. The names are matched in lower case, the way Razor shows them.
+# The armor is read off the armor layers, head, neck, gloves, arms, inner torso and inner
+# legs, and judged lost when one is worn and none shows an aspect. Names are matched in
+# lower case, the way Razor shows them.
 # ----------------------------------------------------------------------------------------
+
+
+# ----------------------------------------------------------------------------------------
+# @ config
+#
+#   config__aspect_hand_row
+#      The gump row pressed when the held item lost its aspect.
+#        0  none: the hand is left alone
+#        1  the weapon row
+#        2  the spellbook row
+#      Both share one aspect, so with the two rows set alike either does.
+# ----------------------------------------------------------------------------------------
+@setvar! config__aspect_hand_row 2
 
 
 # ----------------------------------------------------------------------------------------
 # @ wait
 #
 #   wait__aspect
-#      How long an activation gets before the name is read again.
+#      How long an activation gets before the names are read again.
+#
+#   wait__aspect_gump
+#      How long the gump may take to open, or to come back after a press.
 # ----------------------------------------------------------------------------------------
 @setvar! wait__aspect 1000
+@setvar! wait__aspect_gump 1000
 
 
 # ----------------------------------------------------------------------------------------
 # @ state
 #
-#   var__aspect_hand, var__aspect_armor
-#      The remembered aspects, 99 for none yet. Kept across runs for the Razor session.
+#   var__aspect_hand_item, var__aspect_armor_piece, var__aspect_armor_item
+#      Scratch: the held item, the first armor piece worn, and the first one that shows
+#      an aspect.
 #
-#   var__aspect_hand_item, var__aspect_armor_item, var__aspect_armor_piece, var__aspect_item
-#      Scratch: the held item, the first armor piece showing an aspect, the first armor
-#      piece worn, and the one being read.
-#
-#   var__aspect_book
-#      Scratch: 1 when the held item is a spellbook.
-#
-#   var__aspect_found, var__aspect_hand_found, var__aspect_armor_found
-#      Scratch: the aspect read off a name, 99 for none.
-#
-#   var__aspect_kind, var__aspect_type
-#      Scratch: the aspect to turn on, and its command: 1 weapon, 2 spellbook, 3 armor.
+#   var__aspect_hand_lost, var__aspect_armor_lost
+#      Scratch: 1 when that one is activated this run.
 # ----------------------------------------------------------------------------------------
-if not varexist var__aspect_hand
-    @setvar! var__aspect_hand 99
-endif
-if not varexist var__aspect_armor
-    @setvar! var__aspect_armor 99
-endif
 @setvar! var__aspect_hand_item 0
-@setvar! var__aspect_armor_item 0
 @setvar! var__aspect_armor_piece 0
-@setvar! var__aspect_item 0
-@setvar! var__aspect_book 0
-@setvar! var__aspect_found 99
-@setvar! var__aspect_hand_found 99
-@setvar! var__aspect_armor_found 99
-@setvar! var__aspect_kind 99
-@setvar! var__aspect_type 0
+@setvar! var__aspect_armor_item 0
+@setvar! var__aspect_hand_lost 0
+@setvar! var__aspect_armor_lost 0
 
 
 # ----------------------------------------------------------------------------------------
@@ -78,22 +74,23 @@ while queued
 endwhile
 
 # The held item. The right hand holds a one-handed weapon or the spellbook, the left a
-# two-handed weapon.
+# two-handed weapon. Empty hands leave the hand alone.
 if findlayer self righthand as alias__aspect_item
     @setvar! var__aspect_hand_item alias__aspect_item
 elseif findlayer self lefthand as alias__aspect_item
     @setvar! var__aspect_hand_item alias__aspect_item
 endif
 
-if var__aspect_hand_item != 0
+if config__aspect_hand_row != 0 and var__aspect_hand_item != 0
+    @setvar! var__aspect_hand_lost 1
     getlabel var__aspect_hand_item label__aspect_hand
-    if "spellbook" in label__aspect_hand
-        @setvar! var__aspect_book 1
+    if "aspect" in label__aspect_hand
+        @setvar! var__aspect_hand_lost 0
     endif
 endif
 
-# The armor. The first piece worn is kept for the check after an activation. The first one
-# that shows an aspect is the one read.
+# The armor. The first piece worn is kept for the check after an activation. The armor
+# still has its aspect while any piece shows one.
 if findlayer self head as alias__aspect_item
     @setvar! var__aspect_armor_piece alias__aspect_item
     getlabel alias__aspect_item label__aspect_armor
@@ -162,348 +159,74 @@ if var__aspect_armor_item = 0
     endif
 endif
 
-# Read the aspects: one pass for the held item, one for the armor, through the same chain.
-# 99 when the name shows no aspect, or nothing is there to read.
-for 2
-    @setvar! var__aspect_found 99
-    @setvar! var__aspect_item 0
+if var__aspect_armor_piece != 0 and var__aspect_armor_item = 0
+    @setvar! var__aspect_armor_lost 1
+endif
 
-    if index = 0
-        @setvar! var__aspect_item var__aspect_hand_item
-    else
-        @setvar! var__aspect_item var__aspect_armor_item
+# The activation. The armor first, then the hand, the order the screen takes.
+if var__aspect_hand_lost = 1 or var__aspect_armor_lost = 1
+    say "[aspect"
+    waitforgump 2424293173 wait__aspect_gump
+
+    if ingump "Show Only Unlocked" 2424293173
+        gumpresponse 102 2424293173
+        waitforgump 2424293173 wait__aspect_gump
     endif
 
-    if var__aspect_item != 0
-        getlabel var__aspect_item label__aspect_read
-
-        if "agorawave aspect" in label__aspect_read
-            @setvar! var__aspect_found 0
-        elseif "air aspect" in label__aspect_read
-            @setvar! var__aspect_found 1
-        elseif "arcane aspect" in label__aspect_read
-            @setvar! var__aspect_found 2
-        elseif "artisan aspect" in label__aspect_read
-            @setvar! var__aspect_found 3
-        elseif "blood aspect" in label__aspect_read
-            @setvar! var__aspect_found 4
-        elseif "command aspect" in label__aspect_read
-            @setvar! var__aspect_found 5
-        elseif "death aspect" in label__aspect_read
-            @setvar! var__aspect_found 6
-        elseif "discipline aspect" in label__aspect_read
-            @setvar! var__aspect_found 7
-        elseif "earth aspect" in label__aspect_read
-            @setvar! var__aspect_found 8
-        elseif "eldritch aspect" in label__aspect_read
-            @setvar! var__aspect_found 9
-        elseif "fire aspect" in label__aspect_read
-            @setvar! var__aspect_found 10
-        elseif "fortune aspect" in label__aspect_read
-            @setvar! var__aspect_found 11
-        elseif "frost aspect" in label__aspect_read
-            @setvar! var__aspect_found 12
-        elseif "gadget aspect" in label__aspect_read
-            @setvar! var__aspect_found 13
-        elseif "harvest aspect" in label__aspect_read
-            @setvar! var__aspect_found 14
-        elseif "holy aspect" in label__aspect_read
-            @setvar! var__aspect_found 15
-        elseif "lightning aspect" in label__aspect_read
-            @setvar! var__aspect_found 16
-        elseif "lyric aspect" in label__aspect_read
-            @setvar! var__aspect_found 17
-        elseif "madness aspect" in label__aspect_read
-            @setvar! var__aspect_found 18
-        elseif "poison aspect" in label__aspect_read
-            @setvar! var__aspect_found 19
-        elseif "shadow aspect" in label__aspect_read
-            @setvar! var__aspect_found 20
-        elseif "temporal aspect" in label__aspect_read
-            @setvar! var__aspect_found 21
-        elseif "void aspect" in label__aspect_read
-            @setvar! var__aspect_found 22
-        elseif "war aspect" in label__aspect_read
-            @setvar! var__aspect_found 23
-        elseif "water aspect" in label__aspect_read
-            @setvar! var__aspect_found 24
-        endif
-    endif
-
-    if index = 0
-        @setvar! var__aspect_hand_found var__aspect_found
-    else
-        @setvar! var__aspect_armor_found var__aspect_found
-    endif
-endfor
-
-# Remember or restore. A shown aspect is remembered. A lost one is turned back on when one
-# is remembered, and a warning asks for it to be turned on by hand once when none is.
-for 2
-    @setvar! var__aspect_type 0
-    @setvar! var__aspect_kind 99
-
-    if index = 0
-        if var__aspect_hand_item != 0
-            if var__aspect_hand_found != 99
-                @setvar! var__aspect_hand var__aspect_hand_found
-                if config__sysmsg = 1
-                    sysmsg "Aspect: held item shows aspect {{var__aspect_hand_found}}, remembered." 88
-                endif
-            elseif var__aspect_hand != 99
-                @setvar! var__aspect_kind var__aspect_hand
-                @setvar! var__aspect_type 1
-                if var__aspect_book = 1
-                    @setvar! var__aspect_type 2
-                endif
-            else
-                overhead "[ aspect, out ]" 254
-                if config__sysmsg = 1
-                    sysmsg "Aspect: none remembered for the held item. Turn it on by hand once." 88
-                endif
-            endif
-        endif
-    else
-        if var__aspect_armor_piece != 0
-            if var__aspect_armor_found != 99
-                @setvar! var__aspect_armor var__aspect_armor_found
-                if config__sysmsg = 1
-                    sysmsg "Aspect: armor shows aspect {{var__aspect_armor_found}}, remembered." 88
-                endif
-            elseif var__aspect_armor != 99
-                @setvar! var__aspect_kind var__aspect_armor
-                @setvar! var__aspect_type 3
-            else
-                overhead "[ aspect, out ]" 254
-                if config__sysmsg = 1
-                    sysmsg "Aspect: none remembered for the armor. Turn it on by hand once." 88
-                endif
-            endif
-        endif
-    endif
-
-    if var__aspect_type != 0
-        if config__sysmsg = 1
-            sysmsg "Aspect: turning on aspect {{var__aspect_kind}}, command type {{var__aspect_type}}." 88
+    if gumpexists 2424293173
+        if var__aspect_armor_lost = 1
+            gumpresponse 17 2424293173
+            wait wait__short
+            waitforgump 2424293173 wait__aspect_gump
+            gumpresponse 17 2424293173
+            waitforgump 2424293173 wait__aspect_gump
         endif
 
-        if var__aspect_kind = 0
-            if var__aspect_type = 1
-                say "[AspectWeapon Agorawave"
-            elseif var__aspect_type = 2
-                say "[AspectSpellbook Agorawave"
+        if var__aspect_hand_lost = 1
+            if config__aspect_hand_row = 1
+                gumpresponse 8 2424293173
+                wait wait__short
+                waitforgump 2424293173 wait__aspect_gump
+                gumpresponse 8 2424293173
+                waitforgump 2424293173 wait__aspect_gump
             else
-                say "[AspectArmor Agorawave"
-            endif
-        elseif var__aspect_kind = 1
-            if var__aspect_type = 1
-                say "[AspectWeapon Air"
-            elseif var__aspect_type = 2
-                say "[AspectSpellbook Air"
-            else
-                say "[AspectArmor Air"
-            endif
-        elseif var__aspect_kind = 2
-            if var__aspect_type = 1
-                say "[AspectWeapon Arcane"
-            elseif var__aspect_type = 2
-                say "[AspectSpellbook Arcane"
-            else
-                say "[AspectArmor Arcane"
-            endif
-        elseif var__aspect_kind = 3
-            if var__aspect_type = 1
-                say "[AspectWeapon Artisan"
-            elseif var__aspect_type = 2
-                say "[AspectSpellbook Artisan"
-            else
-                say "[AspectArmor Artisan"
-            endif
-        elseif var__aspect_kind = 4
-            if var__aspect_type = 1
-                say "[AspectWeapon Blood"
-            elseif var__aspect_type = 2
-                say "[AspectSpellbook Blood"
-            else
-                say "[AspectArmor Blood"
-            endif
-        elseif var__aspect_kind = 5
-            if var__aspect_type = 1
-                say "[AspectWeapon Command"
-            elseif var__aspect_type = 2
-                say "[AspectSpellbook Command"
-            else
-                say "[AspectArmor Command"
-            endif
-        elseif var__aspect_kind = 6
-            if var__aspect_type = 1
-                say "[AspectWeapon Death"
-            elseif var__aspect_type = 2
-                say "[AspectSpellbook Death"
-            else
-                say "[AspectArmor Death"
-            endif
-        elseif var__aspect_kind = 7
-            if var__aspect_type = 1
-                say "[AspectWeapon Discipline"
-            elseif var__aspect_type = 2
-                say "[AspectSpellbook Discipline"
-            else
-                say "[AspectArmor Discipline"
-            endif
-        elseif var__aspect_kind = 8
-            if var__aspect_type = 1
-                say "[AspectWeapon Earth"
-            elseif var__aspect_type = 2
-                say "[AspectSpellbook Earth"
-            else
-                say "[AspectArmor Earth"
-            endif
-        elseif var__aspect_kind = 9
-            if var__aspect_type = 1
-                say "[AspectWeapon Eldritch"
-            elseif var__aspect_type = 2
-                say "[AspectSpellbook Eldritch"
-            else
-                say "[AspectArmor Eldritch"
-            endif
-        elseif var__aspect_kind = 10
-            if var__aspect_type = 1
-                say "[AspectWeapon Fire"
-            elseif var__aspect_type = 2
-                say "[AspectSpellbook Fire"
-            else
-                say "[AspectArmor Fire"
-            endif
-        elseif var__aspect_kind = 11
-            if var__aspect_type = 1
-                say "[AspectWeapon Fortune"
-            elseif var__aspect_type = 2
-                say "[AspectSpellbook Fortune"
-            else
-                say "[AspectArmor Fortune"
-            endif
-        elseif var__aspect_kind = 12
-            if var__aspect_type = 1
-                say "[AspectWeapon Frost"
-            elseif var__aspect_type = 2
-                say "[AspectSpellbook Frost"
-            else
-                say "[AspectArmor Frost"
-            endif
-        elseif var__aspect_kind = 13
-            if var__aspect_type = 1
-                say "[AspectWeapon Gadget"
-            elseif var__aspect_type = 2
-                say "[AspectSpellbook Gadget"
-            else
-                say "[AspectArmor Gadget"
-            endif
-        elseif var__aspect_kind = 14
-            if var__aspect_type = 1
-                say "[AspectWeapon Harvest"
-            elseif var__aspect_type = 2
-                say "[AspectSpellbook Harvest"
-            else
-                say "[AspectArmor Harvest"
-            endif
-        elseif var__aspect_kind = 15
-            if var__aspect_type = 1
-                say "[AspectWeapon Holy"
-            elseif var__aspect_type = 2
-                say "[AspectSpellbook Holy"
-            else
-                say "[AspectArmor Holy"
-            endif
-        elseif var__aspect_kind = 16
-            if var__aspect_type = 1
-                say "[AspectWeapon Lightning"
-            elseif var__aspect_type = 2
-                say "[AspectSpellbook Lightning"
-            else
-                say "[AspectArmor Lightning"
-            endif
-        elseif var__aspect_kind = 17
-            if var__aspect_type = 1
-                say "[AspectWeapon Lyric"
-            elseif var__aspect_type = 2
-                say "[AspectSpellbook Lyric"
-            else
-                say "[AspectArmor Lyric"
-            endif
-        elseif var__aspect_kind = 18
-            if var__aspect_type = 1
-                say "[AspectWeapon Madness"
-            elseif var__aspect_type = 2
-                say "[AspectSpellbook Madness"
-            else
-                say "[AspectArmor Madness"
-            endif
-        elseif var__aspect_kind = 19
-            if var__aspect_type = 1
-                say "[AspectWeapon Poison"
-            elseif var__aspect_type = 2
-                say "[AspectSpellbook Poison"
-            else
-                say "[AspectArmor Poison"
-            endif
-        elseif var__aspect_kind = 20
-            if var__aspect_type = 1
-                say "[AspectWeapon Shadow"
-            elseif var__aspect_type = 2
-                say "[AspectSpellbook Shadow"
-            else
-                say "[AspectArmor Shadow"
-            endif
-        elseif var__aspect_kind = 21
-            if var__aspect_type = 1
-                say "[AspectWeapon Temporal"
-            elseif var__aspect_type = 2
-                say "[AspectSpellbook Temporal"
-            else
-                say "[AspectArmor Temporal"
-            endif
-        elseif var__aspect_kind = 22
-            if var__aspect_type = 1
-                say "[AspectWeapon Void"
-            elseif var__aspect_type = 2
-                say "[AspectSpellbook Void"
-            else
-                say "[AspectArmor Void"
-            endif
-        elseif var__aspect_kind = 23
-            if var__aspect_type = 1
-                say "[AspectWeapon War"
-            elseif var__aspect_type = 2
-                say "[AspectSpellbook War"
-            else
-                say "[AspectArmor War"
-            endif
-        elseif var__aspect_kind = 24
-            if var__aspect_type = 1
-                say "[AspectWeapon Water"
-            elseif var__aspect_type = 2
-                say "[AspectSpellbook Water"
-            else
-                say "[AspectArmor Water"
+                gumpresponse 13 2424293173
+                wait wait__short
+                waitforgump 2424293173 wait__aspect_gump
+                gumpresponse 13 2424293173
+                waitforgump 2424293173 wait__aspect_gump
             endif
         endif
 
+        gumpclose
         wait wait__aspect
 
-        # The name shows the aspect again once it took.
-        if index = 0
-            getlabel var__aspect_hand_item label__aspect_read
-        else
-            getlabel var__aspect_armor_piece label__aspect_read
+        # The names show the aspect again once it took.
+        if var__aspect_hand_lost = 1
+            getlabel var__aspect_hand_item label__aspect_hand
+            if "aspect" in label__aspect_hand
+                if config__chatty = 1
+                    overhead "[ aspect, on ]" 269
+                endif
+            else
+                overhead "[ aspect, miss ]" 254
+            endif
         endif
 
-        if "aspect" in label__aspect_read
-            if config__chatty = 1
-                overhead "[ aspect, on ]" 269
+        if var__aspect_armor_lost = 1
+            getlabel var__aspect_armor_piece label__aspect_armor
+            if "aspect" in label__aspect_armor
+                if config__chatty = 1
+                    overhead "[ aspect, on ]" 269
+                endif
+            else
+                overhead "[ aspect, miss ]" 254
             endif
-        else
-            overhead "[ aspect, miss ]" 254
+        endif
+    else
+        overhead "[ aspect, miss ]" 254
+        if config__sysmsg = 1
+            sysmsg "Aspect: the [aspect gump did not open." 88
         endif
     endif
-endfor
+endif

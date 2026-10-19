@@ -886,9 +886,9 @@ order: 10
 regear는 먼저 힐(`recovery/heal-first`), 옷(`gear/dress`, `gear/cosmetic`), 정리(`pack/pouches`, `pack/sorting`), aspect(`gear/aspect`) 순서.
 loadout과 regear는 같은 `gear/aspect` 블록을 씀. 동작 설명은 각 모듈 머리 주석.
 
-- aspect 근거: [Commands](https://wiki.uooutlands.com/Commands)의 `[AspectWeapon`, `[AspectSpellbook`, `[AspectArmor`.
-  [Aspect Mastery](https://wiki.uooutlands.com/Aspect_Mastery): 켤 때마다 Arcane Essence 5, 죽으면 장비의 aspect가 풀림
-- 죽으면 아이템 이름에서 `<name> aspect`도 사라짐(사용자 확인) → 살아 있을 때 이름에서 읽어 세션 변수에 기억, 죽은 뒤 그 이름으로 다시 켬
+- aspect 근거: [Aspect Mastery](https://wiki.uooutlands.com/Aspect_Mastery): 켤 때마다 Arcane Essence 5, 죽으면 장비의 aspect가 풀림
+- 같은 날 `gear/aspect`를 `[aspect` gump의 Activate 버튼으로 바꿈. 기억 없이 잃은 것만 켬. 버튼 번호와 이유는 `module/gear/aspect.razor` 머리 주석
+- gump의 무기 줄과 주문서 줄은 같은 aspect로 맞춰 둘 것. 누르는 줄은 `aspect_hand_row`(기본 주문서 줄)
 
 #### 새 스크립트
 
@@ -899,17 +899,14 @@ loadout과 regear는 같은 `gear/aspect` 블록을 씀. 동작 설명은 각 �
 - 귀환 직후 loadout에서도 룬북 리필이 돌아야 함. 상자를 연 뒤 스크롤이 보일 때까지 최대 2초 기다림. 전에는 0.2초 만에 `[ recall scroll, out ]`이 뜰 수 있었음
 - 가구와 보급 상자를 연 뒤 0.6초(`wait__long`) 기다림. 금고, 저장소, 수리대, 선반, 리사이클러를 다시 묻지 않아야 함. 다시 물으면 이 대기를 늘림
 
-#### 기억
-
-- aspect가 켜진 채 loadout → Journal에 `Aspect: held item shows aspect 9, remembered.`(Eldritch 주문서), `Aspect: armor shows aspect 17, remembered.`(Lyric 방어구). Essence는 안 줄어야 함
-- 번호는 `module/gear/aspect.razor` 머리 주석의 표. 다른 번호가 뜨면 그 이름 기록
-
 #### 다시 켜기
 
-- 죽고 시체를 먹은 뒤 regear → 옷을 다 입고 정리한 뒤 `[AspectSpellbook Eldritch`, `[AspectArmor Lyric`을 말함 → `[ aspect, on ]` 둘, Essence 10 감소
-- `[ aspect, miss ]`: 이름에 aspect가 안 돌아옴. Essence 부족, 명령 거절, 또는 1초(`wait__aspect`) 안에 이름이 안 바뀜. 서버 응답 문장 기록
-- `[ aspect, out ]`: 이번 Razor 세션에 기억한 aspect가 없음. 손으로 한 번 켜고 loadout이나 regear를 돌리면 기억
-- 방어구는 머리, 목, 장갑, 팔, 몸통, 다리 순서로 처음 보이는 aspect를 읽음. 옷(튜닉, 바디스)의 aspect는 안 읽음. 다른 aspect가 섞여 있으면 기록
+- 죽고 시체를 먹은 뒤 regear → 옷을 다 입고 정리한 뒤 `[aspect` gump가 열리고, 방어구와 손 순서로 Activate가 두 번씩 눌린 뒤 닫힘 → `[ aspect, on ]` 둘, Essence 10 감소
+- 클라이언트를 다시 켠 뒤 죽고 처음 돌린 loadout에서도 같음. 전에는 `[ aspect, out ]`
+- aspect가 켜진 채 loadout이나 regear → gump가 안 열리고 Essence 그대로
+- `[ aspect, miss ]`: 1초(`wait__aspect`) 안에 이름에 aspect가 안 돌아옴. Essence 부족이나 버튼 번호 변경. gump가 안 열렸으면 Journal에 `Aspect: the [aspect gump did not open.`
+- gump가 Show Only Unlocked 목록으로 열려도 버튼 102로 줄 화면에 돌아가 눌러야 함. 참고 스크립트의 처리, 이 저장소에서는 미확인
+- 방어구는 머리, 목, 장갑, 팔, 몸통, 다리 중 하나라도 aspect가 보이면 켜진 것으로 봄. 옷(튜닉, 바디스)은 안 봄
 
 #### 먼저 힐
 
