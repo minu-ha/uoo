@@ -64,12 +64,13 @@ order: 20
 
 |  | Tab | Q | W | E | R | T | Y | U |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| 무수정 | — | 셋 라타 | ↑ | **라타 발사** | Teleport | Telekinesis | — | — |
+| 무수정 | — | 셋 라타(Harmful) | ↑ | **라타 발사**(Harmful) | Teleport | Telekinesis | — | — |
 | Shift | — | Harm | Magic Arrow | Fireball | Lightning | Mind Blast | Poison | — |
 | Ctrl | — | Reactive Armor | Magic Reflection | Protection | Bless | **Cure** (커서 → 펫, 동료) | **Resurrection** (커서 → 동료) | — |
 | Alt | — | — | — | — | — | — | — | — |
 
 라타 = last target. `Q`로 대상 지정 → 주문 커서가 뜨면 `E`로 라타에 시전.
+summoner는 2026-10-20부터 Harmful 쪽(`Set Last Target (Harmful)`, `Target Last Harmful`). 적대 대상 표시가 하나로 모이고, 루프도 `lastharmful`을 읽음. default는 아직 일반 쪽
 
 ### <a id="01.D"></a>01.D 홈줄
 
@@ -191,6 +192,7 @@ Ctrl = Cmd, Alt = Option(01절) → macOS가 먼저 가져가는 키 있음.
 | --- | --- | --- | --- |
 | 1028 \~ 1034 | Drink Heal, Cure, Refresh, Magic Resist, Explosion, Strength, Agility | 1058 | Last Target |
 | 1059 | Target Self | 1060 | Set Last Target |
+| 2062 | Set Last Target (Harmful) | 2120 | Target Last Harmful |
 | 1332 | Cancel Current Target | 1391 | > Smart Heal/Cure Self |
 | 1395 | Attack Last Target | 1994 | > Interrupt |
 | 2013 | Target Closest Non-Friendly Monster | 2022, 2024, 2026 | All Follow Me, All Guard Me, All Kill |

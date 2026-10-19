@@ -1,6 +1,8 @@
 # ----------------------------------------------------------------------------------------
 # Remembers the picked enemy and sets var__fighting while it is in reach.
-# Songs, carving and self casts move lasttarget, so blocks read this copy instead.
+# The pick is read off lastharmful: Set Last Target (Harmful) moves only that slot, and
+# Target Closest Non-Friendly Monster moves all three (debug/probe-last-targets, user
+# check 2026-10-20). Blocks read this copy, since their own casts move the slot too.
 # ----------------------------------------------------------------------------------------
 
 
@@ -10,7 +12,7 @@
 #   config__acquire_range
 #      How far the enemy you pick is taken up from, and kept while it stays. The pets
 #      often open on a mob past target_range, and a song or self cast would otherwise
-#      move lasttarget off it before it comes in reach.
+#      move lastharmful off it before it comes in reach.
 #
 #   config__target_range
 #      How far the remembered enemy may be and still count as a fight (var__fighting 1).
@@ -34,18 +36,18 @@ timer__target_grace config__target_grace
 # @ state
 #
 #   var__combat_target
-#      The enemy picked with lasttarget, kept across Plays.
+#      The enemy picked with lastharmful, kept across Plays.
 #
 #   var__fresh_serial
-#      Scratch copy of the lasttarget serial for the mobile range check.
+#      Scratch copy of the lastharmful serial for the mobile range check.
 #
 #   var__keep_lasttarget
 #      Scratch: 1 when a block that is about to answer its own cursor finds a new enemy
-#      in lasttarget, so it leaves the cursor and the enemy to the player.
+#      in lastharmful, so it leaves the cursor and the enemy to the player.
 #
 #   var__target_hold
-#      An enemy a block targeted for its own use, the bard/provo partner. While lasttarget
-#      still shows it, it is not taken for a pick. 0 when none.
+#      An enemy a block targeted for its own use, the bard/provo partner. While
+#      lastharmful still shows it, it is not taken for a pick. 0 when none.
 # ----------------------------------------------------------------------------------------
 if not varexist var__combat_target
     @setvar! var__combat_target 0
@@ -69,10 +71,10 @@ endif
     # within config__acquire_range, and dropped config__target_grace after it leaves that.
     #
     # A serial in var__target_hold was targeted by a block, not picked, so it is passed
-    # over until lasttarget moves on. Every block that takes a pick off lasttarget during
-    # its own cursor skips it the same way.
+    # over until lastharmful moves on. Every block that takes a pick off lastharmful
+    # during its own cursor skips it the same way.
     # ------------------------------------------------------------------------------------
-    if find lasttarget ground -1 -1 config__acquire_range as alias__fresh_target
+    if find lastharmful ground -1 -1 config__acquire_range as alias__fresh_target
         if var__target_hold != 0 and alias__fresh_target != var__target_hold
             @setvar! var__target_hold 0
         endif

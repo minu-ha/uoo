@@ -164,10 +164,10 @@ endif
                     waitfortarget wait__carve_target
 
                     if targetexists "neutral" and not hidden
-                        # No enemy was remembered when this block started, so a live enemy in lasttarget
-                        # now is a Z pressed during the cursor wait.
+                        # No enemy was remembered when this block started, so a live
+                        # enemy in lastharmful now is a Z pressed during the cursor wait.
                         @setvar! var__pick_during_carve 0
-                        if find lasttarget ground -1 -1 config__acquire_range as alias__fresh_target
+                        if find lastharmful ground -1 -1 config__acquire_range as alias__fresh_target
                             @setvar! var__fresh_serial alias__fresh_target
                             if 0x40000000 > var__fresh_serial
                                 if not dead alias__fresh_target
@@ -181,7 +181,7 @@ endif
                         endif
 
                         if var__pick_during_carve = 1
-                            # Leave lasttarget on the new enemy. The corpse is tried again after the fight.
+                            # Leave the pick on the new enemy. The corpse is tried again after the fight.
                             hotkey "Cancel Current Target"
                             if config__sysmsg = 1
                                 sysmsg "Carve cancelled: an enemy was picked during the knife cursor." 88

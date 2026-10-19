@@ -525,7 +525,7 @@ while not dead
     # ------------------------------------------------------------------------------------
     # COMBAT TARGET                                              module/fight/target.razor
     # ------------------------------------------------------------------------------------
-    if find lasttarget ground -1 -1 config__acquire_range as alias__fresh_target
+    if find lastharmful ground -1 -1 config__acquire_range as alias__fresh_target
         if var__target_hold != 0 and alias__fresh_target != var__target_hold
             @setvar! var__target_hold 0
         endif
@@ -1318,7 +1318,7 @@ while not dead
 
                     if targetexists "neutral" and not hidden
                         @setvar! var__pick_during_carve 0
-                        if find lasttarget ground -1 -1 config__acquire_range as alias__fresh_target
+                        if find lastharmful ground -1 -1 config__acquire_range as alias__fresh_target
                             @setvar! var__fresh_serial alias__fresh_target
                             if 0x40000000 > var__fresh_serial
                                 if not dead alias__fresh_target

@@ -44,9 +44,9 @@ endif
     # skipped.
     #
     # The chain only picks the skill and the song after it, the three share the rest.
-    # Right before the backpack is targeted, lasttarget is read once more: a hostile the
+    # Right before the backpack is targeted, lastharmful is read once more: a hostile the
     # player has just picked would be lost to the backpack, the way a green capper was on
-    # 2026-09-29. Then the song stands down, cancels its cursor and leaves lasttarget for
+    # 2026-09-29. Then the song stands down, cancels its cursor and leaves the pick for
     # the next pass.
     # ------------------------------------------------------------------------------------
     if cooldown "song" = 0 and cooldown "music" = 0 and not warmode and var__instrument_ok = 1 and var__my_instrument != 0 and not targetexists and not casting
@@ -78,7 +78,7 @@ endif
             if targetexists
                 @setvar! var__keep_lasttarget 0
 
-                if find lasttarget ground -1 -1 config__acquire_range as alias__fresh_target
+                if find lastharmful ground -1 -1 config__acquire_range as alias__fresh_target
                     if not dead alias__fresh_target and var__combat_target != alias__fresh_target and var__target_hold != alias__fresh_target
                         if noto alias__fresh_target = "hostile" or noto alias__fresh_target = "criminal" or noto alias__fresh_target = "enemy" or noto alias__fresh_target = "murderer"
                             @setvar! var__keep_lasttarget 1

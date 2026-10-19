@@ -953,7 +953,7 @@ while not dead
     # ------------------------------------------------------------------------------------
     # COMBAT TARGET                                              module/fight/target.razor
     # ------------------------------------------------------------------------------------
-    if find lasttarget ground -1 -1 config__acquire_range as alias__fresh_target
+    if find lastharmful ground -1 -1 config__acquire_range as alias__fresh_target
         if var__target_hold != 0 and alias__fresh_target != var__target_hold
             @setvar! var__target_hold 0
         endif
@@ -1916,7 +1916,7 @@ while not dead
                         endif
                     endif
 
-                    if find lasttarget ground -1 -1 config__acquire_range as alias__fresh_target
+                    if find lastharmful ground -1 -1 config__acquire_range as alias__fresh_target
                         if not dead alias__fresh_target and var__combat_target != alias__fresh_target and var__target_hold != alias__fresh_target
                             if noto alias__fresh_target = "hostile" or noto alias__fresh_target = "criminal" or noto alias__fresh_target = "enemy" or noto alias__fresh_target = "murderer"
                                 @setvar! var__combat_target alias__fresh_target
@@ -1969,7 +1969,7 @@ while not dead
                         endif
                     endif
 
-                    if find lasttarget ground -1 -1 config__acquire_range as alias__fresh_target
+                    if find lastharmful ground -1 -1 config__acquire_range as alias__fresh_target
                         if not dead alias__fresh_target and var__combat_target != alias__fresh_target and var__target_hold != alias__fresh_target
                             if noto alias__fresh_target = "hostile" or noto alias__fresh_target = "criminal" or noto alias__fresh_target = "enemy" or noto alias__fresh_target = "murderer"
                                 @setvar! var__combat_target alias__fresh_target
@@ -2087,7 +2087,7 @@ while not dead
                 endfor
 
                 if targetexists
-                    if find lasttarget ground -1 -1 config__acquire_range as alias__fresh_target
+                    if find lastharmful ground -1 -1 config__acquire_range as alias__fresh_target
                         if not dead alias__fresh_target and var__combat_target != alias__fresh_target and var__target_hold != alias__fresh_target
                             if noto alias__fresh_target = "hostile" or noto alias__fresh_target = "criminal" or noto alias__fresh_target = "enemy" or noto alias__fresh_target = "murderer"
                                 @setvar! var__combat_target alias__fresh_target
@@ -2143,7 +2143,7 @@ while not dead
                 endfor
 
                 if targetexists
-                    if find lasttarget ground -1 -1 config__acquire_range as alias__fresh_target
+                    if find lastharmful ground -1 -1 config__acquire_range as alias__fresh_target
                         if not dead alias__fresh_target and var__combat_target != alias__fresh_target and var__target_hold != alias__fresh_target
                             if noto alias__fresh_target = "hostile" or noto alias__fresh_target = "criminal" or noto alias__fresh_target = "enemy" or noto alias__fresh_target = "murderer"
                                 @setvar! var__combat_target alias__fresh_target
@@ -2213,7 +2213,7 @@ while not dead
                 endfor
 
                 if targetexists
-                    if find lasttarget ground -1 -1 config__acquire_range as alias__fresh_target
+                    if find lastharmful ground -1 -1 config__acquire_range as alias__fresh_target
                         if not dead alias__fresh_target and var__combat_target != alias__fresh_target and var__target_hold != alias__fresh_target
                             if noto alias__fresh_target = "hostile" or noto alias__fresh_target = "criminal" or noto alias__fresh_target = "enemy" or noto alias__fresh_target = "murderer"
                                 @setvar! var__combat_target alias__fresh_target
@@ -2264,7 +2264,7 @@ while not dead
                 endfor
 
                 if targetexists
-                    if find lasttarget ground -1 -1 config__acquire_range as alias__fresh_target
+                    if find lastharmful ground -1 -1 config__acquire_range as alias__fresh_target
                         if not dead alias__fresh_target and var__combat_target != alias__fresh_target and var__target_hold != alias__fresh_target
                             if noto alias__fresh_target = "hostile" or noto alias__fresh_target = "criminal" or noto alias__fresh_target = "enemy" or noto alias__fresh_target = "murderer"
                                 @setvar! var__combat_target alias__fresh_target
@@ -2315,7 +2315,7 @@ while not dead
                 endfor
 
                 if targetexists
-                    if find lasttarget ground -1 -1 config__acquire_range as alias__fresh_target
+                    if find lastharmful ground -1 -1 config__acquire_range as alias__fresh_target
                         if not dead alias__fresh_target and var__combat_target != alias__fresh_target and var__target_hold != alias__fresh_target
                             if noto alias__fresh_target = "hostile" or noto alias__fresh_target = "criminal" or noto alias__fresh_target = "enemy" or noto alias__fresh_target = "murderer"
                                 @setvar! var__combat_target alias__fresh_target
@@ -2366,7 +2366,7 @@ while not dead
                 endfor
 
                 if targetexists
-                    if find lasttarget ground -1 -1 config__acquire_range as alias__fresh_target
+                    if find lastharmful ground -1 -1 config__acquire_range as alias__fresh_target
                         if not dead alias__fresh_target and var__combat_target != alias__fresh_target and var__target_hold != alias__fresh_target
                             if noto alias__fresh_target = "hostile" or noto alias__fresh_target = "criminal" or noto alias__fresh_target = "enemy" or noto alias__fresh_target = "murderer"
                                 @setvar! var__combat_target alias__fresh_target
@@ -2434,7 +2434,7 @@ while not dead
                 endfor
 
                 if targetexists
-                    if find lasttarget ground -1 -1 config__acquire_range as alias__fresh_target
+                    if find lastharmful ground -1 -1 config__acquire_range as alias__fresh_target
                         if not dead alias__fresh_target and var__combat_target != alias__fresh_target and var__target_hold != alias__fresh_target
                             if noto alias__fresh_target = "hostile" or noto alias__fresh_target = "criminal" or noto alias__fresh_target = "enemy" or noto alias__fresh_target = "murderer"
                                 @setvar! var__combat_target alias__fresh_target
@@ -2470,7 +2470,7 @@ while not dead
                 waitfortarget wait__ability_target
 
                 if targetexists
-                    if find lasttarget ground -1 -1 config__acquire_range as alias__fresh_target
+                    if find lastharmful ground -1 -1 config__acquire_range as alias__fresh_target
                         if not dead alias__fresh_target and var__combat_target != alias__fresh_target and var__target_hold != alias__fresh_target
                             if noto alias__fresh_target = "hostile" or noto alias__fresh_target = "criminal" or noto alias__fresh_target = "enemy" or noto alias__fresh_target = "murderer"
                                 @setvar! var__combat_target alias__fresh_target
@@ -2712,7 +2712,7 @@ while not dead
                 if targetexists
                     @setvar! var__keep_lasttarget 0
 
-                    if find lasttarget ground -1 -1 config__acquire_range as alias__fresh_target
+                    if find lastharmful ground -1 -1 config__acquire_range as alias__fresh_target
                         if not dead alias__fresh_target and var__combat_target != alias__fresh_target and var__target_hold != alias__fresh_target
                             if noto alias__fresh_target = "hostile" or noto alias__fresh_target = "criminal" or noto alias__fresh_target = "enemy" or noto alias__fresh_target = "murderer"
                                 @setvar! var__keep_lasttarget 1
@@ -2742,7 +2742,7 @@ while not dead
                 if targetexists
                     @setvar! var__keep_lasttarget 0
 
-                    if find lasttarget ground -1 -1 config__acquire_range as alias__fresh_target
+                    if find lastharmful ground -1 -1 config__acquire_range as alias__fresh_target
                         if not dead alias__fresh_target and var__combat_target != alias__fresh_target and var__target_hold != alias__fresh_target
                             if noto alias__fresh_target = "hostile" or noto alias__fresh_target = "criminal" or noto alias__fresh_target = "enemy" or noto alias__fresh_target = "murderer"
                                 @setvar! var__keep_lasttarget 1
