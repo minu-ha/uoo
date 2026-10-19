@@ -688,7 +688,7 @@ endif
 if findtype 31262 backpack as alias__found_alchemists_satchel
     lift alias__found_alchemists_satchel
     wait wait__short
-    drop backpack 56 200
+    drop backpack 64 200
     wait wait__short
     if config__chatty = 1
         overhead "[ alch satchel, moved ]" 290
@@ -797,7 +797,7 @@ if varexist global__my_supply_pouch and find global__my_supply_pouch backpack
         elseif "item identification wand" in label__sorting_item or "sewing kit" in label__sorting_item
             drop global__my_supply_pouch 130 0
         elseif "flute" in label__sorting_item or "drum" in label__sorting_item or "harp" in label__sorting_item or "lute" in label__sorting_item or "tambourine" in label__sorting_item or "gemshorn" in label__sorting_item or "hurdy" in label__sorting_item or "psaltery" in label__sorting_item or "sackbut" in label__sorting_item or "shawm" in label__sorting_item or "vielle" in label__sorting_item
-            drop global__my_supply_pouch 130 80
+            drop global__my_supply_pouch 0 200
         else
             drop global__my_supply_pouch 0 0
         endif
