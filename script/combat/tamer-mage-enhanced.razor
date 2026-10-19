@@ -289,6 +289,7 @@ if not varexist var__combat_target
 endif
 @setvar! var__fresh_serial 0
 @setvar! var__keep_lasttarget 0
+@setvar! var__target_hold 0
 
 
 # ----------------------------------------------------------------------------------------
@@ -520,7 +521,13 @@ while not dead
     # COMBAT TARGET                                              module/fight/target.razor
     # ------------------------------------------------------------------------------------
     if find lasttarget ground -1 -1 config__acquire_range as alias__fresh_target
-        if var__combat_target != alias__fresh_target
+        if var__target_hold != 0 and alias__fresh_target != var__target_hold
+            @setvar! var__target_hold 0
+        endif
+
+        if var__combat_target = alias__fresh_target or var__target_hold = alias__fresh_target
+            # Already the enemy, or the block target held above.
+        else
             @setvar! var__fresh_serial alias__fresh_target
             if 0x40000000 > var__fresh_serial
                 if not dead alias__fresh_target
@@ -1055,7 +1062,7 @@ while not dead
             if targetexists "harmful"
                 @setvar! var__keep_lasttarget 0
                 if find lasttarget ground -1 -1 config__acquire_range as alias__fresh_target
-                    if not dead alias__fresh_target and var__combat_target != alias__fresh_target
+                    if not dead alias__fresh_target and var__combat_target != alias__fresh_target and var__target_hold != alias__fresh_target
                         if noto alias__fresh_target = "hostile" or noto alias__fresh_target = "criminal" or noto alias__fresh_target = "enemy" or noto alias__fresh_target = "murderer"
                             @setvar! var__keep_lasttarget 1
                         endif

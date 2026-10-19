@@ -40,7 +40,10 @@ timer__peace_seen interval__peace_seen
     # barding break does, and while one is running neither Peace nor Provocation can land
     # on that creature, which is why a broken target is left alone until it clears.
     #
-    # Either label is then waited out on interval__peace_seen instead of a find and a
+    # A provoked target is left alone too: it is busy with the partner bard/provo set on
+    # it, and a pacify would stop that fight. Ensemble counts the provocation instead.
+    #
+    # Each label is then waited out on interval__peace_seen instead of a find and a
     # getlabel on every pass. A barding break runs 40 seconds, so it is read every two
     # seconds rather than on every pass, and Peace lands at most two seconds after it
     # clears.
@@ -49,7 +52,7 @@ timer__peace_seen interval__peace_seen
         if find var__combat_target ground -1 -1 config__target_range as alias__peace_target
             getlabel alias__peace_target label__peace_target
 
-            if "pacified" in label__peace_target or "barding break" in label__peace_target
+            if "pacified" in label__peace_target or "barding break" in label__peace_target or "provoked" in label__peace_target
                 settimer "timer__target_grace" 0
                 settimer "timer__peace_seen" 0
             else
@@ -71,7 +74,7 @@ timer__peace_seen interval__peace_seen
                 endif
 
                 if find lasttarget ground -1 -1 config__acquire_range as alias__fresh_target
-                    if not dead alias__fresh_target and var__combat_target != alias__fresh_target
+                    if not dead alias__fresh_target and var__combat_target != alias__fresh_target and var__target_hold != alias__fresh_target
                         if noto alias__fresh_target = "hostile" or noto alias__fresh_target = "criminal" or noto alias__fresh_target = "enemy" or noto alias__fresh_target = "murderer"
                             @setvar! var__combat_target alias__fresh_target
                             settimer "timer__target_grace" 0

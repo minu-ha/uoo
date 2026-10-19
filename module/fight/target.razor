@@ -42,12 +42,17 @@ timer__target_grace config__target_grace
 #   var__keep_lasttarget
 #      Scratch: 1 when a block that is about to answer its own cursor finds a new enemy
 #      in lasttarget, so it leaves the cursor and the enemy to the player.
+#
+#   var__target_hold
+#      An enemy a block targeted for its own use, the bard/provo partner. While lasttarget
+#      still shows it, it is not taken for a pick. 0 when none.
 # ----------------------------------------------------------------------------------------
 if not varexist var__combat_target
     @setvar! var__combat_target 0
 endif
 @setvar! var__fresh_serial 0
 @setvar! var__keep_lasttarget 0
+@setvar! var__target_hold 0
 
 
 # ----------------------------------------------------------------------------------------
@@ -62,9 +67,19 @@ endif
     # be on the left (document/scripting/razor.md part 3, debug-target-state S06). The enemy is a
     # fight (var__fighting 1) inside config__target_range, kept outside it while still
     # within config__acquire_range, and dropped config__target_grace after it leaves that.
+    #
+    # A serial in var__target_hold was targeted by a block, not picked, so it is passed
+    # over until lasttarget moves on. Every block that takes a pick off lasttarget during
+    # its own cursor skips it the same way.
     # ------------------------------------------------------------------------------------
     if find lasttarget ground -1 -1 config__acquire_range as alias__fresh_target
-        if var__combat_target != alias__fresh_target
+        if var__target_hold != 0 and alias__fresh_target != var__target_hold
+            @setvar! var__target_hold 0
+        endif
+
+        if var__combat_target = alias__fresh_target or var__target_hold = alias__fresh_target
+            # Already the enemy, or the block target held above.
+        else
             @setvar! var__fresh_serial alias__fresh_target
             if 0x40000000 > var__fresh_serial
                 if not dead alias__fresh_target

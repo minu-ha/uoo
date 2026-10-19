@@ -1,0 +1,172 @@
+# ----------------------------------------------------------------------------------------
+# Provokes the enemy picked before onto the one picked now, when several are pulled.
+# Switching targets is the whole input: the enemy before the switch becomes the partner,
+# and while both stay alive and near they are provoked onto each other, again whenever
+# it lapses. The spells and the other bard skills stay on the enemy picked last. With
+# four pulled, A to B provokes A onto B, C finds B taken and gets Peace, D provokes C.
+# There is no search for a partner: Razor has no expression that finds an enemy, and the
+# Next Monster Target hotkeys move lasttarget, which fight/target would take for a pick.
+#
+# @ hotkeys Cancel Current Target
+# ----------------------------------------------------------------------------------------
+
+
+# ----------------------------------------------------------------------------------------
+# @ config
+#
+#   config__use_provo
+#      1 provokes the enemy picked before onto the one picked now. 0 never provokes.
+#      Both have to be inside config__target_range, the reach of every bard skill here.
+# ----------------------------------------------------------------------------------------
+@setvar! config__use_provo 1
+
+
+# ----------------------------------------------------------------------------------------
+# @ wait
+#
+#   interval__provo_seen
+#      How long the labels are left unread once one has shown provoked or a barding
+#      break, the same two seconds as bard/peace.
+#
+#   interval__provo_retry
+#      How long a provocation that failed, or could not reach the pair, waits before the
+#      next try. Five seconds is the skill cooldown after a failure (wiki, Bard Necro
+#      part 2).
+# ----------------------------------------------------------------------------------------
+@setvar! interval__provo_seen 2000
+@setvar! interval__provo_retry 5000
+
+
+# ----------------------------------------------------------------------------------------
+# @ timer
+#
+#   timer__provo_seen, timer__provo_retry
+#      Ready on the first pass.
+# ----------------------------------------------------------------------------------------
+timer__provo_seen interval__provo_seen
+timer__provo_retry interval__provo_retry
+
+
+# ----------------------------------------------------------------------------------------
+# @ state
+#
+#   var__provo_partner
+#      The enemy picked before the current one, provoked onto it. 0 when none.
+#
+#   var__provo_last_target
+#      The combat target as this block saw it on the pass before, to notice a switch.
+#
+#   var__provo_answer
+#      Scratch: what the server answered, 0 nothing yet, 1 provoked, 2 try again later,
+#      3 the partner cannot be provoked.
+# ----------------------------------------------------------------------------------------
+@setvar! var__provo_partner 0
+@setvar! var__provo_last_target 0
+@setvar! var__provo_answer 0
+
+
+# ----------------------------------------------------------------------------------------
+# @ loop
+# ----------------------------------------------------------------------------------------
+    # ------------------------------------------------------------------------------------
+    # PROVOKE
+    #
+    # Runs on every pass, outside the fight group, so a switch is noticed even when the
+    # new enemy is still out of reach. A switch from one enemy to another makes the one
+    # before the partner. When the combat target drops to none, say its partner killed
+    # it, the partner is kept, and the next pick gets it: a provoked creature that won
+    # its fight is turned on the next enemy.
+    #
+    # Peace and Provocation share one server slot (Bard Necro part 2), so this goes
+    # before bard/peace in the pass and takes the slot whenever a pair can be provoked.
+    # bard/peace leaves a provoked target alone. Ensemble still counts it: its condition
+    # is Discord and Peace or Provocation.
+    #
+    # The partner is targeted first and the combat target last, so lasttarget ends on
+    # the combat target. A partner the server refuses at the first cursor, out of sight
+    # say, would leave lasttarget on it, so it goes into var__target_hold first and no
+    # block takes it for a pick. The answers are the lines other Outlands bard scripts
+    # read, and the success line also raises the peace/provo bar and the profile's
+    # [ provo, target ] overhead.
+    # ------------------------------------------------------------------------------------
+    if var__combat_target != var__provo_last_target
+        if var__provo_last_target != 0 and var__combat_target != 0
+            @setvar! var__provo_partner var__provo_last_target
+        endif
+        @setvar! var__provo_last_target var__combat_target
+    endif
+
+    if config__use_provo = 1 and var__fighting = 1 and var__provo_partner != 0 and var__provo_partner != var__combat_target and timer "timer__provo_seen" >= interval__provo_seen and timer "timer__provo_retry" >= interval__provo_retry and cooldown "peace/provo" = 0 and cooldown "music" = 0 and skill "Provocation" > 0 and not warmode and var__instrument_ok = 1 and var__my_instrument != 0 and not targetexists and not casting
+        if find var__provo_partner ground -1 -1 config__target_range as alias__provo_partner
+            if dead alias__provo_partner
+                @setvar! var__provo_partner 0
+            elseif find var__combat_target ground -1 -1 config__target_range as alias__provo_target
+                getlabel alias__provo_partner label__provo_partner
+                getlabel alias__provo_target label__provo_target
+
+                if "provoked" in label__provo_partner or "barding break" in label__provo_partner or "provoked" in label__provo_target or "barding break" in label__provo_target
+                    settimer "timer__provo_seen" 0
+                else
+                    useskill 'Provocation'
+                    waitfortarget wait__bard_target
+
+                    # Answered once, the way bard/peace does.
+                    if insysmsg "What instrument shall you play"
+                        target var__my_instrument
+                        waitfortarget wait__bard_target
+
+                        if insysmsg "That is not a musical instrument"
+                            @setvar! var__my_instrument 0
+                        endif
+                    endif
+
+                    if targetexists
+                        @setvar! var__target_hold var__provo_partner
+                        target alias__provo_partner
+                        waitfortarget wait__bard_target
+                    endif
+
+                    if targetexists
+                        target alias__provo_target
+                        wait wait__short
+                    endif
+
+                    if targetexists
+                        hotkey "Cancel Current Target"
+                        wait wait__short
+                    endif
+
+                    # The answer comes within a second. Read on every round until it
+                    # does, with no break: this loop sits inside the main one.
+                    @setvar! var__provo_answer 0
+                    for 5
+                        if var__provo_answer = 0
+                            if insysmsg "play successfully, provoking"
+                                @setvar! var__provo_answer 1
+                            elseif insysmsg "You fail to incite" or insysmsg "too far away" or insysmsg "Target cannot be seen" or insysmsg "You must wait a few moments"
+                                @setvar! var__provo_answer 2
+                            elseif insysmsg "incite that"
+                                @setvar! var__provo_answer 3
+                            else
+                                wait wait__short
+                            endif
+                        endif
+                    endfor
+
+                    if var__provo_answer = 1
+                        settimer "timer__provo_seen" 0
+                    elseif var__provo_answer = 2
+                        settimer "timer__provo_retry" 0
+                    elseif var__provo_answer = 3
+                        @setvar! var__provo_partner 0
+                        if config__chatty = 1
+                            overhead "[ provo, wrong ]" 254
+                        endif
+                    endif
+                endif
+            endif
+        elseif not find var__provo_partner ground -1 -1 config__acquire_range
+            # Gone, or too far to come back into the fight.
+            @setvar! var__provo_partner 0
+        endif
+    endif

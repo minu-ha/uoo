@@ -144,6 +144,12 @@
 
 
 # ----------------------------------------------------------------------------------------
+# module/bard/provo.razor
+# ----------------------------------------------------------------------------------------
+@setvar! config__use_provo 1
+
+
+# ----------------------------------------------------------------------------------------
 # module/necro/burst.razor
 # ----------------------------------------------------------------------------------------
 @setvar! config__symbols_blood_oath 4
@@ -254,6 +260,13 @@
 @setvar! interval__summon_cast_by 23000
 @setvar! interval__summon_release_by 15000
 @setvar! interval__summon_refused 30000
+
+
+# ----------------------------------------------------------------------------------------
+# module/bard/provo.razor
+# ----------------------------------------------------------------------------------------
+@setvar! interval__provo_seen 2000
+@setvar! interval__provo_retry 5000
 
 
 # ----------------------------------------------------------------------------------------
@@ -382,6 +395,20 @@ settimer "timer__summon_age_second" 0
 
 
 # ----------------------------------------------------------------------------------------
+# module/bard/provo.razor
+# ----------------------------------------------------------------------------------------
+if not timerexists "timer__provo_seen"
+    createtimer "timer__provo_seen"
+endif
+settimer "timer__provo_seen" interval__provo_seen
+
+if not timerexists "timer__provo_retry"
+    createtimer "timer__provo_retry"
+endif
+settimer "timer__provo_retry" interval__provo_retry
+
+
+# ----------------------------------------------------------------------------------------
 # module/bard/disco.razor
 # ----------------------------------------------------------------------------------------
 if not timerexists "timer__disco_seen"
@@ -492,6 +519,7 @@ if not varexist var__combat_target
 endif
 @setvar! var__fresh_serial 0
 @setvar! var__keep_lasttarget 0
+@setvar! var__target_hold 0
 
 
 # ----------------------------------------------------------------------------------------
@@ -568,6 +596,14 @@ endif
 @setvar! var__summon_cast 0
 @setvar! var__summon_cut 0
 @setvar! var__summon_release 0
+
+
+# ----------------------------------------------------------------------------------------
+# module/bard/provo.razor
+# ----------------------------------------------------------------------------------------
+@setvar! var__provo_partner 0
+@setvar! var__provo_last_target 0
+@setvar! var__provo_answer 0
 
 
 # ----------------------------------------------------------------------------------------
@@ -906,7 +942,13 @@ while not dead
     # COMBAT TARGET                                              module/fight/target.razor
     # ------------------------------------------------------------------------------------
     if find lasttarget ground -1 -1 config__acquire_range as alias__fresh_target
-        if var__combat_target != alias__fresh_target
+        if var__target_hold != 0 and alias__fresh_target != var__target_hold
+            @setvar! var__target_hold 0
+        endif
+
+        if var__combat_target = alias__fresh_target or var__target_hold = alias__fresh_target
+            # Already the enemy, or the block target held above.
+        else
             @setvar! var__fresh_serial alias__fresh_target
             if 0x40000000 > var__fresh_serial
                 if not dead alias__fresh_target
@@ -1712,6 +1754,87 @@ while not dead
         @setvar! var__hold_symbols 0
     endif
 
+    # ------------------------------------------------------------------------------------
+    # PROVOKE                                                      module/bard/provo.razor
+    # ------------------------------------------------------------------------------------
+    if var__combat_target != var__provo_last_target
+        if var__provo_last_target != 0 and var__combat_target != 0
+            @setvar! var__provo_partner var__provo_last_target
+        endif
+        @setvar! var__provo_last_target var__combat_target
+    endif
+
+    if config__use_provo = 1 and var__fighting = 1 and var__provo_partner != 0 and var__provo_partner != var__combat_target and timer "timer__provo_seen" >= interval__provo_seen and timer "timer__provo_retry" >= interval__provo_retry and cooldown "peace/provo" = 0 and cooldown "music" = 0 and skill "Provocation" > 0 and not warmode and var__instrument_ok = 1 and var__my_instrument != 0 and not targetexists and not casting
+        if find var__provo_partner ground -1 -1 config__target_range as alias__provo_partner
+            if dead alias__provo_partner
+                @setvar! var__provo_partner 0
+            elseif find var__combat_target ground -1 -1 config__target_range as alias__provo_target
+                getlabel alias__provo_partner label__provo_partner
+                getlabel alias__provo_target label__provo_target
+
+                if "provoked" in label__provo_partner or "barding break" in label__provo_partner or "provoked" in label__provo_target or "barding break" in label__provo_target
+                    settimer "timer__provo_seen" 0
+                else
+                    useskill 'Provocation'
+                    waitfortarget wait__bard_target
+
+                    if insysmsg "What instrument shall you play"
+                        target var__my_instrument
+                        waitfortarget wait__bard_target
+
+                        if insysmsg "That is not a musical instrument"
+                            @setvar! var__my_instrument 0
+                        endif
+                    endif
+
+                    if targetexists
+                        @setvar! var__target_hold var__provo_partner
+                        target alias__provo_partner
+                        waitfortarget wait__bard_target
+                    endif
+
+                    if targetexists
+                        target alias__provo_target
+                        wait wait__short
+                    endif
+
+                    if targetexists
+                        hotkey "Cancel Current Target"
+                        wait wait__short
+                    endif
+
+                    @setvar! var__provo_answer 0
+                    for 5
+                        if var__provo_answer = 0
+                            if insysmsg "play successfully, provoking"
+                                @setvar! var__provo_answer 1
+                            elseif insysmsg "You fail to incite" or insysmsg "too far away" or insysmsg "Target cannot be seen" or insysmsg "You must wait a few moments"
+                                @setvar! var__provo_answer 2
+                            elseif insysmsg "incite that"
+                                @setvar! var__provo_answer 3
+                            else
+                                wait wait__short
+                            endif
+                        endif
+                    endfor
+
+                    if var__provo_answer = 1
+                        settimer "timer__provo_seen" 0
+                    elseif var__provo_answer = 2
+                        settimer "timer__provo_retry" 0
+                    elseif var__provo_answer = 3
+                        @setvar! var__provo_partner 0
+                        if config__chatty = 1
+                            overhead "[ provo, wrong ]" 254
+                        endif
+                    endif
+                endif
+            endif
+        elseif not find var__provo_partner ground -1 -1 config__acquire_range
+            @setvar! var__provo_partner 0
+        endif
+    endif
+
     if var__fighting = 1
         # --------------------------------------------------------------------------------
         # DISCO                                                    module/bard/disco.razor
@@ -1741,7 +1864,7 @@ while not dead
                     endif
 
                     if find lasttarget ground -1 -1 config__acquire_range as alias__fresh_target
-                        if not dead alias__fresh_target and var__combat_target != alias__fresh_target
+                        if not dead alias__fresh_target and var__combat_target != alias__fresh_target and var__target_hold != alias__fresh_target
                             if noto alias__fresh_target = "hostile" or noto alias__fresh_target = "criminal" or noto alias__fresh_target = "enemy" or noto alias__fresh_target = "murderer"
                                 @setvar! var__combat_target alias__fresh_target
                                 settimer "timer__target_grace" 0
@@ -1777,7 +1900,7 @@ while not dead
             if find var__combat_target ground -1 -1 config__target_range as alias__peace_target
                 getlabel alias__peace_target label__peace_target
 
-                if "pacified" in label__peace_target or "barding break" in label__peace_target
+                if "pacified" in label__peace_target or "barding break" in label__peace_target or "provoked" in label__peace_target
                     settimer "timer__target_grace" 0
                     settimer "timer__peace_seen" 0
                 else
@@ -1794,7 +1917,7 @@ while not dead
                     endif
 
                     if find lasttarget ground -1 -1 config__acquire_range as alias__fresh_target
-                        if not dead alias__fresh_target and var__combat_target != alias__fresh_target
+                        if not dead alias__fresh_target and var__combat_target != alias__fresh_target and var__target_hold != alias__fresh_target
                             if noto alias__fresh_target = "hostile" or noto alias__fresh_target = "criminal" or noto alias__fresh_target = "enemy" or noto alias__fresh_target = "murderer"
                                 @setvar! var__combat_target alias__fresh_target
                                 settimer "timer__target_grace" 0
@@ -1912,7 +2035,7 @@ while not dead
 
                 if targetexists
                     if find lasttarget ground -1 -1 config__acquire_range as alias__fresh_target
-                        if not dead alias__fresh_target and var__combat_target != alias__fresh_target
+                        if not dead alias__fresh_target and var__combat_target != alias__fresh_target and var__target_hold != alias__fresh_target
                             if noto alias__fresh_target = "hostile" or noto alias__fresh_target = "criminal" or noto alias__fresh_target = "enemy" or noto alias__fresh_target = "murderer"
                                 @setvar! var__combat_target alias__fresh_target
                                 settimer "timer__target_grace" 0
@@ -1968,7 +2091,7 @@ while not dead
 
                 if targetexists
                     if find lasttarget ground -1 -1 config__acquire_range as alias__fresh_target
-                        if not dead alias__fresh_target and var__combat_target != alias__fresh_target
+                        if not dead alias__fresh_target and var__combat_target != alias__fresh_target and var__target_hold != alias__fresh_target
                             if noto alias__fresh_target = "hostile" or noto alias__fresh_target = "criminal" or noto alias__fresh_target = "enemy" or noto alias__fresh_target = "murderer"
                                 @setvar! var__combat_target alias__fresh_target
                                 settimer "timer__target_grace" 0
@@ -2038,7 +2161,7 @@ while not dead
 
                 if targetexists
                     if find lasttarget ground -1 -1 config__acquire_range as alias__fresh_target
-                        if not dead alias__fresh_target and var__combat_target != alias__fresh_target
+                        if not dead alias__fresh_target and var__combat_target != alias__fresh_target and var__target_hold != alias__fresh_target
                             if noto alias__fresh_target = "hostile" or noto alias__fresh_target = "criminal" or noto alias__fresh_target = "enemy" or noto alias__fresh_target = "murderer"
                                 @setvar! var__combat_target alias__fresh_target
                                 settimer "timer__target_grace" 0
@@ -2089,7 +2212,7 @@ while not dead
 
                 if targetexists
                     if find lasttarget ground -1 -1 config__acquire_range as alias__fresh_target
-                        if not dead alias__fresh_target and var__combat_target != alias__fresh_target
+                        if not dead alias__fresh_target and var__combat_target != alias__fresh_target and var__target_hold != alias__fresh_target
                             if noto alias__fresh_target = "hostile" or noto alias__fresh_target = "criminal" or noto alias__fresh_target = "enemy" or noto alias__fresh_target = "murderer"
                                 @setvar! var__combat_target alias__fresh_target
                                 settimer "timer__target_grace" 0
@@ -2140,7 +2263,7 @@ while not dead
 
                 if targetexists
                     if find lasttarget ground -1 -1 config__acquire_range as alias__fresh_target
-                        if not dead alias__fresh_target and var__combat_target != alias__fresh_target
+                        if not dead alias__fresh_target and var__combat_target != alias__fresh_target and var__target_hold != alias__fresh_target
                             if noto alias__fresh_target = "hostile" or noto alias__fresh_target = "criminal" or noto alias__fresh_target = "enemy" or noto alias__fresh_target = "murderer"
                                 @setvar! var__combat_target alias__fresh_target
                                 settimer "timer__target_grace" 0
@@ -2191,7 +2314,7 @@ while not dead
 
                 if targetexists
                     if find lasttarget ground -1 -1 config__acquire_range as alias__fresh_target
-                        if not dead alias__fresh_target and var__combat_target != alias__fresh_target
+                        if not dead alias__fresh_target and var__combat_target != alias__fresh_target and var__target_hold != alias__fresh_target
                             if noto alias__fresh_target = "hostile" or noto alias__fresh_target = "criminal" or noto alias__fresh_target = "enemy" or noto alias__fresh_target = "murderer"
                                 @setvar! var__combat_target alias__fresh_target
                                 settimer "timer__target_grace" 0
@@ -2259,7 +2382,7 @@ while not dead
 
                 if targetexists
                     if find lasttarget ground -1 -1 config__acquire_range as alias__fresh_target
-                        if not dead alias__fresh_target and var__combat_target != alias__fresh_target
+                        if not dead alias__fresh_target and var__combat_target != alias__fresh_target and var__target_hold != alias__fresh_target
                             if noto alias__fresh_target = "hostile" or noto alias__fresh_target = "criminal" or noto alias__fresh_target = "enemy" or noto alias__fresh_target = "murderer"
                                 @setvar! var__combat_target alias__fresh_target
                                 settimer "timer__target_grace" 0
@@ -2295,7 +2418,7 @@ while not dead
 
                 if targetexists
                     if find lasttarget ground -1 -1 config__acquire_range as alias__fresh_target
-                        if not dead alias__fresh_target and var__combat_target != alias__fresh_target
+                        if not dead alias__fresh_target and var__combat_target != alias__fresh_target and var__target_hold != alias__fresh_target
                             if noto alias__fresh_target = "hostile" or noto alias__fresh_target = "criminal" or noto alias__fresh_target = "enemy" or noto alias__fresh_target = "murderer"
                                 @setvar! var__combat_target alias__fresh_target
                                 settimer "timer__target_grace" 0
@@ -2537,7 +2660,7 @@ while not dead
                     @setvar! var__keep_lasttarget 0
 
                     if find lasttarget ground -1 -1 config__acquire_range as alias__fresh_target
-                        if not dead alias__fresh_target and var__combat_target != alias__fresh_target
+                        if not dead alias__fresh_target and var__combat_target != alias__fresh_target and var__target_hold != alias__fresh_target
                             if noto alias__fresh_target = "hostile" or noto alias__fresh_target = "criminal" or noto alias__fresh_target = "enemy" or noto alias__fresh_target = "murderer"
                                 @setvar! var__keep_lasttarget 1
                             endif
@@ -2567,7 +2690,7 @@ while not dead
                     @setvar! var__keep_lasttarget 0
 
                     if find lasttarget ground -1 -1 config__acquire_range as alias__fresh_target
-                        if not dead alias__fresh_target and var__combat_target != alias__fresh_target
+                        if not dead alias__fresh_target and var__combat_target != alias__fresh_target and var__target_hold != alias__fresh_target
                             if noto alias__fresh_target = "hostile" or noto alias__fresh_target = "criminal" or noto alias__fresh_target = "enemy" or noto alias__fresh_target = "murderer"
                                 @setvar! var__keep_lasttarget 1
                             endif
