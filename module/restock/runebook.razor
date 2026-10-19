@@ -114,8 +114,9 @@ if config__use_runebook_refill = 1
     endwhile
 
     # What is left, once, after the last book. A stack a book did not use up drops back
-    # into the box, and its label carries the count. Looked for up to 2 seconds while it
-    # drops back, the way the box was looked into above.
+    # into the box, and its label carries the count, "recall scroll : 895" (user check,
+    # 2026-10-19). Looked for up to 2 seconds while it drops back, the way the box was
+    # looked into above.
     if var__runebook_scrolls_out = 0
         for 10
             if find global__my_recall_scroll global__my_recall_scroll_container
