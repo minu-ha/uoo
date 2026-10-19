@@ -1,8 +1,8 @@
 # ----------------------------------------------------------------------------------------
 # Opens the house containers and runs the bank safe, stockpile, repair, recycler, shelf.
 # The containers are kept in your Razor profile, asked for when one no longer resolves
-# within reach. Each container inside the furniture ends up as a var__has_ flag, so missing
-# gear skips its own part instead of stopping the run.
+# within reach. Each container inside the furniture ends up as a var__has_ flag, so
+# missing gear skips its own part instead of stopping the run.
 #
 # @ hotkeys Cancel Current Target
 # ----------------------------------------------------------------------------------------
@@ -36,7 +36,8 @@
 # @ wait
 #
 #   wait__long
-#      Lets a menu entry finish its work.
+#      Lets a menu entry finish its work, and the furniture contents arrive after it is
+#      opened.
 #
 #   wait__target
 #      Only ever spent in full when no cursor turns up at all.
@@ -240,8 +241,8 @@ endif
 #
 # Every part waits with waitfortarget, never with a plain wait. A fixed sleep is not long
 # enough for the server to answer: the cursor turns up after the part has moved on, and
-# then the next part's waitfortarget picks up that stale cursor instead of its own. That is
-# what kept breaking the storage shelf restock.
+# then the next part's waitfortarget picks up that stale cursor instead of its own. That
+# is what kept breaking the storage shelf restock.
 #
 # One rule, applied everywhere: a part clears up after itself. It answers its own cursor
 # and closes its own gump before it ends, so the part after it does not have to defend
@@ -266,9 +267,9 @@ endif
 
 # Resource stockpile. This is the part that was leaking a cursor. Its prompt,
 #   "Where do you wish to restock this from? You may target yourself, a container, ..."
-# was still up when the storage shelf asked its own question, so the shelf's answer went to
-# this one and the shelf restock never ran. target self was already here, but it does not
-# always take, and the part had nothing to clean up after itself.
+# was still up when the storage shelf asked its own question, so the shelf's answer went
+# to this one and the shelf restock never ran. target self was already here, but it does
+# not always take, and the part had nothing to clean up after itself.
 if var__has_resource_stockpile = 1
     overhead "[ stockpile, on ]" 290
     menu global__my_resource_stockpile 0
@@ -300,8 +301,8 @@ endif
 
 # Magic item recycler. It takes no target and acts on the backpack straight away.
 #
-# If this prompts for a target, the variable is pointing at the Magic Item Vault instead of
-# the recycler. Run  unsetvar global__my_magic_item_recycler  and rerun to retarget it.
+# If this prompts for a target, the variable is pointing at the Magic Item Vault instead
+# of the recycler. Run  unsetvar global__my_magic_item_recycler  and rerun to retarget it.
 if var__has_magic_item_recycler = 1
     overhead "[ recycler, on ]" 290
 
@@ -319,14 +320,14 @@ endif
 # shelf before the loadout comes back out. Restock belongs here with the deposits,
 # Resupply runs after it with the withdrawals.
 #
-# Restock asks what to take from and self is the answer. The two targetexists checks are not
-# the same test: the first answers the prompt, the second catches an answer that was refused
-# and left the cursor up. Nothing cancels before the menu, because every part above already
-# clears up after itself.
+# Restock asks what to take from and self is the answer. The two targetexists checks are
+# not the same test: the first answers the prompt, the second catches an answer that was
+# refused and left the cursor up. Nothing cancels before the menu, because every part
+# above already clears up after itself.
 #
 # No waitforgump. Restock reports "N items were added" without the shelf gump necessarily
-# opening, so waiting on that gump ended the run right here. The gumpclose at the end covers
-# the times it does open.
+# opening, so waiting on that gump ended the run right here. The gumpclose at the end
+# covers the times it does open.
 if var__has_storage_shelf = 1
     overhead "[ shelf, restock ]" 290
     menu global__my_storage_shelf 0
@@ -344,10 +345,11 @@ if var__has_storage_shelf = 1
     gumpclose
 endif
 
-# Storage shelf resupply. The withdrawal half, and the short one: resupply raises no cursor
-# and answers at once. It used to wait on a target anyway, on the theory that the wait kept
-# the restock above from colliding with it. That was wrong. The run was dying on an
-# undeclared wait__long, and the context menu left on screen was the symptom, not the cause.
+# Storage shelf resupply. The withdrawal half, and the short one: resupply raises no
+# cursor and answers at once. It used to wait on a target anyway, on the theory that the
+# wait kept the restock above from colliding with it. That was wrong. The run was dying on
+# an undeclared wait__long, and the context menu left on screen was the symptom, not the
+# cause.
 if var__has_storage_shelf = 1
     overhead "[ shelf, resupply ]" 290
     menu global__my_storage_shelf 1
