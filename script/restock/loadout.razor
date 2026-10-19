@@ -727,7 +727,7 @@ for 10
         wait wait__short
 
         if index = 0
-            drop backpack 44 200
+            drop backpack 0 200
         elseif index = 1
             drop backpack 52 200
         elseif index = 2
@@ -759,7 +759,7 @@ endfor
 while findtype 3705 backpack 38 as alias__found_trap_pouch
     lift alias__found_trap_pouch
     wait wait__short
-    drop backpack 80 130
+    drop backpack 0 200
     wait wait__short
     if config__chatty = 1
         overhead "[ trapped pouch, moved ]" 290

@@ -32,8 +32,10 @@
 #   backpack 0 200        the two satchels, bottom left, first
 #   backpack 0 200        the supply pouch, on the satchels
 #   backpack 0 200        the loot bag, on the supply pouch
-#   backpack 44..76 200   trapped pouches 1 to 5 along the bottom, 8 pixels apart
+#   backpack 0 200        trapped pouch 1, right on the supply pouch and the loot bag
+#   backpack 52..76 200   trapped pouches 2 to 5 along the bottom, 8 pixels apart
 #   backpack 48..80 130   trapped pouches 6 to 10 one row up, 8 pixels apart
+#   backpack 0 200        any trapped pouch past the tenth, on the supply pouch again
 #   pouch    0 0          every supply not named below, the scissors among them
 #   pouch    130 0        identification wand, sewing kit
 #   pouch    130 80       the instrument
@@ -45,7 +47,8 @@
 # the old 0 to 20 put all trapped pouches in one place. The classic backpack gump starts
 # its item area at x 44, y 65 and is 142 by 94 (ServUO containers.cfg). The Outlands
 # backpack is not checked, so the trapped pouch slots are a first try (2026-10-19), to be
-# set from where the user drops them by hand.
+# set from where the user drops them by hand. The first and the extra ones use the very
+# point of the stack, so they cover it wherever the edge turns out to be.
 #
 # Order matters. Moving a pouch closes it, and a closed container does not report what is
 # inside: the counters for the cure and heal potions in there read zero until it is opened
@@ -118,16 +121,16 @@ endif
 # 3. the trapped pouches, on top of the satchels, the supply pouch and the loot bag. The
 # loot bag is a little bigger than a pouch, so the first five spread along the bottom wide
 # enough to cover it, and the next five sit one row up: whatever pokes out over the stack
-# is still a trapped pouch. drop takes literal coordinates, so each slot is a branch on
-# the pass. Any pouch past the tenth lands on the tenth. Not reopened on purpose, nothing
-# reads inside them.
+# is still a trapped pouch. Everything else stays under them. drop takes literal
+# coordinates, so each slot is a branch on the pass. Any pouch past the tenth goes back on
+# the supply pouch. Not reopened on purpose, nothing reads inside them.
 for 10
     if findtype 3705 backpack 38 as alias__found_trap_pouch
         lift alias__found_trap_pouch
         wait wait__short
 
         if index = 0
-            drop backpack 44 200
+            drop backpack 0 200
         elseif index = 1
             drop backpack 52 200
         elseif index = 2
@@ -159,7 +162,7 @@ endfor
 while findtype 3705 backpack 38 as alias__found_trap_pouch
     lift alias__found_trap_pouch
     wait wait__short
-    drop backpack 80 130
+    drop backpack 0 200
     wait wait__short
     if config__chatty = 1
         overhead "[ trapped pouch, moved ]" 290
