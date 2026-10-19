@@ -45,8 +45,10 @@ timer__disco_seen 0
     # the odds are the same either way and the order is only about which effect is worth
     # more.
     #
-    # Music is shared with bard/peace, so whichever of the two fires first stands the
-    # other down until the next pass. That is the arbitration, no extra state needed.
+    # Music is shared with bard/peace and bard/provo, so whichever fires first stands the
+    # others down until the next pass. bard/provo runs earlier in the pass, so while a
+    # pair is free Discordance on a new target waits out one Music window. That is the
+    # arbitration, no extra state needed.
     #
     # warmode is the manual control window, tested on the gate line with the instrument. A
     # target whose label already shows discord is remembered in var__disco_seen and

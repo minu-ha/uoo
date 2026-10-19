@@ -9,8 +9,8 @@
 # @ wait
 #
 #   interval__peace_seen
-#      How long the label is left unread once it has shown pacified or a barding break.
-#      Two seconds is the gap between the 10 second slot and the 12 second pacify.
+#      How long the label is left unread once it has shown pacified, provoked or a
+#      barding break, so Peace lands at most two seconds after it clears.
 # ----------------------------------------------------------------------------------------
 @setvar! interval__peace_seen 2000
 
@@ -30,10 +30,10 @@ timer__peace_seen interval__peace_seen
     # ------------------------------------------------------------------------------------
     # PEACE
     #
-    # The other half of the Ensemble condition, and unlike Discordance it can run out:
-    # 51 seconds at difficulty 300 here (Bard Necro part 2). So it is put back on as soon
-    # as the label stops showing it, rather than once per target: let it lapse and
-    # Ensemble and Virtuoso go dark with it.
+    # The other half of the Ensemble condition, and unlike Discordance it runs out soon.
+    # So it is put back on as soon as the label stops showing it, rather than once per
+    # target: let it lapse and Ensemble and Virtuoso go dark with it. Its length is read
+    # off the label, not assumed (Bard Necro 01.D and 02.N).
     #
     # A pacified creature does not attack, and taking damage does NOT break that. Only a
     # barding break does, and while one is running neither Peace nor Provocation can land
