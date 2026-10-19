@@ -2710,23 +2710,8 @@ while not dead
                 endif
 
                 if targetexists
-                    @setvar! var__keep_lasttarget 0
-
-                    if find lastharmful ground -1 -1 config__acquire_range as alias__fresh_target
-                        if not dead alias__fresh_target and var__combat_target != alias__fresh_target and var__target_hold != alias__fresh_target
-                            if noto alias__fresh_target = "hostile" or noto alias__fresh_target = "criminal" or noto alias__fresh_target = "enemy" or noto alias__fresh_target = "murderer"
-                                @setvar! var__keep_lasttarget 1
-                            endif
-                        endif
-                    endif
-
-                    if var__keep_lasttarget = 1
-                        hotkey "Cancel Current Target"
-                        wait wait__short
-                    else
-                        target backpack
-                        @setvar! var__song_next var__song_after
-                    endif
+                    targetrelloc 0 0
+                    @setvar! var__song_next var__song_after
                 endif
             endif
         endif

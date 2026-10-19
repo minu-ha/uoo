@@ -138,20 +138,21 @@ if cooldown "music" = 0 and cooldown "peace/provo" = 0
 | t=10 | Discordance | Music 0 → 5, Disco 0 → 5 |
 | t=15 | Provocation | Peace와 Provo 슬롯 쿨이 그때 풀림 |
 
-### <a id="02.B"></a>02.B 송은 스킬을 백팩에 쓴 것
+### <a id="02.B"></a>02.B 송은 스킬을 땅이나 자신에 쓴 것
 
-송은 별도 명령이 아님. **바드 스킬을 자기 자신, 곧 백팩에 찍으면 송.**
+송은 별도 명령이 아님. **바드 스킬을 땅이나 자기 자신(백팩)에 찍으면 송.**
 
 > "What do you wish to pacify? (you may target **yourself for an area effect** or the **ground for a group effect**)"
 
 ```
 useskill 'Peacemaking'
 waitfortarget wait__bard_target
-target backpack
+targetrelloc 0 0
 ```
 
-- 마지막 줄 `target backpack` → 송(AoE). `target lasttarget` → 스킬(한 대상 디버프)
-- 기존 구현도 같은 모양(`script/archive/bard-mace.razor`의 BARD SONG BUFF, `module/bard/song.razor`)
+- 위키 [Musicianship](https://wiki.uooutlands.com/Musicianship): 송은 땅을 찍어 켬. 받는 대상은 자신, 자신에게 초록으로 뜨는 플레이어와 생물(팔로워), 파티원. 50칸 안
+- 마지막 줄 `targetrelloc 0 0` → 발밑 땅에 송. `target backpack`(자신)도 송이 되지만 노래 커서는 적대 커서라 `lastharmful`이 백팩으로 바뀜. 땅은 `lastharmful`을 안 바꿈(2026-10-20 사용자 확인)
+- `module/bard/song.razor`는 2026-10-20부터 땅. 옛 구현(`script/archive/bard-mace.razor`의 BARD SONG BUFF)은 백팩
 
 ### <a id="02.C"></a>02.C 세 가지 쿨 계열
 
@@ -1670,7 +1671,7 @@ Tracking 규칙은 [PvP](../game/pvp.md#10) 10절, Hunting 판정의 5초 스킬
 | 브레이크 걸린 대상에는 Peace도 Provo도 불가 | 02.O절 |
 | Peacemaking은 데미지로 안 풀림. 브레이크로만 | 02.P절 |
 | Peace와 Provo는 슬롯 공유. `peace/provo` 한 항목으로 통합 | 02.F절 |
-| 송 = 스킬을 백팩에 찍은 것. Music도 슬롯도 안 세우고 읽기만 | 02.B, 02.E절 |
+| 송 = 스킬을 땅이나 자신에 찍은 것. Music도 슬롯도 안 세우고 읽기만 | 02.B, 02.E절 |
 | 송 쿨은 세 곡이 공유하는 별도 계열. `cooldown "music"`이 아님 | 02.C절 |
 | "Your barding skill cooldowns reset." 프록 존재, Lyric Aspect 방어구가 줌. 쿨 측정 시 벗음 | 02.G절 |
 | Ensemble 조건은 `Discord AND (Peace OR Provo)` | 02.Q절 |
@@ -1725,7 +1726,7 @@ PvP 쪽(명중률, TK 폭탄, 패링, 던전 리콜)은 [PvP](../game/pvp.md#11)
 | 소환수도 Virtuoso와 Ensemble을 받음 | **팔로워 명시는 `Sing Your Own Praises`뿐** |
 | Discordance도 barding break로 끊김 | **안 끊김.** 브레이크는 Peace와 Provo만 |
 | Self Taught는 요구조건만 대체 | **Effective Barding 보너스 상한에도 적용.** 측정값 170 |
-| 송은 별도 명령 | **스킬을 백팩에 찍은 것.** 땅에 찍으면 group effect |
+| 송은 별도 명령 | **스킬을 땅이나 자신에 찍은 것.** 루프는 땅(02.B절) |
 | 송과 스킬은 서로 막음 | **한쪽만 막음.** 송은 Music과 슬롯을 읽기만, 안 세움 |
 | Peace와 Provo는 슬롯이 따로 | **공유.** 로컬 항목이 서로를 반영하지 않아 한 번 착각 |
 | 막힌 시도는 아무 쿨도 안 태움 | **Music을 태움.** 막힌 송 다음의 스킬 판정은 불신 |
