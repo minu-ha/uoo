@@ -107,6 +107,8 @@ and the recipe, then `pnpm build`. Its choices are settings of its blocks, liste
 - `config__use_sewing_kit_and_id_wand` (`restock/tools`) controls both tools together. `1` keeps one Sewing Kit and one
   ID Wand: duplicates go back to the supply box, and missing tools are fetched. `0` skips both. `pack/sorting` still
   arranges tools already in the backpack.
+- `config__id_wand_spare` (`restock/tools`): `1` also carries a spare ID Wand once the carried one is down to 40 uses
+  or fewer, `0` keeps one.
 - `config__carry_magic_instrument` (`restock/instrument`): `1` keeps exactly one magic instrument, `0` leaves
   instruments alone.
 - `config__use_runebook_refill` (`restock/runebook`): `0` skips refilling runebooks, and the scroll box is not asked for.

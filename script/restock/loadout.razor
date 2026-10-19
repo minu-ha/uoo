@@ -39,6 +39,7 @@
 # module/restock/tools.razor
 # ----------------------------------------------------------------------------------------
 @setvar! config__use_sewing_kit_and_id_wand 1
+@setvar! config__id_wand_spare 1
 
 
 # ----------------------------------------------------------------------------------------
@@ -145,6 +146,9 @@ settimer "timer__message" interval__message
 # ----------------------------------------------------------------------------------------
 @setvar! var__kept_sewing_kit 0
 @setvar! var__kept_identification_wand 0
+@setvar! var__identification_wand_low 0
+@setvar! var__identification_wand_this_low 0
+@setvar! var__identification_wand_fetch 0
 
 
 # ----------------------------------------------------------------------------------------
@@ -525,10 +529,23 @@ if config__use_sewing_kit_and_id_wand = 1 and find global__my_supply_box ground 
     endif
 
     @setvar! var__kept_identification_wand 0
+    @setvar! var__identification_wand_low 0
 
     while findtype 20496 backpack as alias__found_identification_wand
+        @setvar! var__identification_wand_this_low 0
+        getlabel alias__found_identification_wand label__identification_wand
+        if "(40 use" in label__identification_wand or "(39 use" in label__identification_wand or "(38 use" in label__identification_wand or "(37 use" in label__identification_wand or "(36 use" in label__identification_wand or "(35 use" in label__identification_wand or "(34 use" in label__identification_wand or "(33 use" in label__identification_wand or "(32 use" in label__identification_wand or "(31 use" in label__identification_wand or "(30 use" in label__identification_wand or "(29 use" in label__identification_wand or "(28 use" in label__identification_wand or "(27 use" in label__identification_wand or "(26 use" in label__identification_wand or "(25 use" in label__identification_wand or "(24 use" in label__identification_wand or "(23 use" in label__identification_wand or "(22 use" in label__identification_wand or "(21 use" in label__identification_wand or "(20 use" in label__identification_wand or "(19 use" in label__identification_wand or "(18 use" in label__identification_wand or "(17 use" in label__identification_wand or "(16 use" in label__identification_wand or "(15 use" in label__identification_wand or "(14 use" in label__identification_wand or "(13 use" in label__identification_wand or "(12 use" in label__identification_wand or "(11 use" in label__identification_wand or "(10 use" in label__identification_wand or "(9 use" in label__identification_wand or "(8 use" in label__identification_wand or "(7 use" in label__identification_wand or "(6 use" in label__identification_wand or "(5 use" in label__identification_wand or "(4 use" in label__identification_wand or "(3 use" in label__identification_wand or "(2 use" in label__identification_wand or "(1 use" in label__identification_wand or "(0 use" in label__identification_wand
+            @setvar! var__identification_wand_this_low 1
+        endif
+
         if var__kept_identification_wand = 0
             @setvar! var__kept_identification_wand 1
+            @setvar! var__identification_wand_low var__identification_wand_this_low
+        elseif var__kept_identification_wand = 1 and config__id_wand_spare = 1 and var__identification_wand_low = 1
+            @setvar! var__kept_identification_wand 2
+        elseif var__kept_identification_wand = 1 and config__id_wand_spare = 1 and var__identification_wand_this_low = 1
+            @setvar! var__kept_identification_wand 2
+            @setvar! var__identification_wand_low 1
         else
             lift alias__found_identification_wand 1
             wait wait__short
@@ -544,17 +561,46 @@ if config__use_sewing_kit_and_id_wand = 1 and find global__my_supply_box ground 
 
     clearignore
 
+    @setvar! var__identification_wand_fetch 0
     if var__kept_identification_wand = 0
-        if findtype 20496 global__my_supply_box as alias__found_identification_wand
-            lift alias__found_identification_wand 1
-            wait wait__short
-            drop backpack
-            wait wait__short
-            if config__chatty = 1
-                overhead "[ id wand, take ]" 290
+        @setvar! var__identification_wand_fetch 1
+    elseif var__kept_identification_wand = 1 and config__id_wand_spare = 1 and var__identification_wand_low = 1
+        @setvar! var__identification_wand_fetch 1
+    endif
+
+    if var__identification_wand_fetch = 1
+        while var__identification_wand_fetch = 1 and findtype 20496 global__my_supply_box as alias__found_identification_wand
+            getlabel alias__found_identification_wand label__identification_wand
+            if "(40 use" in label__identification_wand or "(39 use" in label__identification_wand or "(38 use" in label__identification_wand or "(37 use" in label__identification_wand or "(36 use" in label__identification_wand or "(35 use" in label__identification_wand or "(34 use" in label__identification_wand or "(33 use" in label__identification_wand or "(32 use" in label__identification_wand or "(31 use" in label__identification_wand or "(30 use" in label__identification_wand or "(29 use" in label__identification_wand or "(28 use" in label__identification_wand or "(27 use" in label__identification_wand or "(26 use" in label__identification_wand or "(25 use" in label__identification_wand or "(24 use" in label__identification_wand or "(23 use" in label__identification_wand or "(22 use" in label__identification_wand or "(21 use" in label__identification_wand or "(20 use" in label__identification_wand or "(19 use" in label__identification_wand or "(18 use" in label__identification_wand or "(17 use" in label__identification_wand or "(16 use" in label__identification_wand or "(15 use" in label__identification_wand or "(14 use" in label__identification_wand or "(13 use" in label__identification_wand or "(12 use" in label__identification_wand or "(11 use" in label__identification_wand or "(10 use" in label__identification_wand or "(9 use" in label__identification_wand or "(8 use" in label__identification_wand or "(7 use" in label__identification_wand or "(6 use" in label__identification_wand or "(5 use" in label__identification_wand or "(4 use" in label__identification_wand or "(3 use" in label__identification_wand or "(2 use" in label__identification_wand or "(1 use" in label__identification_wand or "(0 use" in label__identification_wand
+                # Low, passed over for a better one.
+            else
+                lift alias__found_identification_wand 1
+                wait wait__short
+                drop backpack
+                wait wait__short
+                if config__chatty = 1
+                    overhead "[ id wand, take ]" 290
+                endif
+                @setvar! var__identification_wand_fetch 0
             endif
-        else
-            overhead "[ id wand, out ]" 254
+
+            @ignore alias__found_identification_wand
+        endwhile
+
+        clearignore
+
+        if var__identification_wand_fetch = 1
+            if findtype 20496 global__my_supply_box as alias__found_identification_wand
+                lift alias__found_identification_wand 1
+                wait wait__short
+                drop backpack
+                wait wait__short
+                if config__chatty = 1
+                    overhead "[ id wand, take ]" 290
+                endif
+            else
+                overhead "[ id wand, out ]" 254
+            endif
         endif
     endif
 endif
