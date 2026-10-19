@@ -903,7 +903,6 @@ loadout과 regear는 같은 `gear/aspect` 블록을 씀. 동작 설명은 각 �
 #### 다시 켜기
 
 - 죽고 시체를 먹은 뒤 regear → 옷을 다 입고 정리한 뒤 `[aspect` gump가 열리고, 방어구와 손 순서로 Activate가 두 번씩 눌린 뒤 닫힘 → Journal에 `... aspect activated.` 둘, Essence 10 감소
-- 이미 켜진 채 돌렸을 때 Charges가 그대로인지. 켜기와 이미 켜진 경우의 서버 문장은 2026-10-19 loadout에서 확인, 모듈 머리 주석
 - 방어구 몇 조각만 벗었다 낀 채 돌리면 모든 조각이 다시 켜지는지
 - gump가 안 열렸으면 `[ aspect, miss ]`, Journal에 `Aspect: the [aspect gump did not open.`
 - gump가 Show Only Unlocked 목록으로 열려도 버튼 102로 줄 화면에 돌아가 눌러야 함. 참고 스크립트의 처리, 이 저장소에서는 미확인
