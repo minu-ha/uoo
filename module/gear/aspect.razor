@@ -86,6 +86,9 @@ if config__aspect_hand_row != 0 and var__aspect_hand_item != 0
     getlabel var__aspect_hand_item label__aspect_hand
     if "aspect" in label__aspect_hand
         @setvar! var__aspect_hand_lost 0
+        if config__sysmsg = 1
+            sysmsg "Aspect: the held item still shows one: {{label__aspect_hand}}" 88
+        endif
     endif
 endif
 
@@ -159,8 +162,16 @@ if var__aspect_armor_item = 0
     endif
 endif
 
-if var__aspect_armor_piece != 0 and var__aspect_armor_item = 0
+# The label that kept the armor from being activated goes to the Journal: getlabel joins
+# the name and the property lines, so any of them can carry the word.
+if var__aspect_armor_piece = 0
+    if config__sysmsg = 1
+        sysmsg "Aspect: no armor on head, neck, gloves, arms, inner torso or inner legs." 88
+    endif
+elseif var__aspect_armor_item = 0
     @setvar! var__aspect_armor_lost 1
+elseif config__sysmsg = 1
+    sysmsg "Aspect: the armor still shows one: {{label__aspect_armor}}" 88
 endif
 
 # The activation. The armor first, then the hand, the order the screen takes.
