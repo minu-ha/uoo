@@ -54,7 +54,6 @@ order: 10
 
 | 규칙 | 지금 | 정할 것 |
 | --- | --- | --- |
-| 22자 상한([Overheads](../scripting/overheads.md#02) 02절) | 프로필의 `[ magic arrow, target ]` 23자. loadout의 `[ alch satchel, moved ]` 23자 | 줄일까. `magic arrow`를 줄이지 않는 규칙과 충돌 |
 | 대상 위 줄은 1288([Overheads](../scripting/overheads.md#01.C) 01.C절) | moongate의 `[ moongate, set ]`은 290으로 게이트 위, archive/backstab-mugging의 `[ range, out ]`은 254로 lasttarget 위 | 1288로 바꿀까, 예외로 적을까 |
 | 한 대상에 한 낱말([Overheads](../scripting/overheads.md#04) 04절) | 프로필 `[ omen, target ]`과 스크립트 `[ evil omen ]`, train/herding의 `[ herding, done ]`과 글로서리 `herd`, 바 `cannons`와 `[ cannon, out ]`도 불일치 | 어느 쪽으로 맞출까 |
 | 대상만 쓰는 줄 = 시전 알림([Overheads](../scripting/overheads.md#05) 05절) | 프로필의 `[ swing ]`(290)은 대상만인데 시전 알림 아님 | `[ swing, on ]`처럼 상태를 붙일까 |
