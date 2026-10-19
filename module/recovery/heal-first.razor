@@ -51,8 +51,8 @@ timer__heal_first 0
 #      Scratch: 1 once Greater Heal was refused for reagents, so it is not tried again.
 #
 #   var__heal_first_can
-#      Scratch: 1 while something still heals or can: a bandage or a cast running, a heal
-#      potion carried, or one of them going out on this round.
+#      Scratch: 1 while something still heals or can: a bandage, a cast or its cursor
+#      running, a heal potion carried, or one of them going out on this round.
 # ----------------------------------------------------------------------------------------
 @setvar! var__heal_first_no_greater_heal 0
 @setvar! var__heal_first_can 0
@@ -64,7 +64,9 @@ timer__heal_first 0
 while diffhits > config__heal_first_until and timer "timer__heal_first" < wait__heal_first and not dead
     @setvar! var__heal_first_can 0
 
-    if bandaging or casting
+    # A Greater Heal cursor counts too: between the end of the cast and the agent's own
+    # target, nothing else would keep the round going and the cast would be cancelled.
+    if bandaging or casting or targetexists "beneficial"
         @setvar! var__heal_first_can 1
     endif
 

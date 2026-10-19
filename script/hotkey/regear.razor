@@ -227,7 +227,7 @@ endif
 while diffhits > config__heal_first_until and timer "timer__heal_first" < wait__heal_first and not dead
     @setvar! var__heal_first_can 0
 
-    if bandaging or casting
+    if bandaging or casting or targetexists "beneficial"
         @setvar! var__heal_first_can 1
     endif
 
