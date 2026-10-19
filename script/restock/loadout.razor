@@ -757,40 +757,86 @@ while findtype 3705 backpack 38 as alias__found_trap_pouch
 endwhile
 
 if varexist global__my_supply_pouch and find global__my_supply_pouch backpack
+    removelist sorting_instrument_list
+    createlist sorting_instrument_list
+    removelist sorting_tool_list
+    createlist sorting_tool_list
+    removelist sorting_dagger_list
+    createlist sorting_dagger_list
     removelist sorting_item_list
     createlist sorting_item_list
 
-    while findtype 3740|3742|3762|3763|10245|20006|20008|20010|20012|20014|20016|20496|3997|3922|3617|2726|3998|3999|3553|11552|11564|52149|5370|28879|28880|28881|28883|28885|28886|28888|29773|29774|29012 backpack as alias__found_item
+    while findtype 3740|3742|3762|3763|10245|20006|20008|20010|20012|20014|20016 backpack as alias__found_item
+        pushlist sorting_instrument_list alias__found_item
+        @ignore alias__found_item
+    endwhile
+
+    while findtype 20496|3997 backpack as alias__found_item
+        pushlist sorting_tool_list alias__found_item
+        @ignore alias__found_item
+    endwhile
+
+    while findtype 3922 backpack as alias__found_item
+        pushlist sorting_dagger_list alias__found_item
+        @ignore alias__found_item
+    endwhile
+
+    while findtype 3617|2726|3998|3999|3553|11552|11564|52149|5370|28879|28880|28881|28883|28885|28886|28888|29773|29774|29012 backpack as alias__found_item
         pushlist sorting_item_list alias__found_item
         @ignore alias__found_item
     endwhile
 
     clearignore
 
-    foreach alias__sorting_item in sorting_item_list
-        getlabel alias__sorting_item label__sorting_item
-
+    foreach alias__sorting_item in sorting_instrument_list
         if config__chatty = 1
+            getlabel alias__sorting_item label__sorting_item
             overhead "[ sort, {{label__sorting_item}} ]" 290
         endif
 
         lift alias__sorting_item 1000
         wait wait__short
+        drop global__my_supply_pouch 0 200
+        wait wait__short
+    endfor
 
-        if "dagger" in label__sorting_item
-            if varexist global__my_loot_bag and find global__my_loot_bag backpack
-                drop global__my_loot_bag 0 0
-            else
-                drop global__my_supply_pouch 0 0
-            endif
-        elseif "item identification wand" in label__sorting_item or "sewing kit" in label__sorting_item
-            drop global__my_supply_pouch 130 0
-        elseif "flute" in label__sorting_item or "drum" in label__sorting_item or "harp" in label__sorting_item or "lute" in label__sorting_item or "tambourine" in label__sorting_item or "gemshorn" in label__sorting_item or "hurdy" in label__sorting_item or "psaltery" in label__sorting_item or "sackbut" in label__sorting_item or "shawm" in label__sorting_item or "vielle" in label__sorting_item
-            drop global__my_supply_pouch 0 200
+    foreach alias__sorting_item in sorting_tool_list
+        if config__chatty = 1
+            getlabel alias__sorting_item label__sorting_item
+            overhead "[ sort, {{label__sorting_item}} ]" 290
+        endif
+
+        lift alias__sorting_item 1000
+        wait wait__short
+        drop global__my_supply_pouch 130 0
+        wait wait__short
+    endfor
+
+    foreach alias__sorting_item in sorting_dagger_list
+        if config__chatty = 1
+            getlabel alias__sorting_item label__sorting_item
+            overhead "[ sort, {{label__sorting_item}} ]" 290
+        endif
+
+        lift alias__sorting_item 1000
+        wait wait__short
+        if varexist global__my_loot_bag and find global__my_loot_bag backpack
+            drop global__my_loot_bag 0 0
         else
             drop global__my_supply_pouch 0 0
         endif
+        wait wait__short
+    endfor
 
+    foreach alias__sorting_item in sorting_item_list
+        if config__chatty = 1
+            getlabel alias__sorting_item label__sorting_item
+            overhead "[ sort, {{label__sorting_item}} ]" 290
+        endif
+
+        lift alias__sorting_item 1000
+        wait wait__short
+        drop global__my_supply_pouch 0 0
         wait wait__short
     endfor
 endif
