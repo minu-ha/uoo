@@ -153,6 +153,7 @@ targetrelloc 0 0
 - 위키 [Musicianship](https://wiki.uooutlands.com/Musicianship): 송은 땅을 찍어 켬. 받는 대상은 자신, 자신에게 초록으로 뜨는 플레이어와 생물(팔로워), 파티원. 50칸 안
 - 마지막 줄 `targetrelloc 0 0` → 발밑 땅에 송. `target backpack`(자신)도 송이 되지만 노래 커서는 적대 커서라 `lastharmful`이 백팩으로 바뀜. 땅은 `lastharmful`을 안 바꿈(2026-10-20 사용자 확인)
 - `module/bard/song.razor`는 2026-10-20부터 땅. 옛 구현(`script/archive/bard-mace.razor`의 BARD SONG BUFF)은 백팩
+- 집 안에서는 땅이 `That is not accessible.`로 거절됨(2026-10-20 사용자 확인). 참고 스크립트들이 백팩을 찍는 이유로 보임. 사냥터는 집 밖이라 땅으로 둠
 
 ### <a id="02.C"></a>02.C 세 가지 쿨 계열
 
