@@ -7,6 +7,7 @@ order: 30
 
 UO Outlands 아이템 이름과 graphic ID 목록. `findtype` 인자와 hue 조회용, 실행 스크립트 아님.
 분류 이름과 목록 줄은 원문 영어 그대로.
+원문: [uorazorscripts의 아이템 목록](https://outlands.uorazorscripts.com/script/23d5660a-f8fd-491d-97b3-1afa3d73c84d). 2026-10-19에 다시 맞춤(방어구의 돌린 graphic ID, 새 아이템 4줄)
 
 ## <a id="00"></a>00 한눈에
 
@@ -42,72 +43,72 @@ UO Outlands 아이템 이름과 graphic ID 목록. `findtype` 인자와 hue 조�
 ## <a id="02"></a>02 Armor
 
 ```
-#Armor - all IDs: 5056|5059|5060|5061|5063|5070|5074|5075|5076|5078|5085|5089|5090|5101|5103|5105|5106|5129|5131|5132|5135|5138|5139|5142|5143|5144|5146|5201|5203|5204|5205|5207|7169|7170|7173|7175|7177|7179|7181|7610|7947|31003|31004|31005|31006|31007|31008|31009|31010|31011|31012|31015|31191
+#Armor - all IDs: 5051|5054|5055|5056|5059|5060|5061|5062|5063|5067|5068|5069|5070|5074|5075|5076|5077|5078|5082|5083|5084|5085|5089|5090|5099|5100|5101|5102|5103|5104|5105|5106|5129|5131|5132|5135|5136|5137|5138|5139|5140|5141|5142|5143|5144|5146|5198|5199|5200|5201|5202|5203|5204|5205|5206|5207|7168|7169|7170|7171|7172|7173|7174|7175|7176|7177|7178|7179|7180|7181|7609|7610|7947|31003|31004|31005|31006|31007|31008|31009|31010|31011|31012|31015|31174|31191
 
-    #Leather - all IDs: 5061|5063|5070|5074|5075|7169|7175|7177|7179|7610|31191
-        #female leather chest "leather armor" 7175
-        #leather arms "leather sleeves" 5061
-        #leather chest "leather tunic" 5075
-        #leather gloves "Leather Gloves" 5070
+    #Leather - all IDs: 5061|5062|5063|5067|5068|5069|5070|5074|5075|7168|7169|7174|7175|7176|7177|7178|7179|7609|7610|31174|31191
+        #female leather chest "leather armor" 7174|7175
+        #leather arms "leather sleeves" 5061|5069
+        #leather chest "leather tunic" 5068|5075
+        #leather gloves "Leather Gloves" 5062|5070
         #leather gorget "leather gorget" 5063
-        #leather cap "leather cap" 7610
-        #leather bustier "leather bustier" 7179
-        #leather leggings "leather leggings" 5074
-        #leather shorts "leather shorts" 7169
-        #leather skirt "leather skirt" 7177
-        #leather jerkin "leather jerkin" 31191
+        #leather cap "leather cap" 7609|7610
+        #leather bustier "leather bustier" 7178|7179
+        #leather leggings "leather leggings" 5067|5074
+        #leather shorts "leather shorts" 7168|7169
+        #leather skirt "leather skirt" 7176|7177
+        #leather jerkin "leather jerkin" 31174|31191
 
-    #Bone Armor - all IDs: 5201|5203|5204|5205|5207|31003|31004
-        #bone arms "bone arms" 5203
-        #bone chest "bone armor" 5204
-        #bone gloves "bone gloves" 5205
+    #Bone Armor - all IDs: 5198|5199|5200|5201|5202|5203|5204|5205|5206|5207|31003|31004
+        #bone arms "bone arms" 5198|5203
+        #bone chest "bone armor" 5199|5204
+        #bone gloves "bone gloves" 5200|5205
         #bone gorget "bone gorget" 31003
-        #bone helm "bone helmet" 5201
-        #bone legs "bone legs" 5207
+        #bone helm "bone helmet" 5201|5206
+        #bone legs "bone legs|bone leggings" 5202|5207
         #bone skirt "bone skirt" 31004
 
-    #Studded Armor - all IDs: 5076|5078|5085|5089|5090|7170|7181|31011|31012
-        #female studded chest "studded armor" 7170
-        #studded arms "studded sleeves" 5076
-        #studded gloves "studded gloves" 5085
+    #Studded Armor - all IDs: 5076|5077|5078|5082|5083|5084|5085|5089|5090|7170|7171|7180|7181|31011|31012
+        #female studded chest "studded armor" 7170|7171
+        #studded arms "studded sleeves" 5076|5084
+        #studded gloves "studded gloves" 5077|5085
         #studded gorget "studded gorget" 5078
-        #studded cap "studded cap" 31011
-        #studded leggings "studded leggings" 5089
-        #studded chest "studded tunic" 5090
-        #studded skirt "studded skirt" 31012
-        #studded bustier "studded bustier" 7181
+        #studded cap "studded cap" 31011            !! Grapic turns into a leather cap 7609|7610 when rotated !!
+        #studded leggings "studded leggings" 5082|5089
+        #studded chest "studded tunic" 5083|5090
+        #studded skirt "studded skirt" 31012        !! Graphic turns into a leather skirt 7176|7177 when rotated !!
+        #studded bustier "studded bustier" 7180|7181
 
-    #Ringmail - all IDs: 5101|5103|5105|5106|5131|7947|31009|31010
+    #Ringmail - all IDs: 5099|5100|5101|5102|5103|5104|5105|5106|5131|7947|31009|31010
         #orc helm "orc helm" 7947
-        #ringmail arms "ringmail sleeves" 5103
-        #ringmail chest "ringmail tunic" 5101
-        #ringmail gloves "ringmail gloves" 5106
+        #ringmail arms "ringmail sleeves" 5102|5103
+        #ringmail chest "ringmail tunic" 5100|5101
+        #ringmail gloves "ringmail gloves" 5099|5106
         #ringmail gorget "ringmail gorget" 31009
         #ringmail helm "helmet" 5131
-        #ringmail leggings "ringmail leggings" 5105
-        #ringmail skirt "ringmail skirt" 31010
+        #ringmail leggings "ringmail leggings" 5104|5105
+        #ringmail skirt "ringmail skirt" 31010      !! Grapic turns into a leather skirt 7176|7177 when rotated !!
 
-    #Chainmail - all IDs: 5056|5059|5060|31005|31006|31007|31015
-        #chainmail arms "chain arms" 31005
-        #chainmail chest "chainmail tunic" 5060
-        #chainmail gloves "chain gloves" 31015
+    #Chainmail - all IDs: 5051|5054|5055|5056|5059|5060|31005|31006|31007|31015
+        #chainmail arms "chain arms" 31005          !! Grapic turns into ringmail sleeves 5102|5103 when rotated !!
+        #chainmail chest "chainmail tunic" 5055|5060
+        #chainmail gloves "chain gloves" 31015      !! Grapic turns into ringmail gloves 5099|5106 when rotated !!
         #chainmail gorget "chain gorget" 31006
-        #chainmail coif "chainmail coif" 5056
-        #chainmail leggings "chainmail leggings" 5059
-        #chainmail skirt "chain skirt" 31007
+        #chainmail coif "chainmail coif|chainmail  coif" 5051|5056
+        #chainmail leggings "chainmail leggings" 5054|5059
+        #chainmail skirt "chain skirt" 31007        !! Grapic turns into a leather skirt 7176|7177 when rotated !!
 
-    #Platemail - all IDs: 5129|5132|5135|5138|5139|5142|5143|5144|5146|7173|31008
-        #platemail arms "platemail arms" 5143
+    #Platemail - all IDs: 5129|5132|5135|5136|5137|5138|5139|5140|5141|5142|5143|5144|5146|7172|7173|31008
+        #platemail arms "platemail arms" 5136|5143
         #bascinet "norse helm" 5132
         #close helm "close helm" 5129
-        #female platemail chest "plate armor" 7173
-        #platemail gloves "platemail gloves" 5144
+        #female platemail chest "plate armor" 7172|7173
+        #platemail gloves "platemail gloves" 5140|5144
         #platemail gorget "platemail gorget" 5139
         #platemail helm "plate helm" 5138
-        #platemail leggings "platemail legs" 5146
-        #platemail chest "platemail" 5142
+        #platemail leggings "platemail legs" 5137|5146
+        #platemail chest "platemail" 5141|5142
         #norse helm "bascinet" 5135
-        #platemail skirt "plate skirt" 31008
+        #platemail skirt "plate skirt" 31008        !! Grapic turns into a leather skirt 7176|7177 when rotated !!
 ```
 
 ## <a id="03"></a>03 Armor crates
@@ -722,7 +723,7 @@ UO Outlands 아이템 이름과 graphic ID 목록. `findtype` 인자와 hue 조�
 ## <a id="22"></a>22 Plant items
 
 ```
-#Plant items - all IDs: 2323|3703|3707|3715|4090|4154|4550|4551|5344|5453|6187|6193|6327|6328|6330|6333|6334|6335|6337|6338|6341|11942|19403|20498|20499|20500|20501|20502|20503|22326|25570|28719|28741|28987|29030|29217|29343|29345|29372|29868|51078|51098|51188|53611|55139|56408|56410|56413|56415|56416|56417|58196|64500
+#Plant items - all IDs: 2323|3703|3707|3715|4090|4154|4550|4551|5344|5453|6187|6193|6327|6328|6330|6333|6334|6335|6337|6338|6341|11942|19403|20498|20499|20500|20501|20502|20503|22326|25570|28719|28741|28987|29030|29217|29343|29345|29372|29868|51078|51098|51188|53611|55139|56408|56410|56413|56415|56416|56417|58196|64500|71268
 
     #a garden shelf "garden shelf" 51188
     #brewing seeds "bag of seeds" 51078
@@ -782,7 +783,9 @@ UO Outlands 아이템 이름과 graphic ID 목록. `findtype` 인자와 hue 조�
         #basic purified water solution (plant equipment) "bottle" 20501
         #superior purified water solution (plant equipment) "bottle" 20502
         #exceptional purified water solution (plant equipment) "bottle" 20503
-    #mushroom spore "mushroom spore" 53611|55139|58196|64500
+    #mushroom spore
+        #mushroom spore "mushroom spore" 53611|55139|58196|64500
+        #halloween 2026 mushroom spore "shroomtober 2026 spore" 71268
     #rustic planter "flower box" 56413|56415
     #rustic window planter "window planter" 56408|56410
     #small wooden planter "trough" 28987
@@ -924,10 +927,12 @@ UO Outlands 아이템 이름과 graphic ID 목록. `findtype` 인자와 hue 조�
             #a daggerhorn "fish" 44242
             #a goldcrown "fish" 44254
             #a goldfish "fish" 15107
+            #a junvenile crawler "flesh renderer" 9775
             #a largemouth bass "fish" 28827
             #a minnowhead "fish" 47248
             #a norhtern pike "Barracuda EAST" 17604
             #a primordial carp "fish" 44230
+            #a rainbow trout "fish" 44212
             #a river trout "Grouper EAST" 17159
             #a rock bass "fish" 44239
             #a sauger "fish" 44257
@@ -1044,7 +1049,7 @@ UO Outlands 아이템 이름과 graphic ID 목록. `findtype` 인자와 hue 조�
         #hair dye "bottle" 3843
         #headwear dye "bottle" 3842
         #mount gear dye "dye bottle" 15296
-        #runebook dye "bottle" 3838
+        #rune and tome dye "bottle" 3838
         #tattoo dye "dye bottle" 15297
     #immaculate stone "immaculate stone" 23997
     #lantern "lantern" 2594 (lit) | 2597 (not lit)
