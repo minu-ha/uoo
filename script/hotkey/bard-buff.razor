@@ -36,18 +36,29 @@ if not find var_my_instrument backpack
     wait 200
     getlabel backpack backpack_description
 
-    if find var_my_instrument backpack as found_instrument
-        getlabel found_instrument found_instrument_description
+    # Checked by graphic, not by label: a label need not name the instrument.
+    @setvar! var_instrument_picked 0
+    while findtype 3740|3742|3762|3763|10245|20006|20008|20010|20012|20014|20016 backpack as found_instrument
+        if found_instrument = var_my_instrument
+            @setvar! var_instrument_picked 1
+        endif
 
-        if "flute" in found_instrument_description or "drums" in found_instrument_description or "harp" in found_instrument_description or "lute" in found_instrument_description or "tambourine" in found_instrument_description or "gemshorn" in found_instrument_description or "hurdy" in found_instrument_description or "psaltery" in found_instrument_description or "sackbut" in found_instrument_description or "shawm" in found_instrument_description or "Vielle" in found_instrument_description
+        @ignore found_instrument
+    endwhile
+
+    @clearignore
+
+    if var_instrument_picked = 1
+        if find var_my_instrument backpack as found_instrument
+            getlabel found_instrument found_instrument_description
             overhead "[ inst, {{found_instrument_description}} ]" 255
             dclick var_my_instrument
             wait 7000
-        else
-            @setvar var_my_instrument 0
-            overhead "[ inst, wrong ]" 254
-            stop
         endif
+    elseif find var_my_instrument backpack
+        @setvar var_my_instrument 0
+        overhead "[ inst, wrong ]" 254
+        stop
     else
         @setvar var_my_instrument 0
         overhead "[ inst, out ]" 254
