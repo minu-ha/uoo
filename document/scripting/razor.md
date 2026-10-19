@@ -122,6 +122,7 @@ Razor CE에 없거나 CE보다 넓어진 것. 존재 여부만 기록, 인자 �
 | 변수가 왼쪽인 크기 비교(`if var__a >= var__b`, `var < 숫자`) | 문자열 비교가 되어 조용히 거짓 가능. 네크로 능력이 한 번도 안 나감. 인게임 확인됨 2026-10-04(05절) | 변수끼리는 `=`, `!=`만. 크기 비교는 내장 식을 왼쪽에(`mana >= config__x`). serial 범위 검사는 `0x40000000 > var` |
 | 산술(`@setvar! var__n var__n + 1`) | 선례 없음, 안 받는다고 판단 | `counttype`으로 다시 읽기, 리스트 길이 |
 | `as` alias를 묶은 `if`, `while` 블록 밖에서 읽기 | `4294967295`, `noto`가 `Mobile … not found` | 블록 안에서 `@setvar! var__x alias__x`로 복사 |
+| `getlabel`을 부른 블록 밖에서 그 라벨 읽기 | `{{label__x}}`가 `<not found>`. 인게임 확인됨 2026-10-19 | 라벨로 하는 일(`in` 검사, `sysmsg`, `overhead`)은 모두 `getlabel`과 같은 블록 안에. 단어라 변수로 복사도 안 됨 |
 | 단어를 변수에 담기 | 따옴표와 무관하게 `4294967295`. `rename`에 주면 `That name is unacceptable.` | `pushlist` 항목은 글자 유지. `foreach x in list__y`로 꺼내 문자열 인자로. 그 밖의 문자열은 `getlabel` 결과뿐 |
 | 몬스터 종류 단어, 한 글자만 바꾼 것을 펫 이름으로(`mummy`, `wytch`) | `That name is unacceptable.` (인게임 확인됨 2026-10-10) | 두 글자 이상 다르게(`mumi`는 받아짐), 실제 낱말도 피함(`wicca`는 두 글자 차이인데 거절, 인게임 확인됨 2026-10-13). RunUO 계열은 `mage` 같은 단어도 막음(`necro/summon-names`) |
 | 숫자(serial)를 펫 이름으로 | `That name is unacceptable.` | 글자 이름만 |
@@ -357,6 +358,8 @@ flowchart TD
   - `while` 조건에도 변수 크기 비교 금지(선례 없음)
 - **`as` alias를 묶은 블록 밖에서 읽기**: `if findtype … as alias__x`와 `endif` 뒤에서 `alias__x`를 읽으면 `4294967295`, `noto`가 `Mobile … not found`
   - 블록 안에서 `@setvar! var__x alias__x`로 복사. 모듈의 alias가 모두 블록 안에서만 쓰이는 이유
+- **`getlabel` 라벨을 블록 밖에서 읽기**: `if findlayer … as alias__x` 안에서 `getlabel alias__x label__y`, `endif` 뒤의 `sysmsg "… {{label__y}}"`가 `<not found>`(2026-10-19 `gear/aspect` 방어구 진단 줄의 Journal)
+  - 같은 실행에서 `getlabel`과 같은 블록 안의 `sysmsg`는 손에 든 주문서 라벨을 그대로 찍음 → alias처럼 블록을 벗어나면 사라지는 것으로 판단
 - **단어를 변수에 담기**: `@setvar! var__x nomeeheh`는 따옴표 유무와 무관하게 `4294967295`(2026-09-28 프로브)
   - 숫자 `5000`은 `5000`, `0x622396`은 10진수 `6431638`. 변수에는 숫자와 serial만
   - → `rename <serial> <변수>`는 엉뚱한 이름을 보내 `That name is unacceptable.`. 단어는 리스트에 담아 `foreach`로. serial 쪽은 변수 가능

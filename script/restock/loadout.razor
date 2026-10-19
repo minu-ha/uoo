@@ -1,5 +1,5 @@
 # Loadout: the house run before a trip. Deposits, repairs, restocks, sorts the backpack,
-# records the suit and turns a lost aspect back on.
+# records the suit and turns the aspects on.
 # Needs: the house containers within 2 tiles (each asked for once), a supply pouch and a
 # loot bag in the backpack. Arcane Essence for the aspects, 5 each.
 # hotkey/regear puts the recorded suit back on after a death.
@@ -101,7 +101,6 @@
 # ----------------------------------------------------------------------------------------
 # module/gear/aspect.razor
 # ----------------------------------------------------------------------------------------
-@setvar! wait__aspect 1000
 @setvar! wait__aspect_gump 1000
 
 
@@ -238,16 +237,6 @@ endif
 # module/restock/runebook.razor
 # ----------------------------------------------------------------------------------------
 @setvar! var__runebook_scrolls_out 0
-
-
-# ----------------------------------------------------------------------------------------
-# module/gear/aspect.razor
-# ----------------------------------------------------------------------------------------
-@setvar! var__aspect_hand_item 0
-@setvar! var__aspect_armor_piece 0
-@setvar! var__aspect_armor_item 0
-@setvar! var__aspect_hand_lost 0
-@setvar! var__aspect_armor_lost 0
 
 
 # ----------------------------------------------------------------------------------------
@@ -1428,164 +1417,40 @@ while queued
     wait wait__short
 endwhile
 
-if findlayer self righthand as alias__aspect_item
-    @setvar! var__aspect_hand_item alias__aspect_item
-elseif findlayer self lefthand as alias__aspect_item
-    @setvar! var__aspect_hand_item alias__aspect_item
+say "[aspect"
+waitforgump 2424293173 wait__aspect_gump
+
+if ingump "Show Only Unlocked" 2424293173
+    gumpresponse 102 2424293173
+    waitforgump 2424293173 wait__aspect_gump
 endif
 
-if config__aspect_hand_row != 0 and var__aspect_hand_item != 0
-    @setvar! var__aspect_hand_lost 1
-    getlabel var__aspect_hand_item label__aspect_hand
-    if "aspect" in label__aspect_hand
-        @setvar! var__aspect_hand_lost 0
-        if config__sysmsg = 1
-            sysmsg "Aspect: the held item still shows one: {{label__aspect_hand}}" 88
-        endif
-    endif
-endif
-
-if findlayer self head as alias__aspect_item
-    @setvar! var__aspect_armor_piece alias__aspect_item
-    getlabel alias__aspect_item label__aspect_armor
-    if "aspect" in label__aspect_armor
-        @setvar! var__aspect_armor_item alias__aspect_item
-    endif
-endif
-
-if var__aspect_armor_item = 0
-    if findlayer self neck as alias__aspect_item
-        if var__aspect_armor_piece = 0
-            @setvar! var__aspect_armor_piece alias__aspect_item
-        endif
-        getlabel alias__aspect_item label__aspect_armor
-        if "aspect" in label__aspect_armor
-            @setvar! var__aspect_armor_item alias__aspect_item
-        endif
-    endif
-endif
-
-if var__aspect_armor_item = 0
-    if findlayer self gloves as alias__aspect_item
-        if var__aspect_armor_piece = 0
-            @setvar! var__aspect_armor_piece alias__aspect_item
-        endif
-        getlabel alias__aspect_item label__aspect_armor
-        if "aspect" in label__aspect_armor
-            @setvar! var__aspect_armor_item alias__aspect_item
-        endif
-    endif
-endif
-
-if var__aspect_armor_item = 0
-    if findlayer self arms as alias__aspect_item
-        if var__aspect_armor_piece = 0
-            @setvar! var__aspect_armor_piece alias__aspect_item
-        endif
-        getlabel alias__aspect_item label__aspect_armor
-        if "aspect" in label__aspect_armor
-            @setvar! var__aspect_armor_item alias__aspect_item
-        endif
-    endif
-endif
-
-if var__aspect_armor_item = 0
-    if findlayer self innertorso as alias__aspect_item
-        if var__aspect_armor_piece = 0
-            @setvar! var__aspect_armor_piece alias__aspect_item
-        endif
-        getlabel alias__aspect_item label__aspect_armor
-        if "aspect" in label__aspect_armor
-            @setvar! var__aspect_armor_item alias__aspect_item
-        endif
-    endif
-endif
-
-if var__aspect_armor_item = 0
-    if findlayer self innerlegs as alias__aspect_item
-        if var__aspect_armor_piece = 0
-            @setvar! var__aspect_armor_piece alias__aspect_item
-        endif
-        getlabel alias__aspect_item label__aspect_armor
-        if "aspect" in label__aspect_armor
-            @setvar! var__aspect_armor_item alias__aspect_item
-        endif
-    endif
-endif
-
-if var__aspect_armor_piece = 0
-    if config__sysmsg = 1
-        sysmsg "Aspect: no armor on head, neck, gloves, arms, inner torso or inner legs." 88
-    endif
-elseif var__aspect_armor_item = 0
-    @setvar! var__aspect_armor_lost 1
-elseif config__sysmsg = 1
-    sysmsg "Aspect: the armor still shows one: {{label__aspect_armor}}" 88
-endif
-
-if var__aspect_hand_lost = 1 or var__aspect_armor_lost = 1
-    say "[aspect"
+if gumpexists 2424293173
+    gumpresponse 17 2424293173
+    wait wait__short
+    waitforgump 2424293173 wait__aspect_gump
+    gumpresponse 17 2424293173
     waitforgump 2424293173 wait__aspect_gump
 
-    if ingump "Show Only Unlocked" 2424293173
-        gumpresponse 102 2424293173
+    if config__aspect_hand_row = 1
+        gumpresponse 8 2424293173
+        wait wait__short
+        waitforgump 2424293173 wait__aspect_gump
+        gumpresponse 8 2424293173
+        waitforgump 2424293173 wait__aspect_gump
+    elseif config__aspect_hand_row = 2
+        gumpresponse 13 2424293173
+        wait wait__short
+        waitforgump 2424293173 wait__aspect_gump
+        gumpresponse 13 2424293173
         waitforgump 2424293173 wait__aspect_gump
     endif
 
-    if gumpexists 2424293173
-        if var__aspect_armor_lost = 1
-            gumpresponse 17 2424293173
-            wait wait__short
-            waitforgump 2424293173 wait__aspect_gump
-            gumpresponse 17 2424293173
-            waitforgump 2424293173 wait__aspect_gump
-        endif
-
-        if var__aspect_hand_lost = 1
-            if config__aspect_hand_row = 1
-                gumpresponse 8 2424293173
-                wait wait__short
-                waitforgump 2424293173 wait__aspect_gump
-                gumpresponse 8 2424293173
-                waitforgump 2424293173 wait__aspect_gump
-            else
-                gumpresponse 13 2424293173
-                wait wait__short
-                waitforgump 2424293173 wait__aspect_gump
-                gumpresponse 13 2424293173
-                waitforgump 2424293173 wait__aspect_gump
-            endif
-        endif
-
-        gumpclose
-        wait wait__aspect
-
-        if var__aspect_hand_lost = 1
-            getlabel var__aspect_hand_item label__aspect_hand
-            if "aspect" in label__aspect_hand
-                if config__chatty = 1
-                    overhead "[ aspect, on ]" 269
-                endif
-            else
-                overhead "[ aspect, miss ]" 254
-            endif
-        endif
-
-        if var__aspect_armor_lost = 1
-            getlabel var__aspect_armor_piece label__aspect_armor
-            if "aspect" in label__aspect_armor
-                if config__chatty = 1
-                    overhead "[ aspect, on ]" 269
-                endif
-            else
-                overhead "[ aspect, miss ]" 254
-            endif
-        endif
-    else
-        overhead "[ aspect, miss ]" 254
-        if config__sysmsg = 1
-            sysmsg "Aspect: the [aspect gump did not open." 88
-        endif
+    gumpclose
+else
+    overhead "[ aspect, miss ]" 254
+    if config__sysmsg = 1
+        sysmsg "Aspect: the [aspect gump did not open." 88
     endif
 endif
 

@@ -887,7 +887,7 @@ regear는 먼저 힐(`recovery/heal-first`), 옷(`gear/dress`, `gear/cosmetic`),
 loadout과 regear는 같은 `gear/aspect` 블록을 씀. 동작 설명은 각 모듈 머리 주석.
 
 - aspect 근거: [Aspect Mastery](https://wiki.uooutlands.com/Aspect_Mastery): 켤 때마다 Arcane Essence 5, 죽으면 장비의 aspect가 풀림
-- 같은 날 `gear/aspect`를 `[aspect` gump의 Activate 버튼으로 바꿈. 기억 없이 잃은 것만 켬. 버튼 번호와 이유는 `module/gear/aspect.razor` 머리 주석
+- 같은 날 `gear/aspect`를 `[aspect` gump의 Activate 버튼으로 바꿈. 기억 없이 매번 누름. 버튼 번호와 이유는 `module/gear/aspect.razor` 머리 주석
 - gump의 무기 줄과 주문서 줄은 같은 aspect로 맞춰 둘 것. 누르는 줄은 `aspect_hand_row`(기본 주문서 줄)
 
 #### 새 스크립트
@@ -901,12 +901,12 @@ loadout과 regear는 같은 `gear/aspect` 블록을 씀. 동작 설명은 각 �
 
 #### 다시 켜기
 
-- 죽고 시체를 먹은 뒤 regear → 옷을 다 입고 정리한 뒤 `[aspect` gump가 열리고, 방어구와 손 순서로 Activate가 두 번씩 눌린 뒤 닫힘 → `[ aspect, on ]` 둘, Essence 10 감소
+- 죽고 시체를 먹은 뒤 regear → 옷을 다 입고 정리한 뒤 `[aspect` gump가 열리고, 방어구와 손 순서로 Activate가 두 번씩 눌린 뒤 닫힘 → Journal에 `... aspect activated.` 둘, Essence 10 감소
 - 클라이언트를 다시 켠 뒤 죽고 처음 돌린 loadout에서도 같음. 전에는 `[ aspect, out ]`
-- aspect가 켜진 채 loadout이나 regear → gump가 안 열리고 Essence 그대로
-- `[ aspect, miss ]`: 1초(`wait__aspect`) 안에 이름에 aspect가 안 돌아옴. Essence 부족이나 버튼 번호 변경. gump가 안 열렸으면 Journal에 `Aspect: the [aspect gump did not open.`
+- 켜진 채 돌리면 `That equipped item is already of that aspect.` 둘. 이때 Charges가 줄지 않아야 함. 줄면 기록
+- 방어구 몇 조각만 벗었다 낀 채 돌리면 모든 조각이 다시 켜지는지
+- gump가 안 열렸으면 `[ aspect, miss ]`, Journal에 `Aspect: the [aspect gump did not open.`
 - gump가 Show Only Unlocked 목록으로 열려도 버튼 102로 줄 화면에 돌아가 눌러야 함. 참고 스크립트의 처리, 이 저장소에서는 미확인
-- 방어구는 머리, 목, 장갑, 팔, 몸통, 다리 중 하나라도 aspect가 보이면 켜진 것으로 봄. 옷(튜닉, 바디스)은 안 봄
 
 #### 먼저 힐
 

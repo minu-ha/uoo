@@ -72,7 +72,7 @@ order: 30
 | `module/pack/` | 무게, 보급 파우치와 루팅 백 | `gold-drop`, `leather`(가죽 → 루팅 백), `lumber`(Logs → Boards → 루팅 백), `scavenger`(스캐빈저 캐시 비우기), `pouches`(보급 파우치와 루팅 백 지정), `sorting`(백팩 왼쪽 아래 더미와 파우치 안 정리) |
 | `module/escape/` | PK 피하기 | `tracking`(헌트 필터 설정과 Hunting 점검), `recall`(자동 리콜 한 번) |
 | `module/restock/` | 집에서 하는 준비 | `house`(집 컨테이너, 금고, 비축함, 수리대, 재활용기, 선반), `tools`(바느질 키트와 감정 지팡이), `instrument`(마법 악기 하나), `runebook`(룬북 채우기) |
-| `module/gear/` | 입은 장비 | `dress`(부위 기록, 사망 뒤 다시 입기), `cosmetic`(Razor `cosmetic` 목록 입히기), `aspect`(`[aspect` gump로 aspect 다시 켜기) |
+| `module/gear/` | 입은 장비 | `dress`(부위 기록, 사망 뒤 다시 입기), `cosmetic`(Razor `cosmetic` 목록 입히기), `aspect`(`[aspect` gump의 Activate를 매번 누름) |
 | `recipe/<루프>-recipe.razor` | 루프나 루틴 하나 | 헤더, 도는 순서의 블록과 그 밑의 설정 변경, 이 루프만의 준비(03절) |
 | `util/build-scripts.mjs` | 조립기 | 결과물 생성, 레시피 블록 칸 정리. `--settings`, `--new-module`, `--check`(05절) |
 | `script/combat/*.razor`, `script/gather/*.razor`, `script/restock/loadout.razor`, `script/hotkey/regear.razor` | 결과물. 머리에 `Generated from` 줄 | 직접 수정 금지 |
