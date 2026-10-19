@@ -847,7 +847,7 @@ clearignore
 if findtype 30765 backpack as alias__found_reagent_satchel
     lift alias__found_reagent_satchel
     wait wait__short
-    drop backpack 0 200
+    drop backpack 56 200
     wait wait__short
     if config__chatty = 1
         overhead "[ reg satchel, moved ]" 290
@@ -859,7 +859,7 @@ endif
 if findtype 31262 backpack as alias__found_alchemists_satchel
     lift alias__found_alchemists_satchel
     wait wait__short
-    drop backpack 0 200
+    drop backpack 56 200
     wait wait__short
     if config__chatty = 1
         overhead "[ alch satchel, moved ]" 290
@@ -871,7 +871,7 @@ endif
 if varexist global__my_supply_pouch and find global__my_supply_pouch backpack
     lift global__my_supply_pouch
     wait wait__short
-    drop backpack 0 200
+    drop backpack 56 200
     wait wait__short
     if config__chatty = 1
         overhead "[ supplies, moved ]" 290
@@ -883,7 +883,7 @@ endif
 if varexist global__my_loot_bag and find global__my_loot_bag backpack
     lift global__my_loot_bag
     wait wait__short
-    drop backpack 0 200
+    drop backpack 56 200
     wait wait__short
     if config__chatty = 1
         overhead "[ loot bag, moved ]" 290
@@ -898,7 +898,7 @@ for 10
         wait wait__short
 
         if index = 0
-            drop backpack 0 200
+            drop backpack 44 200
         elseif index = 1
             drop backpack 52 200
         elseif index = 2
@@ -930,7 +930,7 @@ endfor
 while findtype 3705 backpack 38 as alias__found_trap_pouch
     lift alias__found_trap_pouch
     wait wait__short
-    drop backpack 0 200
+    drop backpack 56 200
     wait wait__short
     if config__chatty = 1
         overhead "[ trapped pouch, moved ]" 290

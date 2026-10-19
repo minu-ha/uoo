@@ -29,26 +29,25 @@
 # Placement. drop takes literal coordinates, so the numbers are inline, but they only appear
 # in this block. They are gump pixels, not grid cells, so nudge them if items overlap.
 #
-#   backpack 0 200        the two satchels, bottom left, first
-#   backpack 0 200        the supply pouch, on the satchels
-#   backpack 0 200        the loot bag, on the supply pouch
-#   backpack 0 200        trapped pouch 1, right on the supply pouch and the loot bag
-#   backpack 52..76 200   trapped pouches 2 to 5 along the bottom, 8 pixels apart
+#   backpack 56 200       the two satchels, first, at the bottom
+#   backpack 56 200       the supply pouch, on the satchels
+#   backpack 56 200       the loot bag, on the supply pouch
+#   backpack 44..76 200   trapped pouches 1 to 5 along the bottom, 8 pixels apart
 #   backpack 48..80 130   trapped pouches 6 to 10 one row up, 8 pixels apart
-#   backpack 0 200        any trapped pouch past the tenth, on the supply pouch again
+#   backpack 56 200       any trapped pouch past the tenth, on the stack again
 #   pouch    0 0          every supply not named below, the scissors among them
 #   pouch    130 0        identification wand, sewing kit
 #   pouch    130 80       the instrument
 #   pouch    0 80         what loot/recycle keeps, placed by that script
 #   bag      0 0          the dagger
 #
-# A point outside the item area of a container is pulled in to its edge, so x 0 and y 200
-# mean the bottom left corner. It also means every x left of the edge lands on one spot:
-# the old 0 to 20 put all trapped pouches in one place. The classic backpack gump starts
-# its item area at x 44, y 65 and is 142 by 94 (ServUO containers.cfg). The Outlands
-# backpack is not checked, so the trapped pouch slots are a first try (2026-10-19), to be
-# set from where the user drops them by hand. The first and the extra ones use the very
-# point of the stack, so they cover it wherever the edge turns out to be.
+# A point outside the item area of a container is pulled in to its edge, so y 200 means
+# the bottom, and every x left of the edge lands on one spot: the old trapped pouches at x
+# 0 to 20 all sat in one place. The stack sits behind the middle of the trapped pouches,
+# a little left of it because the loot bag is a little bigger than a pouch. At x 0 the
+# satchels and the loot bag poked out on the left of pouches at x 44 (user screenshot,
+# 2026-10-19). The numbers are still a first try, to be set from where the user drops
+# them by hand.
 #
 # Order matters. Moving a pouch closes it, and a closed container does not report what is
 # inside: the counters for the cure and heal potions in there read zero until it is opened
@@ -67,11 +66,11 @@
 cleardragdrop
 clearignore
 
-# 1. the satchels, bottom left of the backpack. Reopened for the same counting reason.
+# 1. the satchels, at the bottom of the backpack. Reopened for the same counting reason.
 if findtype 30765 backpack as alias__found_reagent_satchel
     lift alias__found_reagent_satchel
     wait wait__short
-    drop backpack 0 200
+    drop backpack 56 200
     wait wait__short
     if config__chatty = 1
         overhead "[ reg satchel, moved ]" 290
@@ -83,7 +82,7 @@ endif
 if findtype 31262 backpack as alias__found_alchemists_satchel
     lift alias__found_alchemists_satchel
     wait wait__short
-    drop backpack 0 200
+    drop backpack 56 200
     wait wait__short
     if config__chatty = 1
         overhead "[ alch satchel, moved ]" 290
@@ -97,7 +96,7 @@ endif
 if varexist global__my_supply_pouch and find global__my_supply_pouch backpack
     lift global__my_supply_pouch
     wait wait__short
-    drop backpack 0 200
+    drop backpack 56 200
     wait wait__short
     if config__chatty = 1
         overhead "[ supplies, moved ]" 290
@@ -109,7 +108,7 @@ endif
 if varexist global__my_loot_bag and find global__my_loot_bag backpack
     lift global__my_loot_bag
     wait wait__short
-    drop backpack 0 200
+    drop backpack 56 200
     wait wait__short
     if config__chatty = 1
         overhead "[ loot bag, moved ]" 290
@@ -123,14 +122,14 @@ endif
 # enough to cover it, and the next five sit one row up: whatever pokes out over the stack
 # is still a trapped pouch. Everything else stays under them. drop takes literal
 # coordinates, so each slot is a branch on the pass. Any pouch past the tenth goes back on
-# the supply pouch. Not reopened on purpose, nothing reads inside them.
+# the stack. Not reopened on purpose, nothing reads inside them.
 for 10
     if findtype 3705 backpack 38 as alias__found_trap_pouch
         lift alias__found_trap_pouch
         wait wait__short
 
         if index = 0
-            drop backpack 0 200
+            drop backpack 44 200
         elseif index = 1
             drop backpack 52 200
         elseif index = 2
@@ -162,7 +161,7 @@ endfor
 while findtype 3705 backpack 38 as alias__found_trap_pouch
     lift alias__found_trap_pouch
     wait wait__short
-    drop backpack 0 200
+    drop backpack 56 200
     wait wait__short
     if config__chatty = 1
         overhead "[ trapped pouch, moved ]" 290
