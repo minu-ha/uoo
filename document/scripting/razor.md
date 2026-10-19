@@ -185,9 +185,9 @@ Razor CE에 없거나 CE보다 넓어진 것. 존재 여부만 기록, 인자 �
 | `for 25`, `wait 100`으로 커서 폴링 | 4서클 커서가 루프 종료 후 뜸(2026-09-29). 남은 커서가 `not targetexists` 블록 전부 차단 | `for 60`. 한 바퀴가 `wait` 값보다 훨씬 짧게 도는 것으로 보임. 원인은 확인되지 않았다 |
 | 커서 없는 시전(힐 에이전트, Create Food, 자기 버프)을 `not casting`부터 보며 폴링 | 시전 끊김 순간 `casting` 해제 → 끊김 줄을 안 읽고 나감(2026-09-29). 다음 커서 폴링이 그 줄을 제 것으로 읽고 첫 바퀴에 나가 커서가 남음 | 커서 폴링 시작 전에 끊김 줄을 한 번 읽어 비움(`magery/rotation` 첫머리, `buff/spells`의 Spell Siphon 화살 앞) |
 | 치유할 것이 없을 때 Smart Heal, Greater Heal 에이전트 | 풀피면 커서를 안 찍고 남김(2026-09-29). 모든 블록 정지 | 에이전트 폴링 후 `targetexists and diffhits = 0`이면 `Cancel Current Target` |
-| 스크립트의 `target`과 `Target Self` | lasttarget이 백팩이나 나로 바뀜. 10칸 밖에서 고른 타겟을 노래가 덮어써서 교전 실패(2026-09-29) | 타겟은 화면 거리에서 받아 둠. 백팩이나 나를 찍기 전 lasttarget 재확인 |
+| 스크립트의 `target`과 `Target Self` | lasttarget이 백팩이나 나로 바뀜. 10칸 밖에서 고른 타겟을 노래가 덮어써서 교전 실패(2026-09-29). 적대 커서에 찍으면 `lastharmful`도 바뀜 | 타겟은 화면 거리에서 받아 사본(`var__combat_target`)에 둠. 2026-10-20부터 루프는 `lastharmful`을 읽고, 노래는 땅을 찍음. 블록이 자기 용도로 찍은 몹은 `var__target_hold`(`fight/target`). 손으로 누르는 E, Shift+V, 무기 핫키는 루프의 다음 공격 주문이나 다음 고르기 전까지 그 몹을 가리킬 수 있음 |
 | `Set Last Target (Harmful)`로 고른 대상을 `lasttarget`으로 읽기 | 일반 `lasttarget`은 그대로라 루프가 고른 대상을 못 따라감. `Target Closest Non-Friendly Monster`는 `lasttarget`, `lastharmful`, `lastbeneficial` 셋을 다 바꿈. 인게임 확인됨 2026-10-20(`debug/probe-last-targets`) | 루프는 `lastharmful`을 읽음(`fight/target`). Shift+V(Attack Last Target)와 All Kill 커서도 Harmful 대상을 따라감(사용자 확인 2026-10-20) |
-| 노래 커서에 백팩 찍기 | 노래 커서는 적대 커서라 `lastharmful`도 백팩으로 바뀜. 인게임 확인됨 2026-10-20(`debug/probe-last-targets`) | 블록은 전투 대상 사본(`var__combat_target`)에 걸고, 백팩은 땅에서 안 찾혀 새 대상으로 안 받음 → 루프는 영향 없음. 손으로 누르는 E와 Shift+V만 다음 고르기 전까지 백팩을 가리킴. 2026-10-20부터 `bard/song`은 땅(`targetrelloc 0 0`)을 찍어 `lastharmful`을 안 바꿈 |
+| 노래 커서에 백팩 찍기 | 노래 커서는 적대 커서라 `lastharmful`도 백팩으로 바뀜. 인게임 확인됨 2026-10-20(`debug/probe-last-targets`) | 땅에 찍음([Bard Necro](../templates/bard-necro.md#02.B) 02.B절) |
 | `setlasttarget alias__x`로 lasttarget 복원 | Razor CE 문서의 `setlasttarget ('serial')`과 달리 `Target a new 'Last Target'` 커서. 뒤의 sysmsg 줄 없음, 커서 취소마다 `Target queue cleared.`와 같은 커서가 번갈아 찍힘. 인게임 확인됨 2026-10-07(skinning-enhanced v3 Journal). 스크립트가 그 줄에서 커서 대기로 보임. 인자 무시 원인은 확인되지 않았다 | 사용 안 함. lasttarget 덮어쓰기는 기억한 대상이 없을 때만(`skinning-enhanced.razor` SKINNING) |
 
 ### <a id="03.A"></a>03.A 대상 조회 진단 핫키
@@ -208,7 +208,7 @@ Razor CE에 없거나 CE보다 넓어진 것. 존재 여부만 기록, 인자 �
    - `F END`까지 나오면 같은 거리의 alt로 반복. 시작 문구가 없으면 비교 전에 캐시 확인
 3. 가능하면 2칸 안, 3\~5칸, 6\~10칸, 11\~12칸, 13\~18칸에서 반복, 실제 거리 기록
    - 넓은 범위에서 찾은 대상을 좁은 범위에서 놓치는지 비교. 기본 검색부터 실패면 거리 판정 불가
-4. `Last Target`과 변수 경로 비교: 먼저 Q로 같은 대상 지정
+4. 마지막 대상과 변수 경로 비교: 먼저 Q로 같은 대상 지정. 2026-10-20부터 Q는 `Set Last Target (Harmful)`이라 진단도 `lastharmful`을 읽음. 그 전 결과는 `lasttarget` 기준
    - find 본문의 `config__probe_find_use_last_target`를 `1`로 → 새 커서 없이 그 serial로 실행
    - 기본값 `0`: 직접 찍은 serial과 Q serial이 다르면 F11 건너뜀
 5. Q로 같은 대상 선택 → `debug-target-state` Play
@@ -225,7 +225,7 @@ Razor CE에 없거나 CE보다 넓어진 것. 존재 여부만 기록, 인자 �
 | F01, F02 | `find serial`, 같은 식에 `as` | 기본 검색과 alias 바인딩. alias 성공 시 `same_selected=1` 확인 |
 | F03, F04, F05 | `ground`, `ground -1 -1 18`, 같은 식에 `as` | 검색 소스, 거리 인자, alias의 결과 차이 |
 | F06, F07, F08, F09 | 같은 serial을 2, 5, 10, 12칸으로 검색 | 기본 검색과 F04가 성공한 대상에서 거리 필터 비교 |
-| F10, F11 | F10은 복사한 세션 변수, F11은 같은 대상의 `lasttarget` | 같은 serial을 읽는 경로 차이. Q 대상이 다르면 F11 SKIP |
+| F10, F11 | F10은 복사한 세션 변수, F11은 같은 대상의 `lastharmful`(2026-10-20 전에는 `lasttarget`) | 같은 serial을 읽는 경로 차이. Q 대상이 다르면 F11 SKIP |
 | F12, F13 | F12는 `ignore` 후 검색, F13은 `unignore` 후 검색 | F04 TRUE, F12 FALSE, F13 TRUE → ignore 동작. 모두 FALSE면 ignore 탓으로 단정 금지 |
 | F14, F15 | 바디 ID의 `findtype`으로 18칸, 10칸 검색 | 다른 모빌은 성공 아님, 고른 serial과 같은 항목만 TRUE. 최대 40개를 채우면 INCOMPLETE |
 
@@ -318,7 +318,7 @@ Razor CE에 없거나 CE보다 넓어진 것. 존재 여부만 기록, 인자 �
 1. 패스의 첫 커서 폴링 전에 남은 끊김 줄을 한 번 읽어 비움
 2. 대상을 `find … as`로 찾은 블록 안에서 `cast`. alias는 블록 밖에서 못 읽음 → `target`까지 모두 안에
 3. `for 60` 폴링. 커서, 끊김 줄, 긴급 HP 중 먼저 온 것에서 `break`. HP 때문이면 `hotkey "> Interrupt"`로 제 시전 먼저 끊음
-4. 커서 없음 → 아무것도 안 찍음. 커서 있음 → lasttarget 재확인
+4. 커서 없음 → 아무것도 안 찍음. 커서 있음 → `lastharmful` 재확인
    - 대상 사망, 플레이어의 대상 변경 → `Cancel Current Target`
    - 그대로 → `target`, `wait wait__cast`
 
@@ -326,7 +326,7 @@ Razor CE에 없거나 CE보다 넓어진 것. 존재 여부만 기록, 인자 �
 flowchart TD
   drain("남은 끊김 줄을 읽어 비운다<br>패스의 첫 커서 폴링보다 먼저") --> cast("find … as로 찾은 블록 안에서 cast")
   cast --> poll("for 60 폴링<br>커서, 끊김 줄, 긴급 HP 중 먼저 온 것에서 break<br>HP 때문이면 Interrupt 핫키로 먼저 끊는다") --> cursor{"커서가 떴나"}
-  cursor -- 예 --> reread("lasttarget을 다시 읽는다") --> same{"대상이 살아 있고 그대로인가"}
+  cursor -- 예 --> reread("lastharmful을 다시 읽는다") --> same{"대상이 살아 있고 그대로인가"}
   cursor -- 아니요 --> none("아무것도 찍지 않는다")
   same -- 예 --> hit("target 대상<br>wait wait__cast")
   same -- 아니요 --> cancel("Cancel Current Target")

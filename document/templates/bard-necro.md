@@ -385,6 +385,7 @@ findbuff "song of peacemaking"
 - **데미지로 안 풀림.** 풀리는 것은 **Barding Break뿐**
 - 위키 어디에도 "damage breaks pacify" 없음. 클래식 UO 규칙 적용 안 함
 - → **피스를 걸고 때려도 됨.** 소환수 공격에도 안 풀림. 피스와 공격 로직이 서로 막을 이유 없음
+- **피스가 걸린 몹도 프로보가 걸림**(2026-10-20 사용자 확인). 대상으로 피스를 받던 A를 B에게 프로보한 첫 시험
 
 ### <a id="02.Q"></a>02.Q Bard Codex
 
@@ -1115,21 +1116,22 @@ PK를 만나도 조합 유지, 사냥하던 그대로 싸움(06.D절).
 ```mermaid
 flowchart TD
   drain("드레인<br>큐와 시전이 빌 때까지") --> survive("생존<br>마비, 독, HP") --> cache("타겟 캐시") --> flags("패스 플래그") --> house("하우스키핑<br>5초마다")
-  house --> mush("버섯") --> resummon("재소환<br>빠진 소환수, 교체") --> engaged{"교전 중인가"}
+  house --> mush("버섯") --> resummon("재소환<br>빠진 소환수, 교체") --> provo("프로보<br>고른 적끼리") --> engaged{"교전 중인가"}
   engaged -- 예 --> combat("교전 블록 일곱")
   engaged -- 아니요 --> walk("이동 블록 셋")
 ```
 
-위 일곱 블록은 모든 패스가 통과, 교전 여부는 그 뒤에 한 번만. 교전 패스는 이동 블록을, 이동 패스는 교전 블록을 보지 않음.
+위 여덟 블록은 모든 패스가 통과, 교전 여부는 그 뒤에 한 번만. 교전 패스는 이동 블록을, 이동 패스는 교전 블록을 보지 않음.
 
 | 블록 | 게이트 | 비고 |
 | --- | --- | --- |
 | 드레인 | `while queued or casting` | 이미 나간 동작이 끝난 뒤 상태를 읽음. 참조 스크립트 둘도 루프를 이렇게 시작. 이 루프는 `config__settle_first` 1 |
 | 생존 | `paralyzed or poisoned or diffhits > 0` | 세 상태를 한 줄로 묻고, 안에서 마비, 큐어, 힐 순서. 마비가 맨 앞: 마비 중에는 아래가 아무것도 못 함. 큐어가 힐보다 앞: 큐어는 즉시 끝나고 힐은 독 틱에 일부 손실 |
-| 타겟 캐시 | `lasttarget`과 `noto`, 화면 거리 | 18칸(`config__acquire_range`) 안에서 받아 두고 10칸(`config__target_range`) 안에서 교전. 송과 자기 대상 주문은 lasttarget을 덮어쓰기 전에 재확인 |
+| 타겟 캐시 | `lastharmful`과 `noto`, 화면 거리 | 18칸(`config__acquire_range`) 안에서 받아 두고 10칸(`config__target_range`) 안에서 교전. 블록은 사본(`var__combat_target`)에 걺. 블록이 자기 용도로 찍은 몹은 `var__target_hold`로 빼 둠 |
 | 패스 플래그 | `timer "timer__reagents"` 10초, 또는 시약 부족 문장 | 시약과 주문 플래그 생성(`magery/reagents`, 아래). 심볼 수를 읽는 `ingump` 사슬은 게이트 없이 매 패스(05.H절). 심볼을 못 읽으면 `necro/symbols`가 30초에 한 번 핫바 재오픈 |
 | 하우스키핑 | `# @ every interval__housekeeping` 5초 | 악기 회수, 리프레시 포션, 소환수 이름, 골드는 틱마다. 악기 확인(30초), 음식(60초), 스탯 포션(5초, 교전 중에만)은 자기 시계. 디스코 건 대상은 `bard/disco`가 교전 패스마다 30초 뒤 잊음(05.H절) |
 | 재소환 | `followers < config__summon_followers` 또는 교체 시계 | 교전 중에도 빠진 소환수를 바로 채움. 교체는 기억한 적이 없을 때만. 설계는 04.I절 |
+| 프로보 | 새로 고른 적은 매 패스 목록에. 짝 찾기는 교전 중, 쿨다운 칸과 Music이 빌 때 2초마다, 할 일이 없으면 5초마다 | 고른 적끼리 둘씩(`bard/provo` 머리 주석). 비용은 05.H절 |
 | 교전 중인가 | `var__fighting = 1`(레시피 그룹) | 한 번만 판정. 그 아래 블록은 재판정 안 함 |
 
 - **`magery/reagents`의 시약 플래그는 10초에 한 번**(`timer__reagents`)
@@ -1428,35 +1430,11 @@ endif
 - **라운드로빈은 산술 없이 리터럴 상태값.** `var__song_next`가 1, 2, 3을 순환, 곡마다 자기 슬롯도 확인
 - 교전이 막 끝나면 Peace 슬롯이 10초 남아 Peace 송과 Provo 송 둘 다 막힘 → 그 패스를 건너뛰고 다음 패스에 재시도
 
-```
-if cooldown "song" = 0 and cooldown "music" = 0 and not warmode and var__instrument_ok = 1 and var__my_instrument != 0 and not targetexists and not casting
-    @setvar! var__song_after 0
+코드는 `module/bard/song.razor`의 BARD SONG.
 
-    if var__song_next = 1 and skill "Discordance" > 0 and cooldown "disco" = 0
-        useskill 'Discordance'
-        @setvar! var__song_after 2
-    elseif var__song_next = 2 and skill "Peacemaking" > 0 and cooldown "peace/provo" = 0
-        useskill 'Peacemaking'
-        @setvar! var__song_after 3
-    elseif var__song_next = 3 and skill "Provocation" > 0 and cooldown "peace/provo" = 0
-        useskill 'Provocation'
-        @setvar! var__song_after 1
-    endif
-
-    if var__song_after != 0
-        waitfortarget wait__bard_target
-        # the instrument prompt and the lasttarget check sit here, see BARD SONG
-        if targetexists
-            target backpack
-            @setvar! var__song_next var__song_after
-        endif
-    endif
-endif
-```
-
-- `var__song_next`는 커서가 백팩에 간 뒤에만 진행. 못 부른 곡은 건너뛰지 않고 다음 패스에 재시도
+- `var__song_next`는 커서가 땅에 간 뒤에만 진행. 못 부른 곡은 건너뛰지 않고 다음 패스에 재시도
 - 스킬이 없는 곡(`skill "..." = 0`)에서는 라운드로빈 정지 → 바딩 세 스킬 모두 필요
-- 백팩을 찍기 직전 lasttarget 재확인. 방금 고른 적이 있으면 커서를 취소하고 그 타겟을 다음 패스로
+- 땅을 찍어서 적대 칸(`lastharmful`)을 안 건드림 → 고른 대상을 지키는 재확인이 필요 없음(02.B절)
 - `findbuff "song of ..."`로 게이트하지 않음. 15분 버프라 늘 참 → 갱신이 영영 안 돎. **`cooldown "song" = 0`을 보고 다음 곡**
 - 이동 구간이 10\~20초라 슬롯은 대개 그 안에 풀림. 못 부른 곡은 다음 이동에서
 - **재소환해도 Bless는 재시전 안 함.** 애초에 Grimoire에서 제외
@@ -1482,7 +1460,7 @@ endif
 - **교전과 이동 분기**(2026-09-29, 2026-10-10부터 레시피 그룹). 모든 패스가 지나는 블록(생존, 타겟 캐시, 시약, 심볼, 하우스키핑) 뒤에서,
   `# @ when var__fighting = 1` 그룹이 교전 여부를 한 번만 판정
   - 교전 쪽: 디스코, 피스, 네크로 버스트, 오프닝, 프록 코어, 필러, Poison Strike. 이동 쪽(`# @ otherwise`): 자기 버프, Spell Siphon, 송, Vampiric Embrace
-  - 버섯과 재소환은 분기 앞. 스탯 포션은 하우스키핑 안에서 `var__fighting`을 직접 읽음
+  - 버섯, 재소환, 프로보는 분기 앞. 프로보는 새로 고른 적을 매 패스 목록에 넣어야 해서. 스탯 포션은 하우스키핑 안에서 `var__fighting`을 직접 읽음
   - 이전에는 블록마다 교전 여부를 따로 확인 → 이동 패스도 디스코와 피스의 실패하는 `find`까지 밟음
 - **하우스키핑 틱**(2026-09-29). 매 패스 볼 필요 없는 확인을 5초 `# @ every interval__housekeeping` 그룹 하나에 모음
   - 패스는 그 게이트 한 줄만. 더 긴 주기는 안에서 자기 시계를 한 번 더 확인
@@ -1516,7 +1494,8 @@ endif
 - 5초마다 하우스키핑 틱이 0.4 \~ 0.8초 추가. 소환수가 있을 때, 대부분 이름 검사
 - 10초마다 시약 리프레시가 0.5 \~ 1초 추가. 시전 있는 패스는 여기에 시전 시간
 - Peace 슬롯이 열렸는데 대상이 진정이나 브레이크 중이면, 전에는 `find`와 `getlabel`이 든 7줄이 매 패스 추가. 지금은 2초에 한 번
-- 남은 매 패스 검색은 타겟 캐시의 `find lasttarget`과 `find var__combat_target`(대상이 있을 때만) 둘뿐. 상태가 빨리 바뀌어 유지
+- 남은 매 패스 검색은 타겟 캐시의 `find lastharmful`과 `find var__combat_target`(대상이 있을 때만) 둘뿐. 상태가 빨리 바뀌어 유지
+- 프로보 한 판은 목록의 몹마다 `find` 한두 번, 짝 후보마다 `getlabel` 하나. 짝을 만드는 동안 2초, 할 일이 없으면 5초 간격. 목록은 누가 빠졌을 때만 다시 만듦. 새로 고른 적이 들어오면 바로 다시 봄
   - 버섯의 `findtype`은 마나가 낮을 때만, `counttype`은 이동 중 서 있을 때만 조건 끝에서 읽힘
 - **심볼 수 읽기.** 네크로 핫바 gump는 심볼을 `"<have>/<max>"`로 표시, 루프는 그 글자를 `ingump`로 읽음
   - `ingump`는 부분 문자열 매칭 → 큰 수부터 내려오는 사슬(`10/`부터 `1/`까지). Necromancy 100이면 최대 10

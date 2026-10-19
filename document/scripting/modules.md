@@ -373,10 +373,11 @@ order: 30
 - `recovery/heal`의 `config__heal_hits` ← 다쳤을 때 쉬는 블록(`gather/*`, `pack/leather`, `escape/tracking`)
   - `emergency_hits` ← 시전 중에 끊는 공격 주문(`magery/*`), `necro/resummon`. `recovery/light-heal`의 `light_hits` ← `pack/lumber`
 - `fight/target`의 `var__combat_target`과 사거리 ← `fight/parry-codex`, `fight/weapon-ability`, `pack/leather`, 바드와 네크로와 공격 주문 블록
-  - `var__keep_lasttarget` ← 자기나 백팩을 찍기 전 lasttarget을 재확인하는 블록(`bard/song`, `magery/flamestrike`, `necro/vampiric-embrace`)
+  - `var__keep_lasttarget` ← 자기를 찍거나 시전하기 전 `lastharmful`을 재확인하는 블록(`magery/flamestrike`, `necro/vampiric-embrace`)
+  - `var__target_hold` ← `bard/provo`가 자기 용도로 찍은 몹을 적음. `fight/target`과 커서 중에 고르기를 받는 블록이 그 몹을 건너뜀
   - `gather/skinning`은 칼 커서를 든 동안 고른 적을 여기에 기록
 - `escape/tracking`의 `var__tracking_*`와 `tracking_color` ← `escape/recall`
-- `bard/instrument`의 `var__my_instrument`, `var__instrument_ok`, `wait__bard_target` ← `bard/disco`, `bard/peace`, `bard/song`
+- `bard/instrument`의 `var__my_instrument`, `var__instrument_ok`, `wait__bard_target` ← `bard/disco`, `bard/peace`, `bard/provo`, `bard/song`
 - `necro/symbols`의 `list__necro_symbols`, `var__symbols_spent`, `interval__necro_action`, `wait__message`, `wait__ability_target` ← 네크로 능력 블록
   - `var__symbols_listed` ← `necro/resummon`. VS를 쓴 패스에 리스트를 비우고 다시 읽게 함
 - `necro/summon-names`의 `config__summon_range` ← `necro/resummon`. 교체가 summon-names의 이름으로 놓으므로 둘은 함께

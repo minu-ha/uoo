@@ -164,7 +164,7 @@ Ctrl = Cmd, Alt = Option(01절) → macOS가 먼저 가져가는 키 있음.
 | 소환 | `Alt+1` → `Alt+2` → `Alt+2`, 솔플은 `Alt+1` → `Alt+3` → `Alt+2` | Vengeful Spirit 켠 뒤 듀오는 Lich 둘, 솔플은 Rag Witch와 Lich([Bard Necro](../templates/bard-necro.md#04.B) 04.B절). bard-necro-enhanced가 돌면 루프가 대신 소환([Bard Necro](../templates/bard-necro.md#04.I) 04.I절) |
 | PvE 공격 | `Z` → `V` | 가장 가까운 몹 공격. summoner는 펫이, basic은 내가(01.E절) |
 | PvE 주문 | `V`(summoner)로 라타 → `1 E` `2 E` → `4 E` `5 E` | `1`, `2`는 시그니처 칸(03절) |
-| 몹 여럿(summoner) | `Tab` → `Shift+Z` 여러 번 → 칠 몹에서 멈춤 → `Tab` | 지나간 몹마다 bard-necro-enhanced의 프로보 목록에 들어감. 워모드 중이라 사이에 주문이 안 나감 |
+| 몹 여럿(summoner) | `Tab` → `Shift+Z` 여러 번 → 칠 몹에서 멈춤 → `Tab` | 지나간 몹마다 bard-necro-enhanced의 프로보 목록에 들어감. 루프가 한 바퀴 돌 틈을 두고 누름. 워모드 중이라 사이에 주문이 안 나감 |
 | PvP 시작 | `F4` | 전투 루프 정지, PvP 루프 시작. 펫 공격은 루프가 15초마다 `all kill`. 복귀는 `F1` |
 | PvP 타겟 | `Q`, summoner는 `Shift+X/C`, basic은 `X/C` | 라타 하나만 공격. 가장 가까운 플레이어 타겟은 서버가 막음 → 플레이어는 순환으로만 지정 |
 | PvP 주문 | 라타를 잡고 → `6 E` → `4 E` `5 E` |   |
