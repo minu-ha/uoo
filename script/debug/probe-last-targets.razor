@@ -1,0 +1,27 @@
+# ========================================================================================
+# LAST TARGET PROBE
+#
+# Shows which last target slot a key moves. Razor keeps the general lasttarget apart from
+# lastharmful and lastbeneficial, and the loops read lasttarget, so a key that only moves
+# lastharmful, Set Last Target (Harmful), goes unseen by them.
+#
+# Use
+#   Stop the combat loop. Press the key to test on a creature (Q, V, Shift+Z), then run
+#   this. The Journal shows the serial in each slot, and a slot that holds a creature
+#   within 18 tiles gets an overhead over it. Press another key, run it again, compare.
+#   4294967295 in a slot means Razor took the name for a plain word, not an alias
+#   (document/scripting/razor.md part 3), so that alias does not exist in this build.
+# ========================================================================================
+
+@setvar! var__probe_last lasttarget
+@setvar! var__probe_harmful lastharmful
+@setvar! var__probe_beneficial lastbeneficial
+sysmsg "Probe: lasttarget={{var__probe_last}} lastharmful={{var__probe_harmful}} lastbeneficial={{var__probe_beneficial}}" 88
+
+if find lasttarget ground -1 -1 18 as alias__probe_last
+    overhead "[ last, here ]" 1288 alias__probe_last
+endif
+
+if find lastharmful ground -1 -1 18 as alias__probe_harmful
+    overhead "[ harmful, here ]" 1288 alias__probe_harmful
+endif

@@ -188,6 +188,7 @@ Diagnostics live in `debug/`. Stop the combat loop before running a probe or the
 | [debug-target-find](debug/debug-target-find.razor) | Compare serial lookup, range filters and optional body scans |
 | [debug-target-state](debug/debug-target-state.razor) | Inspect target state, variable comparison and readiness gates |
 | [test-telekinesis-var](debug/test-telekinesis-var.razor) | Cast one Telekinesis using a manually stored target serial |
+| [probe-last-targets](debug/probe-last-targets.razor) | Show which last target slot (`lasttarget`, `lastharmful`, `lastbeneficial`) a key moved |
 
 After moving a script, rebind any old hotkey to its `debug\...` path. The probe results are recorded in
 [the Razor doc](../document/scripting/razor.md#03.A).
