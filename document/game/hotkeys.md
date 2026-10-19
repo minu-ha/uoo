@@ -70,7 +70,7 @@ order: 20
 | Alt | — | — | — | — | — | — | — | — |
 
 라타 = last target. `Q`로 대상 지정 → 주문 커서가 뜨면 `E`로 라타에 시전.
-summoner는 2026-10-20부터 Harmful 쪽(`Set Last Target (Harmful)`, `Target Last Harmful`). 적대 대상 표시가 하나로 모이고, 루프도 `lastharmful`을 읽음. default는 아직 일반 쪽
+2026-10-20부터 두 프로필 모두 Harmful 쪽(`Set Last Target (Harmful)`, `Target Last Harmful`). 적대 대상 표시가 하나로 모이고, 루프도 `lastharmful`을 읽음
 
 ### <a id="01.D"></a>01.D 홈줄
 
