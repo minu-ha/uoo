@@ -150,11 +150,13 @@ for 10
             drop backpack 72 130
         elseif index = 9
             drop backpack 80 130
+        else
+            drop backpack 56 200
         endif
 
         wait wait__short
         if config__chatty = 1
-            overhead "[ trapped pouch, moved ]" 290
+            overhead "[ pouch, moved ]" 290
         endif
         @ignore alias__found_trap_pouch
     endif
@@ -166,79 +168,117 @@ while findtype 3705 backpack 38 as alias__found_trap_pouch
     drop backpack 56 200
     wait wait__short
     if config__chatty = 1
-        overhead "[ trapped pouch, moved ]" 290
+        overhead "[ pouch, moved ]" 290
     endif
     @ignore alias__found_trap_pouch
 endwhile
 
-# 4. everything else, into the supply pouch. Each kind is collected by its graphic, not by
-#    its label: a label need not name the thing, and a vielle (20016) landed with the
-#    supplies (user check, 2026-10-19). Collected first, because the walk below moves items
-#    out of the backpack and a findtype loop cannot be trusted while its own source is
-#    changing. Without a supply pouch the kit stays loose in the backpack.
+# The ignore list outlives the script. Cleared here, not only in step 4, which a missing
+# supply pouch skips: a combat loop that keeps the list would not see the pouches.
+clearignore
+
+# 4. everything else, into the supply pouch. Each kind is collected by its graphic, not
+#    by its label: a label need not name the thing, and a vielle (20016) landed with the
+#    supplies (user check, 2026-10-19).
+#
+#    A backpack search also reaches into the containers in it (pack/leather), so what sits
+#    in the supply pouch already is left where it is. That saves a lift and a drop per
+#    stack on every run, and keeps what loot/recycle saved in the bottom right. A dagger
+#    counts only when plain (hue 0), the one loot/recycle leaves alone, and not yet where
+#    it goes.
+#
+#    Collected first, because the walk below moves items out of the backpack and a
+#    findtype loop cannot be trusted while its own source is changing. Without a supply
+#    pouch the kit stays loose in the backpack.
 if varexist global__my_supply_pouch and find global__my_supply_pouch backpack
-    removelist sorting_instrument_list
-    createlist sorting_instrument_list
-    removelist sorting_tool_list
-    createlist sorting_tool_list
-    removelist sorting_dagger_list
-    createlist sorting_dagger_list
-    removelist sorting_item_list
-    createlist sorting_item_list
+    removelist list__sorting_instrument
+    createlist list__sorting_instrument
+    removelist list__sorting_tool
+    createlist list__sorting_tool
+    removelist list__sorting_dagger
+    createlist list__sorting_dagger
+    removelist list__sorting_item
+    createlist list__sorting_item
 
     while findtype 3740|3742|3762|3763|10245|20006|20008|20010|20012|20014|20016 backpack as alias__found_item
-        pushlist sorting_instrument_list alias__found_item
+        if find alias__found_item global__my_supply_pouch
+            # Already in the supply pouch.
+        else
+            pushlist list__sorting_instrument alias__found_item
+        endif
+
         @ignore alias__found_item
     endwhile
 
     while findtype 20496|3997 backpack as alias__found_item
-        pushlist sorting_tool_list alias__found_item
+        if find alias__found_item global__my_supply_pouch
+            # Already in the supply pouch.
+        else
+            pushlist list__sorting_tool alias__found_item
+        endif
+
         @ignore alias__found_item
     endwhile
 
-    while findtype 3922 backpack as alias__found_item
-        pushlist sorting_dagger_list alias__found_item
+    while findtype 3922 backpack 0 as alias__found_item
+        if varexist global__my_loot_bag and find global__my_loot_bag backpack
+            if find alias__found_item global__my_loot_bag
+                # Already in the loot bag.
+            else
+                pushlist list__sorting_dagger alias__found_item
+            endif
+        elseif find alias__found_item global__my_supply_pouch
+            # Already in the supply pouch, its place without a loot bag.
+        else
+            pushlist list__sorting_dagger alias__found_item
+        endif
+
         @ignore alias__found_item
     endwhile
 
     while findtype 3617|2726|3998|3999|3553|11552|11564|52149|5370|28879|28880|28881|28883|28885|28886|28888|29773|29774|29012 backpack as alias__found_item
-        pushlist sorting_item_list alias__found_item
+        if find alias__found_item global__my_supply_pouch
+            # Already in the supply pouch.
+        else
+            pushlist list__sorting_item alias__found_item
+        endif
+
         @ignore alias__found_item
     endwhile
 
     clearignore
 
-    foreach alias__sorting_item in sorting_instrument_list
+    foreach sorting_item in list__sorting_instrument
         if config__chatty = 1
-            getlabel alias__sorting_item label__sorting_item
+            getlabel sorting_item label__sorting_item
             overhead "[ sort, {{label__sorting_item}} ]" 290
         endif
 
-        lift alias__sorting_item 1000
+        lift sorting_item 1000
         wait wait__short
         drop global__my_supply_pouch 0 200
         wait wait__short
     endfor
 
-    foreach alias__sorting_item in sorting_tool_list
+    foreach sorting_item in list__sorting_tool
         if config__chatty = 1
-            getlabel alias__sorting_item label__sorting_item
+            getlabel sorting_item label__sorting_item
             overhead "[ sort, {{label__sorting_item}} ]" 290
         endif
 
-        lift alias__sorting_item 1000
+        lift sorting_item 1000
         wait wait__short
         drop global__my_supply_pouch 130 0
         wait wait__short
     endfor
 
-    foreach alias__sorting_item in sorting_dagger_list
+    foreach sorting_item in list__sorting_dagger
         if config__chatty = 1
-            getlabel alias__sorting_item label__sorting_item
+            getlabel sorting_item label__sorting_item
             overhead "[ sort, {{label__sorting_item}} ]" 290
         endif
 
-        lift alias__sorting_item 1000
+        lift sorting_item 1000
         wait wait__short
         if varexist global__my_loot_bag and find global__my_loot_bag backpack
             drop global__my_loot_bag 0 0
@@ -248,13 +288,13 @@ if varexist global__my_supply_pouch and find global__my_supply_pouch backpack
         wait wait__short
     endfor
 
-    foreach alias__sorting_item in sorting_item_list
+    foreach sorting_item in list__sorting_item
         if config__chatty = 1
-            getlabel alias__sorting_item label__sorting_item
+            getlabel sorting_item label__sorting_item
             overhead "[ sort, {{label__sorting_item}} ]" 290
         endif
 
-        lift alias__sorting_item 1000
+        lift sorting_item 1000
         wait wait__short
         drop global__my_supply_pouch 0 0
         wait wait__short
