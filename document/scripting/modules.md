@@ -69,7 +69,7 @@ order: 30
 | `module/tamer/` | 펫 스킬 | `herding`(목동 지팡이), `vet-kit`(나와 펫에게 수의사 키트) |
 | `module/fight/` | 근접 전투 보조 | `target`(기억한 적), `weapon-swap`(pvp 무기 슬롯), `axe`, `sword-codex`, `parry-codex`, `weapon-ability` |
 | `module/gather/` | 채집 | `lumberjacking`(Smart Harvest), `skinning`(칼질) |
-| `module/pack/` | 무게, 보급 파우치와 루팅 백 | `gold-drop`, `leather`(가죽 → 루팅 백), `lumber`(Logs → Boards → 루팅 백), `scavenger`(스캐빈저 캐시 비우기), `pouches`(보급 파우치와 루팅 백 지정), `sorting`(백팩 왼쪽 아래 더미와 파우치 안 정리) |
+| `module/pack/` | 무게, 보급 파우치와 루팅 백 | `gold-drop`, `leather`(가죽 → 루팅 백), `lumber`(Logs → Boards → 루팅 백), `scavenger`(스캐빈저 캐시 비우기), `pouches`(보급 파우치와 루팅 백 지정), `sorting`(백팩 아래쪽 더미와 트랩 파우치, 파우치 안 정리) |
 | `module/escape/` | PK 피하기 | `tracking`(헌트 필터 설정과 Hunting 점검), `recall`(자동 리콜 한 번) |
 | `module/restock/` | 집에서 하는 준비 | `house`(집 컨테이너, 금고, 비축함, 수리대, 재활용기, 선반), `tools`(바느질 키트와 감정 지팡이), `instrument`(마법 악기 하나), `runebook`(룬북 채우기) |
 | `module/gear/` | 입은 장비 | `dress`(부위 기록, 사망 뒤 다시 입기), `cosmetic`(Razor `cosmetic` 목록 입히기), `aspect`(`[aspect` gump의 Activate를 매번 누름) |

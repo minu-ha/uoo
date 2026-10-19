@@ -110,6 +110,8 @@ and the recipe, then `pnpm build`. Its choices are settings of its blocks, liste
 - `config__carry_magic_instrument` (`restock/instrument`): `1` keeps exactly one magic instrument, `0` leaves
   instruments alone.
 - `config__use_runebook_refill` (`restock/runebook`): `0` skips refilling runebooks, and the scroll box is not asked for.
+- `config__aspect_hand_row` (`gear/aspect`): the `[aspect` gump row pressed for the held item, `2` spellbook (default),
+  `1` weapon, `0` none. Set the weapon and spellbook rows to the same aspect: activating either turns both.
 
 [hotkey/regear.razor](hotkey/regear.razor) (Alt+0), built from `recipe/regear-recipe.razor`, is for after a death:
 it heals to full, puts back on the suit loadout recorded, sorts the backpack and turns the aspects back on.
