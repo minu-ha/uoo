@@ -362,7 +362,7 @@ order: 30
 
 | 신호 | 쓰는 곳 | 읽는 곳 |
 | --- | --- | --- |
-| `var__fighting` | `fight/target`(기억한 적이 `target_range` 안이면 1), pvp 레시피(늘 1) | `buff/potions`, `buff/spells`의 Bless와 Arch Protection, `buff/mushroom`의 Create Food, `magery/flamestrike`, `fight/archery-codex`의 고른 적 세기, bard-necro-enhanced의 교전 그룹 |
+| `var__fighting` | `fight/target`(기억한 적이 `target_range` 안이면 1), pvp 레시피(늘 1) | `buff/potions`, `buff/spells`의 Bless와 Arch Protection, `buff/mushroom`의 Create Food, `magery/flamestrike`, `fight/archery-codex`의 고른 적 세기, bard-necro-enhanced와 bard-archer-enhanced의 교전 그룹 |
 | `var__hold_casts` | `escape/recall`(리콜 결정 시 1) | `buff/spells`, `necro/resummon` |
 | `var__hold_gathering` | `escape/recall`(리콜 결정, 필요한 책 없음, 감지 리콜인데 Tracking이 사냥 중이 아니면 1) | `gather/lumberjacking`, `pack/lumber` |
 | `var__hold_symbols` | `necro/resummon`(소환수가 빠지고 마나 20\~64면 1, 은행이 차면 0) | `necro/burst`, `necro/poison-strike`, `necro/vampiric-embrace` |

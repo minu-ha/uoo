@@ -238,7 +238,7 @@ Hinder와 Maiming.
 - 교전 = 고른 적이 10칸 안. 바딩 사거리. 사격 사거리 8칸은 손으로 맞춤
 - **Peace가 Disco보다 먼저.** 몹을 붙잡을 소환수가 없음 → Peace가 몹을 막음. 끊긴 Peace(Ensemble 40%)가 Virtuoso 갱신(20%)보다 먼저 Music을 씀
 - `buff/spells`는 교전 중에도. 사격과 시전이 서로 안 막음(01.A절), 패스 끝에 둬서 바딩이 먼저
-- warmode(수동 구간): 바딩, 노래, 버프 정지. 회복 시전, 포션, 붕대, 코덱스 전환, 무기 능력은 계속
+- warmode(수동 구간): 바딩, 노래, 버프, 음식 정지. 회복 시전, 포션, 붕대, 코덱스 전환, 무기 능력은 계속
 
 ### <a id="04.B"></a>04.B 여러 마리 판정
 
@@ -248,6 +248,9 @@ Hinder와 Maiming.
 - 대상 옆 2칸 판정은 불가. 몹끼리 거리를 재는 식이 없음. 프로보 짝은 붙어 싸우므로 짝 중 하나를 쏘면 Incendiary가 다른 쪽에 감
 - 다쳤을 때(Fowling)가 가장 먼저. 피니셔는 다쳤을 때도 마릿수로
 - 전환은 코덱스 라벨로 지금 자세와 피니셔를 읽은 뒤에만. 명령이 켜고 끄는 토글이라 같은 것을 또 말하면 꺼짐
+- 라벨에 자세 이름이 없거나 둘 이상이면 자세 전환을, 피니셔 이름이 없거나 둘이면 피니셔 전환을 그 Play 동안 멈춤(`[ archery stance, off ]`, `[ archery finisher, off ]`).
+  라벨이 지금 것 하나만 보이는지는 확인되지 않았다
+- 라벨은 2초 확인마다가 아니라 원하는 것과 기억한 것이 다를 때만, 3초에 한 번까지 읽음. 손으로 바꾼 것은 30초마다 기억을 지워 다시 읽음
 - 명령: `[ArcheryAmmunition1`\~`5`(위키 순서 Arcane, Fowling, Incendiary, Longshot, Maiming), `[ArcheryFinisher1`(Ricochet), `[ArcheryFinisher2`(Pincushion). [Commands](https://wiki.uooutlands.com/Commands)
 - 자세가 바뀌면 서버가 머리 위에 `Fowling ammunition` 같은 문장을 띄움 → 스크립트는 같은 알림을 다시 안 띄움([Overheads](../scripting/overheads.md#01.B) 01.B절)
 
