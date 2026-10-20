@@ -1,0 +1,549 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<profile>
+	<property name="DisplaySkillChanges" type="System.Boolean">False</property>
+	<property name="TitleBarText" type="System.String">UO - {char}</property>
+	<property name="TitleBarDisplay" type="System.Boolean">True</property>
+	<property name="AutoSearch" type="System.Boolean">False</property>
+	<property name="NoSearchPouches" type="System.Boolean">True</property>
+	<property name="CounterWarnAmount" type="System.Int32">5</property>
+	<property name="CounterWarn" type="System.Boolean">True</property>
+	<property name="ObjectDelay" type="System.Int32">600</property>
+	<property name="ObjectDelayEnabled" type="System.Boolean">True</property>
+	<property name="AlwaysOnTop" type="System.Boolean">False</property>
+	<property name="SortCounters" type="System.Boolean">True</property>
+	<property name="QueueActions" type="System.Boolean">False</property>
+	<property name="QueueTargets" type="System.Boolean">False</property>
+	<property name="WindowX" type="System.Int32">2819</property>
+	<property name="WindowY" type="System.Int32">1767</property>
+	<property name="CountStealthSteps" type="System.Boolean">True</property>
+	<property name="SysColor" type="System.Int32">68</property>
+	<property name="WarningColor" type="System.Int32">37</property>
+	<property name="ExemptColor" type="System.Int32">1152</property>
+	<property name="Opacity" type="System.Int32">100</property>
+	<property name="BlockDismount" type="System.Boolean">True</property>
+	<property name="CapFullScreen" type="System.Boolean">False</property>
+	<property name="CapPath" type="System.String">C:\Users\Administrator\Pictures\RazorScreenShots</property>
+	<property name="CapTimeStamp" type="System.Boolean">True</property>
+	<property name="ImageFormat" type="System.String">jpg</property>
+	<property name="UndressConflicts" type="System.Boolean">True</property>
+	<property name="Systray" type="System.Boolean">False</property>
+	<property name="RazorWidth" type="System.Int32">1181</property>
+	<property name="RazorHeight" type="System.Int32">793</property>
+	<property name="SellAgentMax" type="System.Int32">99</property>
+	<property name="SkillListCol" type="System.Int32">1</property>
+	<property name="SkillListAsc" type="System.Boolean">True</property>
+	<property name="AutoStack" type="System.Boolean">False</property>
+	<property name="ActionStatusMsg" type="System.Boolean">True</property>
+	<property name="RangeCheckLT" type="System.Boolean">True</property>
+	<property name="LTRange" type="System.Int32">12</property>
+	<property name="FilterSnoopMsg" type="System.Boolean">True</property>
+	<property name="SmartLastTarget" type="System.Boolean">True</property>
+	<property name="LastTargTextFlags" type="System.Boolean">True</property>
+	<property name="AutoFriend" type="System.Boolean">False</property>
+	<property name="MessageLevel" type="System.Int32">0</property>
+	<property name="ForceIP" type="System.String" />
+	<property name="ForcePort" type="System.Int32">0</property>
+	<property name="BlockHealPoison" type="System.Boolean">False</property>
+	<property name="MapX" type="System.Int32">200</property>
+	<property name="MapY" type="System.Int32">200</property>
+	<property name="MapW" type="System.Int32">200</property>
+	<property name="MapH" type="System.Int32">200</property>
+	<property name="HotKeyStop" type="System.Boolean">True</property>
+	<property name="DiffTargetByType" type="System.Boolean">False</property>
+	<property name="StepThroughMacro" type="System.Boolean">False</property>
+	<property name="ShowTargetSelfLastClearOverhead" type="System.Boolean">True</property>
+	<property name="ShowOverheadMessages" type="System.Boolean">True</property>
+	<property name="OverheadFormat" type="System.String">{msg}</property>
+	<property name="OverheadStyle" type="System.Int32">1</property>
+	<property name="LogSkillChanges" type="System.Boolean">False</property>
+	<property name="StealthOverhead" type="System.Boolean">True</property>
+	<property name="ShowAttackTargetOverhead" type="System.Boolean">True</property>
+	<property name="RangeCheckTargetByType" type="System.Boolean">False</property>
+	<property name="RangeCheckDoubleClick" type="System.Boolean">False</property>
+	<property name="ShowContainerLabels" type="System.Boolean">True</property>
+	<property name="ContainerLabelFormat" type="System.String">[{label}] ({type})</property>
+	<property name="ContainerLabelColor" type="System.Int32">88</property>
+	<property name="ContainerLabelStyle" type="System.Int32">1</property>
+	<property name="Season" type="System.Int32">5</property>
+	<property name="BlockTradeRequests" type="System.Boolean">False</property>
+	<property name="BlockPartyInvites" type="System.Boolean">False</property>
+	<property name="AutoAcceptParty" type="System.Boolean">False</property>
+	<property name="ShowTextTargetIndicator" type="System.Boolean">True</property>
+	<property name="ShowAttackTargetNewOnly" type="System.Boolean">False</property>
+	<property name="ShowInRazorTitleBar" type="System.Boolean">False</property>
+	<property name="RazorTitleBarText" type="System.String">{name} on {account} ({profile} - {shard}) - Razor v{version}</property>
+	<property name="EnableUOAAPI" type="System.Boolean">True</property>
+	<property name="TargetIndicatorFormat" type="System.String">&amp;&amp;&amp;&amp;&amp;&amp;&amp;&amp;&amp;&amp;&amp;&amp;&amp;&amp;&amp;&amp;&amp;&amp;</property>
+	<property name="NextPrevTargetIgnoresFriends" type="System.Boolean">False</property>
+	<property name="StealthStepsFormat" type="System.String">Steps: {step}</property>
+	<property name="ShowFriendOverhead" type="System.Boolean">False</property>
+	<property name="DisplaySkillChangesOverhead" type="System.Boolean">False</property>
+	<property name="GrabHotBag" type="System.String">0</property>
+	<property name="MacroActionDelay" type="System.Boolean">False</property>
+	<property name="DisableMacroPlayFinish" type="System.Boolean">False</property>
+	<property name="ShowBandageTimer" type="System.Boolean">True</property>
+	<property name="ShowBandageTimerFormat" type="System.String">Bandage: {count}s</property>
+	<property name="ShowBandageTimerLocation" type="System.Int32">0</property>
+	<property name="OnlyShowBandageTimerEvery" type="System.Boolean">True</property>
+	<property name="OnlyShowBandageTimerSeconds" type="System.Int32">2</property>
+	<property name="ShowBandageTimerHue" type="System.Int32">88</property>
+	<property name="TargetIndicatorHue" type="System.Int32">33</property>
+	<property name="FilterSystemMessages" type="System.Boolean">False</property>
+	<property name="FilterRazorMessages" type="System.Boolean">False</property>
+	<property name="FilterDelay" type="System.Double">3.5</property>
+	<property name="FilterOverheadMessages" type="System.Boolean">False</property>
+	<property name="OnlyNextPrevBeneficial" type="System.Boolean">False</property>
+	<property name="FriendlyBeneficialOnly" type="System.Boolean">False</property>
+	<property name="NonFriendlyHarmfulOnly" type="System.Boolean">True</property>
+	<property name="ShowBandageStart" type="System.Boolean">False</property>
+	<property name="BandageStartMessage" type="System.String">Bandage: Starting</property>
+	<property name="ShowBandageEnd" type="System.Boolean">False</property>
+	<property name="BandageEndMessage" type="System.String">Bandage: Ending</property>
+	<property name="CaptureOthersDeathDelay" type="System.Double">0.5</property>
+	<property name="CaptureOwnDeathDelay" type="System.Double">0.5</property>
+	<property name="CaptureOthersDeath" type="System.Boolean">False</property>
+	<property name="CaptureOwnDeath" type="System.Boolean">False</property>
+	<property name="TargetFilterEnabled" type="System.Boolean">False</property>
+	<property name="SoundFilterEnabled" type="System.Boolean">False</property>
+	<property name="ShowFilteredSound" type="System.Boolean">False</property>
+	<property name="ShowPlayingSoundInfo" type="System.Boolean">False</property>
+	<property name="ShowMusicInfo" type="System.Boolean">False</property>
+	<property name="AutoSaveScript" type="System.Boolean">False</property>
+	<property name="AutoSaveScriptPlay" type="System.Boolean">False</property>
+	<property name="HighlightFriend" type="System.Boolean">False</property>
+	<property name="ScriptTargetTypeRange" type="System.Boolean">False</property>
+	<property name="ScriptDClickTypeRange" type="System.Boolean">False</property>
+	<property name="ScriptFindTypeRange" type="System.Boolean">False</property>
+	<property name="ScriptDisablePlayFinish" type="System.Boolean">True</property>
+	<property name="ShowPartyFriendOverhead" type="System.Boolean">False</property>
+	<property name="EnableTextFilter" type="System.Boolean">True</property>
+	<property name="DisableScriptTooltips" type="System.Boolean">False</property>
+	<property name="DisableScriptRestrictionMessage" type="System.Boolean">False</property>
+	<filters />
+	<counters>
+		<counter name="Bandages" enabled="True" image="True" />
+		<counter name="Black Pearl" enabled="True" image="True" />
+		<counter name="Blood Moss" enabled="True" image="True" />
+		<counter name="Cure Potions" enabled="True" image="True" />
+		<counter name="Garlic" enabled="True" image="True" />
+		<counter name="Ginseng" enabled="True" image="True" />
+		<counter name="Heal Potions" enabled="True" image="True" />
+		<counter name="Mandrake Root" enabled="True" image="True" />
+		<counter name="Nightshade" enabled="True" image="True" />
+		<counter name="Spider's Silk" enabled="True" image="True" />
+		<counter name="Sulfurous Ash" enabled="True" image="True" />
+	</counters>
+	<agents>
+		<Buy-1 enabled="False">
+			<item id="30999" amount="5" />
+		</Buy-1>
+		<Buy-2 enabled="False" />
+		<Buy-3 enabled="False" />
+		<Buy-4 enabled="False" />
+		<Buy-5 enabled="False" />
+		<Buy-6 enabled="False" />
+		<Buy-7 enabled="False" />
+		<Buy-8 enabled="False" />
+		<Buy-9 enabled="False" />
+		<Buy-10 enabled="False" />
+		<IgnoreList enabled="False" />
+		<Organizer-1 hotbag="1158970839">
+			<item id="20496" />
+		</Organizer-1>
+		<Organizer-2 hotbag="0" />
+		<Organizer-3 hotbag="0" />
+		<Organizer-4 hotbag="0" />
+		<Organizer-5 hotbag="0" />
+		<Organizer-6 hotbag="0" />
+		<Organizer-7 hotbag="0" />
+		<Organizer-8 hotbag="0" />
+		<Organizer-9 hotbag="0" />
+		<Organizer-10 hotbag="1158970839">
+			<item id="3997" />
+		</Organizer-10>
+		<Organizer-11 hotbag="0" />
+		<Organizer-12 hotbag="0" />
+		<Organizer-13 hotbag="0" />
+		<Organizer-14 hotbag="0" />
+		<Organizer-15 hotbag="0" />
+		<Organizer-16 hotbag="0" />
+		<Organizer-17 hotbag="0" />
+		<Organizer-18 hotbag="0" />
+		<Organizer-19 hotbag="0" />
+		<Organizer-20 hotbag="0" />
+		<Restock-1 hotbag="0" />
+		<Restock-2 hotbag="0" />
+		<Restock-3 hotbag="0" />
+		<Restock-4 hotbag="0" />
+		<Restock-5 hotbag="0" />
+		<Restock-6 hotbag="0" />
+		<Restock-7 hotbag="0" />
+		<Restock-8 hotbag="0" />
+		<Restock-9 hotbag="0" />
+		<Restock-10 hotbag="1158970839">
+			<item id="3997" amount="1" />
+		</Restock-10>
+		<Scavenger enabled="True">
+			<bag serial="0x62B488B2" />
+		</Scavenger>
+		<AutoSearchExemptions />
+		<Sell enabled="False" />
+		<UseOnce />
+	</agents>
+	<dresslists>
+		<list name="cosmetic">
+			<item serial="1121947659" />
+			<item serial="1121947654" />
+			<item serial="1121947661" />
+		</list>
+	</dresslists>
+	<hotkeys>
+		<key mod="4" key="87" send="False">L:3002015</key>
+		<key mod="0" key="48" send="False">L:3002016</key>
+		<key mod="2" key="81" send="False">L:3002017</key>
+		<key mod="2" key="84" send="False">L:3002021</key>
+		<key mod="4" key="81" send="False">L:3002022</key>
+		<key mod="2" key="69" send="False">L:3002025</key>
+		<key mod="2" key="82" send="False">L:3002027</key>
+		<key mod="4" key="69" send="False">L:3002028</key>
+		<key mod="4" key="89" send="False">L:3002030</key>
+		<key mod="0" key="84" send="False">L:3002031</key>
+		<key mod="0" key="82" send="False">L:3002032</key>
+		<key mod="2" key="90" send="False">L:3002034</key>
+		<key mod="2" key="192" send="False">L:3002039</key>
+		<key mod="4" key="82" send="False">L:3002040</key>
+		<key mod="2" key="88" send="False">L:3002044</key>
+		<key mod="2" key="87" send="False">L:3002046</key>
+		<key mod="4" key="84" send="False">L:3002047</key>
+		<key mod="0" key="54" send="False">L:3002048</key>
+		<key mod="0" key="53" send="False">L:3002052</key>
+		<key mod="0" key="52" send="False">L:3002053</key>
+		<key mod="2" key="67" send="False">L:3002054</key>
+		<key mod="2" key="86" send="False">L:3002058</key>
+		<key mod="0" key="72" send="False">L:3002059</key>
+		<key mod="2" key="89" send="False">L:3002069</key>
+		<key mod="0" key="192" send="False">L:1391</key>
+		<key mod="0" key="-2" send="False">L:1994</key>
+		<key mod="0" key="69" send="False">L:2120</key>
+		<key mod="0" key="32" send="False">L:1059</key>
+		<key mod="0" key="81" send="False">L:2062</key>
+		<key mod="0" key="86" send="False">L:1395</key>
+		<key mod="0" key="-5" send="False">L:1332</key>
+		<key mod="4" key="-1" send="False">L:2052</key>
+		<key mod="0" key="67" send="False">L:2054</key>
+		<key mod="4" key="90" send="False">L:2083</key>
+		<key mod="4" key="-2" send="False">L:2055</key>
+		<key mod="0" key="88" send="False">L:2057</key>
+		<key mod="0" key="90" send="False">L:2013</key>
+		<key mod="0" key="27" send="False">L:2101</key>
+		<key mod="0" key="112" send="False">Play Script: combat\bard-archer-enhanced</key>
+		<key mod="0" key="115" send="False">Play Script: combat\pvp</key>
+		<key mod="0" key="113" send="False">Play Script: hotkey\cancel-target</key>
+		<key mod="0" key="66" send="False">Play Script: hotkey\moongate</key>
+		<key mod="1" key="48" send="False">Play Script: hotkey\regear</key>
+		<key mod="0" key="122" send="False">Play Script: loot\claim-loot</key>
+		<key mod="0" key="114" send="False">Play Script: loot\recycle</key>
+		<key mod="0" key="121" send="False">Play Script: loot\share-loot</key>
+		<key mod="0" key="123" send="False">Play Script: restock\loadout</key>
+		<key mod="2" key="49" send="False">L:1028</key>
+		<key mod="2" key="50" send="False">L:1029</key>
+		<key mod="2" key="51" send="False">L:1030</key>
+		<key mod="2" key="54" send="False">L:1031</key>
+		<key mod="0" key="71" send="False">L:1032</key>
+		<key mod="2" key="52" send="False">L:1033</key>
+		<key mod="2" key="53" send="False">L:1034</key>
+		<key mod="0" key="-4" send="False">L:2527</key>
+		<key mod="0" key="70" send="False">L:2529</key>
+		<key mod="0" key="50" send="False">L:1044069</key>
+		<key mod="0" key="49" send="False">L:1044075</key>
+		<key mod="0" key="118" send="False">L:1044081</key>
+		<key mod="0" key="51" send="False">L:1044082</key>
+		<key mod="0" key="119" send="False">L:1044106</key>
+	</hotkeys>
+	<overheadmessages>
+		<overheadmessage searchtext=" : Attempting to heal you." message="[ heal, coming ]" hue="209" />
+		<overheadmessage searchtext="You do not have a full suit of armor" message="[ armor, out ]" hue="254" />
+		<overheadmessage searchtext="Now tracking" message="[ track, {3} {4} {5} ]" hue="290" />
+		<overheadmessage searchtext="spaces to target" message="[ track, {3} {4} {5} ]" hue="290" />
+		<overheadmessage searchtext="You search the home and find no one hiding within." message="[ house, clear ]" hue="269" />
+		<overheadmessage searchtext="script variable updated" message="[ var, set ]" hue="290" />
+		<overheadmessage searchtext="Your attack hamstrings your target" message="[ hams, target ]" hue="244" />
+		<overheadmessage searchtext="There's not enough wood here to harvest." message="[ wood, out ]" hue="254" />
+		<overheadmessage searchtext="Harvest double yield/loot triggered" message="[ harvest, double ]" hue="269" />
+		<overheadmessage searchtext="You chop some" message="[ lumber, {4} ]" hue="269" />
+		<overheadmessage searchtext="You hack at the tree for a while, but fail to produce any useable wood." message="[ lumber, miss ]" hue="254" />
+		<overheadmessage searchtext="Lumberjacking skillgain:" message="[ lumber, {3} ]" hue="290" />
+		<overheadmessage searchtext="Your skill in Lumberjacking has increased" message="[ lumber, gain ]" hue="290" />
+		<overheadmessage searchtext="You have recently traveled" message="[ harvest, wait ]" hue="254" />
+		<overheadmessage searchtext="You do not see any harvestable resources nearby" message="[ harvest, out ]" hue="254" />
+		<overheadmessage searchtext="harvesting is not allowed" message="[ harvest, blocked ]" hue="254" />
+		<overheadmessage searchtext="you notice" message="[ thief, me ]" hue="234" />
+		<overheadmessage searchtext="you have already used the maximum" message="[ field, out ]" hue="254" />
+		<overheadmessage searchtext="You have been poisoned!" message="[ poison, on ]" hue="234" />
+		<overheadmessage searchtext="You have been cured of all poisons." message="[ poison, off ]" hue="265" />
+		<overheadmessage searchtext="You have been cured of all poisons!" message="[ poison, off ]" hue="265" />
+		<overheadmessage searchtext="You are already at full health." message="[ hits, full ]" hue="290" />
+		<overheadmessage searchtext="You increase your damage resistance to creature-casted spells" message="[ resist, on ]" hue="290" />
+		<overheadmessage searchtext="You cannot move!" message="[ para, on ]" hue="234" />
+		<overheadmessage searchtext="You can move!" message="[ para, off ]" hue="265" />
+		<overheadmessage searchtext="before you may use another strength potion" message="" hue="254" />
+		<overheadmessage searchtext="before you may use another agility potion" message="" hue="254" />
+		<overheadmessage searchtext="you are already at full stamina." message="[ stam, full ]" hue="290" />
+		<overheadmessage searchtext="You are not poisoned." message="[ poison, off ]" hue="265" />
+		<overheadmessage searchtext="You may now use a strength potion." message="[ str, ready ]" hue="269" />
+		<overheadmessage searchtext="You may now use an agility potion." message="[ agi, ready ]" hue="269" />
+		<overheadmessage searchtext="Looting this corpse will be a criminal act!" message="[ loot, crim ]" hue="254" />
+		<overheadmessage searchtext="Looting this monster corpse will be a criminal act!" message="[ loot, crim ]" hue="254" />
+		<overheadmessage searchtext="You carve materials from the corpse." message="[ carve, done ]" hue="290" />
+		<overheadmessage searchtext="worth carving or investigating" message="[ corpse, out ]" hue="254" />
+		<overheadmessage searchtext="Criminal actions are not permitted" message="[ crim, blocked ]" hue="254" />
+		<overheadmessage searchtext="That corpse has already been carved." message="[ corpse, carved ]" hue="290" />
+		<overheadmessage searchtext="You have committed a criminal act!" message="[ crim, on ]" hue="234" />
+		<overheadmessage searchtext="You are now a criminal." message="[ crim, on ]" hue="234" />
+		<overheadmessage searchtext="You have been reported for a murder!" message="[ murder, +1 ]" hue="234" />
+		<overheadmessage searchtext="You summon an ancient" message="[ ancient, on ]" hue="269" />
+		<overheadmessage searchtext="Your spellbook generates mana for your spell." message="[ mana, refund ]" hue="290" />
+		<overheadmessage searchtext="You fail to ignite the campfire." message="[ camp, miss ]" hue="254" />
+		<overheadmessage searchtext="Your campfire is now secure." message="[ camp, on ]" hue="269" />
+		<overheadmessage searchtext="You feel it would take a few moments to secure your camp." message="[ camp, coming ]" hue="290" />
+		<overheadmessage searchtext="You enter a meditative trance." message="[ medi, on ]" hue="290" />
+		<overheadmessage searchtext="Your concentration is disturbed, thus ruining thy spell." message="[ cast, disturbed ]" hue="254" />
+		<overheadmessage searchtext="Being perfectly rested, you shove something invisible out of the way." message="[ hidden, near ]" hue="254" />
+		<overheadmessage searchtext="You may now attempt to" message="[ hams, ready ]" hue="269" />
+		<overheadmessage searchtext="You refrain from making hamstring attempts." message="[ hams mode, off ]" hue="290" />
+		<overheadmessage searchtext="You will now attempt to hamstring your opponents." message="[ hams mode, on ]" hue="290" />
+		<overheadmessage searchtext="You fail to hamstring your opponent." message="[ hams, miss ]" hue="254" />
+		<overheadmessage searchtext="Their attack hamstrings you!" message="[ hams, me ]" hue="234" />
+		<overheadmessage searchtext="You are no longer hamstrung" message="[ hams, off ]" hue="265" />
+		<overheadmessage searchtext="You will now attempt to disarm your opponents." message="[ disarm mode, on ]" hue="290" />
+		<overheadmessage searchtext="You refrain from making disarm attempts." message="[ disarm mode, off ]" hue="290" />
+		<overheadmessage searchtext="Your strike disarms your target!" message="[ disarm, target ]" hue="244" />
+		<overheadmessage searchtext="You fail to disarm your opponent." message="[ disarm, miss ]" hue="254" />
+		<overheadmessage searchtext="Their attack disarms you!" message="[ disarm, me ]" hue="234" />
+		<overheadmessage searchtext="Where do you wish to traverse to?" message="[ rope, pick ]" hue="255" />
+		<overheadmessage searchtext="That location is blocked." message="[ spot, blocked ]" hue="254" />
+		<overheadmessage searchtext="Target cannot be seen." message="[ range, out ]" hue="254" />
+		<overheadmessage searchtext="You are now under the protection of the town guards." message="[ guard, on ]" hue="290" />
+		<overheadmessage searchtext="You have left the protection of the town guards." message="[ guard, off ]" hue="254" />
+		<overheadmessage searchtext="Someone tried to steal from you." message="[ thief, me ]" hue="234" />
+		<overheadmessage searchtext="You have been revealed!" message="[ reveal, me ]" hue="234" />
+		<overheadmessage searchtext="You have been banned from this house." message="[ ban, me ]" hue="254" />
+		<overheadmessage searchtext="You have been ejected from this house!" message="[ eject, me ]" hue="254" />
+		<overheadmessage searchtext="You have been added to the party." message="[ party, on ]" hue="209" />
+		<overheadmessage searchtext="You have been removed from the party." message="[ party, off ]" hue="209" />
+		<overheadmessage searchtext="You feel ready to continue stealthing" message="[ stealth, ready ]" hue="269" />
+		<overheadmessage searchtext="You feel comfortable enough to begin stealthing" message="[ stealth, ready ]" hue="269" />
+		<overheadmessage searchtext="You have 5 stealth steps remaining" message="[ stealth, 5 ]" hue="290" />
+		<overheadmessage searchtext="You have successfully cleared it of traps" message="[ trap, done ]" hue="290" />
+		<overheadmessage searchtext="You successfully pick the lock" message="[ lock, done ]" hue="290" />
+		<overheadmessage searchtext="You fail to make any progress on the lock" message="[ lock, miss ]" hue="254" />
+		<overheadmessage searchtext="You fail to make any progress towards removing traps" message="[ trap, miss ]" hue="254" />
+		<overheadmessage searchtext="You finish using veterinary supplies" message="[ vet, done ]" hue="290" />
+		<overheadmessage searchtext="You begin using veterinary supplies" message="[ vet, on ]" hue="290" />
+		<overheadmessage searchtext="What do you wish to focus your follower's aggression towards?" message="[ herd, pick ]" hue="255" />
+		<overheadmessage searchtext="you extend the life of your creature" message="[ summon, extended ]" hue="290" />
+		<overheadmessage searchtext="you are now under the effect of herbal poultice" message="[ herb, on ]" hue="290" />
+		<overheadmessage searchtext="Your herbal poultice has lost its effectiveness." message="[ herb, off ]" hue="254" />
+		<overheadmessage searchtext="That spell is already currently in effect." message="[ buff, on ]" hue="290" />
+		<overheadmessage searchtext="already at full repair" message="[ repair, done ]" hue="290" />
+		<overheadmessage searchtext="You may now use another magic mushroom" message="[ mush, ready ]" hue="269" />
+		<overheadmessage searchtext="before you may consume another magic mushroom" message="[ mush, {5} ]" hue="290" />
+		<overheadmessage searchtext="One of more of your ship crewmembers" message="[ crew, ready ]" hue="269" />
+		<overheadmessage searchtext="Criminal healing will now be allowed" message="[ crim heal, on ]" hue="290" />
+		<overheadmessage searchtext="Criminal healing will now be prevented" message="[ crim heal, off ]" hue="290" />
+		<overheadmessage searchtext="Criminal looting will now be allowed" message="[ crim loot, on ]" hue="290" />
+		<overheadmessage searchtext="Criminal looting will now be prevented" message="[ crim loot, off ]" hue="290" />
+		<overheadmessage searchtext="Your lightning spell hinders your target" message="[ lightning, target ]" hue="244" />
+		<overheadmessage searchtext="Your attack cripples your target, lowering their defense" message="[ cripple, target ]" hue="244" />
+		<overheadmessage searchtext="You smash through" message="[ smash, target ]" hue="244" />
+		<overheadmessage searchtext="susceptible to special" message="[ bleed, target ]" hue="244" />
+		<overheadmessage searchtext="armslore skillgain" message="[ swing ]" hue="290" />
+		<overheadmessage searchtext="attack causes your target to bleed" message="[ bleed, target ]" hue="244" />
+		<overheadmessage searchtext="minutes before" message="[ wait, {5}m ]" hue="254" />
+		<overheadmessage searchtext="minute before" message="[ wait, {5}m ]" hue="254" />
+		<overheadmessage searchtext="minutes " message="[ wait, {5}m {7}s ]" hue="254" />
+		<overheadmessage searchtext="minute " message="[ wait, {5}m {7}s ]" hue="254" />
+		<overheadmessage searchtext="must wait another" message="[ wait, {5}s ]" hue="254" />
+		<overheadmessage searchtext="0 Trapped pouches remain" message="[ pouch, out ]" hue="254" />
+		<overheadmessage searchtext="No trapped pouches found" message="[ pouch, out ]" hue="254" />
+		<overheadmessage searchtext="restricted from performing aggressive" message="[ restrict, {14} ]" hue="234" />
+		<overheadmessage searchtext="world will save" message="[ world, coming ]" hue="224" />
+		<overheadmessage searchtext="world is saving" message="[ world, saving ]" hue="224" />
+		<overheadmessage searchtext="save complete" message="[ world, done ]" hue="224" />
+		<overheadmessage searchtext="aspect and other bonuses return" message="[ aspect, on ]" hue="269" />
+		<overheadmessage searchtext="free cure potion" message="[ cure pot, free ]" hue="290" />
+		<overheadmessage searchtext="too fatiqued" message="[ weight, over ]" hue="254" />
+		<overheadmessage searchtext="too fatigued" message="[ weight, over ]" hue="254" />
+		<overheadmessage searchtext="are overloaded" message="[ weight, over ]" hue="254" />
+		<overheadmessage searchtext="contested boss has spawned" message="[ boss, {7} ]" hue="224" />
+		<overheadmessage searchtext="control points earned for current beacon" message="[ beacon, +{2} {12} ]" hue="290" />
+		<overheadmessage searchtext="kill points earned" message="[ kill, +{2} {9} ]" hue="290" />
+		<overheadmessage searchtext="DF A Dungeon Flashpoint will begin in 15 minutes." message="[ flashpoint, coming ]" hue="224" />
+		<overheadmessage searchtext="cured the target of all poisons" message="[ cure, target ]" hue="269" />
+		<overheadmessage searchtext="cast a wizardry magic arrow spell again" message="[ magic arrow, ready ]" hue="269" />
+		<overheadmessage searchtext="cast a wizardry harm spell again" message="[ harm, ready ]" hue="269" />
+		<overheadmessage searchtext="cast a wizardry fireball spell again" message="[ fireball, ready ]" hue="269" />
+		<overheadmessage searchtext="cast a wizardry lightning spell again" message="[ lightning, ready ]" hue="269" />
+		<overheadmessage searchtext="cast a wizardry chain lightning spell again" message="[ chain, ready ]" hue="269" />
+		<overheadmessage searchtext="cast a wizardry meteor swarm spell again" message="[ meteor, ready ]" hue="269" />
+		<overheadmessage searchtext="magic arrow activated" message="[ magic arrow, target ]" hue="244" />
+		<overheadmessage searchtext="harm activated" message="[ harm, target ]" hue="244" />
+		<overheadmessage searchtext="fireball activated" message="[ fireball, target ]" hue="244" />
+		<overheadmessage searchtext="chain lightning activated" message="[ chain, target ]" hue="244" />
+		<overheadmessage searchtext="meteor swarm activated" message="[ meteor, target ]" hue="244" />
+		<overheadmessage searchtext="upgraded to Deadly" message="[ poison, deadly ]" hue="244" />
+		<overheadmessage searchtext="upgraded to Lethal" message="[ poison, lethal ]" hue="244" />
+		<overheadmessage searchtext="Triggered (Epic)" message="[ aspect, on ]" hue="269" />
+		<overheadmessage searchtext="enough experience to upgrade" message="[ aspect, upgrade ]" hue="290" />
+		<overheadmessage searchtext="Society Job Progress" message="[ society, {4} ]" hue="290" />
+		<overheadmessage searchtext="You have completed a society job" message="[ society, done ]" hue="290" />
+		<overheadmessage searchtext="aspect experience" message="[ {4}, {7} ]" hue="290" />
+		<overheadmessage searchtext="resist a bleed" message="[ bleed, off ]" hue="265" />
+		<overheadmessage searchtext="resist a disease effect" message="[ disease, off ]" hue="265" />
+		<overheadmessage searchtext="been struck by an ancient blight" message="[ disease, on ]" hue="234" />
+		<overheadmessage searchtext="may now review results" message="[ boss, done ]" hue="290" />
+		<overheadmessage searchtext="struck by an evil omen" message="[ omen, target ]" hue="244" />
+		<overheadmessage searchtext="enough unholy" message="[ unholy, out ]" hue="254" />
+		<overheadmessage searchtext="unholy symbols remaining" message="[ unholy, {4} ]" hue="290" />
+		<overheadmessage searchtext="max unholy" message="[ unholy, max ]" hue="269" />
+		<overheadmessage searchtext="consume a magic mushroom" message="[ mush, on ]" hue="290" />
+		<overheadmessage searchtext="mana from your mana well" message="[ eldritch, +{3} ]" hue="290" />
+		<overheadmessage searchtext="You consume" message="[ essence, +{3} ]" hue="290" />
+		<overheadmessage searchtext="generates mana" message="[ mana, refund ]" hue="290" />
+		<overheadmessage searchtext="progress on the lock" message="[ lock, {8} ]" hue="290" />
+		<overheadmessage searchtext="clearing it of traps" message="[ trap, {10} ]" hue="290" />
+		<overheadmessage searchtext="thrown at that player within 30" message="[ teleki, target ]" hue="244" />
+		<overheadmessage searchtext="has applied telekinesis to you" message="[ teleki, me ]" hue="234" />
+		<overheadmessage searchtext="An explosion potion has stuck to you" message="[ bomb, me ]" hue="234" />
+		<overheadmessage searchtext="Your explosion potion sticks to your target" message="[ bomb, target ]" hue="244" />
+		<overheadmessage searchtext="free hand to drink" message="[ hands, full ]" hue="254" />
+		<overheadmessage searchtext="You drink a healing potion" message="[ heal pot, on ]" hue="290" />
+		<overheadmessage searchtext="You drink a cure potion" message="[ cure pot, on ]" hue="290" />
+		<overheadmessage searchtext="You will now automatically" message="[ scroll mode, on ]" hue="290" />
+		<overheadmessage searchtext="You may only cast that spell on a player once every 30 seconds." message="[ limit, 30s ]" hue="254" />
+		<overheadmessage searchtext="Your boarding party fails to board the ship" message="[ boarding, miss ]" hue="254" />
+		<overheadmessage searchtext="That ship is too far away to board." message="[ range, out ]" hue="254" />
+		<overheadmessage searchtext="Your shot hinders your target!" message="[ hinder, target ]" hue="244" />
+		<overheadmessage searchtext="You deactivate your stance." message="[ stance, off ]" hue="254" />
+		<overheadmessage searchtext="You smash the unprotected" message="[ smash, target ]" hue="244" />
+		<overheadmessage searchtext="fallen to corruption" message="[ shrine, on ]" hue="224" />
+		<overheadmessage searchtext="You begin to move quietly" message="[ stealth, on ]" hue="290" />
+		<overheadmessage searchtext="You have 4 stealth" message="[ stealth, 4 ]" hue="254" />
+		<overheadmessage searchtext="You have 3 stealth" message="[ stealth, 3 ]" hue="254" />
+		<overheadmessage searchtext="You have 2 stealth" message="[ stealth, 2 ]" hue="254" />
+		<overheadmessage searchtext="You have 1 stealth" message="[ stealth, 1 ]" hue="234" />
+		<overheadmessage searchtext="You have 0 stealth" message="[ stealth, 0 ]" hue="234" />
+		<overheadmessage searchtext="You must hide first" message="[ hide, off ]" hue="254" />
+		<overheadmessage searchtext="Those cannons are out of ammunition" message="[ cannon, out ]" hue="254" />
+		<overheadmessage searchtext="You fail to steal" message="[ steal, miss ]" hue="254" />
+		<overheadmessage searchtext="You fail in your stealing attempt" message="[ steal, miss ]" hue="254" />
+		<overheadmessage searchtext="You steal" message="[ steal, done ]" hue="290" />
+		<overheadmessage searchtext="You successfully steal" message="[ steal, done ]" hue="290" />
+		<overheadmessage searchtext="You have already stolen from this creature" message="[ steal, wrong ]" hue="254" />
+		<overheadmessage searchtext="You may now taunt again." message="[ taunt, ready ]" hue="269" />
+		<overheadmessage searchtext="Potion codex Panaccea upgrade is now ready." message="[ panacea, ready ]" hue="269" />
+		<overheadmessage searchtext="Your ability to hide is no longer impeded" message="[ hide, ready ]" hue="269" />
+		<overheadmessage searchtext="Weapon ability ready" message="[ ability, ready ]" hue="269" />
+		<overheadmessage searchtext="your rapid" message="[ move, slow ]" hue="254" />
+		<overheadmessage searchtext="your movements attract" message="[ move, slow ]" hue="254" />
+		<overheadmessage searchtext="your quick movements draw the attention" message="[ move, slow ]" hue="254" />
+		<overheadmessage searchtext="iron flesh charges remaining" message="[ iron flesh, {1} ]" hue="290" />
+		<overheadmessage searchtext="You detonate a ground trap" message="[ detonate, done ]" hue="290" />
+		<overheadmessage searchtext="You may now detonate another trap" message="[ detonate, ready ]" hue="269" />
+		<overheadmessage searchtext="You increase your [EventScore" message="[ event, +{6} ]" hue="290" />
+		<overheadmessage searchtext="You are now under the effect of a Song" message="[ song, on ]" hue="290" />
+		<overheadmessage searchtext="You fail to discord" message="[ disco, miss ]" hue="254" />
+		<overheadmessage searchtext="fail to pacify any nearby creatures" message="[ peace, area miss ]" hue="254" />
+		<overheadmessage searchtext="fail to pacify your opponent" message="[ peace, miss ]" hue="254" />
+		<overheadmessage searchtext="disrupting your opponent" message="[ disco, target ]" hue="244" />
+		<overheadmessage searchtext="briefly discording" message="[ disco, area ]" hue="244" />
+		<overheadmessage searchtext="pacifying your target" message="[ peace, target ]" hue="244" />
+		<overheadmessage searchtext="briefly pacifying" message="[ peace, area ]" hue="244" />
+		<overheadmessage searchtext="play successfully, provoking" message="[ provo, target ]" hue="244" />
+		<overheadmessage searchtext="fail to incite anger" message="[ provo, miss ]" hue="254" />
+		<overheadmessage searchtext="Song of Discordance effect ends" message="[ disco song, off ]" hue="254" />
+		<overheadmessage searchtext="Song of Peacemaking effect ends" message="[ peace song, off ]" hue="254" />
+		<overheadmessage searchtext="Song of Provocation effect ends" message="[ provo song, off ]" hue="254" />
+		<overheadmessage searchtext="additional energy" message="[ spell, charged ]" hue="244" />
+		<overheadmessage searchtext="What instrument shall you play" message="[ inst, out ]" hue="254" />
+		<overheadmessage searchtext="now planted" message="[ planted, on ]" hue="290" />
+		<overheadmessage searchtext="5 moving throws" message="[ throws, 5 ]" hue="290" />
+		<overheadmessage searchtext="4 moving throws" message="[ throws, 4 ]" hue="290" />
+		<overheadmessage searchtext="3 moving throws" message="[ throws, 3 ]" hue="290" />
+		<overheadmessage searchtext="2 moving throws" message="[ throws, 2 ]" hue="290" />
+		<overheadmessage searchtext="1 moving throws" message="[ throws, 1 ]" hue="234" />
+		<overheadmessage searchtext="0 moving throws" message="[ throws, 0 ]" hue="234" />
+		<overheadmessage searchtext="wing your target" message="[ wing, target ]" hue="244" />
+		<overheadmessage searchtext="Magic reflect removed" message="[ reflect, off ]" hue="254" />
+		<overheadmessage searchtext="Spell siphon active." message="[ siphon, on ]" hue="269" />
+		<overheadmessage searchtext="Your spell siphon bonus has expired" message="[ siphon, off ]" hue="254" />
+		<overheadmessage searchtext="You absorb their spell." message="[ spell, absorbed ]" hue="269" />
+		<overheadmessage searchtext="You mana drain your target." message="[ drain, target ]" hue="244" />
+		<overheadmessage searchtext="You curse your target." message="[ curse, target ]" hue="244" />
+		<overheadmessage searchtext="Your reactive armor spell has been nullified." message="[ reactive, off ]" hue="254" />
+		<overheadmessage searchtext="You generate mana for your spell." message="[ mana, refund ]" hue="290" />
+		<overheadmessage searchtext="recovered from energy bolt kill" message="[ eb, refund ]" hue="290" />
+		<overheadmessage searchtext="That is too far away." message="[ range, out ]" hue="254" />
+	</overheadmessages>
+	<containerlabels />
+	<macrovariables />
+	<scriptvariables>
+		<scriptvariable serial="0x0" name="var_use_magic_instrument_item" />
+		<scriptvariable serial="0x4092E13B" name="var_my_loot_chest" />
+		<scriptvariable serial="0x12C" name="var_global_waiting_time" />
+		<scriptvariable serial="0x7D0" name="var_global_waiting_target_time" />
+		<scriptvariable serial="0x450581D2" name="var_my_barrel_container" />
+		<scriptvariable serial="0x45147618" name="var_my_runebook_container" />
+		<scriptvariable serial="0x488AC23E" name="global__my_furniture_container" />
+		<scriptvariable serial="0x49C8351F" name="var_my_resource_stockpile" />
+		<scriptvariable serial="0x462490DB" name="var_my_magic_item_recycler" />
+		<scriptvariable serial="0x439B7713" name="var_my_repair_bench" />
+		<scriptvariable serial="0x41FCEC56" name="var_my_storage_shelf" />
+		<scriptvariable serial="0x0" name="var_my_recall_scroll" />
+		<scriptvariable serial="0x55A63E0B" name="var_my_looting_pouch" />
+		<scriptvariable serial="0x45147618" name="var_my_recall_scroll_container" />
+		<scriptvariable serial="0x49F2F20C" name="var_my_wizard_satchel" />
+		<scriptvariable serial="0x0" name="var_my_instrument" />
+		<scriptvariable serial="0x1" name="var_use_discord" />
+		<scriptvariable serial="0x0" name="var_use_peace" />
+		<scriptvariable serial="0x0" name="var_use_provo" />
+		<scriptvariable serial="0x45147DD7" name="var_my_wand_container" />
+		<scriptvariable serial="0x4625F87C" name="var_my_bank_deposit_safe" />
+		<scriptvariable serial="0x1" name="var_use_potion" />
+		<scriptvariable serial="0x1" name="var_use_panacea" />
+		<scriptvariable serial="0x0" name="alchemyStockpile" />
+		<scriptvariable serial="0x0" name="inscriptionStockpile" />
+		<scriptvariable serial="0x0" name="blacksmithStockpile" />
+		<scriptvariable serial="0x0" name="tailoringStockpile" />
+		<scriptvariable serial="0x0" name="carpentryStockpile" />
+		<scriptvariable serial="0x0" name="tinkeringStockpile" />
+		<scriptvariable serial="0x0" name="cartographyStockpile" />
+		<scriptvariable serial="0x0" name="cookingStockpile" />
+		<scriptvariable serial="0x1" name="waitForMe" />
+		<scriptvariable serial="0x3D61D" name="myHealTarget" />
+		<scriptvariable serial="0xCF4EF" name="tameTarget" />
+		<scriptvariable serial="0x44DFF8BD" name="var__my-instrument" />
+		<scriptvariable serial="0x440CA7D7" name="var__my_instrument" />
+		<scriptvariable serial="0x2404CD" name="var__vendor_target" />
+		<scriptvariable serial="0x4035B3" name="var__label_target" />
+		<scriptvariable serial="0x488E31CA" name="var_my_loot_container" />
+		<scriptvariable serial="0x73CD0282" name="var_my_distribution_container" />
+		<scriptvariable serial="0x0" name="is_stealth" />
+		<scriptvariable serial="0x45147DD7" name="global__my_supply_box" />
+		<scriptvariable serial="0x45147618" name="global__my_recall_scroll_container" />
+		<scriptvariable serial="0x0" name="global__my_recall_scroll" />
+		<scriptvariable serial="0x4625F87C" name="global__my_bank_deposit_safe" />
+		<scriptvariable serial="0x49C8351F" name="global__my_resource_stockpile" />
+		<scriptvariable serial="0x439B7713" name="global__my_repair_bench" />
+		<scriptvariable serial="0x41FCEC56" name="global__my_storage_shelf" />
+		<scriptvariable serial="0x462490DB" name="global__my_magic_item_recycler" />
+		<scriptvariable serial="0x4EDE2A5D" name="global__my_supply_pouch" />
+		<scriptvariable serial="0x73CD0282" name="global__my_distribution_container" />
+		<scriptvariable serial="0x488E31CA" name="global__my_loot_container" />
+		<scriptvariable serial="0x4EDE2A5F" name="global__my_loot_bag" />
+	</scriptvariables>
+	<friends />
+	<textfilters />
+	<targetfilters />
+	<soundfilters />
+</profile>

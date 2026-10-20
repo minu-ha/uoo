@@ -9,7 +9,7 @@ Bard Necro 템플릿의 메커니즘과 판단. 소환 조합, 전투 루프의 
 **숫자는 추측 금지.** 바드, 네크로, 소환수 숫자는 여기서 인용, 없으면 위키를 읽고 여기에 추가.
 인용과 확인 표시: [Workflow](../working/workflow.md#01.C) 01.C절.
 
-- 캐릭터 `nomeehej`, Razor 프로필 `summoner`
+- 캐릭터 `nomeehej`, Razor 프로필 `summoner`. 2026-10-21 nomeehej는 [Bard Archer](bard-archer.md)로 바꾸고 `bard` 프로필로 옮김. 이 루프와 summoner 프로필은 그대로 둠
 - 사냥: `script/combat/bard-necro-enhanced.razor`(F1). PK: F4를 다시 연결한 `script/combat/pvp.razor`
 - 2026-09-28 `bard-mechanics.md`, `bard-necro-combat-design.md`, `bard-necro-summon-guide.md` 세 문서를 하나로 통합. 이력은 git
 

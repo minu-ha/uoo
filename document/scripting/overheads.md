@@ -288,6 +288,7 @@ flowchart TD
 ## <a id="07"></a>07 프로필 오버헤드 표
 
 Razor 프로필 `summoner.xml`, `default.xml`의 `<overheadmessages>`. 정본은 프로필 xml, 항목을 바꾸면 이 표도 수정.
+`bard.xml`은 2026-10-21 `summoner.xml`을 복사 → 같은 목록. 항목을 바꾸면 세 파일 모두.
 두 파일은 거의 같음. `default.xml`에는 던지기 8줄(`now planted`, `moving throws`, `wing your target`)과 벌목 3줄이 없고 붕대 1줄이 더 있음.
 벌목 3줄(`Lumberjacking skillgain:`, `Your skill in Lumberjacking has increased`, `You do not see any harvestable resources nearby`)은 2026-10-07부터 `default.xml`에서 빠짐.
 

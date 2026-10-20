@@ -5,14 +5,15 @@ group: Game reference
 order: 20
 ---
 
-모든 캐릭터 **같은 자리에 같은 역할**. 배치는 두 유형, Razor 프로필 하나 = 유형 하나.
+모든 캐릭터 **같은 자리에 같은 역할**. 배치는 세 유형, Razor 프로필 하나 = 유형 하나.
 
 | 유형 | 누구 | Razor 프로필 |
 | --- | --- | --- |
 | summoner | 소환수와 펫을 부리는 캐릭터 | `summoner` |
+| bard | 펫 없이 바딩하고 손으로 공격하는 캐릭터. 2026-10-21 `summoner`를 복사 | `bard` |
 | basic | 그 밖의 캐릭터(기본형) | `default` |
 
-- 두 유형이 다른 칸: 아랫줄(01.E절)뿐
+- 유형마다 다른 칸: 아랫줄(01.E절)뿐
 - 템플릿마다 채우는 칸: `1 2 3`, `F1`, `F4`, Alt 줄(03절)
 - 바인딩 정본: Razor 프로필 xml, ClassicUO `macros.xml`, `profile.json`(02.C절). 이 문서는 사람이 읽는 배치도
 
@@ -85,14 +86,15 @@ order: 20
 
 ### <a id="01.E"></a>01.E 아랫줄
 
-**`Z → V` = 공격.** 두 유형 모두 `Z`로 시작, `V`로 끝. 키의 뜻은 유형마다 달라도 결과는 같음 → 가장 가까운 몹 공격.
+**`Z → V` = 공격.** 세 유형 모두 `Z`로 시작, `V`로 끝. 키의 뜻은 유형마다 달라도 결과는 같음 → 가장 가까운 몹 공격.
 유형마다 다른 칸: `Z X C V`의 무수정과 Shift뿐.
 
 |  | Z | X | C | V | B | N |
 | --- | --- | --- | --- | --- | --- | --- |
 | 무수정 (summoner) | **All Kill** (커서) | All Follow Me | All Guard Me | **가장 가까운 몹 타겟** | moongate | home |
-| 무수정 (basic) | **가장 가까운 몹 타겟** | 이전 플레이어 | 다음 플레이어 | **Attack Last Target** | moongate | home |
+| 무수정 (basic, bard) | **가장 가까운 몹 타겟** | 이전 플레이어 | 다음 플레이어 | **Attack Last Target** | moongate | home |
 | Shift (summoner) | 다음 몹 | 이전 플레이어 | 다음 플레이어 | Attack Last Target | — | — |
+| Shift (bard) | 다음 몹 | — | — | — | — | — |
 | Shift (basic) | 햄스트링 토글 (예정) | 디스암 토글 (예정) | — | — | — | — |
 | Ctrl | Wall of Stone | Dispel Field | Invisibility | Reveal | — | — |
 | Alt | — | — | — | — | — | — |
@@ -100,7 +102,8 @@ order: 20
 - summoner: `Z` → All Kill 커서, `V` → 그 커서를 가장 가까운 몹으로 채움. 커서가 없으면 `V`는 라타 지정만
 - summoner `Shift+Z`: 다음 몹을 라타로(Next Non-Friendly Monster Target, 2026-10-20). 커서 없이 순환 → 루프의 커서와 안 부딪힘
 - basic: `Z`로 라타 지정, `V`로 공격. PvP는 `X`나 `C`로 플레이어 지정 → `V`
-- 플레이어 순환: summoner `Shift+X/C`, basic 무수정 `X/C`. 키 하나에 바인딩 하나 → summoner는 무수정 `X`, `C`를 펫 명령에 씀
+- bard: 무수정은 basic과 같음. 펫이 없어 펫 명령 없음. `Shift+Z`는 summoner처럼 다음 몹 → 프로보와 아처리 코덱스의 고른 적 목록 채우기
+- 플레이어 순환: summoner `Shift+X/C`, basic과 bard 무수정 `X/C`. 키 하나에 바인딩 하나 → summoner는 무수정 `X`, `C`를 펫 명령에 씀
 - summoner Follow `X`, Guard `C`. `C`는 가장 자주 누르는 `V` 옆 → 오입력 잦음.
   Guard 오입력은 펫이 싸움 유지, Follow 오입력은 펫이 싸움 중단
 - 햄스트링과 디스암: 평소 켬. basic의 `Shift+Z`, `Shift+X`는 상황별 토글 자리(예정, 07절).
@@ -123,7 +126,7 @@ order: 20
 | 층 | 뜻 | 줄별 |
 | --- | --- | --- |
 | 무수정 | 손에 익어야 하는 것 | 이동, 타겟, 펫, 핵심 콤보, 도주, 긴급 |
-| Shift | 밖으로 던지는 것 | 윗줄 공격 주문 6, 아랫줄 교전(summoner는 플레이어 순환, basic은 햄스트링과 디스암) |
+| Shift | 밖으로 던지는 것 | 윗줄 공격 주문 6, 아랫줄 교전(summoner는 플레이어 순환, bard는 다음 몹, basic은 햄스트링과 디스암) |
 | Ctrl | 나와 내 편에 좋은 것 | 숫자줄 포션 6, 윗줄 버프 4와 펫 큐어와 동료 부활, 아랫줄 필드와 유틸 4, `` ` `` 펫 힐 |
 | Alt | 소환만 | `1` VS → `2`\~`6`. 예외 `0` regear 하나(01.B절). 전투 밖에서 천천히 |
 
@@ -154,19 +157,22 @@ Ctrl = Cmd, Alt = Option(01절) → macOS가 먼저 가져가는 키 있음.
 
 | 캐릭터, 템플릿 (유형) | 1 2 3 | F1 | F4 | Alt 줄 |
 | --- | --- | --- | --- | --- |
-| nomeehej, Bard Necro (summoner) | Disco, Peace, Provo | bard-necro-enhanced | pvp | 소환 5와 VS |
+| nomeehej, Bard Archer (bard) | Disco, Peace, Provo | bard-archer-enhanced | pvp | — |
 | nomeehui (옛 xuezhonglian), PK 메이지 (default) | Feeblemind, Weaken, Clumsy | skinning-enhanced (현재 연결) | pvp | Water El과 Earth El만 (`Alt+3`, `Alt+4`) |
+
+- 2026-10-21 nomeehej를 Bard Necro(summoner)에서 Bard Archer(bard)로. summoner 프로필과 bard-necro-enhanced는 그대로 둠([Bard Archer](../templates/bard-archer.md#04.D) 04.D절)
+- summoner일 때 nomeehej의 Alt 줄: 소환 5와 VS
 
 ## <a id="04"></a>04 손에 잡히는 흐름
 
 | 상황 | 키 | 메모 |
 | --- | --- | --- |
 | 소환 | `Alt+1` → `Alt+2` → `Alt+2`, 솔플은 `Alt+1` → `Alt+3` → `Alt+2` | Vengeful Spirit 켠 뒤 듀오는 Lich 둘, 솔플은 Rag Witch와 Lich([Bard Necro](../templates/bard-necro.md#04.B) 04.B절). bard-necro-enhanced가 돌면 루프가 대신 소환([Bard Necro](../templates/bard-necro.md#04.I) 04.I절) |
-| PvE 공격 | `Z` → `V` | 가장 가까운 몹 공격. summoner는 펫이, basic은 내가(01.E절) |
+| PvE 공격 | `Z` → `V` | 가장 가까운 몹 공격. summoner는 펫이, basic과 bard는 내가(01.E절) |
 | PvE 주문 | `V`(summoner)로 라타 → `1 E` `2 E` → `4 E` `5 E` | `1`, `2`는 시그니처 칸(03절) |
-| 몹 여럿(summoner) | `Tab` → `Shift+Z` 여러 번 → 칠 몹에서 멈춤 → `Tab` | 지나간 몹마다 bard-necro-enhanced의 프로보 목록에 들어감. 루프가 한 바퀴 돌 틈을 두고 누름. 워모드 중이라 사이에 주문이 안 나감 |
+| 몹 여럿(summoner, bard) | `Tab` → `Shift+Z` 여러 번 → 칠 몹에서 멈춤 → `Tab` | 지나간 몹마다 프로보 목록에 들어감. bard-archer-enhanced는 아처리 코덱스의 고른 적 목록에도. 루프가 한 바퀴 돌 틈을 두고 누름. 워모드 중이라 사이에 주문이 안 나감 |
 | PvP 시작 | `F4` | 전투 루프 정지, PvP 루프 시작. 펫 공격은 루프가 15초마다 `all kill`. 복귀는 `F1` |
-| PvP 타겟 | `Q`, summoner는 `Shift+X/C`, basic은 `X/C` | 라타 하나만 공격. 가장 가까운 플레이어 타겟은 서버가 막음 → 플레이어는 순환으로만 지정 |
+| PvP 타겟 | `Q`, summoner는 `Shift+X/C`, basic과 bard는 `X/C` | 라타 하나만 공격. 가장 가까운 플레이어 타겟은 서버가 막음 → 플레이어는 순환으로만 지정 |
 | PvP 주문 | 라타를 잡고 → `6 E` → `4 E` `5 E` |   |
 | 폭탄 | `T` `E` → `G` `E` | Telekinesis 먼저. 상대가 30초 동안 끈끈이([PvP](pvp.md#04) 04절) |
 | 긴급 | `` ` `` 힐(새끼손가락), 사이드 아래 Pouch(엄지), `Ctrl+1` 힐 포션(엄지와 약지) | 손 이동 없이 누름 |
@@ -174,7 +180,9 @@ Ctrl = Cmd, Alt = Option(01절) → macOS가 먼저 가져가는 키 있음.
 
 #### 지금 연결된 것
 
-- default와 summoner 프로필: F4 → `Play Script: combat\pvp`. 2026-10-05 템플릿별 PvP 스크립트 삭제, `combat/pvp` 하나로 통합
+- default, summoner, bard 프로필: F4 → `Play Script: combat\pvp`. 2026-10-05 템플릿별 PvP 스크립트 삭제, `combat/pvp` 하나로 통합
+- bard 현재 연결: `F1=bard-archer-enhanced`, `F4=pvp`. 2026-10-21 summoner를 복사해 아랫줄, F1, Alt 소환만 바꿈.
+  게임에서 nomeehej의 Razor 프로필을 `bard`로 고르면 `chars.lst`는 Razor가 기록
 - default 현재 연결: `F1=skinning-enhanced`, `F4=pvp`, `T=Telekinesis`. 2026-10-09 게임에서 lumberjack-enhanced → skinning-enhanced로 다시 변경
 - 진단 파일: `debug\...` 경로로 연결. 프로필 원본 수정 전 게임 종료([Workflow](../working/workflow.md#04.C) 04.C절)
 - 2026-10-05 `xuezhonglian` → `nomeehui`. ClassicUO 설정 정본 `config/indian/classicuo/nomeehui/`, 게임의 새 이름 폴더를 여기에 연결.
@@ -243,7 +251,7 @@ Ctrl = Cmd, Alt = Option(01절) → macOS가 먼저 가져가는 키 있음.
 - default `2`, `3`의 Weaken, Clumsy가 실제 템플릿에 맞는지. 임시 배정. `1`은 2026-10-09 사용자가 Feeblemind로 결정
 - 사이드 위, 아래와 코드 `-5`, `-4`의 대응. 반대면 두 줄 맞바꿈
 - macOS "다음 윈도우로 초점 이동"을 끈 뒤 `` Ctrl+` ``이 게임에 들어오는지
-- 아랫줄 새 배치(`summoner.xml`, `default.xml`)의 게임 동작
+- 아랫줄 새 배치(`summoner.xml`, `default.xml`, `bard.xml`)의 게임 동작
 - 햄스트링과 디스암 토글 거는 방법(Razor 핫키, 채팅 명령, 버튼). 위키 Hamstring 문서 확인 후 basic `Shift+Z`, `Shift+X`에 걸기
 - Razor로 옮긴 주문 핫키(`L:3002011` \~ `L:3002074`)의 Outlands 동작. CE 규칙으로 계산한 번호, 이 포크에서 게임 확인 안 됨.
   주문 매크로는 여섯 캐릭터의 `macros.xml`에서 이미 삭제. 안 도는 키는 Razor Hotkeys 탭에서 다시 걸고 게임 종료로 프로필 저장
