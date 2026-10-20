@@ -80,7 +80,7 @@ Lumberjacking 120, Swordsmanship 100, 나머지 여섯 스킬 80씩 = 700. 남�
 ## <a id="02"></a>02 스탯 225와 회복
 
 STR 100 고정, DEX와 INT 배분. 표는 Greater Agility +20만 반영.
-Greater Strength 복용 시 최대 HP 120으로 계산. Bless의 정수 처리와 중첩은 제외([PvP](../game/pvp.md#09.D) 09.D절).
+Greater Strength 복용 시 최대 HP 120으로 계산. Bless는 포션과 안 겹침, 정수 처리는 제외([PvP](../game/pvp.md#09.D) 09.D절).
 
 | STR, DEX, INT | 포션 뒤 DEX | 자기 붕대 | 판단 |
 | --- | --- | --- | --- |
