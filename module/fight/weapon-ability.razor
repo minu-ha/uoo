@@ -1,18 +1,29 @@
 # ----------------------------------------------------------------------------------------
-# The weapon ability on the remembered enemy within 2 tiles, once per meter fill.
+# The weapon ability on the remembered enemy in reach, once per meter fill.
 # ----------------------------------------------------------------------------------------
 
 
 # ----------------------------------------------------------------------------------------
 # @ config
 #
+#   config__ability_codex
+#      The codex the held weapon belongs to, which names the three ability slots.
+#        1  Swords: Spinslash, Rend, Chop
+#        2  Archery: Skirmish, Full Draw, Repeater
+#
 #   config__ability_main
-#      Weapon ability to use.
-#        1  Spinslash
-#        2  Rend
-#        3  Chop
+#      Weapon ability to use, by its slot in that codex.
+#        1  Spinslash, or Skirmish
+#        2  Rend, or Full Draw
+#        3  Chop, or Repeater
+#
+#   config__ability_range
+#      How far, in tiles, the remembered enemy may be for the request. 2 for a melee
+#      weapon, the weapon's reach for a bow.
 # ----------------------------------------------------------------------------------------
+@setvar! config__ability_codex 1
 @setvar! config__ability_main 3
+@setvar! config__ability_range 2
 
 
 # ----------------------------------------------------------------------------------------
@@ -36,14 +47,17 @@ timer__ability interval__ability
     # ------------------------------------------------------------------------------------
     # WEAPON ABILITY
     #
-    # Chop is the default: one hit at +250%, independent of weapon specials. Spinslash
-    # spreads +15% over 15 seconds, about two hits' worth. Rend needs bleeds already on
-    # the target. All three share one meter, and the ability fires on the next melee hit.
-    # Chop is further scaled by weapon speed, and that formula is not documented. A timer
-    # spaces the request, as in archive/bard-mace. A wrong interval only shifts the
-    # timing.
+    # The three abilities of a codex share one meter, and the requested one fires on the
+    # next hit. Swords: Chop is the default, one hit at +250%, independent of weapon
+    # specials. Spinslash spreads +15% over 15 seconds, about two hits' worth. Rend needs
+    # bleeds already on the target. Archery: Repeater makes three hits at 75% each at
+    # once. Full Draw adds 50% for 15 seconds, and a speed 20 crossbow fires about 4.2
+    # times in that, so 208% against 225%, and only while standing. Skirmish adds 35% and
+    # fires on the move (Bard Archer 02.D). Chop and Repeater are further scaled by weapon
+    # speed, and that formula is not documented. A timer spaces the request, as in
+    # archive/bard-mace. A wrong interval only shifts the timing.
     # ------------------------------------------------------------------------------------
-    if timer "timer__ability" >= interval__ability and find var__combat_target ground -1 -1 2
+    if timer "timer__ability" >= interval__ability and find var__combat_target ground -1 -1 config__ability_range
         if config__ability_main = 1
             say "[WeaponAbility1"
         elseif config__ability_main = 2
@@ -53,11 +67,19 @@ timer__ability interval__ability
         endif
         settimer "timer__ability" 0
         if config__sysmsg = 1
-            sysmsg "Weapon ability request: slot {{config__ability_main}}. Fires on the next melee hit." 88
+            sysmsg "Weapon ability request: codex {{config__ability_codex}}, slot {{config__ability_main}}. Fires on the next hit." 88
         endif
 
         if config__chatty = 1
-            if config__ability_main = 3
+            if config__ability_codex = 2
+                if config__ability_main = 3
+                    overhead "[ repeater ]" 219
+                elseif config__ability_main = 2
+                    overhead "[ full draw ]" 219
+                elseif config__ability_main = 1
+                    overhead "[ skirmish ]" 219
+                endif
+            elseif config__ability_main = 3
                 overhead "[ chop ]" 219
             elseif config__ability_main = 1
                 overhead "[ spinslash ]" 219
