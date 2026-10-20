@@ -349,7 +349,7 @@ order: 30
 | `# @ config` | `chatty`, `sysmsg`: 출력 스위치 |   |
 |   | `clear_at_start`: Play 시 시작 4줄 실행 여부([Conventions](conventions.md#02.D) 02.D절) | pvp가 0. 플레이어가 든 커서와 시전 보존 |
 |   | `use_magery`, `use_potions`: 회복 블록과 버프 블록 여럿이 함께 보는 스위치 | dexxer-basic은 마법 0 |
-|   | `walk_guard`: 1이면 우리 시전이 `walk` 바 동안 대기 | pvp가 0. 싸움 중에는 기다릴 더 나은 때가 없음 |
+|   | `walk_guard`: 1이면 우리 시전이 `walk` 바 동안 대기. 긴급선 Greater Heal은 예외 | pvp가 0. 싸움 중에는 기다릴 더 나은 때가 없음 |
 |   | `warmode_is_manual`: 1이면 워모드가 플레이어의 조작 창. 우리 시전과 음식은 쉬고, 포션과 붕대는 나감. `recover_in_warmode`: 그때 회복 시전도 쉴지 | lumberjack-enhanced가 1. bard-necro-enhanced도 1, 회복은 계속(1) |
 |   | `use_bandages`, `heal_skill_min`: 붕대 사용 여부. 못 쓰면 `recovery/light-heal`이 대신 | dexxer-basic, skinning-enhanced는 Healing 10 초과일 때만 붕대. bard-necro-enhanced는 붕대 안 씀 |
 |   | `settle_first`: 1이면 패스 첫머리에서 아이템 큐와 시전 종료 대기 | bard-necro-enhanced가 1 |
