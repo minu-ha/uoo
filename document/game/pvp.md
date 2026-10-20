@@ -525,11 +525,37 @@ TK 쿨다운 제약은 2020-09-28 패치 원문에만, 현재 위키에는 없�
 - Rope 더블클릭 → 1초 행동 구속, 타겟 커서가 열린 동안 근접 스윙도 정지
 - Teleport 직후 Rope로 공유 쿨 회피 불가. Rope 금지는 아니나 이후 이동 수단을 오래 잠그는 비용
 
-### <a id="05.D"></a>05.D 가죽과 자연 마나 재생
+### <a id="05.D"></a>05.D 방어구와 자연 마나 재생
+
+> "The baseline Mana Regen rate is 1 mana restored every 2 seconds (i.e., 0.5 mana per second)." -- Meditation
+> "The minimum Mana Regen rate is 1 mana restored every 8 seconds (i.e., 0.125 mana per second)." -- Meditation
+> "A player's Total Armor Meditation Penalty is equal to the combined Meditation Penalties of all armor worn" -- Meditation
+> "Which would result in a (2 \* 16.3%) = -32.6% effect on their Mana Regen rate." -- Meditation, 스터디드 한 벌과 플레이트 고짓의 예
 
 - [Meditation](https://wiki.uooutlands.com/Meditation) 기본 재생: 2초에 1마나
+- 부위 하나의 페널티 = 부위 비율 × 재질 비율. 입은 부위의 합계 × 2 = 재생 감소율
+  - 부위: 가슴 35%, 다리 22%, 팔 15%, 머리 14%, 장갑 7%, 목 7%, 방패 35%([Armor & Weapons](https://wiki.uooutlands.com/Armor_%26_Weapons))
+  - 재질: 가죽 0%, 스터디드 10%, 본 25%, 링 50%, 체인 75%, 플레이트 100%
 - Leather = 방어구에 의한 재생 감소 없음. 재생 가산은 아님
 - Meditation 0, 가죽, 다른 보정 없음 → 이론상 30초에 15, 60초에 30마나
+
+방패 없이 한 재질로 여섯 부위를 입은 한 벌. 간격은 아래 나누기 식, Meditation 0.
+
+| 한 벌 | 페널티 합계 | 재생 감소 | 1마나 간격 | 120초 재생 |
+| --- | --- | --- | --- | --- |
+| 가죽 | 0% | 0% | 2초 | 60 |
+| 스터디드 | 10% | 20% | 2.4초 | 50 |
+| 본 | 25% | 50% | 3초 | 40 |
+| 링 | 50% | 100% | 4초 | 30 |
+| 체인 | 75% | 150% | 5초 | 24 |
+| 플레이트 | 100% | 200% | 6초 | 20 |
+
+- 감소율을 재생에서 빼는지 나누는지는 위키 문장만으로 안 정해짐. 빼면 링 한 벌부터 0 → 최저점 8초
+- [outlandsbutler.com](https://www.outlandsbutler.com/) 장비 계산은 나누기: `1마나 간격 = 2초 × (1 + 감소율)`. 체인 한 벌 5초, 플레이트 한 벌 6초. 2026-10-21 사용자 화면
+- 위키가 한 벌 효과를 −100%, −150%, −200%로 따로 적는 것과 맞는 쪽은 나누기 → 이 표도 나누기. 실제 간격은 확인되지 않았다
+  - 확인 방법: 체인 한 벌, 음식 버프 없이 마나 10이 차는 시간. 나누기면 50초, 빼기면 80초
+- 나누기면 갑옷만으로는 최저점(8초)에 닿지 않음. 플레이트 한 벌이 6초
+- Butler는 음식 버프의 재생 +25%를 곱함(체인 0.2 → 0.25마나/초). 위키 근거는 확인되지 않았다
 - 수동 Meditation 성공 상태 유지는 가정하지 않음. 이동, 행동, 피격으로 끊기는 능동 명상을 추격 중 유지한다고 보지 않음
 - 마나가 가득 찬 동안의 재생은 쌓이지 않음. 시전 비용, 시점, 장비 변경에 따라 실제 남는 마나는 다름
 - 최대 마나 ≠ 현재 마나. INT 45에서 Earth Elemental의 50마나 비용은 스크롤 성공률 보정으로 해결 불가
@@ -882,9 +908,16 @@ PvP 근접 데미지 기대 감소 = 막을 확률 × 감소율.
 
 - 원문 식의 괄호 불일치. 같은 페이지 무기표에 맞춘 식: `스윙 간격 = 15000 / ((min(현재 스태미나, 100) + 100) × 무기 Speed)`초
 - PvP는 현재 스태미나와 무기 Speed만. PvM의 Aspect나 스킬 공속 보너스 없음
+- 현재 스태미나가 간격을 정함 → 맞아서 줄어든 스태미나만큼 느려짐. Speed 20 무기는 스태미나 100에서 3.75초, 60에서 4.69초
 - [Quick Switch](https://wiki.uooutlands.com/Combat_Overview)의 기준은 마지막 장착이 아닌 마지막 스윙
 - 빠른 무기로 바꾸면 마지막 스윙부터 빠른 무기 간격, 느린 무기로 바꾸면 느린 무기 간격
 - 무기별 별도 타이머로 중간에 공짜 한 대를 끼우는 구조 아님
+
+> "increases the amount of stamina the wearer will lose when taking damage" / "A player's Total Stamina Fatigue Penalty is their (Total Armor Meditation Penalty / 2)." —
+> [Armor & Weapons의 Stamina Fatigue Penalties](https://wiki.uooutlands.com/Armor_%26_Weapons)
+
+- 방어구가 무거울수록 맞을 때 스태미나를 더 잃음. 위키 식이면 체인 한 벌 37.5%, 플레이트 한 벌 50%(페널티 합계는 05.D절)
+- Butler 화면은 절반이 아닌 합계 그대로(체인 75%, 플레이트 100%). 위키 본문의 체인 예시(80%)도 표와 다름 → 실제 값은 확인되지 않았다
 
 ### <a id="09.C"></a>09.C 붕대의 회복량과 시간
 
@@ -908,6 +941,15 @@ PvP 근접 데미지 기대 감소 = 막을 확률 × 감소율.
 - PvP에서 독 상태로 붕대를 쓰면 PvM처럼 해독과 HP 회복을 함께 한다고 계산하지 않음
   ([Heal through Poison](https://wiki.uooutlands.com/Combat_Overview))
 
+> "Chance to resurrect with less than 100 Healing scales from 24% with 80 Healing skill to 62% with 99 Healing skill." /
+> "Players with 100 Healing and 80 Anatomy skill will always have 100% chance to resurrect their target with bandages." —
+> [Healing](https://wiki.uooutlands.com/Healing)
+
+> "Bandaging another target takes 5-7.5 seconds, scaled based on Healer's Dexterity (capped at 100 Dexterity)" — [Healing](https://wiki.uooutlands.com/Healing)
+
+- 붕대 부활 확률: Healing 80에서 24%, 99에서 62%, 100이면 늘 성공. 사이 값의 식은 위키에 없음
+- 남에게 붕대: 5\~7.5초, DEX 100에서 5초. 부활에 걸리는 시간은 위키에 없음
+
 ### <a id="09.D"></a>09.D 스탯 포션과 Bless
 
 > "Increases max strength/hp by 20" / "Increases max dexterity/stamina by 20" —
@@ -915,7 +957,8 @@ PvP 근접 데미지 기대 감소 = 막을 확률 × 감소율.
 
 - Greater Strength: STR과 최대 HP +20. Greater Agility: DEX와 최대 스태미나 +20
 - [Bless](https://wiki.uooutlands.com/Template:SpellCircles)의 스탯 보정식 `11 × Magery / 100` → Magery 80이면 8.8
-- 실제 정수 처리, 포션과의 중첩은 확인되지 않았다. 검증 전에는 포션 값에 +11을 더하지 않음
+- **포션과 안 겹침.** 힘, 민첩 포션이 걸린 동안 Bless는 STR, DEX를 더 올리지 않음 → 남는 것은 INT(최대 마나). 인게임 확인됨 2026-10-21
+- 실제 정수 처리는 확인되지 않았다
 - 버프 바로는 포션 판별 불가. 위키 [BuffIcons](https://wiki.uooutlands.com/Template:BuffIcons)는 같은 아이콘을 `Strength Spell / Potion`, `Agility Spell / Potion`으로 표기
 - 사용자 확인 2026-10-09: Magery 100 Bless는 `Your strength/dexterity/intelligence has changed by 11`, 버프 바에 `Strength`, `Agility`, `Cunning`
 - 스탯 포션 버프 이름에도 Potion 없음 → `findbuff 'Strength'`로 보면 내 Bless든 아군 Bless든 걸린 동안 포션을 안 마심
@@ -938,6 +981,23 @@ PvP 근접 데미지 기대 감소 = 막을 확률 × 감소율.
 - 기본 무기 피해에 Tactics, Anatomy, 해당 보조 피해를 적용한 뒤 이 비율로 비교
 - Parry, Reactive Armor, 무기 품질, 마법 옵션, 추가 효과, 정수 처리는 별도 조건
 - 피해 중간값에 명중률을 곱해도, 접근 실패와 이동 시간을 반영한 실전 DPS는 아님
+
+NPC 판매 방어구의 부위별 AR. [Armor & Weapons](https://wiki.uooutlands.com/Armor_%26_Weapons)의 표.
+
+| 부위 | 가죽 | 스터디드 | 본 | 링 | 체인 | 플레이트 |
+| --- | --- | --- | --- | --- | --- | --- |
+| 가슴 | 9 | 11 | 12 | 14 | 16 | 18 |
+| 다리 | 6 | 7 | 8 | 9 | 10 | 11 |
+| 팔 | 4 | 5 | 5 | 6 | 7 | 8 |
+| 장갑 | 2 | 2 | 2 | 3 | 3 | 4 |
+| 목 | 2 | 2 | 2 | 3 | 3 | 4 |
+| 머리 | 4 | 4 | 5 | 6 | 6 | 7 |
+| 방패 | 4 | 5 | 6 | 7 | 8 | 9 |
+| 방패 뺀 여섯 부위 합 | 27 | 31 | 34 | 41 | 45 | 52 |
+
+- 위키의 한 벌 Base Armor(25, 30, 35, 40, 45, 50)와 표의 합이 조금 다름. 이유는 위키에 없음
+- AR은 부위 비율 없이 그대로 더함. 부위 비율은 마나 페널티(05.D절)에만
+- 마법과 제작 보정: Defense +20%, GM과 Guarding +40%, Hardening +60%, Fortification +80%, Invulnerability +100%. 부서진 방어구는 AR 50% 감소
 
 ## <a id="10"></a>10 Tracking
 
