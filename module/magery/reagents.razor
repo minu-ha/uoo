@@ -58,8 +58,8 @@ timer__reagents interval__reagents
 #   var__regs_reactive_armor, var__regs_magic_reflect, var__regs_magic_arrow,
 #   var__regs_harm, var__regs_fireball, var__regs_lightning, var__regs_curse,
 #   var__regs_mana_drain, var__regs_energy_bolt, var__regs_bless,
-#   var__regs_arch_protection, var__regs_flamestrike, var__regs_summon,
-#   var__regs_summon_ash
+#   var__regs_protection, var__regs_arch_protection, var__regs_flamestrike,
+#   var__regs_summon, var__regs_summon_ash
 #      1 when every reagent of that spell was found, written only by this block.
 #        cure            garlic 3972, ginseng 3973
 #        heal            garlic, ginseng, spider silk 3981
@@ -75,6 +75,7 @@ timer__reagents interval__reagents
 #        mana drain      black pearl, mandrake root, spider silk
 #        energy bolt     black pearl, nightshade
 #        bless           garlic, mandrake root
+#        protection      garlic, ginseng, sulfurous ash
 #        arch protection garlic, ginseng, mandrake root, sulfurous ash
 #        flamestrike     spider silk, sulfurous ash
 #        summon          bloodmoss 3963, mandrake root, spider silk. Water, Earth and Air
@@ -100,6 +101,7 @@ timer__reagents interval__reagents
 @setvar! var__regs_mana_drain 0
 @setvar! var__regs_energy_bolt 0
 @setvar! var__regs_bless 0
+@setvar! var__regs_protection 0
 @setvar! var__regs_arch_protection 0
 @setvar! var__regs_flamestrike 0
 @setvar! var__regs_summon 0
@@ -176,6 +178,7 @@ timer__reagents interval__reagents
             @setvar! var__regs_mana_drain 0
             @setvar! var__regs_energy_bolt 0
             @setvar! var__regs_bless 0
+            @setvar! var__regs_protection 0
             @setvar! var__regs_arch_protection 0
             @setvar! var__regs_flamestrike 0
             @setvar! var__regs_summon 0
@@ -222,6 +225,9 @@ timer__reagents interval__reagents
             endif
             if var__has_garlic = 1 and var__has_mandrake = 1
                 @setvar! var__regs_bless 1
+            endif
+            if var__has_garlic = 1 and var__has_ginseng = 1 and var__has_ash = 1
+                @setvar! var__regs_protection 1
             endif
             if var__has_garlic = 1 and var__has_ginseng = 1 and var__has_mandrake = 1 and var__has_ash = 1
                 @setvar! var__regs_arch_protection 1

@@ -102,6 +102,8 @@
 @setvar! config__use_magic_reflect 1
 @setvar! config__mana_reactive_armor 4
 @setvar! config__mana_magic_reflect 14
+@setvar! config__use_protection 0
+@setvar! config__mana_protection 6
 @setvar! config__use_bless 0
 @setvar! config__use_arch_protection 0
 @setvar! config__mana_bless 9
@@ -219,6 +221,7 @@ settimer "timer__agi_potion" interval__stat_potion
 @setvar! var__regs_mana_drain 0
 @setvar! var__regs_energy_bolt 0
 @setvar! var__regs_bless 0
+@setvar! var__regs_protection 0
 @setvar! var__regs_arch_protection 0
 @setvar! var__regs_flamestrike 0
 @setvar! var__regs_summon 0
@@ -362,6 +365,7 @@ while not dead
             @setvar! var__regs_mana_drain 0
             @setvar! var__regs_energy_bolt 0
             @setvar! var__regs_bless 0
+            @setvar! var__regs_protection 0
             @setvar! var__regs_arch_protection 0
             @setvar! var__regs_flamestrike 0
             @setvar! var__regs_summon 0
@@ -408,6 +412,9 @@ while not dead
             endif
             if var__has_garlic = 1 and var__has_mandrake = 1
                 @setvar! var__regs_bless 1
+            endif
+            if var__has_garlic = 1 and var__has_ginseng = 1 and var__has_ash = 1
+                @setvar! var__regs_protection 1
             endif
             if var__has_garlic = 1 and var__has_ginseng = 1 and var__has_mandrake = 1 and var__has_ash = 1
                 @setvar! var__regs_arch_protection 1
@@ -664,6 +671,49 @@ while not dead
                             endif
                             wait wait__poll
                         endfor
+                    elseif config__use_protection = 1 and not warmode and var__regs_protection = 1 and mana >= config__mana_protection and not findbuff "Protection"
+                        if insysmsg "Your concentration is disturbed, thus ruining thy spell."
+                            # consumed, nothing else to do
+                        endif
+                        cast "Protection"
+                        if config__sysmsg = 1
+                            sysmsg "Buff: Protection." 88
+                        endif
+                        wait wait__short
+
+                        for 60
+                            if targetexists
+                                break
+                            endif
+                            if insysmsg "Your concentration is disturbed, thus ruining thy spell."
+                                break
+                            endif
+                            if not casting
+                                break
+                            endif
+                            if diffhits >= config__buff_max_loss
+                                hotkey "> Interrupt"
+                                break
+                            endif
+                            if config__buff_when_poisoned = 0 and poisoned
+                                hotkey "> Interrupt"
+                                break
+                            endif
+                            wait wait__poll
+                        endfor
+
+                        if targetexists "beneficial" or targetexists "neutral"
+                            target self
+                            for 10
+                                if findbuff "Protection"
+                                    break
+                                endif
+                                wait wait__poll
+                            endfor
+                        elseif targetexists
+                            hotkey "Cancel Current Target"
+                            wait wait__short
+                        endif
                     elseif config__use_bless = 1 and var__fighting = 0 and not warmode and var__regs_bless = 1 and mana >= config__mana_bless and not findbuff "Cunning"
                         cast "Bless"
                         if config__sysmsg = 1
