@@ -858,7 +858,7 @@ order: 10
 
 #### 노래(2026-10-20)
 
-- Shadowspire Cathedral에서 첫 노래가 땅으로 실패한 뒤 6초 쉬고 백팩으로 바꿔 노래가 들어가는지(`You are now under the effect of a Song`). 다른 던전과 필드에서는 계속 땅
+- Shadowspire Cathedral과 집에서도 노래가 들어가는지(`You are now under the effect of a Song`). 노래는 다시 백팩
 - 노래가 막히거나 실패해도 곡을 건너뛰지 않고, `use another skill`이 매 바퀴 반복되지 않는지
 
 #### 프로보와 마지막 대상(2026-10-20)

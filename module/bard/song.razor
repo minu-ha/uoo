@@ -34,20 +34,11 @@ timer__song_retry interval__song_retry
 #   var__song_after
 #      Scratch: the song after the one just played.
 #
-#   var__song_on_self
-#      1 sings on yourself (the backpack), 0 on the ground. Starts on the ground and
-#      changes over when a place refuses it. Kept across Plays, so a loop that recycle
-#      restarts does not pay the refused try and its wait again.
-#
 #   var__song_answer
-#      Scratch: 0 no answer, 1 the song took, 2 blocked by a cooldown, 3 the target was
-#      refused.
+#      Scratch: 0 no answer, 1 the song took, 2 blocked or refused.
 # ----------------------------------------------------------------------------------------
 if not varexist var__song_next
     @setvar! var__song_next 1
-endif
-if not varexist var__song_on_self
-    @setvar! var__song_on_self 0
 endif
 @setvar! var__song_after 0
 @setvar! var__song_answer 0
@@ -77,21 +68,13 @@ endif
     # music bar learned the blocked lines (Bard Necro 02.I) trying every pass kept every
     # song blocked for good. The wait stays for a profile without those triggers.
     #
-    # A house refuses the ground ("That is not accessible."), and in Shadowspire
-    # Cathedral the script's ground fails while one clicked by hand works (user checks,
-    # 2026-10-20): targetrelloc picks the spot under you by its coordinates, which in
-    # some buildings is not the floor you see. A refusal, or no answer at all, changes
-    # the next try over to the backpack, and back again if that is refused too, so each
-    # place settles on what it takes. The refused try burns Music like a blocked one, so
-    # the change costs one interval__song_retry. The backpack answers a harmful cursor and
-    # moves lastharmful, which the loop does not read for its target (fight/target).
+    # The song goes on yourself, the backpack. The ground works too, but a house refuses
+    # it and Shadowspire Cathedral refuses the script's (Bard Necro 02.B), and each
+    # refusal burns a Music window. The backpack answers a harmful cursor and moves
+    # lastharmful, which the loop does not read for its target (fight/target): only the
+    # keys pressed by hand point at the backpack until the next pick.
     #
     # The chain only picks the skill and the song after it, the three share the rest.
-    # The song goes on the ground under you, the way the wiki (Musicianship) starts one:
-    # it reaches you, every follower and anyone green to you within 50 tiles, and a
-    # ground target leaves lastharmful alone (user check, 2026-10-20). The backpack it
-    # used to target answers a harmful cursor, which moved lastharmful off the pick
-    # (document/scripting/razor.md part 3), so the song had to stand down around a pick.
     # ------------------------------------------------------------------------------------
     if cooldown "song" = 0 and cooldown "music" = 0 and timer "timer__song_retry" >= interval__song_retry and not warmode and var__instrument_ok = 1 and var__my_instrument != 0 and not targetexists and not casting
         @setvar! var__song_after 0
@@ -107,9 +90,6 @@ endif
             # Read off.
         endif
         if insysmsg "provoke or pacify another creature"
-            # Read off.
-        endif
-        if insysmsg "not accessible"
             # Read off.
         endif
 
@@ -137,11 +117,7 @@ endif
             endif
 
             if targetexists
-                if var__song_on_self = 1
-                    target backpack
-                else
-                    targetrelloc 0 0
-                endif
+                target backpack
 
                 # The answer comes within a second. Read on every round until it does,
                 # with no break: this loop sits inside the main one.
@@ -152,8 +128,6 @@ endif
                             @setvar! var__song_answer 1
                         elseif insysmsg "use another skill" or insysmsg "another barding song" or insysmsg "provoke or pacify another creature"
                             @setvar! var__song_answer 2
-                        elseif insysmsg "not accessible"
-                            @setvar! var__song_answer 3
                         else
                             wait wait__short
                         endif
@@ -164,14 +138,6 @@ endif
                     @setvar! var__song_next var__song_after
                 else
                     settimer "timer__song_retry" 0
-                endif
-
-                if var__song_answer = 0 or var__song_answer = 3
-                    if var__song_on_self = 1
-                        @setvar! var__song_on_self 0
-                    else
-                        @setvar! var__song_on_self 1
-                    endif
                 endif
             endif
         endif

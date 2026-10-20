@@ -642,9 +642,6 @@ endif
 if not varexist var__song_next
     @setvar! var__song_next 1
 endif
-if not varexist var__song_on_self
-    @setvar! var__song_on_self 0
-endif
 @setvar! var__song_after 0
 @setvar! var__song_answer 0
 
@@ -2742,9 +2739,6 @@ while not dead
             if insysmsg "provoke or pacify another creature"
                 # Read off.
             endif
-            if insysmsg "not accessible"
-                # Read off.
-            endif
 
             if var__song_next = 1 and skill "Discordance" > 0 and cooldown "disco" = 0
                 useskill 'Discordance'
@@ -2770,11 +2764,7 @@ while not dead
                 endif
 
                 if targetexists
-                    if var__song_on_self = 1
-                        target backpack
-                    else
-                        targetrelloc 0 0
-                    endif
+                    target backpack
 
                     @setvar! var__song_answer 0
                     for 5
@@ -2783,8 +2773,6 @@ while not dead
                                 @setvar! var__song_answer 1
                             elseif insysmsg "use another skill" or insysmsg "another barding song" or insysmsg "provoke or pacify another creature"
                                 @setvar! var__song_answer 2
-                            elseif insysmsg "not accessible"
-                                @setvar! var__song_answer 3
                             else
                                 wait wait__short
                             endif
@@ -2795,14 +2783,6 @@ while not dead
                         @setvar! var__song_next var__song_after
                     else
                         settimer "timer__song_retry" 0
-                    endif
-
-                    if var__song_answer = 0 or var__song_answer = 3
-                        if var__song_on_self = 1
-                            @setvar! var__song_on_self 0
-                        else
-                            @setvar! var__song_on_self 1
-                        endif
                     endif
                 endif
             endif

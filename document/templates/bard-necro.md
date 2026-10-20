@@ -138,24 +138,23 @@ if cooldown "music" = 0 and cooldown "peace/provo" = 0
 | t=10 | Discordance | Music 0 → 5, Disco 0 → 5 |
 | t=15 | Provocation | Peace와 Provo 슬롯 쿨이 그때 풀림 |
 
-### <a id="02.B"></a>02.B 송은 스킬을 땅이나 자신에 쓴 것
+### <a id="02.B"></a>02.B 송은 스킬을 자신이나 땅에 쓴 것
 
-송은 별도 명령이 아님. **바드 스킬을 땅이나 자기 자신(백팩)에 찍으면 송.**
+송은 별도 명령이 아님. **바드 스킬을 자기 자신(백팩)이나 땅에 찍으면 송.**
 
 > "What do you wish to pacify? (you may target **yourself for an area effect** or the **ground for a group effect**)"
 
 ```
 useskill 'Peacemaking'
 waitfortarget wait__bard_target
-targetrelloc 0 0
+target backpack
 ```
 
 - 위키 [Musicianship](https://wiki.uooutlands.com/Musicianship): 송은 땅을 찍어 켬. 받는 대상은 자신, 자신에게 초록으로 뜨는 플레이어와 생물(팔로워), 파티원. 50칸 안
-- 마지막 줄 `targetrelloc 0 0` → 발밑 땅에 송. `target backpack`(자신)도 송이 되지만 노래 커서는 적대 커서라 `lastharmful`이 백팩으로 바뀜. 땅은 `lastharmful`을 안 바꿈(2026-10-20 사용자 확인)
-- `module/bard/song.razor`는 2026-10-20부터 땅. 옛 구현(`script/archive/bard-mace.razor`의 BARD SONG BUFF)은 백팩
-- 집 안에서는 땅이 `That is not accessible.`로 거절됨(2026-10-20 사용자 확인). 참고 스크립트들이 백팩을 찍는 이유로 보임
-- Shadowspire Cathedral에서는 스크립트의 땅 찍기만 실패하고 손으로 바닥을 찍으면 됨(2026-10-20 사용자 확인). `targetrelloc 0 0`은 발밑을 좌표로 찍어서, 건물 바닥에서는 보이는 바닥과 달라지는 것으로 추정
-- 그래서 `bard/song`은 땅이 거절되거나 답이 없으면 다음 시도를 백팩으로 바꾸고, 백팩도 거절되면 다시 땅으로. 막히거나 실패하면 6초 쉼
+- 마지막 줄 `target backpack` → 자신에게 송(범위 효과). 땅(`targetrelloc 0 0`)도 송이 되지만 집 안에서는 `That is not accessible.`로 거절되고, Shadowspire Cathedral에서는 스크립트의 땅만 실패(손으로 바닥을 찍으면 됨). 모두 2026-10-20 사용자 확인
+  - `targetrelloc 0 0`은 발밑을 좌표로 찍어서, 건물 바닥에서는 보이는 바닥과 달라지는 것으로 추정. 참고 스크립트들이 백팩을 찍는 이유로 보임
+- 노래 커서는 적대 커서 → 백팩을 찍으면 `lastharmful`이 백팩으로 바뀜. 루프는 사본(`var__combat_target`)을 쓰고 백팩은 새 대상으로 안 받아 영향 없음. 손으로 누르는 E와 Shift+V만 다음 고르기 전까지 백팩을 가리킴
+- `module/bard/song.razor`는 백팩. 2026-10-20 하루 땅을 썼다가, 거절되는 장소와 그때마다 태우는 Music 때문에 백팩으로 돌아옴
 - 막힌 노래 시도도 Music 5초를 다시 시작하는데(02.C절 표의 마지막 줄) 그때 `music` 바는 그 문장에 반응하지 않았음 → 매 바퀴 재시도해서 노래가 영영 막힘. 2026-10-20 대성당에서 이 순환이 남. 같은 날 `music` 바에 막힘 문장을 넣음(02.I절)
 
 ### <a id="02.C"></a>02.C 세 가지 쿨 계열
@@ -1436,9 +1435,9 @@ endif
 
 코드는 `module/bard/song.razor`의 BARD SONG.
 
-- `var__song_next`는 커서가 땅에 간 뒤에만 진행. 못 부른 곡은 건너뛰지 않고 다음 패스에 재시도
+- `var__song_next`는 노래가 들어간 뒤에만 진행(`under the effect of a Song`). 막히거나 실패한 곡은 건너뛰지 않고 6초 뒤 재시도
 - 스킬이 없는 곡(`skill "..." = 0`)에서는 라운드로빈 정지 → 바딩 세 스킬 모두 필요
-- 땅을 찍어서 적대 칸(`lastharmful`)을 안 건드림 → 고른 대상을 지키는 재확인이 필요 없음(02.B절)
+- 백팩을 찍어 적대 칸(`lastharmful`)이 백팩으로 바뀌어도 루프는 사본을 써서 영향 없음 → 고른 대상을 지키는 재확인이 필요 없음(02.B절)
 - `findbuff "song of ..."`로 게이트하지 않음. 15분 버프라 늘 참 → 갱신이 영영 안 돎. **`cooldown "song" = 0`을 보고 다음 곡**
 - 이동 구간이 10\~20초라 슬롯은 대개 그 안에 풀림. 못 부른 곡은 다음 이동에서
 - **재소환해도 Bless는 재시전 안 함.** 애초에 Grimoire에서 제외
@@ -1655,7 +1654,7 @@ Tracking 규칙은 [PvP](../game/pvp.md#10) 10절, Hunting 판정의 5초 스킬
 | 브레이크 걸린 대상에는 Peace도 Provo도 불가 | 02.O절 |
 | Peacemaking은 데미지로 안 풀림. 브레이크로만 | 02.P절 |
 | Peace와 Provo는 슬롯 공유. `peace/provo` 한 항목으로 통합 | 02.F절 |
-| 송 = 스킬을 땅이나 자신에 찍은 것. Music도 슬롯도 안 세우고 읽기만 | 02.B, 02.E절 |
+| 송 = 스킬을 자신이나 땅에 찍은 것. Music도 슬롯도 안 세우고 읽기만 | 02.B, 02.E절 |
 | 송 쿨은 세 곡이 공유하는 별도 계열. `cooldown "music"`이 아님 | 02.C절 |
 | "Your barding skill cooldowns reset." 프록 존재, Lyric Aspect 방어구가 줌. 쿨 측정 시 벗음 | 02.G절 |
 | Ensemble 조건은 `Discord AND (Peace OR Provo)` | 02.Q절 |
@@ -1710,7 +1709,7 @@ PvP 쪽(명중률, TK 폭탄, 패링, 던전 리콜)은 [PvP](../game/pvp.md#11)
 | 소환수도 Virtuoso와 Ensemble을 받음 | **팔로워 명시는 `Sing Your Own Praises`뿐** |
 | Discordance도 barding break로 끊김 | **안 끊김.** 브레이크는 Peace와 Provo만 |
 | Self Taught는 요구조건만 대체 | **Effective Barding 보너스 상한에도 적용.** 측정값 170 |
-| 송은 별도 명령 | **스킬을 땅이나 자신에 찍은 것.** 루프는 땅(02.B절) |
+| 송은 별도 명령 | **스킬을 자신이나 땅에 찍은 것.** 루프는 백팩(02.B절) |
 | 송과 스킬은 서로 막음 | **한쪽만 막음.** 송은 Music과 슬롯을 읽기만, 안 세움 |
 | Peace와 Provo는 슬롯이 따로 | **공유.** 로컬 항목이 서로를 반영하지 않아 한 번 착각 |
 | 막힌 시도는 아무 쿨도 안 태움 | **Music을 태움.** 막힌 송 다음의 스킬 판정은 불신 |
