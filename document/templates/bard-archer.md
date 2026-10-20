@@ -23,7 +23,7 @@ Bard Archer 템플릿의 판단과 숫자. 바딩, 회복, 버프는 루프, 사
 | [04](#04) | `bard-archer-enhanced`의 설계와 `bard` 프로필 |
 | [05](#05) | 출처 |
 
-이 문서에 걸린 질문은 [Open items](../questions/open-items.md).
+이 문서에 걸린 질문과 인게임 확인은 [Open items](../questions/open-items.md#16) 16절.
 
 ::part[캐릭터]
 

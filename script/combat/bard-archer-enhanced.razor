@@ -1,0 +1,1820 @@
+# Bard Archer Enhanced: bard control, sustain, self buffs and the archery codex, around
+# shots you fire by hand.
+# Design, codex choices and every number: document/templates/bard-archer.md.
+# Needs: Discordance, Peacemaking and Provocation trained, an instrument and a codex of
+# archery in the backpack, bandages, potions and reagents.
+# You shoot: pick with Z or Q, then V (Attack Last Target). The loop never attacks.
+# cooldowns.xml carries every bar this loop reads: music, disco, peace/provo, song, heal
+# pot, reflect and walk. The names are lowercase and the glossary is
+# document/scripting/overheads.md.
+# A fight is a picked enemy inside target_range. In a fight: Provocation of the enemies you
+# picked onto each other, Peacemaking, Discordance renewed whenever Virtuoso runs out, and
+# Repeater once the meter is full. On the walk: the bard song. Always: the archery stance
+# and finisher, Reactive Armor, Magic Reflection and Protection.
+# Warmode is the player's manual window: the bard skills, the song and the self buffs
+# stand down. Cures, heals, bandages, potions, the codex and the ability keep running.
+# Hotkeys: Drink Cure, > Smart Heal/Cure Self, Drink Heal, > Greater Heal/Cure Self,
+#          Cancel Current Target, Bandage Self, Drink Refresh, Drink Strength, Drink Agility,
+#          Drink Magic Resist, > Interrupt, Target Self.
+# Generated from recipe/bard-archer-enhanced-recipe.razor by util/build-scripts.mjs. Edit module/ and recipe/, not this file.
+
+
+# ========================================================================================
+# CONFIG
+# ========================================================================================
+
+# ----------------------------------------------------------------------------------------
+# module/base.razor
+# ----------------------------------------------------------------------------------------
+@setvar! config__chatty 1
+@setvar! config__sysmsg 1
+@setvar! config__clear_at_start 1
+@setvar! config__use_magery 1
+@setvar! config__use_potions 1
+@setvar! config__walk_guard 1
+@setvar! config__warmode_is_manual 1
+@setvar! config__recover_in_warmode 1
+@setvar! config__use_bandages 1
+@setvar! config__heal_skill_min 10
+@setvar! config__settle_first 1
+
+
+# ----------------------------------------------------------------------------------------
+# module/recovery/cure.razor
+# ----------------------------------------------------------------------------------------
+@setvar! config__mana_cure 6
+
+
+# ----------------------------------------------------------------------------------------
+# module/recovery/heal.razor
+# ----------------------------------------------------------------------------------------
+@setvar! config__heal_hits 35
+@setvar! config__emergency_hits 45
+@setvar! config__mana_greater_heal 11
+
+
+# ----------------------------------------------------------------------------------------
+# module/recovery/light-heal.razor
+# ----------------------------------------------------------------------------------------
+@setvar! config__use_light_heal 0
+@setvar! config__light_hits 15
+@setvar! config__mana_heal 4
+
+
+# ----------------------------------------------------------------------------------------
+# module/fight/target.razor
+# ----------------------------------------------------------------------------------------
+@setvar! config__acquire_range 18
+@setvar! config__target_range 10
+@setvar! config__target_grace 500
+
+
+# ----------------------------------------------------------------------------------------
+# module/magery/reagents.razor
+# ----------------------------------------------------------------------------------------
+@setvar! config__mana_1st 4
+@setvar! config__mana_2nd 6
+@setvar! config__mana_3rd 9
+@setvar! config__mana_4th 11
+@setvar! config__interrupt_to_heal 1
+
+
+# ----------------------------------------------------------------------------------------
+# module/bard/instrument.razor
+# ----------------------------------------------------------------------------------------
+@setvar! config__use_magic_instrument 1
+
+
+# ----------------------------------------------------------------------------------------
+# module/recovery/refresh.razor
+# ----------------------------------------------------------------------------------------
+@setvar! config__refresh_stam 60
+
+
+# ----------------------------------------------------------------------------------------
+# module/buff/potions.razor
+# ----------------------------------------------------------------------------------------
+@setvar! config__use_resist_potion 1
+@setvar! config__str_potion 120
+@setvar! config__dex_potion 100
+
+
+# ----------------------------------------------------------------------------------------
+# module/pack/gold-drop.razor
+# ----------------------------------------------------------------------------------------
+@setvar! config__gold_drop_amount 2000
+
+
+# ----------------------------------------------------------------------------------------
+# module/fight/archery-codex.razor
+# ----------------------------------------------------------------------------------------
+@setvar! config__archery_stance_main 1
+@setvar! config__archery_stance_pack 3
+@setvar! config__fowling_enter_diff 60
+@setvar! config__fowling_leave_diff 48
+@setvar! config__archery_finisher_main 2
+@setvar! config__archery_finisher_pack 1
+
+
+# ----------------------------------------------------------------------------------------
+# module/bard/disco.razor
+# ----------------------------------------------------------------------------------------
+@setvar! config__keep_virtuoso 1
+
+
+# ----------------------------------------------------------------------------------------
+# module/fight/weapon-ability.razor
+# ----------------------------------------------------------------------------------------
+@setvar! config__ability_codex 2
+@setvar! config__ability_main 3
+@setvar! config__ability_range 8
+
+
+# ----------------------------------------------------------------------------------------
+# module/buff/spells.razor
+# ----------------------------------------------------------------------------------------
+@setvar! config__use_reactive_armor 1
+@setvar! config__use_magic_reflect 1
+@setvar! config__mana_reactive_armor 24
+@setvar! config__mana_magic_reflect 34
+@setvar! config__use_protection 1
+@setvar! config__mana_protection 26
+@setvar! config__use_bless 0
+@setvar! config__use_arch_protection 0
+@setvar! config__mana_bless 9
+@setvar! config__mana_arch_protection 11
+@setvar! config__use_spell_siphon 0
+@setvar! config__mana_spell_siphon 4
+@setvar! config__buff_max_loss 35
+@setvar! config__buff_when_poisoned 0
+
+
+# ========================================================================================
+# WAIT AND COOLDOWN
+# ========================================================================================
+
+# ----------------------------------------------------------------------------------------
+# module/base.razor
+# ----------------------------------------------------------------------------------------
+@setvar! wait__poll 100
+@setvar! wait__short 200
+@setvar! interval__message 3000
+@setvar! interval__housekeeping 5000
+
+
+# ----------------------------------------------------------------------------------------
+# module/recovery/heal.razor
+# ----------------------------------------------------------------------------------------
+@setvar! cooldown__heal_potion 10000
+
+
+# ----------------------------------------------------------------------------------------
+# module/magery/reagents.razor
+# ----------------------------------------------------------------------------------------
+@setvar! interval__reagents 10000
+@setvar! wait__cast 300
+
+
+# ----------------------------------------------------------------------------------------
+# module/bard/instrument.razor
+# ----------------------------------------------------------------------------------------
+@setvar! wait__bard_target 1000
+@setvar! wait__instrument_pick 750
+@setvar! interval__instrument_check 30000
+
+
+# ----------------------------------------------------------------------------------------
+# module/buff/food.razor
+# ----------------------------------------------------------------------------------------
+@setvar! interval__food 60000
+
+
+# ----------------------------------------------------------------------------------------
+# module/buff/potions.razor
+# ----------------------------------------------------------------------------------------
+@setvar! interval__stat_potion 5000
+
+
+# ----------------------------------------------------------------------------------------
+# module/pack/gold-drop.razor
+# ----------------------------------------------------------------------------------------
+@setvar! wait__gold_drop 1000
+
+
+# ----------------------------------------------------------------------------------------
+# module/bard/provo.razor
+# ----------------------------------------------------------------------------------------
+@setvar! interval__provo_seen 2000
+@setvar! interval__provo_retry 5000
+
+
+# ----------------------------------------------------------------------------------------
+# module/fight/archery-codex.razor
+# ----------------------------------------------------------------------------------------
+@setvar! interval__archery_check 2000
+@setvar! interval__archery_retry 3000
+@setvar! interval__archery_resync 30000
+@setvar! interval__archery_pack_hold 6000
+
+
+# ----------------------------------------------------------------------------------------
+# module/bard/peace.razor
+# ----------------------------------------------------------------------------------------
+@setvar! interval__peace_seen 2000
+
+
+# ----------------------------------------------------------------------------------------
+# module/bard/disco.razor
+# ----------------------------------------------------------------------------------------
+@setvar! interval__disco_seen 30000
+
+
+# ----------------------------------------------------------------------------------------
+# module/fight/weapon-ability.razor
+# ----------------------------------------------------------------------------------------
+@setvar! interval__ability 60000
+
+
+# ----------------------------------------------------------------------------------------
+# module/bard/song.razor
+# ----------------------------------------------------------------------------------------
+@setvar! interval__song_retry 6000
+
+
+# ========================================================================================
+# TIMER
+# ========================================================================================
+
+# ----------------------------------------------------------------------------------------
+# module/base.razor
+# ----------------------------------------------------------------------------------------
+if not timerexists "timer__message"
+    createtimer "timer__message"
+endif
+settimer "timer__message" interval__message
+
+
+# ----------------------------------------------------------------------------------------
+# module/fight/target.razor
+# ----------------------------------------------------------------------------------------
+if not timerexists "timer__target_grace"
+    createtimer "timer__target_grace"
+endif
+settimer "timer__target_grace" config__target_grace
+
+
+# ----------------------------------------------------------------------------------------
+# module/magery/reagents.razor
+# ----------------------------------------------------------------------------------------
+if not timerexists "timer__reagents"
+    createtimer "timer__reagents"
+endif
+settimer "timer__reagents" interval__reagents
+
+
+# ----------------------------------------------------------------------------------------
+# module/bard/instrument.razor
+# ----------------------------------------------------------------------------------------
+if not timerexists "timer__instrument_check"
+    createtimer "timer__instrument_check"
+endif
+settimer "timer__instrument_check" interval__instrument_check
+
+
+# ----------------------------------------------------------------------------------------
+# module/buff/food.razor
+# ----------------------------------------------------------------------------------------
+if not timerexists "timer__food"
+    createtimer "timer__food"
+endif
+settimer "timer__food" interval__food
+
+
+# ----------------------------------------------------------------------------------------
+# module/buff/potions.razor
+# ----------------------------------------------------------------------------------------
+if not timerexists "timer__str_potion"
+    createtimer "timer__str_potion"
+endif
+settimer "timer__str_potion" interval__stat_potion
+
+if not timerexists "timer__agi_potion"
+    createtimer "timer__agi_potion"
+endif
+settimer "timer__agi_potion" interval__stat_potion
+
+
+# ----------------------------------------------------------------------------------------
+# module/bard/provo.razor
+# ----------------------------------------------------------------------------------------
+if not timerexists "timer__provo_seen"
+    createtimer "timer__provo_seen"
+endif
+settimer "timer__provo_seen" interval__provo_seen
+
+if not timerexists "timer__provo_retry"
+    createtimer "timer__provo_retry"
+endif
+settimer "timer__provo_retry" interval__provo_retry
+
+
+# ----------------------------------------------------------------------------------------
+# module/fight/archery-codex.razor
+# ----------------------------------------------------------------------------------------
+if not timerexists "timer__archery_check"
+    createtimer "timer__archery_check"
+endif
+settimer "timer__archery_check" interval__archery_check
+
+if not timerexists "timer__archery_retry"
+    createtimer "timer__archery_retry"
+endif
+settimer "timer__archery_retry" interval__archery_retry
+
+if not timerexists "timer__archery_resync"
+    createtimer "timer__archery_resync"
+endif
+settimer "timer__archery_resync" 0
+
+if not timerexists "timer__archery_pack"
+    createtimer "timer__archery_pack"
+endif
+settimer "timer__archery_pack" 0
+
+
+# ----------------------------------------------------------------------------------------
+# module/bard/peace.razor
+# ----------------------------------------------------------------------------------------
+if not timerexists "timer__peace_seen"
+    createtimer "timer__peace_seen"
+endif
+settimer "timer__peace_seen" interval__peace_seen
+
+
+# ----------------------------------------------------------------------------------------
+# module/bard/disco.razor
+# ----------------------------------------------------------------------------------------
+if not timerexists "timer__disco_seen"
+    createtimer "timer__disco_seen"
+endif
+settimer "timer__disco_seen" 0
+
+
+# ----------------------------------------------------------------------------------------
+# module/fight/weapon-ability.razor
+# ----------------------------------------------------------------------------------------
+if not timerexists "timer__ability"
+    createtimer "timer__ability"
+endif
+settimer "timer__ability" interval__ability
+
+
+# ----------------------------------------------------------------------------------------
+# module/bard/song.razor
+# ----------------------------------------------------------------------------------------
+if not timerexists "timer__song_retry"
+    createtimer "timer__song_retry"
+endif
+settimer "timer__song_retry" interval__song_retry
+
+
+# ----------------------------------------------------------------------------------------
+# recipe/bard-archer-enhanced-recipe.razor
+# ----------------------------------------------------------------------------------------
+if not timerexists "timer__housekeeping"
+    createtimer "timer__housekeeping"
+endif
+settimer "timer__housekeeping" interval__housekeeping
+
+
+# ========================================================================================
+# STATE
+# ========================================================================================
+
+# ----------------------------------------------------------------------------------------
+# module/base.razor
+# ----------------------------------------------------------------------------------------
+@setvar! var__fighting 0
+@setvar! var__hold_casts 0
+@setvar! var__hold_gathering 0
+@setvar! var__hold_symbols 0
+
+
+# ----------------------------------------------------------------------------------------
+# module/recovery/heal.razor
+# ----------------------------------------------------------------------------------------
+@setvar! var__heal_potion_out 0
+
+
+# ----------------------------------------------------------------------------------------
+# module/recovery/light-heal.razor
+# ----------------------------------------------------------------------------------------
+@setvar! var__light_heal_due 0
+
+
+# ----------------------------------------------------------------------------------------
+# module/fight/target.razor
+# ----------------------------------------------------------------------------------------
+if not varexist var__combat_target
+    @setvar! var__combat_target 0
+endif
+if not varexist var__target_hold
+    @setvar! var__target_hold 0
+endif
+@setvar! var__fresh_serial 0
+@setvar! var__keep_lasttarget 0
+
+
+# ----------------------------------------------------------------------------------------
+# module/magery/reagents.razor
+# ----------------------------------------------------------------------------------------
+@setvar! var__regs_cure 0
+@setvar! var__regs_heal 0
+@setvar! var__regs_greater_heal 0
+@setvar! var__regs_create_food 0
+@setvar! var__regs_reactive_armor 0
+@setvar! var__regs_magic_reflect 0
+@setvar! var__regs_magic_arrow 0
+@setvar! var__regs_harm 0
+@setvar! var__regs_fireball 0
+@setvar! var__regs_lightning 0
+@setvar! var__regs_curse 0
+@setvar! var__regs_mana_drain 0
+@setvar! var__regs_energy_bolt 0
+@setvar! var__regs_bless 0
+@setvar! var__regs_protection 0
+@setvar! var__regs_arch_protection 0
+@setvar! var__regs_flamestrike 0
+@setvar! var__regs_summon 0
+@setvar! var__regs_summon_ash 0
+@setvar! var__has_black_pearl 0
+@setvar! var__has_bloodmoss 0
+@setvar! var__has_garlic 0
+@setvar! var__has_ginseng 0
+@setvar! var__has_mandrake 0
+@setvar! var__has_nightshade 0
+@setvar! var__has_ash 0
+@setvar! var__has_silk 0
+
+
+# ----------------------------------------------------------------------------------------
+# module/bard/instrument.razor
+# ----------------------------------------------------------------------------------------
+if not varexist var__my_instrument
+    @setvar! var__my_instrument 0
+endif
+@setvar! var__instrument_ok 0
+@setvar! var__instrument_picked 0
+
+
+# ----------------------------------------------------------------------------------------
+# module/bard/provo.razor
+# ----------------------------------------------------------------------------------------
+@setvar! var__provo_first 0
+@setvar! var__provo_second 0
+@setvar! var__provo_skip 0
+@setvar! var__provo_dropped 0
+@setvar! var__provo_answer 0
+
+
+# ----------------------------------------------------------------------------------------
+# module/fight/archery-codex.razor
+# ----------------------------------------------------------------------------------------
+@setvar! var__archery_want config__archery_stance_main
+@setvar! var__archery_active 0
+@setvar! var__archery_finisher_want 0
+@setvar! var__archery_finisher_active 0
+@setvar! var__archery_disabled 0
+@setvar! var__archery_finisher_off 0
+@setvar! var__archery_hurt 0
+@setvar! var__archery_pack 0
+@setvar! var__archery_read 0
+
+
+# ----------------------------------------------------------------------------------------
+# module/bard/disco.razor
+# ----------------------------------------------------------------------------------------
+@setvar! var__disco_seen 0
+@setvar! var__disco_again 0
+
+
+# ----------------------------------------------------------------------------------------
+# module/bard/song.razor
+# ----------------------------------------------------------------------------------------
+if not varexist var__song_next
+    @setvar! var__song_next 1
+endif
+@setvar! var__song_after 0
+@setvar! var__song_answer 0
+
+
+# ----------------------------------------------------------------------------------------
+# module/base.razor
+# ----------------------------------------------------------------------------------------
+if pvp
+    overhead "[ script, blocked ]" 254
+    stop
+endif
+
+if config__clear_at_start = 1
+    clearall
+    clearsysmsg
+    cleardragdrop
+    clearignore
+endif
+
+
+# ----------------------------------------------------------------------------------------
+# module/bard/instrument.razor
+# ----------------------------------------------------------------------------------------
+if not find var__my_instrument backpack
+    @setvar! var__my_instrument 0
+
+    if config__use_magic_instrument = 1
+        while findtype 3740|3742|3762|3763|10245|20006|20008|20010|20012|20014|20016 backpack as alias__found_magic_instrument
+            getlabel alias__found_magic_instrument label__found_magic_instrument
+
+            if "supremely" in label__found_magic_instrument or "exceedingly" in label__found_magic_instrument
+                @setvar! var__my_instrument alias__found_magic_instrument
+                break
+            endif
+
+            @ignore alias__found_magic_instrument
+        endwhile
+
+        @clearignore
+    elseif findtype 3740|3742|3762|3763|10245|20006|20008|20010|20012|20014|20016 backpack as alias__found_craft_instrument
+        @setvar! var__my_instrument alias__found_craft_instrument
+    endif
+endif
+
+if not find var__my_instrument backpack
+    overhead "[ inst, pick ]" 255
+    @setvar! var__my_instrument
+    wait wait__instrument_pick
+
+    @setvar! var__instrument_picked 0
+    while findtype 3740|3742|3762|3763|10245|20006|20008|20010|20012|20014|20016 backpack as alias__found_instrument
+        if alias__found_instrument = var__my_instrument
+            @setvar! var__instrument_picked 1
+        endif
+
+        @ignore alias__found_instrument
+    endwhile
+
+    @clearignore
+
+    if var__instrument_picked = 1
+        if find var__my_instrument backpack as alias__picked_instrument
+            getlabel alias__picked_instrument label__picked_instrument
+            overhead "[ inst, {{label__picked_instrument}} ]" 255
+        endif
+    elseif find var__my_instrument backpack
+        @setvar! var__my_instrument 0
+        overhead "[ inst, wrong ]" 254
+        stop
+    else
+        @setvar! var__my_instrument 0
+        overhead "[ inst, out ]" 254
+        stop
+    endif
+endif
+
+
+# ----------------------------------------------------------------------------------------
+# module/bard/provo.razor
+# ----------------------------------------------------------------------------------------
+if not listexists 'list__provo_known'
+    createlist 'list__provo_known'
+endif
+if not listexists 'list__provo_keep'
+    createlist 'list__provo_keep'
+endif
+removelist 'list__provo_never'
+createlist 'list__provo_never'
+
+
+# ----------------------------------------------------------------------------------------
+# module/fight/archery-codex.razor
+# ----------------------------------------------------------------------------------------
+if not listexists 'list__archery_picked'
+    createlist 'list__archery_picked'
+endif
+if not listexists 'list__archery_keep'
+    createlist 'list__archery_keep'
+endif
+if not listexists 'list__archery_near'
+    createlist 'list__archery_near'
+endif
+
+
+# ----------------------------------------------------------------------------------------
+# recipe/bard-archer-enhanced-recipe.razor
+# ----------------------------------------------------------------------------------------
+if not listexists 'list__resume_script'
+    createlist 'list__resume_script'
+endif
+clearlist 'list__resume_script'
+pushlist 'list__resume_script' 'Play Script: combat\bard-archer-enhanced'
+
+if config__chatty = 1
+    overhead "[ bard archer, on ]" 290
+endif
+
+
+# ========================================================================================
+# MAIN LOOP
+# ========================================================================================
+while not dead
+    # ------------------------------------------------------------------------------------
+    # PASS START                                                         module/base.razor
+    # ------------------------------------------------------------------------------------
+    if pvp
+        overhead "[ script, blocked ]" 254
+        stop
+    endif
+
+    if config__settle_first = 1
+        while queued or casting
+            wait wait__short
+        endwhile
+    endif
+
+    if paralyzed or poisoned or diffhits > 0
+        # --------------------------------------------------------------------------------
+        # CURE                                                  module/recovery/cure.razor
+        # --------------------------------------------------------------------------------
+        if paralyzed
+            if findtype 3705 backpack 38
+                yell "[Pouch"
+                wait wait__short
+            elseif timer "timer__message" >= interval__message
+                overhead "[ pouch, out ]" 254
+                settimer "timer__message" 0
+            endif
+        elseif poisoned and not hidden and not queued and not targetexists
+            if config__use_potions = 1 and findtype "Orange Potion" self
+                hotkey "Drink Cure"
+                wait wait__short
+            else
+                if config__use_potions = 1 and timer "timer__message" >= interval__message
+                    overhead "[ cure pot, out ]" 254
+                    settimer "timer__message" 0
+                endif
+
+                if config__use_magery = 1 and var__regs_cure = 1 and mana >= config__mana_cure and not casting
+                    if config__warmode_is_manual = 0 or config__recover_in_warmode = 1 or not warmode
+                        if config__walk_guard = 0 or cooldown "walk" = 0
+                            hotkey "> Smart Heal/Cure Self"
+                            if config__sysmsg = 1
+                                sysmsg "Agent: Smart Heal/Cure Self for poison." 88
+                            endif
+                            wait wait__short
+
+                            for 60
+                                if not casting
+                                    break
+                                endif
+                                if insysmsg "Your concentration is disturbed, thus ruining thy spell."
+                                    break
+                                endif
+                                wait wait__poll
+                            endfor
+                        endif
+                    endif
+                endif
+            endif
+        endif
+
+        # --------------------------------------------------------------------------------
+        # HEAL                                                  module/recovery/heal.razor
+        # --------------------------------------------------------------------------------
+        if not poisoned and not paralyzed and not hidden and not queued and not targetexists and diffhits >= config__heal_hits
+            @setvar! var__heal_potion_out 0
+            if config__use_potions = 1 and cooldown "heal pot" = 0
+                if findtype "Yellow Potion" self as alias__heal_potion
+                    getlabel alias__heal_potion label__heal_potion
+                    if "next usable" in label__heal_potion
+                        # Still on its own cooldown.
+                    else
+                        hotkey "Drink Heal"
+                        cooldown "heal pot" cooldown__heal_potion
+                        @setvar! var__heal_potion_out 1
+                        wait wait__short
+                    endif
+                elseif timer "timer__message" >= interval__message
+                    overhead "[ heal pot, out ]" 254
+                    settimer "timer__message" 0
+                endif
+            endif
+
+            if var__heal_potion_out = 0 and diffhits >= config__emergency_hits and config__use_magery = 1 and var__regs_greater_heal = 1 and mana >= config__mana_greater_heal and not casting
+                if config__warmode_is_manual = 0 or config__recover_in_warmode = 1 or not warmode
+                    hotkey "> Greater Heal/Cure Self"
+                    if config__sysmsg = 1
+                        sysmsg "Agent: Greater Heal/Cure Self." 88
+                    endif
+                    wait wait__short
+
+                    for 60
+                        if not casting
+                            break
+                        endif
+                        if insysmsg "Your concentration is disturbed, thus ruining thy spell."
+                            break
+                        endif
+                        wait wait__poll
+                    endfor
+
+                    if targetexists "beneficial" and diffhits = 0
+                        hotkey "Cancel Current Target"
+                        wait wait__short
+                    endif
+                endif
+            endif
+        endif
+
+        # --------------------------------------------------------------------------------
+        # BANDAGE                                            module/recovery/bandage.razor
+        # --------------------------------------------------------------------------------
+        if config__use_bandages = 1 and not bandaging and not paralyzed and not hidden and not queued and not targetexists and skill "Healing" > config__heal_skill_min
+            if diffhits > 0 or poisoned
+                if findtype 3617 self
+                    hotkey "Bandage Self"
+                    wait wait__short
+                elseif timer "timer__message" >= interval__message
+                    overhead "[ bandage, out ]" 254
+                    settimer "timer__message" 0
+                endif
+            endif
+        endif
+
+        # --------------------------------------------------------------------------------
+        # LIGHT HEAL                                      module/recovery/light-heal.razor
+        # --------------------------------------------------------------------------------
+        if not poisoned and not paralyzed and not hidden and not queued and not casting and not targetexists and config__use_magery = 1 and var__regs_heal = 1 and diffhits >= config__light_hits and mana >= config__mana_heal
+            @setvar! var__light_heal_due 0
+            if config__use_light_heal = 1 or config__use_bandages = 0 or skill "Healing" <= config__heal_skill_min
+                @setvar! var__light_heal_due 1
+            elseif not bandaging and not findtype 3617 self
+                @setvar! var__light_heal_due 1
+            endif
+
+            if var__light_heal_due = 1
+                if config__warmode_is_manual = 0 or config__recover_in_warmode = 1 or not warmode
+                    if config__walk_guard = 0 or cooldown "walk" = 0
+                        hotkey "> Smart Heal/Cure Self"
+                        if config__sysmsg = 1
+                            sysmsg "Agent: Smart Heal/Cure Self, light Heal." 88
+                        endif
+                        wait wait__short
+
+                        for 60
+                            if not casting
+                                break
+                            endif
+                            if insysmsg "Your concentration is disturbed, thus ruining thy spell."
+                                break
+                            endif
+                            wait wait__poll
+                        endfor
+
+                        if targetexists "beneficial" and diffhits = 0
+                            hotkey "Cancel Current Target"
+                            wait wait__short
+                        endif
+                    endif
+                endif
+            endif
+        endif
+    endif
+
+    # ------------------------------------------------------------------------------------
+    # COMBAT TARGET                                              module/fight/target.razor
+    # ------------------------------------------------------------------------------------
+    if find lastharmful ground -1 -1 config__acquire_range as alias__fresh_target
+        if var__target_hold != 0 and alias__fresh_target != var__target_hold
+            @setvar! var__target_hold 0
+        endif
+
+        if var__combat_target = alias__fresh_target or var__target_hold = alias__fresh_target
+            # Already the enemy, or the block target held above.
+        else
+            @setvar! var__fresh_serial alias__fresh_target
+            if 0x40000000 > var__fresh_serial
+                if not dead alias__fresh_target
+                    if noto alias__fresh_target = "hostile" or noto alias__fresh_target = "criminal" or noto alias__fresh_target = "enemy" or noto alias__fresh_target = "murderer"
+                        @setvar! var__combat_target alias__fresh_target
+                        settimer "timer__target_grace" 0
+                        if config__chatty = 1
+                            overhead "[ target, set ]" 1288 var__combat_target
+                        endif
+                        if config__sysmsg = 1
+                            sysmsg "Combat target: {{alias__fresh_target}}." 88
+                        endif
+                    endif
+                endif
+            endif
+        endif
+    endif
+
+    @setvar! var__fighting 0
+    if var__combat_target = 0
+        # No enemy remembered, nothing to keep.
+    elseif find var__combat_target ground -1 -1 config__target_range as alias__stored_target
+        settimer "timer__target_grace" 0
+        if dead alias__stored_target
+            @setvar! var__combat_target 0
+            @setvar! var__target_hold 0
+        elseif noto alias__stored_target != "hostile" and noto alias__stored_target != "criminal" and noto alias__stored_target != "enemy" and noto alias__stored_target != "murderer"
+            @setvar! var__combat_target 0
+            @setvar! var__target_hold 0
+        else
+            @setvar! var__fighting 1
+        endif
+    elseif find var__combat_target ground -1 -1 config__acquire_range as alias__stored_target
+        settimer "timer__target_grace" 0
+        if dead alias__stored_target
+            @setvar! var__combat_target 0
+            @setvar! var__target_hold 0
+        endif
+    elseif timer "timer__target_grace" >= config__target_grace
+        @setvar! var__combat_target 0
+        @setvar! var__target_hold 0
+    endif
+
+    # ------------------------------------------------------------------------------------
+    # REAGENTS                                                module/magery/reagents.razor
+    # ------------------------------------------------------------------------------------
+    if config__use_magery = 1
+        if timer "timer__reagents" >= interval__reagents or insysmsg "More reagents are needed"
+            settimer "timer__reagents" 0
+
+            @setvar! var__has_black_pearl 0
+            @setvar! var__has_bloodmoss 0
+            @setvar! var__has_garlic 0
+            @setvar! var__has_ginseng 0
+            @setvar! var__has_mandrake 0
+            @setvar! var__has_nightshade 0
+            @setvar! var__has_ash 0
+            @setvar! var__has_silk 0
+
+            if findtype 3962 self
+                @setvar! var__has_black_pearl 1
+            endif
+            if findtype 3963 self
+                @setvar! var__has_bloodmoss 1
+            endif
+            if findtype 3972 self
+                @setvar! var__has_garlic 1
+            endif
+            if findtype 3973 self
+                @setvar! var__has_ginseng 1
+            endif
+            if findtype 3974 self
+                @setvar! var__has_mandrake 1
+            endif
+            if findtype 3976 self
+                @setvar! var__has_nightshade 1
+            endif
+            if findtype 3980 self
+                @setvar! var__has_ash 1
+            endif
+            if findtype 3981 self
+                @setvar! var__has_silk 1
+            endif
+
+            @setvar! var__regs_cure 0
+            @setvar! var__regs_heal 0
+            @setvar! var__regs_greater_heal 0
+            @setvar! var__regs_create_food 0
+            @setvar! var__regs_reactive_armor 0
+            @setvar! var__regs_magic_reflect 0
+            @setvar! var__regs_magic_arrow 0
+            @setvar! var__regs_harm 0
+            @setvar! var__regs_fireball 0
+            @setvar! var__regs_lightning 0
+            @setvar! var__regs_curse 0
+            @setvar! var__regs_mana_drain 0
+            @setvar! var__regs_energy_bolt 0
+            @setvar! var__regs_bless 0
+            @setvar! var__regs_protection 0
+            @setvar! var__regs_arch_protection 0
+            @setvar! var__regs_flamestrike 0
+            @setvar! var__regs_summon 0
+            @setvar! var__regs_summon_ash 0
+
+            if var__has_garlic = 1 and var__has_ginseng = 1
+                @setvar! var__regs_cure 1
+            endif
+            if var__has_garlic = 1 and var__has_ginseng = 1 and var__has_silk = 1
+                @setvar! var__regs_heal 1
+            endif
+            if var__has_garlic = 1 and var__has_ginseng = 1 and var__has_mandrake = 1 and var__has_silk = 1
+                @setvar! var__regs_greater_heal 1
+            endif
+            if var__has_garlic = 1 and var__has_ginseng = 1 and var__has_mandrake = 1
+                @setvar! var__regs_create_food 1
+            endif
+            if var__has_garlic = 1 and var__has_silk = 1 and var__has_ash = 1
+                @setvar! var__regs_reactive_armor 1
+            endif
+            if var__has_garlic = 1 and var__has_mandrake = 1 and var__has_silk = 1
+                @setvar! var__regs_magic_reflect 1
+            endif
+            if var__has_ash = 1
+                @setvar! var__regs_magic_arrow 1
+            endif
+            if var__has_nightshade = 1 and var__has_silk = 1
+                @setvar! var__regs_harm 1
+            endif
+            if var__has_black_pearl = 1
+                @setvar! var__regs_fireball 1
+            endif
+            if var__has_mandrake = 1 and var__has_ash = 1
+                @setvar! var__regs_lightning 1
+            endif
+            if var__has_garlic = 1 and var__has_nightshade = 1 and var__has_ash = 1
+                @setvar! var__regs_curse 1
+            endif
+            if var__has_black_pearl = 1 and var__has_mandrake = 1 and var__has_silk = 1
+                @setvar! var__regs_mana_drain 1
+            endif
+            if var__has_black_pearl = 1 and var__has_nightshade = 1
+                @setvar! var__regs_energy_bolt 1
+            endif
+            if var__has_garlic = 1 and var__has_mandrake = 1
+                @setvar! var__regs_bless 1
+            endif
+            if var__has_garlic = 1 and var__has_ginseng = 1 and var__has_ash = 1
+                @setvar! var__regs_protection 1
+            endif
+            if var__has_garlic = 1 and var__has_ginseng = 1 and var__has_mandrake = 1 and var__has_ash = 1
+                @setvar! var__regs_arch_protection 1
+            endif
+            if var__has_silk = 1 and var__has_ash = 1
+                @setvar! var__regs_flamestrike 1
+            endif
+            if var__has_bloodmoss = 1 and var__has_mandrake = 1 and var__has_silk = 1
+                @setvar! var__regs_summon 1
+            endif
+            if var__has_bloodmoss = 1 and var__has_mandrake = 1 and var__has_silk = 1 and var__has_ash = 1
+                @setvar! var__regs_summon_ash 1
+            endif
+        endif
+    endif
+
+    if timer "timer__housekeeping" >= interval__housekeeping
+        settimer "timer__housekeeping" 0
+
+        # --------------------------------------------------------------------------------
+        # INSTRUMENT                                          module/bard/instrument.razor
+        # --------------------------------------------------------------------------------
+        if var__my_instrument = 0
+            if not targetexists and not casting
+                if findtype 3740|3742|3762|3763|10245|20006|20008|20010|20012|20014|20016 backpack as alias__spare_instrument
+                    @setvar! var__my_instrument alias__spare_instrument
+                    @setvar! var__instrument_ok 1
+
+                    if config__chatty = 1
+                        overhead "[ inst, set ]" 290
+                    endif
+                elseif timer "timer__message" >= interval__message
+                    overhead "[ inst, out ]" 254
+                    settimer "timer__message" 0
+                endif
+            endif
+        endif
+
+        if timer "timer__instrument_check" >= interval__instrument_check
+            settimer "timer__instrument_check" 0
+            @setvar! var__instrument_ok 0
+
+            if find var__my_instrument backpack
+                @setvar! var__instrument_ok 1
+            endif
+        endif
+
+        # --------------------------------------------------------------------------------
+        # REFRESH                                            module/recovery/refresh.razor
+        # --------------------------------------------------------------------------------
+        if stam <= config__refresh_stam and config__use_potions = 1 and not paralyzed and not hidden and not queued and not targetexists
+            if findtype "Red Potion" self
+                hotkey "Drink Refresh"
+                wait wait__short
+            endif
+        endif
+
+        # --------------------------------------------------------------------------------
+        # FOOD                                                      module/buff/food.razor
+        # --------------------------------------------------------------------------------
+        if timer "timer__food" >= interval__food and not findbuff "Food Satisfaction"
+            if config__warmode_is_manual = 0 or not warmode
+                if not hidden and not queued and not casting and not targetexists
+                    settimer "timer__food" 0
+                    if findtype tray backpack as alias__food
+                        dclick alias__food
+                        wait wait__short
+                    endif
+                endif
+            endif
+        endif
+
+        # --------------------------------------------------------------------------------
+        # STAT POTIONS                                           module/buff/potions.razor
+        # --------------------------------------------------------------------------------
+        if var__fighting = 1 and config__use_potions = 1 and not paralyzed and not hidden and not targetexists
+            if not queued and str < config__str_potion and timer "timer__str_potion" >= interval__stat_potion
+                settimer "timer__str_potion" 0
+                if findtype "White Potion" self
+                    hotkey "Drink Strength"
+                    wait wait__short
+                endif
+            endif
+            if not queued and dex < config__dex_potion and timer "timer__agi_potion" >= interval__stat_potion
+                settimer "timer__agi_potion" 0
+                if findtype "Blue Potion" self
+                    hotkey "Drink Agility"
+                    wait wait__short
+                endif
+            endif
+            if config__use_resist_potion = 1 and not queued and not findbuff "Magic Resist Potion"
+                if findtype "Black Potion" self
+                    hotkey "Drink Magic Resist"
+                    wait wait__short
+                endif
+            endif
+        endif
+
+        # --------------------------------------------------------------------------------
+        # GOLD                                                 module/pack/gold-drop.razor
+        # --------------------------------------------------------------------------------
+        if weight > maxweight
+            if not hidden and not queued and not casting and not targetexists
+                if findtype "gold coin" backpack as alias__found_gold
+                    lift alias__found_gold config__gold_drop_amount
+                    droprelloc 0 0
+                    if config__sysmsg = 1
+                        sysmsg "Gold drop: up to {{config__gold_drop_amount}} at your feet, weight over max." 88
+                    endif
+                    wait wait__short
+
+                    if insysmsg "cannot drop anything"
+                        drop backpack -1 -1 -1
+                    endif
+
+                    wait wait__gold_drop
+                    if config__chatty = 1
+                        overhead "[ gold, dropped ]" 290
+                    endif
+                elseif timer "timer__message" >= interval__message
+                    overhead "[ weight, over ]" 254
+                    settimer "timer__message" 0
+                endif
+            endif
+        endif
+    endif
+
+    # ------------------------------------------------------------------------------------
+    # PROVOKE                                                      module/bard/provo.razor
+    # ------------------------------------------------------------------------------------
+    if var__combat_target != 0 and not inlist 'list__provo_known' var__combat_target
+        pushlist 'list__provo_known' var__combat_target
+        settimer "timer__provo_seen" interval__provo_seen
+        settimer "timer__provo_retry" interval__provo_retry
+    endif
+
+    if var__fighting = 1 and list 'list__provo_known' >= 2 and timer "timer__provo_seen" >= interval__provo_seen and timer "timer__provo_retry" >= interval__provo_retry and cooldown "peace/provo" = 0 and cooldown "music" = 0 and skill "Provocation" > 0 and not warmode and var__instrument_ok = 1 and var__my_instrument != 0 and not targetexists and not casting
+        settimer "timer__provo_seen" 0
+        @setvar! var__provo_first 0
+        @setvar! var__provo_second 0
+        @setvar! var__provo_dropped 0
+        clearlist 'list__provo_keep'
+
+        foreach provo_mob in list__provo_known
+            if find provo_mob ground -1 -1 config__acquire_range as alias__provo_mob
+                if dead alias__provo_mob
+                    @setvar! var__provo_dropped 1
+                else
+                    pushlist 'list__provo_keep' provo_mob
+
+                    if var__provo_second = 0 and provo_mob != var__combat_target and provo_mob != var__provo_skip
+                        if not inlist 'list__provo_never' provo_mob
+                            if find provo_mob ground -1 -1 config__target_range as alias__provo_near
+                                getlabel alias__provo_near label__provo_mob
+
+                                if "provoked" in label__provo_mob or "barding break" in label__provo_mob
+                                    # Busy, or cannot take one now.
+                                elseif var__provo_first = 0
+                                    @setvar! var__provo_first provo_mob
+                                else
+                                    @setvar! var__provo_second provo_mob
+                                endif
+                            endif
+                        endif
+                    endif
+                endif
+            else
+                @setvar! var__provo_dropped 1
+            endif
+        endfor
+
+        if var__provo_dropped = 1
+            clearlist 'list__provo_known'
+            foreach provo_mob in list__provo_keep
+                pushlist 'list__provo_known' provo_mob
+            endfor
+        endif
+
+        @setvar! var__provo_skip 0
+
+        if var__provo_first != 0 and var__provo_second = 0
+            if not inlist 'list__provo_never' var__combat_target
+                if find var__combat_target ground -1 -1 config__target_range as alias__provo_target
+                    getlabel alias__provo_target label__provo_target
+
+                    if "provoked" in label__provo_target or "barding break" in label__provo_target
+                        # Taken too. The lone one waits for the next free enemy.
+                    else
+                        @setvar! var__provo_second var__combat_target
+                    endif
+                endif
+            endif
+        endif
+
+        if var__provo_second = 0
+            settimer "timer__provo_retry" 0
+        else
+            if insysmsg "play successfully, provoking"
+                # Read off, with the three below, before this round's answer.
+            endif
+            if insysmsg "too far away"
+                # Read off.
+            endif
+            if insysmsg "Target cannot be seen"
+                # Read off.
+            endif
+            if insysmsg "You must wait a few moments"
+                # Read off.
+            endif
+
+            useskill 'Provocation'
+            waitfortarget wait__bard_target
+
+            if insysmsg "What instrument shall you play"
+                target var__my_instrument
+                waitfortarget wait__bard_target
+
+                if insysmsg "That is not a musical instrument"
+                    @setvar! var__my_instrument 0
+                endif
+            endif
+
+            if targetexists
+                @setvar! var__target_hold var__provo_first
+                target var__provo_first
+                waitfortarget wait__bard_target
+            endif
+
+            if targetexists
+                @setvar! var__target_hold var__provo_second
+                target var__provo_second
+                wait wait__short
+            endif
+
+            if targetexists
+                hotkey "Cancel Current Target"
+                wait wait__short
+            endif
+
+            @setvar! var__provo_answer 0
+            for 5
+                if var__provo_answer = 0
+                    if insysmsg "play successfully, provoking"
+                        @setvar! var__provo_answer 1
+                    elseif insysmsg "fail to incite anger"
+                        @setvar! var__provo_answer 2
+                    elseif insysmsg "too far away" or insysmsg "Target cannot be seen"
+                        @setvar! var__provo_answer 3
+                    elseif insysmsg "incite that"
+                        @setvar! var__provo_answer 4
+                    elseif insysmsg "You must wait a few moments"
+                        @setvar! var__provo_answer 5
+                    else
+                        wait wait__short
+                    endif
+                endif
+            endfor
+
+            if var__provo_answer = 4
+                pushlist 'list__provo_never' var__provo_first
+                overhead "[ provo, wrong ]" 1288 var__provo_first
+            elseif var__provo_answer = 5
+                settimer "timer__provo_retry" 0
+            elseif var__provo_answer = 3 or var__provo_answer = 0
+                @setvar! var__provo_skip var__provo_first
+                settimer "timer__provo_retry" 0
+            endif
+        endif
+    endif
+
+    # ------------------------------------------------------------------------------------
+    # ARCHERY CODEX                                       module/fight/archery-codex.razor
+    # ------------------------------------------------------------------------------------
+    if var__combat_target != 0 and not inlist 'list__archery_picked' var__combat_target
+        pushlist 'list__archery_picked' var__combat_target
+    endif
+
+    if timer "timer__archery_check" >= interval__archery_check
+        settimer "timer__archery_check" 0
+
+        if timer "timer__archery_resync" >= interval__archery_resync
+            @setvar! var__archery_active 0
+            @setvar! var__archery_finisher_active 0
+            settimer "timer__archery_resync" 0
+        endif
+
+        clearlist 'list__archery_near'
+        if var__fighting = 1 and list 'list__archery_picked' >= 2
+            clearlist 'list__archery_keep'
+            foreach archery_mob in list__archery_picked
+                if find archery_mob ground -1 -1 config__acquire_range as alias__archery_mob
+                    if not dead alias__archery_mob
+                        pushlist 'list__archery_keep' archery_mob
+                        if find archery_mob ground -1 -1 config__target_range
+                            pushlist 'list__archery_near' archery_mob
+                        endif
+                    endif
+                endif
+            endfor
+
+            clearlist 'list__archery_picked'
+            foreach archery_mob in list__archery_keep
+                pushlist 'list__archery_picked' archery_mob
+            endfor
+        endif
+
+        if list 'list__archery_near' >= 2
+            @setvar! var__archery_pack 1
+            settimer "timer__archery_pack" 0
+        elseif timer "timer__archery_pack" >= interval__archery_pack_hold
+            @setvar! var__archery_pack 0
+        endif
+
+        if diffhits > config__fowling_enter_diff
+            @setvar! var__archery_hurt 1
+        elseif diffhits < config__fowling_leave_diff
+            @setvar! var__archery_hurt 0
+        endif
+
+        if var__archery_hurt = 1
+            @setvar! var__archery_want 2
+        elseif var__archery_pack = 1 and config__archery_stance_pack != 0
+            @setvar! var__archery_want config__archery_stance_pack
+        else
+            @setvar! var__archery_want config__archery_stance_main
+        endif
+
+        if var__archery_pack = 1 and config__archery_finisher_pack != 0
+            @setvar! var__archery_finisher_want config__archery_finisher_pack
+        else
+            @setvar! var__archery_finisher_want config__archery_finisher_main
+        endif
+
+        @setvar! var__archery_read 0
+        if var__archery_disabled = 0 and var__archery_want != var__archery_active
+            @setvar! var__archery_read 1
+        elseif var__archery_finisher_off = 0 and var__archery_finisher_want != 0 and var__archery_finisher_want != var__archery_finisher_active
+            @setvar! var__archery_read 1
+        endif
+
+        if var__archery_read = 1 and timer "timer__archery_retry" >= interval__archery_retry
+            settimer "timer__archery_retry" 0
+
+            if findtype 11886 backpack as alias__archery_codex
+                getlabel alias__archery_codex label__archery_codex
+
+                if var__archery_disabled = 0
+                    if "Arcane" in label__archery_codex and "Fowling" in label__archery_codex
+                        @setvar! var__archery_disabled 1
+                    elseif "Arcane" in label__archery_codex
+                        @setvar! var__archery_active 1
+                    elseif "Fowling" in label__archery_codex
+                        @setvar! var__archery_active 2
+                    elseif "Incendiary" in label__archery_codex
+                        @setvar! var__archery_active 3
+                    elseif "Longshot" in label__archery_codex
+                        @setvar! var__archery_active 4
+                    elseif "Maiming" in label__archery_codex
+                        @setvar! var__archery_active 5
+                    else
+                        @setvar! var__archery_disabled 1
+                    endif
+
+                    if var__archery_disabled = 1
+                        overhead "[ archery stance, off ]" 254
+                        if config__sysmsg = 1
+                            sysmsg "Archery codex label names no single stance, the stance stands down: {{label__archery_codex}}" 88
+                        endif
+                    endif
+                endif
+
+                if var__archery_finisher_off = 0 and var__archery_finisher_want != 0
+                    if "Ricochet" in label__archery_codex and "Pincushion" in label__archery_codex
+                        @setvar! var__archery_finisher_off 1
+                    elseif "Ricochet" in label__archery_codex
+                        @setvar! var__archery_finisher_active 1
+                    elseif "Pincushion" in label__archery_codex
+                        @setvar! var__archery_finisher_active 2
+                    else
+                        @setvar! var__archery_finisher_off 1
+                    endif
+
+                    if var__archery_finisher_off = 1
+                        overhead "[ archery finisher, off ]" 254
+                        if config__sysmsg = 1
+                            sysmsg "Archery codex label names no single finisher, the finisher stands down: {{label__archery_codex}}" 88
+                        endif
+                    elseif var__archery_finisher_want != var__archery_finisher_active
+                        if var__archery_finisher_want = 1
+                            say "[ArcheryFinisher1"
+                        elseif var__archery_finisher_want = 2
+                            say "[ArcheryFinisher2"
+                        endif
+                        @setvar! var__archery_finisher_active var__archery_finisher_want
+                        if config__sysmsg = 1
+                            sysmsg "Archery finisher switch: slot {{var__archery_finisher_want}}." 88
+                        endif
+                        if config__chatty = 1
+                            if var__archery_finisher_want = 1
+                                overhead "[ archery, ricochet ]" 290
+                            elseif var__archery_finisher_want = 2
+                                overhead "[ archery, pincushion ]" 290
+                            endif
+                        endif
+                        wait wait__short
+                    endif
+                endif
+
+                if var__archery_disabled = 0 and var__archery_want != var__archery_active
+                    if config__sysmsg = 1
+                        sysmsg "Archery stance switch: slot {{var__archery_active}} to {{var__archery_want}}." 88
+                    endif
+                    if var__archery_want = 1
+                        say "[ArcheryAmmunition1"
+                    elseif var__archery_want = 2
+                        say "[ArcheryAmmunition2"
+                    elseif var__archery_want = 3
+                        say "[ArcheryAmmunition3"
+                    elseif var__archery_want = 4
+                        say "[ArcheryAmmunition4"
+                    elseif var__archery_want = 5
+                        say "[ArcheryAmmunition5"
+                    endif
+
+                    @setvar! var__archery_active var__archery_want
+                    settimer "timer__archery_resync" 0
+                endif
+            elseif timer "timer__message" >= interval__message
+                overhead "[ archery codex, out ]" 254
+                settimer "timer__message" 0
+            endif
+        endif
+    endif
+
+    if var__fighting = 1
+        # --------------------------------------------------------------------------------
+        # PEACE                                                    module/bard/peace.razor
+        # --------------------------------------------------------------------------------
+        if timer "timer__peace_seen" >= interval__peace_seen and cooldown "peace/provo" = 0 and cooldown "music" = 0 and skill "Peacemaking" > 0 and not warmode and var__instrument_ok = 1 and var__my_instrument != 0 and not targetexists and not casting
+            if find var__combat_target ground -1 -1 config__target_range as alias__peace_target
+                getlabel alias__peace_target label__peace_target
+
+                if "pacified" in label__peace_target or "barding break" in label__peace_target or "provoked" in label__peace_target
+                    settimer "timer__target_grace" 0
+                    settimer "timer__peace_seen" 0
+                else
+                    useskill 'Peacemaking'
+                    waitfortarget wait__bard_target
+
+                    if insysmsg "What instrument shall you play"
+                        target var__my_instrument
+                        waitfortarget wait__bard_target
+
+                        if insysmsg "That is not a musical instrument"
+                            @setvar! var__my_instrument 0
+                        endif
+                    endif
+
+                    if find lastharmful ground -1 -1 config__acquire_range as alias__fresh_target
+                        if not dead alias__fresh_target and var__combat_target != alias__fresh_target and var__target_hold != alias__fresh_target
+                            if noto alias__fresh_target = "hostile" or noto alias__fresh_target = "criminal" or noto alias__fresh_target = "enemy" or noto alias__fresh_target = "murderer"
+                                @setvar! var__combat_target alias__fresh_target
+                                settimer "timer__target_grace" 0
+
+                                if find var__combat_target ground -1 -1 config__target_range as alias__peace_target
+                                    if config__chatty = 1
+                                        overhead "[ target, set ]" 1288 var__combat_target
+                                    endif
+                                endif
+                            endif
+                        endif
+                    endif
+
+                    while targetexists
+                        if dead alias__peace_target or var__combat_target != alias__peace_target
+                            hotkey "Cancel Current Target"
+                            wait wait__short
+                        else
+                            target alias__peace_target
+                            wait wait__short
+                        endif
+                    endwhile
+
+                    wait wait__short
+                endif
+            endif
+        endif
+
+        # --------------------------------------------------------------------------------
+        # DISCO                                                    module/bard/disco.razor
+        # --------------------------------------------------------------------------------
+        if timer "timer__disco_seen" >= interval__disco_seen
+            @setvar! var__disco_seen 0
+        elseif config__keep_virtuoso = 1 and var__disco_seen != 0 and not findbuff "Virtuoso"
+            @setvar! var__disco_seen 0
+            @setvar! var__disco_again 1
+        endif
+
+        if var__combat_target != var__disco_seen and cooldown "disco" = 0 and cooldown "music" = 0 and skill "Discordance" > 0 and not warmode and var__instrument_ok = 1 and var__my_instrument != 0 and not targetexists and not casting
+            if find var__combat_target ground -1 -1 config__target_range as alias__disco_target
+                getlabel alias__disco_target label__disco_target
+
+                if "discord" in label__disco_target and var__disco_again = 0
+                    @setvar! var__disco_seen var__combat_target
+                    settimer "timer__disco_seen" 0
+                else
+                    @setvar! var__disco_again 0
+                    useskill 'Discordance'
+                    waitfortarget wait__bard_target
+
+                    if insysmsg "What instrument shall you play"
+                        target var__my_instrument
+                        waitfortarget wait__bard_target
+
+                        if insysmsg "That is not a musical instrument"
+                            @setvar! var__my_instrument 0
+                        endif
+                    endif
+
+                    if find lastharmful ground -1 -1 config__acquire_range as alias__fresh_target
+                        if not dead alias__fresh_target and var__combat_target != alias__fresh_target and var__target_hold != alias__fresh_target
+                            if noto alias__fresh_target = "hostile" or noto alias__fresh_target = "criminal" or noto alias__fresh_target = "enemy" or noto alias__fresh_target = "murderer"
+                                @setvar! var__combat_target alias__fresh_target
+                                settimer "timer__target_grace" 0
+
+                                if find var__combat_target ground -1 -1 config__target_range as alias__disco_target
+                                    if config__chatty = 1
+                                        overhead "[ target, set ]" 1288 var__combat_target
+                                    endif
+                                endif
+                            endif
+                        endif
+                    endif
+
+                    while targetexists
+                        if dead alias__disco_target or var__combat_target != alias__disco_target
+                            hotkey "Cancel Current Target"
+                            wait wait__short
+                        else
+                            target alias__disco_target
+                            wait wait__short
+                        endif
+                    endwhile
+
+                    wait wait__short
+                endif
+            endif
+        endif
+
+        # --------------------------------------------------------------------------------
+        # WEAPON ABILITY                                 module/fight/weapon-ability.razor
+        # --------------------------------------------------------------------------------
+        if timer "timer__ability" >= interval__ability and find var__combat_target ground -1 -1 config__ability_range
+            if config__ability_main = 1
+                say "[WeaponAbility1"
+            elseif config__ability_main = 2
+                say "[WeaponAbility2"
+            elseif config__ability_main = 3
+                say "[WeaponAbility3"
+            endif
+            settimer "timer__ability" 0
+            if config__sysmsg = 1
+                sysmsg "Weapon ability request: codex {{config__ability_codex}}, slot {{config__ability_main}}. Fires on the next hit." 88
+            endif
+
+            if config__chatty = 1
+                if config__ability_codex = 2
+                    if config__ability_main = 3
+                        overhead "[ repeater ]" 219
+                    elseif config__ability_main = 2
+                        overhead "[ full draw ]" 219
+                    elseif config__ability_main = 1
+                        overhead "[ skirmish ]" 219
+                    endif
+                elseif config__ability_main = 3
+                    overhead "[ chop ]" 219
+                elseif config__ability_main = 1
+                    overhead "[ spinslash ]" 219
+                elseif config__ability_main = 2
+                    overhead "[ rend ]" 219
+                endif
+            endif
+        endif
+    else
+        # --------------------------------------------------------------------------------
+        # BARD SONG                                                 module/bard/song.razor
+        # --------------------------------------------------------------------------------
+        if cooldown "song" = 0 and cooldown "music" = 0 and timer "timer__song_retry" >= interval__song_retry and not warmode and var__instrument_ok = 1 and var__my_instrument != 0 and not targetexists and not casting
+            @setvar! var__song_after 0
+
+            if insysmsg "under the effect of a Song"
+                # Read off.
+            endif
+            if insysmsg "use another skill"
+                # Read off.
+            endif
+            if insysmsg "another barding song"
+                # Read off.
+            endif
+            if insysmsg "provoke or pacify another creature"
+                # Read off.
+            endif
+
+            if var__song_next = 1 and skill "Discordance" > 0 and cooldown "disco" = 0
+                useskill 'Discordance'
+                @setvar! var__song_after 2
+            elseif var__song_next = 2 and skill "Peacemaking" > 0 and cooldown "peace/provo" = 0
+                useskill 'Peacemaking'
+                @setvar! var__song_after 3
+            elseif var__song_next = 3 and skill "Provocation" > 0 and cooldown "peace/provo" = 0
+                useskill 'Provocation'
+                @setvar! var__song_after 1
+            endif
+
+            if var__song_after != 0
+                waitfortarget wait__bard_target
+
+                if insysmsg "What instrument shall you play"
+                    target var__my_instrument
+                    waitfortarget wait__bard_target
+
+                    if insysmsg "That is not a musical instrument"
+                        @setvar! var__my_instrument 0
+                    endif
+                endif
+
+                if targetexists
+                    target backpack
+
+                    @setvar! var__song_answer 0
+                    for 5
+                        if var__song_answer = 0
+                            if insysmsg "under the effect of a Song"
+                                @setvar! var__song_answer 1
+                            elseif insysmsg "use another skill" or insysmsg "another barding song" or insysmsg "provoke or pacify another creature"
+                                @setvar! var__song_answer 2
+                            else
+                                wait wait__short
+                            endif
+                        endif
+                    endfor
+
+                    if var__song_answer = 1
+                        @setvar! var__song_next var__song_after
+                    else
+                        settimer "timer__song_retry" 0
+                    endif
+                endif
+            endif
+        endif
+    endif
+
+    # ------------------------------------------------------------------------------------
+    # SELF BUFFS                                                  module/buff/spells.razor
+    # ------------------------------------------------------------------------------------
+    if config__use_magery = 1 and var__hold_casts = 0 and not paralyzed and not hidden and not queued and not casting and not targetexists and diffhits < config__buff_max_loss
+        if config__buff_when_poisoned = 1 or not poisoned
+            if config__warmode_is_manual = 0 or not warmode
+                if config__walk_guard = 0 or cooldown "walk" = 0
+                    if config__use_reactive_armor = 1 and var__regs_reactive_armor = 1 and mana >= config__mana_reactive_armor and not findbuff "Reactive Armor"
+                        cast "Reactive Armor"
+                        if config__sysmsg = 1
+                            sysmsg "Buff: Reactive Armor." 88
+                        endif
+                        wait wait__short
+
+                        for 60
+                            if not casting
+                                break
+                            endif
+                            if insysmsg "Your concentration is disturbed, thus ruining thy spell."
+                                break
+                            endif
+                            if diffhits >= config__buff_max_loss
+                                hotkey "> Interrupt"
+                                break
+                            endif
+                            if config__buff_when_poisoned = 0 and poisoned
+                                hotkey "> Interrupt"
+                                break
+                            endif
+                            wait wait__poll
+                        endfor
+                    elseif config__use_magic_reflect = 1 and var__regs_magic_reflect = 1 and mana >= config__mana_magic_reflect and cooldown "reflect" = 0 and not findbuff "Magic Reflection"
+                        cast "Magic Reflection"
+                        if config__sysmsg = 1
+                            sysmsg "Buff: Magic Reflection." 88
+                        endif
+                        wait wait__short
+
+                        for 60
+                            if not casting
+                                break
+                            endif
+                            if insysmsg "Your concentration is disturbed, thus ruining thy spell."
+                                break
+                            endif
+                            if diffhits >= config__buff_max_loss
+                                hotkey "> Interrupt"
+                                break
+                            endif
+                            if config__buff_when_poisoned = 0 and poisoned
+                                hotkey "> Interrupt"
+                                break
+                            endif
+                            wait wait__poll
+                        endfor
+                    elseif config__use_protection = 1 and not warmode and var__regs_protection = 1 and mana >= config__mana_protection and not findbuff "Protection"
+                        if insysmsg "Your concentration is disturbed, thus ruining thy spell."
+                            # consumed, nothing else to do
+                        endif
+                        cast "Protection"
+                        if config__sysmsg = 1
+                            sysmsg "Buff: Protection." 88
+                        endif
+                        wait wait__short
+
+                        for 60
+                            if targetexists
+                                break
+                            endif
+                            if insysmsg "Your concentration is disturbed, thus ruining thy spell."
+                                break
+                            endif
+                            if not casting
+                                break
+                            endif
+                            if diffhits >= config__buff_max_loss
+                                hotkey "> Interrupt"
+                                break
+                            endif
+                            if config__buff_when_poisoned = 0 and poisoned
+                                hotkey "> Interrupt"
+                                break
+                            endif
+                            wait wait__poll
+                        endfor
+
+                        if targetexists "beneficial" or targetexists "neutral"
+                            target self
+                            for 10
+                                if findbuff "Protection"
+                                    break
+                                endif
+                                wait wait__poll
+                            endfor
+                        elseif targetexists
+                            hotkey "Cancel Current Target"
+                            wait wait__short
+                        endif
+                    elseif config__use_bless = 1 and var__fighting = 0 and not warmode and var__regs_bless = 1 and mana >= config__mana_bless and not findbuff "Cunning"
+                        cast "Bless"
+                        if config__sysmsg = 1
+                            sysmsg "Buff: Bless." 88
+                        endif
+                        wait wait__short
+
+                        for 60
+                            if targetexists
+                                break
+                            endif
+                            if insysmsg "Your concentration is disturbed, thus ruining thy spell."
+                                break
+                            endif
+                            if diffhits >= config__buff_max_loss
+                                hotkey "> Interrupt"
+                                break
+                            endif
+                            if config__buff_when_poisoned = 0 and poisoned
+                                hotkey "> Interrupt"
+                                break
+                            endif
+                            wait wait__poll
+                        endfor
+
+                        if targetexists "beneficial"
+                            target self
+                            for 10
+                                if findbuff "Cunning"
+                                    break
+                                endif
+                                wait wait__poll
+                            endfor
+                        elseif targetexists
+                            hotkey "Cancel Current Target"
+                            wait wait__short
+                        endif
+                    elseif config__use_arch_protection = 1 and var__fighting = 0 and not warmode and var__regs_arch_protection = 1 and mana >= config__mana_arch_protection and not findbuff "Protection"
+                        cast "Arch Protection"
+                        if config__sysmsg = 1
+                            sysmsg "Buff: Arch Protection." 88
+                        endif
+                        wait wait__short
+
+                        for 60
+                            if targetexists
+                                break
+                            endif
+                            if insysmsg "Your concentration is disturbed, thus ruining thy spell."
+                                break
+                            endif
+                            if diffhits >= config__buff_max_loss
+                                hotkey "> Interrupt"
+                                break
+                            endif
+                            if config__buff_when_poisoned = 0 and poisoned
+                                hotkey "> Interrupt"
+                                break
+                            endif
+                            wait wait__poll
+                        endfor
+
+                        if targetexists "neutral"
+                            target self
+                            for 10
+                                if findbuff "Protection"
+                                    break
+                                endif
+                                wait wait__poll
+                            endfor
+                        elseif targetexists
+                            hotkey "Cancel Current Target"
+                            wait wait__short
+                        endif
+                    elseif config__use_spell_siphon = 1 and not warmode and var__regs_magic_arrow = 1 and mana >= config__mana_spell_siphon and not findbuff "Spell Siphon" and not findbuff "Magic Reflection"
+                        if insysmsg "Your concentration is disturbed, thus ruining thy spell."
+                            # consumed, nothing else to do
+                        endif
+                        cast "Magic Arrow"
+                        if config__sysmsg = 1
+                            sysmsg "Buff: Magic Arrow on yourself for Spell Siphon." 88
+                        endif
+                        wait wait__short
+
+                        for 60
+                            if targetexists
+                                break
+                            endif
+                            if insysmsg "Your concentration is disturbed, thus ruining thy spell."
+                                break
+                            endif
+                            if diffhits >= config__buff_max_loss
+                                hotkey "> Interrupt"
+                                break
+                            endif
+                            if config__buff_when_poisoned = 0 and poisoned
+                                hotkey "> Interrupt"
+                                break
+                            endif
+                            wait wait__poll
+                        endfor
+
+                        if targetexists "harmful"
+                            hotkey 'Target Self'
+                            wait wait__cast
+                        elseif targetexists
+                            hotkey "Cancel Current Target"
+                            wait wait__short
+                        endif
+                    endif
+                endif
+            endif
+        endif
+    endif
+
+    # ------------------------------------------------------------------------------------
+    # END OF PASS                                                        module/base.razor
+    # ------------------------------------------------------------------------------------
+    wait wait__poll
+endwhile

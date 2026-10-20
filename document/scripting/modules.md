@@ -24,7 +24,7 @@ order: 30
 | [09](#09) | 아직 옮기지 않은 것 |
 
 루프별 인게임 확인 항목: [Open items](../questions/open-items.md).
-09절 lumberjack-enhanced, 10절 pvp, 11절 skinning-enhanced, 12절 tamer-mage-enhanced, 14절 bard-necro-enhanced, 15절 loadout과 regear.
+09절 lumberjack-enhanced, 10절 pvp, 11절 skinning-enhanced, 12절 tamer-mage-enhanced, 14절 bard-necro-enhanced, 15절 loadout과 regear, 16절 bard-archer-enhanced.
 
 ::part[설계]
 

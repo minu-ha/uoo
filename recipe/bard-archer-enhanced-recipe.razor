@@ -1,0 +1,313 @@
+# Recipe for script/combat/bard-archer-enhanced.razor. Build it with: node util/build-scripts.mjs
+# Every setting of this loop: node util/build-scripts.mjs --settings recipe/bard-archer-enhanced-recipe.razor
+# @ output script/combat/bard-archer-enhanced.razor
+
+
+# ========================================================================================
+# @ header
+# ========================================================================================
+
+# Bard Archer Enhanced: bard control, sustain, self buffs and the archery codex, around
+# shots you fire by hand.
+# Design, codex choices and every number: document/templates/bard-archer.md.
+# Needs: Discordance, Peacemaking and Provocation trained, an instrument and a codex of
+# archery in the backpack, bandages, potions and reagents.
+# You shoot: pick with Z or Q, then V (Attack Last Target). The loop never attacks.
+# cooldowns.xml carries every bar this loop reads: music, disco, peace/provo, song, heal
+# pot, reflect and walk. The names are lowercase and the glossary is
+# document/scripting/overheads.md.
+# A fight is a picked enemy inside target_range. In a fight: Provocation of the enemies you
+# picked onto each other, Peacemaking, Discordance renewed whenever Virtuoso runs out, and
+# Repeater once the meter is full. On the walk: the bard song. Always: the archery stance
+# and finisher, Reactive Armor, Magic Reflection and Protection.
+# Warmode is the player's manual window: the bard skills, the song and the self buffs
+# stand down. Cures, heals, bandages, potions, the codex and the ability keep running.
+
+
+# ========================================================================================
+# @ blocks
+#
+#   One box per block, in the order the blocks run, base first. The builder writes the box.
+#   Yours are the "> " lines in it (a note on the block, or under a setting the reason for
+#   its value) and the @setvar! lines under it. Write a new @setvar! line under any box, its
+#   reason as a "#" line right above it: the builder moves both to the box it belongs to.
+# ========================================================================================
+
+# ----------------------------------------------------------------------------------------
+# @ use base
+#
+#   The frame of every loop and routine. Every recipe lists it first.
+#
+#   warmode_is_manual (default 0)
+#      Whose warmode it is.
+#        0  ours: our casts ignore it
+#        1  the player's manual control window: our casts and the food stand down while it
+#           is on. Potions and bandages still go out
+#      Read by recovery/cure, recovery/heal, recovery/light-heal, buff/food, buff/spells.
+#      > Warmode is yours, for bard skills by hand: our casts stand down too.
+#
+#   recover_in_warmode (default 0)
+#      With warmode_is_manual 1, what the recovery casts (cure, heal, light Heal) do in
+#      warmode.
+#        0  stand down with the rest
+#        1  keep going, so only the other casts wait for the player
+#      Read by recovery/cure, recovery/heal, recovery/light-heal.
+#      > What keeps the character alive keeps running in warmode.
+#
+#   heal_skill_min (default 0)
+#      Healing must be above this to bandage. At or below it recovery/light-heal stands
+#      in.
+#      Read by recovery/bandage, recovery/light-heal.
+#      > Healing 80 template. Below 10 the light Heal stands in.
+#
+#   settle_first (default 0)
+#      What a pass does first.
+#        0  reads the state at once. Potions still go out while a spell is casting
+#        1  waits for the item queue and any cast to finish
+#      > Anything already in flight finishes before the pass reads state.
+# ----------------------------------------------------------------------------------------
+@setvar! config__warmode_is_manual 1
+@setvar! config__recover_in_warmode 1
+@setvar! config__heal_skill_min 10
+@setvar! config__settle_first 1
+
+# ========================================================================================
+# @ when paralyzed or poisoned or diffhits > 0
+# ========================================================================================
+
+# ----------------------------------------------------------------------------------------
+# @ use recovery/cure
+#
+#   The trapped pouch while paralyzed, else a cure potion or the Smart Heal/Cure agent.
+# ----------------------------------------------------------------------------------------
+
+# ----------------------------------------------------------------------------------------
+# @ use recovery/heal
+#
+#   Heal potion at heal_hits, else Greater Heal at emergency_hits.
+#
+#   emergency_hits (default 35)
+#      Missing hit points that cast Greater Heal when no heal potion went out on this
+#      pass. Not below heal_hits.
+#      > Bandages handle ordinary damage, so Greater Heal waits for 45.
+# ----------------------------------------------------------------------------------------
+@setvar! config__emergency_hits 45
+
+# ----------------------------------------------------------------------------------------
+# @ use recovery/bandage
+#
+#   Self bandage while hurt or poisoned, never over a running one.
+# ----------------------------------------------------------------------------------------
+
+# ----------------------------------------------------------------------------------------
+# @ use recovery/light-heal
+#
+#   The light Heal agent: the bandage stand-in, or beside them with use_light_heal 1.
+# ----------------------------------------------------------------------------------------
+
+# ========================================================================================
+# @ end
+# ========================================================================================
+
+# ----------------------------------------------------------------------------------------
+# @ use fight/target
+#
+#   Remembers the picked enemy and sets var__fighting while it is in reach.
+#
+#   acquire_range (default 12)
+#      How far the enemy you pick is taken up from, and kept while it stays. The pets
+#      often open on a mob past target_range, and a song or self cast would otherwise
+#      move lastharmful off it before it comes in reach.
+#      Also read by bard/provo, fight/archery-codex, bard/peace, bard/disco.
+#      > The whole screen: an enemy picked far off is kept while it walks in.
+#
+#   target_range (default 12)
+#      How far the remembered enemy may be and still count as a fight (var__fighting 1).
+#      Not above acquire_range.
+#      Also read by bard/provo, fight/archery-codex, bard/peace, bard/disco.
+#      > The bard skills reach this far. The crossbow's 8 tiles are yours to keep.
+#
+#   target_grace (default 1200)
+#      How long, in ms, a remembered enemy that left acquire_range is kept.
+#      > A target that left the screen is dropped half a second later.
+# ----------------------------------------------------------------------------------------
+@setvar! config__acquire_range 18
+@setvar! config__target_range 10
+@setvar! config__target_grace 500
+
+# ----------------------------------------------------------------------------------------
+# @ use magery/reagents
+#
+#   Reagent flags for the Magery casts, the mana per circle and the shared cast settings.
+# ----------------------------------------------------------------------------------------
+
+# ========================================================================================
+# @ every interval__housekeeping
+# ========================================================================================
+
+# ----------------------------------------------------------------------------------------
+# @ use bard/instrument
+#
+#   Finds the instrument before the loop and keeps track of it while the loop runs.
+# ----------------------------------------------------------------------------------------
+
+# ----------------------------------------------------------------------------------------
+# @ use recovery/refresh
+#
+#   Total Refresh at or below refresh_stam.
+#
+#   refresh_stam (default 15)
+#      Current stamina at or below this drinks a Refresh.
+#      > Shots slow with current stamina: a Refresh at 60, as in skinning-enhanced.
+# ----------------------------------------------------------------------------------------
+@setvar! config__refresh_stam 60
+
+# ----------------------------------------------------------------------------------------
+# @ use buff/food
+#
+#   Eats from a tray while Food Satisfaction is missing, looked at once a minute.
+# ----------------------------------------------------------------------------------------
+
+# ----------------------------------------------------------------------------------------
+# @ use buff/potions
+#
+#   Strength and Agility by stat value, Magic Resist by its icon, while fighting.
+# ----------------------------------------------------------------------------------------
+
+# ----------------------------------------------------------------------------------------
+# @ use pack/gold-drop
+#
+#   Drops gold at your feet while over max weight, one drop per pass.
+# ----------------------------------------------------------------------------------------
+
+# ========================================================================================
+# @ end
+# ========================================================================================
+
+# ----------------------------------------------------------------------------------------
+# @ use bard/provo
+#
+#   Provokes the enemies you picked onto each other, two at a time, while any is free.
+# ----------------------------------------------------------------------------------------
+
+# ----------------------------------------------------------------------------------------
+# @ use fight/archery-codex
+#
+#   Codex of archery: Arcane, Fowling while hurt, Incendiary and Ricochet on a pack.
+# ----------------------------------------------------------------------------------------
+
+# ========================================================================================
+# @ when var__fighting = 1
+# ========================================================================================
+
+# ----------------------------------------------------------------------------------------
+# @ use bard/peace
+#
+#   Peacemaking kept up on the target, waiting out a pacify or a barding break.
+# ----------------------------------------------------------------------------------------
+
+# ----------------------------------------------------------------------------------------
+# @ use bard/disco
+#
+#   Discordance once per target, read off its label, then left alone for 30 seconds.
+#
+#   keep_virtuoso (default 0)
+#      1 discords the target again once the Virtuoso buff is gone, even when its label
+#      already shows discord. Virtuoso lasts 15 seconds after a successful barding
+#      action, and a Discordance on a discorded creature still counts (Bard Necro 02.Q).
+#      > Virtuoso 5 gives 20% damage and resistance: renewed about every 15 seconds.
+# ----------------------------------------------------------------------------------------
+@setvar! config__keep_virtuoso 1
+
+# ----------------------------------------------------------------------------------------
+# @ use fight/weapon-ability
+#
+#   The weapon ability on the remembered enemy in reach, once per meter fill.
+#
+#   ability_codex (default 1)
+#      The codex the held weapon belongs to, which names the three ability slots.
+#        1  Swords: Spinslash, Rend, Chop
+#        2  Archery: Skirmish, Full Draw, Repeater
+#      > The Rampart Crossbow is an archery weapon.
+#
+#   ability_main (default 3, the same value)
+#      Weapon ability to use, by its slot in that codex.
+#        1  Spinslash, or Skirmish
+#        2  Rend, or Full Draw
+#        3  Chop, or Repeater
+#      > Repeater: 225% at once, Full Draw 208% over 15 seconds (Bard Archer 02.D).
+#
+#   ability_range (default 2)
+#      How far, in tiles, the remembered enemy may be for the request. 2 for a melee
+#      weapon, the weapon's reach for a bow.
+#      > The crossbow reaches 8 tiles.
+# ----------------------------------------------------------------------------------------
+@setvar! config__ability_codex 2
+@setvar! config__ability_main 3
+@setvar! config__ability_range 8
+
+# ========================================================================================
+# @ otherwise
+# ========================================================================================
+
+# ----------------------------------------------------------------------------------------
+# @ use bard/song
+#
+#   One bard song per walk pass, Discordance, Peacemaking and Provocation in turn.
+# ----------------------------------------------------------------------------------------
+
+# ========================================================================================
+# @ end
+# ========================================================================================
+
+# ----------------------------------------------------------------------------------------
+# @ use buff/spells
+#
+#   Reactive Armor, then Magic Reflection, whenever one is missing.
+#
+#   mana_reactive_armor (default 4)
+#      Minimum current mana to start Reactive Armor.
+#      > Keeps 20 mana for Greater Heal and Telekinesis, as in skinning-enhanced.
+#
+#   mana_magic_reflect (default 14)
+#      Minimum current mana to start Magic Reflection.
+#      > Same reserve: the base 14 plus 20.
+#
+#   use_protection (default 0)
+#      1 keeps Protection on yourself, in a fight too. Warmode off, since it may open a
+#      cursor like Bless. Arch Protection shows the same Protection icon, so one of the
+#      two is enough.
+#      > AR +12 for 6 mana per 2 minutes, the cheapest armor here (Bard Archer 01.C).
+#
+#   mana_protection (default 6)
+#      Minimum current mana to start Protection.
+#      > Same reserve: the base 6 plus 20.
+#
+#   buff_when_poisoned (default 1)
+#      Buffs while poisoned.
+#        0  no: hold them back and cut one that is casting, so the cure goes first
+#        1  yes
+#      > The cure goes first: no buffs while poisoned.
+# ----------------------------------------------------------------------------------------
+@setvar! config__mana_reactive_armor 24
+@setvar! config__mana_magic_reflect 34
+@setvar! config__use_protection 1
+@setvar! config__mana_protection 26
+@setvar! config__buff_when_poisoned 0
+
+
+# ========================================================================================
+# @ setup
+# ========================================================================================
+
+# loot/recycle runs the hotkey named in this list when it finishes or gives up. A list, because
+# a variable cannot hold a word (document/scripting/razor.md part 3). It lasts until the client closes.
+if not listexists 'list__resume_script'
+    createlist 'list__resume_script'
+endif
+clearlist 'list__resume_script'
+pushlist 'list__resume_script' 'Play Script: combat\bard-archer-enhanced'
+
+if config__chatty = 1
+    overhead "[ bard archer, on ]" 290
+endif

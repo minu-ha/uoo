@@ -37,6 +37,7 @@ order: 10
 | [13](#13) | recycle의 루프 복귀 확인 |
 | [14](#14) | bard-necro-enhanced 인게임 확인 |
 | [15](#15) | loadout, regear, aspect 인게임 확인 |
+| [16](#16) | bard-archer-enhanced 인게임 확인 |
 
 ::part[설정과 알림]
 
@@ -932,3 +933,48 @@ loadout과 regear는 같은 `gear/aspect` 블록을 씀. 동작 설명은 각 �
 - regear 뒤 백팩 아래쪽에 새첼, 보급 파우치, 루팅 백, 트랩 파우치가 loadout 때처럼 쌓이고, 보급품이 보급 파우치로 들어가야 함
 - 시체에서 보급 파우치나 루팅 백을 못 가져왔으면 묻지 않고 `[ supplies, out ]`, `[ loot bag, out ]`(`pouches_ask` 0)
 - 보급 파우치가 없으면 보급품은 백팩에 그대로, aspect까지 계속. 다음 loadout에서 새 파우치를 고름
+
+## <a id="16"></a>16 bard-archer-enhanced 인게임 확인
+
+2026-10-21 추가. 설계와 숫자는 [Bard Archer](../templates/bard-archer.md) 04절.
+새 루프와 새 프로필 → 클라이언트 재시작, nomeehej의 Razor 프로필을 `bard`로([Workflow](../working/workflow.md#04.A) 04.A절).
+
+#### 시작
+
+- F1 → 악기 검색(없으면 `[ inst, pick ]`), `[ bard archer, on ]`
+- Tab으로 warmode를 켜면 바딩, 노래, RA, Reflect, Protection이 멈추고 끄면 다시. 회복, 포션, 붕대는 계속
+
+#### 코덱스 라벨
+
+- `debug/dump-label`로 codex of archery(11886) 라벨 기록. 지금 자세 하나와 지금 피니셔 하나만, 대소문자 그대로(`Arcane`, `Ricochet`) 보여야 함
+- 다섯 자세나 두 피니셔를 모두 나열하면 `[ archery stance, off ]`나 `[ archery finisher, off ]`, 전환 정지. 그 라벨 문장으로 판정 방식 수정
+- `[ArcheryAmmunition3`이 Incendiary를 켜는지, 켜진 자세를 다시 말하면 꺼지는지(`You deactivate your stance.`)
+- `[ArcheryFinisher1`이 Ricochet을 고르고 Pincushion을 끄는지, 둘이 따로 켜지는지
+
+#### 자세와 피니셔 전환
+
+- 한 마리: Arcane, Pincushion. Journal에 `Archery stance switch`, `Archery finisher switch`
+- `Z`나 `Q`로 두 마리 이상을 찍어 10칸 안에 두면 2초 안에 Incendiary와 `[ archery, ricochet ]`. 하나로 줄면 6초 뒤 Arcane, Pincushion
+- 피를 60 넘게 잃으면 Fowling, 48 아래로 회복하면 원래 자세. 프로보 짝 둘 중 하나를 쏠 때 Incendiary가 짝에게 들어가는지
+- 손으로 자세를 바꾸면 30초 안에 루프가 다시 맞추는지
+
+#### Virtuoso
+
+- 한 마리를 오래 잡을 때 Virtuoso 아이콘이 빠지면 Discordance가 다시 나가는지(약 15초마다). 실패하면 5초 뒤 다시
+- 끊긴 Peace가 Virtuoso 갱신보다 먼저 나가는지
+
+#### 무기 능력
+
+- 60초마다 `[ repeater ]`, Journal `Weapon ability request: codex 2, slot 3`. `[WeaponAbility3`이 Repeater인지
+- 요청한 뒤 다음 요청(60초)까지 한 발도 못 맞히면 능력이 꺼지는지. 토글이면 요청을 `Weapon ability ready` 문장에 맞춰야 함
+- Repeater 피해를 일반 사격 한 발과 비교. 무기 속도 보정 식이 위키에 없음
+
+#### Protection
+
+- `Buff: Protection.` 뒤 아이콘 `Protection`. 커서가 뜨는지, 뜨면 자기에게 들어가는지
+- 2분 뒤 아이콘이 사라지면 다시. 마나 26 아래에서는 안 나감
+
+#### 마나와 바딩
+
+- 체인 한 벌, 음식 버프 없이 마나 10이 차는 시간. 50초면 Butler 식([PvP](../game/pvp.md#05.D) 05.D절)
+- 송 메시지가 `8.5%`인지. `6.8%`면 Lyric Aspect 보너스 없음([Bard Archer](../templates/bard-archer.md#01.C) 01.C절)
