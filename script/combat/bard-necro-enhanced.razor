@@ -145,6 +145,12 @@
 
 
 # ----------------------------------------------------------------------------------------
+# module/bard/disco.razor
+# ----------------------------------------------------------------------------------------
+@setvar! config__keep_virtuoso 0
+
+
+# ----------------------------------------------------------------------------------------
 # module/necro/burst.razor
 # ----------------------------------------------------------------------------------------
 @setvar! config__symbols_blood_oath 4
@@ -624,6 +630,7 @@ endif
 # module/bard/disco.razor
 # ----------------------------------------------------------------------------------------
 @setvar! var__disco_seen 0
+@setvar! var__disco_again 0
 
 
 # ----------------------------------------------------------------------------------------
@@ -1933,16 +1940,20 @@ while not dead
         # --------------------------------------------------------------------------------
         if timer "timer__disco_seen" >= interval__disco_seen
             @setvar! var__disco_seen 0
+        elseif config__keep_virtuoso = 1 and var__disco_seen != 0 and not findbuff "Virtuoso"
+            @setvar! var__disco_seen 0
+            @setvar! var__disco_again 1
         endif
 
         if var__combat_target != var__disco_seen and cooldown "disco" = 0 and cooldown "music" = 0 and skill "Discordance" > 0 and not warmode and var__instrument_ok = 1 and var__my_instrument != 0 and not targetexists and not casting
             if find var__combat_target ground -1 -1 config__target_range as alias__disco_target
                 getlabel alias__disco_target label__disco_target
 
-                if "discord" in label__disco_target
+                if "discord" in label__disco_target and var__disco_again = 0
                     @setvar! var__disco_seen var__combat_target
                     settimer "timer__disco_seen" 0
                 else
+                    @setvar! var__disco_again 0
                     useskill 'Discordance'
                     waitfortarget wait__bard_target
 

@@ -6,6 +6,17 @@
 
 
 # ----------------------------------------------------------------------------------------
+# @ config
+#
+#   config__keep_virtuoso
+#      1 discords the target again once the Virtuoso buff is gone, even when its label
+#      already shows discord. Virtuoso lasts 15 seconds after a successful barding
+#      action, and a Discordance on a discorded creature still counts (Bard Necro 02.Q).
+# ----------------------------------------------------------------------------------------
+@setvar! config__keep_virtuoso 0
+
+
+# ----------------------------------------------------------------------------------------
 # @ wait
 #
 #   interval__disco_seen
@@ -26,8 +37,13 @@ timer__disco_seen 0
 #
 #   var__disco_seen
 #      The target last seen discorded, 0 when none. Empty at every start.
+#
+#   var__disco_again
+#      1 when Virtuoso ran out on a target seen discorded, so the next Discordance goes
+#      out whatever the label shows. Cleared when it goes.
 # ----------------------------------------------------------------------------------------
 @setvar! var__disco_seen 0
+@setvar! var__disco_again 0
 
 
 # ----------------------------------------------------------------------------------------
@@ -37,11 +53,11 @@ timer__disco_seen 0
     # DISCO
     #
     # Discordance runs about two minutes and does not break, so it is applied once per
-    # target and then left alone. It goes before Peace because Ensemble wants Discord AND
-    # Peace on the same creature, and the one that does not break is worth landing first.
-    # bard-mace leads with Peace instead, and for a dexxer that is right: Peace is what
-    # stops the mob hitting the player in melee. Here the followers hold the mob and the
-    # player is ten tiles back, so the debuff outranks the pacify. Skill is 80 on both, so
+    # target and then left alone. In bard-necro it goes before Peace because Ensemble
+    # wants Discord AND Peace on the same creature, and the one that does not break is
+    # worth landing first: the followers hold the mob and the player is ten tiles back.
+    # With nothing else holding the mob, Peace is what keeps it off the player, so such a
+    # loop lists bard/peace first, as bard-mace led with Peace. Skill is 80 on both, so
     # the odds are the same either way and the order is only about which effect is worth
     # more.
     #
@@ -54,20 +70,31 @@ timer__disco_seen 0
     # target whose label already shows discord is remembered in var__disco_seen and
     # forgotten once interval__disco_seen has run, instead of a find and a getlabel a
     # pass.
+    #
+    # With config__keep_virtuoso 1 it is also forgotten once the Virtuoso buff is gone,
+    # and var__disco_again sends the next Discordance whatever its label shows. Virtuoso
+    # lasts 15 seconds after a successful barding action, a Discordance on a discorded
+    # creature renews it and a song does not (Bard Necro 02.Q). So on one long target the
+    # skill goes out about every 15 seconds, after a lapsed Peace when that block runs
+    # first.
     # ------------------------------------------------------------------------------------
     # Forget the target seen discorded, so its label is read again.
     if timer "timer__disco_seen" >= interval__disco_seen
         @setvar! var__disco_seen 0
+    elseif config__keep_virtuoso = 1 and var__disco_seen != 0 and not findbuff "Virtuoso"
+        @setvar! var__disco_seen 0
+        @setvar! var__disco_again 1
     endif
 
     if var__combat_target != var__disco_seen and cooldown "disco" = 0 and cooldown "music" = 0 and skill "Discordance" > 0 and not warmode and var__instrument_ok = 1 and var__my_instrument != 0 and not targetexists and not casting
         if find var__combat_target ground -1 -1 config__target_range as alias__disco_target
             getlabel alias__disco_target label__disco_target
 
-            if "discord" in label__disco_target
+            if "discord" in label__disco_target and var__disco_again = 0
                 @setvar! var__disco_seen var__combat_target
                 settimer "timer__disco_seen" 0
             else
+                @setvar! var__disco_again 0
                 useskill 'Discordance'
                 waitfortarget wait__bard_target
 

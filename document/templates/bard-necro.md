@@ -413,6 +413,13 @@ findbuff "song of peacemaking"
   테이머 펫도 해당. T3는 `-100%` → 테이머 쪽은 내 송 효과 없음
 - **`Self Taught` 상한**은 "lowest printed skill". Disco, Peace, Provo가 모두 80이면 T3(120점)를 찍어도 **80까지만** → T2(3점)가 상한
 
+> "For the next 15 seconds after a successful barding action the player gains a Damage Bonus and Damage Resistance against Barded Creatures of (25% \* (Lowest Skill / 100))" --
+> Bard Codex 화면, Virtuoso T3
+
+- **Virtuoso는 성공한 바딩 행동 뒤 15초.** 크기는 printed 최저값 기준 → 세 스킬 80이면 T3도 20%
+- 이미 Discord 걸린 대상에게 Discordance를 다시 성공해도 버프가 다시 생김. 송으로는 안 생김. 버프 이름 `Virtuoso`. 인게임 확인됨 2026-10-21
+- → 한 마리를 오래 잡는 동안 Virtuoso를 지키려면 15초마다 Discordance를 다시 걸어야 함(`bard/disco`의 `keep_virtuoso`)
+
 ### <a id="02.R"></a>02.R 바딩 성공률
 
 > "Increases barding success chances by (6% / 18% / 30%) of normal" -- Perfect Pitch
