@@ -856,6 +856,11 @@ order: 10
 - 적을 찍으면 10칸 안에서 Disco, Peace, 네크로 버스트, 오프너, 프록이 예전 순서로
 - 적이 없으면 버섯, RA, Reflect, Spell Siphon, 노래, Vampiric Embrace
 
+#### 노래(2026-10-20)
+
+- Shadowspire Cathedral에서 첫 노래가 땅으로 실패한 뒤 6초 쉬고 백팩으로 바꿔 노래가 들어가는지(`You are now under the effect of a Song`). 다른 던전과 필드에서는 계속 땅
+- 노래가 막히거나 실패해도 곡을 건너뛰지 않고, `use another skill`이 매 바퀴 반복되지 않는지
+
 #### 프로보와 마지막 대상(2026-10-20)
 
 - 몹 셋 이상을 Shift+Z로 한 번씩 찍어 두면 지금 대상이 아닌 둘씩 프로보, 지금 대상은 피스. 풀리거나 한쪽이 죽으면 남은 몹끼리 다시 짝

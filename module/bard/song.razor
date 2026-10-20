@@ -6,6 +6,25 @@
 
 
 # ----------------------------------------------------------------------------------------
+# @ wait
+#
+#   interval__song_retry
+#      How long a song that was refused or blocked waits before the next try. A blocked
+#      try starts the 5 second Music window again (Bard Necro part 2), so a little more.
+# ----------------------------------------------------------------------------------------
+@setvar! interval__song_retry 6000
+
+
+# ----------------------------------------------------------------------------------------
+# @ timer
+#
+#   timer__song_retry
+#      Ready on the first pass.
+# ----------------------------------------------------------------------------------------
+timer__song_retry interval__song_retry
+
+
+# ----------------------------------------------------------------------------------------
 # @ state
 #
 #   var__song_next
@@ -14,11 +33,21 @@
 #
 #   var__song_after
 #      Scratch: the song after the one just played.
+#
+#   var__song_on_self
+#      1 sings on yourself (the backpack), 0 on the ground. Starts on the ground and
+#      changes over when a place refuses it.
+#
+#   var__song_answer
+#      Scratch: 0 no answer, 1 the song took, 2 blocked by a cooldown, 3 the target was
+#      refused.
 # ----------------------------------------------------------------------------------------
 if not varexist var__song_next
     @setvar! var__song_next 1
 endif
 @setvar! var__song_after 0
+@setvar! var__song_on_self 0
+@setvar! var__song_answer 0
 
 
 # ----------------------------------------------------------------------------------------
@@ -39,11 +68,18 @@ endif
     # would be true almost always and the refresh would never fire. The gate is the song
     # cooldown plus the slot each song borrows.
     #
-    # A branch only advances var__song_next once the cursor was actually delivered, so a
-    # song that could not go out, for any reason, is retried next pass instead of being
-    # skipped. Inside a house the ground is refused with "That is not accessible." after
-    # the cursor went out, so there the songs step through without landing (Bard Necro
-    # 02.B). Hunting grounds are outside.
+    # var__song_next only moves on once the song took, read off "under the effect of a
+    # Song". A song that was blocked or refused is tried again after interval__song_retry,
+    # not every pass: a blocked try starts the server's Music window again while the bar
+    # shows nothing, so trying every pass kept every song blocked for good.
+    #
+    # A house refuses the ground ("That is not accessible."), and in Shadowspire
+    # Cathedral the script's ground fails while one clicked by hand works (user checks,
+    # 2026-10-20): targetrelloc picks the spot under you by its coordinates, which in
+    # some buildings is not the floor you see. A refusal, or no answer at all, changes
+    # the next try over to the backpack, and back again if that is refused too, so each
+    # place settles on what it takes. The backpack answers a harmful cursor and moves
+    # lastharmful, which the loop does not read for its target (fight/target).
     #
     # The chain only picks the skill and the song after it, the three share the rest.
     # The song goes on the ground under you, the way the wiki (Musicianship) starts one:
@@ -52,8 +88,25 @@ endif
     # used to target answers a harmful cursor, which moved lastharmful off the pick
     # (document/scripting/razor.md part 3), so the song had to stand down around a pick.
     # ------------------------------------------------------------------------------------
-    if cooldown "song" = 0 and cooldown "music" = 0 and not warmode and var__instrument_ok = 1 and var__my_instrument != 0 and not targetexists and not casting
+    if cooldown "song" = 0 and cooldown "music" = 0 and timer "timer__song_retry" >= interval__song_retry and not warmode and var__instrument_ok = 1 and var__my_instrument != 0 and not targetexists and not casting
         @setvar! var__song_after 0
+
+        # Read off, so an old line cannot pass for this song's answer.
+        if insysmsg "under the effect of a Song"
+            # Read off.
+        endif
+        if insysmsg "use another skill"
+            # Read off.
+        endif
+        if insysmsg "another barding song"
+            # Read off.
+        endif
+        if insysmsg "provoke or pacify another creature"
+            # Read off.
+        endif
+        if insysmsg "not accessible"
+            # Read off.
+        endif
 
         if var__song_next = 1 and skill "Discordance" > 0 and cooldown "disco" = 0
             useskill 'Discordance'
@@ -79,8 +132,42 @@ endif
             endif
 
             if targetexists
-                targetrelloc 0 0
-                @setvar! var__song_next var__song_after
+                if var__song_on_self = 1
+                    target backpack
+                else
+                    targetrelloc 0 0
+                endif
+
+                # The answer comes within a second. Read on every round until it does,
+                # with no break: this loop sits inside the main one.
+                @setvar! var__song_answer 0
+                for 5
+                    if var__song_answer = 0
+                        if insysmsg "under the effect of a Song"
+                            @setvar! var__song_answer 1
+                        elseif insysmsg "use another skill" or insysmsg "another barding song" or insysmsg "provoke or pacify another creature"
+                            @setvar! var__song_answer 2
+                        elseif insysmsg "not accessible"
+                            @setvar! var__song_answer 3
+                        else
+                            wait wait__short
+                        endif
+                    endif
+                endfor
+
+                if var__song_answer = 1
+                    @setvar! var__song_next var__song_after
+                else
+                    settimer "timer__song_retry" 0
+                endif
+
+                if var__song_answer = 0 or var__song_answer = 3
+                    if var__song_on_self = 1
+                        @setvar! var__song_on_self 0
+                    else
+                        @setvar! var__song_on_self 1
+                    endif
+                endif
             endif
         endif
     endif

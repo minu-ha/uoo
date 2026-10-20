@@ -153,7 +153,10 @@ targetrelloc 0 0
 - 위키 [Musicianship](https://wiki.uooutlands.com/Musicianship): 송은 땅을 찍어 켬. 받는 대상은 자신, 자신에게 초록으로 뜨는 플레이어와 생물(팔로워), 파티원. 50칸 안
 - 마지막 줄 `targetrelloc 0 0` → 발밑 땅에 송. `target backpack`(자신)도 송이 되지만 노래 커서는 적대 커서라 `lastharmful`이 백팩으로 바뀜. 땅은 `lastharmful`을 안 바꿈(2026-10-20 사용자 확인)
 - `module/bard/song.razor`는 2026-10-20부터 땅. 옛 구현(`script/archive/bard-mace.razor`의 BARD SONG BUFF)은 백팩
-- 집 안에서는 땅이 `That is not accessible.`로 거절됨(2026-10-20 사용자 확인). 참고 스크립트들이 백팩을 찍는 이유로 보임. 사냥터는 집 밖이라 땅으로 둠
+- 집 안에서는 땅이 `That is not accessible.`로 거절됨(2026-10-20 사용자 확인). 참고 스크립트들이 백팩을 찍는 이유로 보임
+- Shadowspire Cathedral에서는 스크립트의 땅 찍기만 실패하고 손으로 바닥을 찍으면 됨(2026-10-20 사용자 확인). `targetrelloc 0 0`은 발밑을 좌표로 찍어서, 건물 바닥에서는 보이는 바닥과 달라지는 것으로 추정
+- 그래서 `bard/song`은 땅이 거절되거나 답이 없으면 다음 시도를 백팩으로 바꾸고, 백팩도 거절되면 다시 땅으로. 막히거나 실패하면 6초 쉼
+- 막힌 노래 시도도 Music 5초를 다시 시작하는데(02.C절 표의 마지막 줄) `music` 바는 그 문장에 반응하지 않음 → 매 바퀴 재시도하면 노래가 영영 막힘. 2026-10-20 대성당에서 이 순환이 남
 
 ### <a id="02.C"></a>02.C 세 가지 쿨 계열
 

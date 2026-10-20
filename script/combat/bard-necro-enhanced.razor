@@ -283,6 +283,12 @@
 
 
 # ----------------------------------------------------------------------------------------
+# module/bard/song.razor
+# ----------------------------------------------------------------------------------------
+@setvar! interval__song_retry 6000
+
+
+# ----------------------------------------------------------------------------------------
 # module/necro/vampiric-embrace.razor
 # ----------------------------------------------------------------------------------------
 @setvar! interval__embrace_miss 5000
@@ -459,6 +465,15 @@ settimer "timer__poison_strike" interval__necro_action
 
 
 # ----------------------------------------------------------------------------------------
+# module/bard/song.razor
+# ----------------------------------------------------------------------------------------
+if not timerexists "timer__song_retry"
+    createtimer "timer__song_retry"
+endif
+settimer "timer__song_retry" interval__song_retry
+
+
+# ----------------------------------------------------------------------------------------
 # module/necro/vampiric-embrace.razor
 # ----------------------------------------------------------------------------------------
 if not timerexists "timer__vampiric_embrace"
@@ -628,6 +643,8 @@ if not varexist var__song_next
     @setvar! var__song_next 1
 endif
 @setvar! var__song_after 0
+@setvar! var__song_on_self 0
+@setvar! var__song_answer 0
 
 
 # ----------------------------------------------------------------------------------------
@@ -2708,8 +2725,24 @@ while not dead
         # --------------------------------------------------------------------------------
         # BARD SONG                                                 module/bard/song.razor
         # --------------------------------------------------------------------------------
-        if cooldown "song" = 0 and cooldown "music" = 0 and not warmode and var__instrument_ok = 1 and var__my_instrument != 0 and not targetexists and not casting
+        if cooldown "song" = 0 and cooldown "music" = 0 and timer "timer__song_retry" >= interval__song_retry and not warmode and var__instrument_ok = 1 and var__my_instrument != 0 and not targetexists and not casting
             @setvar! var__song_after 0
+
+            if insysmsg "under the effect of a Song"
+                # Read off.
+            endif
+            if insysmsg "use another skill"
+                # Read off.
+            endif
+            if insysmsg "another barding song"
+                # Read off.
+            endif
+            if insysmsg "provoke or pacify another creature"
+                # Read off.
+            endif
+            if insysmsg "not accessible"
+                # Read off.
+            endif
 
             if var__song_next = 1 and skill "Discordance" > 0 and cooldown "disco" = 0
                 useskill 'Discordance'
@@ -2735,8 +2768,40 @@ while not dead
                 endif
 
                 if targetexists
-                    targetrelloc 0 0
-                    @setvar! var__song_next var__song_after
+                    if var__song_on_self = 1
+                        target backpack
+                    else
+                        targetrelloc 0 0
+                    endif
+
+                    @setvar! var__song_answer 0
+                    for 5
+                        if var__song_answer = 0
+                            if insysmsg "under the effect of a Song"
+                                @setvar! var__song_answer 1
+                            elseif insysmsg "use another skill" or insysmsg "another barding song" or insysmsg "provoke or pacify another creature"
+                                @setvar! var__song_answer 2
+                            elseif insysmsg "not accessible"
+                                @setvar! var__song_answer 3
+                            else
+                                wait wait__short
+                            endif
+                        endif
+                    endfor
+
+                    if var__song_answer = 1
+                        @setvar! var__song_next var__song_after
+                    else
+                        settimer "timer__song_retry" 0
+                    endif
+
+                    if var__song_answer = 0 or var__song_answer = 3
+                        if var__song_on_self = 1
+                            @setvar! var__song_on_self 0
+                        else
+                            @setvar! var__song_on_self 1
+                        endif
+                    endif
                 endif
             endif
         endif
