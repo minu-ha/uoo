@@ -642,8 +642,10 @@ endif
 if not varexist var__song_next
     @setvar! var__song_next 1
 endif
+if not varexist var__song_on_self
+    @setvar! var__song_on_self 0
+endif
 @setvar! var__song_after 0
-@setvar! var__song_on_self 0
 @setvar! var__song_answer 0
 
 

@@ -36,7 +36,8 @@ timer__song_retry interval__song_retry
 #
 #   var__song_on_self
 #      1 sings on yourself (the backpack), 0 on the ground. Starts on the ground and
-#      changes over when a place refuses it.
+#      changes over when a place refuses it. Kept across Plays, so a loop that recycle
+#      restarts does not pay the refused try and its wait again.
 #
 #   var__song_answer
 #      Scratch: 0 no answer, 1 the song took, 2 blocked by a cooldown, 3 the target was
@@ -45,8 +46,10 @@ timer__song_retry interval__song_retry
 if not varexist var__song_next
     @setvar! var__song_next 1
 endif
+if not varexist var__song_on_self
+    @setvar! var__song_on_self 0
+endif
 @setvar! var__song_after 0
-@setvar! var__song_on_self 0
 @setvar! var__song_answer 0
 
 
@@ -79,8 +82,9 @@ endif
     # 2026-10-20): targetrelloc picks the spot under you by its coordinates, which in
     # some buildings is not the floor you see. A refusal, or no answer at all, changes
     # the next try over to the backpack, and back again if that is refused too, so each
-    # place settles on what it takes. The backpack answers a harmful cursor and moves
-    # lastharmful, which the loop does not read for its target (fight/target).
+    # place settles on what it takes. The refused try burns Music like a blocked one, so
+    # the change costs one interval__song_retry. The backpack answers a harmful cursor and
+    # moves lastharmful, which the loop does not read for its target (fight/target).
     #
     # The chain only picks the skill and the song after it, the three share the rest.
     # The song goes on the ground under you, the way the wiki (Musicianship) starts one:
