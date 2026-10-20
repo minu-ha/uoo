@@ -32,6 +32,7 @@ Ultima Online Outlands Razor 스크립트의 작성과 수정 기준.
 | [Item list](game/item-list.md) | 아이템 이름, graphic id, hue |
 | [Bard Necro](templates/bard-necro.md) | Bard Necro 메커니즘, 소환수, 전투 루프 설계, PvP 판단, 인게임 확인 |
 | [Lumberjack PvP](templates/lumberjack-pvp.md) | 벌목과 PvP 템플릿의 스킬, 스탯, 도끼 선택, 마나 예산, 교전 분기, 구현 요구사항 |
+| [Bard Archer](templates/bard-archer.md) | Bard Archer의 스킬과 코덱스, 갑옷과 마나, 아처리 자세와 피니셔와 무기 능력, 부활, 전투 루프 설계 |
 | [Open items](questions/open-items.md) | 사용자에게 물을 것. 뜨지 않는 바, 규칙과 어긋난 줄, 출처 없는 숫자, 인게임 확인 목록 |
 
 저장소 안내(GitHub):

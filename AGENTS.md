@@ -68,6 +68,7 @@ Ultima Online Outlands용 Razor 스크립트 저장소.
 | 바드, 네크로, 소환수 숫자        | [Bard Necro](document/templates/bard-necro.md)                                                                                                       |
 | PvP 규칙                         | [PvP](document/game/pvp.md)                                                                                                                          |
 | 벌목과 PvP 템플릿, 교전          | [Lumberjack PvP](document/templates/lumberjack-pvp.md)                                                                                               |
+| 아처리, 바드 아처 템플릿         | [Bard Archer](document/templates/bard-archer.md)                                                                                                     |
 | 키 배치                          | [Hotkeys](document/game/hotkeys.md)                                                                                                                  |
 | `findtype` 인자(graphic id, hue) | [Item list](document/game/item-list.md)                                                                                                              |
 | 문서 수정이나 새 문서            | [Writing](document/working/writing.md)                                                                                                               |
