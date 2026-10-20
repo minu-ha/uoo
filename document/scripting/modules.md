@@ -67,7 +67,7 @@ order: 30
 | `module/bard/` | 바드 스킬 | `instrument`(악기 찾기와 점검), `disco`(대상마다 한 번, 설정에 따라 Virtuoso가 빠지면 다시), `peace`, `provo`(고른 적 가운데 풀린 둘씩 서로에게 프로보), `song`(이동 중 노래 셋을 차례로) |
 | `module/necro/` | 네크로 핫바와 소환수 | `symbols`(핫바 열어 두기, Unholy Symbol 수 읽기), `summon-names`(소환수 이름 바꾸기), `resummon`(Vengeful Spirit 뒤 빠진 소환수 재소환, 마나가 낮으면 Wither, 오래된 소환수 교체), `burst`(Blood Oath, Corpse Skin, Evil Omen), `poison-strike`, `vampiric-embrace` |
 | `module/tamer/` | 펫 스킬 | `herding`(목동 지팡이), `vet-kit`(나와 펫에게 수의사 키트) |
-| `module/fight/` | 근접 전투 보조 | `target`(기억한 적), `weapon-swap`(pvp 무기 슬롯), `axe`, `sword-codex`, `parry-codex`, `weapon-ability`(Swords나 Archery 코덱스의 능력, 사거리 설정) |
+| `module/fight/` | 무기 전투 보조 | `target`(기억한 적), `weapon-swap`(pvp 무기 슬롯), `axe`, `sword-codex`, `parry-codex`, `archery-codex`(자세와 피니셔, 고른 적 수로 전환), `weapon-ability`(Swords나 Archery 코덱스의 능력, 사거리 설정) |
 | `module/gather/` | 채집 | `lumberjacking`(Smart Harvest), `skinning`(칼질) |
 | `module/pack/` | 무게, 보급 파우치와 루팅 백 | `gold-drop`, `leather`(가죽 → 루팅 백), `lumber`(Logs → Boards → 루팅 백), `scavenger`(스캐빈저 캐시 비우기), `pouches`(보급 파우치와 루팅 백 지정), `sorting`(백팩 아래쪽 더미와 트랩 파우치, 파우치 안 정리) |
 | `module/escape/` | PK 피하기 | `tracking`(헌트 필터 설정과 Hunting 점검), `recall`(자동 리콜 한 번) |
@@ -362,7 +362,7 @@ order: 30
 
 | 신호 | 쓰는 곳 | 읽는 곳 |
 | --- | --- | --- |
-| `var__fighting` | `fight/target`(기억한 적이 `target_range` 안이면 1), pvp 레시피(늘 1) | `buff/potions`, `buff/spells`의 Bless와 Arch Protection, `buff/mushroom`의 Create Food, `magery/flamestrike`, bard-necro-enhanced의 교전 그룹 |
+| `var__fighting` | `fight/target`(기억한 적이 `target_range` 안이면 1), pvp 레시피(늘 1) | `buff/potions`, `buff/spells`의 Bless와 Arch Protection, `buff/mushroom`의 Create Food, `magery/flamestrike`, `fight/archery-codex`의 고른 적 세기, bard-necro-enhanced의 교전 그룹 |
 | `var__hold_casts` | `escape/recall`(리콜 결정 시 1) | `buff/spells`, `necro/resummon` |
 | `var__hold_gathering` | `escape/recall`(리콜 결정, 필요한 책 없음, 감지 리콜인데 Tracking이 사냥 중이 아니면 1) | `gather/lumberjacking`, `pack/lumber` |
 | `var__hold_symbols` | `necro/resummon`(소환수가 빠지고 마나 20\~64면 1, 은행이 차면 0) | `necro/burst`, `necro/poison-strike`, `necro/vampiric-embrace` |
@@ -372,7 +372,7 @@ order: 30
 - `magery/reagents`의 `var__regs_*`, 서클별 마나, `interrupt_to_heal`, `wait__cast` ← 회복 시전, `buff/spells`, `buff/mushroom`, 공격 주문(`magery/*`), `necro/resummon`
 - `recovery/heal`의 `config__heal_hits` ← 다쳤을 때 쉬는 블록(`gather/*`, `pack/leather`, `escape/tracking`)
   - `emergency_hits` ← 시전 중에 끊는 공격 주문(`magery/*`), `necro/resummon`. `recovery/light-heal`의 `light_hits` ← `pack/lumber`
-- `fight/target`의 `var__combat_target`과 사거리 ← `fight/parry-codex`, `fight/weapon-ability`, `pack/leather`, 바드와 네크로와 공격 주문 블록
+- `fight/target`의 `var__combat_target`과 사거리 ← `fight/parry-codex`, `fight/archery-codex`, `fight/weapon-ability`, `pack/leather`, 바드와 네크로와 공격 주문 블록
   - `var__keep_lasttarget` ← 자기를 찍거나 시전하기 전 `lastharmful`을 재확인하는 블록(`magery/flamestrike`, `necro/vampiric-embrace`)
   - `var__target_hold` ← `bard/provo`가 자기 용도로 찍은 몹을 적음. `fight/target`과 커서 중에 고르기를 받는 블록이 그 몹을 건너뜀
   - `gather/skinning`은 칼 커서를 든 동안 고른 적을 여기에 기록
