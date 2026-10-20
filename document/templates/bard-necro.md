@@ -156,7 +156,7 @@ targetrelloc 0 0
 - 집 안에서는 땅이 `That is not accessible.`로 거절됨(2026-10-20 사용자 확인). 참고 스크립트들이 백팩을 찍는 이유로 보임
 - Shadowspire Cathedral에서는 스크립트의 땅 찍기만 실패하고 손으로 바닥을 찍으면 됨(2026-10-20 사용자 확인). `targetrelloc 0 0`은 발밑을 좌표로 찍어서, 건물 바닥에서는 보이는 바닥과 달라지는 것으로 추정
 - 그래서 `bard/song`은 땅이 거절되거나 답이 없으면 다음 시도를 백팩으로 바꾸고, 백팩도 거절되면 다시 땅으로. 막히거나 실패하면 6초 쉼
-- 막힌 노래 시도도 Music 5초를 다시 시작하는데(02.C절 표의 마지막 줄) `music` 바는 그 문장에 반응하지 않음 → 매 바퀴 재시도하면 노래가 영영 막힘. 2026-10-20 대성당에서 이 순환이 남
+- 막힌 노래 시도도 Music 5초를 다시 시작하는데(02.C절 표의 마지막 줄) 그때 `music` 바는 그 문장에 반응하지 않았음 → 매 바퀴 재시도해서 노래가 영영 막힘. 2026-10-20 대성당에서 이 순환이 남. 같은 날 `music` 바에 막힘 문장을 넣음(02.I절)
 
 ### <a id="02.C"></a>02.C 세 가지 쿨 계열
 
@@ -267,7 +267,7 @@ findbuff "song of peacemaking"
 | 항목 | 길이 | 트리거 |
 | --- | --- | --- |
 | `skill` |   | 일반 스킬 전부, 바드 5초 트리거 4개, 리셋 |
-| `music` | 5s | `play successfully`, `fail to incite anger`, `fail to discord`, `fail to pacify` |
+| `music` | 5s | `play successfully`, `fail to incite anger`, `fail to discord`, `fail to pacify`, 막힘 문장 `use another skill`, `another barding song`, `provoke or pacify another creature` |
 |   | 0s | `Your barding skill cooldowns` |
 | `disco` | 5s | `successfully, disrupting your opponent`, `fail to discord`, `briefly discording` |
 |   | 0s | `Your barding skill cooldowns` |
@@ -292,6 +292,7 @@ findbuff "song of peacemaking"
 | Peace에서 `"You play successfully, briefly pacifying ..."` 5초 **제거** | 같은 문장에 `"successfully, briefly pacifying"` 11초가 이미 있어 충돌 |
 | Peace와 Provo를 **`peace/provo` 한 항목으로 통합** | 서버가 슬롯 공유(02.F절) |
 | `skill`에 바드 5초 트리거 **추가** | 서버의 스킬 게이트가 하나 → 바드가 도는 동안 다른 스킬도 막힘(02.J절) |
+| `music`에 막힘 문장 셋 5초 **추가**(2026-10-20, nomeehej, nomeehui) | 막힌 시도도 Music을 다시 태움(02.C절). 바가 몰라서 루프가 매 바퀴 재시도 → 노래가 영영 막힌 일(Shadowspire Cathedral). `provoke or pacify` 막힘이 Music을 태우는지는 미측정, 5초 대기는 손해가 작아 같이 넣음 |
 | 항목 이름 **통일**. 처음 PascalCase, 2026-09-26 모두 소문자 | 스크립트 11개의 `heal pot`과 XML의 `Heal Pot`이 어긋나 임시 쿨다운으로만 돌고 바는 안 뜸. 규칙은 [Overheads](../scripting/overheads.md#06.A) 06.A절 |
 | `fireball`에 발동 트리거 `"fireball activated"` **추가** | 실제 문장은 "Wizardry fireball activated.". 트리거가 없어 바가 안 채워지고 프록 게이트가 매 패스 통과 |
 | 바가 자주 뜨는 순서로 **재배치** | 위 목록의 순서 |

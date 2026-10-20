@@ -70,8 +70,9 @@ endif
     #
     # var__song_next only moves on once the song took, read off "under the effect of a
     # Song". A song that was blocked or refused is tried again after interval__song_retry,
-    # not every pass: a blocked try starts the server's Music window again while the bar
-    # shows nothing, so trying every pass kept every song blocked for good.
+    # not every pass: a blocked try starts the server's Music window again, and before the
+    # music bar learned the blocked lines (Bard Necro 02.I) trying every pass kept every
+    # song blocked for good. The wait stays for a profile without those triggers.
     #
     # A house refuses the ground ("That is not accessible."), and in Shadowspire
     # Cathedral the script's ground fails while one clicked by hand works (user checks,
