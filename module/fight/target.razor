@@ -55,9 +55,11 @@ timer__target_grace config__target_grace
 if not varexist var__combat_target
     @setvar! var__combat_target 0
 endif
+
 if not varexist var__target_hold
     @setvar! var__target_hold 0
 endif
+
 @setvar! var__fresh_serial 0
 @setvar! var__keep_lasttarget 0
 
@@ -88,6 +90,7 @@ endif
             # Already the enemy, or the block target held above.
         else
             @setvar! var__fresh_serial alias__fresh_target
+
             if 0x40000000 > var__fresh_serial
                 if not dead alias__fresh_target
                     if noto alias__fresh_target = "hostile" or noto alias__fresh_target = "criminal" or noto alias__fresh_target = "enemy" or noto alias__fresh_target = "murderer"
@@ -106,10 +109,12 @@ endif
     endif
 
     @setvar! var__fighting 0
+
     if var__combat_target = 0
         # No enemy remembered, nothing to keep.
     elseif find var__combat_target ground -1 -1 config__target_range as alias__stored_target
         settimer "timer__target_grace" 0
+
         if dead alias__stored_target
             @setvar! var__combat_target 0
             @setvar! var__target_hold 0
@@ -121,6 +126,7 @@ endif
         endif
     elseif find var__combat_target ground -1 -1 config__acquire_range as alias__stored_target
         settimer "timer__target_grace" 0
+
         if dead alias__stored_target
             @setvar! var__combat_target 0
             @setvar! var__target_hold 0

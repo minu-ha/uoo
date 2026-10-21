@@ -31,6 +31,7 @@ timer__food interval__food
         if config__warmode_is_manual = 0 or not warmode
             if not hidden and not queued and not casting and not targetexists
                 settimer "timer__food" 0
+
                 if findtype tray backpack as alias__food
                     dclick alias__food
                     wait wait__short

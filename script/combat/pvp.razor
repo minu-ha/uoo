@@ -329,24 +329,31 @@ while not dead
             if findtype 3962 self
                 @setvar! var__has_black_pearl 1
             endif
+
             if findtype 3963 self
                 @setvar! var__has_bloodmoss 1
             endif
+
             if findtype 3972 self
                 @setvar! var__has_garlic 1
             endif
+
             if findtype 3973 self
                 @setvar! var__has_ginseng 1
             endif
+
             if findtype 3974 self
                 @setvar! var__has_mandrake 1
             endif
+
             if findtype 3976 self
                 @setvar! var__has_nightshade 1
             endif
+
             if findtype 3980 self
                 @setvar! var__has_ash 1
             endif
+
             if findtype 3981 self
                 @setvar! var__has_silk 1
             endif
@@ -374,57 +381,75 @@ while not dead
             if var__has_garlic = 1 and var__has_ginseng = 1
                 @setvar! var__regs_cure 1
             endif
+
             if var__has_garlic = 1 and var__has_ginseng = 1 and var__has_silk = 1
                 @setvar! var__regs_heal 1
             endif
+
             if var__has_garlic = 1 and var__has_ginseng = 1 and var__has_mandrake = 1 and var__has_silk = 1
                 @setvar! var__regs_greater_heal 1
             endif
+
             if var__has_garlic = 1 and var__has_ginseng = 1 and var__has_mandrake = 1
                 @setvar! var__regs_create_food 1
             endif
+
             if var__has_garlic = 1 and var__has_silk = 1 and var__has_ash = 1
                 @setvar! var__regs_reactive_armor 1
             endif
+
             if var__has_garlic = 1 and var__has_mandrake = 1 and var__has_silk = 1
                 @setvar! var__regs_magic_reflect 1
             endif
+
             if var__has_ash = 1
                 @setvar! var__regs_magic_arrow 1
             endif
+
             if var__has_nightshade = 1 and var__has_silk = 1
                 @setvar! var__regs_harm 1
             endif
+
             if var__has_black_pearl = 1
                 @setvar! var__regs_fireball 1
             endif
+
             if var__has_mandrake = 1 and var__has_ash = 1
                 @setvar! var__regs_lightning 1
             endif
+
             if var__has_garlic = 1 and var__has_nightshade = 1 and var__has_ash = 1
                 @setvar! var__regs_curse 1
             endif
+
             if var__has_black_pearl = 1 and var__has_mandrake = 1 and var__has_silk = 1
                 @setvar! var__regs_mana_drain 1
             endif
+
             if var__has_black_pearl = 1 and var__has_nightshade = 1
                 @setvar! var__regs_energy_bolt 1
             endif
+
             if var__has_garlic = 1 and var__has_mandrake = 1
                 @setvar! var__regs_bless 1
             endif
+
             if var__has_garlic = 1 and var__has_ginseng = 1 and var__has_ash = 1
                 @setvar! var__regs_protection 1
             endif
+
             if var__has_garlic = 1 and var__has_ginseng = 1 and var__has_mandrake = 1 and var__has_ash = 1
                 @setvar! var__regs_arch_protection 1
             endif
+
             if var__has_silk = 1 and var__has_ash = 1
                 @setvar! var__regs_flamestrike 1
             endif
+
             if var__has_bloodmoss = 1 and var__has_mandrake = 1 and var__has_silk = 1
                 @setvar! var__regs_summon 1
             endif
+
             if var__has_bloodmoss = 1 and var__has_mandrake = 1 and var__has_silk = 1 and var__has_ash = 1
                 @setvar! var__regs_summon_ash 1
             endif
@@ -466,9 +491,11 @@ while not dead
                                 if not casting
                                     break
                                 endif
+
                                 if insysmsg "Your concentration is disturbed, thus ruining thy spell."
                                     break
                                 endif
+
                                 wait wait__poll
                             endfor
                         endif
@@ -482,9 +509,11 @@ while not dead
         # --------------------------------------------------------------------------------
         if not poisoned and not paralyzed and not hidden and not queued and not targetexists and diffhits >= config__heal_hits
             @setvar! var__heal_potion_out 0
+
             if config__use_potions = 1 and cooldown "heal pot" = 0
                 if findtype "Yellow Potion" self as alias__heal_potion
                     getlabel alias__heal_potion label__heal_potion
+
                     if "next usable" in label__heal_potion
                         # Still on its own cooldown.
                     else
@@ -511,9 +540,11 @@ while not dead
                         if not casting
                             break
                         endif
+
                         if insysmsg "Your concentration is disturbed, thus ruining thy spell."
                             break
                         endif
+
                         wait wait__poll
                     endfor
 
@@ -545,6 +576,7 @@ while not dead
         # --------------------------------------------------------------------------------
         if not poisoned and not paralyzed and not hidden and not queued and not casting and not targetexists and config__use_magery = 1 and var__regs_heal = 1 and diffhits >= config__light_hits and mana >= config__mana_heal
             @setvar! var__light_heal_due 0
+
             if config__use_light_heal = 1 or config__use_bandages = 0 or skill "Healing" <= config__heal_skill_min
                 @setvar! var__light_heal_due 1
             elseif not bandaging and not findtype 3617 self
@@ -564,9 +596,11 @@ while not dead
                             if not casting
                                 break
                             endif
+
                             if insysmsg "Your concentration is disturbed, thus ruining thy spell."
                                 break
                             endif
+
                             wait wait__poll
                         endfor
 
@@ -596,18 +630,22 @@ while not dead
     if var__fighting = 1 and config__use_potions = 1 and not paralyzed and not hidden and not targetexists
         if not queued and str < config__str_potion and timer "timer__str_potion" >= interval__stat_potion
             settimer "timer__str_potion" 0
+
             if findtype "White Potion" self
                 hotkey "Drink Strength"
                 wait wait__short
             endif
         endif
+
         if not queued and dex < config__dex_potion and timer "timer__agi_potion" >= interval__stat_potion
             settimer "timer__agi_potion" 0
+
             if findtype "Blue Potion" self
                 hotkey "Drink Agility"
                 wait wait__short
             endif
         endif
+
         if config__use_resist_potion = 1 and not queued and not findbuff "Magic Resist Potion"
             if findtype "Black Potion" self
                 hotkey "Drink Magic Resist"
@@ -634,17 +672,21 @@ while not dead
                             if not casting
                                 break
                             endif
+
                             if insysmsg "Your concentration is disturbed, thus ruining thy spell."
                                 break
                             endif
+
                             if diffhits >= config__buff_max_loss
                                 hotkey "> Interrupt"
                                 break
                             endif
+
                             if config__buff_when_poisoned = 0 and poisoned
                                 hotkey "> Interrupt"
                                 break
                             endif
+
                             wait wait__poll
                         endfor
                     elseif config__use_magic_reflect = 1 and var__regs_magic_reflect = 1 and mana >= config__mana_magic_reflect and cooldown "reflect" = 0 and not findbuff "Magic Reflection"
@@ -658,23 +700,28 @@ while not dead
                             if not casting
                                 break
                             endif
+
                             if insysmsg "Your concentration is disturbed, thus ruining thy spell."
                                 break
                             endif
+
                             if diffhits >= config__buff_max_loss
                                 hotkey "> Interrupt"
                                 break
                             endif
+
                             if config__buff_when_poisoned = 0 and poisoned
                                 hotkey "> Interrupt"
                                 break
                             endif
+
                             wait wait__poll
                         endfor
                     elseif config__use_protection = 1 and not warmode and var__regs_protection = 1 and mana >= config__mana_protection and not findbuff "Protection"
                         if insysmsg "Your concentration is disturbed, thus ruining thy spell."
                             # consumed, nothing else to do
                         endif
+
                         cast "Protection"
                         if config__sysmsg = 1
                             sysmsg "Buff: Protection." 88
@@ -685,29 +732,36 @@ while not dead
                             if targetexists
                                 break
                             endif
+
                             if insysmsg "Your concentration is disturbed, thus ruining thy spell."
                                 break
                             endif
+
                             if not casting
                                 break
                             endif
+
                             if diffhits >= config__buff_max_loss
                                 hotkey "> Interrupt"
                                 break
                             endif
+
                             if config__buff_when_poisoned = 0 and poisoned
                                 hotkey "> Interrupt"
                                 break
                             endif
+
                             wait wait__poll
                         endfor
 
                         if targetexists "beneficial" or targetexists "neutral"
                             target self
+
                             for 10
                                 if findbuff "Protection"
                                     break
                                 endif
+
                                 wait wait__poll
                             endfor
                         elseif targetexists
@@ -725,26 +779,32 @@ while not dead
                             if targetexists
                                 break
                             endif
+
                             if insysmsg "Your concentration is disturbed, thus ruining thy spell."
                                 break
                             endif
+
                             if diffhits >= config__buff_max_loss
                                 hotkey "> Interrupt"
                                 break
                             endif
+
                             if config__buff_when_poisoned = 0 and poisoned
                                 hotkey "> Interrupt"
                                 break
                             endif
+
                             wait wait__poll
                         endfor
 
                         if targetexists "beneficial"
                             target self
+
                             for 10
                                 if findbuff "Cunning"
                                     break
                                 endif
+
                                 wait wait__poll
                             endfor
                         elseif targetexists
@@ -762,26 +822,32 @@ while not dead
                             if targetexists
                                 break
                             endif
+
                             if insysmsg "Your concentration is disturbed, thus ruining thy spell."
                                 break
                             endif
+
                             if diffhits >= config__buff_max_loss
                                 hotkey "> Interrupt"
                                 break
                             endif
+
                             if config__buff_when_poisoned = 0 and poisoned
                                 hotkey "> Interrupt"
                                 break
                             endif
+
                             wait wait__poll
                         endfor
 
                         if targetexists "neutral"
                             target self
+
                             for 10
                                 if findbuff "Protection"
                                     break
                                 endif
+
                                 wait wait__poll
                             endfor
                         elseif targetexists
@@ -792,6 +858,7 @@ while not dead
                         if insysmsg "Your concentration is disturbed, thus ruining thy spell."
                             # consumed, nothing else to do
                         endif
+
                         cast "Magic Arrow"
                         if config__sysmsg = 1
                             sysmsg "Buff: Magic Arrow on yourself for Spell Siphon." 88
@@ -802,17 +869,21 @@ while not dead
                             if targetexists
                                 break
                             endif
+
                             if insysmsg "Your concentration is disturbed, thus ruining thy spell."
                                 break
                             endif
+
                             if diffhits >= config__buff_max_loss
                                 hotkey "> Interrupt"
                                 break
                             endif
+
                             if config__buff_when_poisoned = 0 and poisoned
                                 hotkey "> Interrupt"
                                 break
                             endif
+
                             wait wait__poll
                         endfor
 
@@ -834,6 +905,7 @@ while not dead
     # ------------------------------------------------------------------------------------
     if not paralyzed and not hidden and not queued and not casting and not targetexists
         @setvar! var__weapon_want 0
+
         if config__weapon_4_graphic != 0 and cooldown "swing 4" = 0
             @setvar! var__weapon_want config__weapon_4_graphic
         elseif config__weapon_3_graphic != 0 and cooldown "swing 3" = 0
@@ -858,17 +930,20 @@ while not dead
             if var__weapon_armed_graphic != var__weapon_want
                 @setvar! var__weapon_armed_graphic var__weapon_want
                 @setvar! var__weapon_armed_serial 0
+
                 if findtype var__weapon_want self as alias__own_weapon
                     @setvar! var__weapon_armed_serial alias__own_weapon
                 endif
             endif
 
             @setvar! var__weapon_held 0
+
             if findlayer self lefthand as alias__held_left
                 if alias__held_left = var__weapon_armed_serial
                     @setvar! var__weapon_held 1
                 endif
             endif
+
             if findlayer self righthand as alias__held_right
                 if alias__held_right = var__weapon_armed_serial
                     @setvar! var__weapon_held 1
@@ -884,6 +959,7 @@ while not dead
                     wait wait__short
                 else
                     @setvar! var__weapon_armed_graphic 0
+
                     if lhandempty and rhandempty and timer "timer__message" >= interval__message
                         overhead "[ weapon, out ]" 254
                         settimer "timer__message" 0

@@ -109,17 +109,21 @@
                             if not casting
                                 break
                             endif
+
                             if insysmsg "Your concentration is disturbed, thus ruining thy spell."
                                 break
                             endif
+
                             if diffhits >= config__buff_max_loss
                                 hotkey "> Interrupt"
                                 break
                             endif
+
                             if config__buff_when_poisoned = 0 and poisoned
                                 hotkey "> Interrupt"
                                 break
                             endif
+
                             wait wait__poll
                         endfor
                     elseif config__use_magic_reflect = 1 and var__regs_magic_reflect = 1 and mana >= config__mana_magic_reflect and cooldown "reflect" = 0 and not findbuff "Magic Reflection"
@@ -133,17 +137,21 @@
                             if not casting
                                 break
                             endif
+
                             if insysmsg "Your concentration is disturbed, thus ruining thy spell."
                                 break
                             endif
+
                             if diffhits >= config__buff_max_loss
                                 hotkey "> Interrupt"
                                 break
                             endif
+
                             if config__buff_when_poisoned = 0 and poisoned
                                 hotkey "> Interrupt"
                                 break
                             endif
+
                             wait wait__poll
                         endfor
                     elseif config__use_protection = 1 and not warmode and var__regs_protection = 1 and mana >= config__mana_protection and not findbuff "Protection"
@@ -151,6 +159,7 @@
                         if insysmsg "Your concentration is disturbed, thus ruining thy spell."
                             # consumed, nothing else to do
                         endif
+
                         cast "Protection"
                         if config__sysmsg = 1
                             sysmsg "Buff: Protection." 88
@@ -161,29 +170,36 @@
                             if targetexists
                                 break
                             endif
+
                             if insysmsg "Your concentration is disturbed, thus ruining thy spell."
                                 break
                             endif
+
                             if not casting
                                 break
                             endif
+
                             if diffhits >= config__buff_max_loss
                                 hotkey "> Interrupt"
                                 break
                             endif
+
                             if config__buff_when_poisoned = 0 and poisoned
                                 hotkey "> Interrupt"
                                 break
                             endif
+
                             wait wait__poll
                         endfor
 
                         if targetexists "beneficial" or targetexists "neutral"
                             target self
+
                             for 10
                                 if findbuff "Protection"
                                     break
                                 endif
+
                                 wait wait__poll
                             endfor
                         elseif targetexists
@@ -202,26 +218,32 @@
                             if targetexists
                                 break
                             endif
+
                             if insysmsg "Your concentration is disturbed, thus ruining thy spell."
                                 break
                             endif
+
                             if diffhits >= config__buff_max_loss
                                 hotkey "> Interrupt"
                                 break
                             endif
+
                             if config__buff_when_poisoned = 0 and poisoned
                                 hotkey "> Interrupt"
                                 break
                             endif
+
                             wait wait__poll
                         endfor
 
                         if targetexists "beneficial"
                             target self
+
                             for 10
                                 if findbuff "Cunning"
                                     break
                                 endif
+
                                 wait wait__poll
                             endfor
                         elseif targetexists
@@ -240,26 +262,32 @@
                             if targetexists
                                 break
                             endif
+
                             if insysmsg "Your concentration is disturbed, thus ruining thy spell."
                                 break
                             endif
+
                             if diffhits >= config__buff_max_loss
                                 hotkey "> Interrupt"
                                 break
                             endif
+
                             if config__buff_when_poisoned = 0 and poisoned
                                 hotkey "> Interrupt"
                                 break
                             endif
+
                             wait wait__poll
                         endfor
 
                         if targetexists "neutral"
                             target self
+
                             for 10
                                 if findbuff "Protection"
                                     break
                                 endif
+
                                 wait wait__poll
                             endfor
                         elseif targetexists
@@ -272,6 +300,7 @@
                         if insysmsg "Your concentration is disturbed, thus ruining thy spell."
                             # consumed, nothing else to do
                         endif
+
                         cast "Magic Arrow"
                         if config__sysmsg = 1
                             sysmsg "Buff: Magic Arrow on yourself for Spell Siphon." 88
@@ -282,17 +311,21 @@
                             if targetexists
                                 break
                             endif
+
                             if insysmsg "Your concentration is disturbed, thus ruining thy spell."
                                 break
                             endif
+
                             if diffhits >= config__buff_max_loss
                                 hotkey "> Interrupt"
                                 break
                             endif
+
                             if config__buff_when_poisoned = 0 and poisoned
                                 hotkey "> Interrupt"
                                 break
                             endif
+
                             wait wait__poll
                         endfor
 

@@ -142,24 +142,31 @@ timer__reagents interval__reagents
             if findtype 3962 self
                 @setvar! var__has_black_pearl 1
             endif
+
             if findtype 3963 self
                 @setvar! var__has_bloodmoss 1
             endif
+
             if findtype 3972 self
                 @setvar! var__has_garlic 1
             endif
+
             if findtype 3973 self
                 @setvar! var__has_ginseng 1
             endif
+
             if findtype 3974 self
                 @setvar! var__has_mandrake 1
             endif
+
             if findtype 3976 self
                 @setvar! var__has_nightshade 1
             endif
+
             if findtype 3980 self
                 @setvar! var__has_ash 1
             endif
+
             if findtype 3981 self
                 @setvar! var__has_silk 1
             endif
@@ -187,57 +194,75 @@ timer__reagents interval__reagents
             if var__has_garlic = 1 and var__has_ginseng = 1
                 @setvar! var__regs_cure 1
             endif
+
             if var__has_garlic = 1 and var__has_ginseng = 1 and var__has_silk = 1
                 @setvar! var__regs_heal 1
             endif
+
             if var__has_garlic = 1 and var__has_ginseng = 1 and var__has_mandrake = 1 and var__has_silk = 1
                 @setvar! var__regs_greater_heal 1
             endif
+
             if var__has_garlic = 1 and var__has_ginseng = 1 and var__has_mandrake = 1
                 @setvar! var__regs_create_food 1
             endif
+
             if var__has_garlic = 1 and var__has_silk = 1 and var__has_ash = 1
                 @setvar! var__regs_reactive_armor 1
             endif
+
             if var__has_garlic = 1 and var__has_mandrake = 1 and var__has_silk = 1
                 @setvar! var__regs_magic_reflect 1
             endif
+
             if var__has_ash = 1
                 @setvar! var__regs_magic_arrow 1
             endif
+
             if var__has_nightshade = 1 and var__has_silk = 1
                 @setvar! var__regs_harm 1
             endif
+
             if var__has_black_pearl = 1
                 @setvar! var__regs_fireball 1
             endif
+
             if var__has_mandrake = 1 and var__has_ash = 1
                 @setvar! var__regs_lightning 1
             endif
+
             if var__has_garlic = 1 and var__has_nightshade = 1 and var__has_ash = 1
                 @setvar! var__regs_curse 1
             endif
+
             if var__has_black_pearl = 1 and var__has_mandrake = 1 and var__has_silk = 1
                 @setvar! var__regs_mana_drain 1
             endif
+
             if var__has_black_pearl = 1 and var__has_nightshade = 1
                 @setvar! var__regs_energy_bolt 1
             endif
+
             if var__has_garlic = 1 and var__has_mandrake = 1
                 @setvar! var__regs_bless 1
             endif
+
             if var__has_garlic = 1 and var__has_ginseng = 1 and var__has_ash = 1
                 @setvar! var__regs_protection 1
             endif
+
             if var__has_garlic = 1 and var__has_ginseng = 1 and var__has_mandrake = 1 and var__has_ash = 1
                 @setvar! var__regs_arch_protection 1
             endif
+
             if var__has_silk = 1 and var__has_ash = 1
                 @setvar! var__regs_flamestrike 1
             endif
+
             if var__has_bloodmoss = 1 and var__has_mandrake = 1 and var__has_silk = 1
                 @setvar! var__regs_summon 1
             endif
+
             if var__has_bloodmoss = 1 and var__has_mandrake = 1 and var__has_silk = 1 and var__has_ash = 1
                 @setvar! var__regs_summon_ash 1
             endif

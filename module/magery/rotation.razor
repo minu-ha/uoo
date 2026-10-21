@@ -53,9 +53,11 @@ timer__magic_window interval__magic_window
 #      filler wait for it.
 # ----------------------------------------------------------------------------------------
 @setvar! var__opener_done 0
+
 if not varexist var__proc_target
     @setvar! var__proc_target 0
 endif
+
 @setvar! var__procs_done 0
 
 
@@ -65,6 +67,7 @@ endif
 if not listexists 'list__magic_drained_targets'
     createlist 'list__magic_drained_targets'
 endif
+
 if not listexists 'list__magic_cursed_targets'
     createlist 'list__magic_cursed_targets'
 endif
@@ -155,7 +158,6 @@ endif
                         # not delivered, so the target stays off the list
                     else
                         pushlist 'list__magic_drained_targets' var__combat_target
-
                     endif
                 endif
             endif
@@ -213,7 +215,6 @@ endif
                     else
                         pushlist 'list__magic_cursed_targets' var__combat_target
                         settimer "timer__magic_window" 0
-
                     endif
                 endif
             endif

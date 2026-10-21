@@ -75,17 +75,21 @@ timer__vet_kit interval__vet_running
     if var__vet_running = 0 and not bandaging and not hidden and not queued and not targetexists
         if diffhits > 0 or timer "timer__vet_kit" >= var__vet_wait
             settimer "timer__vet_kit" 0
+
             if findtype 25750 backpack as alias__vet_kit
                 dclick alias__vet_kit
                 @setvar! var__vet_running 1
+
                 for 20
                     if insysmsg "You begin using veterinary supplies"
                         break
                     endif
+
                     if insysmsg "do not require healing"
                         @setvar! var__vet_running 0
                         break
                     endif
+
                     wait wait__poll
                 endfor
 
@@ -97,6 +101,7 @@ timer__vet_kit interval__vet_running
             else
                 # Out of supplies. Looked up again after the same wait, or at once when hurt.
                 @setvar! var__vet_wait interval__vet_refused
+
                 if timer "timer__message" >= interval__message
                     overhead "[ vet kit, out ]" 254
                     settimer "timer__message" 0

@@ -34,7 +34,6 @@ if not varexist global__my_supply_pouch or not find global__my_supply_pouch back
 
     if counttype 3705 backpack 0 = 1 and findtype 3705 backpack 0 as alias__found_pouch
         setvar global__my_supply_pouch alias__found_pouch
-
         if config__chatty = 1
             overhead "[ supplies, set ]" 290
         endif
@@ -55,7 +54,6 @@ if not varexist global__my_loot_bag or not find global__my_loot_bag backpack
 
     if counttype 3702 backpack = 1 and findtype 3702 backpack as alias__found_bag
         setvar global__my_loot_bag alias__found_bag
-
         if config__chatty = 1
             overhead "[ loot bag, set ]" 290
         endif

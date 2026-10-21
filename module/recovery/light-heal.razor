@@ -47,6 +47,7 @@
     # ------------------------------------------------------------------------------------
     if not poisoned and not paralyzed and not hidden and not queued and not casting and not targetexists and config__use_magery = 1 and var__regs_heal = 1 and diffhits >= config__light_hits and mana >= config__mana_heal
         @setvar! var__light_heal_due 0
+
         if config__use_light_heal = 1 or config__use_bandages = 0 or skill "Healing" <= config__heal_skill_min
             @setvar! var__light_heal_due 1
         elseif not bandaging and not findtype 3617 self
@@ -66,9 +67,11 @@
                         if not casting
                             break
                         endif
+
                         if insysmsg "Your concentration is disturbed, thus ruining thy spell."
                             break
                         endif
+
                         wait wait__poll
                     endfor
 

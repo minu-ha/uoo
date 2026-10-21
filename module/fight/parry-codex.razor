@@ -112,6 +112,7 @@ timer__parry_resync 0
         endif
 
         @setvar! var__parry_want config__parry_stance_main
+
         if poisoned or findbuff "Bleed" or findbuff "Disease"
             if config__parry_dot_in_melee = 1 or not find var__combat_target ground -1 -1 2
                 @setvar! var__parry_want config__parry_stance_dot
@@ -123,6 +124,7 @@ timer__parry_resync 0
 
             if findtype 11889 backpack as alias__parry_codex
                 getlabel alias__parry_codex label__parry_codex
+
                 if "Testudo" in label__parry_codex
                     @setvar! var__parry_active 3
                 elseif "Warding" in label__parry_codex
@@ -145,6 +147,7 @@ timer__parry_resync 0
                 if var__parry_disabled = 0 and var__parry_finisher_checked = 0 and config__parry_finisher_main != 0
                     @setvar! var__parry_finisher_checked 1
                     @setvar! var__parry_finisher_state 0
+
                     if config__parry_finisher_main = 1
                         if "Last Stand" in label__parry_codex
                             @setvar! var__parry_finisher_state 1
@@ -190,6 +193,7 @@ timer__parry_resync 0
                     if config__sysmsg = 1
                         sysmsg "Parry stance switch: slot {{var__parry_active}} to {{var__parry_want}}. Damage over time and melee decide Warding." 88
                     endif
+
                     if var__parry_want = 1
                         say "[ShieldsStance1"
                     elseif var__parry_want = 2

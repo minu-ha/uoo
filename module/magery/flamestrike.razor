@@ -32,6 +32,7 @@
             if insysmsg "Your concentration is disturbed, thus ruining thy spell."
                 # Consumed. A stale disturbance cannot end the poll below early.
             endif
+
             cast "Flamestrike"
             wait wait__short
 
@@ -39,9 +40,11 @@
                 if targetexists
                     break
                 endif
+
                 if insysmsg "Your concentration is disturbed, thus ruining thy spell."
                     break
                 endif
+
                 if config__interrupt_to_heal = 1 and diffhits >= config__emergency_hits
                     if config__chatty = 1
                         overhead "[ flamestrike, cut ]" 254
@@ -49,11 +52,13 @@
                     hotkey "> Interrupt"
                     break
                 endif
+
                 wait wait__poll
             endfor
 
             if targetexists "harmful"
                 @setvar! var__keep_lasttarget 0
+
                 if find lastharmful ground -1 -1 config__acquire_range as alias__fresh_target
                     if not dead alias__fresh_target and var__combat_target != alias__fresh_target and var__target_hold != alias__fresh_target
                         if noto alias__fresh_target = "hostile" or noto alias__fresh_target = "criminal" or noto alias__fresh_target = "enemy" or noto alias__fresh_target = "murderer"

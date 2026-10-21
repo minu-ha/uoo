@@ -48,6 +48,7 @@ timer__harvest interval__harvest_retry
 #      is missing.
 # ----------------------------------------------------------------------------------------
 @setvar! var__harvest_retry interval__harvest_retry
+
 if not varexist var__my_hatchet
     @setvar! var__my_hatchet 0
 endif
@@ -78,6 +79,7 @@ endif
             if lhandempty
                 if not find var__my_hatchet backpack
                     @setvar! var__my_hatchet 0
+
                     if findtype 3907|3908 backpack as alias__packed_hatchet
                         @setvar! var__my_hatchet alias__packed_hatchet
                     endif
@@ -99,6 +101,7 @@ endif
                 # Adopt an already held Hatchet once, including replacement tools with a new serial.
                 if var__my_hatchet != alias__equipped_hatchet
                     getlabel alias__equipped_hatchet label__hand_tool
+
                     if "hatchet" in label__hand_tool or "Hatchet" in label__hand_tool
                         @setvar! var__my_hatchet alias__equipped_hatchet
                     elseif not hidden and not queued and not casting and not targetexists and not warmode
@@ -122,6 +125,7 @@ endif
                         target self
                         wait wait__short
                     endif
+
                     settimer "timer__harvest" 0
                 endif
             endif

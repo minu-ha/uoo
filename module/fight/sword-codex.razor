@@ -146,6 +146,7 @@ timer__sword_resync 0
                 if var__sword_disabled = 0 and var__sword_finisher_checked = 0 and config__sword_finisher_main != 0
                     @setvar! var__sword_finisher_checked 1
                     @setvar! var__sword_finisher_state 0
+
                     if config__sword_finisher_main = 2
                         if "Execute" in label__sword_codex
                             @setvar! var__sword_finisher_state 1
@@ -191,6 +192,7 @@ timer__sword_resync 0
                     if config__sysmsg = 1
                         sysmsg "Sword stance switch: slot {{var__sword_active}} to {{var__sword_want}}." 88
                     endif
+
                     if var__sword_want = 1
                         say "[SwordsStance1"
                     elseif var__sword_want = 2

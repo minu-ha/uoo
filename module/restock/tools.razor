@@ -68,7 +68,6 @@ if config__use_sewing_kit_and_id_wand = 1 and find global__my_supply_box ground 
             wait wait__short
             drop global__my_supply_box
             wait wait__short
-
             if config__chatty = 1
                 overhead "[ sewing kit, back ]" 290
             endif
@@ -85,7 +84,6 @@ if config__use_sewing_kit_and_id_wand = 1 and find global__my_supply_box ground 
             wait wait__short
             drop backpack
             wait wait__short
-
             if config__chatty = 1
                 overhead "[ sewing kit, take ]" 290
             endif
@@ -124,7 +122,6 @@ if config__use_sewing_kit_and_id_wand = 1 and find global__my_supply_box ground 
             wait wait__short
             drop global__my_supply_box
             wait wait__short
-
             if config__chatty = 1
                 overhead "[ id wand, back ]" 290
             endif
@@ -156,11 +153,9 @@ if config__use_sewing_kit_and_id_wand = 1 and find global__my_supply_box ground 
                 wait wait__short
                 drop backpack
                 wait wait__short
-
                 if config__chatty = 1
                     overhead "[ id wand, take ]" 290
                 endif
-
                 @setvar! var__identification_wand_fetch 0
             endif
 
@@ -175,7 +170,6 @@ if config__use_sewing_kit_and_id_wand = 1 and find global__my_supply_box ground 
                 wait wait__short
                 drop backpack
                 wait wait__short
-
                 if config__chatty = 1
                     overhead "[ id wand, take ]" 290
                 endif

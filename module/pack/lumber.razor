@@ -60,7 +60,6 @@ timer__pack_lumber 0
                     if config__sysmsg = 1
                         sysmsg "Lumber pack BEGIN: convert Logs, then move Boards." 88
                     endif
-
                     dclick global__my_loot_bag
                     wait wait__lumber_item
 
@@ -90,7 +89,6 @@ timer__pack_lumber 0
                                 if config__sysmsg = 1
                                     sysmsg "Lumber convert: serial={{alias__lumber_stack}}." 88
                                 endif
-
                                 dclick alias__lumber_stack
                                 wait wait__lumber_item
                             elseif find alias__lumber_stack global__my_loot_bag
@@ -119,7 +117,6 @@ timer__pack_lumber 0
 
                         @clearignore
                     endfor
-
                     if config__sysmsg = 1
                         sysmsg "Lumber pack END: returning to recovery and harvest checks." 88
 

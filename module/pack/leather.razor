@@ -52,7 +52,6 @@ timer__pack_leather 0
                     if config__sysmsg = 1
                         sysmsg "Leather pack BEGIN." 88
                     endif
-
                     dclick global__my_loot_bag
                     wait wait__pack_item
                     settimer "timer__pack_leather" 0
@@ -69,7 +68,6 @@ timer__pack_leather 0
                             if config__sysmsg = 1
                                 sysmsg "Leather move request: serial={{alias__leather_stack}}." 88
                             endif
-
                             lift alias__leather_stack 60000
                             drop global__my_loot_bag -1 -1
                             wait wait__pack_item
@@ -79,7 +77,6 @@ timer__pack_leather 0
                             wait wait__poll
                         endwhile
                     endwhile
-
                     if config__sysmsg = 1
                         sysmsg "Leather pack END." 88
                     endif

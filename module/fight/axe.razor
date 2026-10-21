@@ -55,8 +55,10 @@ endif
         if lhandempty
             if not hidden and not queued and not casting and not targetexists
                 settimer "timer__equip" 0
+
                 if not find var__my_weapon backpack
                     @setvar! var__my_weapon 0
+
                     if findtype config__axe_graphic backpack as alias__packed_weapon
                         @setvar! var__my_weapon alias__packed_weapon
                     endif

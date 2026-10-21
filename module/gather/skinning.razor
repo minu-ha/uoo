@@ -81,6 +81,7 @@ timer__grey_only interval__grey_only
 @setvar! var__carve_crime 0
 @setvar! var__carve_retry 0
 @setvar! var__carve_reply 0
+
 if not varexist var__my_knife
     @setvar! var__my_knife 0
 endif
@@ -128,21 +129,26 @@ endif
     if timer "timer__carve" >= interval__carve and var__combat_target = 0
         settimer "timer__carve" 0
         @setvar! var__carve_direct 0
+
         if config__skin_unowned = 1 and var__carve_crime = 0 and timer "timer__grey_only" >= interval__grey_only
             @setvar! var__carve_direct 1
         endif
 
         if diffhits < config__heal_hits and not poisoned and not paralyzed and not hidden and not queued and not casting and not targetexists and findtype 8198 ground -1 -1 2 as alias__corpse
             @setvar! var__corpse_ok 1
+
             if var__carve_direct = 1
                 getlabel alias__corpse label__corpse
                 @setvar! var__corpse_ok 0
+
                 if "corpse" in label__corpse or "Corpse" in label__corpse
                     @setvar! var__corpse_ok 1
                 endif
+
                 if "remains" in label__corpse or "Remains" in label__corpse
                     @setvar! var__corpse_ok 0
                 endif
+
                 if var__corpse_ok = 0
                     @ignore alias__corpse
                     if config__sysmsg = 1
@@ -154,6 +160,7 @@ endif
             if var__corpse_ok = 1
                 if not find var__my_knife backpack
                     @setvar! var__my_knife 0
+
                     if findtype 11552|11564 backpack as alias__packed_knife
                         @setvar! var__my_knife alias__packed_knife
                     endif
@@ -167,8 +174,10 @@ endif
                         # No enemy was remembered when this block started, so a live
                         # enemy in lastharmful now is a Z pressed during the cursor wait.
                         @setvar! var__pick_during_carve 0
+
                         if find lastharmful ground -1 -1 config__acquire_range as alias__fresh_target
                             @setvar! var__fresh_serial alias__fresh_target
+
                             if 0x40000000 > var__fresh_serial
                                 if not dead alias__fresh_target
                                     if noto alias__fresh_target = "hostile" or noto alias__fresh_target = "criminal" or noto alias__fresh_target = "enemy" or noto alias__fresh_target = "murderer"
@@ -200,6 +209,7 @@ endif
                             #   3 a criminal act or a criminal action refusal
                             @setvar! var__carve_reply 0
                             settimer "timer__carve" 0
+
                             while var__carve_reply = 0 and timer "timer__carve" < wait__carve_reply
                                 if insysmsg "corpse carving on"
                                     @setvar! var__carve_reply 3
@@ -251,6 +261,7 @@ endif
                             # Condition-terminated wait, without break.
                             @setvar! var__carve_reply 0
                             settimer "timer__carve" 0
+
                             while var__carve_reply = 0 and timer "timer__carve" < wait__carve_reply
                                 if insysmsg "worth carving"
                                     @setvar! var__carve_reply 2
@@ -287,5 +298,6 @@ endif
                 endif
             endif
         endif
+
         settimer "timer__carve" 0
     endif

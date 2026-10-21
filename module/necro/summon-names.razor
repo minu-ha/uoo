@@ -41,6 +41,7 @@
 if not listexists 'list__named_summons'
     createlist 'list__named_summons'
 endif
+
 clearlist 'list__named_summons'
 
 # The names, in the order the kinds are read below. A list, because a variable cannot hold a
@@ -53,6 +54,7 @@ clearlist 'list__named_summons'
 if not listexists 'list__summon_kinds'
     createlist 'list__summon_kinds'
 endif
+
 clearlist 'list__summon_kinds'
 pushlist 'list__summon_kinds' 'nite'
 pushlist 'list__summon_kinds' 'majik'
@@ -112,6 +114,7 @@ pushlist 'list__summon_kinds' 'rotter'
                     # list__summon_kinds, in either case.
                     getlabel alias__fresh_summon label__fresh_summon
                     @setvar! var__summon_kind 99
+
                     if "skeletal knight" in label__fresh_summon or "Skeletal Knight" in label__fresh_summon
                         @setvar! var__summon_kind 0
                     elseif "skeletal mage" in label__fresh_summon or "Skeletal Mage" in label__fresh_summon

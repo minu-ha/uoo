@@ -59,9 +59,11 @@
     # ------------------------------------------------------------------------------------
     if not poisoned and not paralyzed and not hidden and not queued and not targetexists and diffhits >= config__heal_hits
         @setvar! var__heal_potion_out 0
+
         if config__use_potions = 1 and cooldown "heal pot" = 0
             if findtype "Yellow Potion" self as alias__heal_potion
                 getlabel alias__heal_potion label__heal_potion
+
                 if "next usable" in label__heal_potion
                     # Still on its own cooldown.
                 else
@@ -88,9 +90,11 @@
                     if not casting
                         break
                     endif
+
                     if insysmsg "Your concentration is disturbed, thus ruining thy spell."
                         break
                     endif
+
                     wait wait__poll
                 endfor
 

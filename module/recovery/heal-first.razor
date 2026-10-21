@@ -80,6 +80,7 @@ while diffhits > config__heal_first_until and timer "timer__heal_first" < wait__
     if config__use_potions = 1 and not targetexists and findtype "Yellow Potion" self as alias__heal_first_potion
         @setvar! var__heal_first_can 1
         getlabel alias__heal_first_potion label__heal_first_potion
+
         if "next usable" in label__heal_first_potion
             # Still on its own cooldown.
         else

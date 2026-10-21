@@ -61,18 +61,22 @@ timer__agi_potion interval__stat_potion
     if var__fighting = 1 and config__use_potions = 1 and not paralyzed and not hidden and not targetexists
         if not queued and str < config__str_potion and timer "timer__str_potion" >= interval__stat_potion
             settimer "timer__str_potion" 0
+
             if findtype "White Potion" self
                 hotkey "Drink Strength"
                 wait wait__short
             endif
         endif
+
         if not queued and dex < config__dex_potion and timer "timer__agi_potion" >= interval__stat_potion
             settimer "timer__agi_potion" 0
+
             if findtype "Blue Potion" self
                 hotkey "Drink Agility"
                 wait wait__short
             endif
         endif
+
         if config__use_resist_potion = 1 and not queued and not findbuff "Magic Resist Potion"
             if findtype "Black Potion" self
                 hotkey "Drink Magic Resist"

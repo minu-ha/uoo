@@ -219,7 +219,6 @@ timer__recall_check interval__recall_check
             if config__recall_on_weight = 1 and var__recall_needed = 0
                 if diffweight <= config__weight_remaining
                     @setvar! var__recall_needed 1
-
                     if config__sysmsg = 1
                         sysmsg "Recall trigger: spare weight at or below {{config__weight_remaining}}." 88
                     endif

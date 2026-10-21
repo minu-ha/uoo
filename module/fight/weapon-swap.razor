@@ -33,9 +33,11 @@
 if not varexist var__weapon_armed_serial
     @setvar! var__weapon_armed_serial 0
 endif
+
 if not varexist var__weapon_armed_graphic
     @setvar! var__weapon_armed_graphic 0
 endif
+
 @setvar! var__weapon_want 0
 @setvar! var__weapon_held 0
 
@@ -55,6 +57,7 @@ endif
     # ------------------------------------------------------------------------------------
     if not paralyzed and not hidden and not queued and not casting and not targetexists
         @setvar! var__weapon_want 0
+
         if config__weapon_4_graphic != 0 and cooldown "swing 4" = 0
             @setvar! var__weapon_want config__weapon_4_graphic
         elseif config__weapon_3_graphic != 0 and cooldown "swing 3" = 0
@@ -79,17 +82,20 @@ endif
             if var__weapon_armed_graphic != var__weapon_want
                 @setvar! var__weapon_armed_graphic var__weapon_want
                 @setvar! var__weapon_armed_serial 0
+
                 if findtype var__weapon_want self as alias__own_weapon
                     @setvar! var__weapon_armed_serial alias__own_weapon
                 endif
             endif
 
             @setvar! var__weapon_held 0
+
             if findlayer self lefthand as alias__held_left
                 if alias__held_left = var__weapon_armed_serial
                     @setvar! var__weapon_held 1
                 endif
             endif
+
             if findlayer self righthand as alias__held_right
                 if alias__held_right = var__weapon_armed_serial
                     @setvar! var__weapon_held 1
@@ -106,6 +112,7 @@ endif
                 else
                     # Gone from hand and pack: search again next pass.
                     @setvar! var__weapon_armed_graphic 0
+
                     if lhandempty and rhandempty and timer "timer__message" >= interval__message
                         overhead "[ weapon, out ]" 254
                         settimer "timer__message" 0

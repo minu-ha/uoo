@@ -56,6 +56,7 @@ timer__instrument_check interval__instrument_check
 if not varexist var__my_instrument
     @setvar! var__my_instrument 0
 endif
+
 @setvar! var__instrument_ok 0
 @setvar! var__instrument_picked 0
 
@@ -97,6 +98,7 @@ if not find var__my_instrument backpack
     wait wait__instrument_pick
 
     @setvar! var__instrument_picked 0
+
     while findtype 3740|3742|3762|3763|10245|20006|20008|20010|20012|20014|20016 backpack as alias__found_instrument
         if alias__found_instrument = var__my_instrument
             @setvar! var__instrument_picked 1

@@ -138,9 +138,11 @@ timer__archery_pack 0
 if not listexists 'list__archery_picked'
     createlist 'list__archery_picked'
 endif
+
 if not listexists 'list__archery_keep'
     createlist 'list__archery_keep'
 endif
+
 if not listexists 'list__archery_near'
     createlist 'list__archery_near'
 endif
@@ -190,12 +192,15 @@ endif
         endif
 
         clearlist 'list__archery_near'
+
         if var__fighting = 1 and list 'list__archery_picked' >= 2
             clearlist 'list__archery_keep'
+
             foreach archery_mob in list__archery_picked
                 if find archery_mob ground -1 -1 config__acquire_range as alias__archery_mob
                     if not dead alias__archery_mob
                         pushlist 'list__archery_keep' archery_mob
+
                         if find archery_mob ground -1 -1 config__target_range
                             pushlist 'list__archery_near' archery_mob
                         endif
@@ -204,6 +209,7 @@ endif
             endfor
 
             clearlist 'list__archery_picked'
+
             foreach archery_mob in list__archery_keep
                 pushlist 'list__archery_picked' archery_mob
             endfor
@@ -237,6 +243,7 @@ endif
         endif
 
         @setvar! var__archery_read 0
+
         if var__archery_disabled = 0 and var__archery_want != var__archery_active
             @setvar! var__archery_read 1
         elseif var__archery_finisher_off = 0 and var__archery_finisher_want != 0 and var__archery_finisher_want != var__archery_finisher_active
@@ -297,6 +304,7 @@ endif
                         elseif var__archery_finisher_want = 2
                             say "[ArcheryFinisher2"
                         endif
+
                         @setvar! var__archery_finisher_active var__archery_finisher_want
                         if config__sysmsg = 1
                             sysmsg "Archery finisher switch: slot {{var__archery_finisher_want}}." 88
@@ -317,6 +325,7 @@ endif
                     if config__sysmsg = 1
                         sysmsg "Archery stance switch: slot {{var__archery_active}} to {{var__archery_want}}." 88
                     endif
+
                     if var__archery_want = 1
                         say "[ArcheryAmmunition1"
                     elseif var__archery_want = 2

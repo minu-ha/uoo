@@ -74,9 +74,11 @@ timer__provo_retry interval__provo_retry
 if not listexists 'list__provo_known'
     createlist 'list__provo_known'
 endif
+
 if not listexists 'list__provo_keep'
     createlist 'list__provo_keep'
 endif
+
 removelist 'list__provo_never'
 createlist 'list__provo_never'
 
@@ -158,6 +160,7 @@ createlist 'list__provo_never'
 
         if var__provo_dropped = 1
             clearlist 'list__provo_known'
+
             foreach provo_mob in list__provo_keep
                 pushlist 'list__provo_known' provo_mob
             endfor
@@ -187,12 +190,15 @@ createlist 'list__provo_never'
             if insysmsg "play successfully, provoking"
                 # Read off, with the three below, before this round's answer.
             endif
+
             if insysmsg "too far away"
                 # Read off.
             endif
+
             if insysmsg "Target cannot be seen"
                 # Read off.
             endif
+
             if insysmsg "You must wait a few moments"
                 # Read off.
             endif
@@ -230,6 +236,7 @@ createlist 'list__provo_never'
             # The answer comes within a second. Read on every round until it does, with
             # no break: this loop sits inside the main one.
             @setvar! var__provo_answer 0
+
             for 5
                 if var__provo_answer = 0
                     if insysmsg "play successfully, provoking"

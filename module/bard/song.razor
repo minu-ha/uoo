@@ -40,6 +40,7 @@ timer__song_retry interval__song_retry
 if not varexist var__song_next
     @setvar! var__song_next 1
 endif
+
 @setvar! var__song_after 0
 @setvar! var__song_answer 0
 
@@ -83,12 +84,15 @@ endif
         if insysmsg "under the effect of a Song"
             # Read off.
         endif
+
         if insysmsg "use another skill"
             # Read off.
         endif
+
         if insysmsg "another barding song"
             # Read off.
         endif
+
         if insysmsg "provoke or pacify another creature"
             # Read off.
         endif
@@ -122,6 +126,7 @@ endif
                 # The answer comes within a second. Read on every round until it does,
                 # with no break: this loop sits inside the main one.
                 @setvar! var__song_answer 0
+
                 for 5
                     if var__song_answer = 0
                         if insysmsg "under the effect of a Song"

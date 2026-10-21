@@ -224,6 +224,7 @@ endif
 if not listexists 'list__resume_script'
     createlist 'list__resume_script'
 endif
+
 clearlist 'list__resume_script'
 pushlist 'list__resume_script' 'Play Script: combat\dexxer-basic'
 
@@ -265,24 +266,31 @@ while not dead
             if findtype 3962 self
                 @setvar! var__has_black_pearl 1
             endif
+
             if findtype 3963 self
                 @setvar! var__has_bloodmoss 1
             endif
+
             if findtype 3972 self
                 @setvar! var__has_garlic 1
             endif
+
             if findtype 3973 self
                 @setvar! var__has_ginseng 1
             endif
+
             if findtype 3974 self
                 @setvar! var__has_mandrake 1
             endif
+
             if findtype 3976 self
                 @setvar! var__has_nightshade 1
             endif
+
             if findtype 3980 self
                 @setvar! var__has_ash 1
             endif
+
             if findtype 3981 self
                 @setvar! var__has_silk 1
             endif
@@ -310,57 +318,75 @@ while not dead
             if var__has_garlic = 1 and var__has_ginseng = 1
                 @setvar! var__regs_cure 1
             endif
+
             if var__has_garlic = 1 and var__has_ginseng = 1 and var__has_silk = 1
                 @setvar! var__regs_heal 1
             endif
+
             if var__has_garlic = 1 and var__has_ginseng = 1 and var__has_mandrake = 1 and var__has_silk = 1
                 @setvar! var__regs_greater_heal 1
             endif
+
             if var__has_garlic = 1 and var__has_ginseng = 1 and var__has_mandrake = 1
                 @setvar! var__regs_create_food 1
             endif
+
             if var__has_garlic = 1 and var__has_silk = 1 and var__has_ash = 1
                 @setvar! var__regs_reactive_armor 1
             endif
+
             if var__has_garlic = 1 and var__has_mandrake = 1 and var__has_silk = 1
                 @setvar! var__regs_magic_reflect 1
             endif
+
             if var__has_ash = 1
                 @setvar! var__regs_magic_arrow 1
             endif
+
             if var__has_nightshade = 1 and var__has_silk = 1
                 @setvar! var__regs_harm 1
             endif
+
             if var__has_black_pearl = 1
                 @setvar! var__regs_fireball 1
             endif
+
             if var__has_mandrake = 1 and var__has_ash = 1
                 @setvar! var__regs_lightning 1
             endif
+
             if var__has_garlic = 1 and var__has_nightshade = 1 and var__has_ash = 1
                 @setvar! var__regs_curse 1
             endif
+
             if var__has_black_pearl = 1 and var__has_mandrake = 1 and var__has_silk = 1
                 @setvar! var__regs_mana_drain 1
             endif
+
             if var__has_black_pearl = 1 and var__has_nightshade = 1
                 @setvar! var__regs_energy_bolt 1
             endif
+
             if var__has_garlic = 1 and var__has_mandrake = 1
                 @setvar! var__regs_bless 1
             endif
+
             if var__has_garlic = 1 and var__has_ginseng = 1 and var__has_ash = 1
                 @setvar! var__regs_protection 1
             endif
+
             if var__has_garlic = 1 and var__has_ginseng = 1 and var__has_mandrake = 1 and var__has_ash = 1
                 @setvar! var__regs_arch_protection 1
             endif
+
             if var__has_silk = 1 and var__has_ash = 1
                 @setvar! var__regs_flamestrike 1
             endif
+
             if var__has_bloodmoss = 1 and var__has_mandrake = 1 and var__has_silk = 1
                 @setvar! var__regs_summon 1
             endif
+
             if var__has_bloodmoss = 1 and var__has_mandrake = 1 and var__has_silk = 1 and var__has_ash = 1
                 @setvar! var__regs_summon_ash 1
             endif
@@ -402,9 +428,11 @@ while not dead
                                 if not casting
                                     break
                                 endif
+
                                 if insysmsg "Your concentration is disturbed, thus ruining thy spell."
                                     break
                                 endif
+
                                 wait wait__poll
                             endfor
                         endif
@@ -418,9 +446,11 @@ while not dead
         # --------------------------------------------------------------------------------
         if not poisoned and not paralyzed and not hidden and not queued and not targetexists and diffhits >= config__heal_hits
             @setvar! var__heal_potion_out 0
+
             if config__use_potions = 1 and cooldown "heal pot" = 0
                 if findtype "Yellow Potion" self as alias__heal_potion
                     getlabel alias__heal_potion label__heal_potion
+
                     if "next usable" in label__heal_potion
                         # Still on its own cooldown.
                     else
@@ -447,9 +477,11 @@ while not dead
                         if not casting
                             break
                         endif
+
                         if insysmsg "Your concentration is disturbed, thus ruining thy spell."
                             break
                         endif
+
                         wait wait__poll
                     endfor
 
@@ -495,11 +527,9 @@ while not dead
             if findtype "gold coin" backpack as alias__found_gold
                 lift alias__found_gold config__gold_drop_amount
                 droprelloc 0 0
-
                 if config__sysmsg = 1
                     sysmsg "Gold drop: up to {{config__gold_drop_amount}} at your feet, weight over max." 88
                 endif
-
                 wait wait__short
 
                 if insysmsg "cannot drop anything"
@@ -507,7 +537,6 @@ while not dead
                 endif
 
                 wait wait__gold_drop
-
                 if config__chatty = 1
                     overhead "[ gold, dropped ]" 290
                 endif
@@ -525,6 +554,7 @@ while not dead
         if config__warmode_is_manual = 0 or not warmode
             if not hidden and not queued and not casting and not targetexists
                 settimer "timer__food" 0
+
                 if findtype tray backpack as alias__food
                     dclick alias__food
                     wait wait__short
@@ -539,7 +569,6 @@ while not dead
     if timer "timer__scavenger_clear" >= interval__scavenger_clear
         settimer "timer__scavenger_clear" 0
         hotkey "Clear Scavenger Cache"
-
         if config__sysmsg = 1
             sysmsg "Scavenger cache cleared." 88
         endif

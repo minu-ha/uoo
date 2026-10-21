@@ -57,9 +57,11 @@
                             if not casting
                                 break
                             endif
+
                             if insysmsg "Your concentration is disturbed, thus ruining thy spell."
                                 break
                             endif
+
                             wait wait__poll
                         endfor
                     endif

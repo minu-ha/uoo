@@ -65,6 +65,7 @@ timer__ability interval__ability
         elseif config__ability_main = 3
             say "[WeaponAbility3"
         endif
+
         settimer "timer__ability" 0
         if config__sysmsg = 1
             sysmsg "Weapon ability request: codex {{config__ability_codex}}, slot {{config__ability_main}}. Fires on the next hit." 88
