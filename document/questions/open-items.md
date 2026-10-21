@@ -1209,20 +1209,23 @@ Outlands 포크의 해당 핫키와 커서 간섭은 아래 검증 필요.
 
 ## <a id="18"></a>18 tamer-archer-enhanced 인게임 확인
 
-2026-10-21 추가. bard-archer-enhanced의 아처리 쪽에 tamer-mage-enhanced의 수의사 키트를 더한 루프. 정본은 레시피 [recipe/tamer-archer-enhanced-recipe.razor](https://github.com/minu-ha/uoo/blob/master/recipe/tamer-archer-enhanced-recipe.razor).
+2026-10-21 추가. 정본은 레시피 [recipe/tamer-archer-enhanced-recipe.razor](https://github.com/minu-ha/uoo/blob/master/recipe/tamer-archer-enhanced-recipe.razor).
 summoner 프로필 기준: `Z` All Kill 커서 → `V` 가장 가까운 몹(펫 공격과 라타), `Shift+V` 내 사격.
 
 #### 템플릿과 설계
 
+- 템플릿: Animal Lore, Animal Taming 120. Veterinary, Resisting Spells, Magery, Archery, Tactics, Herding 80. 사용자 화면 2026-10-21.
+  Healing 없음 → 붕대 블록 없음, 수의사 키트가 셀프 붕대([12절](#12)). 사용자 확인 2026-10-21
 - 바드 블록 없음. 펫 명령과 대상 지정은 수동, 루프는 펫을 명령하지 않음
-- 블록 순서: base, `tamer/herding`(크룩 활성, 시작 때 한 번), `bard/provo-picks`(마릿수 판정용 선택 등록), 회복(cure, heal), `tamer/vet-kit`, `fight/rearm`(활 5042), `fight/target`, `magery/reagents`,
-  5초마다 refresh, food, potions, gold-drop, `fight/archery-codex`, 교전 중 `fight/weapon-ability`, `buff/spells`
-- 뺀 것: `escape/tracking`(사용자 요청 2026-10-21), `recovery/bandage`(키트가 셀프 붕대, tamer-mage와 같음), `buff/mushroom`, `magery/flamestrike`, Bless
+- 코덱스 자세와 피니셔는 수동. `[CodexHotbar`를 시작 때 한 번 띄움([Commands](https://wiki.uooutlands.com/Commands) "Launches the Codex Hotbar").
+  자동으로 바꾸려면 레시피에 `fight/archery-codex`와 그 마릿수 입력 `bard/provo-picks`를 넣음. 블록 켜고 끄기는 설정이 아니라 레시피([Modules](../scripting/modules.md#07.B) 07.B절)
+- 블록 순서: base, `tamer/herding`(크룩 활성, 시작 때 한 번), 회복(cure, heal 45), `tamer/vet-kit`, `fight/rearm`(활 5042), `fight/target`(18, 10, 500), `magery/reagents`,
+  5초마다 refresh 60, food, potions, gold-drop, 교전 중 `fight/weapon-ability`, `buff/spells`
+- 뺀 것: `escape/tracking`, `recovery/bandage`, `bard/provo-picks`, `fight/archery-codex`, `buff/mushroom`, `magery/flamestrike`, Bless, Arch Protection. 사용자 요청 2026-10-21
 - Full Draw: 활은 2.21초에 한 발([PvP](../game/pvp.md#09.B) 09.B절 표) → 15초에 6.8발 × 50% = 약 340%. Repeater 225%보다 큼. 정지 3초 조건이라 움직이며 쏘면 Repeater(`ability_main` 3)
 - 사거리 10: 활([Bard Archer](../templates/bard-archer.md#02.A) 02.A절). `target_range`와 `ability_range` 모두 10
-- Arch Protection: 교전 밖에서 나와 펫의 AR. 마나 예비는 tamer-mage와 같은 11(Greater Heal)
-- `[CodexHotbar`를 시작 때 한 번([Commands](https://wiki.uooutlands.com/Commands) "Launches the Codex Hotbar")
-- 스탯 포션 기준선 STR 120, DEX 100은 기본값. 이 템플릿의 스탯은 미기록 → 다르면 레시피에서 변경. Magery가 없는 템플릿이면 `use_magery` 0
+- 버프는 bard-archer와 같은 RA 24, Reflect 34, Protection 26. Greater Heal 11과 Teleport 9의 20을 남김
+- 스탯 포션 기준선 STR 120, DEX 100은 기본값. 이 템플릿의 스탯은 미기록 → 다르면 레시피에서 변경
 - 같은 활을 주워 여럿이 되어도 들고 있던 serial을 기억해 그것만 다시 듦. 아무것도 기억 못 하는 새 클라이언트에서만 graphic 5042로 검색, 그때는 첫 번째 활
 
 #### 인게임 확인
@@ -1230,7 +1233,6 @@ summoner 프로필 기준: `Z` All Kill 커서 → `V` 가장 가까운 몹(펫 
 - F1 → `[ crook, out ]` 없이 `[ tamer archer, on ]`, 코덱스 핫바가 뜨는지. 이미 떠 있을 때 다시 Play하면 닫히는지
 - 수의사 키트: [12절](#12)의 항목 그대로
 - 시전 뒤 활 재장착: [16절](#16) 재장착 항목. Journal `Rearm: two-handed layer remembered`, 시전 뒤 `Rearm: equip requested on the two-handed layer`
-- 자세와 피니셔 전환: [16절](#16) 코덱스 항목. 후보 등록은 `V`나 `Shift+Space`, 절차는 [17절](#17)
 - `[ full draw ]` 60초마다. 정지 3초 뒤 발사되는지, 움직이면 안 나가는지. 손해면 `ability_main` 3
-- Arch Protection: 교전이 끝나면 `Buff: Arch Protection.`, 펫에도 `Protection` 아이콘
+- `Buff: Protection.` 뒤 아이콘, 2분 뒤 다시([16절](#16) Protection 항목)
 - 프로필 연결은 아직 없음. 쓸 캐릭터의 summoner 프로필 F1을 `Play Script: combat\tamer-archer-enhanced`로, 게임 종료 뒤 xml 확인

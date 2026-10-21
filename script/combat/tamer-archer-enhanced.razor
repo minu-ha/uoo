@@ -1,21 +1,21 @@
 # Tamer Archer Enhanced: veterinary supplies for you and the pets, sustain, self buffs and
-# the archery codex, around shots you fire by hand.
+# Full Draw, around shots you fire by hand.
 # Design and in-game checks: document/questions/open-items.md part 18.
+# Template: Animal Lore and Animal Taming 120, Veterinary, Resisting Spells, Magery,
+# Archery, Tactics and Herding 80 (user screen, 2026-10-21).
 # Needs: veterinary supplies (25750), a shepherd's crook for Herding, a bow and a codex of
 # archery in the backpack, potions and reagents.
 # Pets and targeting stay manual: Z then V sends the pets, Shift+V (Attack Last Target)
 # fires the bow. The script never commands a pet and never attacks.
-# Pack picks: V, or Shift+Space (Set Last Target, Beneficial), then [ provo, set ]. Two or
-# more picked enemies in reach switch the codex to Incendiary and Ricochet.
+# The codex is yours too: its hotbar is opened once at Play ([CodexHotbar), the stance
+# and the finisher are switched by hand.
 # A cast clears your hands: the bow goes back on as soon as the hand is empty.
-# The codex hotbar is opened once at Play ([CodexHotbar).
 # cooldowns.xml carries every bar this loop reads: heal pot, reflect and walk. A missing
 # bar reads 0.
 # A fight is a picked enemy inside target_range. In a fight: Full Draw once the meter is
-# full. Between fights: Arch Protection on you and the pets. Always: the archery stance
-# and finisher, Reactive Armor and Magic Reflection.
+# full. Always: Reactive Armor, Magic Reflection and Protection.
 # Warmode is the player's manual window: the self buffs and the food stand down. Cures,
-# heals, the vet kit, potions, the codex, the ability and the re-arm keep running.
+# heals, the vet kit, potions, the ability and the re-arm keep running.
 # Hotkeys: Drink Cure, > Smart Heal/Cure Self, Drink Heal, > Greater Heal/Cure Self,
 #          Cancel Current Target, Drink Refresh, Drink Strength, Drink Agility, Drink Magic Resist,
 #          > Interrupt, Target Self.
@@ -101,17 +101,6 @@
 
 
 # ----------------------------------------------------------------------------------------
-# module/fight/archery-codex.razor
-# ----------------------------------------------------------------------------------------
-@setvar! config__archery_stance_main 1
-@setvar! config__archery_stance_pack 3
-@setvar! config__fowling_enter_diff 45
-@setvar! config__fowling_leave_diff 30
-@setvar! config__archery_finisher_main 2
-@setvar! config__archery_finisher_pack 1
-
-
-# ----------------------------------------------------------------------------------------
 # module/fight/weapon-ability.razor
 # ----------------------------------------------------------------------------------------
 @setvar! config__ability_codex 2
@@ -124,14 +113,14 @@
 # ----------------------------------------------------------------------------------------
 @setvar! config__use_reactive_armor 1
 @setvar! config__use_magic_reflect 1
-@setvar! config__mana_reactive_armor 15
-@setvar! config__mana_magic_reflect 25
-@setvar! config__use_protection 0
-@setvar! config__mana_protection 6
+@setvar! config__mana_reactive_armor 24
+@setvar! config__mana_magic_reflect 34
+@setvar! config__use_protection 1
+@setvar! config__mana_protection 26
 @setvar! config__use_bless 0
-@setvar! config__use_arch_protection 1
+@setvar! config__use_arch_protection 0
 @setvar! config__mana_bless 9
-@setvar! config__mana_arch_protection 22
+@setvar! config__mana_arch_protection 11
 @setvar! config__use_spell_siphon 0
 @setvar! config__mana_spell_siphon 4
 @setvar! config__buff_max_loss 35
@@ -193,15 +182,6 @@
 # module/pack/gold-drop.razor
 # ----------------------------------------------------------------------------------------
 @setvar! wait__gold_drop 1000
-
-
-# ----------------------------------------------------------------------------------------
-# module/fight/archery-codex.razor
-# ----------------------------------------------------------------------------------------
-@setvar! interval__archery_check 2000
-@setvar! interval__archery_retry 3000
-@setvar! interval__archery_resync 30000
-@setvar! interval__archery_pack_hold 6000
 
 
 # ----------------------------------------------------------------------------------------
@@ -283,30 +263,6 @@ settimer "timer__agi_potion" interval__stat_potion
 
 
 # ----------------------------------------------------------------------------------------
-# module/fight/archery-codex.razor
-# ----------------------------------------------------------------------------------------
-if not timerexists "timer__archery_check"
-    createtimer "timer__archery_check"
-endif
-settimer "timer__archery_check" interval__archery_check
-
-if not timerexists "timer__archery_retry"
-    createtimer "timer__archery_retry"
-endif
-settimer "timer__archery_retry" interval__archery_retry
-
-if not timerexists "timer__archery_resync"
-    createtimer "timer__archery_resync"
-endif
-settimer "timer__archery_resync" 0
-
-if not timerexists "timer__archery_pack"
-    createtimer "timer__archery_pack"
-endif
-settimer "timer__archery_pack" 0
-
-
-# ----------------------------------------------------------------------------------------
 # module/fight/weapon-ability.razor
 # ----------------------------------------------------------------------------------------
 if not timerexists "timer__ability"
@@ -335,16 +291,6 @@ settimer "timer__housekeeping" interval__housekeeping
 @setvar! var__hold_casts 0
 @setvar! var__hold_gathering 0
 @setvar! var__hold_symbols 0
-
-
-# ----------------------------------------------------------------------------------------
-# module/bard/provo-picks.razor
-# ----------------------------------------------------------------------------------------
-if not varexist var__provo_last_pick
-    @setvar! var__provo_last_pick lastbeneficial
-endif
-@setvar! var__provo_pick 0
-@setvar! var__provo_added 0
 
 
 # ----------------------------------------------------------------------------------------
@@ -418,20 +364,6 @@ endif
 
 
 # ----------------------------------------------------------------------------------------
-# module/fight/archery-codex.razor
-# ----------------------------------------------------------------------------------------
-@setvar! var__archery_want config__archery_stance_main
-@setvar! var__archery_active 0
-@setvar! var__archery_finisher_want 0
-@setvar! var__archery_finisher_active 0
-@setvar! var__archery_disabled 0
-@setvar! var__archery_finisher_off 0
-@setvar! var__archery_hurt 0
-@setvar! var__archery_pack 0
-@setvar! var__archery_read 0
-
-
-# ----------------------------------------------------------------------------------------
 # module/base.razor
 # ----------------------------------------------------------------------------------------
 if pvp
@@ -455,94 +387,6 @@ if findtype "shepherd's crook" backpack as alias__crook
     wait wait__short
 else
     overhead "[ crook, out ]" 254
-endif
-
-
-# ----------------------------------------------------------------------------------------
-# module/bard/provo-picks.razor
-# ----------------------------------------------------------------------------------------
-if not listexists 'list__provo_candidates'
-    createlist 'list__provo_candidates'
-endif
-
-
-# ----------------------------------------------------------------------------------------
-# module/fight/rearm.razor
-# ----------------------------------------------------------------------------------------
-removelist 'list__rearm_two_handed'
-createlist 'list__rearm_two_handed'
-
-pushlist 'list__rearm_two_handed' 5042
-pushlist 'list__rearm_two_handed' 30994
-pushlist 'list__rearm_two_handed' 30995
-pushlist 'list__rearm_two_handed' 30990
-pushlist 'list__rearm_two_handed' 5117
-pushlist 'list__rearm_two_handed' 31186
-
-pushlist 'list__rearm_two_handed' 5123
-pushlist 'list__rearm_two_handed' 3719
-pushlist 'list__rearm_two_handed' 3938
-pushlist 'list__rearm_two_handed' 30992
-
-pushlist 'list__rearm_two_handed' 5112
-pushlist 'list__rearm_two_handed' 3568
-pushlist 'list__rearm_two_handed' 3721
-pushlist 'list__rearm_two_handed' 3713
-pushlist 'list__rearm_two_handed' 3717
-pushlist 'list__rearm_two_handed' 3718
-pushlist 'list__rearm_two_handed' 5177
-pushlist 'list__rearm_two_handed' 31001
-pushlist 'list__rearm_two_handed' 31180
-pushlist 'list__rearm_two_handed' 31182
-pushlist 'list__rearm_two_handed' 31178
-
-pushlist 'list__rearm_two_handed' 3913
-pushlist 'list__rearm_two_handed' 3911
-pushlist 'list__rearm_two_handed' 3915
-pushlist 'list__rearm_two_handed' 5115
-pushlist 'list__rearm_two_handed' 3909
-pushlist 'list__rearm_two_handed' 5187
-pushlist 'list__rearm_two_handed' 3907
-pushlist 'list__rearm_two_handed' 3908
-pushlist 'list__rearm_two_handed' 5182
-pushlist 'list__rearm_two_handed' 3917
-pushlist 'list__rearm_two_handed' 30988
-pushlist 'list__rearm_two_handed' 31190
-
-pushlist 'list__rearm_two_handed' 31017
-pushlist 'list__rearm_two_handed' 31019
-pushlist 'list__rearm_two_handed' 31021
-pushlist 'list__rearm_two_handed' 31023
-pushlist 'list__rearm_two_handed' 31025
-pushlist 'list__rearm_two_handed' 31027
-pushlist 'list__rearm_two_handed' 31029
-pushlist 'list__rearm_two_handed' 31031
-pushlist 'list__rearm_two_handed' 31033
-pushlist 'list__rearm_two_handed' 31035
-pushlist 'list__rearm_two_handed' 31037
-pushlist 'list__rearm_two_handed' 31038
-pushlist 'list__rearm_two_handed' 31041
-pushlist 'list__rearm_two_handed' 31043
-pushlist 'list__rearm_two_handed' 31045
-pushlist 'list__rearm_two_handed' 31047
-pushlist 'list__rearm_two_handed' 31049
-pushlist 'list__rearm_two_handed' 31051
-pushlist 'list__rearm_two_handed' 31053
-pushlist 'list__rearm_two_handed' 31055
-
-pushlist 'list__rearm_two_handed' 31169
-pushlist 'list__rearm_two_handed' 31172
-
-
-# ----------------------------------------------------------------------------------------
-# module/fight/archery-codex.razor
-# ----------------------------------------------------------------------------------------
-if not listexists 'list__archery_picked'
-    createlist 'list__archery_picked'
-endif
-
-if not listexists 'list__archery_near'
-    createlist 'list__archery_near'
 endif
 
 
@@ -580,31 +424,6 @@ while not dead
         while queued or casting
             wait wait__short
         endwhile
-    endif
-
-    # ------------------------------------------------------------------------------------
-    # PROVO PICKS                                            module/bard/provo-picks.razor
-    # ------------------------------------------------------------------------------------
-    @setvar! var__provo_added 0
-    @setvar! var__provo_pick lastbeneficial
-
-    if var__provo_pick != var__provo_last_pick
-        @setvar! var__provo_last_pick var__provo_pick
-
-        if var__provo_pick != 0 and 0x40000000 > var__provo_pick and not inlist 'list__provo_candidates' var__provo_pick
-            if find var__provo_pick ground -1 -1 config__acquire_range as alias__provo_pick
-                if not dead alias__provo_pick
-                    if noto alias__provo_pick = "hostile" or noto alias__provo_pick = "criminal" or noto alias__provo_pick = "enemy" or noto alias__provo_pick = "murderer"
-                        pushlist 'list__provo_candidates' var__provo_pick
-                        @setvar! var__provo_added 1
-
-                        if config__chatty = 1
-                            overhead "[ provo, set ]" 1288 var__provo_pick
-                        endif
-                    endif
-                endif
-            endif
-        endif
     endif
 
     if paralyzed or poisoned or diffhits > 0
@@ -812,15 +631,7 @@ while not dead
             if var__rearm_sent = 0 and config__rearm_graphic != 0 and var__rearm_left = 0 and var__rearm_right = 0 and lhandempty and rhandempty
                 if findtype config__rearm_graphic backpack as alias__rearm_found
                     lift alias__rearm_found
-
-                    if inlist 'list__rearm_two_handed' config__rearm_graphic
-                        @setvar! var__rearm_left alias__rearm_found
-                        drop self lefthand
-                    else
-                        @setvar! var__rearm_right alias__rearm_found
-                        drop self righthand
-                    endif
-
+                    drop self lefthand
                     if config__sysmsg = 1
                         sysmsg "Rearm: graphic {{config__rearm_graphic}} picked from the backpack, serial={{alias__rearm_found}}. The next check reads the hands." 88
                     endif
@@ -1121,174 +932,6 @@ while not dead
                     overhead "[ weight, over ]" 254
                     settimer "timer__message" 0
                 endif
-            endif
-        endif
-    endif
-
-    # ------------------------------------------------------------------------------------
-    # ARCHERY CODEX                                       module/fight/archery-codex.razor
-    # ------------------------------------------------------------------------------------
-    if timer "timer__archery_check" >= interval__archery_check
-        settimer "timer__archery_check" 0
-        clearlist 'list__archery_picked'
-
-        if var__combat_target != 0
-            pushlist 'list__archery_picked' var__combat_target
-        endif
-
-        foreach archery_mob in list__provo_candidates
-            if not inlist 'list__archery_picked' archery_mob
-                pushlist 'list__archery_picked' archery_mob
-            endif
-        endfor
-
-        if timer "timer__archery_resync" >= interval__archery_resync
-            @setvar! var__archery_active 0
-            @setvar! var__archery_finisher_active 0
-            settimer "timer__archery_resync" 0
-        endif
-
-        clearlist 'list__archery_near'
-
-        if var__fighting = 1 and list 'list__archery_picked' >= 2
-            foreach archery_mob in list__archery_picked
-                if find archery_mob ground -1 -1 config__acquire_range as alias__archery_mob
-                    if not dead alias__archery_mob
-                        if find archery_mob ground -1 -1 config__target_range
-                            pushlist 'list__archery_near' archery_mob
-                        endif
-                    endif
-                endif
-            endfor
-        endif
-
-        if list 'list__archery_near' >= 2
-            @setvar! var__archery_pack 1
-            settimer "timer__archery_pack" 0
-        elseif timer "timer__archery_pack" >= interval__archery_pack_hold
-            @setvar! var__archery_pack 0
-        endif
-
-        if diffhits > config__fowling_enter_diff
-            @setvar! var__archery_hurt 1
-        elseif diffhits < config__fowling_leave_diff
-            @setvar! var__archery_hurt 0
-        endif
-
-        if var__archery_hurt = 1
-            @setvar! var__archery_want 2
-        elseif var__archery_pack = 1 and config__archery_stance_pack != 0
-            @setvar! var__archery_want config__archery_stance_pack
-        else
-            @setvar! var__archery_want config__archery_stance_main
-        endif
-
-        if var__archery_pack = 1 and config__archery_finisher_pack != 0
-            @setvar! var__archery_finisher_want config__archery_finisher_pack
-        else
-            @setvar! var__archery_finisher_want config__archery_finisher_main
-        endif
-
-        @setvar! var__archery_read 0
-
-        if var__archery_disabled = 0 and var__archery_want != var__archery_active
-            @setvar! var__archery_read 1
-        elseif var__archery_finisher_off = 0 and var__archery_finisher_want != 0 and var__archery_finisher_want != var__archery_finisher_active
-            @setvar! var__archery_read 1
-        endif
-
-        if var__archery_read = 1 and timer "timer__archery_retry" >= interval__archery_retry
-            settimer "timer__archery_retry" 0
-
-            if findtype 11886 backpack as alias__archery_codex
-                getlabel alias__archery_codex label__archery_codex
-
-                if var__archery_disabled = 0
-                    if "Arcane" in label__archery_codex and "Fowling" in label__archery_codex
-                        @setvar! var__archery_disabled 1
-                    elseif "Arcane" in label__archery_codex
-                        @setvar! var__archery_active 1
-                    elseif "Fowling" in label__archery_codex
-                        @setvar! var__archery_active 2
-                    elseif "Incendiary" in label__archery_codex
-                        @setvar! var__archery_active 3
-                    elseif "Longshot" in label__archery_codex
-                        @setvar! var__archery_active 4
-                    elseif "Maiming" in label__archery_codex
-                        @setvar! var__archery_active 5
-                    else
-                        @setvar! var__archery_disabled 1
-                    endif
-
-                    if var__archery_disabled = 1
-                        overhead "[ archery stance, off ]" 254
-                        if config__sysmsg = 1
-                            sysmsg "Archery codex label names no single stance, the stance stands down: {{label__archery_codex}}" 88
-                        endif
-                    endif
-                endif
-
-                if var__archery_finisher_off = 0 and var__archery_finisher_want != 0
-                    if "Ricochet" in label__archery_codex and "Pincushion" in label__archery_codex
-                        @setvar! var__archery_finisher_off 1
-                    elseif "Ricochet" in label__archery_codex
-                        @setvar! var__archery_finisher_active 1
-                    elseif "Pincushion" in label__archery_codex
-                        @setvar! var__archery_finisher_active 2
-                    else
-                        @setvar! var__archery_finisher_off 1
-                    endif
-
-                    if var__archery_finisher_off = 1
-                        overhead "[ archery finisher, off ]" 254
-                        if config__sysmsg = 1
-                            sysmsg "Archery codex label names no single finisher, the finisher stands down: {{label__archery_codex}}" 88
-                        endif
-                    elseif var__archery_finisher_want != var__archery_finisher_active
-                        if var__archery_finisher_want = 1
-                            say "[ArcheryFinisher1"
-                        elseif var__archery_finisher_want = 2
-                            say "[ArcheryFinisher2"
-                        endif
-
-                        @setvar! var__archery_finisher_active var__archery_finisher_want
-                        if config__sysmsg = 1
-                            sysmsg "Archery finisher switch: slot {{var__archery_finisher_want}}." 88
-                        endif
-                        if config__chatty = 1
-                            if var__archery_finisher_want = 1
-                                overhead "[ archery, ricochet ]" 290
-                            elseif var__archery_finisher_want = 2
-                                overhead "[ archery, pincushion ]" 290
-                            endif
-                        endif
-                        wait wait__short
-                    endif
-                endif
-
-                if var__archery_disabled = 0 and var__archery_want != var__archery_active
-                    if config__sysmsg = 1
-                        sysmsg "Archery stance switch: slot {{var__archery_active}} to {{var__archery_want}}." 88
-                    endif
-
-                    if var__archery_want = 1
-                        say "[ArcheryAmmunition1"
-                    elseif var__archery_want = 2
-                        say "[ArcheryAmmunition2"
-                    elseif var__archery_want = 3
-                        say "[ArcheryAmmunition3"
-                    elseif var__archery_want = 4
-                        say "[ArcheryAmmunition4"
-                    elseif var__archery_want = 5
-                        say "[ArcheryAmmunition5"
-                    endif
-
-                    @setvar! var__archery_active var__archery_want
-                    settimer "timer__archery_resync" 0
-                endif
-            elseif timer "timer__message" >= interval__message
-                overhead "[ archery codex, out ]" 254
-                settimer "timer__message" 0
             endif
         endif
     endif

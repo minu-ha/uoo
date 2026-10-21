@@ -8,23 +8,23 @@
 # ========================================================================================
 
 # Tamer Archer Enhanced: veterinary supplies for you and the pets, sustain, self buffs and
-# the archery codex, around shots you fire by hand.
+# Full Draw, around shots you fire by hand.
 # Design and in-game checks: document/questions/open-items.md part 18.
+# Template: Animal Lore and Animal Taming 120, Veterinary, Resisting Spells, Magery,
+# Archery, Tactics and Herding 80 (user screen, 2026-10-21).
 # Needs: veterinary supplies (25750), a shepherd's crook for Herding, a bow and a codex of
 # archery in the backpack, potions and reagents.
 # Pets and targeting stay manual: Z then V sends the pets, Shift+V (Attack Last Target)
 # fires the bow. The script never commands a pet and never attacks.
-# Pack picks: V, or Shift+Space (Set Last Target, Beneficial), then [ provo, set ]. Two or
-# more picked enemies in reach switch the codex to Incendiary and Ricochet.
+# The codex is yours too: its hotbar is opened once at Play ([CodexHotbar), the stance
+# and the finisher are switched by hand.
 # A cast clears your hands: the bow goes back on as soon as the hand is empty.
-# The codex hotbar is opened once at Play ([CodexHotbar).
 # cooldowns.xml carries every bar this loop reads: heal pot, reflect and walk. A missing
 # bar reads 0.
 # A fight is a picked enemy inside target_range. In a fight: Full Draw once the meter is
-# full. Between fights: Arch Protection on you and the pets. Always: the archery stance
-# and finisher, Reactive Armor and Magic Reflection.
+# full. Always: Reactive Armor, Magic Reflection and Protection.
 # Warmode is the player's manual window: the self buffs and the food stand down. Cures,
-# heals, the vet kit, potions, the codex, the ability and the re-arm keep running.
+# heals, the vet kit, potions, the ability and the re-arm keep running.
 
 
 # ========================================================================================
@@ -74,13 +74,6 @@
 #   Runs once, before the loop.
 # ----------------------------------------------------------------------------------------
 
-# ----------------------------------------------------------------------------------------
-# @ use bard/provo-picks
-#
-#   Registers changed lastbeneficial enemies as Provocation candidates, before our casts.
-#   > No barding here: the registered picks only feed the archery codex's enemy count.
-# ----------------------------------------------------------------------------------------
-
 # ========================================================================================
 # @ when paralyzed or poisoned or diffhits > 0
 # ========================================================================================
@@ -111,6 +104,7 @@
 # @ use tamer/vet-kit
 #
 #   Veterinary supplies on you and the followers around you, never over a running kit.
+#   > No Healing on this template: the kit is the self bandage, as in tamer-mage.
 # ----------------------------------------------------------------------------------------
 
 # ----------------------------------------------------------------------------------------
@@ -123,9 +117,8 @@
 #   rearm_graphic (default 0)
 #      Graphic of the weapon to pick out of the backpack while both hands are empty and
 #      nothing is remembered, on a fresh client. 0 picks nothing: only an item once seen
-#      in hand goes back. The hand it goes to comes from the two-handed list in setup.
-#      5042 is the bow, 5187 the two handed axe and 31186 the Rampart Crossbow in
-#      document/game/item-list.md.
+#      in hand goes back. 5042 is the bow, 5187 the two handed axe and 31186 the Rampart
+#      Crossbow in document/game/item-list.md.
 #      > The bow, 5042 under Archery in item-list, for a fresh client with the bow packed.
 # ----------------------------------------------------------------------------------------
 @setvar! config__rearm_graphic 5042
@@ -139,13 +132,11 @@
 #      How far the enemy you pick is taken up from, and kept while it stays. The pets
 #      often open on a mob past target_range, and a song or self cast would otherwise
 #      move lastharmful off it before it comes in reach.
-#      Also read by bard/provo-picks, fight/archery-codex.
 #      > The whole screen: an enemy picked far off is kept while it walks in.
 #
 #   target_range (default 12)
 #      How far the remembered enemy may be and still count as a fight (var__fighting 1).
 #      Not above acquire_range.
-#      Also read by fight/archery-codex.
 #      > The bow reaches 10 tiles.
 #
 #   target_grace (default 1200)
@@ -199,12 +190,6 @@
 # @ end
 # ========================================================================================
 
-# ----------------------------------------------------------------------------------------
-# @ use fight/archery-codex
-#
-#   Codex of archery: Arcane, Fowling while hurt, Incendiary and Ricochet on a pack.
-# ----------------------------------------------------------------------------------------
-
 # ========================================================================================
 # @ when var__fighting = 1
 # ========================================================================================
@@ -248,22 +233,21 @@
 #
 #   mana_reactive_armor (default 4)
 #      Minimum current mana to start Reactive Armor.
-#      > Each start line is the spell cost plus 11 kept for Greater Heal, as in tamer-mage.
+#      > Keeps 20 mana for Greater Heal and Teleport, as in bard-archer.
 #
 #   mana_magic_reflect (default 14)
 #      Minimum current mana to start Magic Reflection.
-#      > Same reserve: 14 plus 11.
+#      > Same reserve: the base 14 plus 20.
 #
-#   use_arch_protection (default 0)
-#      1 keeps Bless on yourself, and Arch Protection on you and the followers around you,
-#      while no enemy is engaged (var__fighting 0) and warmode is off. Both open a cursor
-#      answered with yourself, Bless a beneficial one and Arch Protection a neutral one, so
-#      they never take a cast from a fight.
-#      > Arch Protection on you and the pets after a fight, as in tamer-mage.
+#   use_protection (default 0)
+#      1 keeps Protection on yourself, in a fight too. Warmode off, since it may open a
+#      cursor like Bless. Arch Protection shows the same Protection icon, so one of the
+#      two is enough.
+#      > AR +12 for 6 mana per 2 minutes, as in bard-archer.
 #
-#   mana_arch_protection (default 11)
-#      Minimum current mana to start Bless and Arch Protection.
-#      > Arch Protection costs 11: plus 11 for Greater Heal.
+#   mana_protection (default 6)
+#      Minimum current mana to start Protection.
+#      > Same reserve: the base 6 plus 20.
 #
 #   buff_when_poisoned (default 1)
 #      Buffs while poisoned.
@@ -271,10 +255,10 @@
 #        1  yes
 #      > The cure goes first: no buffs while poisoned.
 # ----------------------------------------------------------------------------------------
-@setvar! config__mana_reactive_armor 15
-@setvar! config__mana_magic_reflect 25
-@setvar! config__use_arch_protection 1
-@setvar! config__mana_arch_protection 22
+@setvar! config__mana_reactive_armor 24
+@setvar! config__mana_magic_reflect 34
+@setvar! config__use_protection 1
+@setvar! config__mana_protection 26
 @setvar! config__buff_when_poisoned 0
 
 
@@ -291,7 +275,7 @@ endif
 clearlist 'list__resume_script'
 pushlist 'list__resume_script' 'Play Script: combat\tamer-archer-enhanced'
 
-# The codex hotbar, so the stance and the finisher the loop switches stay in view.
+# The codex hotbar, so the stance and the finisher you switch by hand stay in view.
 say "[CodexHotbar"
 wait wait__short
 
