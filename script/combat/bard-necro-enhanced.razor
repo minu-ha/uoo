@@ -1283,6 +1283,17 @@ while not dead
         # --------------------------------------------------------------------------------
         # INSTRUMENT                                          module/bard/instrument.razor
         # --------------------------------------------------------------------------------
+        if timer "timer__instrument_check" >= interval__instrument_check
+            settimer "timer__instrument_check" 0
+            @setvar! var__instrument_ok 0
+
+            if find var__my_instrument backpack
+                @setvar! var__instrument_ok 1
+            else
+                @setvar! var__my_instrument 0
+            endif
+        endif
+
         if var__my_instrument = 0
             if not targetexists and not casting
                 if findtype 3740|3742|3762|3763|10245|20006|20008|20010|20012|20014|20016 backpack as alias__spare_instrument
@@ -1296,15 +1307,6 @@ while not dead
                     overhead "[ inst, out ]" 254
                     settimer "timer__message" 0
                 endif
-            endif
-        endif
-
-        if timer "timer__instrument_check" >= interval__instrument_check
-            settimer "timer__instrument_check" 0
-            @setvar! var__instrument_ok 0
-
-            if find var__my_instrument backpack
-                @setvar! var__instrument_ok 1
             endif
         endif
 

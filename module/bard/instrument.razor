@@ -134,10 +134,22 @@ endif
     # the player is not looking at, in the middle of a fight.
     #
     # Whether the instrument is still in the backpack is looked at every thirty seconds,
-    # not every pass. The bard blocks test not warmode, var__instrument_ok and
-    # var__my_instrument themselves. A bard block that finds the instrument gone clears
-    # var__my_instrument on the spot, which stands them down at once, clock or no clock.
+    # not every pass. Missing cached instruments are cleared before spare detection.
+    # The bard blocks test not warmode, var__instrument_ok and var__my_instrument.
+    # A bard block that finds the instrument gone clears var__my_instrument on the spot,
+    # which stands them down at once, clock or no clock.
     # ------------------------------------------------------------------------------------
+    if timer "timer__instrument_check" >= interval__instrument_check
+        settimer "timer__instrument_check" 0
+        @setvar! var__instrument_ok 0
+
+        if find var__my_instrument backpack
+            @setvar! var__instrument_ok 1
+        else
+            @setvar! var__my_instrument 0
+        endif
+    endif
+
     if var__my_instrument = 0
         if not targetexists and not casting
             if findtype 3740|3742|3762|3763|10245|20006|20008|20010|20012|20014|20016 backpack as alias__spare_instrument
@@ -151,14 +163,5 @@ endif
                 overhead "[ inst, out ]" 254
                 settimer "timer__message" 0
             endif
-        endif
-    endif
-
-    if timer "timer__instrument_check" >= interval__instrument_check
-        settimer "timer__instrument_check" 0
-        @setvar! var__instrument_ok 0
-
-        if find var__my_instrument backpack
-            @setvar! var__instrument_ok 1
         endif
     endif
