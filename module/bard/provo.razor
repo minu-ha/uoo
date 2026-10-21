@@ -45,6 +45,10 @@ timer__provo_retry interval__provo_retry
 #   var__provo_dropped
 #      Scratch: 1 when the round found an enemy dead or gone, so the pool is rebuilt.
 #
+#   var__provo_sent
+#      Scratch: 0 before delivery, 1 after the first creature, 2 after the second.
+#      The second delivery is allowed only after the first was sent.
+#
 #   var__provo_answer
 #      Scratch: what the server answered, 0 nothing known, 1 provoked, 2 failed, 3 out of
 #      reach, 4 the first one cannot be provoked, 5 the slot was not free yet.
@@ -52,6 +56,7 @@ timer__provo_retry interval__provo_retry
 @setvar! var__provo_first 0
 @setvar! var__provo_second 0
 @setvar! var__provo_dropped 0
+@setvar! var__provo_sent 0
 @setvar! var__provo_answer 0
 
 
@@ -73,27 +78,17 @@ createlist 'list__provo_never'
     # ------------------------------------------------------------------------------------
     # PROVOKE
     #
-    # Input is collected earlier by bard/provo-picks, including during manual control
-    # and cooldowns. A new registration refreshes the scan clocks. Dead, friendly and
-    # far candidates leave on the next round, with no label read for registration.
+    # New candidates refresh the scan clocks. Dead, friendly and far candidates leave
+    # the pool on a scan. The first two free labels make a pair, including the bard
+    # target. A lone candidate waits. Effect rules: Bard Necro 02.P.
     #
-    # Pairs follow registration order, including the current bard target. A, B, C, D, E
-    # gives A onto B, C onto D, and E waiting. A pacified candidate can still be provoked
-    # (Bard Necro 02.P). Peace leaves provoked creatures alone.
+    # Provo precedes Peace and Disco and uses their shared music cooldown. Each creature
+    # delivery rechecks the pair, preserves a fresh Q selection, and records its own
+    # harmful target in var__target_hold. This protects the cached bard target, not the
+    # native harmful slot. Warmode leaves manual cursors untouched.
     #
-    # Peace and Provocation share one server slot (Bard Necro part 2), so this goes
-    # before bard/peace and bard/disco in the pass and takes the slot, and Music, whenever
-    # a pair is free. Peace and Provocation both last 51 seconds here (Bard Necro 01.D),
-    # and Ensemble counts either effect alongside Discordance (Bard Necro part 2).
-    #
-    # The first enemy is targeted, then the second, and each goes into var__target_hold
-    # just before. The Provocation cursor is harmful (user check, 2026-10-20), so the
-    # second one ends up in lastharmful, and a refused first target leaves it on the
-    # first. No block takes either for a new pick. This protects the cached bard target,
-    # not the native harmful slot used by manual hotkeys.
-    # The Journal lines this reads are read off first, so a line left over from a cast
-    # cannot pass for this answer. The answers are the lines other Outlands bard scripts
-    # read, and "fail to incite anger" is the one cooldowns.xml and the profile key on.
+    # Old response lines are consumed before the request. Labels decide the next free
+    # pair. No permanent pair record, unregistered fallback, or script stop.
     # ------------------------------------------------------------------------------------
     if var__provo_added = 1
         settimer "timer__provo_seen" interval__provo_seen
@@ -114,22 +109,20 @@ createlist 'list__provo_never'
                 elseif noto alias__provo_mob = "hostile" or noto alias__provo_mob = "criminal" or noto alias__provo_mob = "enemy" or noto alias__provo_mob = "murderer"
                     pushlist 'list__provo_keep' provo_mob
 
-                    if var__provo_second = 0
-                        if not inlist 'list__provo_never' provo_mob
-                            if find provo_mob ground -1 -1 config__target_range as alias__provo_near
-                                @unsetvar! label__provo_mob
-                                @setvar! label__provo_mob 0
-                                getlabel alias__provo_near label__provo_mob
+                    if var__provo_second = 0 and not inlist 'list__provo_never' provo_mob
+                        if find provo_mob ground -1 -1 config__target_range as alias__provo_near
+                            @unsetvar! label__provo_mob
+                            @setvar! label__provo_mob 0
+                            getlabel alias__provo_near label__provo_mob
 
-                                if label__provo_mob = 0
-                                    # No label means no known free barding slot.
-                                elseif "provoked" in label__provo_mob or "barding break" in label__provo_mob
-                                    # Busy, or cannot take one now.
-                                elseif var__provo_first = 0
-                                    @setvar! var__provo_first provo_mob
-                                else
-                                    @setvar! var__provo_second provo_mob
-                                endif
+                            if label__provo_mob = 0
+                                # No label means no known free barding slot.
+                            elseif "provoked" in label__provo_mob or "barding break" in label__provo_mob
+                                # Busy, or cannot take one now.
+                            elseif var__provo_first = 0
+                                @setvar! var__provo_first provo_mob
+                            else
+                                @setvar! var__provo_second provo_mob
                             endif
                         endif
                     endif
@@ -154,7 +147,7 @@ createlist 'list__provo_never'
             settimer "timer__provo_retry" 0
         elseif not warmode and not targetexists and not casting
             if insysmsg "play successfully, provoking"
-                # Read off, with the three below, before this round's answer.
+                # Read off before this round's answer.
             endif
 
             if insysmsg "too far away"
@@ -194,62 +187,52 @@ createlist 'list__provo_never'
                 endif
             endif
 
-            # Validate both serials again after the cursor wait. A manual cursor is
-            # left untouched in warmode, even if it carries the old harmful flag.
-            if targetexists "harmful" and not warmode
-                # Preserve a completed Q selection before our own target overwrites it.
-                if find lastharmful ground -1 -1 config__acquire_range as alias__fresh_target
-                    @setvar! var__fresh_serial alias__fresh_target
+            # Revalidate after each cursor wait. Never deliver the second alone.
+            @setvar! var__provo_sent 0
 
-                    if 0x40000000 > var__fresh_serial and var__combat_target != alias__fresh_target and var__target_hold != alias__fresh_target
-                        if not dead alias__fresh_target
-                            if noto alias__fresh_target = "hostile" or noto alias__fresh_target = "criminal" or noto alias__fresh_target = "enemy" or noto alias__fresh_target = "murderer"
-                                @setvar! var__combat_target alias__fresh_target
-                                settimer "timer__target_grace" 0
+            for 2
+                if index = 0 or var__provo_sent = 1
+                    if targetexists "harmful" and not warmode
+                        # Preserve a completed Q selection before our target overwrites it.
+                        if find lastharmful ground -1 -1 config__acquire_range as alias__fresh_target
+                            @setvar! var__fresh_serial alias__fresh_target
 
-                                if config__chatty = 1
-                                    overhead "[ target, set ]" 1288 var__combat_target
-                                endif
-                            endif
-                        endif
-                    endif
-                endif
+                            if 0x40000000 > var__fresh_serial and var__combat_target != alias__fresh_target and var__target_hold != alias__fresh_target
+                                if not dead alias__fresh_target
+                                    if noto alias__fresh_target = "hostile" or noto alias__fresh_target = "criminal" or noto alias__fresh_target = "enemy" or noto alias__fresh_target = "murderer"
+                                        @setvar! var__combat_target alias__fresh_target
+                                        settimer "timer__target_grace" 0
 
-                if find var__provo_first ground -1 -1 config__target_range and find var__provo_second ground -1 -1 config__target_range
-                    if not dead var__provo_first and not dead var__provo_second
-                        @setvar! var__target_hold var__provo_first
-                        target var__provo_first
-                        waitfortarget wait__bard_target
-
-                        if targetexists "harmful" and not warmode
-                            if find lastharmful ground -1 -1 config__acquire_range as alias__fresh_target
-                                @setvar! var__fresh_serial alias__fresh_target
-
-                                if 0x40000000 > var__fresh_serial and var__combat_target != alias__fresh_target and var__target_hold != alias__fresh_target
-                                    if not dead alias__fresh_target
-                                        if noto alias__fresh_target = "hostile" or noto alias__fresh_target = "criminal" or noto alias__fresh_target = "enemy" or noto alias__fresh_target = "murderer"
-                                            @setvar! var__combat_target alias__fresh_target
-                                            settimer "timer__target_grace" 0
-
-                                            if config__chatty = 1
-                                                overhead "[ target, set ]" 1288 var__combat_target
-                                            endif
+                                        if config__chatty = 1
+                                            overhead "[ target, set ]" 1288 var__combat_target
                                         endif
                                     endif
                                 endif
                             endif
+                        endif
 
-                            if find var__provo_first ground -1 -1 config__target_range and find var__provo_second ground -1 -1 config__target_range
-                                if not dead var__provo_first and not dead var__provo_second
+                        if find var__provo_first ground -1 -1 config__target_range and find var__provo_second ground -1 -1 config__target_range
+                            if not dead var__provo_first and not dead var__provo_second
+                                if index = 0
+                                    @setvar! var__target_hold var__provo_first
+                                else
                                     @setvar! var__target_hold var__provo_second
-                                    target var__provo_second
+                                endif
+
+                                target var__target_hold
+
+                                if index = 0
+                                    @setvar! var__provo_sent 1
+                                    waitfortarget wait__bard_target
+                                else
+                                    @setvar! var__provo_sent 2
                                     wait wait__short
                                 endif
                             endif
                         endif
                     endif
                 endif
-            endif
+            endfor
 
             if targetexists "harmful" and not warmode
                 hotkey "Cancel Current Target"

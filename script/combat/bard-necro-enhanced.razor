@@ -648,6 +648,7 @@ endif
 @setvar! var__provo_first 0
 @setvar! var__provo_second 0
 @setvar! var__provo_dropped 0
+@setvar! var__provo_sent 0
 @setvar! var__provo_answer 0
 
 
@@ -882,17 +883,15 @@ while not dead
     if var__provo_pick != var__provo_last_pick
         @setvar! var__provo_last_pick var__provo_pick
 
-        if var__provo_pick != 0 and 0x40000000 > var__provo_pick
+        if var__provo_pick != 0 and 0x40000000 > var__provo_pick and not inlist 'list__provo_candidates' var__provo_pick
             if find var__provo_pick ground -1 -1 config__acquire_range as alias__provo_pick
                 if not dead alias__provo_pick
                     if noto alias__provo_pick = "hostile" or noto alias__provo_pick = "criminal" or noto alias__provo_pick = "enemy" or noto alias__provo_pick = "murderer"
-                        if not inlist 'list__provo_candidates' var__provo_pick
-                            pushlist 'list__provo_candidates' var__provo_pick
-                            @setvar! var__provo_added 1
+                        pushlist 'list__provo_candidates' var__provo_pick
+                        @setvar! var__provo_added 1
 
-                            if config__chatty = 1
-                                overhead "[ provo, set ]" 1288 var__provo_pick
-                            endif
+                        if config__chatty = 1
+                            overhead "[ provo, set ]" 1288 var__provo_pick
                         endif
                     endif
                 endif
@@ -1926,22 +1925,20 @@ while not dead
                 elseif noto alias__provo_mob = "hostile" or noto alias__provo_mob = "criminal" or noto alias__provo_mob = "enemy" or noto alias__provo_mob = "murderer"
                     pushlist 'list__provo_keep' provo_mob
 
-                    if var__provo_second = 0
-                        if not inlist 'list__provo_never' provo_mob
-                            if find provo_mob ground -1 -1 config__target_range as alias__provo_near
-                                @unsetvar! label__provo_mob
-                                @setvar! label__provo_mob 0
-                                getlabel alias__provo_near label__provo_mob
+                    if var__provo_second = 0 and not inlist 'list__provo_never' provo_mob
+                        if find provo_mob ground -1 -1 config__target_range as alias__provo_near
+                            @unsetvar! label__provo_mob
+                            @setvar! label__provo_mob 0
+                            getlabel alias__provo_near label__provo_mob
 
-                                if label__provo_mob = 0
-                                    # No label means no known free barding slot.
-                                elseif "provoked" in label__provo_mob or "barding break" in label__provo_mob
-                                    # Busy, or cannot take one now.
-                                elseif var__provo_first = 0
-                                    @setvar! var__provo_first provo_mob
-                                else
-                                    @setvar! var__provo_second provo_mob
-                                endif
+                            if label__provo_mob = 0
+                                # No label means no known free barding slot.
+                            elseif "provoked" in label__provo_mob or "barding break" in label__provo_mob
+                                # Busy, or cannot take one now.
+                            elseif var__provo_first = 0
+                                @setvar! var__provo_first provo_mob
+                            else
+                                @setvar! var__provo_second provo_mob
                             endif
                         endif
                     endif
@@ -1965,7 +1962,7 @@ while not dead
             settimer "timer__provo_retry" 0
         elseif not warmode and not targetexists and not casting
             if insysmsg "play successfully, provoking"
-                # Read off, with the three below, before this round's answer.
+                # Read off before this round's answer.
             endif
 
             if insysmsg "too far away"
@@ -2004,59 +2001,50 @@ while not dead
                 endif
             endif
 
-            if targetexists "harmful" and not warmode
-                if find lastharmful ground -1 -1 config__acquire_range as alias__fresh_target
-                    @setvar! var__fresh_serial alias__fresh_target
+            @setvar! var__provo_sent 0
 
-                    if 0x40000000 > var__fresh_serial and var__combat_target != alias__fresh_target and var__target_hold != alias__fresh_target
-                        if not dead alias__fresh_target
-                            if noto alias__fresh_target = "hostile" or noto alias__fresh_target = "criminal" or noto alias__fresh_target = "enemy" or noto alias__fresh_target = "murderer"
-                                @setvar! var__combat_target alias__fresh_target
-                                settimer "timer__target_grace" 0
+            for 2
+                if index = 0 or var__provo_sent = 1
+                    if targetexists "harmful" and not warmode
+                        if find lastharmful ground -1 -1 config__acquire_range as alias__fresh_target
+                            @setvar! var__fresh_serial alias__fresh_target
 
-                                if config__chatty = 1
-                                    overhead "[ target, set ]" 1288 var__combat_target
-                                endif
-                            endif
-                        endif
-                    endif
-                endif
+                            if 0x40000000 > var__fresh_serial and var__combat_target != alias__fresh_target and var__target_hold != alias__fresh_target
+                                if not dead alias__fresh_target
+                                    if noto alias__fresh_target = "hostile" or noto alias__fresh_target = "criminal" or noto alias__fresh_target = "enemy" or noto alias__fresh_target = "murderer"
+                                        @setvar! var__combat_target alias__fresh_target
+                                        settimer "timer__target_grace" 0
 
-                if find var__provo_first ground -1 -1 config__target_range and find var__provo_second ground -1 -1 config__target_range
-                    if not dead var__provo_first and not dead var__provo_second
-                        @setvar! var__target_hold var__provo_first
-                        target var__provo_first
-                        waitfortarget wait__bard_target
-
-                        if targetexists "harmful" and not warmode
-                            if find lastharmful ground -1 -1 config__acquire_range as alias__fresh_target
-                                @setvar! var__fresh_serial alias__fresh_target
-
-                                if 0x40000000 > var__fresh_serial and var__combat_target != alias__fresh_target and var__target_hold != alias__fresh_target
-                                    if not dead alias__fresh_target
-                                        if noto alias__fresh_target = "hostile" or noto alias__fresh_target = "criminal" or noto alias__fresh_target = "enemy" or noto alias__fresh_target = "murderer"
-                                            @setvar! var__combat_target alias__fresh_target
-                                            settimer "timer__target_grace" 0
-
-                                            if config__chatty = 1
-                                                overhead "[ target, set ]" 1288 var__combat_target
-                                            endif
+                                        if config__chatty = 1
+                                            overhead "[ target, set ]" 1288 var__combat_target
                                         endif
                                     endif
                                 endif
                             endif
+                        endif
 
-                            if find var__provo_first ground -1 -1 config__target_range and find var__provo_second ground -1 -1 config__target_range
-                                if not dead var__provo_first and not dead var__provo_second
+                        if find var__provo_first ground -1 -1 config__target_range and find var__provo_second ground -1 -1 config__target_range
+                            if not dead var__provo_first and not dead var__provo_second
+                                if index = 0
+                                    @setvar! var__target_hold var__provo_first
+                                else
                                     @setvar! var__target_hold var__provo_second
-                                    target var__provo_second
+                                endif
+
+                                target var__target_hold
+
+                                if index = 0
+                                    @setvar! var__provo_sent 1
+                                    waitfortarget wait__bard_target
+                                else
+                                    @setvar! var__provo_sent 2
                                     wait wait__short
                                 endif
                             endif
                         endif
                     endif
                 endif
-            endif
+            endfor
 
             if targetexists "harmful" and not warmode
                 hotkey "Cancel Current Target"
