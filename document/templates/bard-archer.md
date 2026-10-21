@@ -129,13 +129,13 @@ Healer's Codex 20점: Immunize 5, Triage 5, Self Treatment 5, Specialist 5.
 | 자세 | 랭크당 | 7랭크 | 판단 |
 | --- | --- | --- | --- |
 | Arcane | 정확도와 피해 3% | +21%, +21% | **기본.** 조건 없이 매 발 |
-| Fowling | 피해 2%, 쏜 뒤 5초 피해 저항 4% | +14%, 저항 +28% | **다쳤을 때.** 잃은 HP 60 초과에서 켜고 48 미만에서 끔 |
+| Fowling | 피해 2%, 쏜 뒤 5초 피해 저항 4% | +14%, 저항 +28% | **다쳤을 때.** 잃은 HP 45 초과에서 켜고 30 미만에서 끔 |
 | Incendiary | 피해의 10%를 2칸 안 무작위 적에게 | 70% | **여러 마리일 때.** 판정은 04.B절 |
 | Longshot | 사거리 (랭크 / 2) 올림, 피해 3% | +4칸, +21% | 안 씀. 8칸으로 충분 |
 | Maiming | Hinder 지속 10%, Overpowered Hinder 피해 10% | +70%, +70% | 안 씀. 아래 |
 
 - 출처: [Archery](https://wiki.uooutlands.com/Archery)의 Codex Stances
-- Fowling 선은 sword-codex의 Defensive와 같음
+- Fowling 기준: 2026-10-21 사용자 선택. 회복 뒤에도 큰 손실이 남으면 방어 전환, 충분히 회복한 뒤 해제. 인게임 효과는 확인되지 않았다
 - Incendiary: 프로보로 붙어 싸우는 짝이 대상 옆에 있으면 Arcane의 21%보다 큼. 대상 옆에 적이 없으면 손해
 
 Hinder와 Maiming.

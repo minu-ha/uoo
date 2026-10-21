@@ -955,7 +955,8 @@ loadout과 regear는 같은 `gear/aspect` 블록을 씀. 동작 설명은 각 �
 
 - 한 마리: Arcane, Pincushion. Journal에 `Archery stance switch`, `Archery finisher switch`
 - `Z`나 `Q`로 두 마리 이상을 찍어 10칸 안에 두면 2초 안에 Incendiary와 `[ archery, ricochet ]`. 하나로 줄면 6초 뒤 Arcane, Pincushion
-- 피를 60 넘게 잃으면 Fowling, 48 아래로 회복하면 원래 자세. 프로보 짝 둘 중 하나를 쏠 때 Incendiary가 짝에게 들어가는지
+- [Bard Archer](../templates/bard-archer.md#02.B) 02.B절의 Fowling 기준: 진입선 초과에서 켜고 해제선 미만에서 원래 자세. 경계값과 두 선 사이에서는 기존 상태 유지
+- 프로보 짝 둘 중 하나를 쏠 때 Incendiary가 짝에게 들어가는지
 - 손으로 자세를 바꾸면 30초 안에 루프가 다시 맞추는지
 
 #### Virtuoso
