@@ -69,7 +69,7 @@ order: 10
 | `Shift`+휠 | 아군 순환이 Shift 층 정의("밖으로 던지는 것")와 어긋남([Hotkeys](../game/hotkeys.md#02.A) 02.A절) | 의도한 예외인가 |
 | 가장 가까운 플레이어 타겟 | "서버가 막아 놨다"([Hotkeys](../game/hotkeys.md#04) 04절)에 출처 없음 | 맞다면 PvP 제약 → [Razor](../scripting/razor.md#07) 07절로 옮길까 |
 | "C and a click" | 지금은 없는 bard-necro-pvp 주석의 말. 어느 바인딩과도 불일치(summoner의 `C`는 All Guard Me) → "Q or Shift+X/C"로 수정함 | 원래 뜻이 있었나 |
-| 저장소 밖 파일 | L 이름과 `Razor_lang.enu`([Hotkeys](../game/hotkeys.md#05) 05절), Wine `user.reg` 키 이름(01절), Clumsy subcode 62(05절) 미대조 | 게임이 깔린 기계에서 대조 가능한가 |
+| 저장소 밖 파일 | Wine `user.reg` 키 이름(01절), Clumsy subcode 62(05절) 미대조. L 이름은 2026-10-21 설치된 `Razor_lang.enu`와 대조 완료([Hotkeys](../game/hotkeys.md#05) 05절) | 나머지도 게임이 깔린 기계에서 대조 가능한가 |
 
 ::part[근거]
 

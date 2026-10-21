@@ -84,7 +84,7 @@ order: 20
 | Ctrl | — | — | — | — | — | — | — |
 | Alt | — | — | — | — | — | — | — |
 
-`F` 로프: `[rope`를 말하는 매크로 → `macros.xml`에 걸음(02.C절). 여섯 캐릭터 같은 자리.
+`F` 로프: Razor `Rope`(L:2529, 05절). `macros.xml`의 `[rope` 매크로도 F에 있으나 `HotKeyStop`에 가려짐(02.C절). 여섯 캐릭터 같은 자리.
 
 ### <a id="01.E"></a>01.E 아랫줄
 
@@ -200,7 +200,8 @@ Ctrl = Cmd, Alt = Option(01절) → macOS가 먼저 가져가는 키 있음.
 
 ## <a id="05"></a>05 Razor 내장 이름과 L 번호
 
-프로필의 `L:번호` 출처: `Assistant/Language/Razor_lang.enu`. 아래는 현재 프로필에 걸린 번호.
+프로필의 `L:번호` 출처: `ClassicUO/Data/Plugins/Assistant/Language/Razor_lang.enu`. 아래는 현재 프로필에 걸린 번호.
+스킬과 주문을 뺀 번호는 2026-10-21 설치된 파일과 대조해 전부 일치.
 
 | 번호 | 이름 | 번호 | 이름 |
 | --- | --- | --- | --- |
@@ -212,7 +213,7 @@ Ctrl = Cmd, Alt = Option(01절) → macOS가 먼저 가져가는 키 있음.
 | 2013 | Target Closest Non-Friendly Monster | 2022, 2024, 2026 | All Follow Me, All Guard Me, All Kill |
 | 2083 | Next Non-Friendly Monster Target | — | — |
 | 2052, 2055 | Next Friendly Player Target, Previous Friendly Player Target | 2054, 2057 | Next Non-Friendly Player Target, Previous Non-Friendly Player Target |
-| 2101 | > Stop Current Script | 2527 | Pouch |
+| 2101 | > Stop Current Script | 2527, 2529 | Pouch, Rope |
 | 1044060 + 스킬번호 | 스킬 사용(Disco 1044075, Peace 1044069, Hiding 1044081, Provo 1044082, Meditation 1044106) | 1060522 | Vengeful Spirit. Razor Hotkeys 탭에서 건 번호. 손으로 넣은 2124는 종료 시 버려짐 |
 
 **Magery 주문** 번호는 계산.
