@@ -133,14 +133,10 @@ timer__archery_pack 0
 # ----------------------------------------------------------------------------------------
 # @ setup
 # ----------------------------------------------------------------------------------------
-# The picked enemies are kept across Plays, as bard/provo keeps its pool. Dead and far ones
-# leave on the next count in a fight.
+# Temporary lists for the deduplicated union of the bard target and Provo candidates.
+# They are rebuilt on every count, so a Q-only target does not remain after another pick.
 if not listexists 'list__archery_picked'
     createlist 'list__archery_picked'
-endif
-
-if not listexists 'list__archery_keep'
-    createlist 'list__archery_keep'
 endif
 
 if not listexists 'list__archery_near'
@@ -167,9 +163,9 @@ endif
     # against one enemy and Ricochet against a pack (Bard Archer 02.C).
     #
     # A pack is two or more picked enemies alive within config__target_range. Razor finds
-    # no enemy by itself, so every enemy you pick joins a list, the way bard/provo keeps
-    # its pool, and the list is counted every interval__archery_check while fighting with
-    # two or more on it. The count cannot see which enemy stands beside the target. A pack
+    # no enemy by itself, so the current bard target and the registered Provocation
+    # candidates are merged without duplicates and counted every interval__archery_check.
+    # The count cannot see which enemy stands beside the target. A pack
     # outlives the count by interval__archery_pack_hold, and Fowling outranks it.
     #
     # The codex label is the only source of truth, as in fight/sword-codex. Every command
@@ -178,12 +174,19 @@ endif
     # Play. The server puts a stance change over your head itself ("Fowling ammunition"),
     # so only the finisher switch shows an overhead here.
     # ------------------------------------------------------------------------------------
-    if var__combat_target != 0 and not inlist 'list__archery_picked' var__combat_target
-        pushlist 'list__archery_picked' var__combat_target
-    endif
-
     if timer "timer__archery_check" >= interval__archery_check
         settimer "timer__archery_check" 0
+        clearlist 'list__archery_picked'
+
+        if var__combat_target != 0
+            pushlist 'list__archery_picked' var__combat_target
+        endif
+
+        foreach archery_mob in list__provo_candidates
+            if not inlist 'list__archery_picked' archery_mob
+                pushlist 'list__archery_picked' archery_mob
+            endif
+        endfor
 
         if timer "timer__archery_resync" >= interval__archery_resync
             @setvar! var__archery_active 0
@@ -194,24 +197,14 @@ endif
         clearlist 'list__archery_near'
 
         if var__fighting = 1 and list 'list__archery_picked' >= 2
-            clearlist 'list__archery_keep'
-
             foreach archery_mob in list__archery_picked
                 if find archery_mob ground -1 -1 config__acquire_range as alias__archery_mob
                     if not dead alias__archery_mob
-                        pushlist 'list__archery_keep' archery_mob
-
                         if find archery_mob ground -1 -1 config__target_range
                             pushlist 'list__archery_near' archery_mob
                         endif
                     endif
                 endif
-            endfor
-
-            clearlist 'list__archery_picked'
-
-            foreach archery_mob in list__archery_keep
-                pushlist 'list__archery_picked' archery_mob
             endfor
         endif
 

@@ -12,6 +12,9 @@
 # (design in part 5, mechanics in part 2).
 # Needs: Discordance, Peacemaking and Provocation trained (the song round robin parks on a
 # missing one), an instrument in the backpack, a necromancer book, and reagents.
+# Provo candidates: closest monster or Set Last Target (Beneficial), then [ provo, set ].
+# Q changes only the bard target. Register in warmode until native cursor overlap is
+# checked in-game (document/questions/open-items.md part 17).
 # The hotbar's own Auto-Renew must be OFF for every ability this loop drives: it spends
 # the same symbols, cheapest first.
 # cooldowns.xml carries every bar this loop reads: music, song, disco, peace/provo, magic
@@ -79,6 +82,12 @@
 @setvar! config__use_bandages 0
 @setvar! config__settle_first 1
 
+# ----------------------------------------------------------------------------------------
+# @ use bard/provo-picks
+#
+#   Registers changed lastbeneficial enemies as Provocation candidates, before our casts.
+# ----------------------------------------------------------------------------------------
+
 # ========================================================================================
 # @ when paralyzed or poisoned or diffhits > 0
 # ========================================================================================
@@ -114,7 +123,7 @@
 #      How far the enemy you pick is taken up from, and kept while it stays. The pets
 #      often open on a mob past target_range, and a song or self cast would otherwise
 #      move lastharmful off it before it comes in reach.
-#      Also read by bard/provo, bard/disco, bard/peace, magery/rotation,
+#      Also read by bard/provo-picks, bard/provo, bard/disco, bard/peace, magery/rotation,
 #         necro/poison-strike, necro/vampiric-embrace.
 #      > The whole screen: the pets often open on a mob well past target_range.
 #
@@ -247,7 +256,7 @@
 # ----------------------------------------------------------------------------------------
 # @ use bard/provo
 #
-#   Provokes the enemies you picked onto each other, two at a time, while any is free.
+#   Provokes registered candidates in order, two at a time, including the bard target.
 # ----------------------------------------------------------------------------------------
 
 # ========================================================================================

@@ -73,6 +73,9 @@ order: 20
 라타 = last target. `Q`로 대상 지정 → 주문 커서가 뜨면 `E`로 라타에 시전.
 2026-10-20부터 두 프로필 모두 Harmful 쪽(`Set Last Target (Harmful)`, `Target Last Harmful`). 적대 대상 표시가 하나로 모이고, 루프도 `lastharmful`을 읽음
 
+두 바드 루프의 별도 프로보 후보 키는 [Open items](../questions/open-items.md#17) 17절.
+Alt+Q는 배치 예시, 현재 프로필에 자동으로 추가된 바인딩은 아님.
+
 ### <a id="01.D"></a>01.D 홈줄
 
 |  | A | S | D | F | G | H | J |
@@ -102,7 +105,7 @@ order: 20
 - summoner: `Z` → All Kill 커서, `V` → 그 커서를 가장 가까운 몹으로 채움. 커서가 없으면 `V`는 라타 지정만
 - summoner `Shift+Z`: 다음 몹을 라타로(Next Non-Friendly Monster Target, 2026-10-20). 커서 없이 순환 → 루프의 커서와 안 부딪힘
 - basic: `Z`로 라타 지정, `V`로 공격. PvP는 `X`나 `C`로 플레이어 지정 → `V`
-- bard: 무수정은 basic과 같음. 펫이 없어 펫 명령 없음. `Shift+Z`는 summoner처럼 다음 몹 → 프로보와 아처리 코덱스의 고른 적 목록 채우기
+- bard: 무수정은 basic과 같음. 펫이 없어 펫 명령 없음. `Shift+Z`는 summoner처럼 다음 몹으로 바딩 대상 변경. 프로보 후보 입력은 [Open items](../questions/open-items.md#17) 17절
 - 플레이어 순환: summoner `Shift+X/C`, basic과 bard 무수정 `X/C`. 키 하나에 바인딩 하나 → summoner는 무수정 `X`, `C`를 펫 명령에 씀
 - summoner Follow `X`, Guard `C`. `C`는 가장 자주 누르는 `V` 옆 → 오입력 잦음.
   Guard 오입력은 펫이 싸움 유지, Follow 오입력은 펫이 싸움 중단
@@ -170,7 +173,7 @@ Ctrl = Cmd, Alt = Option(01절) → macOS가 먼저 가져가는 키 있음.
 | 소환 | `Alt+1` → `Alt+2` → `Alt+2`, 솔플은 `Alt+1` → `Alt+3` → `Alt+2` | Vengeful Spirit 켠 뒤 듀오는 Lich 둘, 솔플은 Rag Witch와 Lich([Bard Necro](../templates/bard-necro.md#04.B) 04.B절). bard-necro-enhanced가 돌면 루프가 대신 소환([Bard Necro](../templates/bard-necro.md#04.I) 04.I절) |
 | PvE 공격 | `Z` → `V` | 가장 가까운 몹 공격. summoner는 펫이, basic과 bard는 내가(01.E절) |
 | PvE 주문 | `V`(summoner)로 라타 → `1 E` `2 E` → `4 E` `5 E` | `1`, `2`는 시그니처 칸(03절) |
-| 몹 여럿(summoner, bard) | `Tab` → `Shift+Z` 여러 번 → 칠 몹에서 멈춤 → `Tab` | 지나간 몹마다 프로보 목록에 들어감. bard-archer-enhanced는 아처리 코덱스의 고른 적 목록에도. 루프가 한 바퀴 돌 틈을 두고 누름. 워모드 중이라 사이에 주문이 안 나감 |
+| 몹 여럿(summoner, bard) | [프로보 후보 등록 절차](../questions/open-items.md#17) | 두 바드 루프의 후보 등록과 바딩 대상 선택 분리 |
 | PvP 시작 | `F4` | 전투 루프 정지, PvP 루프 시작. 펫 공격은 루프가 15초마다 `all kill`. 복귀는 `F1` |
 | PvP 타겟 | `Q`, summoner는 `Shift+X/C`, basic과 bard는 `X/C` | 라타 하나만 공격. 가장 가까운 플레이어 타겟은 서버가 막음 → 플레이어는 순환으로만 지정 |
 | PvP 주문 | 라타를 잡고 → `6 E` → `4 E` `5 E` |   |

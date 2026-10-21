@@ -1,0 +1,72 @@
+# ----------------------------------------------------------------------------------------
+# Registers changed lastbeneficial enemies as Provocation candidates, before our casts.
+# Z (Target Closest Non-Friendly Monster) moves this slot too. Q changes only the bard
+# target, while Set Last Target (Beneficial) adds a candidate without changing it.
+# Registration acknowledges storage, not a cast. Use the warmode manual window until
+# overlapping native selection cursors have been checked in-game (Open items part 17).
+# ----------------------------------------------------------------------------------------
+
+
+# ----------------------------------------------------------------------------------------
+# @ state
+#
+#   var__provo_last_pick
+#      Last observed input serial, kept across Plays. The initial slot is a baseline,
+#      not a new registration.
+#
+#   var__provo_pick
+#      Scratch copy of lastbeneficial, validated before entering the candidate list.
+#
+#   var__provo_added
+#      1 on a pass that added a new candidate, so bard/provo can refresh its scan clocks.
+# ----------------------------------------------------------------------------------------
+if not varexist var__provo_last_pick
+    @setvar! var__provo_last_pick lastbeneficial
+endif
+
+@setvar! var__provo_pick 0
+@setvar! var__provo_added 0
+
+
+# ----------------------------------------------------------------------------------------
+# @ setup
+# ----------------------------------------------------------------------------------------
+# A separate list leaves the old harmful-input pool behind on the first upgraded Play.
+# Candidates and the observed input survive recycle and other Plays in this session.
+if not listexists 'list__provo_candidates'
+    createlist 'list__provo_candidates'
+endif
+
+
+# ----------------------------------------------------------------------------------------
+# @ loop
+# ----------------------------------------------------------------------------------------
+    # ------------------------------------------------------------------------------------
+    # PROVO PICKS
+    #
+    # Read one input snapshot before recovery and automatic barding, even in warmode and
+    # during cooldowns. Only a new, live hostile mobile is stored. No label query here.
+    # ------------------------------------------------------------------------------------
+    @setvar! var__provo_added 0
+    @setvar! var__provo_pick lastbeneficial
+
+    if var__provo_pick != var__provo_last_pick
+        @setvar! var__provo_last_pick var__provo_pick
+
+        if var__provo_pick != 0 and 0x40000000 > var__provo_pick
+            if find var__provo_pick ground -1 -1 config__acquire_range as alias__provo_pick
+                if not dead alias__provo_pick
+                    if noto alias__provo_pick = "hostile" or noto alias__provo_pick = "criminal" or noto alias__provo_pick = "enemy" or noto alias__provo_pick = "murderer"
+                        if not inlist 'list__provo_candidates' var__provo_pick
+                            pushlist 'list__provo_candidates' var__provo_pick
+                            @setvar! var__provo_added 1
+
+                            if config__chatty = 1
+                                overhead "[ provo, set ]" 1288 var__provo_pick
+                            endif
+                        endif
+                    endif
+                endif
+            endif
+        endif
+    endif

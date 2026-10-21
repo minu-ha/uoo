@@ -28,8 +28,15 @@
 
 # ----------------------------------------------------------------------------------------
 # @ timer
+#
+#   timer__disco_seen
+#      Runs from the last label that showed Discordance.
+#
+#   timer__disco_target
+#      Bounds delivery of the cursor opened by this block.
 # ----------------------------------------------------------------------------------------
 timer__disco_seen 0
+timer__disco_target 0
 
 
 # ----------------------------------------------------------------------------------------
@@ -88,13 +95,22 @@ timer__disco_seen 0
 
     if var__combat_target != var__disco_seen and cooldown "disco" = 0 and cooldown "music" = 0 and skill "Discordance" > 0 and not warmode and var__instrument_ok = 1 and var__my_instrument != 0 and not targetexists and not casting
         if find var__combat_target ground -1 -1 config__target_range as alias__disco_target
+            @unsetvar! label__disco_target
+            @setvar! label__disco_target 0
             getlabel alias__disco_target label__disco_target
 
-            if "discord" in label__disco_target and var__disco_again = 0
+            if label__disco_target = 0
+                # No label, no cast decision.
+            elseif "discord" in label__disco_target and var__disco_again = 0
                 @setvar! var__disco_seen var__combat_target
                 settimer "timer__disco_seen" 0
-            else
+            elseif not warmode and not targetexists and not casting
                 @setvar! var__disco_again 0
+
+                if insysmsg "What instrument shall you play"
+                    # Read off before this request.
+                endif
+
                 useskill 'Discordance'
                 waitfortarget wait__bard_target
 
@@ -103,7 +119,7 @@ timer__disco_seen 0
                 # makes the skill open the real target cursor, so the wait is
                 # simply repeated. replay is documented as restarting the whole
                 # script from the top, which would re-run the entire setup.
-                if insysmsg "What instrument shall you play"
+                if not warmode and targetexists and insysmsg "What instrument shall you play"
                     target var__my_instrument
                     waitfortarget wait__bard_target
 
@@ -127,7 +143,9 @@ timer__disco_seen 0
                     endif
                 endif
 
-                while targetexists
+                settimer "timer__disco_target" 0
+
+                while targetexists and not warmode and timer "timer__disco_target" < wait__bard_target
                     if dead alias__disco_target or var__combat_target != alias__disco_target
                         hotkey "Cancel Current Target"
                         wait wait__short
@@ -136,6 +154,10 @@ timer__disco_seen 0
                         wait wait__short
                     endif
                 endwhile
+
+                if targetexists and not warmode
+                    hotkey "Cancel Current Target"
+                endif
 
                 wait wait__short
             endif

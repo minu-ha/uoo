@@ -20,8 +20,12 @@
 #
 #   timer__peace_seen
 #      Ready on the first pass.
+#
+#   timer__peace_target
+#      Bounds delivery of the cursor opened by this block.
 # ----------------------------------------------------------------------------------------
 timer__peace_seen interval__peace_seen
+timer__peace_target 0
 
 
 # ----------------------------------------------------------------------------------------
@@ -49,12 +53,20 @@ timer__peace_seen interval__peace_seen
     # ------------------------------------------------------------------------------------
     if timer "timer__peace_seen" >= interval__peace_seen and cooldown "peace/provo" = 0 and cooldown "music" = 0 and skill "Peacemaking" > 0 and not warmode and var__instrument_ok = 1 and var__my_instrument != 0 and not targetexists and not casting
         if find var__combat_target ground -1 -1 config__target_range as alias__peace_target
+            @unsetvar! label__peace_target
+            @setvar! label__peace_target 0
             getlabel alias__peace_target label__peace_target
 
-            if "pacified" in label__peace_target or "barding break" in label__peace_target or "provoked" in label__peace_target
+            if label__peace_target = 0
+                # No label, no cast decision.
+            elseif "pacified" in label__peace_target or "barding break" in label__peace_target or "provoked" in label__peace_target
                 settimer "timer__target_grace" 0
                 settimer "timer__peace_seen" 0
-            else
+            elseif not warmode and not targetexists and not casting
+                if insysmsg "What instrument shall you play"
+                    # Read off before this request.
+                endif
+
                 useskill 'Peacemaking'
                 waitfortarget wait__bard_target
 
@@ -63,7 +75,7 @@ timer__peace_seen interval__peace_seen
                 # makes the skill open the real target cursor, so the wait is
                 # simply repeated. replay is documented as restarting the whole
                 # script from the top, which would re-run the entire setup.
-                if insysmsg "What instrument shall you play"
+                if not warmode and targetexists and insysmsg "What instrument shall you play"
                     target var__my_instrument
                     waitfortarget wait__bard_target
 
@@ -87,7 +99,9 @@ timer__peace_seen interval__peace_seen
                     endif
                 endif
 
-                while targetexists
+                settimer "timer__peace_target" 0
+
+                while targetexists and not warmode and timer "timer__peace_target" < wait__bard_target
                     if dead alias__peace_target or var__combat_target != alias__peace_target
                         hotkey "Cancel Current Target"
                         wait wait__short
@@ -96,6 +110,10 @@ timer__peace_seen interval__peace_seen
                         wait wait__short
                     endif
                 endwhile
+
+                if targetexists and not warmode
+                    hotkey "Cancel Current Target"
+                endif
 
                 wait wait__short
             endif

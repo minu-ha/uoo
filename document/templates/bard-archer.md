@@ -227,6 +227,7 @@ Hinder와 Maiming.
 | 자리 | 블록 | 값과 출처 |
 | --- | --- | --- |
 | base | | `warmode_is_manual` 1, `recover_in_warmode` 1, `settle_first` 1(bard-necro). `heal_skill_min` 10(skinning) |
+| 패스 첫머리 | `bard/provo-picks` | 바딩 대상과 독립된 후보 입력. [Open items](../questions/open-items.md#17) 17절 |
 | 다쳤거나 독, 마비 | `recovery/cure`, `heal`, `bandage`, `light-heal` | 잃은 HP 기준 `heal_hits` 35, `emergency_hits` 45. 회복 정책은 아래 |
 | 공용 | `fight/target`, `magery/reagents` | `acquire_range` 18, `target_range` 10, `target_grace` 500(bard-necro) |
 | 5초마다 | `bard/instrument`, `recovery/refresh`, `buff/food`, `buff/potions`, `pack/gold-drop` | `refresh_stam` 60(skinning). 포션 기준선 STR 120, DEX 100은 기본값 |
@@ -237,6 +238,7 @@ Hinder와 Maiming.
 
 - 교전 = 고른 적이 10칸 안. 바딩 사거리. 사격 사거리 8칸은 손으로 맞춤
 - **바딩 우선순위: Provo, Disco, Peace.** Provo로 짝을 붙인 뒤 현재 대상에 Discordance, Peacemaking. bard-necro와 같은 순서. 코덱스 전환은 Provo와 Disco 사이
+- 프로보 후보 입력, 현재 대상이 짝에 포함된 경우와 커서의 미검증 범위는 [Open items](../questions/open-items.md#17) 17절
 - 스킬별 쿨과 공유 쿨: [Bard Necro](bard-necro.md#02.E) 02.E절
 - **평소 회복은 붕대.** 잃은 HP 35 이상이면 힐 포션, 그 패스에 포션을 안 마셨고 손실 45 이상이면 Greater Heal. 붕대 종료를 기다리지 않음
 - 일반 Heal은 붕대 대체용으로 유지. 이 템플릿의 기본 설정에서는 붕대가 없고 감는 중도 아닐 때만 사용, 붕대 중첩 시전 없음
@@ -245,7 +247,7 @@ Hinder와 Maiming.
 
 ### <a id="04.B"></a>04.B 여러 마리 판정
 
-- Razor는 적을 스스로 못 찾음(`module/bard/provo.razor` 머리 주석) → 고른 적(`Z`, `Q`)을 목록에 모음
+- 현재 바딩 대상과 등록한 프로보 후보를 중복 없이 합쳐 마릿수 판정. 입력 방법은 [Open items](../questions/open-items.md#17) 17절
 - 2초마다 목록에서 살아 있고 10칸 안인 적을 셈. **둘 이상이면 Incendiary와 Ricochet**, 아니면 Arcane과 Pincushion
 - 하나로 줄어도 6초 유지 → 짝 하나가 잠깐 멀어질 때 자세가 깜빡이지 않음
 - 대상 옆 2칸 판정은 불가. 몹끼리 거리를 재는 식이 없음. 프로보 짝은 붙어 싸우므로 짝 중 하나를 쏘면 Incendiary가 다른 쪽에 감

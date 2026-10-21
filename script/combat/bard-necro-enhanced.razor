@@ -3,6 +3,9 @@
 # (design in part 5, mechanics in part 2).
 # Needs: Discordance, Peacemaking and Provocation trained (the song round robin parks on a
 # missing one), an instrument in the backpack, a necromancer book, and reagents.
+# Provo candidates: closest monster or Set Last Target (Beneficial), then [ provo, set ].
+# Q changes only the bard target. Register in warmode until native cursor overlap is
+# checked in-game (document/questions/open-items.md part 17).
 # The hotbar's own Auto-Renew must be OFF for every ability this loop drives: it spends
 # the same symbols, cheapest first.
 # cooldowns.xml carries every bar this loop reads: music, song, disco, peace/provo, magic
@@ -425,6 +428,11 @@ if not timerexists "timer__disco_seen"
 endif
 settimer "timer__disco_seen" 0
 
+if not timerexists "timer__disco_target"
+    createtimer "timer__disco_target"
+endif
+settimer "timer__disco_target" 0
+
 
 # ----------------------------------------------------------------------------------------
 # module/bard/peace.razor
@@ -433,6 +441,11 @@ if not timerexists "timer__peace_seen"
     createtimer "timer__peace_seen"
 endif
 settimer "timer__peace_seen" interval__peace_seen
+
+if not timerexists "timer__peace_target"
+    createtimer "timer__peace_target"
+endif
+settimer "timer__peace_target" 0
 
 
 # ----------------------------------------------------------------------------------------
@@ -515,6 +528,16 @@ settimer "timer__housekeeping" interval__housekeeping
 @setvar! var__hold_casts 0
 @setvar! var__hold_gathering 0
 @setvar! var__hold_symbols 0
+
+
+# ----------------------------------------------------------------------------------------
+# module/bard/provo-picks.razor
+# ----------------------------------------------------------------------------------------
+if not varexist var__provo_last_pick
+    @setvar! var__provo_last_pick lastbeneficial
+endif
+@setvar! var__provo_pick 0
+@setvar! var__provo_added 0
 
 
 # ----------------------------------------------------------------------------------------
@@ -624,7 +647,6 @@ endif
 # ----------------------------------------------------------------------------------------
 @setvar! var__provo_first 0
 @setvar! var__provo_second 0
-@setvar! var__provo_skip 0
 @setvar! var__provo_dropped 0
 @setvar! var__provo_answer 0
 
@@ -669,6 +691,14 @@ if config__clear_at_start = 1
     clearsysmsg
     cleardragdrop
     clearignore
+endif
+
+
+# ----------------------------------------------------------------------------------------
+# module/bard/provo-picks.razor
+# ----------------------------------------------------------------------------------------
+if not listexists 'list__provo_candidates'
+    createlist 'list__provo_candidates'
 endif
 
 
@@ -790,10 +820,6 @@ endif
 # ----------------------------------------------------------------------------------------
 # module/bard/provo.razor
 # ----------------------------------------------------------------------------------------
-if not listexists 'list__provo_known'
-    createlist 'list__provo_known'
-endif
-
 if not listexists 'list__provo_keep'
     createlist 'list__provo_keep'
 endif
@@ -845,6 +871,33 @@ while not dead
         while queued or casting
             wait wait__short
         endwhile
+    endif
+
+    # ------------------------------------------------------------------------------------
+    # PROVO PICKS                                            module/bard/provo-picks.razor
+    # ------------------------------------------------------------------------------------
+    @setvar! var__provo_added 0
+    @setvar! var__provo_pick lastbeneficial
+
+    if var__provo_pick != var__provo_last_pick
+        @setvar! var__provo_last_pick var__provo_pick
+
+        if var__provo_pick != 0 and 0x40000000 > var__provo_pick
+            if find var__provo_pick ground -1 -1 config__acquire_range as alias__provo_pick
+                if not dead alias__provo_pick
+                    if noto alias__provo_pick = "hostile" or noto alias__provo_pick = "criminal" or noto alias__provo_pick = "enemy" or noto alias__provo_pick = "murderer"
+                        if not inlist 'list__provo_candidates' var__provo_pick
+                            pushlist 'list__provo_candidates' var__provo_pick
+                            @setvar! var__provo_added 1
+
+                            if config__chatty = 1
+                                overhead "[ provo, set ]" 1288 var__provo_pick
+                            endif
+                        endif
+                    endif
+                endif
+            endif
+        endif
     endif
 
     if paralyzed or poisoned or diffhits > 0
@@ -1854,32 +1907,35 @@ while not dead
     # ------------------------------------------------------------------------------------
     # PROVOKE                                                      module/bard/provo.razor
     # ------------------------------------------------------------------------------------
-    if var__combat_target != 0 and not inlist 'list__provo_known' var__combat_target
-        pushlist 'list__provo_known' var__combat_target
+    if var__provo_added = 1
         settimer "timer__provo_seen" interval__provo_seen
         settimer "timer__provo_retry" interval__provo_retry
     endif
 
-    if var__fighting = 1 and list 'list__provo_known' >= 2 and timer "timer__provo_seen" >= interval__provo_seen and timer "timer__provo_retry" >= interval__provo_retry and cooldown "peace/provo" = 0 and cooldown "music" = 0 and skill "Provocation" > 0 and not warmode and var__instrument_ok = 1 and var__my_instrument != 0 and not targetexists and not casting
+    if var__fighting = 1 and list 'list__provo_candidates' >= 2 and timer "timer__provo_seen" >= interval__provo_seen and timer "timer__provo_retry" >= interval__provo_retry and cooldown "peace/provo" = 0 and cooldown "music" = 0 and skill "Provocation" > 0 and not warmode and var__instrument_ok = 1 and var__my_instrument != 0 and not targetexists and not casting
         settimer "timer__provo_seen" 0
         @setvar! var__provo_first 0
         @setvar! var__provo_second 0
         @setvar! var__provo_dropped 0
         clearlist 'list__provo_keep'
 
-        foreach provo_mob in list__provo_known
+        foreach provo_mob in list__provo_candidates
             if find provo_mob ground -1 -1 config__acquire_range as alias__provo_mob
                 if dead alias__provo_mob
                     @setvar! var__provo_dropped 1
-                else
+                elseif noto alias__provo_mob = "hostile" or noto alias__provo_mob = "criminal" or noto alias__provo_mob = "enemy" or noto alias__provo_mob = "murderer"
                     pushlist 'list__provo_keep' provo_mob
 
-                    if var__provo_second = 0 and provo_mob != var__combat_target and provo_mob != var__provo_skip
+                    if var__provo_second = 0
                         if not inlist 'list__provo_never' provo_mob
                             if find provo_mob ground -1 -1 config__target_range as alias__provo_near
+                                @unsetvar! label__provo_mob
+                                @setvar! label__provo_mob 0
                                 getlabel alias__provo_near label__provo_mob
 
-                                if "provoked" in label__provo_mob or "barding break" in label__provo_mob
+                                if label__provo_mob = 0
+                                    # No label means no known free barding slot.
+                                elseif "provoked" in label__provo_mob or "barding break" in label__provo_mob
                                     # Busy, or cannot take one now.
                                 elseif var__provo_first = 0
                                     @setvar! var__provo_first provo_mob
@@ -1889,6 +1945,8 @@ while not dead
                             endif
                         endif
                     endif
+                else
+                    @setvar! var__provo_dropped 1
                 endif
             else
                 @setvar! var__provo_dropped 1
@@ -1896,32 +1954,16 @@ while not dead
         endfor
 
         if var__provo_dropped = 1
-            clearlist 'list__provo_known'
+            clearlist 'list__provo_candidates'
 
             foreach provo_mob in list__provo_keep
-                pushlist 'list__provo_known' provo_mob
+                pushlist 'list__provo_candidates' provo_mob
             endfor
-        endif
-
-        @setvar! var__provo_skip 0
-
-        if var__provo_first != 0 and var__provo_second = 0
-            if not inlist 'list__provo_never' var__combat_target
-                if find var__combat_target ground -1 -1 config__target_range as alias__provo_target
-                    getlabel alias__provo_target label__provo_target
-
-                    if "provoked" in label__provo_target or "barding break" in label__provo_target
-                        # Taken too. The lone one waits for the next free enemy.
-                    else
-                        @setvar! var__provo_second var__combat_target
-                    endif
-                endif
-            endif
         endif
 
         if var__provo_second = 0
             settimer "timer__provo_retry" 0
-        else
+        elseif not warmode and not targetexists and not casting
             if insysmsg "play successfully, provoking"
                 # Read off, with the three below, before this round's answer.
             endif
@@ -1938,10 +1980,22 @@ while not dead
                 # Read off.
             endif
 
+            if insysmsg "fail to incite anger"
+                # Read off.
+            endif
+
+            if insysmsg "incite that"
+                # Read off.
+            endif
+
+            if insysmsg "What instrument shall you play"
+                # Read off before this request.
+            endif
+
             useskill 'Provocation'
             waitfortarget wait__bard_target
 
-            if insysmsg "What instrument shall you play"
+            if not warmode and targetexists and insysmsg "What instrument shall you play"
                 target var__my_instrument
                 waitfortarget wait__bard_target
 
@@ -1950,19 +2004,61 @@ while not dead
                 endif
             endif
 
-            if targetexists
-                @setvar! var__target_hold var__provo_first
-                target var__provo_first
-                waitfortarget wait__bard_target
+            if targetexists "harmful" and not warmode
+                if find lastharmful ground -1 -1 config__acquire_range as alias__fresh_target
+                    @setvar! var__fresh_serial alias__fresh_target
+
+                    if 0x40000000 > var__fresh_serial and var__combat_target != alias__fresh_target and var__target_hold != alias__fresh_target
+                        if not dead alias__fresh_target
+                            if noto alias__fresh_target = "hostile" or noto alias__fresh_target = "criminal" or noto alias__fresh_target = "enemy" or noto alias__fresh_target = "murderer"
+                                @setvar! var__combat_target alias__fresh_target
+                                settimer "timer__target_grace" 0
+
+                                if config__chatty = 1
+                                    overhead "[ target, set ]" 1288 var__combat_target
+                                endif
+                            endif
+                        endif
+                    endif
+                endif
+
+                if find var__provo_first ground -1 -1 config__target_range and find var__provo_second ground -1 -1 config__target_range
+                    if not dead var__provo_first and not dead var__provo_second
+                        @setvar! var__target_hold var__provo_first
+                        target var__provo_first
+                        waitfortarget wait__bard_target
+
+                        if targetexists "harmful" and not warmode
+                            if find lastharmful ground -1 -1 config__acquire_range as alias__fresh_target
+                                @setvar! var__fresh_serial alias__fresh_target
+
+                                if 0x40000000 > var__fresh_serial and var__combat_target != alias__fresh_target and var__target_hold != alias__fresh_target
+                                    if not dead alias__fresh_target
+                                        if noto alias__fresh_target = "hostile" or noto alias__fresh_target = "criminal" or noto alias__fresh_target = "enemy" or noto alias__fresh_target = "murderer"
+                                            @setvar! var__combat_target alias__fresh_target
+                                            settimer "timer__target_grace" 0
+
+                                            if config__chatty = 1
+                                                overhead "[ target, set ]" 1288 var__combat_target
+                                            endif
+                                        endif
+                                    endif
+                                endif
+                            endif
+
+                            if find var__provo_first ground -1 -1 config__target_range and find var__provo_second ground -1 -1 config__target_range
+                                if not dead var__provo_first and not dead var__provo_second
+                                    @setvar! var__target_hold var__provo_second
+                                    target var__provo_second
+                                    wait wait__short
+                                endif
+                            endif
+                        endif
+                    endif
+                endif
             endif
 
-            if targetexists
-                @setvar! var__target_hold var__provo_second
-                target var__provo_second
-                wait wait__short
-            endif
-
-            if targetexists
+            if targetexists "harmful" and not warmode
                 hotkey "Cancel Current Target"
                 wait wait__short
             endif
@@ -1970,7 +2066,7 @@ while not dead
             @setvar! var__provo_answer 0
 
             for 5
-                if var__provo_answer = 0
+                if var__provo_answer = 0 and not warmode
                     if insysmsg "play successfully, provoking"
                         @setvar! var__provo_answer 1
                     elseif insysmsg "fail to incite anger"
@@ -1987,14 +2083,32 @@ while not dead
                 endif
             endfor
 
-            if var__provo_answer = 4
-                pushlist 'list__provo_never' var__provo_first
-                overhead "[ provo, wrong ]" 1288 var__provo_first
-            elseif var__provo_answer = 5
-                settimer "timer__provo_retry" 0
-            elseif var__provo_answer = 3 or var__provo_answer = 0
-                @setvar! var__provo_skip var__provo_first
-                settimer "timer__provo_retry" 0
+            if not warmode
+                if var__provo_answer = 4
+                    pushlist 'list__provo_never' var__provo_first
+                    overhead "[ provo, wrong ]" 1288 var__provo_first
+                elseif var__provo_answer = 5
+                    settimer "timer__provo_retry" 0
+                elseif var__provo_answer = 0 or var__provo_answer = 2 or var__provo_answer = 3
+                    clearlist 'list__provo_keep'
+
+                    foreach provo_mob in list__provo_candidates
+                        if provo_mob != var__provo_first
+                            pushlist 'list__provo_keep' provo_mob
+                        endif
+                    endfor
+
+                    clearlist 'list__provo_candidates'
+
+                    foreach provo_mob in list__provo_keep
+                        pushlist 'list__provo_candidates' provo_mob
+                    endfor
+
+                    pushlist 'list__provo_candidates' var__provo_first
+                    if var__provo_answer != 2
+                        settimer "timer__provo_retry" 0
+                    endif
+                endif
             endif
         endif
     endif
@@ -2012,17 +2126,26 @@ while not dead
 
         if var__combat_target != var__disco_seen and cooldown "disco" = 0 and cooldown "music" = 0 and skill "Discordance" > 0 and not warmode and var__instrument_ok = 1 and var__my_instrument != 0 and not targetexists and not casting
             if find var__combat_target ground -1 -1 config__target_range as alias__disco_target
+                @unsetvar! label__disco_target
+                @setvar! label__disco_target 0
                 getlabel alias__disco_target label__disco_target
 
-                if "discord" in label__disco_target and var__disco_again = 0
+                if label__disco_target = 0
+                    # No label, no cast decision.
+                elseif "discord" in label__disco_target and var__disco_again = 0
                     @setvar! var__disco_seen var__combat_target
                     settimer "timer__disco_seen" 0
-                else
+                elseif not warmode and not targetexists and not casting
                     @setvar! var__disco_again 0
+
+                    if insysmsg "What instrument shall you play"
+                        # Read off before this request.
+                    endif
+
                     useskill 'Discordance'
                     waitfortarget wait__bard_target
 
-                    if insysmsg "What instrument shall you play"
+                    if not warmode and targetexists and insysmsg "What instrument shall you play"
                         target var__my_instrument
                         waitfortarget wait__bard_target
 
@@ -2046,7 +2169,9 @@ while not dead
                         endif
                     endif
 
-                    while targetexists
+                    settimer "timer__disco_target" 0
+
+                    while targetexists and not warmode and timer "timer__disco_target" < wait__bard_target
                         if dead alias__disco_target or var__combat_target != alias__disco_target
                             hotkey "Cancel Current Target"
                             wait wait__short
@@ -2055,6 +2180,10 @@ while not dead
                             wait wait__short
                         endif
                     endwhile
+
+                    if targetexists and not warmode
+                        hotkey "Cancel Current Target"
+                    endif
 
                     wait wait__short
                 endif
@@ -2066,16 +2195,24 @@ while not dead
         # --------------------------------------------------------------------------------
         if timer "timer__peace_seen" >= interval__peace_seen and cooldown "peace/provo" = 0 and cooldown "music" = 0 and skill "Peacemaking" > 0 and not warmode and var__instrument_ok = 1 and var__my_instrument != 0 and not targetexists and not casting
             if find var__combat_target ground -1 -1 config__target_range as alias__peace_target
+                @unsetvar! label__peace_target
+                @setvar! label__peace_target 0
                 getlabel alias__peace_target label__peace_target
 
-                if "pacified" in label__peace_target or "barding break" in label__peace_target or "provoked" in label__peace_target
+                if label__peace_target = 0
+                    # No label, no cast decision.
+                elseif "pacified" in label__peace_target or "barding break" in label__peace_target or "provoked" in label__peace_target
                     settimer "timer__target_grace" 0
                     settimer "timer__peace_seen" 0
-                else
+                elseif not warmode and not targetexists and not casting
+                    if insysmsg "What instrument shall you play"
+                        # Read off before this request.
+                    endif
+
                     useskill 'Peacemaking'
                     waitfortarget wait__bard_target
 
-                    if insysmsg "What instrument shall you play"
+                    if not warmode and targetexists and insysmsg "What instrument shall you play"
                         target var__my_instrument
                         waitfortarget wait__bard_target
 
@@ -2099,7 +2236,9 @@ while not dead
                         endif
                     endif
 
-                    while targetexists
+                    settimer "timer__peace_target" 0
+
+                    while targetexists and not warmode and timer "timer__peace_target" < wait__bard_target
                         if dead alias__peace_target or var__combat_target != alias__peace_target
                             hotkey "Cancel Current Target"
                             wait wait__short
@@ -2108,6 +2247,10 @@ while not dead
                             wait wait__short
                         endif
                     endwhile
+
+                    if targetexists and not warmode
+                        hotkey "Cancel Current Target"
+                    endif
 
                     wait wait__short
                 endif

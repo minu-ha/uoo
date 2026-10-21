@@ -13,6 +13,9 @@
 # Needs: Discordance, Peacemaking and Provocation trained, an instrument and a codex of
 # archery in the backpack, bandages, potions and reagents.
 # You shoot: pick with Z or Q, then V (Attack Last Target). The loop never attacks.
+# Provo candidates: Z or Set Last Target (Beneficial), then wait for [ provo, set ].
+# Q changes only the bard target. Register in warmode until native cursor overlap is
+# checked in-game (document/questions/open-items.md part 17).
 # cooldowns.xml carries every bar this loop reads: music, disco, peace/provo, song, heal
 # pot, reflect and walk. The names are lowercase and the glossary is
 # document/scripting/overheads.md.
@@ -72,6 +75,12 @@
 @setvar! config__heal_skill_min 10
 @setvar! config__settle_first 1
 
+# ----------------------------------------------------------------------------------------
+# @ use bard/provo-picks
+#
+#   Registers changed lastbeneficial enemies as Provocation candidates, before our casts.
+# ----------------------------------------------------------------------------------------
+
 # ========================================================================================
 # @ when paralyzed or poisoned or diffhits > 0
 # ========================================================================================
@@ -119,7 +128,8 @@
 #      How far the enemy you pick is taken up from, and kept while it stays. The pets
 #      often open on a mob past target_range, and a song or self cast would otherwise
 #      move lastharmful off it before it comes in reach.
-#      Also read by bard/provo, fight/archery-codex, bard/disco, bard/peace.
+#      Also read by bard/provo-picks, bard/provo, fight/archery-codex, bard/disco,
+#         bard/peace.
 #      > The whole screen: an enemy picked far off is kept while it walks in.
 #
 #   target_range (default 12)
@@ -188,7 +198,7 @@
 # ----------------------------------------------------------------------------------------
 # @ use bard/provo
 #
-#   Provokes the enemies you picked onto each other, two at a time, while any is free.
+#   Provokes registered candidates in order, two at a time, including the bard target.
 # ----------------------------------------------------------------------------------------
 
 # ----------------------------------------------------------------------------------------
