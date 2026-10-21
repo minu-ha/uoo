@@ -90,9 +90,9 @@ Design notes and in-game checks are in [document/questions/open-items.md](../doc
 
 ## Returning to the loop
 
-`loot/recycle` runs every hotkey named in the list `list__resume_script` when it finishes, and also when it gives up
-for lack of an ID wand or a recycling tool, so its last line no longer names a loop. Its author's own previous-script list was
-renamed to this one. The farming loops fill the list at Play with their own Razor hotkey name, the one the profile
+`loot/recycle` runs every hotkey named in the list `list__resume_script` when it finishes or cannot start because a
+required container or tool is missing. An unconfirmed item move or a stuck action queue stops without resuming:
+see the [in-game checks](../document/questions/open-items.md#13). The farming loops fill the list at Play with their own Razor hotkey name, the one the profile
 stores (`Play Script: gather\skinning-enhanced`): `bard-necro-enhanced`, `bard-archer-enhanced`, `tamer-mage-enhanced`, `dexxer-basic`,
 `skinning-enhanced` and `lumberjack-enhanced`. The archived `bard-mace` and `bard-throwing` register their `Play Script: archive\…` name.
 It is a list because a variable reads a word back as 4294967295 (document/scripting/razor.md part 3).
