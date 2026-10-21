@@ -626,8 +626,8 @@ order: 10
 
 #### Two-Handed Axe 다시 들기
 
-- 왼손이 비면 저장한 도끼를 다시 듦. 저장한 것이 없으면 graphic 5187 검색. 손에 든 도끼는 라벨의 `two-handed axe`로 한 번 저장
-- item-list의 5187이 아닌 graphic의 도끼면 백팩 검색 실패 → `config__axe_graphic` 변경
+- 왼손이 비면 저장한 도끼를 다시 듦. 저장한 것이 없으면 graphic 5187 검색. 손에 든 것은 라벨 없이 serial로 한 번 저장(`fight/rearm`, 2026-10-21 `fight/axe`에서 이름 변경)
+- item-list의 5187이 아닌 graphic의 도끼면 백팩 검색 실패 → `config__rearm_graphic` 변경
 - 시전 중에는 장착 없음. 무장 해제 뒤 장착이 거절되면 2초마다 재시도, 장착 때문에 자기 주문이 끊기면 실패
 
 #### Magery 자기 회복과 버프
@@ -1062,6 +1062,14 @@ loadout과 regear는 같은 `gear/aspect` 블록을 씀. 동작 설명은 각 �
 
 - `Buff: Protection.` 뒤 아이콘 `Protection`. 커서가 뜨는지, 뜨면 자기에게 들어가는지
 - 2분 뒤 아이콘이 사라지면 다시. 마나 26 아래에서는 안 나감
+
+#### 재장착
+
+- Play 때 석궁을 든 상태면 Journal에 `Weapon remembered from the left hand`. 백팩에 있으면 `[ weapon, out ]`이 3초마다, 손으로 한 번 들면 그때부터 기억
+- RA, Reflect, Protection, Greater Heal 뒤 석궁이 백팩으로 떨어지고 2초 안에 다시 손에. Journal `Weapon equip requested`
+- 다시 든 뒤 사격이 이어지는지, `V`를 다시 눌러야 하는지
+- 재장착이 바딩 커서나 자기 주문을 끊지 않는지. 끊기면 시전 중 가드가 샌 것
+- Rampart Crossbow의 graphic(`>info`)을 [Item list](../game/item-list.md)에 추가하면 `rearm_graphic`으로 새 클라이언트에서도 백팩 검색 가능
 
 #### 마나와 바딩
 

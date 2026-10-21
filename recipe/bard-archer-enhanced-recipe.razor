@@ -16,6 +16,7 @@
 # Provo candidates: Z, or Shift+Space (Set Last Target, Beneficial), then wait for
 # [ provo, set ]. Q changes only the bard target. Register in warmode until native cursor
 # overlap is checked in-game (document/questions/open-items.md part 17).
+# A cast clears your hands: the crossbow goes back on as soon as the left hand is empty.
 # cooldowns.xml carries every bar this loop reads: music, disco, peace/provo, song, heal
 # pot, reflect and walk. The names are lowercase and the glossary is
 # document/scripting/overheads.md.
@@ -118,6 +119,14 @@
 # ========================================================================================
 # @ end
 # ========================================================================================
+
+# ----------------------------------------------------------------------------------------
+# @ use fight/rearm
+#
+#   Re-arms the remembered two-handed weapon when the left hand is empty.
+#   > Right after recovery, before the barding: the shots are the damage here. No graphic,
+#   > the crossbow in hand at Play is the one remembered.
+# ----------------------------------------------------------------------------------------
 
 # ----------------------------------------------------------------------------------------
 # @ use fight/target

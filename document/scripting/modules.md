@@ -67,7 +67,7 @@ order: 30
 | `module/bard/` | 바드 스킬 | `instrument`(악기 찾기와 점검), `disco`(대상마다 한 번, 설정에 따라 Virtuoso가 빠지면 다시), `peace`, `provo-picks`(별도 후보 입력), `provo`(등록 후보 가운데 풀린 둘씩 서로에게 프로보), `song`(이동 중 노래 셋을 차례로) |
 | `module/necro/` | 네크로 핫바와 소환수 | `symbols`(핫바 열어 두기, Unholy Symbol 수 읽기), `summon-names`(소환수 이름 바꾸기), `resummon`(Vengeful Spirit 뒤 빠진 소환수 재소환, 마나가 낮으면 Wither, 오래된 소환수 교체), `burst`(Blood Oath, Corpse Skin, Evil Omen), `poison-strike`, `vampiric-embrace` |
 | `module/tamer/` | 펫 스킬 | `herding`(목동 지팡이), `vet-kit`(나와 펫에게 수의사 키트) |
-| `module/fight/` | 무기 전투 보조 | `target`(기억한 적), `weapon-swap`(pvp 무기 슬롯), `axe`, `sword-codex`, `parry-codex`, `archery-codex`(자세와 피니셔, 고른 적 수로 전환), `weapon-ability`(Swords나 Archery 코덱스의 능력, 사거리 설정) |
+| `module/fight/` | 무기 전투 보조 | `target`(기억한 적), `weapon-swap`(pvp 무기 슬롯), `rearm`(빈 왼손에 기억한 양손 무기 다시 들기), `sword-codex`, `parry-codex`, `archery-codex`(자세와 피니셔, 고른 적 수로 전환), `weapon-ability`(Swords나 Archery 코덱스의 능력, 사거리 설정) |
 | `module/gather/` | 채집 | `lumberjacking`(Smart Harvest), `skinning`(칼질) |
 | `module/pack/` | 무게, 보급 파우치와 루팅 백 | `gold-drop`, `leather`(가죽 → 루팅 백), `lumber`(Logs → Boards → 루팅 백), `scavenger`(스캐빈저 캐시 비우기), `pouches`(보급 파우치와 루팅 백 지정), `sorting`(백팩 아래쪽 더미와 트랩 파우치, 파우치 안 정리) |
 | `module/escape/` | PK 피하기 | `tracking`(헌트 필터 설정과 Hunting 점검), `recall`(자동 리콜 한 번) |
@@ -573,7 +573,7 @@ pvp 결과물에서는 시작 4줄이 `if config__clear_at_start = 1` 안, pvp�
 
 합치지 않은 것:
 
-- `fight/axe`와 `fight/weapon-swap`: 비슷해 보이지만 앞은 2초 시계로 빈손만, 뒤는 패스마다 두 손을 읽는 PvP용 → 비용이 다름
+- `fight/rearm`과 `fight/weapon-swap`: 비슷해 보이지만 앞은 2초 시계로 빈손만, 뒤는 패스마다 두 손을 읽는 PvP용 → 비용이 다름
 - `bard/disco`와 `bard/peace`, 두 codex: 주고받는 것이 없는 독립 블록
 - `recovery/refresh`와 `buff/food`: 작지만 맡는 일이 다름
 

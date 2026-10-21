@@ -1,23 +1,33 @@
 # ----------------------------------------------------------------------------------------
-# Re-arms the cached Two-Handed Axe when the left hand is empty.
+# Re-arms the remembered two-handed weapon when the left hand is empty.
+# A cast clears the hands: the weapon lands in the backpack and the fight goes on with
+# fists until it is back (user check on the archer, 2026-10-21, and the gather loops
+# before it). This reads the left hand, where Razor shows two-handed weapons, every two
+# seconds. The weapon seen there is remembered by serial, so no graphic is needed:
+# whatever the player armed is what goes back, and a replacement is remembered the same
+# way. A word cannot live in a variable (document/scripting/razor.md part 3), so no
+# label names the weapon kind: the layer does. rearm_graphic adds a backpack search for a
+# fresh client or after a death, when nothing is remembered yet.
 # ----------------------------------------------------------------------------------------
 
 
 # ----------------------------------------------------------------------------------------
 # @ config
 #
-#   config__axe_graphic
-#      Graphic of the axe to re-arm. 5187 is the two handed axe in
-#      document/game/item-list.md.
+#   config__rearm_graphic
+#      Graphic of the weapon to pick out of the backpack when none is remembered, or the
+#      remembered one is gone. 0 picks nothing: only a weapon once seen in hand goes back.
+#      5187 is the two handed axe in document/game/item-list.md.
 # ----------------------------------------------------------------------------------------
-@setvar! config__axe_graphic 5187
+@setvar! config__rearm_graphic 0
 
 
 # ----------------------------------------------------------------------------------------
 # @ wait
 #
 #   interval__equip_retry
-#      A refused equip, after a disarm for example, waits this long before the next try.
+#      How often the hand is read. A refused equip, after a disarm for example, waits
+#      this long before the next try.
 # ----------------------------------------------------------------------------------------
 @setvar! interval__equip_retry 2000
 
@@ -32,8 +42,8 @@ timer__equip interval__equip_retry
 # @ state
 #
 #   var__my_weapon
-#      Selected axe serial, reused across Stop and Play. 0 means rediscover from the
-#      backpack.
+#      The remembered weapon serial, reused across Stop and Play. 0 means none yet:
+#      rediscover from the hand, or from the backpack by rearm_graphic.
 # ----------------------------------------------------------------------------------------
 if not varexist var__my_weapon
     @setvar! var__my_weapon 0
@@ -44,12 +54,14 @@ endif
 # @ loop
 # ----------------------------------------------------------------------------------------
     # ------------------------------------------------------------------------------------
-    # AXE
+    # REARM
     #
-    # The Two-Handed Axe takes the lefthand layer, so an empty left hand means it is gone.
-    # Arming before a cast completes interrupts the cast (wiki Combat Overview), so
-    # casting blocks this. An axe already in hand is adopted once by label, including a
-    # replacement with a new serial. Any other left hand item is left alone.
+    # Every two seconds. Arming before a cast completes interrupts the cast (wiki Combat
+    # Overview), so casting, a cursor, the item queue and hiding block this. An empty
+    # left hand gets the remembered weapon back out of the backpack. With none
+    # remembered, or the remembered one gone from the backpack, rearm_graphic names the
+    # one to pick. A weapon already in hand is remembered once by serial. The request is
+    # not proof of the equip: the next check reads the hand again.
     # ------------------------------------------------------------------------------------
     if timer "timer__equip" >= interval__equip_retry
         if lhandempty
@@ -59,8 +71,10 @@ endif
                 if not find var__my_weapon backpack
                     @setvar! var__my_weapon 0
 
-                    if findtype config__axe_graphic backpack as alias__packed_weapon
-                        @setvar! var__my_weapon alias__packed_weapon
+                    if config__rearm_graphic != 0
+                        if findtype config__rearm_graphic backpack as alias__packed_weapon
+                            @setvar! var__my_weapon alias__packed_weapon
+                        endif
                     endif
                 endif
 
@@ -70,24 +84,20 @@ endif
                     lift alias__weapon_to_equip
                     drop self lefthand
                     if config__sysmsg = 1
-                        sysmsg "Axe equip requested: serial={{alias__weapon_to_equip}}. The next check reads the hand." 88
+                        sysmsg "Weapon equip requested: serial={{alias__weapon_to_equip}}. The next check reads the hand." 88
                     endif
                     wait wait__short
                 elseif timer "timer__message" >= interval__message
-                    overhead "[ axe, out ]" 254
+                    overhead "[ weapon, out ]" 254
                     settimer "timer__message" 0
                 endif
             endif
         elseif findlayer self lefthand as alias__equipped_weapon
             if var__my_weapon != alias__equipped_weapon
                 settimer "timer__equip" 0
-                getlabel alias__equipped_weapon label__hand_weapon
-                # item-list names the type "two handed axe" and archive/hally-mage reads "two-handed axe".
-                if "two-handed axe" in label__hand_weapon or "two handed axe" in label__hand_weapon or "Two-Handed Axe" in label__hand_weapon or "Two Handed Axe" in label__hand_weapon
-                    @setvar! var__my_weapon alias__equipped_weapon
-                    if config__sysmsg = 1
-                        sysmsg "Axe adopted from the left hand: serial={{alias__equipped_weapon}}." 88
-                    endif
+                @setvar! var__my_weapon alias__equipped_weapon
+                if config__sysmsg = 1
+                    sysmsg "Weapon remembered from the left hand: serial={{alias__equipped_weapon}}." 88
                 endif
             endif
         endif

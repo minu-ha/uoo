@@ -7,6 +7,7 @@
 # Provo candidates: Z, or Shift+Space (Set Last Target, Beneficial), then wait for
 # [ provo, set ]. Q changes only the bard target. Register in warmode until native cursor
 # overlap is checked in-game (document/questions/open-items.md part 17).
+# A cast clears your hands: the crossbow goes back on as soon as the left hand is empty.
 # cooldowns.xml carries every bar this loop reads: music, disco, peace/provo, song, heal
 # pot, reflect and walk. The names are lowercase and the glossary is
 # document/scripting/overheads.md.
@@ -63,6 +64,12 @@
 @setvar! config__use_light_heal 0
 @setvar! config__light_hits 15
 @setvar! config__mana_heal 4
+
+
+# ----------------------------------------------------------------------------------------
+# module/fight/rearm.razor
+# ----------------------------------------------------------------------------------------
+@setvar! config__rearm_graphic 0
 
 
 # ----------------------------------------------------------------------------------------
@@ -173,6 +180,12 @@
 
 
 # ----------------------------------------------------------------------------------------
+# module/fight/rearm.razor
+# ----------------------------------------------------------------------------------------
+@setvar! interval__equip_retry 2000
+
+
+# ----------------------------------------------------------------------------------------
 # module/magery/reagents.razor
 # ----------------------------------------------------------------------------------------
 @setvar! interval__reagents 10000
@@ -256,6 +269,15 @@ if not timerexists "timer__message"
     createtimer "timer__message"
 endif
 settimer "timer__message" interval__message
+
+
+# ----------------------------------------------------------------------------------------
+# module/fight/rearm.razor
+# ----------------------------------------------------------------------------------------
+if not timerexists "timer__equip"
+    createtimer "timer__equip"
+endif
+settimer "timer__equip" interval__equip_retry
 
 
 # ----------------------------------------------------------------------------------------
@@ -434,6 +456,14 @@ endif
 # module/recovery/light-heal.razor
 # ----------------------------------------------------------------------------------------
 @setvar! var__light_heal_due 0
+
+
+# ----------------------------------------------------------------------------------------
+# module/fight/rearm.razor
+# ----------------------------------------------------------------------------------------
+if not varexist var__my_weapon
+    @setvar! var__my_weapon 0
+endif
 
 
 # ----------------------------------------------------------------------------------------
@@ -848,6 +878,47 @@ while not dead
                             wait wait__short
                         endif
                     endif
+                endif
+            endif
+        endif
+    endif
+
+    # ------------------------------------------------------------------------------------
+    # REARM                                                       module/fight/rearm.razor
+    # ------------------------------------------------------------------------------------
+    if timer "timer__equip" >= interval__equip_retry
+        if lhandempty
+            if not hidden and not queued and not casting and not targetexists
+                settimer "timer__equip" 0
+
+                if not find var__my_weapon backpack
+                    @setvar! var__my_weapon 0
+
+                    if config__rearm_graphic != 0
+                        if findtype config__rearm_graphic backpack as alias__packed_weapon
+                            @setvar! var__my_weapon alias__packed_weapon
+                        endif
+                    endif
+                endif
+
+                if find var__my_weapon backpack as alias__weapon_to_equip
+                    lift alias__weapon_to_equip
+                    drop self lefthand
+                    if config__sysmsg = 1
+                        sysmsg "Weapon equip requested: serial={{alias__weapon_to_equip}}. The next check reads the hand." 88
+                    endif
+                    wait wait__short
+                elseif timer "timer__message" >= interval__message
+                    overhead "[ weapon, out ]" 254
+                    settimer "timer__message" 0
+                endif
+            endif
+        elseif findlayer self lefthand as alias__equipped_weapon
+            if var__my_weapon != alias__equipped_weapon
+                settimer "timer__equip" 0
+                @setvar! var__my_weapon alias__equipped_weapon
+                if config__sysmsg = 1
+                    sysmsg "Weapon remembered from the left hand: serial={{alias__equipped_weapon}}." 88
                 endif
             endif
         endif

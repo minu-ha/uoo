@@ -97,10 +97,17 @@
 @setvar! config__refresh_stam 60
 
 # ----------------------------------------------------------------------------------------
-# @ use fight/axe
+# @ use fight/rearm
 #
-#   Re-arms the cached Two-Handed Axe when the left hand is empty.
+#   Re-arms the remembered two-handed weapon when the left hand is empty.
+#
+#   rearm_graphic (default 0)
+#      Graphic of the weapon to pick out of the backpack when none is remembered, or the
+#      remembered one is gone. 0 picks nothing: only a weapon once seen in hand goes back.
+#      5187 is the two handed axe in document/game/item-list.md.
+#      > The two handed axe, so a fresh client finds it in the backpack before any cast.
 # ----------------------------------------------------------------------------------------
+@setvar! config__rearm_graphic 5187
 
 # ----------------------------------------------------------------------------------------
 # @ use pack/gold-drop

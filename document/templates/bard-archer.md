@@ -46,6 +46,7 @@ Bard Archer 템플릿의 판단과 숫자. 바딩, 회복, 버프는 루프, 사
 - 루프가 맡는 것: 바딩, 회복, 자기 버프, 코덱스 자세와 피니셔 전환, 무기 능력 요청(04절)
 - **warmode는 Tab으로 직접.** 켜면 손으로 바딩하는 구간 → 루프의 바딩, 노래, 버프, 음식 정지(04.A절). `Z`, `V`는 warmode를 안 바꿈
 - 바딩, 시전과 사격은 서로 안 막음. 사용자 확인 2026-10-21
+- 시전하면 무기가 백팩으로 떨어짐. 사용자 확인 2026-10-21 → 빈 왼손이면 루프가 석궁을 다시 듦(04.A절)
 
 ### <a id="01.B"></a>01.B 코덱스
 
@@ -229,6 +230,7 @@ Hinder와 Maiming.
 | base | | `warmode_is_manual` 1, `recover_in_warmode` 1, `settle_first` 1(bard-necro). `heal_skill_min` 10(skinning) |
 | 패스 첫머리 | `bard/provo-picks` | `Z` 또는 `Shift+Space`로 등록하는 후보 입력, 바딩 대상과 독립. [Open items](../questions/open-items.md#17) 17절 |
 | 다쳤거나 독, 마비 | `recovery/cure`, `heal`, `bandage`, `light-heal` | 잃은 HP 기준 `heal_hits` 35, `emergency_hits` 45. 회복 정책은 아래 |
+| 회복 다음 | `fight/rearm` | 빈 왼손에 기억한 석궁. graphic 없이 손에 든 것을 serial로 기억, 2초마다 확인. skinning-enhanced와 같은 블록 |
 | 공용 | `fight/target`, `magery/reagents` | `acquire_range` 18, `target_range` 10, `target_grace` 500(bard-necro) |
 | 5초마다 | `bard/instrument`, `recovery/refresh`, `buff/food`, `buff/potions`, `pack/gold-drop` | `refresh_stam` 60(skinning). 포션 기준선 STR 120, DEX 100은 기본값 |
 | 늘 | `bard/provo`, `fight/archery-codex` | 자세와 피니셔 전환(04.B절) |
@@ -243,7 +245,7 @@ Hinder와 Maiming.
 - **평소 회복은 붕대.** 잃은 HP 35 이상이면 힐 포션, 그 패스에 포션을 안 마셨고 손실 45 이상이면 Greater Heal. 붕대 종료를 기다리지 않음
 - 일반 Heal은 붕대 대체용으로 유지. 이 템플릿의 기본 설정에서는 붕대가 없고 감는 중도 아닐 때만 사용, 붕대 중첩 시전 없음
 - `buff/spells`는 교전 중에도. 사격과 시전이 서로 안 막음(01.A절), 패스 끝에 둬서 바딩이 먼저
-- warmode(수동 구간): 바딩, 노래, 버프, 음식 정지. 회복 시전, 포션, 붕대, 코덱스 전환, 무기 능력은 계속
+- warmode(수동 구간): 바딩, 노래, 버프, 음식 정지. 회복 시전, 포션, 붕대, 코덱스 전환, 무기 능력, 재장착은 계속
 
 ### <a id="04.B"></a>04.B 여러 마리 판정
 

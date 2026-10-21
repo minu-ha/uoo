@@ -71,9 +71,9 @@
 
 
 # ----------------------------------------------------------------------------------------
-# module/fight/axe.razor
+# module/fight/rearm.razor
 # ----------------------------------------------------------------------------------------
-@setvar! config__axe_graphic 5187
+@setvar! config__rearm_graphic 5187
 
 
 # ----------------------------------------------------------------------------------------
@@ -171,7 +171,7 @@
 
 
 # ----------------------------------------------------------------------------------------
-# module/fight/axe.razor
+# module/fight/rearm.razor
 # ----------------------------------------------------------------------------------------
 @setvar! interval__equip_retry 2000
 
@@ -261,7 +261,7 @@ settimer "timer__target_grace" config__target_grace
 
 
 # ----------------------------------------------------------------------------------------
-# module/fight/axe.razor
+# module/fight/rearm.razor
 # ----------------------------------------------------------------------------------------
 if not timerexists "timer__equip"
     createtimer "timer__equip"
@@ -400,7 +400,7 @@ endif
 
 
 # ----------------------------------------------------------------------------------------
-# module/fight/axe.razor
+# module/fight/rearm.razor
 # ----------------------------------------------------------------------------------------
 if not varexist var__my_weapon
     @setvar! var__my_weapon 0
@@ -757,7 +757,7 @@ while not dead
     endif
 
     # ------------------------------------------------------------------------------------
-    # AXE                                                           module/fight/axe.razor
+    # REARM                                                       module/fight/rearm.razor
     # ------------------------------------------------------------------------------------
     if timer "timer__equip" >= interval__equip_retry
         if lhandempty
@@ -767,8 +767,10 @@ while not dead
                 if not find var__my_weapon backpack
                     @setvar! var__my_weapon 0
 
-                    if findtype config__axe_graphic backpack as alias__packed_weapon
-                        @setvar! var__my_weapon alias__packed_weapon
+                    if config__rearm_graphic != 0
+                        if findtype config__rearm_graphic backpack as alias__packed_weapon
+                            @setvar! var__my_weapon alias__packed_weapon
+                        endif
                     endif
                 endif
 
@@ -776,23 +778,20 @@ while not dead
                     lift alias__weapon_to_equip
                     drop self lefthand
                     if config__sysmsg = 1
-                        sysmsg "Axe equip requested: serial={{alias__weapon_to_equip}}. The next check reads the hand." 88
+                        sysmsg "Weapon equip requested: serial={{alias__weapon_to_equip}}. The next check reads the hand." 88
                     endif
                     wait wait__short
                 elseif timer "timer__message" >= interval__message
-                    overhead "[ axe, out ]" 254
+                    overhead "[ weapon, out ]" 254
                     settimer "timer__message" 0
                 endif
             endif
         elseif findlayer self lefthand as alias__equipped_weapon
             if var__my_weapon != alias__equipped_weapon
                 settimer "timer__equip" 0
-                getlabel alias__equipped_weapon label__hand_weapon
-                if "two-handed axe" in label__hand_weapon or "two handed axe" in label__hand_weapon or "Two-Handed Axe" in label__hand_weapon or "Two Handed Axe" in label__hand_weapon
-                    @setvar! var__my_weapon alias__equipped_weapon
-                    if config__sysmsg = 1
-                        sysmsg "Axe adopted from the left hand: serial={{alias__equipped_weapon}}." 88
-                    endif
+                @setvar! var__my_weapon alias__equipped_weapon
+                if config__sysmsg = 1
+                    sysmsg "Weapon remembered from the left hand: serial={{alias__equipped_weapon}}." 88
                 endif
             endif
         endif
