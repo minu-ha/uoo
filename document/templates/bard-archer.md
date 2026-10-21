@@ -231,12 +231,13 @@ Hinder와 Maiming.
 | 공용 | `fight/target`, `magery/reagents` | `acquire_range` 18, `target_range` 10, `target_grace` 500(bard-necro) |
 | 5초마다 | `bard/instrument`, `recovery/refresh`, `buff/food`, `buff/potions`, `pack/gold-drop` | `refresh_stam` 60(skinning). 포션 기준선 STR 120, DEX 100은 기본값 |
 | 늘 | `bard/provo`, `fight/archery-codex` | 자세와 피니셔 전환(04.B절) |
-| 교전 중 | `bard/peace`, `bard/disco`, `fight/weapon-ability` | `keep_virtuoso` 1. Archery 코덱스, Repeater, 사거리 8 |
+| 교전 중 | `bard/disco`, `bard/peace`, `fight/weapon-ability` | `keep_virtuoso` 1. Archery 코덱스, Repeater, 사거리 8 |
 | 이동 중 | `bard/song` | |
 | 늘 | `buff/spells` | RA 24, Reflect 34, Protection 26, 독이면 버프 안 함 |
 
 - 교전 = 고른 적이 10칸 안. 바딩 사거리. 사격 사거리 8칸은 손으로 맞춤
-- **Peace가 Disco보다 먼저.** 몹을 붙잡을 소환수가 없음 → Peace가 몹을 막음. 끊긴 Peace(Ensemble 40%)가 Virtuoso 갱신(20%)보다 먼저 Music을 씀
+- **바딩 우선순위: Provo, Disco, Peace.** Provo로 짝을 붙인 뒤 현재 대상에 Discordance, Peacemaking. bard-necro와 같은 순서. 코덱스 전환은 Provo와 Disco 사이
+- 스킬별 쿨과 공유 쿨: [Bard Necro](bard-necro.md#02.E) 02.E절
 - `buff/spells`는 교전 중에도. 사격과 시전이 서로 안 막음(01.A절), 패스 끝에 둬서 바딩이 먼저
 - warmode(수동 구간): 바딩, 노래, 버프, 음식 정지. 회복 시전, 포션, 붕대, 코덱스 전환, 무기 능력은 계속
 

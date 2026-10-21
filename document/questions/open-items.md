@@ -961,7 +961,8 @@ loadout과 regear는 같은 `gear/aspect` 블록을 씀. 동작 설명은 각 �
 #### Virtuoso
 
 - 한 마리를 오래 잡을 때 Virtuoso 아이콘이 빠지면 Discordance가 다시 나가는지(약 15초마다). 실패하면 5초 뒤 다시
-- 끊긴 Peace가 Virtuoso 갱신보다 먼저 나가는지
+- 새 대상에서는 Discordance 뒤 Peacemaking. 프로보할 짝이 있으면 Provocation이 먼저 나가는지
+- 끊긴 Peace와 Virtuoso 갱신이 겹치면 Discordance 먼저
 
 #### 무기 능력
 
