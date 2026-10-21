@@ -34,7 +34,7 @@ order: 10
 | [10](#10) | 공통 pvp 인게임 확인 |
 | [11](#11) | skinning-enhanced 인게임 확인 |
 | [12](#12) | tamer-mage-enhanced 인게임 확인 |
-| [13](#13) | recycle의 루프 복귀 확인 |
+| [13](#13) | recycle의 속도, 감정 실패, 루프 복귀 확인 |
 | [14](#14) | bard-necro-enhanced 인게임 확인 |
 | [15](#15) | loadout, regear, aspect 인게임 확인 |
 | [16](#16) | bard-archer-enhanced 인게임 확인 |
@@ -767,51 +767,72 @@ order: 10
 - bard-necro-enhanced처럼 시전 블록은 `walk` 바가 도는 동안 대기. 걷는 동안 회복 에이전트가 늦으면 기록. 포션은 걷는 중에도 나감
 - 2026-10-20 걷는 중 Greater Heal이 안 나감 → 긴급선 Greater Heal만 가드 없음. 달리며 피가 빠질 때 나가는지, 걸음에 끊기면 다음 패스에 다시 나가는지
 
-## <a id="13"></a>13 recycle 복귀 인게임 확인
+## <a id="13"></a>13 recycle 인게임 확인
 
-2026-10-10부터 `loot/recycle`이 끝나면 마지막으로 Play한 사냥이나 채집 루프를 다시 켬. 전에는 루프를 바꿀 때마다 마지막 줄의 `script "…"`를 수동 수정.
+`loot/recycle`: 백팩의 전리품을 단일 ID wand로 감정, 품질에 따라 보관 또는 분해, 자원 드롭 뒤 마지막 사냥이나 채집 루프로 복귀.
+2026-10-21 속도 개선과 실패 보호 추가. 새 경로의 인게임 동작은 확인되지 않았다.
 
-- recycle에 원작자의 같은 장치가 있었음. 아이템 ID를 못 해 일찍 끝날 때 이전 스크립트 리스트의 항목을 `hotkey`로 실행.
-  원작자 저장소에는 이 리스트를 읽는 스크립트만 있고 채우는 스크립트는 없음 → 사용자가 채움
-- 그 리스트 이름을 저장소 규칙대로 `list__resume_script`로, recycle 마지막 줄도 같은 모양으로 변경
-- bard-necro-enhanced, skinning-enhanced, lumberjack-enhanced, tamer-mage-enhanced, dexxer-basic이 Play할 때 자기 핫키 이름을 이 리스트에 추가.
-  archive로 옮긴 bard-mace와 bard-throwing은 `Play Script: archive\…` 이름으로 추가. pvp는 싸울 때만 켜므로 제외
-- 핫키 이름은 프로필 xml이 F1을 저장한 모양 `Play Script: gather\skinning-enhanced`를 따름.
-  스크립트 안의 `hotkey 'Play Script: <폴더>\<이름>'`이 그 스크립트를 켬(사용자 확인). 인게임 확인됨 2026-10-19
-- 변수는 단어를 `4294967295`로 읽음([Razor](../scripting/razor.md#03) 03절) → 리스트 사용
+#### 도구와 분해 모드
 
-#### 복귀
+- 단일 ID wand `20496`만 사용. Item Identification 스킬 경로와 `config__min_item_id_skill`, `wait__item_id` 제거
+- 재활용 도구: tinker tool, sewing kit 또는 saw. 도구가 없으면 경고 뒤 루프로 복귀
+- 분해 검프의 `Recycle Single Item` 문구를 확인한 뒤 개별 아이템만 타깃. 다른 모드는 `[ recycle, wrong ]`, 후속 아이템 처리 중단
 
-- skinning-enhanced를 Play한 뒤 F3 recycle → 끝나고 `Skinning enhanced v11 loaded`가 다시 떠야 함. lumberjack-enhanced를 Play한 뒤에는 그쪽으로 복귀
-- 아무것도 안 돌면 핫키 이름의 모양이 다름. Razor Hotkeys 탭의 스크립트 이름 기록
+> "Recycle single item" is the recommended option, as it is limited to recycling individual items.
 
-#### ID를 못 해서 일찍 끝날 때
+출처: [공식 Recycling](https://wiki.uooutlands.com/Recycling), 2026-10-21 확인.
+다른 분해 모드는 백팩의 유용한 장비까지 대상이 될 수 있음.
+검프의 대소문자 `Recycle Single Item` 선례는 [Bapeths Slower Item Recycler](https://outlands.uorazorscripts.com/script/752d1745-90d4-4078-a8cb-8ce2cccef3e0).
+현재 클라이언트 문구는 인게임 미확인. 단일 모드인데 `[ recycle, wrong ]`이면 검프 원문 기록.
 
-- ID 스킬이나 완드가 없어 `Jase says: Not able to ID items..`가 뜰 때도 같은 루프로 복귀
+#### 속도와 설정
 
-#### 등록 전
+| 비용 | 이전 | 변경 |
+| --- | --- | --- |
+| 감정 직후 | 고정 650ms 대기, 재검색과 재분류 | 감정된 라벨을 받으면 같은 아이템 처리에서 바로 분류 |
+| 즉시 감정 성공 시 아이템 라벨 조회 | 3회 | 2회. 응답이 늦으면 제한 시간 안에서 추가 조회 |
+| 보급 파우치의 저장품 | 실행마다 재조회, 재이동 | `config__skip_supply_pouch 1`이 기본값. 라벨 조회와 이동 생략 |
+| 아이템별 Journal | 기본 켜짐 | `config__sysmsg 0`이 기본값. `1`이면 검사와 저장 로그 |
+| 완드와 분해 도구 | 반복 타입 검색 | 선택한 serial 재사용, 완드 커서 실패나 분해 도구 유실 시 다시 검색 |
 
-- 클라이언트를 켠 뒤 루프를 한 번도 Play하지 않고 recycle을 돌리면 아무 스크립트도 안 돌아야 함
+- `config__skip_supply_pouch 0`: 보급 파우치 안도 재검사. 보관 설정을 바꿔 다시 분류할 때 사용
+- 파우치가 없어 저장 위치가 백팩이면 이 제외 설정과 무관하게 계속 검사
+- 품목 12종의 검색 목록, 보관 설정 49개의 기본값, 품질과 방어구 재질 판정, 보관 위치는 유지
+- 아이템 이동과 자원 드롭 뒤 `wait__item 650ms`, 커서 대기 `wait__target 500ms`, 검프 대기 `wait__gump 5000ms`는 유지
+- `wait__identify 650ms`: 감정 응답의 추가 조회 기한. `wait__label_poll 50ms`: 미감정 라벨 재조회 전 대기
+  서버 쿨다운이나 실측 속도가 아닌 스크립트 설정. `getlabel` 자체 대기 시간은 별도([Razor](../scripting/razor.md#06) 06절)
+- `timer__recycle_identify`: 아이템을 완드로 타깃한 뒤 시작. 감정된 라벨을 받으면 분류. 계속 미감정이고 추가 조회 기한이 지나면 그 아이템 처리 종료
+- 실행 상태: `var__id_wand`, `var__id_wand_out`, `var__recycle_tool`, `var__recycle_ready`, `var__item_pending`, `var__id_attempted`. 이전 `var__recycle_item` 제거
 
-#### pvp 중
+정적 동일성 검사와 모의 실행은 통과. 실제 단축 시간, Outlands의 라벨 응답 시간과 행동 큐는 인게임 확인 필요.
 
-- pvp 중 recycle → 마지막 사냥이나 채집 루프로 복귀. pvp 복귀를 원하면 기록
+#### 분류와 반복 실행
 
-#### 다시 쓴 recycle
+- 미감정 일반품, 미감정 보관품, 이미 감정한 품목을 섞어 실행. 품질 설정대로 보관 또는 분해
+- 저장품은 보급 파우치 `global__my_supply_pouch`의 오른쪽 아래 `130 200`으로. 파우치가 없으면 hue 0 파우치, 그것도 없으면 백팩
+- 다시 실행하면 보급 파우치의 저장품과 사용 장비는 라벨 조회나 이동 없이 그대로. 새 전리품만 처리
+- 방어구는 graphic이 아닌 라벨의 재질로 판정. 돌려 놓은 체인 장갑은 링메일이 아닌 체인 설정으로 보관
+- 보관 품질이 아닌 exceptional은 `config__save_exceptional 1`이면 제자리 유지. aspect와 hue 0 주문서, 단검도 분해하지 않음
+- 품질 설정에 걸려 보관한 물건이 같은 처리에서 다시 분해되면 실패
 
-- 2026-10-10 저장소 규칙으로 재작성. 변수 이름, 오버헤드, 대기 값, 시작 4줄 변경, 분류는 그대로여야 함
-- `config__sysmsg 1`이면 Journal에 아이템마다 `Recycle check: …`, 저장 시 `Recycle save: …`. `[ item, saving ]`은 `config__chatty` 설정을 따름
-- 링메일의 fortification, hardening, guarding, defense 스위치가 이제 동작, studded 방어구는 studded 보관함으로(지금은 둘 다 루트 파우치)
-- 재질을 못 읽은 방어구는 루트 파우치로. 재활용 도구가 없을 때도 루프로 복귀
-- 2026-10-13 저장 위치 수정. 원작부터 hue 38 파우치를 먼저 골라 트랩 파우치로 들어감(사용자 보고).
-  이제 loadout의 `global__my_looting_pouch`, 없으면 hue 0 파우치, 없으면 백팩. 저장한 아이템이 루팅 파우치에 들어가야 함
-- 2026-10-19 저장 위치를 보급 파우치(`global__my_supply_pouch`)의 오른쪽 아래(`130 200`)로. 루팅 백은 날것의 루팅만.
-  저장한 아이템이 보급 파우치 오른쪽 아래에 모이고, 왼쪽 위 보급품, 오른쪽 위 도구, 왼쪽 아래 악기와 섞이지 않아야 함
-- 2026-10-19 방어구를 한 반복문으로 합침. 돌려 놓은 graphic까지 찾고(예: 가죽 튜닉 5068), 저장 설정과 저장 위치는 라벨의 재질로 고름.
-  돌려 놓은 방어구도 자기 재질 설정으로 판정돼야 함. 예: 돌려 놓은 무적 체인 장갑은 링메일이 아닌 체인 설정으로 저장
-- 감정이 안 되는 아이템(완드 충전이 떨어짐 등)에서 멈추지 않고 다음 아이템으로 넘어가야 함. 그 아이템은 다음 실행에 다시 봄
-- 2026-10-21 반복 비용 축소. `config__skip_supply_pouch 1`이 기본값: 보급 파우치 안의 물건은 라벨 조회와 이동 없이 제외. `0`이면 재검사
-  보급 파우치가 없어 저장 위치가 백팩이면 계속 검사. `config__sysmsg` 기본값은 `0`, 경고는 계속 표시. 인게임 동작은 확인되지 않았다
+#### 감정과 분해 실패
+
+- 첫 완드를 소진, 예비 완드는 유지. 커서를 못 연 완드는 그 실행에서 제외, 같은 아이템에 예비 완드 사용
+- 모든 완드가 커서를 못 열면 `[ id wand, out ]` 한 번. 미감정품은 남기고 이미 감정된 품목은 계속 처리
+- 감정 응답을 확인하지 못하면 `[ item id, miss ]`, 라벨을 못 받으면 `[ item, skip ]`. 그 물건은 이동하거나 분해하지 않음
+- 감정 실패와 라벨 실패로 남긴 물건은 다음 실행에 다시 검사
+- 분해 검프나 커서를 못 받으면 `[ recycle, blocked ]`, 후속 아이템 처리 중단. 아이템마다 같은 타임아웃 반복 금지
+- 분해 중단 뒤에도 기존 자원 드롭과 루프 복귀 실행. 땅에 내려놓기 거절 시 자원은 백팩으로 복구
+
+#### 루프 복귀
+
+- `list__resume_script`의 각 항목을 `hotkey`로 실행. 정상 종료와 시작 도구 부족 모두 같은 경로
+- bard-necro-enhanced, bard-archer-enhanced, tamer-mage-enhanced, dexxer-basic, skinning-enhanced, lumberjack-enhanced가 Play할 때 자기 핫키 이름 등록
+  archive의 bard-mace와 bard-throwing은 archive 이름 등록. pvp는 등록하지 않음
+- `hotkey 'Play Script: gather\skinning-enhanced'`의 실행과 복귀는 인게임 확인됨 2026-10-19
+- skinning-enhanced를 Play한 뒤 F3 → 끝나고 그 루프의 loaded 문구. lumberjack이나 bard-archer를 Play한 뒤에는 그쪽으로 복귀
+- 클라이언트를 켠 뒤 루프를 한 번도 Play하지 않았으면 recycle만 종료. pvp 중에는 마지막 사냥이나 채집 루프로 복귀
+- 이름의 저장 형식은 [script/README.md](https://github.com/minu-ha/uoo/blob/master/script/README.md#returning-to-the-loop), 반영은 [Workflow](../working/workflow.md#04.A) 04.A절
 
 ## <a id="14"></a>14 bard-necro-enhanced 인게임 확인
 

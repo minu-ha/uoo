@@ -1,5 +1,5 @@
 # Identify, save or recycle the farming loot in the backpack, drop plain resources, then return to the loop.
-# Needs: Item Identification or the single item ID wand (20496), and a tinker tool, sewing kit or saw.
+# Needs: a single item ID wand (20496), and a tinker tool, sewing kit or saw in Recycle Single Item mode.
 # Based on "Item Recycle while Farming" by Jaseowns (outlands.uorazorscripts.com), 6/01/2026, which added
 # dual wield and throwing items. Rewritten to the repo conventions on 2026-10-10.
 # Saved items go to the bottom right of the loadout supply pouch, else a plain pouch or the pack.
@@ -21,9 +21,6 @@ clearignore
 # Skip the chosen supply pouch: its contents were saved or packed for use.
 # Set to 0 to recheck it. Backpack fallback always checks every item.
 @setvar! config__skip_supply_pouch 1
-
-# Item Identification needed to identify by skill. Below it only the wand identifies.
-@setvar! config__min_item_id_skill 1
 
 # Plain resources dropped at your feet at the end.
 @setvar! config__drop_ingots 1
@@ -105,8 +102,18 @@ clearignore
 # ========================================================================================
 @setvar! wait__item 650
 @setvar! wait__target 500
-@setvar! wait__item_id 2000
+# Identification response budget, not a fixed pause or a server cooldown.
+@setvar! wait__identify 650
+@setvar! wait__label_poll 50
 @setvar! wait__gump 5000
+
+# ========================================================================================
+# TIMER
+# ========================================================================================
+if not timerexists "timer__recycle_identify"
+    createtimer "timer__recycle_identify"
+endif
+settimer "timer__recycle_identify" 0
 
 # ========================================================================================
 # STATE
@@ -149,28 +156,27 @@ endif
 
 @setvar! var__source_container backpack
 
-# Scratch values, set and read inside each item block.
-#   save_item     1 when the item carries a kept property
-#   recycle_item  1 until the item goes to identification instead
-#   save_to       armor: the container its material goes to
-#   armor_type    armor: its material by label, 1 leather, 2 studded, 3 bone, 4 ringmail,
-#                 5 chainmail, 6 platemail, 0 none named
+# Cached tools are selected again only after they disappear or fail to produce a cursor.
+# A failed wand is ignored for this run, so a spare can take over without retrying every item.
+@setvar! var__id_wand 0
+@setvar! var__id_wand_out 0
+@setvar! var__recycle_tool 0
+@setvar! var__recycle_ready 1
+
+# Per-item progress. Labels are read and consumed inside the same retry loop scope.
+# A numeric label sentinel detects a missing reply without scoped varexist assumptions.
+@setvar! var__item_pending 0
+@setvar! var__id_attempted 0
 @setvar! var__save_item 0
-@setvar! var__recycle_item 0
 @setvar! var__save_to 0
 @setvar! var__armor_type 0
 
 # ========================================================================================
 # TOOLS
 # ========================================================================================
-# Identification by container (Item Identification 120), by skill, or by the single item wand.
-# Without any of them, or without a recycling tool, the script returns to the loop.
-if skill "Item Identification" = 120
-    # Identifies the whole container.
-elseif skill "Item Identification" >= 100
-    # Identifies by skill.
-elseif findtype 20496 backpack as alias__id_wand
-    # Identifies with the wand.
+# Only the single item wand identifies. Missing tools return to the registered loop.
+if findtype 20496 backpack as alias__id_wand
+    @setvar! var__id_wand alias__id_wand
 elseif findtype 20495 backpack as alias__id_wand
     overhead "[ id wand, wrong ]" 254
     sysmsg "Recycle: the ID wand must be the single item wand (20496)." 88
@@ -180,11 +186,9 @@ elseif findtype 20495 backpack as alias__id_wand
         endfor
     endif
     stop
-elseif skill "Item Identification" >= config__min_item_id_skill
-    # Identifies by skill.
 else
-    overhead "[ item id, out ]" 254
-    sysmsg "Recycle: needs Item Identification or the single item ID wand (20496)." 88
+    overhead "[ id wand, out ]" 254
+    sysmsg "Recycle: needs a single item ID wand (20496)." 88
     if listexists 'list__resume_script'
         foreach resume_hotkey in list__resume_script
             hotkey resume_hotkey
@@ -193,7 +197,9 @@ else
     stop
 endif
 
-if not findtype 4032|4032|3997|7864|4148|4136 backpack
+if findtype 4032|3997|7864|4148|4136 backpack as alias__recycle_tool
+    @setvar! var__recycle_tool alias__recycle_tool
+else
     overhead "[ recycle tool, out ]" 254
     sysmsg "Recycle: needs a tinker tool, sewing kit or saw." 88
     if listexists 'list__resume_script'
@@ -209,9 +215,10 @@ endif
 # ========================================================================================
 # ITEMS
 # ========================================================================================
-# Each kind is checked in turn: a kept property saves the item, an unidentified one is sent to
-# identification and checked again once it reads identified, the rest is recycled.
-# Exceptional and aspect items stay.
+# Each kind is checked in turn. Identification retries only the label, never the item search
+# or classification. Once identified, the same label scope saves or recycles it exactly once.
+# Missing labels and failed IDs leave the item untouched. Exceptional and aspect items stay.
+# A tool timeout stops further item processing rather than repeating that wait for every item.
 # Hue 0 spellbooks (3834) and daggers (3922) are left alone.
 while findtype 3834|3922 var__source_container 0 as alias__item
     @ignore alias__item
@@ -220,457 +227,589 @@ endwhile
 # ========================================================================================
 # ARCANE STAFFS
 # ========================================================================================
-while findtype 31017|31019|31021|31023|31025|31027|31029|31031|31033|31035|31037|31038|31041|31043|31045|31047|31049|31051|31053|31055 var__source_container as alias__item
+while var__recycle_ready = 1 and findtype 31017|31019|31021|31023|31025|31027|31029|31031|31033|31035|31037|31038|31041|31043|31045|31047|31049|31051|31053|31055 var__source_container as alias__item
     if config__skip_supply_pouch = 1 and var__save_container != backpack and find alias__item var__save_container
-        @ignore alias__item
+        # Already stored or packed for use.
     else
-        getlabel alias__item label__item
-        if config__sysmsg = 1
-            sysmsg "Recycle check: {{label__item}}" 88
-        endif
-        @setvar! var__save_item 0
-        @setvar! var__recycle_item 1
-        if config__save_greater_slaying = 1 and "slaying" in label__item and "greater" in label__item
-            @setvar! var__save_item 1
-        elseif config__save_lesser_slaying = 1 and "slaying" in label__item and "lesser" in label__item
-            @setvar! var__save_item 1
-        elseif config__save_supremely = 1 and "supremely" in label__item
-            @setvar! var__save_item 1
-        elseif config__save_exceedingly = 1 and "exceedingly" in label__item
-            @setvar! var__save_item 1
-        elseif config__save_eminently = 1 and "eminently" in label__item
-            @setvar! var__save_item 1
-        elseif config__save_surpassingly = 1 and "surpassingly" in label__item
-            @setvar! var__save_item 1
-        elseif config__save_accurate = 1 and "accurate" in label__item
-            @setvar! var__save_item 1
-        elseif config__save_vanquishing = 1 and "vanquishing" in label__item
-            @setvar! var__save_item 1
-        elseif config__save_power = 1 and "power" in label__item
-            @setvar! var__save_item 1
-        elseif config__save_force = 1 and "force" in label__item
-            @setvar! var__save_item 1
-        elseif config__save_might = 1 and "might" in label__item
-            @setvar! var__save_item 1
-        elseif config__save_ruin = 1 and "ruin" in label__item
-            @setvar! var__save_item 1
-        elseif config__save_regular_slaying = 1 and "slaying" in label__item
-            if "lesser" in label__item
-                # A lesser one follows config__save_lesser_slaying above.
-            else
-                @setvar! var__save_item 1
-            endif
-        endif
-
-        if "unidentified" in label__item
-            if skill "Item Identification" = 120
-                useskill "itemId"
-                waitfortarget wait__target
-                target var__source_container
-                wait wait__item_id
-                @setvar! var__recycle_item 0
-            elseif findtype 20496 backpack as alias__id_wand
-                dclick alias__id_wand
-                waitfortarget wait__target
-                target alias__item
-                @setvar! var__recycle_item 0
-            elseif skill "Item Identification" >= config__min_item_id_skill
-                useskill "itemId"
-                waitfortarget wait__target
-                target alias__item
-                wait wait__item_id
-                @setvar! var__recycle_item 0
-            endif
-
-            # Read again: one identified now is checked on the next pass of this loop, one that
-            # is still not is left for the next run, so a spent wand cannot hold the loop.
-            if var__recycle_item = 0
-                wait wait__item
-                getlabel alias__item label__item
-                if "unidentified" in label__item
-                    @ignore alias__item
+        @setvar! var__item_pending 1
+        @setvar! var__id_attempted 0
+        while var__item_pending = 1
+            @unsetvar! label__item
+            @setvar! label__item 0
+            getlabel alias__item label__item
+            if label__item = 0
+                @setvar! var__item_pending 0
+                overhead "[ item, skip ]" 254
+                sysmsg "Recycle: no label returned. Item left untouched." 88
+            elseif "unidentified" in label__item
+                if var__id_attempted = 0
+                    if var__id_wand_out = 1
+                        @setvar! var__item_pending 0
+                    else
+                        if var__id_wand = 0 and findtype 20496 backpack as alias__spare_id_wand
+                            @setvar! var__id_wand alias__spare_id_wand
+                        endif
+                        if var__id_wand = 0
+                            @setvar! var__item_pending 0
+                            @setvar! var__id_wand_out 1
+                            overhead "[ id wand, out ]" 254
+                            sysmsg "Recycle: no usable ID wand left. Unidentified items left untouched." 88
+                        else
+                            hotkey 'Cancel Current Target'
+                            dclick var__id_wand
+                            waitfortarget wait__target
+                            if targetexists
+                                target alias__item
+                                settimer "timer__recycle_identify" 0
+                                @setvar! var__id_attempted 1
+                            else
+                                hotkey 'Cancel Current Target'
+                                @ignore var__id_wand
+                                @setvar! var__id_wand 0
+                            endif
+                        endif
+                    endif
+                elseif timer "timer__recycle_identify" >= wait__identify
+                    @setvar! var__item_pending 0
+                    overhead "[ item id, miss ]" 254
+                    sysmsg "Recycle: identification not confirmed. Item left untouched: {{label__item}}" 88
+                else
+                    wait wait__label_poll
                 endif
-            endif
-        endif
+            else
+                @setvar! var__item_pending 0
+                if config__sysmsg = 1
+                    sysmsg "Recycle check: {{label__item}}" 88
+                endif
+                @setvar! var__save_item 0
+                if config__save_greater_slaying = 1 and "slaying" in label__item and "greater" in label__item
+                    @setvar! var__save_item 1
+                elseif config__save_lesser_slaying = 1 and "slaying" in label__item and "lesser" in label__item
+                    @setvar! var__save_item 1
+                elseif config__save_supremely = 1 and "supremely" in label__item
+                    @setvar! var__save_item 1
+                elseif config__save_exceedingly = 1 and "exceedingly" in label__item
+                    @setvar! var__save_item 1
+                elseif config__save_eminently = 1 and "eminently" in label__item
+                    @setvar! var__save_item 1
+                elseif config__save_surpassingly = 1 and "surpassingly" in label__item
+                    @setvar! var__save_item 1
+                elseif config__save_accurate = 1 and "accurate" in label__item
+                    @setvar! var__save_item 1
+                elseif config__save_vanquishing = 1 and "vanquishing" in label__item
+                    @setvar! var__save_item 1
+                elseif config__save_power = 1 and "power" in label__item
+                    @setvar! var__save_item 1
+                elseif config__save_force = 1 and "force" in label__item
+                    @setvar! var__save_item 1
+                elseif config__save_might = 1 and "might" in label__item
+                    @setvar! var__save_item 1
+                elseif config__save_ruin = 1 and "ruin" in label__item
+                    @setvar! var__save_item 1
+                elseif config__save_regular_slaying = 1 and "slaying" in label__item
+                    if "lesser" in label__item
+                        # A lesser one follows config__save_lesser_slaying above.
+                    else
+                        @setvar! var__save_item 1
+                    endif
+                endif
 
-        if var__save_item = 1
-            if config__chatty = 1
-                overhead "[ item, saving ]" 290
-            endif
-            if config__sysmsg = 1
-                sysmsg "Recycle save: {{label__item}}" 88
-            endif
-            lift alias__item
-            drop var__staff_storage 130 200 0
-            wait wait__item
-            @ignore alias__item
-        endif
-
-        if var__recycle_item = 1
-            if find alias__item backpack
-                if config__save_exceptional = 1 and "exceptional" in label__item
+                if var__save_item = 1
+                    if config__chatty = 1
+                        overhead "[ item, saving ]" 290
+                    endif
+                    if config__sysmsg = 1
+                        sysmsg "Recycle save: {{label__item}}" 88
+                    endif
+                    lift alias__item
+                    drop var__staff_storage 130 200 0
+                    wait wait__item
+                elseif config__save_exceptional = 1 and "exceptional" in label__item
                     # Exceptional craft is kept.
                 elseif "aspect" in label__item
                     # Aspect items are kept.
-                else
+                elseif find alias__item backpack
                     if not gumpexists 949095101
-                        if findtype 4032|3997|7864|4148|4136 backpack as alias__recycle_tool
-                            dclick alias__recycle_tool
+                        if not find var__recycle_tool backpack
+                            @setvar! var__recycle_tool 0
+                            if findtype 4032|3997|7864|4148|4136 backpack as alias__spare_recycle_tool
+                                @setvar! var__recycle_tool alias__spare_recycle_tool
+                            endif
+                        endif
+                        if var__recycle_tool != 0
+                            dclick var__recycle_tool
                             waitforgump 949095101 wait__gump
                         endif
                     endif
                     if gumpexists 949095101
-                        gumpresponse 3 949095101
-                        waitfortarget wait__target
-                        target alias__item
+                        if ingump "Recycle Single Item" 949095101
+                            hotkey 'Cancel Current Target'
+                            gumpresponse 3 949095101
+                            waitfortarget wait__target
+                            if targetexists
+                                target alias__item
+                            else
+                                @setvar! var__recycle_ready 0
+                                hotkey 'Cancel Current Target'
+                                overhead "[ recycle, blocked ]" 254
+                                sysmsg "Recycle: no recycling cursor. Remaining items left untouched." 88
+                            endif
+                        else
+                            @setvar! var__recycle_ready 0
+                            overhead "[ recycle, wrong ]" 254
+                            sysmsg "Recycle: select Recycle Single Item in the tool menu. Remaining items left untouched." 88
+                        endif
+                    else
+                        @setvar! var__recycle_ready 0
+                        overhead "[ recycle, blocked ]" 254
+                        sysmsg "Recycle: no recycling menu. Remaining items left untouched." 88
                     endif
                 endif
             endif
-            @ignore alias__item
-        endif
+        endwhile
     endif
+    @ignore alias__item
 endwhile
 
 # ========================================================================================
 # DUAL WIELD
 # ========================================================================================
-while findtype "dual wield tracker knife|duel wield katana|dual wield norse axe|dual wield rapier|dual wield sabre|dual wield scimitar|67773|67774|67775|67776|67777|67778" var__source_container as alias__item
+while var__recycle_ready = 1 and findtype "dual wield tracker knife|duel wield katana|dual wield norse axe|dual wield rapier|dual wield sabre|dual wield scimitar|67773|67774|67775|67776|67777|67778" var__source_container as alias__item
     if config__skip_supply_pouch = 1 and var__save_container != backpack and find alias__item var__save_container
-        @ignore alias__item
+        # Already stored or packed for use.
     else
-        getlabel alias__item label__item
-        if config__sysmsg = 1
-            sysmsg "Recycle check: {{label__item}}" 88
-        endif
-        @setvar! var__save_item 0
-        @setvar! var__recycle_item 1
-        if config__save_greater_slaying = 1 and "slaying" in label__item and "greater" in label__item
-            @setvar! var__save_item 1
-        elseif config__save_lesser_slaying = 1 and "slaying" in label__item and "lesser" in label__item
-            @setvar! var__save_item 1
-        elseif config__save_supremely = 1 and "supremely" in label__item
-            @setvar! var__save_item 1
-        elseif config__save_exceedingly = 1 and "exceedingly" in label__item
-            @setvar! var__save_item 1
-        elseif config__save_eminently = 1 and "eminently" in label__item
-            @setvar! var__save_item 1
-        elseif config__save_surpassingly = 1 and "surpassingly" in label__item
-            @setvar! var__save_item 1
-        elseif config__save_accurate = 1 and "accurate" in label__item
-            @setvar! var__save_item 1
-        elseif config__save_vanquishing = 1 and "vanquishing" in label__item
-            @setvar! var__save_item 1
-        elseif config__save_power = 1 and "power" in label__item
-            @setvar! var__save_item 1
-        elseif config__save_force = 1 and "force" in label__item
-            @setvar! var__save_item 1
-        elseif config__save_might = 1 and "might" in label__item
-            @setvar! var__save_item 1
-        elseif config__save_ruin = 1 and "ruin" in label__item
-            @setvar! var__save_item 1
-        elseif config__save_regular_slaying = 1 and "slaying" in label__item
-            if "lesser" in label__item
-                # A lesser one follows config__save_lesser_slaying above.
-            else
-                @setvar! var__save_item 1
-            endif
-        endif
-
-        if "unidentified" in label__item
-            if skill "Item Identification" = 120
-                useskill "itemId"
-                waitfortarget wait__target
-                target var__source_container
-                wait wait__item_id
-                @setvar! var__recycle_item 0
-            elseif findtype 20496 backpack as alias__id_wand
-                dclick alias__id_wand
-                waitfortarget wait__target
-                target alias__item
-                @setvar! var__recycle_item 0
-            elseif skill "Item Identification" >= config__min_item_id_skill
-                useskill "itemId"
-                waitfortarget wait__target
-                target alias__item
-                wait wait__item_id
-                @setvar! var__recycle_item 0
-            endif
-
-            # Read again: one identified now is checked on the next pass of this loop, one that
-            # is still not is left for the next run, so a spent wand cannot hold the loop.
-            if var__recycle_item = 0
-                wait wait__item
-                getlabel alias__item label__item
-                if "unidentified" in label__item
-                    @ignore alias__item
+        @setvar! var__item_pending 1
+        @setvar! var__id_attempted 0
+        while var__item_pending = 1
+            @unsetvar! label__item
+            @setvar! label__item 0
+            getlabel alias__item label__item
+            if label__item = 0
+                @setvar! var__item_pending 0
+                overhead "[ item, skip ]" 254
+                sysmsg "Recycle: no label returned. Item left untouched." 88
+            elseif "unidentified" in label__item
+                if var__id_attempted = 0
+                    if var__id_wand_out = 1
+                        @setvar! var__item_pending 0
+                    else
+                        if var__id_wand = 0 and findtype 20496 backpack as alias__spare_id_wand
+                            @setvar! var__id_wand alias__spare_id_wand
+                        endif
+                        if var__id_wand = 0
+                            @setvar! var__item_pending 0
+                            @setvar! var__id_wand_out 1
+                            overhead "[ id wand, out ]" 254
+                            sysmsg "Recycle: no usable ID wand left. Unidentified items left untouched." 88
+                        else
+                            hotkey 'Cancel Current Target'
+                            dclick var__id_wand
+                            waitfortarget wait__target
+                            if targetexists
+                                target alias__item
+                                settimer "timer__recycle_identify" 0
+                                @setvar! var__id_attempted 1
+                            else
+                                hotkey 'Cancel Current Target'
+                                @ignore var__id_wand
+                                @setvar! var__id_wand 0
+                            endif
+                        endif
+                    endif
+                elseif timer "timer__recycle_identify" >= wait__identify
+                    @setvar! var__item_pending 0
+                    overhead "[ item id, miss ]" 254
+                    sysmsg "Recycle: identification not confirmed. Item left untouched: {{label__item}}" 88
+                else
+                    wait wait__label_poll
                 endif
-            endif
-        endif
+            else
+                @setvar! var__item_pending 0
+                if config__sysmsg = 1
+                    sysmsg "Recycle check: {{label__item}}" 88
+                endif
+                @setvar! var__save_item 0
+                if config__save_greater_slaying = 1 and "slaying" in label__item and "greater" in label__item
+                    @setvar! var__save_item 1
+                elseif config__save_lesser_slaying = 1 and "slaying" in label__item and "lesser" in label__item
+                    @setvar! var__save_item 1
+                elseif config__save_supremely = 1 and "supremely" in label__item
+                    @setvar! var__save_item 1
+                elseif config__save_exceedingly = 1 and "exceedingly" in label__item
+                    @setvar! var__save_item 1
+                elseif config__save_eminently = 1 and "eminently" in label__item
+                    @setvar! var__save_item 1
+                elseif config__save_surpassingly = 1 and "surpassingly" in label__item
+                    @setvar! var__save_item 1
+                elseif config__save_accurate = 1 and "accurate" in label__item
+                    @setvar! var__save_item 1
+                elseif config__save_vanquishing = 1 and "vanquishing" in label__item
+                    @setvar! var__save_item 1
+                elseif config__save_power = 1 and "power" in label__item
+                    @setvar! var__save_item 1
+                elseif config__save_force = 1 and "force" in label__item
+                    @setvar! var__save_item 1
+                elseif config__save_might = 1 and "might" in label__item
+                    @setvar! var__save_item 1
+                elseif config__save_ruin = 1 and "ruin" in label__item
+                    @setvar! var__save_item 1
+                elseif config__save_regular_slaying = 1 and "slaying" in label__item
+                    if "lesser" in label__item
+                        # A lesser one follows config__save_lesser_slaying above.
+                    else
+                        @setvar! var__save_item 1
+                    endif
+                endif
 
-        if var__save_item = 1
-            if config__chatty = 1
-                overhead "[ item, saving ]" 290
-            endif
-            if config__sysmsg = 1
-                sysmsg "Recycle save: {{label__item}}" 88
-            endif
-            lift alias__item
-            drop var__dual_wield_storage 130 200 0
-            wait wait__item
-            @ignore alias__item
-        endif
-
-        if var__recycle_item = 1
-            if find alias__item backpack
-                if config__save_exceptional = 1 and "exceptional" in label__item
+                if var__save_item = 1
+                    if config__chatty = 1
+                        overhead "[ item, saving ]" 290
+                    endif
+                    if config__sysmsg = 1
+                        sysmsg "Recycle save: {{label__item}}" 88
+                    endif
+                    lift alias__item
+                    drop var__dual_wield_storage 130 200 0
+                    wait wait__item
+                elseif config__save_exceptional = 1 and "exceptional" in label__item
                     # Exceptional craft is kept.
                 elseif "aspect" in label__item
                     # Aspect items are kept.
-                else
+                elseif find alias__item backpack
                     if not gumpexists 949095101
-                        if findtype 4032|3997|7864|4148|4136 backpack as alias__recycle_tool
-                            dclick alias__recycle_tool
+                        if not find var__recycle_tool backpack
+                            @setvar! var__recycle_tool 0
+                            if findtype 4032|3997|7864|4148|4136 backpack as alias__spare_recycle_tool
+                                @setvar! var__recycle_tool alias__spare_recycle_tool
+                            endif
+                        endif
+                        if var__recycle_tool != 0
+                            dclick var__recycle_tool
                             waitforgump 949095101 wait__gump
                         endif
                     endif
                     if gumpexists 949095101
-                        gumpresponse 3 949095101
-                        waitfortarget wait__target
-                        target alias__item
+                        if ingump "Recycle Single Item" 949095101
+                            hotkey 'Cancel Current Target'
+                            gumpresponse 3 949095101
+                            waitfortarget wait__target
+                            if targetexists
+                                target alias__item
+                            else
+                                @setvar! var__recycle_ready 0
+                                hotkey 'Cancel Current Target'
+                                overhead "[ recycle, blocked ]" 254
+                                sysmsg "Recycle: no recycling cursor. Remaining items left untouched." 88
+                            endif
+                        else
+                            @setvar! var__recycle_ready 0
+                            overhead "[ recycle, wrong ]" 254
+                            sysmsg "Recycle: select Recycle Single Item in the tool menu. Remaining items left untouched." 88
+                        endif
+                    else
+                        @setvar! var__recycle_ready 0
+                        overhead "[ recycle, blocked ]" 254
+                        sysmsg "Recycle: no recycling menu. Remaining items left untouched." 88
                     endif
                 endif
             endif
-            @ignore alias__item
-        endif
+        endwhile
     endif
+    @ignore alias__item
 endwhile
 
 # ========================================================================================
 # THROWING
 # ========================================================================================
-while findtype "chakram|francisca|hurlbat|javelin|throwing knife|throwing star|67713|67723|67734|67744|67754|67764" var__source_container as alias__item
+while var__recycle_ready = 1 and findtype "chakram|francisca|hurlbat|javelin|throwing knife|throwing star|67713|67723|67734|67744|67754|67764" var__source_container as alias__item
     if config__skip_supply_pouch = 1 and var__save_container != backpack and find alias__item var__save_container
-        @ignore alias__item
+        # Already stored or packed for use.
     else
-        getlabel alias__item label__item
-        if config__sysmsg = 1
-            sysmsg "Recycle check: {{label__item}}" 88
-        endif
-        @setvar! var__save_item 0
-        @setvar! var__recycle_item 1
-        if config__save_greater_slaying = 1 and "slaying" in label__item and "greater" in label__item
-            @setvar! var__save_item 1
-        elseif config__save_lesser_slaying = 1 and "slaying" in label__item and "lesser" in label__item
-            @setvar! var__save_item 1
-        elseif config__save_supremely = 1 and "supremely" in label__item
-            @setvar! var__save_item 1
-        elseif config__save_exceedingly = 1 and "exceedingly" in label__item
-            @setvar! var__save_item 1
-        elseif config__save_eminently = 1 and "eminently" in label__item
-            @setvar! var__save_item 1
-        elseif config__save_surpassingly = 1 and "surpassingly" in label__item
-            @setvar! var__save_item 1
-        elseif config__save_accurate = 1 and "accurate" in label__item
-            @setvar! var__save_item 1
-        elseif config__save_vanquishing = 1 and "vanquishing" in label__item
-            @setvar! var__save_item 1
-        elseif config__save_power = 1 and "power" in label__item
-            @setvar! var__save_item 1
-        elseif config__save_force = 1 and "force" in label__item
-            @setvar! var__save_item 1
-        elseif config__save_might = 1 and "might" in label__item
-            @setvar! var__save_item 1
-        elseif config__save_ruin = 1 and "ruin" in label__item
-            @setvar! var__save_item 1
-        elseif config__save_regular_slaying = 1 and "slaying" in label__item
-            if "lesser" in label__item
-                # A lesser one follows config__save_lesser_slaying above.
-            else
-                @setvar! var__save_item 1
-            endif
-        endif
-
-        if "unidentified" in label__item
-            if skill "Item Identification" = 120
-                useskill "itemId"
-                waitfortarget wait__target
-                target var__source_container
-                wait wait__item_id
-                @setvar! var__recycle_item 0
-            elseif findtype 20496 backpack as alias__id_wand
-                dclick alias__id_wand
-                waitfortarget wait__target
-                target alias__item
-                @setvar! var__recycle_item 0
-            elseif skill "Item Identification" >= config__min_item_id_skill
-                useskill "itemId"
-                waitfortarget wait__target
-                target alias__item
-                wait wait__item_id
-                @setvar! var__recycle_item 0
-            endif
-
-            # Read again: one identified now is checked on the next pass of this loop, one that
-            # is still not is left for the next run, so a spent wand cannot hold the loop.
-            if var__recycle_item = 0
-                wait wait__item
-                getlabel alias__item label__item
-                if "unidentified" in label__item
-                    @ignore alias__item
+        @setvar! var__item_pending 1
+        @setvar! var__id_attempted 0
+        while var__item_pending = 1
+            @unsetvar! label__item
+            @setvar! label__item 0
+            getlabel alias__item label__item
+            if label__item = 0
+                @setvar! var__item_pending 0
+                overhead "[ item, skip ]" 254
+                sysmsg "Recycle: no label returned. Item left untouched." 88
+            elseif "unidentified" in label__item
+                if var__id_attempted = 0
+                    if var__id_wand_out = 1
+                        @setvar! var__item_pending 0
+                    else
+                        if var__id_wand = 0 and findtype 20496 backpack as alias__spare_id_wand
+                            @setvar! var__id_wand alias__spare_id_wand
+                        endif
+                        if var__id_wand = 0
+                            @setvar! var__item_pending 0
+                            @setvar! var__id_wand_out 1
+                            overhead "[ id wand, out ]" 254
+                            sysmsg "Recycle: no usable ID wand left. Unidentified items left untouched." 88
+                        else
+                            hotkey 'Cancel Current Target'
+                            dclick var__id_wand
+                            waitfortarget wait__target
+                            if targetexists
+                                target alias__item
+                                settimer "timer__recycle_identify" 0
+                                @setvar! var__id_attempted 1
+                            else
+                                hotkey 'Cancel Current Target'
+                                @ignore var__id_wand
+                                @setvar! var__id_wand 0
+                            endif
+                        endif
+                    endif
+                elseif timer "timer__recycle_identify" >= wait__identify
+                    @setvar! var__item_pending 0
+                    overhead "[ item id, miss ]" 254
+                    sysmsg "Recycle: identification not confirmed. Item left untouched: {{label__item}}" 88
+                else
+                    wait wait__label_poll
                 endif
-            endif
-        endif
+            else
+                @setvar! var__item_pending 0
+                if config__sysmsg = 1
+                    sysmsg "Recycle check: {{label__item}}" 88
+                endif
+                @setvar! var__save_item 0
+                if config__save_greater_slaying = 1 and "slaying" in label__item and "greater" in label__item
+                    @setvar! var__save_item 1
+                elseif config__save_lesser_slaying = 1 and "slaying" in label__item and "lesser" in label__item
+                    @setvar! var__save_item 1
+                elseif config__save_supremely = 1 and "supremely" in label__item
+                    @setvar! var__save_item 1
+                elseif config__save_exceedingly = 1 and "exceedingly" in label__item
+                    @setvar! var__save_item 1
+                elseif config__save_eminently = 1 and "eminently" in label__item
+                    @setvar! var__save_item 1
+                elseif config__save_surpassingly = 1 and "surpassingly" in label__item
+                    @setvar! var__save_item 1
+                elseif config__save_accurate = 1 and "accurate" in label__item
+                    @setvar! var__save_item 1
+                elseif config__save_vanquishing = 1 and "vanquishing" in label__item
+                    @setvar! var__save_item 1
+                elseif config__save_power = 1 and "power" in label__item
+                    @setvar! var__save_item 1
+                elseif config__save_force = 1 and "force" in label__item
+                    @setvar! var__save_item 1
+                elseif config__save_might = 1 and "might" in label__item
+                    @setvar! var__save_item 1
+                elseif config__save_ruin = 1 and "ruin" in label__item
+                    @setvar! var__save_item 1
+                elseif config__save_regular_slaying = 1 and "slaying" in label__item
+                    if "lesser" in label__item
+                        # A lesser one follows config__save_lesser_slaying above.
+                    else
+                        @setvar! var__save_item 1
+                    endif
+                endif
 
-        if var__save_item = 1
-            if config__chatty = 1
-                overhead "[ item, saving ]" 290
-            endif
-            if config__sysmsg = 1
-                sysmsg "Recycle save: {{label__item}}" 88
-            endif
-            lift alias__item
-            drop var__throwing_storage 130 200 0
-            wait wait__item
-            @ignore alias__item
-        endif
-
-        if var__recycle_item = 1
-            if find alias__item backpack
-                if config__save_exceptional = 1 and "exceptional" in label__item
+                if var__save_item = 1
+                    if config__chatty = 1
+                        overhead "[ item, saving ]" 290
+                    endif
+                    if config__sysmsg = 1
+                        sysmsg "Recycle save: {{label__item}}" 88
+                    endif
+                    lift alias__item
+                    drop var__throwing_storage 130 200 0
+                    wait wait__item
+                elseif config__save_exceptional = 1 and "exceptional" in label__item
                     # Exceptional craft is kept.
                 elseif "aspect" in label__item
                     # Aspect items are kept.
-                else
+                elseif find alias__item backpack
                     if not gumpexists 949095101
-                        if findtype 4032|3997|7864|4148|4136 backpack as alias__recycle_tool
-                            dclick alias__recycle_tool
+                        if not find var__recycle_tool backpack
+                            @setvar! var__recycle_tool 0
+                            if findtype 4032|3997|7864|4148|4136 backpack as alias__spare_recycle_tool
+                                @setvar! var__recycle_tool alias__spare_recycle_tool
+                            endif
+                        endif
+                        if var__recycle_tool != 0
+                            dclick var__recycle_tool
                             waitforgump 949095101 wait__gump
                         endif
                     endif
                     if gumpexists 949095101
-                        gumpresponse 3 949095101
-                        waitfortarget wait__target
-                        target alias__item
+                        if ingump "Recycle Single Item" 949095101
+                            hotkey 'Cancel Current Target'
+                            gumpresponse 3 949095101
+                            waitfortarget wait__target
+                            if targetexists
+                                target alias__item
+                            else
+                                @setvar! var__recycle_ready 0
+                                hotkey 'Cancel Current Target'
+                                overhead "[ recycle, blocked ]" 254
+                                sysmsg "Recycle: no recycling cursor. Remaining items left untouched." 88
+                            endif
+                        else
+                            @setvar! var__recycle_ready 0
+                            overhead "[ recycle, wrong ]" 254
+                            sysmsg "Recycle: select Recycle Single Item in the tool menu. Remaining items left untouched." 88
+                        endif
+                    else
+                        @setvar! var__recycle_ready 0
+                        overhead "[ recycle, blocked ]" 254
+                        sysmsg "Recycle: no recycling menu. Remaining items left untouched." 88
                     endif
                 endif
             endif
-            @ignore alias__item
-        endif
+        endwhile
     endif
+    @ignore alias__item
 endwhile
 
 # ========================================================================================
 # SWORDS
 # ========================================================================================
-while findtype 3909|3911|3913|3915|3917|3934|3937|5046|5049|5115|5119|5182|5185|5187|30988|31128|31190 var__source_container as alias__item
+while var__recycle_ready = 1 and findtype 3909|3911|3913|3915|3917|3934|3937|5046|5049|5115|5119|5182|5185|5187|30988|31128|31190 var__source_container as alias__item
     if config__skip_supply_pouch = 1 and var__save_container != backpack and find alias__item var__save_container
-        @ignore alias__item
+        # Already stored or packed for use.
     else
-        getlabel alias__item label__item
-        if config__sysmsg = 1
-            sysmsg "Recycle check: {{label__item}}" 88
-        endif
-        @setvar! var__save_item 0
-        @setvar! var__recycle_item 1
-        if config__save_greater_slaying = 1 and "slaying" in label__item and "greater" in label__item
-            @setvar! var__save_item 1
-        elseif config__save_lesser_slaying = 1 and "slaying" in label__item and "lesser" in label__item
-            @setvar! var__save_item 1
-        elseif config__save_supremely = 1 and "supremely" in label__item
-            @setvar! var__save_item 1
-        elseif config__save_exceedingly = 1 and "exceedingly" in label__item
-            @setvar! var__save_item 1
-        elseif config__save_eminently = 1 and "eminently" in label__item
-            @setvar! var__save_item 1
-        elseif config__save_surpassingly = 1 and "surpassingly" in label__item
-            @setvar! var__save_item 1
-        elseif config__save_accurate = 1 and "accurate" in label__item
-            @setvar! var__save_item 1
-        elseif config__save_vanquishing = 1 and "vanquishing" in label__item
-            @setvar! var__save_item 1
-        elseif config__save_power = 1 and "power" in label__item
-            @setvar! var__save_item 1
-        elseif config__save_force = 1 and "force" in label__item
-            @setvar! var__save_item 1
-        elseif config__save_might = 1 and "might" in label__item
-            @setvar! var__save_item 1
-        elseif config__save_ruin = 1 and "ruin" in label__item
-            @setvar! var__save_item 1
-        elseif config__save_regular_slaying = 1 and "slaying" in label__item
-            if "lesser" in label__item
-                # A lesser one follows config__save_lesser_slaying above.
-            else
-                @setvar! var__save_item 1
-            endif
-        endif
-
-        if "unidentified" in label__item
-            if skill "Item Identification" = 120
-                useskill "itemId"
-                waitfortarget wait__target
-                target var__source_container
-                wait wait__item_id
-                @setvar! var__recycle_item 0
-            elseif findtype 20496 backpack as alias__id_wand
-                dclick alias__id_wand
-                waitfortarget wait__target
-                target alias__item
-                @setvar! var__recycle_item 0
-            elseif skill "Item Identification" >= config__min_item_id_skill
-                useskill "itemId"
-                waitfortarget wait__target
-                target alias__item
-                wait wait__item_id
-                @setvar! var__recycle_item 0
-            endif
-
-            # Read again: one identified now is checked on the next pass of this loop, one that
-            # is still not is left for the next run, so a spent wand cannot hold the loop.
-            if var__recycle_item = 0
-                wait wait__item
-                getlabel alias__item label__item
-                if "unidentified" in label__item
-                    @ignore alias__item
+        @setvar! var__item_pending 1
+        @setvar! var__id_attempted 0
+        while var__item_pending = 1
+            @unsetvar! label__item
+            @setvar! label__item 0
+            getlabel alias__item label__item
+            if label__item = 0
+                @setvar! var__item_pending 0
+                overhead "[ item, skip ]" 254
+                sysmsg "Recycle: no label returned. Item left untouched." 88
+            elseif "unidentified" in label__item
+                if var__id_attempted = 0
+                    if var__id_wand_out = 1
+                        @setvar! var__item_pending 0
+                    else
+                        if var__id_wand = 0 and findtype 20496 backpack as alias__spare_id_wand
+                            @setvar! var__id_wand alias__spare_id_wand
+                        endif
+                        if var__id_wand = 0
+                            @setvar! var__item_pending 0
+                            @setvar! var__id_wand_out 1
+                            overhead "[ id wand, out ]" 254
+                            sysmsg "Recycle: no usable ID wand left. Unidentified items left untouched." 88
+                        else
+                            hotkey 'Cancel Current Target'
+                            dclick var__id_wand
+                            waitfortarget wait__target
+                            if targetexists
+                                target alias__item
+                                settimer "timer__recycle_identify" 0
+                                @setvar! var__id_attempted 1
+                            else
+                                hotkey 'Cancel Current Target'
+                                @ignore var__id_wand
+                                @setvar! var__id_wand 0
+                            endif
+                        endif
+                    endif
+                elseif timer "timer__recycle_identify" >= wait__identify
+                    @setvar! var__item_pending 0
+                    overhead "[ item id, miss ]" 254
+                    sysmsg "Recycle: identification not confirmed. Item left untouched: {{label__item}}" 88
+                else
+                    wait wait__label_poll
                 endif
-            endif
-        endif
+            else
+                @setvar! var__item_pending 0
+                if config__sysmsg = 1
+                    sysmsg "Recycle check: {{label__item}}" 88
+                endif
+                @setvar! var__save_item 0
+                if config__save_greater_slaying = 1 and "slaying" in label__item and "greater" in label__item
+                    @setvar! var__save_item 1
+                elseif config__save_lesser_slaying = 1 and "slaying" in label__item and "lesser" in label__item
+                    @setvar! var__save_item 1
+                elseif config__save_supremely = 1 and "supremely" in label__item
+                    @setvar! var__save_item 1
+                elseif config__save_exceedingly = 1 and "exceedingly" in label__item
+                    @setvar! var__save_item 1
+                elseif config__save_eminently = 1 and "eminently" in label__item
+                    @setvar! var__save_item 1
+                elseif config__save_surpassingly = 1 and "surpassingly" in label__item
+                    @setvar! var__save_item 1
+                elseif config__save_accurate = 1 and "accurate" in label__item
+                    @setvar! var__save_item 1
+                elseif config__save_vanquishing = 1 and "vanquishing" in label__item
+                    @setvar! var__save_item 1
+                elseif config__save_power = 1 and "power" in label__item
+                    @setvar! var__save_item 1
+                elseif config__save_force = 1 and "force" in label__item
+                    @setvar! var__save_item 1
+                elseif config__save_might = 1 and "might" in label__item
+                    @setvar! var__save_item 1
+                elseif config__save_ruin = 1 and "ruin" in label__item
+                    @setvar! var__save_item 1
+                elseif config__save_regular_slaying = 1 and "slaying" in label__item
+                    if "lesser" in label__item
+                        # A lesser one follows config__save_lesser_slaying above.
+                    else
+                        @setvar! var__save_item 1
+                    endif
+                endif
 
-        if var__save_item = 1
-            if config__chatty = 1
-                overhead "[ item, saving ]" 290
-            endif
-            if config__sysmsg = 1
-                sysmsg "Recycle save: {{label__item}}" 88
-            endif
-            lift alias__item
-            drop var__swords_storage 130 200 0
-            wait wait__item
-            @ignore alias__item
-        endif
-
-        if var__recycle_item = 1
-            if find alias__item backpack
-                if config__save_exceptional = 1 and "exceptional" in label__item
+                if var__save_item = 1
+                    if config__chatty = 1
+                        overhead "[ item, saving ]" 290
+                    endif
+                    if config__sysmsg = 1
+                        sysmsg "Recycle save: {{label__item}}" 88
+                    endif
+                    lift alias__item
+                    drop var__swords_storage 130 200 0
+                    wait wait__item
+                elseif config__save_exceptional = 1 and "exceptional" in label__item
                     # Exceptional craft is kept.
                 elseif "aspect" in label__item
                     # Aspect items are kept.
-                else
+                elseif find alias__item backpack
                     if not gumpexists 949095101
-                        if findtype 4032|3997|7864|4148|4136 backpack as alias__recycle_tool
-                            dclick alias__recycle_tool
+                        if not find var__recycle_tool backpack
+                            @setvar! var__recycle_tool 0
+                            if findtype 4032|3997|7864|4148|4136 backpack as alias__spare_recycle_tool
+                                @setvar! var__recycle_tool alias__spare_recycle_tool
+                            endif
+                        endif
+                        if var__recycle_tool != 0
+                            dclick var__recycle_tool
                             waitforgump 949095101 wait__gump
                         endif
                     endif
                     if gumpexists 949095101
-                        gumpresponse 3 949095101
-                        waitfortarget wait__target
-                        target alias__item
+                        if ingump "Recycle Single Item" 949095101
+                            hotkey 'Cancel Current Target'
+                            gumpresponse 3 949095101
+                            waitfortarget wait__target
+                            if targetexists
+                                target alias__item
+                            else
+                                @setvar! var__recycle_ready 0
+                                hotkey 'Cancel Current Target'
+                                overhead "[ recycle, blocked ]" 254
+                                sysmsg "Recycle: no recycling cursor. Remaining items left untouched." 88
+                            endif
+                        else
+                            @setvar! var__recycle_ready 0
+                            overhead "[ recycle, wrong ]" 254
+                            sysmsg "Recycle: select Recycle Single Item in the tool menu. Remaining items left untouched." 88
+                        endif
+                    else
+                        @setvar! var__recycle_ready 0
+                        overhead "[ recycle, blocked ]" 254
+                        sysmsg "Recycle: no recycling menu. Remaining items left untouched." 88
                     endif
                 endif
             endif
-            @ignore alias__item
-        endif
+        endwhile
     endif
+    @ignore alias__item
 endwhile
 
 # ========================================================================================
@@ -680,113 +819,146 @@ if var__macing_storage != 0 and var__macing_storage != var__save_container
     dclick var__macing_storage
     wait wait__item
 endif
-while findtype 3568|3713|3721|3932|5040|5044|5112|5127|5177|5179|5181|30991|30999|31000|31001|31014|31178|31180|31182 var__source_container as alias__item
+while var__recycle_ready = 1 and findtype 3568|3713|3721|3932|5040|5044|5112|5127|5177|5179|5181|30991|30999|31000|31001|31014|31178|31180|31182 var__source_container as alias__item
     if config__skip_supply_pouch = 1 and var__save_container != backpack and find alias__item var__save_container
-        @ignore alias__item
+        # Already stored or packed for use.
     else
-        getlabel alias__item label__item
-        if config__sysmsg = 1
-            sysmsg "Recycle check: {{label__item}}" 88
-        endif
-        @setvar! var__save_item 0
-        @setvar! var__recycle_item 1
-        if config__save_greater_slaying = 1 and "slaying" in label__item and "greater" in label__item
-            @setvar! var__save_item 1
-        elseif config__save_lesser_slaying = 1 and "slaying" in label__item and "lesser" in label__item
-            @setvar! var__save_item 1
-        elseif config__save_supremely = 1 and "supremely" in label__item
-            @setvar! var__save_item 1
-        elseif config__save_exceedingly = 1 and "exceedingly" in label__item
-            @setvar! var__save_item 1
-        elseif config__save_eminently = 1 and "eminently" in label__item
-            @setvar! var__save_item 1
-        elseif config__save_surpassingly = 1 and "surpassingly" in label__item
-            @setvar! var__save_item 1
-        elseif config__save_accurate = 1 and "accurate" in label__item
-            @setvar! var__save_item 1
-        elseif config__save_vanquishing = 1 and "vanquishing" in label__item
-            @setvar! var__save_item 1
-        elseif config__save_power = 1 and "power" in label__item
-            @setvar! var__save_item 1
-        elseif config__save_force = 1 and "force" in label__item
-            @setvar! var__save_item 1
-        elseif config__save_might = 1 and "might" in label__item
-            @setvar! var__save_item 1
-        elseif config__save_regular_slaying = 1 and "slaying" in label__item
-            if "lesser" in label__item
-                # A lesser one follows config__save_lesser_slaying above.
-            else
-                @setvar! var__save_item 1
-            endif
-        endif
-
-        if "unidentified" in label__item
-            if skill "Item Identification" = 120
-                useskill "itemId"
-                waitfortarget wait__target
-                target var__source_container
-                wait wait__item_id
-                @setvar! var__recycle_item 0
-            elseif findtype 20496 backpack as alias__id_wand
-                dclick alias__id_wand
-                waitfortarget wait__target
-                target alias__item
-                @setvar! var__recycle_item 0
-            elseif skill "Item Identification" >= config__min_item_id_skill
-                useskill "itemId"
-                waitfortarget wait__target
-                target alias__item
-                wait wait__item_id
-                @setvar! var__recycle_item 0
-            endif
-
-            # Read again: one identified now is checked on the next pass of this loop, one that
-            # is still not is left for the next run, so a spent wand cannot hold the loop.
-            if var__recycle_item = 0
-                wait wait__item
-                getlabel alias__item label__item
-                if "unidentified" in label__item
-                    @ignore alias__item
+        @setvar! var__item_pending 1
+        @setvar! var__id_attempted 0
+        while var__item_pending = 1
+            @unsetvar! label__item
+            @setvar! label__item 0
+            getlabel alias__item label__item
+            if label__item = 0
+                @setvar! var__item_pending 0
+                overhead "[ item, skip ]" 254
+                sysmsg "Recycle: no label returned. Item left untouched." 88
+            elseif "unidentified" in label__item
+                if var__id_attempted = 0
+                    if var__id_wand_out = 1
+                        @setvar! var__item_pending 0
+                    else
+                        if var__id_wand = 0 and findtype 20496 backpack as alias__spare_id_wand
+                            @setvar! var__id_wand alias__spare_id_wand
+                        endif
+                        if var__id_wand = 0
+                            @setvar! var__item_pending 0
+                            @setvar! var__id_wand_out 1
+                            overhead "[ id wand, out ]" 254
+                            sysmsg "Recycle: no usable ID wand left. Unidentified items left untouched." 88
+                        else
+                            hotkey 'Cancel Current Target'
+                            dclick var__id_wand
+                            waitfortarget wait__target
+                            if targetexists
+                                target alias__item
+                                settimer "timer__recycle_identify" 0
+                                @setvar! var__id_attempted 1
+                            else
+                                hotkey 'Cancel Current Target'
+                                @ignore var__id_wand
+                                @setvar! var__id_wand 0
+                            endif
+                        endif
+                    endif
+                elseif timer "timer__recycle_identify" >= wait__identify
+                    @setvar! var__item_pending 0
+                    overhead "[ item id, miss ]" 254
+                    sysmsg "Recycle: identification not confirmed. Item left untouched: {{label__item}}" 88
+                else
+                    wait wait__label_poll
                 endif
-            endif
-        endif
+            else
+                @setvar! var__item_pending 0
+                if config__sysmsg = 1
+                    sysmsg "Recycle check: {{label__item}}" 88
+                endif
+                @setvar! var__save_item 0
+                if config__save_greater_slaying = 1 and "slaying" in label__item and "greater" in label__item
+                    @setvar! var__save_item 1
+                elseif config__save_lesser_slaying = 1 and "slaying" in label__item and "lesser" in label__item
+                    @setvar! var__save_item 1
+                elseif config__save_supremely = 1 and "supremely" in label__item
+                    @setvar! var__save_item 1
+                elseif config__save_exceedingly = 1 and "exceedingly" in label__item
+                    @setvar! var__save_item 1
+                elseif config__save_eminently = 1 and "eminently" in label__item
+                    @setvar! var__save_item 1
+                elseif config__save_surpassingly = 1 and "surpassingly" in label__item
+                    @setvar! var__save_item 1
+                elseif config__save_accurate = 1 and "accurate" in label__item
+                    @setvar! var__save_item 1
+                elseif config__save_vanquishing = 1 and "vanquishing" in label__item
+                    @setvar! var__save_item 1
+                elseif config__save_power = 1 and "power" in label__item
+                    @setvar! var__save_item 1
+                elseif config__save_force = 1 and "force" in label__item
+                    @setvar! var__save_item 1
+                elseif config__save_might = 1 and "might" in label__item
+                    @setvar! var__save_item 1
+                elseif config__save_regular_slaying = 1 and "slaying" in label__item
+                    if "lesser" in label__item
+                        # A lesser one follows config__save_lesser_slaying above.
+                    else
+                        @setvar! var__save_item 1
+                    endif
+                endif
 
-        if var__save_item = 1
-            if config__chatty = 1
-                overhead "[ item, saving ]" 290
-            endif
-            if config__sysmsg = 1
-                sysmsg "Recycle save: {{label__item}}" 88
-            endif
-            lift alias__item
-            drop var__macing_storage 130 200 0
-            wait wait__item
-            @ignore alias__item
-        endif
-
-        if var__recycle_item = 1
-            if find alias__item backpack
-                if config__save_exceptional = 1 and "exceptional" in label__item
+                if var__save_item = 1
+                    if config__chatty = 1
+                        overhead "[ item, saving ]" 290
+                    endif
+                    if config__sysmsg = 1
+                        sysmsg "Recycle save: {{label__item}}" 88
+                    endif
+                    lift alias__item
+                    drop var__macing_storage 130 200 0
+                    wait wait__item
+                elseif config__save_exceptional = 1 and "exceptional" in label__item
                     # Exceptional craft is kept.
                 elseif "aspect" in label__item
                     # Aspect items are kept.
-                else
+                elseif find alias__item backpack
                     if not gumpexists 949095101
-                        if findtype 4032|3997|7864|4148|4136 backpack as alias__recycle_tool
-                            dclick alias__recycle_tool
+                        if not find var__recycle_tool backpack
+                            @setvar! var__recycle_tool 0
+                            if findtype 4032|3997|7864|4148|4136 backpack as alias__spare_recycle_tool
+                                @setvar! var__recycle_tool alias__spare_recycle_tool
+                            endif
+                        endif
+                        if var__recycle_tool != 0
+                            dclick var__recycle_tool
                             waitforgump 949095101 wait__gump
                         endif
                     endif
                     if gumpexists 949095101
-                        gumpresponse 3 949095101
-                        waitfortarget wait__target
-                        target alias__item
+                        if ingump "Recycle Single Item" 949095101
+                            hotkey 'Cancel Current Target'
+                            gumpresponse 3 949095101
+                            waitfortarget wait__target
+                            if targetexists
+                                target alias__item
+                            else
+                                @setvar! var__recycle_ready 0
+                                hotkey 'Cancel Current Target'
+                                overhead "[ recycle, blocked ]" 254
+                                sysmsg "Recycle: no recycling cursor. Remaining items left untouched." 88
+                            endif
+                        else
+                            @setvar! var__recycle_ready 0
+                            overhead "[ recycle, wrong ]" 254
+                            sysmsg "Recycle: select Recycle Single Item in the tool menu. Remaining items left untouched." 88
+                        endif
+                    else
+                        @setvar! var__recycle_ready 0
+                        overhead "[ recycle, blocked ]" 254
+                        sysmsg "Recycle: no recycling menu. Remaining items left untouched." 88
                     endif
                 endif
             endif
-            @ignore alias__item
-        endif
+        endwhile
     endif
+    @ignore alias__item
 endwhile
 
 # ========================================================================================
@@ -796,115 +968,148 @@ if var__fencing_storage != 0 and var__fencing_storage != var__save_container
     dclick var__fencing_storage
     wait wait__item
 endif
-while findtype 31172|31169|3719|3922|3938|5121|5123|5125|30989|30992|30996|30997|30998|31176|31188 var__source_container as alias__item
+while var__recycle_ready = 1 and findtype 31172|31169|3719|3922|3938|5121|5123|5125|30989|30992|30996|30997|30998|31176|31188 var__source_container as alias__item
     if config__skip_supply_pouch = 1 and var__save_container != backpack and find alias__item var__save_container
-        @ignore alias__item
+        # Already stored or packed for use.
     else
-        getlabel alias__item label__item
-        if config__sysmsg = 1
-            sysmsg "Recycle check: {{label__item}}" 88
-        endif
-        @setvar! var__save_item 0
-        @setvar! var__recycle_item 1
-        if config__save_greater_slaying = 1 and "slaying" in label__item and "greater" in label__item
-            @setvar! var__save_item 1
-        elseif config__save_lesser_slaying = 1 and "slaying" in label__item and "lesser" in label__item
-            @setvar! var__save_item 1
-        elseif config__save_supremely = 1 and "supremely" in label__item
-            @setvar! var__save_item 1
-        elseif config__save_exceedingly = 1 and "exceedingly" in label__item
-            @setvar! var__save_item 1
-        elseif config__save_eminently = 1 and "eminently" in label__item
-            @setvar! var__save_item 1
-        elseif config__save_surpassingly = 1 and "surpassingly" in label__item
-            @setvar! var__save_item 1
-        elseif config__save_accurate = 1 and "accurate" in label__item
-            @setvar! var__save_item 1
-        elseif config__save_vanquishing = 1 and "vanquishing" in label__item
-            @setvar! var__save_item 1
-        elseif config__save_power = 1 and "power" in label__item
-            @setvar! var__save_item 1
-        elseif config__save_force = 1 and "force" in label__item
-            @setvar! var__save_item 1
-        elseif config__save_might = 1 and "might" in label__item
-            @setvar! var__save_item 1
-        elseif config__save_ruin = 1 and "ruin" in label__item
-            @setvar! var__save_item 1
-        elseif config__save_regular_slaying = 1 and "slaying" in label__item
-            if "lesser" in label__item
-                # A lesser one follows config__save_lesser_slaying above.
-            else
-                @setvar! var__save_item 1
-            endif
-        endif
-
-        if "unidentified" in label__item
-            if skill "Item Identification" = 120
-                useskill "itemId"
-                waitfortarget wait__target
-                target var__source_container
-                wait wait__item_id
-                @setvar! var__recycle_item 0
-            elseif findtype 20496 backpack as alias__id_wand
-                dclick alias__id_wand
-                waitfortarget wait__target
-                target alias__item
-                @setvar! var__recycle_item 0
-            elseif skill "Item Identification" >= config__min_item_id_skill
-                useskill "itemId"
-                waitfortarget wait__target
-                target alias__item
-                wait wait__item_id
-                @setvar! var__recycle_item 0
-            endif
-
-            # Read again: one identified now is checked on the next pass of this loop, one that
-            # is still not is left for the next run, so a spent wand cannot hold the loop.
-            if var__recycle_item = 0
-                wait wait__item
-                getlabel alias__item label__item
-                if "unidentified" in label__item
-                    @ignore alias__item
+        @setvar! var__item_pending 1
+        @setvar! var__id_attempted 0
+        while var__item_pending = 1
+            @unsetvar! label__item
+            @setvar! label__item 0
+            getlabel alias__item label__item
+            if label__item = 0
+                @setvar! var__item_pending 0
+                overhead "[ item, skip ]" 254
+                sysmsg "Recycle: no label returned. Item left untouched." 88
+            elseif "unidentified" in label__item
+                if var__id_attempted = 0
+                    if var__id_wand_out = 1
+                        @setvar! var__item_pending 0
+                    else
+                        if var__id_wand = 0 and findtype 20496 backpack as alias__spare_id_wand
+                            @setvar! var__id_wand alias__spare_id_wand
+                        endif
+                        if var__id_wand = 0
+                            @setvar! var__item_pending 0
+                            @setvar! var__id_wand_out 1
+                            overhead "[ id wand, out ]" 254
+                            sysmsg "Recycle: no usable ID wand left. Unidentified items left untouched." 88
+                        else
+                            hotkey 'Cancel Current Target'
+                            dclick var__id_wand
+                            waitfortarget wait__target
+                            if targetexists
+                                target alias__item
+                                settimer "timer__recycle_identify" 0
+                                @setvar! var__id_attempted 1
+                            else
+                                hotkey 'Cancel Current Target'
+                                @ignore var__id_wand
+                                @setvar! var__id_wand 0
+                            endif
+                        endif
+                    endif
+                elseif timer "timer__recycle_identify" >= wait__identify
+                    @setvar! var__item_pending 0
+                    overhead "[ item id, miss ]" 254
+                    sysmsg "Recycle: identification not confirmed. Item left untouched: {{label__item}}" 88
+                else
+                    wait wait__label_poll
                 endif
-            endif
-        endif
+            else
+                @setvar! var__item_pending 0
+                if config__sysmsg = 1
+                    sysmsg "Recycle check: {{label__item}}" 88
+                endif
+                @setvar! var__save_item 0
+                if config__save_greater_slaying = 1 and "slaying" in label__item and "greater" in label__item
+                    @setvar! var__save_item 1
+                elseif config__save_lesser_slaying = 1 and "slaying" in label__item and "lesser" in label__item
+                    @setvar! var__save_item 1
+                elseif config__save_supremely = 1 and "supremely" in label__item
+                    @setvar! var__save_item 1
+                elseif config__save_exceedingly = 1 and "exceedingly" in label__item
+                    @setvar! var__save_item 1
+                elseif config__save_eminently = 1 and "eminently" in label__item
+                    @setvar! var__save_item 1
+                elseif config__save_surpassingly = 1 and "surpassingly" in label__item
+                    @setvar! var__save_item 1
+                elseif config__save_accurate = 1 and "accurate" in label__item
+                    @setvar! var__save_item 1
+                elseif config__save_vanquishing = 1 and "vanquishing" in label__item
+                    @setvar! var__save_item 1
+                elseif config__save_power = 1 and "power" in label__item
+                    @setvar! var__save_item 1
+                elseif config__save_force = 1 and "force" in label__item
+                    @setvar! var__save_item 1
+                elseif config__save_might = 1 and "might" in label__item
+                    @setvar! var__save_item 1
+                elseif config__save_ruin = 1 and "ruin" in label__item
+                    @setvar! var__save_item 1
+                elseif config__save_regular_slaying = 1 and "slaying" in label__item
+                    if "lesser" in label__item
+                        # A lesser one follows config__save_lesser_slaying above.
+                    else
+                        @setvar! var__save_item 1
+                    endif
+                endif
 
-        if var__save_item = 1
-            if config__chatty = 1
-                overhead "[ item, saving ]" 290
-            endif
-            if config__sysmsg = 1
-                sysmsg "Recycle save: {{label__item}}" 88
-            endif
-            lift alias__item
-            drop var__fencing_storage 130 200 0
-            wait wait__item
-            @ignore alias__item
-        endif
-
-        if var__recycle_item = 1
-            if find alias__item backpack
-                if config__save_exceptional = 1 and "exceptional" in label__item
+                if var__save_item = 1
+                    if config__chatty = 1
+                        overhead "[ item, saving ]" 290
+                    endif
+                    if config__sysmsg = 1
+                        sysmsg "Recycle save: {{label__item}}" 88
+                    endif
+                    lift alias__item
+                    drop var__fencing_storage 130 200 0
+                    wait wait__item
+                elseif config__save_exceptional = 1 and "exceptional" in label__item
                     # Exceptional craft is kept.
                 elseif "aspect" in label__item
                     # Aspect items are kept.
-                else
+                elseif find alias__item backpack
                     if not gumpexists 949095101
-                        if findtype 4032|3997|7864|4148|4136 backpack as alias__recycle_tool
-                            dclick alias__recycle_tool
+                        if not find var__recycle_tool backpack
+                            @setvar! var__recycle_tool 0
+                            if findtype 4032|3997|7864|4148|4136 backpack as alias__spare_recycle_tool
+                                @setvar! var__recycle_tool alias__spare_recycle_tool
+                            endif
+                        endif
+                        if var__recycle_tool != 0
+                            dclick var__recycle_tool
                             waitforgump 949095101 wait__gump
                         endif
                     endif
                     if gumpexists 949095101
-                        gumpresponse 3 949095101
-                        waitfortarget wait__target
-                        target alias__item
+                        if ingump "Recycle Single Item" 949095101
+                            hotkey 'Cancel Current Target'
+                            gumpresponse 3 949095101
+                            waitfortarget wait__target
+                            if targetexists
+                                target alias__item
+                            else
+                                @setvar! var__recycle_ready 0
+                                hotkey 'Cancel Current Target'
+                                overhead "[ recycle, blocked ]" 254
+                                sysmsg "Recycle: no recycling cursor. Remaining items left untouched." 88
+                            endif
+                        else
+                            @setvar! var__recycle_ready 0
+                            overhead "[ recycle, wrong ]" 254
+                            sysmsg "Recycle: select Recycle Single Item in the tool menu. Remaining items left untouched." 88
+                        endif
+                    else
+                        @setvar! var__recycle_ready 0
+                        overhead "[ recycle, blocked ]" 254
+                        sysmsg "Recycle: no recycling menu. Remaining items left untouched." 88
                     endif
                 endif
             endif
-            @ignore alias__item
-        endif
+        endwhile
     endif
+    @ignore alias__item
 endwhile
 
 # ========================================================================================
@@ -914,115 +1119,148 @@ if var__archery_storage != 0 and var__archery_storage != var__save_container
     dclick var__archery_storage
     wait wait__item
 endif
-while findtype 3920|5042|5117|30990|30993|30994|30995|31184|31186 var__source_container as alias__item
+while var__recycle_ready = 1 and findtype 3920|5042|5117|30990|30993|30994|30995|31184|31186 var__source_container as alias__item
     if config__skip_supply_pouch = 1 and var__save_container != backpack and find alias__item var__save_container
-        @ignore alias__item
+        # Already stored or packed for use.
     else
-        getlabel alias__item label__item
-        if config__sysmsg = 1
-            sysmsg "Recycle check: {{label__item}}" 88
-        endif
-        @setvar! var__save_item 0
-        @setvar! var__recycle_item 1
-        if config__save_greater_slaying = 1 and "slaying" in label__item and "greater" in label__item
-            @setvar! var__save_item 1
-        elseif config__save_lesser_slaying = 1 and "slaying" in label__item and "lesser" in label__item
-            @setvar! var__save_item 1
-        elseif config__save_supremely = 1 and "supremely" in label__item
-            @setvar! var__save_item 1
-        elseif config__save_exceedingly = 1 and "exceedingly" in label__item
-            @setvar! var__save_item 1
-        elseif config__save_eminently = 1 and "eminently" in label__item
-            @setvar! var__save_item 1
-        elseif config__save_surpassingly = 1 and "surpassingly" in label__item
-            @setvar! var__save_item 1
-        elseif config__save_accurate = 1 and "accurate" in label__item
-            @setvar! var__save_item 1
-        elseif config__save_vanquishing = 1 and "vanquishing" in label__item
-            @setvar! var__save_item 1
-        elseif config__save_power = 1 and "power" in label__item
-            @setvar! var__save_item 1
-        elseif config__save_force = 1 and "force" in label__item
-            @setvar! var__save_item 1
-        elseif config__save_might = 1 and "might" in label__item
-            @setvar! var__save_item 1
-        elseif config__save_ruin = 1 and "ruin" in label__item
-            @setvar! var__save_item 1
-        elseif config__save_regular_slaying = 1 and "slaying" in label__item
-            if "lesser" in label__item
-                # A lesser one follows config__save_lesser_slaying above.
-            else
-                @setvar! var__save_item 1
-            endif
-        endif
-
-        if "unidentified" in label__item
-            if skill "Item Identification" = 120
-                useskill "itemId"
-                waitfortarget wait__target
-                target var__source_container
-                wait wait__item_id
-                @setvar! var__recycle_item 0
-            elseif findtype 20496 backpack as alias__id_wand
-                dclick alias__id_wand
-                waitfortarget wait__target
-                target alias__item
-                @setvar! var__recycle_item 0
-            elseif skill "Item Identification" >= config__min_item_id_skill
-                useskill "itemId"
-                waitfortarget wait__target
-                target alias__item
-                wait wait__item_id
-                @setvar! var__recycle_item 0
-            endif
-
-            # Read again: one identified now is checked on the next pass of this loop, one that
-            # is still not is left for the next run, so a spent wand cannot hold the loop.
-            if var__recycle_item = 0
-                wait wait__item
-                getlabel alias__item label__item
-                if "unidentified" in label__item
-                    @ignore alias__item
+        @setvar! var__item_pending 1
+        @setvar! var__id_attempted 0
+        while var__item_pending = 1
+            @unsetvar! label__item
+            @setvar! label__item 0
+            getlabel alias__item label__item
+            if label__item = 0
+                @setvar! var__item_pending 0
+                overhead "[ item, skip ]" 254
+                sysmsg "Recycle: no label returned. Item left untouched." 88
+            elseif "unidentified" in label__item
+                if var__id_attempted = 0
+                    if var__id_wand_out = 1
+                        @setvar! var__item_pending 0
+                    else
+                        if var__id_wand = 0 and findtype 20496 backpack as alias__spare_id_wand
+                            @setvar! var__id_wand alias__spare_id_wand
+                        endif
+                        if var__id_wand = 0
+                            @setvar! var__item_pending 0
+                            @setvar! var__id_wand_out 1
+                            overhead "[ id wand, out ]" 254
+                            sysmsg "Recycle: no usable ID wand left. Unidentified items left untouched." 88
+                        else
+                            hotkey 'Cancel Current Target'
+                            dclick var__id_wand
+                            waitfortarget wait__target
+                            if targetexists
+                                target alias__item
+                                settimer "timer__recycle_identify" 0
+                                @setvar! var__id_attempted 1
+                            else
+                                hotkey 'Cancel Current Target'
+                                @ignore var__id_wand
+                                @setvar! var__id_wand 0
+                            endif
+                        endif
+                    endif
+                elseif timer "timer__recycle_identify" >= wait__identify
+                    @setvar! var__item_pending 0
+                    overhead "[ item id, miss ]" 254
+                    sysmsg "Recycle: identification not confirmed. Item left untouched: {{label__item}}" 88
+                else
+                    wait wait__label_poll
                 endif
-            endif
-        endif
+            else
+                @setvar! var__item_pending 0
+                if config__sysmsg = 1
+                    sysmsg "Recycle check: {{label__item}}" 88
+                endif
+                @setvar! var__save_item 0
+                if config__save_greater_slaying = 1 and "slaying" in label__item and "greater" in label__item
+                    @setvar! var__save_item 1
+                elseif config__save_lesser_slaying = 1 and "slaying" in label__item and "lesser" in label__item
+                    @setvar! var__save_item 1
+                elseif config__save_supremely = 1 and "supremely" in label__item
+                    @setvar! var__save_item 1
+                elseif config__save_exceedingly = 1 and "exceedingly" in label__item
+                    @setvar! var__save_item 1
+                elseif config__save_eminently = 1 and "eminently" in label__item
+                    @setvar! var__save_item 1
+                elseif config__save_surpassingly = 1 and "surpassingly" in label__item
+                    @setvar! var__save_item 1
+                elseif config__save_accurate = 1 and "accurate" in label__item
+                    @setvar! var__save_item 1
+                elseif config__save_vanquishing = 1 and "vanquishing" in label__item
+                    @setvar! var__save_item 1
+                elseif config__save_power = 1 and "power" in label__item
+                    @setvar! var__save_item 1
+                elseif config__save_force = 1 and "force" in label__item
+                    @setvar! var__save_item 1
+                elseif config__save_might = 1 and "might" in label__item
+                    @setvar! var__save_item 1
+                elseif config__save_ruin = 1 and "ruin" in label__item
+                    @setvar! var__save_item 1
+                elseif config__save_regular_slaying = 1 and "slaying" in label__item
+                    if "lesser" in label__item
+                        # A lesser one follows config__save_lesser_slaying above.
+                    else
+                        @setvar! var__save_item 1
+                    endif
+                endif
 
-        if var__save_item = 1
-            if config__chatty = 1
-                overhead "[ item, saving ]" 290
-            endif
-            if config__sysmsg = 1
-                sysmsg "Recycle save: {{label__item}}" 88
-            endif
-            lift alias__item
-            drop var__archery_storage 130 200 0
-            wait wait__item
-            @ignore alias__item
-        endif
-
-        if var__recycle_item = 1
-            if find alias__item backpack
-                if config__save_exceptional = 1 and "exceptional" in label__item
+                if var__save_item = 1
+                    if config__chatty = 1
+                        overhead "[ item, saving ]" 290
+                    endif
+                    if config__sysmsg = 1
+                        sysmsg "Recycle save: {{label__item}}" 88
+                    endif
+                    lift alias__item
+                    drop var__archery_storage 130 200 0
+                    wait wait__item
+                elseif config__save_exceptional = 1 and "exceptional" in label__item
                     # Exceptional craft is kept.
                 elseif "aspect" in label__item
                     # Aspect items are kept.
-                else
+                elseif find alias__item backpack
                     if not gumpexists 949095101
-                        if findtype 4032|3997|7864|4148|4136 backpack as alias__recycle_tool
-                            dclick alias__recycle_tool
+                        if not find var__recycle_tool backpack
+                            @setvar! var__recycle_tool 0
+                            if findtype 4032|3997|7864|4148|4136 backpack as alias__spare_recycle_tool
+                                @setvar! var__recycle_tool alias__spare_recycle_tool
+                            endif
+                        endif
+                        if var__recycle_tool != 0
+                            dclick var__recycle_tool
                             waitforgump 949095101 wait__gump
                         endif
                     endif
                     if gumpexists 949095101
-                        gumpresponse 3 949095101
-                        waitfortarget wait__target
-                        target alias__item
+                        if ingump "Recycle Single Item" 949095101
+                            hotkey 'Cancel Current Target'
+                            gumpresponse 3 949095101
+                            waitfortarget wait__target
+                            if targetexists
+                                target alias__item
+                            else
+                                @setvar! var__recycle_ready 0
+                                hotkey 'Cancel Current Target'
+                                overhead "[ recycle, blocked ]" 254
+                                sysmsg "Recycle: no recycling cursor. Remaining items left untouched." 88
+                            endif
+                        else
+                            @setvar! var__recycle_ready 0
+                            overhead "[ recycle, wrong ]" 254
+                            sysmsg "Recycle: select Recycle Single Item in the tool menu. Remaining items left untouched." 88
+                        endif
+                    else
+                        @setvar! var__recycle_ready 0
+                        overhead "[ recycle, blocked ]" 254
+                        sysmsg "Recycle: no recycling menu. Remaining items left untouched." 88
                     endif
                 endif
             endif
-            @ignore alias__item
-        endif
+        endwhile
     endif
+    @ignore alias__item
 endwhile
 
 # ========================================================================================
@@ -1032,95 +1270,128 @@ if var__shield_storage != 0 and var__shield_storage != var__save_container
     dclick var__shield_storage
     wait wait__item
 endif
-while findtype 7026|7027|7029|7031|7033|7034|7035|7107|7109|31002|31130 var__source_container as alias__item
+while var__recycle_ready = 1 and findtype 7026|7027|7029|7031|7033|7034|7035|7107|7109|31002|31130 var__source_container as alias__item
     if config__skip_supply_pouch = 1 and var__save_container != backpack and find alias__item var__save_container
-        @ignore alias__item
+        # Already stored or packed for use.
     else
-        getlabel alias__item label__item
-        if config__sysmsg = 1
-            sysmsg "Recycle check: {{label__item}}" 88
-        endif
-        @setvar! var__save_item 0
-        @setvar! var__recycle_item 1
-        if config__save_invulnerability = 1 and "invulnerability" in label__item
-            @setvar! var__save_item 1
-        elseif config__save_fortification = 1 and "fortification" in label__item
-            @setvar! var__save_item 1
-        elseif config__save_hardening = 1 and "hardening" in label__item
-            @setvar! var__save_item 1
-        elseif config__save_guarding = 1 and "guarding" in label__item
-            @setvar! var__save_item 1
-        elseif config__save_defense = 1 and "defense" in label__item
-            @setvar! var__save_item 1
-        endif
-
-        if "unidentified" in label__item
-            if skill "Item Identification" = 120
-                useskill "itemId"
-                waitfortarget wait__target
-                target var__source_container
-                wait wait__item_id
-                @setvar! var__recycle_item 0
-            elseif findtype 20496 backpack as alias__id_wand
-                dclick alias__id_wand
-                waitfortarget wait__target
-                target alias__item
-                @setvar! var__recycle_item 0
-            elseif skill "Item Identification" >= config__min_item_id_skill
-                useskill "itemId"
-                waitfortarget wait__target
-                target alias__item
-                wait wait__item_id
-                @setvar! var__recycle_item 0
-            endif
-
-            # Read again: one identified now is checked on the next pass of this loop, one that
-            # is still not is left for the next run, so a spent wand cannot hold the loop.
-            if var__recycle_item = 0
-                wait wait__item
-                getlabel alias__item label__item
-                if "unidentified" in label__item
-                    @ignore alias__item
+        @setvar! var__item_pending 1
+        @setvar! var__id_attempted 0
+        while var__item_pending = 1
+            @unsetvar! label__item
+            @setvar! label__item 0
+            getlabel alias__item label__item
+            if label__item = 0
+                @setvar! var__item_pending 0
+                overhead "[ item, skip ]" 254
+                sysmsg "Recycle: no label returned. Item left untouched." 88
+            elseif "unidentified" in label__item
+                if var__id_attempted = 0
+                    if var__id_wand_out = 1
+                        @setvar! var__item_pending 0
+                    else
+                        if var__id_wand = 0 and findtype 20496 backpack as alias__spare_id_wand
+                            @setvar! var__id_wand alias__spare_id_wand
+                        endif
+                        if var__id_wand = 0
+                            @setvar! var__item_pending 0
+                            @setvar! var__id_wand_out 1
+                            overhead "[ id wand, out ]" 254
+                            sysmsg "Recycle: no usable ID wand left. Unidentified items left untouched." 88
+                        else
+                            hotkey 'Cancel Current Target'
+                            dclick var__id_wand
+                            waitfortarget wait__target
+                            if targetexists
+                                target alias__item
+                                settimer "timer__recycle_identify" 0
+                                @setvar! var__id_attempted 1
+                            else
+                                hotkey 'Cancel Current Target'
+                                @ignore var__id_wand
+                                @setvar! var__id_wand 0
+                            endif
+                        endif
+                    endif
+                elseif timer "timer__recycle_identify" >= wait__identify
+                    @setvar! var__item_pending 0
+                    overhead "[ item id, miss ]" 254
+                    sysmsg "Recycle: identification not confirmed. Item left untouched: {{label__item}}" 88
+                else
+                    wait wait__label_poll
                 endif
-            endif
-        endif
+            else
+                @setvar! var__item_pending 0
+                if config__sysmsg = 1
+                    sysmsg "Recycle check: {{label__item}}" 88
+                endif
+                @setvar! var__save_item 0
+                if config__save_invulnerability = 1 and "invulnerability" in label__item
+                    @setvar! var__save_item 1
+                elseif config__save_fortification = 1 and "fortification" in label__item
+                    @setvar! var__save_item 1
+                elseif config__save_hardening = 1 and "hardening" in label__item
+                    @setvar! var__save_item 1
+                elseif config__save_guarding = 1 and "guarding" in label__item
+                    @setvar! var__save_item 1
+                elseif config__save_defense = 1 and "defense" in label__item
+                    @setvar! var__save_item 1
+                endif
 
-        if var__save_item = 1
-            if config__chatty = 1
-                overhead "[ item, saving ]" 290
-            endif
-            if config__sysmsg = 1
-                sysmsg "Recycle save: {{label__item}}" 88
-            endif
-            lift alias__item
-            drop var__shield_storage 130 200 0
-            wait wait__item
-            @ignore alias__item
-        endif
-
-        if var__recycle_item = 1
-            if find alias__item backpack
-                if config__save_exceptional = 1 and "exceptional" in label__item
+                if var__save_item = 1
+                    if config__chatty = 1
+                        overhead "[ item, saving ]" 290
+                    endif
+                    if config__sysmsg = 1
+                        sysmsg "Recycle save: {{label__item}}" 88
+                    endif
+                    lift alias__item
+                    drop var__shield_storage 130 200 0
+                    wait wait__item
+                elseif config__save_exceptional = 1 and "exceptional" in label__item
                     # Exceptional craft is kept.
                 elseif "aspect" in label__item
                     # Aspect items are kept.
-                else
+                elseif find alias__item backpack
                     if not gumpexists 949095101
-                        if findtype 4032|3997|7864|4148|4136 backpack as alias__recycle_tool
-                            dclick alias__recycle_tool
+                        if not find var__recycle_tool backpack
+                            @setvar! var__recycle_tool 0
+                            if findtype 4032|3997|7864|4148|4136 backpack as alias__spare_recycle_tool
+                                @setvar! var__recycle_tool alias__spare_recycle_tool
+                            endif
+                        endif
+                        if var__recycle_tool != 0
+                            dclick var__recycle_tool
                             waitforgump 949095101 wait__gump
                         endif
                     endif
                     if gumpexists 949095101
-                        gumpresponse 3 949095101
-                        waitfortarget wait__target
-                        target alias__item
+                        if ingump "Recycle Single Item" 949095101
+                            hotkey 'Cancel Current Target'
+                            gumpresponse 3 949095101
+                            waitfortarget wait__target
+                            if targetexists
+                                target alias__item
+                            else
+                                @setvar! var__recycle_ready 0
+                                hotkey 'Cancel Current Target'
+                                overhead "[ recycle, blocked ]" 254
+                                sysmsg "Recycle: no recycling cursor. Remaining items left untouched." 88
+                            endif
+                        else
+                            @setvar! var__recycle_ready 0
+                            overhead "[ recycle, wrong ]" 254
+                            sysmsg "Recycle: select Recycle Single Item in the tool menu. Remaining items left untouched." 88
+                        endif
+                    else
+                        @setvar! var__recycle_ready 0
+                        overhead "[ recycle, blocked ]" 254
+                        sysmsg "Recycle: no recycling menu. Remaining items left untouched." 88
                     endif
                 endif
             endif
-            @ignore alias__item
-        endif
+        endwhile
     endif
+    @ignore alias__item
 endwhile
 
 # ========================================================================================
@@ -1130,115 +1401,148 @@ if var__mage_storage != 0 and var__mage_storage != var__save_container
     dclick var__mage_storage
     wait wait__item
 endif
-while findtype 3570|3571|3572|3573|3834 var__source_container as alias__item
+while var__recycle_ready = 1 and findtype 3570|3571|3572|3573|3834 var__source_container as alias__item
     if config__skip_supply_pouch = 1 and var__save_container != backpack and find alias__item var__save_container
-        @ignore alias__item
+        # Already stored or packed for use.
     else
-        getlabel alias__item label__item
-        if config__sysmsg = 1
-            sysmsg "Recycle check: {{label__item}}" 88
-        endif
-        @setvar! var__save_item 0
-        @setvar! var__recycle_item 1
-        if config__save_greater_slaying = 1 and "slaying" in label__item and "greater" in label__item
-            @setvar! var__save_item 1
-        elseif config__save_lesser_slaying = 1 and "slaying" in label__item and "lesser" in label__item
-            @setvar! var__save_item 1
-        elseif config__save_supremely = 1 and "supremely" in label__item
-            @setvar! var__save_item 1
-        elseif config__save_exceedingly = 1 and "exceedingly" in label__item
-            @setvar! var__save_item 1
-        elseif config__save_eminently = 1 and "eminently" in label__item
-            @setvar! var__save_item 1
-        elseif config__save_surpassingly = 1 and "surpassingly" in label__item
-            @setvar! var__save_item 1
-        elseif config__save_accurate = 1 and "accurate" in label__item
-            @setvar! var__save_item 1
-        elseif config__save_vanquishing = 1 and "vanquishing" in label__item
-            @setvar! var__save_item 1
-        elseif config__save_power = 1 and "power" in label__item
-            @setvar! var__save_item 1
-        elseif config__save_force = 1 and "force" in label__item
-            @setvar! var__save_item 1
-        elseif config__save_might = 1 and "might" in label__item
-            @setvar! var__save_item 1
-        elseif config__save_ruin = 1 and "ruin" in label__item
-            @setvar! var__save_item 1
-        elseif config__save_regular_slaying = 1 and "slaying" in label__item
-            if "lesser" in label__item
-                # A lesser one follows config__save_lesser_slaying above.
-            else
-                @setvar! var__save_item 1
-            endif
-        endif
-
-        if "unidentified" in label__item
-            if skill "Item Identification" = 120
-                useskill "itemId"
-                waitfortarget wait__target
-                target var__source_container
-                wait wait__item_id
-                @setvar! var__recycle_item 0
-            elseif findtype 20496 backpack as alias__id_wand
-                dclick alias__id_wand
-                waitfortarget wait__target
-                target alias__item
-                @setvar! var__recycle_item 0
-            elseif skill "Item Identification" >= config__min_item_id_skill
-                useskill "itemId"
-                waitfortarget wait__target
-                target alias__item
-                wait wait__item_id
-                @setvar! var__recycle_item 0
-            endif
-
-            # Read again: one identified now is checked on the next pass of this loop, one that
-            # is still not is left for the next run, so a spent wand cannot hold the loop.
-            if var__recycle_item = 0
-                wait wait__item
-                getlabel alias__item label__item
-                if "unidentified" in label__item
-                    @ignore alias__item
+        @setvar! var__item_pending 1
+        @setvar! var__id_attempted 0
+        while var__item_pending = 1
+            @unsetvar! label__item
+            @setvar! label__item 0
+            getlabel alias__item label__item
+            if label__item = 0
+                @setvar! var__item_pending 0
+                overhead "[ item, skip ]" 254
+                sysmsg "Recycle: no label returned. Item left untouched." 88
+            elseif "unidentified" in label__item
+                if var__id_attempted = 0
+                    if var__id_wand_out = 1
+                        @setvar! var__item_pending 0
+                    else
+                        if var__id_wand = 0 and findtype 20496 backpack as alias__spare_id_wand
+                            @setvar! var__id_wand alias__spare_id_wand
+                        endif
+                        if var__id_wand = 0
+                            @setvar! var__item_pending 0
+                            @setvar! var__id_wand_out 1
+                            overhead "[ id wand, out ]" 254
+                            sysmsg "Recycle: no usable ID wand left. Unidentified items left untouched." 88
+                        else
+                            hotkey 'Cancel Current Target'
+                            dclick var__id_wand
+                            waitfortarget wait__target
+                            if targetexists
+                                target alias__item
+                                settimer "timer__recycle_identify" 0
+                                @setvar! var__id_attempted 1
+                            else
+                                hotkey 'Cancel Current Target'
+                                @ignore var__id_wand
+                                @setvar! var__id_wand 0
+                            endif
+                        endif
+                    endif
+                elseif timer "timer__recycle_identify" >= wait__identify
+                    @setvar! var__item_pending 0
+                    overhead "[ item id, miss ]" 254
+                    sysmsg "Recycle: identification not confirmed. Item left untouched: {{label__item}}" 88
+                else
+                    wait wait__label_poll
                 endif
-            endif
-        endif
+            else
+                @setvar! var__item_pending 0
+                if config__sysmsg = 1
+                    sysmsg "Recycle check: {{label__item}}" 88
+                endif
+                @setvar! var__save_item 0
+                if config__save_greater_slaying = 1 and "slaying" in label__item and "greater" in label__item
+                    @setvar! var__save_item 1
+                elseif config__save_lesser_slaying = 1 and "slaying" in label__item and "lesser" in label__item
+                    @setvar! var__save_item 1
+                elseif config__save_supremely = 1 and "supremely" in label__item
+                    @setvar! var__save_item 1
+                elseif config__save_exceedingly = 1 and "exceedingly" in label__item
+                    @setvar! var__save_item 1
+                elseif config__save_eminently = 1 and "eminently" in label__item
+                    @setvar! var__save_item 1
+                elseif config__save_surpassingly = 1 and "surpassingly" in label__item
+                    @setvar! var__save_item 1
+                elseif config__save_accurate = 1 and "accurate" in label__item
+                    @setvar! var__save_item 1
+                elseif config__save_vanquishing = 1 and "vanquishing" in label__item
+                    @setvar! var__save_item 1
+                elseif config__save_power = 1 and "power" in label__item
+                    @setvar! var__save_item 1
+                elseif config__save_force = 1 and "force" in label__item
+                    @setvar! var__save_item 1
+                elseif config__save_might = 1 and "might" in label__item
+                    @setvar! var__save_item 1
+                elseif config__save_ruin = 1 and "ruin" in label__item
+                    @setvar! var__save_item 1
+                elseif config__save_regular_slaying = 1 and "slaying" in label__item
+                    if "lesser" in label__item
+                        # A lesser one follows config__save_lesser_slaying above.
+                    else
+                        @setvar! var__save_item 1
+                    endif
+                endif
 
-        if var__save_item = 1
-            if config__chatty = 1
-                overhead "[ item, saving ]" 290
-            endif
-            if config__sysmsg = 1
-                sysmsg "Recycle save: {{label__item}}" 88
-            endif
-            lift alias__item
-            drop var__mage_storage 130 200 0
-            wait wait__item
-            @ignore alias__item
-        endif
-
-        if var__recycle_item = 1
-            if find alias__item backpack
-                if config__save_exceptional = 1 and "exceptional" in label__item
+                if var__save_item = 1
+                    if config__chatty = 1
+                        overhead "[ item, saving ]" 290
+                    endif
+                    if config__sysmsg = 1
+                        sysmsg "Recycle save: {{label__item}}" 88
+                    endif
+                    lift alias__item
+                    drop var__mage_storage 130 200 0
+                    wait wait__item
+                elseif config__save_exceptional = 1 and "exceptional" in label__item
                     # Exceptional craft is kept.
                 elseif "aspect" in label__item
                     # Aspect items are kept.
-                else
+                elseif find alias__item backpack
                     if not gumpexists 949095101
-                        if findtype 4032|3997|7864|4148|4136 backpack as alias__recycle_tool
-                            dclick alias__recycle_tool
+                        if not find var__recycle_tool backpack
+                            @setvar! var__recycle_tool 0
+                            if findtype 4032|3997|7864|4148|4136 backpack as alias__spare_recycle_tool
+                                @setvar! var__recycle_tool alias__spare_recycle_tool
+                            endif
+                        endif
+                        if var__recycle_tool != 0
+                            dclick var__recycle_tool
                             waitforgump 949095101 wait__gump
                         endif
                     endif
                     if gumpexists 949095101
-                        gumpresponse 3 949095101
-                        waitfortarget wait__target
-                        target alias__item
+                        if ingump "Recycle Single Item" 949095101
+                            hotkey 'Cancel Current Target'
+                            gumpresponse 3 949095101
+                            waitfortarget wait__target
+                            if targetexists
+                                target alias__item
+                            else
+                                @setvar! var__recycle_ready 0
+                                hotkey 'Cancel Current Target'
+                                overhead "[ recycle, blocked ]" 254
+                                sysmsg "Recycle: no recycling cursor. Remaining items left untouched." 88
+                            endif
+                        else
+                            @setvar! var__recycle_ready 0
+                            overhead "[ recycle, wrong ]" 254
+                            sysmsg "Recycle: select Recycle Single Item in the tool menu. Remaining items left untouched." 88
+                        endif
+                    else
+                        @setvar! var__recycle_ready 0
+                        overhead "[ recycle, blocked ]" 254
+                        sysmsg "Recycle: no recycling menu. Remaining items left untouched." 88
                     endif
                 endif
             endif
-            @ignore alias__item
-        endif
+        endwhile
     endif
+    @ignore alias__item
 endwhile
 
 # ========================================================================================
@@ -1248,115 +1552,148 @@ if var__wrestling_storage != 0 and var__wrestling_storage != var__save_container
     dclick var__wrestling_storage
     wait wait__item
 endif
-while findtype 22187|31141|31142 var__source_container as alias__item
+while var__recycle_ready = 1 and findtype 22187|31141|31142 var__source_container as alias__item
     if config__skip_supply_pouch = 1 and var__save_container != backpack and find alias__item var__save_container
-        @ignore alias__item
+        # Already stored or packed for use.
     else
-        getlabel alias__item label__item
-        if config__sysmsg = 1
-            sysmsg "Recycle check: {{label__item}}" 88
-        endif
-        @setvar! var__save_item 0
-        @setvar! var__recycle_item 1
-        if config__save_greater_slaying = 1 and "slaying" in label__item and "greater" in label__item
-            @setvar! var__save_item 1
-        elseif config__save_lesser_slaying = 1 and "slaying" in label__item and "lesser" in label__item
-            @setvar! var__save_item 1
-        elseif config__save_supremely = 1 and "supremely" in label__item
-            @setvar! var__save_item 1
-        elseif config__save_exceedingly = 1 and "exceedingly" in label__item
-            @setvar! var__save_item 1
-        elseif config__save_eminently = 1 and "eminently" in label__item
-            @setvar! var__save_item 1
-        elseif config__save_surpassingly = 1 and "surpassingly" in label__item
-            @setvar! var__save_item 1
-        elseif config__save_accurate = 1 and "accurate" in label__item
-            @setvar! var__save_item 1
-        elseif config__save_vanquishing = 1 and "vanquishing" in label__item
-            @setvar! var__save_item 1
-        elseif config__save_power = 1 and "power" in label__item
-            @setvar! var__save_item 1
-        elseif config__save_force = 1 and "force" in label__item
-            @setvar! var__save_item 1
-        elseif config__save_might = 1 and "might" in label__item
-            @setvar! var__save_item 1
-        elseif config__save_ruin = 1 and "ruin" in label__item
-            @setvar! var__save_item 1
-        elseif config__save_regular_slaying = 1 and "slaying" in label__item
-            if "lesser" in label__item
-                # A lesser one follows config__save_lesser_slaying above.
-            else
-                @setvar! var__save_item 1
-            endif
-        endif
-
-        if "unidentified" in label__item
-            if skill "Item Identification" = 120
-                useskill "itemId"
-                waitfortarget wait__target
-                target var__source_container
-                wait wait__item_id
-                @setvar! var__recycle_item 0
-            elseif findtype 20496 backpack as alias__id_wand
-                dclick alias__id_wand
-                waitfortarget wait__target
-                target alias__item
-                @setvar! var__recycle_item 0
-            elseif skill "Item Identification" >= config__min_item_id_skill
-                useskill "itemId"
-                waitfortarget wait__target
-                target alias__item
-                wait wait__item_id
-                @setvar! var__recycle_item 0
-            endif
-
-            # Read again: one identified now is checked on the next pass of this loop, one that
-            # is still not is left for the next run, so a spent wand cannot hold the loop.
-            if var__recycle_item = 0
-                wait wait__item
-                getlabel alias__item label__item
-                if "unidentified" in label__item
-                    @ignore alias__item
+        @setvar! var__item_pending 1
+        @setvar! var__id_attempted 0
+        while var__item_pending = 1
+            @unsetvar! label__item
+            @setvar! label__item 0
+            getlabel alias__item label__item
+            if label__item = 0
+                @setvar! var__item_pending 0
+                overhead "[ item, skip ]" 254
+                sysmsg "Recycle: no label returned. Item left untouched." 88
+            elseif "unidentified" in label__item
+                if var__id_attempted = 0
+                    if var__id_wand_out = 1
+                        @setvar! var__item_pending 0
+                    else
+                        if var__id_wand = 0 and findtype 20496 backpack as alias__spare_id_wand
+                            @setvar! var__id_wand alias__spare_id_wand
+                        endif
+                        if var__id_wand = 0
+                            @setvar! var__item_pending 0
+                            @setvar! var__id_wand_out 1
+                            overhead "[ id wand, out ]" 254
+                            sysmsg "Recycle: no usable ID wand left. Unidentified items left untouched." 88
+                        else
+                            hotkey 'Cancel Current Target'
+                            dclick var__id_wand
+                            waitfortarget wait__target
+                            if targetexists
+                                target alias__item
+                                settimer "timer__recycle_identify" 0
+                                @setvar! var__id_attempted 1
+                            else
+                                hotkey 'Cancel Current Target'
+                                @ignore var__id_wand
+                                @setvar! var__id_wand 0
+                            endif
+                        endif
+                    endif
+                elseif timer "timer__recycle_identify" >= wait__identify
+                    @setvar! var__item_pending 0
+                    overhead "[ item id, miss ]" 254
+                    sysmsg "Recycle: identification not confirmed. Item left untouched: {{label__item}}" 88
+                else
+                    wait wait__label_poll
                 endif
-            endif
-        endif
+            else
+                @setvar! var__item_pending 0
+                if config__sysmsg = 1
+                    sysmsg "Recycle check: {{label__item}}" 88
+                endif
+                @setvar! var__save_item 0
+                if config__save_greater_slaying = 1 and "slaying" in label__item and "greater" in label__item
+                    @setvar! var__save_item 1
+                elseif config__save_lesser_slaying = 1 and "slaying" in label__item and "lesser" in label__item
+                    @setvar! var__save_item 1
+                elseif config__save_supremely = 1 and "supremely" in label__item
+                    @setvar! var__save_item 1
+                elseif config__save_exceedingly = 1 and "exceedingly" in label__item
+                    @setvar! var__save_item 1
+                elseif config__save_eminently = 1 and "eminently" in label__item
+                    @setvar! var__save_item 1
+                elseif config__save_surpassingly = 1 and "surpassingly" in label__item
+                    @setvar! var__save_item 1
+                elseif config__save_accurate = 1 and "accurate" in label__item
+                    @setvar! var__save_item 1
+                elseif config__save_vanquishing = 1 and "vanquishing" in label__item
+                    @setvar! var__save_item 1
+                elseif config__save_power = 1 and "power" in label__item
+                    @setvar! var__save_item 1
+                elseif config__save_force = 1 and "force" in label__item
+                    @setvar! var__save_item 1
+                elseif config__save_might = 1 and "might" in label__item
+                    @setvar! var__save_item 1
+                elseif config__save_ruin = 1 and "ruin" in label__item
+                    @setvar! var__save_item 1
+                elseif config__save_regular_slaying = 1 and "slaying" in label__item
+                    if "lesser" in label__item
+                        # A lesser one follows config__save_lesser_slaying above.
+                    else
+                        @setvar! var__save_item 1
+                    endif
+                endif
 
-        if var__save_item = 1
-            if config__chatty = 1
-                overhead "[ item, saving ]" 290
-            endif
-            if config__sysmsg = 1
-                sysmsg "Recycle save: {{label__item}}" 88
-            endif
-            lift alias__item
-            drop var__wrestling_storage 130 200 0
-            wait wait__item
-            @ignore alias__item
-        endif
-
-        if var__recycle_item = 1
-            if find alias__item backpack
-                if config__save_exceptional = 1 and "exceptional" in label__item
+                if var__save_item = 1
+                    if config__chatty = 1
+                        overhead "[ item, saving ]" 290
+                    endif
+                    if config__sysmsg = 1
+                        sysmsg "Recycle save: {{label__item}}" 88
+                    endif
+                    lift alias__item
+                    drop var__wrestling_storage 130 200 0
+                    wait wait__item
+                elseif config__save_exceptional = 1 and "exceptional" in label__item
                     # Exceptional craft is kept.
                 elseif "aspect" in label__item
                     # Aspect items are kept.
-                else
+                elseif find alias__item backpack
                     if not gumpexists 949095101
-                        if findtype 4032|3997|7864|4148|4136 backpack as alias__recycle_tool
-                            dclick alias__recycle_tool
+                        if not find var__recycle_tool backpack
+                            @setvar! var__recycle_tool 0
+                            if findtype 4032|3997|7864|4148|4136 backpack as alias__spare_recycle_tool
+                                @setvar! var__recycle_tool alias__spare_recycle_tool
+                            endif
+                        endif
+                        if var__recycle_tool != 0
+                            dclick var__recycle_tool
                             waitforgump 949095101 wait__gump
                         endif
                     endif
                     if gumpexists 949095101
-                        gumpresponse 3 949095101
-                        waitfortarget wait__target
-                        target alias__item
+                        if ingump "Recycle Single Item" 949095101
+                            hotkey 'Cancel Current Target'
+                            gumpresponse 3 949095101
+                            waitfortarget wait__target
+                            if targetexists
+                                target alias__item
+                            else
+                                @setvar! var__recycle_ready 0
+                                hotkey 'Cancel Current Target'
+                                overhead "[ recycle, blocked ]" 254
+                                sysmsg "Recycle: no recycling cursor. Remaining items left untouched." 88
+                            endif
+                        else
+                            @setvar! var__recycle_ready 0
+                            overhead "[ recycle, wrong ]" 254
+                            sysmsg "Recycle: select Recycle Single Item in the tool menu. Remaining items left untouched." 88
+                        endif
+                    else
+                        @setvar! var__recycle_ready 0
+                        overhead "[ recycle, blocked ]" 254
+                        sysmsg "Recycle: no recycling menu. Remaining items left untouched." 88
                     endif
                 endif
             endif
-            @ignore alias__item
-        endif
+        endwhile
     endif
+    @ignore alias__item
 endwhile
 
 # ========================================================================================
@@ -1366,115 +1703,148 @@ if var__music_storage != 0 and var__music_storage != var__save_container
     dclick var__music_storage
     wait wait__item
 endif
-while findtype 3740|3742|3762|3763|10245|20006|20008|20010|20012|20014|20016 var__source_container as alias__item
+while var__recycle_ready = 1 and findtype 3740|3742|3762|3763|10245|20006|20008|20010|20012|20014|20016 var__source_container as alias__item
     if config__skip_supply_pouch = 1 and var__save_container != backpack and find alias__item var__save_container
-        @ignore alias__item
+        # Already stored or packed for use.
     else
-        getlabel alias__item label__item
-        if config__sysmsg = 1
-            sysmsg "Recycle check: {{label__item}}" 88
-        endif
-        @setvar! var__save_item 0
-        @setvar! var__recycle_item 1
-        if config__save_greater_slaying = 1 and "enticement" in label__item and "greater" in label__item
-            @setvar! var__save_item 1
-        elseif config__save_lesser_slaying = 1 and "enticement" in label__item and "lesser" in label__item
-            @setvar! var__save_item 1
-        elseif config__save_supremely = 1 and "supremely" in label__item
-            @setvar! var__save_item 1
-        elseif config__save_exceedingly = 1 and "exceedingly" in label__item
-            @setvar! var__save_item 1
-        elseif config__save_eminently = 1 and "eminently" in label__item
-            @setvar! var__save_item 1
-        elseif config__save_surpassingly = 1 and "surpassingly" in label__item
-            @setvar! var__save_item 1
-        elseif config__save_accurate = 1 and "accurate" in label__item
-            @setvar! var__save_item 1
-        elseif config__save_vanquishing = 1 and "vanquishing" in label__item
-            @setvar! var__save_item 1
-        elseif config__save_power = 1 and "power" in label__item
-            @setvar! var__save_item 1
-        elseif config__save_force = 1 and "force" in label__item
-            @setvar! var__save_item 1
-        elseif config__save_might = 1 and "might" in label__item
-            @setvar! var__save_item 1
-        elseif config__save_ruin = 1 and "ruin" in label__item
-            @setvar! var__save_item 1
-        elseif config__save_regular_slaying = 1 and "enticement" in label__item
-            if "lesser" in label__item
-                # A lesser one follows config__save_lesser_slaying above.
-            else
-                @setvar! var__save_item 1
-            endif
-        endif
-
-        if "unidentified" in label__item
-            if skill "Item Identification" = 120
-                useskill "itemId"
-                waitfortarget wait__target
-                target var__source_container
-                wait wait__item_id
-                @setvar! var__recycle_item 0
-            elseif findtype 20496 backpack as alias__id_wand
-                dclick alias__id_wand
-                waitfortarget wait__target
-                target alias__item
-                @setvar! var__recycle_item 0
-            elseif skill "Item Identification" >= config__min_item_id_skill
-                useskill "itemId"
-                waitfortarget wait__target
-                target alias__item
-                wait wait__item_id
-                @setvar! var__recycle_item 0
-            endif
-
-            # Read again: one identified now is checked on the next pass of this loop, one that
-            # is still not is left for the next run, so a spent wand cannot hold the loop.
-            if var__recycle_item = 0
-                wait wait__item
-                getlabel alias__item label__item
-                if "unidentified" in label__item
-                    @ignore alias__item
+        @setvar! var__item_pending 1
+        @setvar! var__id_attempted 0
+        while var__item_pending = 1
+            @unsetvar! label__item
+            @setvar! label__item 0
+            getlabel alias__item label__item
+            if label__item = 0
+                @setvar! var__item_pending 0
+                overhead "[ item, skip ]" 254
+                sysmsg "Recycle: no label returned. Item left untouched." 88
+            elseif "unidentified" in label__item
+                if var__id_attempted = 0
+                    if var__id_wand_out = 1
+                        @setvar! var__item_pending 0
+                    else
+                        if var__id_wand = 0 and findtype 20496 backpack as alias__spare_id_wand
+                            @setvar! var__id_wand alias__spare_id_wand
+                        endif
+                        if var__id_wand = 0
+                            @setvar! var__item_pending 0
+                            @setvar! var__id_wand_out 1
+                            overhead "[ id wand, out ]" 254
+                            sysmsg "Recycle: no usable ID wand left. Unidentified items left untouched." 88
+                        else
+                            hotkey 'Cancel Current Target'
+                            dclick var__id_wand
+                            waitfortarget wait__target
+                            if targetexists
+                                target alias__item
+                                settimer "timer__recycle_identify" 0
+                                @setvar! var__id_attempted 1
+                            else
+                                hotkey 'Cancel Current Target'
+                                @ignore var__id_wand
+                                @setvar! var__id_wand 0
+                            endif
+                        endif
+                    endif
+                elseif timer "timer__recycle_identify" >= wait__identify
+                    @setvar! var__item_pending 0
+                    overhead "[ item id, miss ]" 254
+                    sysmsg "Recycle: identification not confirmed. Item left untouched: {{label__item}}" 88
+                else
+                    wait wait__label_poll
                 endif
-            endif
-        endif
+            else
+                @setvar! var__item_pending 0
+                if config__sysmsg = 1
+                    sysmsg "Recycle check: {{label__item}}" 88
+                endif
+                @setvar! var__save_item 0
+                if config__save_greater_slaying = 1 and "enticement" in label__item and "greater" in label__item
+                    @setvar! var__save_item 1
+                elseif config__save_lesser_slaying = 1 and "enticement" in label__item and "lesser" in label__item
+                    @setvar! var__save_item 1
+                elseif config__save_supremely = 1 and "supremely" in label__item
+                    @setvar! var__save_item 1
+                elseif config__save_exceedingly = 1 and "exceedingly" in label__item
+                    @setvar! var__save_item 1
+                elseif config__save_eminently = 1 and "eminently" in label__item
+                    @setvar! var__save_item 1
+                elseif config__save_surpassingly = 1 and "surpassingly" in label__item
+                    @setvar! var__save_item 1
+                elseif config__save_accurate = 1 and "accurate" in label__item
+                    @setvar! var__save_item 1
+                elseif config__save_vanquishing = 1 and "vanquishing" in label__item
+                    @setvar! var__save_item 1
+                elseif config__save_power = 1 and "power" in label__item
+                    @setvar! var__save_item 1
+                elseif config__save_force = 1 and "force" in label__item
+                    @setvar! var__save_item 1
+                elseif config__save_might = 1 and "might" in label__item
+                    @setvar! var__save_item 1
+                elseif config__save_ruin = 1 and "ruin" in label__item
+                    @setvar! var__save_item 1
+                elseif config__save_regular_slaying = 1 and "enticement" in label__item
+                    if "lesser" in label__item
+                        # A lesser one follows config__save_lesser_slaying above.
+                    else
+                        @setvar! var__save_item 1
+                    endif
+                endif
 
-        if var__save_item = 1
-            if config__chatty = 1
-                overhead "[ item, saving ]" 290
-            endif
-            if config__sysmsg = 1
-                sysmsg "Recycle save: {{label__item}}" 88
-            endif
-            lift alias__item
-            drop var__music_storage 130 200 0
-            wait wait__item
-            @ignore alias__item
-        endif
-
-        if var__recycle_item = 1
-            if find alias__item backpack
-                if config__save_exceptional = 1 and "exceptional" in label__item
+                if var__save_item = 1
+                    if config__chatty = 1
+                        overhead "[ item, saving ]" 290
+                    endif
+                    if config__sysmsg = 1
+                        sysmsg "Recycle save: {{label__item}}" 88
+                    endif
+                    lift alias__item
+                    drop var__music_storage 130 200 0
+                    wait wait__item
+                elseif config__save_exceptional = 1 and "exceptional" in label__item
                     # Exceptional craft is kept.
                 elseif "aspect" in label__item
                     # Aspect items are kept.
-                else
+                elseif find alias__item backpack
                     if not gumpexists 949095101
-                        if findtype 4032|3997|7864|4148|4136 backpack as alias__recycle_tool
-                            dclick alias__recycle_tool
+                        if not find var__recycle_tool backpack
+                            @setvar! var__recycle_tool 0
+                            if findtype 4032|3997|7864|4148|4136 backpack as alias__spare_recycle_tool
+                                @setvar! var__recycle_tool alias__spare_recycle_tool
+                            endif
+                        endif
+                        if var__recycle_tool != 0
+                            dclick var__recycle_tool
                             waitforgump 949095101 wait__gump
                         endif
                     endif
                     if gumpexists 949095101
-                        gumpresponse 3 949095101
-                        waitfortarget wait__target
-                        target alias__item
+                        if ingump "Recycle Single Item" 949095101
+                            hotkey 'Cancel Current Target'
+                            gumpresponse 3 949095101
+                            waitfortarget wait__target
+                            if targetexists
+                                target alias__item
+                            else
+                                @setvar! var__recycle_ready 0
+                                hotkey 'Cancel Current Target'
+                                overhead "[ recycle, blocked ]" 254
+                                sysmsg "Recycle: no recycling cursor. Remaining items left untouched." 88
+                            endif
+                        else
+                            @setvar! var__recycle_ready 0
+                            overhead "[ recycle, wrong ]" 254
+                            sysmsg "Recycle: select Recycle Single Item in the tool menu. Remaining items left untouched." 88
+                        endif
+                    else
+                        @setvar! var__recycle_ready 0
+                        overhead "[ recycle, blocked ]" 254
+                        sysmsg "Recycle: no recycling menu. Remaining items left untouched." 88
                     endif
                 endif
             endif
-            @ignore alias__item
-        endif
+        endwhile
     endif
+    @ignore alias__item
 endwhile
 
 # ========================================================================================
@@ -1491,206 +1861,242 @@ endwhile
 #
 # Until 2026-10-19 one loop per type took the pieces by graphic, so a turned chain glove
 # was judged by the ringmail switches and recycled, and most second facings were missed.
-while findtype 5051|5054|5055|5056|5059|5060|5061|5062|5063|5067|5068|5069|5070|5074|5075|5076|5077|5078|5082|5083|5084|5085|5089|5090|5099|5100|5101|5102|5103|5104|5105|5106|5129|5131|5132|5135|5136|5137|5138|5139|5140|5141|5142|5143|5144|5146|5198|5199|5200|5201|5202|5203|5204|5205|5206|5207|7168|7169|7170|7171|7172|7173|7174|7175|7176|7177|7178|7179|7180|7181|7609|7610|7947|31003|31004|31005|31006|31007|31008|31009|31010|31011|31012|31015|31174|31191 var__source_container as alias__item
+while var__recycle_ready = 1 and findtype 5051|5054|5055|5056|5059|5060|5061|5062|5063|5067|5068|5069|5070|5074|5075|5076|5077|5078|5082|5083|5084|5085|5089|5090|5099|5100|5101|5102|5103|5104|5105|5106|5129|5131|5132|5135|5136|5137|5138|5139|5140|5141|5142|5143|5144|5146|5198|5199|5200|5201|5202|5203|5204|5205|5206|5207|7168|7169|7170|7171|7172|7173|7174|7175|7176|7177|7178|7179|7180|7181|7609|7610|7947|31003|31004|31005|31006|31007|31008|31009|31010|31011|31012|31015|31174|31191 var__source_container as alias__item
     if config__skip_supply_pouch = 1 and var__save_container != backpack and find alias__item var__save_container
-        @ignore alias__item
+        # Already stored or packed for use.
     else
-        getlabel alias__item label__item
-        if config__sysmsg = 1
-            sysmsg "Recycle check: {{label__item}}" 88
-        endif
-        @setvar! var__save_item 0
-        @setvar! var__recycle_item 1
-
-        @setvar! var__armor_type 0
-        if "plate" in label__item
-            @setvar! var__armor_type 6
-        elseif "chain" in label__item
-            @setvar! var__armor_type 5
-        elseif "ring" in label__item
-            @setvar! var__armor_type 4
-        elseif "bone" in label__item
-            @setvar! var__armor_type 3
-        elseif "studded" in label__item
-            @setvar! var__armor_type 2
-        elseif "leather" in label__item
-            @setvar! var__armor_type 1
-        elseif "bascinet" in label__item or "close helm" in label__item or "norse helm" in label__item
-            @setvar! var__armor_type 6
-        elseif "orc helm" in label__item
-            @setvar! var__armor_type 4
-        endif
-
-        if var__armor_type = 1
-            if config__save_invulnerability_leather = 1 and "invulnerability" in label__item
-                @setvar! var__save_item 1
-            elseif config__save_fortification_leather = 1 and "fortification" in label__item
-                @setvar! var__save_item 1
-            elseif config__save_hardening_leather = 1 and "hardening" in label__item
-                @setvar! var__save_item 1
-            elseif config__save_guarding_leather = 1 and "guarding" in label__item
-                @setvar! var__save_item 1
-            elseif config__save_defense_leather = 1 and "defense" in label__item
-                @setvar! var__save_item 1
-            endif
-        elseif var__armor_type = 2
-            if config__save_invulnerability_studded_leather = 1 and "invulnerability" in label__item
-                @setvar! var__save_item 1
-            elseif config__save_fortification_studded_leather = 1 and "fortification" in label__item
-                @setvar! var__save_item 1
-            elseif config__save_hardening_studded_leather = 1 and "hardening" in label__item
-                @setvar! var__save_item 1
-            elseif config__save_guarding_studded_leather = 1 and "guarding" in label__item
-                @setvar! var__save_item 1
-            elseif config__save_defense_studded_leather = 1 and "defense" in label__item
-                @setvar! var__save_item 1
-            endif
-        elseif var__armor_type = 3
-            if config__save_invulnerability_bone_armor = 1 and "invulnerability" in label__item
-                @setvar! var__save_item 1
-            elseif config__save_fortification_bone_armor = 1 and "fortification" in label__item
-                @setvar! var__save_item 1
-            elseif config__save_hardening_bone_armor = 1 and "hardening" in label__item
-                @setvar! var__save_item 1
-            elseif config__save_guarding_bone_armor = 1 and "guarding" in label__item
-                @setvar! var__save_item 1
-            elseif config__save_defense_bone_armor = 1 and "defense" in label__item
-                @setvar! var__save_item 1
-            endif
-        elseif var__armor_type = 4
-            if config__save_invulnerability_ringmail = 1 and "invulnerability" in label__item
-                @setvar! var__save_item 1
-            elseif config__save_fortification_ringmail = 1 and "fortification" in label__item
-                @setvar! var__save_item 1
-            elseif config__save_hardening_ringmail = 1 and "hardening" in label__item
-                @setvar! var__save_item 1
-            elseif config__save_guarding_ringmail = 1 and "guarding" in label__item
-                @setvar! var__save_item 1
-            elseif config__save_defense_ringmail = 1 and "defense" in label__item
-                @setvar! var__save_item 1
-            endif
-        elseif var__armor_type = 5
-            if config__save_invulnerability_chainmail = 1 and "invulnerability" in label__item
-                @setvar! var__save_item 1
-            elseif config__save_fortification_chainmail = 1 and "fortification" in label__item
-                @setvar! var__save_item 1
-            elseif config__save_hardening_chainmail = 1 and "hardening" in label__item
-                @setvar! var__save_item 1
-            elseif config__save_guarding_chainmail = 1 and "guarding" in label__item
-                @setvar! var__save_item 1
-            elseif config__save_defense_chainmail = 1 and "defense" in label__item
-                @setvar! var__save_item 1
-            endif
-        elseif var__armor_type = 6
-            if config__save_invulnerability_platemail = 1 and "invulnerability" in label__item
-                @setvar! var__save_item 1
-            elseif config__save_fortification_platemail = 1 and "fortification" in label__item
-                @setvar! var__save_item 1
-            elseif config__save_hardening_platemail = 1 and "hardening" in label__item
-                @setvar! var__save_item 1
-            elseif config__save_guarding_platemail = 1 and "guarding" in label__item
-                @setvar! var__save_item 1
-            elseif config__save_defense_platemail = 1 and "defense" in label__item
-                @setvar! var__save_item 1
-            endif
-        else
-            if config__save_invulnerability = 1 and "invulnerability" in label__item
-                @setvar! var__save_item 1
-            elseif config__save_fortification = 1 and "fortification" in label__item
-                @setvar! var__save_item 1
-            elseif config__save_hardening = 1 and "hardening" in label__item
-                @setvar! var__save_item 1
-            elseif config__save_guarding = 1 and "guarding" in label__item
-                @setvar! var__save_item 1
-            elseif config__save_defense = 1 and "defense" in label__item
-                @setvar! var__save_item 1
-            endif
-        endif
-
-        if "unidentified" in label__item
-            if skill "Item Identification" = 120
-                useskill "itemId"
-                waitfortarget wait__target
-                target var__source_container
-                wait wait__item_id
-                @setvar! var__recycle_item 0
-            elseif findtype 20496 backpack as alias__id_wand
-                dclick alias__id_wand
-                waitfortarget wait__target
-                target alias__item
-                @setvar! var__recycle_item 0
-            elseif skill "Item Identification" >= config__min_item_id_skill
-                useskill "itemId"
-                waitfortarget wait__target
-                target alias__item
-                wait wait__item_id
-                @setvar! var__recycle_item 0
-            endif
-
-            # Read again: one identified now is checked on the next pass of this loop, one that
-            # is still not is left for the next run, so a spent wand cannot hold the loop.
-            if var__recycle_item = 0
-                wait wait__item
-                getlabel alias__item label__item
-                if "unidentified" in label__item
-                    @ignore alias__item
+        @setvar! var__item_pending 1
+        @setvar! var__id_attempted 0
+        while var__item_pending = 1
+            @unsetvar! label__item
+            @setvar! label__item 0
+            getlabel alias__item label__item
+            if label__item = 0
+                @setvar! var__item_pending 0
+                overhead "[ item, skip ]" 254
+                sysmsg "Recycle: no label returned. Item left untouched." 88
+            elseif "unidentified" in label__item
+                if var__id_attempted = 0
+                    if var__id_wand_out = 1
+                        @setvar! var__item_pending 0
+                    else
+                        if var__id_wand = 0 and findtype 20496 backpack as alias__spare_id_wand
+                            @setvar! var__id_wand alias__spare_id_wand
+                        endif
+                        if var__id_wand = 0
+                            @setvar! var__item_pending 0
+                            @setvar! var__id_wand_out 1
+                            overhead "[ id wand, out ]" 254
+                            sysmsg "Recycle: no usable ID wand left. Unidentified items left untouched." 88
+                        else
+                            hotkey 'Cancel Current Target'
+                            dclick var__id_wand
+                            waitfortarget wait__target
+                            if targetexists
+                                target alias__item
+                                settimer "timer__recycle_identify" 0
+                                @setvar! var__id_attempted 1
+                            else
+                                hotkey 'Cancel Current Target'
+                                @ignore var__id_wand
+                                @setvar! var__id_wand 0
+                            endif
+                        endif
+                    endif
+                elseif timer "timer__recycle_identify" >= wait__identify
+                    @setvar! var__item_pending 0
+                    overhead "[ item id, miss ]" 254
+                    sysmsg "Recycle: identification not confirmed. Item left untouched: {{label__item}}" 88
+                else
+                    wait wait__label_poll
                 endif
-            endif
-        endif
+            else
+                @setvar! var__item_pending 0
+                if config__sysmsg = 1
+                    sysmsg "Recycle check: {{label__item}}" 88
+                endif
+                @setvar! var__save_item 0
 
-        if var__save_item = 1
-            if config__chatty = 1
-                overhead "[ item, saving ]" 290
-            endif
-            if config__sysmsg = 1
-                sysmsg "Recycle save: {{label__item}}" 88
-            endif
-            # Armor goes by its material. Anything else stays in the supply pouch.
-            @setvar! var__save_to var__save_container
-            if var__armor_type = 6
-                @setvar! var__save_to var__plate_storage
-            elseif var__armor_type = 5
-                @setvar! var__save_to var__chainmail_storage
-            elseif var__armor_type = 4
-                @setvar! var__save_to var__ringmail_storage
-            elseif var__armor_type = 3
-                @setvar! var__save_to var__bone_storage
-            elseif var__armor_type = 2
-                @setvar! var__save_to var__studded_storage
-            elseif var__armor_type = 1
-                @setvar! var__save_to var__leather_storage
-            endif
-            lift alias__item
-            drop var__save_to 130 200 0
-            wait wait__item
-            @ignore alias__item
-        endif
+                @setvar! var__armor_type 0
+                if "plate" in label__item
+                    @setvar! var__armor_type 6
+                elseif "chain" in label__item
+                    @setvar! var__armor_type 5
+                elseif "ring" in label__item
+                    @setvar! var__armor_type 4
+                elseif "bone" in label__item
+                    @setvar! var__armor_type 3
+                elseif "studded" in label__item
+                    @setvar! var__armor_type 2
+                elseif "leather" in label__item
+                    @setvar! var__armor_type 1
+                elseif "bascinet" in label__item or "close helm" in label__item or "norse helm" in label__item
+                    @setvar! var__armor_type 6
+                elseif "orc helm" in label__item
+                    @setvar! var__armor_type 4
+                endif
 
-        if var__recycle_item = 1
-            if find alias__item backpack
-                if config__save_exceptional = 1 and "exceptional" in label__item
+                if var__armor_type = 1
+                    if config__save_invulnerability_leather = 1 and "invulnerability" in label__item
+                        @setvar! var__save_item 1
+                    elseif config__save_fortification_leather = 1 and "fortification" in label__item
+                        @setvar! var__save_item 1
+                    elseif config__save_hardening_leather = 1 and "hardening" in label__item
+                        @setvar! var__save_item 1
+                    elseif config__save_guarding_leather = 1 and "guarding" in label__item
+                        @setvar! var__save_item 1
+                    elseif config__save_defense_leather = 1 and "defense" in label__item
+                        @setvar! var__save_item 1
+                    endif
+                elseif var__armor_type = 2
+                    if config__save_invulnerability_studded_leather = 1 and "invulnerability" in label__item
+                        @setvar! var__save_item 1
+                    elseif config__save_fortification_studded_leather = 1 and "fortification" in label__item
+                        @setvar! var__save_item 1
+                    elseif config__save_hardening_studded_leather = 1 and "hardening" in label__item
+                        @setvar! var__save_item 1
+                    elseif config__save_guarding_studded_leather = 1 and "guarding" in label__item
+                        @setvar! var__save_item 1
+                    elseif config__save_defense_studded_leather = 1 and "defense" in label__item
+                        @setvar! var__save_item 1
+                    endif
+                elseif var__armor_type = 3
+                    if config__save_invulnerability_bone_armor = 1 and "invulnerability" in label__item
+                        @setvar! var__save_item 1
+                    elseif config__save_fortification_bone_armor = 1 and "fortification" in label__item
+                        @setvar! var__save_item 1
+                    elseif config__save_hardening_bone_armor = 1 and "hardening" in label__item
+                        @setvar! var__save_item 1
+                    elseif config__save_guarding_bone_armor = 1 and "guarding" in label__item
+                        @setvar! var__save_item 1
+                    elseif config__save_defense_bone_armor = 1 and "defense" in label__item
+                        @setvar! var__save_item 1
+                    endif
+                elseif var__armor_type = 4
+                    if config__save_invulnerability_ringmail = 1 and "invulnerability" in label__item
+                        @setvar! var__save_item 1
+                    elseif config__save_fortification_ringmail = 1 and "fortification" in label__item
+                        @setvar! var__save_item 1
+                    elseif config__save_hardening_ringmail = 1 and "hardening" in label__item
+                        @setvar! var__save_item 1
+                    elseif config__save_guarding_ringmail = 1 and "guarding" in label__item
+                        @setvar! var__save_item 1
+                    elseif config__save_defense_ringmail = 1 and "defense" in label__item
+                        @setvar! var__save_item 1
+                    endif
+                elseif var__armor_type = 5
+                    if config__save_invulnerability_chainmail = 1 and "invulnerability" in label__item
+                        @setvar! var__save_item 1
+                    elseif config__save_fortification_chainmail = 1 and "fortification" in label__item
+                        @setvar! var__save_item 1
+                    elseif config__save_hardening_chainmail = 1 and "hardening" in label__item
+                        @setvar! var__save_item 1
+                    elseif config__save_guarding_chainmail = 1 and "guarding" in label__item
+                        @setvar! var__save_item 1
+                    elseif config__save_defense_chainmail = 1 and "defense" in label__item
+                        @setvar! var__save_item 1
+                    endif
+                elseif var__armor_type = 6
+                    if config__save_invulnerability_platemail = 1 and "invulnerability" in label__item
+                        @setvar! var__save_item 1
+                    elseif config__save_fortification_platemail = 1 and "fortification" in label__item
+                        @setvar! var__save_item 1
+                    elseif config__save_hardening_platemail = 1 and "hardening" in label__item
+                        @setvar! var__save_item 1
+                    elseif config__save_guarding_platemail = 1 and "guarding" in label__item
+                        @setvar! var__save_item 1
+                    elseif config__save_defense_platemail = 1 and "defense" in label__item
+                        @setvar! var__save_item 1
+                    endif
+                else
+                    if config__save_invulnerability = 1 and "invulnerability" in label__item
+                        @setvar! var__save_item 1
+                    elseif config__save_fortification = 1 and "fortification" in label__item
+                        @setvar! var__save_item 1
+                    elseif config__save_hardening = 1 and "hardening" in label__item
+                        @setvar! var__save_item 1
+                    elseif config__save_guarding = 1 and "guarding" in label__item
+                        @setvar! var__save_item 1
+                    elseif config__save_defense = 1 and "defense" in label__item
+                        @setvar! var__save_item 1
+                    endif
+                endif
+
+                if var__save_item = 1
+                    if config__chatty = 1
+                        overhead "[ item, saving ]" 290
+                    endif
+                    if config__sysmsg = 1
+                        sysmsg "Recycle save: {{label__item}}" 88
+                    endif
+                    # Armor goes by its material. Anything else stays in the supply pouch.
+                    @setvar! var__save_to var__save_container
+                    if var__armor_type = 6
+                        @setvar! var__save_to var__plate_storage
+                    elseif var__armor_type = 5
+                        @setvar! var__save_to var__chainmail_storage
+                    elseif var__armor_type = 4
+                        @setvar! var__save_to var__ringmail_storage
+                    elseif var__armor_type = 3
+                        @setvar! var__save_to var__bone_storage
+                    elseif var__armor_type = 2
+                        @setvar! var__save_to var__studded_storage
+                    elseif var__armor_type = 1
+                        @setvar! var__save_to var__leather_storage
+                    endif
+                    lift alias__item
+                    drop var__save_to 130 200 0
+                    wait wait__item
+                elseif config__save_exceptional = 1 and "exceptional" in label__item
                     # Exceptional craft is kept.
                 elseif "aspect" in label__item
                     # Aspect items are kept.
-                else
+                elseif find alias__item backpack
                     if not gumpexists 949095101
-                        if findtype 4032|3997|7864|4148|4136 backpack as alias__recycle_tool
-                            dclick alias__recycle_tool
+                        if not find var__recycle_tool backpack
+                            @setvar! var__recycle_tool 0
+                            if findtype 4032|3997|7864|4148|4136 backpack as alias__spare_recycle_tool
+                                @setvar! var__recycle_tool alias__spare_recycle_tool
+                            endif
+                        endif
+                        if var__recycle_tool != 0
+                            dclick var__recycle_tool
                             waitforgump 949095101 wait__gump
                         endif
                     endif
                     if gumpexists 949095101
-                        gumpresponse 3 949095101
-                        waitfortarget wait__target
-                        target alias__item
+                        if ingump "Recycle Single Item" 949095101
+                            hotkey 'Cancel Current Target'
+                            gumpresponse 3 949095101
+                            waitfortarget wait__target
+                            if targetexists
+                                target alias__item
+                            else
+                                @setvar! var__recycle_ready 0
+                                hotkey 'Cancel Current Target'
+                                overhead "[ recycle, blocked ]" 254
+                                sysmsg "Recycle: no recycling cursor. Remaining items left untouched." 88
+                            endif
+                        else
+                            @setvar! var__recycle_ready 0
+                            overhead "[ recycle, wrong ]" 254
+                            sysmsg "Recycle: select Recycle Single Item in the tool menu. Remaining items left untouched." 88
+                        endif
+                    else
+                        @setvar! var__recycle_ready 0
+                        overhead "[ recycle, blocked ]" 254
+                        sysmsg "Recycle: no recycling menu. Remaining items left untouched." 88
                     endif
                 endif
             endif
-            @ignore alias__item
-        endif
+        endwhile
     endif
+    @ignore alias__item
 endwhile
 wait wait__item
+if targetexists
+    hotkey 'Cancel Current Target'
+endif
 gumpclose 949095101
 
 @clearignore

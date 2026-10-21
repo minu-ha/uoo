@@ -91,7 +91,7 @@ Design notes and in-game checks are in [document/questions/open-items.md](../doc
 ## Returning to the loop
 
 `loot/recycle` runs every hotkey named in the list `list__resume_script` when it finishes, and also when it gives up
-for lack of item identification, so its last line no longer names a loop. Its author's own previous-script list was
+for lack of an ID wand or a recycling tool, so its last line no longer names a loop. Its author's own previous-script list was
 renamed to this one. The farming loops fill the list at Play with their own Razor hotkey name, the one the profile
 stores (`Play Script: gather\skinning-enhanced`): `bard-necro-enhanced`, `bard-archer-enhanced`, `tamer-mage-enhanced`, `dexxer-basic`,
 `skinning-enhanced` and `lumberjack-enhanced`. The archived `bard-mace` and `bard-throwing` register their `Play Script: archive\…` name.
