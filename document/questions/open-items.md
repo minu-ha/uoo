@@ -626,7 +626,7 @@ order: 10
 
 #### Two-Handed Axe 다시 들기
 
-- 왼손이 비면 저장한 도끼를 다시 듦. 저장한 것이 없으면 graphic 5187 검색. 손에 든 것은 라벨 없이 serial로 한 번 저장(`fight/rearm`, 2026-10-21 `fight/axe`에서 이름 변경)
+- 왼손이 비면 들고 있던 도끼를 다시 듦. 아무것도 기억 못 하면 graphic 5187 검색. 손에 든 것은 라벨 없이 serial로 한 번 기억(`fight/rearm`, 2026-10-21 `fight/axe`에서 이름 변경. 오른손도 같은 규칙)
 - item-list의 5187이 아닌 graphic의 도끼면 백팩 검색 실패 → `config__rearm_graphic` 변경
 - 시전 중에는 장착 없음. 무장 해제 뒤 장착이 거절되면 2초마다 재시도, 장착 때문에 자기 주문이 끊기면 실패
 
@@ -1065,11 +1065,12 @@ loadout과 regear는 같은 `gear/aspect` 블록을 씀. 동작 설명은 각 �
 
 #### 재장착
 
-- Play 때 석궁을 든 상태면 Journal에 `Weapon remembered from the left hand`. 백팩에 있으면 `[ weapon, out ]`이 3초마다, 손으로 한 번 들면 그때부터 기억
-- RA, Reflect, Protection, Greater Heal 뒤 석궁이 백팩으로 떨어지고 2초 안에 다시 손에. Journal `Weapon equip requested`
+- Play 때 석궁을 든 상태면 Journal에 `Rearm: two-handed layer remembered`. 백팩에 있으면 graphic 31186으로 찾아 `Rearm: graphic 31186 picked`. 둘 다 아니면 `[ weapon, out ]`이 3초마다
+- RA, Reflect, Protection, Greater Heal 뒤 석궁이 백팩으로 떨어지고 2초 안에 다시 손에. Journal `Rearm: equip requested on the two-handed layer`
+- 같은 석궁을 하나 더 주워 백팩에 두고 시전 → 들고 있던 것(serial)이 돌아오는지. `rhandempty`와 `righthand`가 이 포크에 있는지(없으면 오류 줄)
 - 다시 든 뒤 사격이 이어지는지, `V`를 다시 눌러야 하는지
 - 재장착이 바딩 커서나 자기 주문을 끊지 않는지. 끊기면 시전 중 가드가 샌 것
-- Rampart Crossbow의 graphic(`>info`)을 [Item list](../game/item-list.md)에 추가하면 `rearm_graphic`으로 새 클라이언트에서도 백팩 검색 가능
+- 31186이 Pistol Crossbow와 같은 art인지. 같으면 백팩에 둘 다 있을 때 `findtype`이 어느 쪽을 집는지
 
 #### 마나와 바딩
 

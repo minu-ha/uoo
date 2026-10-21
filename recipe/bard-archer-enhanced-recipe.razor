@@ -123,10 +123,19 @@
 # ----------------------------------------------------------------------------------------
 # @ use fight/rearm
 #
-#   Re-arms the remembered two-handed weapon when the left hand is empty.
-#   > Right after recovery, before the barding: the shots are the damage here. No graphic,
-#   > the crossbow in hand at Play is the one remembered.
+#   Re-arms what each hand held, out of the backpack, when a cast or a disarm empties it.
+#   > Right after recovery, before the barding: the shots are the damage here.
+#
+#   rearm_graphic (default 0)
+#      Graphic of the weapon to pick out of the backpack while both hands are empty and
+#      nothing is remembered, on a fresh client. 0 picks nothing: only an item once seen
+#      in hand goes back. The hand it goes to comes from the two-handed list in setup.
+#      5042 is the bow, 5187 the two handed axe and 31186 the Rampart Crossbow in
+#      document/game/item-list.md.
+#      > The Rampart Crossbow: 31186 under Archery in item-list, read off its Item Data
+#      > in-game 2026-10-21. A fresh client finds it in the backpack too.
 # ----------------------------------------------------------------------------------------
+@setvar! config__rearm_graphic 31186
 
 # ----------------------------------------------------------------------------------------
 # @ use fight/target

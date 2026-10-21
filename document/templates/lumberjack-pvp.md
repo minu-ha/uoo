@@ -466,6 +466,7 @@ Tracking 주문 보조의 결합 순서를 단정하지 않으려고 첫 표에�
 
 - 손의 Hatchet 확인 → `Use item in hand`, 커서 대기, `Target Self` 순서로 채집. 이미 수동으로 연 커서가 있으면 새 채집 시작 안 함
 - 빈손: `lhandempty` 먼저 확인 → 저장한 `var__my_hatchet`을 백팩에서 찾아 `lift`, `drop self lefthand`로 장착.
+  Hatchet은 Outlands 무기표에서 2H("(2H) Axe, Battle Axe, … Two-Handed Axe, Hatchet" -- [Armor & Weapons](https://wiki.uooutlands.com/Armor_%26_Weapons)) → Razor의 `lefthand`가 맞는 레이어
   방식은 [bard-mace](https://github.com/minu-ha/uoo/blob/master/script/archive/bard-mace.razor)를 따름
 - 장착 다음 시도에서는 `findlayer self lefthand`의 serial이 저장한 도끼와 같을 때만 사용.
   검색 성공이나 장착 요청만으로 실제 장착으로 보지 않음

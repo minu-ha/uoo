@@ -1108,6 +1108,7 @@ UO Outlands 아이템 이름과 graphic ID 목록. `findtype` 인자와 hue 조�
         #vine staff "vine staff" 31029
 
     #Archery - all IDs: 3920|5042|5117|30990|30993|30994|30995|31184|31186
+    # 1H and 2H per weapon, by the wiki Armor & Weapons table: the setup list of module/fight/rearm.razor
         #balestra "balestra" 30993
         #bow "bow" 5042
         #crossbow "crossbow" 3920
@@ -1116,6 +1117,7 @@ UO Outlands 아이템 이름과 graphic ID 목록. `findtype` 인자와 hue 조�
         #hunting bow "composite bow" 30994
         #pistol crossbow "stubnose crossbow" 31184
         #pistol crossbow "tower guard crossbow" 31186
+        #rampart crossbow "tower guard crossbow" 31186 (hue 1763. Item Data in-game 2026-10-21. Same art as the pistol crossbow line, unverified)
         #recurve bow "recurve bow" 30995
 
     #Dual Wielding - all IDs: 67773|67774|67775|67776|67777|67778

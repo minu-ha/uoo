@@ -116,6 +116,8 @@ Healer's Codex 20점: Immunize 5, Triage 5, Self Treatment 5, Specialist 5.
 
 - Rampart Crossbow: [Armor & Weapons](https://wiki.uooutlands.com/Armor_%26_Weapons) 무기표의 "(2H) Heavy Crossbow, Rampart Crossbow, Great Bow" 줄. 스윙당 3.75초, 피해 17\~45, 평균 31
 - 사거리: 석궁과 Great Bow 8칸, 활 10칸([Archery](https://wiki.uooutlands.com/Archery))
+- 손: Rampart Crossbow, Heavy Crossbow, 활 넷은 2H. Crossbow, Balestra, Pistol Crossbow는 1H([Archery](https://wiki.uooutlands.com/Archery) 무기표).
+  Razor의 `lefthand`가 2H 레이어. `fight/rearm`은 들고 있던 레이어를 기억해 손을 가름. graphic 31186, Item Data 인게임 확인 2026-10-21([Item list](../game/item-list.md) Archery)
 - 간격 식: [PvP](../game/pvp.md#09.B) 09.B절. 스태미나 100에서 3.75초. 맞아서 스태미나가 줄면 느려짐
 
 > "Increases Swing Speed by (5% \* (Anatomy Skill / 100))" -- Archery
@@ -230,7 +232,7 @@ Hinder와 Maiming.
 | base | | `warmode_is_manual` 1, `recover_in_warmode` 1, `settle_first` 1(bard-necro). `heal_skill_min` 10(skinning) |
 | 패스 첫머리 | `bard/provo-picks` | `Z` 또는 `Shift+Space`로 등록하는 후보 입력, 바딩 대상과 독립. [Open items](../questions/open-items.md#17) 17절 |
 | 다쳤거나 독, 마비 | `recovery/cure`, `heal`, `bandage`, `light-heal` | 잃은 HP 기준 `heal_hits` 35, `emergency_hits` 45. 회복 정책은 아래 |
-| 회복 다음 | `fight/rearm` | 빈 왼손에 기억한 석궁. graphic 없이 손에 든 것을 serial로 기억, 2초마다 확인. skinning-enhanced와 같은 블록 |
+| 회복 다음 | `fight/rearm` | 들고 있던 석궁을 serial로 기억, 손이 비면 백팩에서 다시 듦. 2초마다. `rearm_graphic` 31186은 새 클라이언트용 백팩 검색. skinning-enhanced와 같은 블록 |
 | 공용 | `fight/target`, `magery/reagents` | `acquire_range` 18, `target_range` 10, `target_grace` 500(bard-necro) |
 | 5초마다 | `bard/instrument`, `recovery/refresh`, `buff/food`, `buff/potions`, `pack/gold-drop` | `refresh_stam` 60(skinning). 포션 기준선 STR 120, DEX 100은 기본값 |
 | 늘 | `bard/provo`, `fight/archery-codex` | 자세와 피니셔 전환(04.B절) |
