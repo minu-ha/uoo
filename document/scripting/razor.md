@@ -123,6 +123,7 @@ Razor CE에 없거나 CE보다 넓어진 것. 존재 여부만 기록, 인자 �
 | 산술(`@setvar! var__n var__n + 1`) | 선례 없음, 안 받는다고 판단 | `counttype`으로 다시 읽기, 리스트 길이 |
 | `as` alias를 묶은 `if`, `while` 블록 밖에서 읽기 | `4294967295`, `noto`가 `Mobile … not found` | 블록 안에서 `@setvar! var__x alias__x`로 복사 |
 | `getlabel`을 부른 블록 밖에서 그 라벨 읽기 | `{{label__x}}`가 `<not found>`. 인게임 확인됨 2026-10-19 | 라벨로 하는 일(`in` 검사, `sysmsg`, `overhead`)은 모두 `getlabel`과 같은 블록 안에. 단어라 변수로 복사도 안 됨 |
+| 중첩 블록의 라벨 존재를 일반 `varexist`로 판정 | CE 원본은 루트 범위만 확인 → 받은 라벨도 없다고 판정 가능. Outlands 내부 구현은 미확인(05절) | 이전 라벨 삭제, 숫자 `0` 초기값, `getlabel` 뒤 `label__x = 0`이면 미확인 처리 |
 | 단어를 변수에 담기 | 따옴표와 무관하게 `4294967295`. `rename`에 주면 `That name is unacceptable.` | `pushlist` 항목은 글자 유지. `foreach x in list__y`로 꺼내 문자열 인자로. 그 밖의 문자열은 `getlabel` 결과뿐 |
 | 몬스터 종류 단어, 한 글자만 바꾼 것을 펫 이름으로(`mummy`, `wytch`) | `That name is unacceptable.` (인게임 확인됨 2026-10-10) | 두 글자 이상 다르게(`mumi`는 받아짐), 실제 낱말도 피함(`wicca`는 두 글자 차이인데 거절, 인게임 확인됨 2026-10-13). RunUO 계열은 `mage` 같은 단어도 막음(`necro/summon-names`) |
 | 숫자(serial)를 펫 이름으로 | `That name is unacceptable.` | 글자 이름만 |
@@ -363,6 +364,13 @@ flowchart TD
   - 블록 안에서 `@setvar! var__x alias__x`로 복사. 모듈의 alias가 모두 블록 안에서만 쓰이는 이유
 - **`getlabel` 라벨을 블록 밖에서 읽기**: `if findlayer … as alias__x` 안에서 `getlabel alias__x label__y`, `endif` 뒤의 `sysmsg "… {{label__y}}"`가 `<not found>`(2026-10-19 `gear/aspect` 방어구 진단 줄의 Journal. 그 줄은 커밋 `dc675e2`, 블록은 그 뒤 다시 씀)
   - 같은 실행에서 `getlabel`과 같은 블록 안의 `sysmsg`는 손에 든 주문서 라벨을 그대로 찍음 → alias처럼 블록을 벗어나면 사라지는 것으로 판단
+- **중첩 라벨의 `varexist`**: CE [VarExist](https://github.com/markdwags/Razor/blob/master/Razor/Scripts/Expressions.cs)는 일반 호출에서 `ExistAlias` 사용
+  - [Interpreter](https://github.com/markdwags/Razor/blob/master/Razor/Scripts/Engine/Interpreter.cs)의 `ExistAlias`는 루트 범위만 검사. 라벨 읽기는 부모 범위를 따라가지만 이 존재 검사는 그렇지 않음
+  - `@varexist`도 대안으로 단정 불가. CE는 `if` 평가 전에 새 범위를 만들고, 이 표현식은 현재 범위만 확인
+  - `debug-target-state`의 존재 검사 선례는 루트에서 조회한 라벨. 중첩 `while`의 선례 아님
+  - `loot/recycle`: 같은 반복 범위에서 `@unsetvar! label__item`, `@setvar! label__item 0`, `getlabel` 순서. 결과가 `0`이면 이동과 분해 생략
+  - 숫자 초기값은 라벨 문자열 복사가 아님. 이전 반복의 라벨을 지워야 조회 실패가 옛 라벨로 통과하지 않음
+  - 2026-10-21 CE 소스와 범위 모형으로 확인. Outlands 포크에서 새 경로의 인게임 동작은 확인되지 않았다
 - **단어를 변수에 담기**: `@setvar! var__x nomeeheh`는 따옴표 유무와 무관하게 `4294967295`(2026-09-28 프로브)
   - 숫자 `5000`은 `5000`, `0x622396`은 10진수 `6431638`. 변수에는 숫자와 serial만
   - → `rename <serial> <변수>`는 엉뚱한 이름을 보내 `That name is unacceptable.`. 단어는 리스트에 담아 `foreach`로. serial 쪽은 변수 가능
@@ -404,6 +412,12 @@ flowchart TD
 | 거짓 `if` 100개(3줄 본문 건너뜀) | 1 \~ 2초 | 10 \~ 20ms |
 | `findtype … self` 50번 | 1 \~ 2초 | **20 \~ 40ms** |
 | 20갈래 `elseif` 사슬 10번 | 0.25 \~ 0.5초 | 사슬 하나 25 \~ 50ms |
+
+`getlabel`도 즉시 끝나는 로컬 조회로 가정 금지.
+
+- CE [GetLabel](https://github.com/markdwags/Razor/blob/master/Razor/Scripts/Commands.cs): 서버에 단일 클릭 전송, 첫 라벨 뒤 500ms 동안 후속 라벨 수집. 첫 응답이 없으면 2000ms 타임아웃
+- 이 시간은 CE 구현의 값. Outlands 포크의 내부 대기 시간은 확인되지 않았다
+- 반복 조회 제거가 우선. 응답 대기가 필요한 곳은 결과를 확인한 뒤 진행, 미확인 상태로 분류하거나 파괴하지 않음
 
 Bard Necro 루프 적용 결과: [Bard Necro](../templates/bard-necro.md#05.H) 05.H절. 패스마다 `findtype` 최대 32번이던 시약 플래그 읽기를 10초에 7번으로 줄임(처음에는 30초).
 
