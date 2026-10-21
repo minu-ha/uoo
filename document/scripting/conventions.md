@@ -158,7 +158,7 @@ endwhile
 # Needs: global__my_loot_container (asked for on first run), container within 2 tiles
 ```
 
-### <a id="02.D"></a>02.D 시작 4줄과 들여쓰기
+### <a id="02.D"></a>02.D 시작 4줄, 들여쓰기, 빈 줄
 
 ```
 clearall
@@ -173,6 +173,31 @@ clearignore
 - 예외 공통 `combat/pvp`: 플레이어 수동 입력과 함께 돌므로 시작 4줄 생략. 레시피에 `config__clear_at_start 0`([Modules](modules.md#06) 06절)
   - 이유: Play 시 플레이어가 든 주문 커서, 아이템 커서, 시전 큐, 장착 큐 보존
   - 대신 자동 행동 직전에 수동 시전, 타깃, 큐 검사([PvP](../game/pvp.md#05.E) 05.E절)
+
+빈 줄은 작업 단위의 경계에 하나씩.
+
+- 준비, 요청과 대기, 결과 처리, 다음 작업 사이에 빈 줄 하나. 긴 중첩 분기도 같은 기준
+- 같은 행동의 명령은 붙임. `dclick`과 `waitfortarget`, `lift`와 `drop`, 상태 초기화 묶음 등
+- 블록 첫 줄과 닫는 줄 앞에는 빈 줄 없음. 연속 빈 줄은 하나로. 조립 결과의 정리는 [Modules](modules.md#05) 05절
+
+```
+settimer "timer__action" 0
+
+while queued and timer "timer__action" < wait__timeout
+    wait wait__poll
+endwhile
+
+if queued
+    stop
+endif
+
+dclick var__tool
+waitfortarget wait__target
+
+if targetexists
+    target alias__item
+endif
+```
 
 ### <a id="02.E"></a>02.E 주석
 

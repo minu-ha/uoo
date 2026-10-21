@@ -418,6 +418,8 @@ flowchart TD
 - CE [GetLabel](https://github.com/markdwags/Razor/blob/master/Razor/Scripts/Commands.cs): 서버에 단일 클릭 전송, 첫 라벨 뒤 500ms 동안 후속 라벨 수집. 첫 응답이 없으면 2000ms 타임아웃
 - 이 시간은 CE 구현의 값. Outlands 포크의 내부 대기 시간은 확인되지 않았다
 - 반복 조회 제거가 우선. 응답 대기가 필요한 곳은 결과를 확인한 뒤 진행, 미확인 상태로 분류하거나 파괴하지 않음
+- 대기용 `getlabel backpack` 사용 금지. 백팩 라벨은 다른 아이템의 감정, 분해, 이동 완료 신호가 아님
+  실제 대상의 품질 라벨, 소속 변경, 제거 여부로 확인. `queued`는 클라이언트 행동 큐 상태이며 서버 작업 성공과 별개
 
 Bard Necro 루프 적용 결과: [Bard Necro](../templates/bard-necro.md#05.H) 05.H절. 패스마다 `findtype` 최대 32번이던 시약 플래그 읽기를 10초에 7번으로 줄임(처음에는 30초).
 
