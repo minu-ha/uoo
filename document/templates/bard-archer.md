@@ -227,7 +227,7 @@ Hinder와 Maiming.
 | 자리 | 블록 | 값과 출처 |
 | --- | --- | --- |
 | base | | `warmode_is_manual` 1, `recover_in_warmode` 1, `settle_first` 1(bard-necro). `heal_skill_min` 10(skinning) |
-| 다쳤거나 독, 마비 | `recovery/cure`, `heal`, `bandage`, `light-heal` | `emergency_hits` 45(skinning). light-heal은 붕대가 떨어졌을 때만 |
+| 다쳤거나 독, 마비 | `recovery/cure`, `heal`, `bandage`, `light-heal` | 잃은 HP 기준 `heal_hits` 35, `emergency_hits` 45. 회복 정책은 아래 |
 | 공용 | `fight/target`, `magery/reagents` | `acquire_range` 18, `target_range` 10, `target_grace` 500(bard-necro) |
 | 5초마다 | `bard/instrument`, `recovery/refresh`, `buff/food`, `buff/potions`, `pack/gold-drop` | `refresh_stam` 60(skinning). 포션 기준선 STR 120, DEX 100은 기본값 |
 | 늘 | `bard/provo`, `fight/archery-codex` | 자세와 피니셔 전환(04.B절) |
@@ -238,6 +238,8 @@ Hinder와 Maiming.
 - 교전 = 고른 적이 10칸 안. 바딩 사거리. 사격 사거리 8칸은 손으로 맞춤
 - **바딩 우선순위: Provo, Disco, Peace.** Provo로 짝을 붙인 뒤 현재 대상에 Discordance, Peacemaking. bard-necro와 같은 순서. 코덱스 전환은 Provo와 Disco 사이
 - 스킬별 쿨과 공유 쿨: [Bard Necro](bard-necro.md#02.E) 02.E절
+- **평소 회복은 붕대.** 잃은 HP 35 이상이면 힐 포션, 그 패스에 포션을 안 마셨고 손실 45 이상이면 Greater Heal. 붕대 종료를 기다리지 않음
+- 일반 Heal은 붕대 대체용으로 유지. 이 템플릿의 기본 설정에서는 붕대가 없고 감는 중도 아닐 때만 사용, 붕대 중첩 시전 없음
 - `buff/spells`는 교전 중에도. 사격과 시전이 서로 안 막음(01.A절), 패스 끝에 둬서 바딩이 먼저
 - warmode(수동 구간): 바딩, 노래, 버프, 음식 정지. 회복 시전, 포션, 붕대, 코덱스 전환, 무기 능력은 계속
 

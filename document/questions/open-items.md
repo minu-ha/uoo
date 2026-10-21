@@ -944,6 +944,14 @@ loadout과 regear는 같은 `gear/aspect` 블록을 씀. 동작 설명은 각 �
 - F1 → 악기 검색(없으면 `[ inst, pick ]`), `[ bard archer, on ]`
 - Tab으로 warmode를 켜면 바딩, 노래, RA, Reflect, Protection이 멈추고 끄면 다시. 회복, 포션, 붕대는 계속
 
+#### 회복
+
+- 붕대가 있으면 붕대로 회복, 일반 Heal 시전 없음. 붕대를 감는 도중 마지막 붕대를 다 써도 끝날 때까지 일반 Heal 대기
+- 붕대가 없고 감는 중도 아니면 손실이 `light_hits` 이상일 때만 `Agent: Smart Heal/Cure Self, light Heal.`. 마나나 시약이 없으면 시전 없음
+- 붕대 중 힐 포션 기준에 닿으면 `heal pot` 바. 그 패스에는 Greater Heal을 건너뛰고, 다음 패스에도 긴급선 이상이면 `Agent: Greater Heal/Cure Self.`
+- 힐 포션이 없거나 쿨 중이면 긴급선부터 Greater Heal. 마나나 시약이 없으면 시전 없음, 풀피가 되면 남은 회복 커서 취소
+- 기준값과 회복 정책: [Bard Archer](../templates/bard-archer.md#04.A) 04.A절
+
 #### 코덱스 라벨
 
 - `debug/dump-label`로 codex of archery(11886) 라벨 기록. 지금 자세 하나와 지금 피니셔 하나만, 대소문자 그대로(`Arcane`, `Ricochet`) 보여야 함
