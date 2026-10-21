@@ -88,6 +88,7 @@ timer__recall_check interval__recall_check
     # hunting comes from escape/tracking.
     # ------------------------------------------------------------------------------------
     @setvar! var__recall_check_due 0
+
     if timer "timer__recall_check" >= interval__recall_check
         @setvar! var__recall_check_due 1
         settimer "timer__recall_check" 0
@@ -96,6 +97,7 @@ timer__recall_check interval__recall_check
     if var__recall_sent = 0
         if var__recall_check_due = 1
             @setvar! var__recall_book_available 0
+
             if findtype "runebook" backpack or findtype "runetome" backpack
                 @setvar! var__recall_book_available 1
             elseif config__require_runebook = 1 and timer "timer__message" >= interval__message
@@ -205,6 +207,7 @@ timer__recall_check interval__recall_check
                         @setvar! var__recall_needed 1
                     endif
                 endif
+
                 if var__recall_needed = 1 and config__sysmsg = 1
                     sysmsg "Recall trigger: Tracking report, configured color={{config__tracking_color}}." 88
                 endif
@@ -216,9 +219,11 @@ timer__recall_check interval__recall_check
             if config__recall_on_weight = 1 and var__recall_needed = 0
                 if diffweight <= config__weight_remaining
                     @setvar! var__recall_needed 1
+
                     if config__sysmsg = 1
                         sysmsg "Recall trigger: spare weight at or below {{config__weight_remaining}}." 88
                     endif
+
                     if timer "timer__message" >= interval__message
                         overhead "[ weight, low ]" 254
                         settimer "timer__message" 0
@@ -272,6 +277,7 @@ timer__recall_check interval__recall_check
     # Gathering also waits for a required book and, when detection is on and the character has
     # Tracking, for the hunt.
     @setvar! var__hold_gathering 0
+
     if var__recall_needed = 1
         @setvar! var__hold_casts 1
         @setvar! var__hold_gathering 1

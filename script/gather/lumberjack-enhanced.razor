@@ -379,29 +379,35 @@ if skill "Tracking" > 0
                     if findbuff "tracking"
                         gumpresponse 6 4267467659
                         wait wait__short
+
                         for 60
                             if not findbuff "tracking"
                                 break
                             endif
+
                             wait wait__poll
                         endfor
                     endif
 
                     clearsysmsg
+
                     if not findbuff "tracking" and gumpexists 4267467659
                         for 10
                             if diffhits >= config__heal_hits or poisoned or warmode or hidden or queued or casting or targetexists
                                 break
                             endif
+
                             if not gumpexists 4267467659
                                 break
                             endif
+
                             gumpresponse 8 4267467659
                             @setvar! var__tracking_button_answered 0
                             for 60
                                 if diffhits >= config__heal_hits or poisoned or warmode or hidden or queued or casting or targetexists
                                     break
                                 endif
+
                                 if config__tracking_color = 1
                                     if insysmsg "You will now hunt murderer players"
                                         @setvar! var__tracking_filter_confirmed 1
@@ -427,12 +433,15 @@ if skill "Tracking" > 0
                                         break
                                     endif
                                 endif
+
                                 if insysmsg "You will now hunt"
                                     @setvar! var__tracking_button_answered 1
                                     break
                                 endif
+
                                 wait wait__poll
                             endfor
+
                             if var__tracking_filter_confirmed = 1 or var__tracking_button_answered = 0
                                 break
                             endif
@@ -442,14 +451,17 @@ if skill "Tracking" > 0
 
                 if var__tracking_filter_confirmed = 1 and gumpexists 4267467659 and diffhits < config__heal_hits and not poisoned and not warmode and not hidden and not queued and not casting and not targetexists
                     clearsysmsg
+
                     if not findbuff "tracking"
                         gumpresponse 6 4267467659
                         wait wait__short
                     endif
+
                     if findbuff "tracking"
                         @setvar! var__tracking_hunting_active 1
                         @setvar! var__tracking_setup_color config__tracking_color
                     endif
+
                     if config__show_tracking = 0
                         gumpclose 4267467659
                     endif
@@ -512,6 +524,7 @@ while not dead
     if timer "timer__tracking_check" >= interval__tracking_check and skill "Tracking" > 0
         settimer "timer__tracking_check" 0
         @setvar! var__tracking_hunting_active 0
+
         if var__tracking_filter_confirmed = 1 and findbuff "tracking"
             @setvar! var__tracking_hunting_active 1
         endif
@@ -685,6 +698,7 @@ while not dead
     # RECALL                                                    module/escape/recall.razor
     # ------------------------------------------------------------------------------------
     @setvar! var__recall_check_due 0
+
     if timer "timer__recall_check" >= interval__recall_check
         @setvar! var__recall_check_due 1
         settimer "timer__recall_check" 0
@@ -693,6 +707,7 @@ while not dead
     if var__recall_sent = 0
         if var__recall_check_due = 1
             @setvar! var__recall_book_available 0
+
             if findtype "runebook" backpack or findtype "runetome" backpack
                 @setvar! var__recall_book_available 1
             elseif config__require_runebook = 1 and timer "timer__message" >= interval__message
@@ -800,6 +815,7 @@ while not dead
                         @setvar! var__recall_needed 1
                     endif
                 endif
+
                 if var__recall_needed = 1 and config__sysmsg = 1
                     sysmsg "Recall trigger: Tracking report, configured color={{config__tracking_color}}." 88
                 endif
@@ -810,9 +826,11 @@ while not dead
             if config__recall_on_weight = 1 and var__recall_needed = 0
                 if diffweight <= config__weight_remaining
                     @setvar! var__recall_needed 1
+
                     if config__sysmsg = 1
                         sysmsg "Recall trigger: spare weight at or below {{config__weight_remaining}}." 88
                     endif
+
                     if timer "timer__message" >= interval__message
                         overhead "[ weight, low ]" 254
                         settimer "timer__message" 0
@@ -856,6 +874,7 @@ while not dead
     endif
 
     @setvar! var__hold_gathering 0
+
     if var__recall_needed = 1
         @setvar! var__hold_casts 1
         @setvar! var__hold_gathering 1
@@ -1281,10 +1300,12 @@ while not dead
         if diffhits < config__light_hits and not poisoned and not paralyzed and not warmode
             if not hidden and not queued and not casting and not targetexists
                 settimer "timer__pack_lumber" 0
+
                 if find global__my_loot_bag backpack
                     if config__sysmsg = 1
                         sysmsg "Lumber pack BEGIN: convert Logs, then move Boards." 88
                     endif
+
                     dclick global__my_loot_bag
                     wait wait__lumber_item
 
@@ -1294,6 +1315,7 @@ while not dead
                         else
                             @setvar! var__lumber_graphic 7127
                         endif
+
                         settimer "timer__pack_lumber" 0
                         @clearignore
 
@@ -1306,6 +1328,7 @@ while not dead
                                 if config__sysmsg = 1
                                     sysmsg "Lumber convert: serial={{alias__lumber_stack}}." 88
                                 endif
+
                                 dclick alias__lumber_stack
                                 wait wait__lumber_item
                             elseif find alias__lumber_stack global__my_loot_bag
@@ -1326,13 +1349,17 @@ while not dead
                                 wait wait__poll
                             endwhile
                         endwhile
+
                         @clearignore
                     endfor
+
                     if config__sysmsg = 1
                         sysmsg "Lumber pack END: returning to recovery and harvest checks." 88
+
                         if queued
                             sysmsg "Lumber pack: item queue still active. Harvest waits for queued=0." 88
                         endif
+
                         if targetexists
                             sysmsg "Lumber pack: target cursor active. Harvest leaves it to the player." 88
                         endif

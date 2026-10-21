@@ -52,6 +52,7 @@ if config__carry_magic_instrument = 1
                 wait wait__short
                 drop global__my_supply_box
                 wait wait__short
+
                 if config__chatty = 1
                     overhead "[ inst, back ]" 290
                 endif
@@ -72,9 +73,11 @@ if config__carry_magic_instrument = 1
                 wait wait__short
                 drop backpack
                 wait wait__short
+
                 if config__chatty = 1
                     overhead "[ inst, take ]" 290
                 endif
+
                 @setvar! var__kept_instrument 1
                 break
             endif

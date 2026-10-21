@@ -35,6 +35,7 @@ timer__scavenger_clear 0
     if timer "timer__scavenger_clear" >= interval__scavenger_clear
         settimer "timer__scavenger_clear" 0
         hotkey "Clear Scavenger Cache"
+
         if config__sysmsg = 1
             sysmsg "Scavenger cache cleared." 88
         endif

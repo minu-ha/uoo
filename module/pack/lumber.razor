@@ -55,10 +55,12 @@ timer__pack_lumber 0
         if diffhits < config__light_hits and not poisoned and not paralyzed and not warmode
             if not hidden and not queued and not casting and not targetexists
                 settimer "timer__pack_lumber" 0
+
                 if find global__my_loot_bag backpack
                     if config__sysmsg = 1
                         sysmsg "Lumber pack BEGIN: convert Logs, then move Boards." 88
                     endif
+
                     dclick global__my_loot_bag
                     wait wait__lumber_item
 
@@ -71,6 +73,7 @@ timer__pack_lumber 0
                         else
                             @setvar! var__lumber_graphic 7127
                         endif
+
                         settimer "timer__pack_lumber" 0
                         @clearignore
 
@@ -87,6 +90,7 @@ timer__pack_lumber 0
                                 if config__sysmsg = 1
                                     sysmsg "Lumber convert: serial={{alias__lumber_stack}}." 88
                                 endif
+
                                 dclick alias__lumber_stack
                                 wait wait__lumber_item
                             elseif find alias__lumber_stack global__my_loot_bag
@@ -112,13 +116,17 @@ timer__pack_lumber 0
                                 wait wait__poll
                             endwhile
                         endwhile
+
                         @clearignore
                     endfor
+
                     if config__sysmsg = 1
                         sysmsg "Lumber pack END: returning to recovery and harvest checks." 88
+
                         if queued
                             sysmsg "Lumber pack: item queue still active. Harvest waits for queued=0." 88
                         endif
+
                         if targetexists
                             sysmsg "Lumber pack: target cursor active. Harvest leaves it to the player." 88
                         endif

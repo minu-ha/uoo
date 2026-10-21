@@ -67,6 +67,7 @@ if config__use_runebook_refill = 1
         overhead "[ scroll, {{label__found_runetome}} ]" 290
 
         lift global__my_recall_scroll 6000
+
         if insysmsg 'not found or out of range'
             overhead "[ recall scroll, out ]" 254
             @setvar! var__runebook_scrolls_out 1
@@ -83,6 +84,7 @@ if config__use_runebook_refill = 1
         overhead "[ scroll, {{label__found_runetome}} ]" 290
 
         lift global__my_recall_scroll 6000
+
         if insysmsg 'not found or out of range'
             overhead "[ recall scroll, out ]" 254
             @setvar! var__runebook_scrolls_out 1
@@ -100,6 +102,7 @@ if config__use_runebook_refill = 1
             overhead "[ scroll, {{label__found_runetome}} ]" 290
 
             lift global__my_recall_scroll 60000
+
             if insysmsg 'not found or out of range'
                 overhead "[ recall scroll, out ]" 254
                 @setvar! var__runebook_scrolls_out 1

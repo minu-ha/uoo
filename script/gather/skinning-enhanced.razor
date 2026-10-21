@@ -790,9 +790,11 @@ while not dead
             if findtype "gold coin" backpack as alias__found_gold
                 lift alias__found_gold config__gold_drop_amount
                 droprelloc 0 0
+
                 if config__sysmsg = 1
                     sysmsg "Gold drop: up to {{config__gold_drop_amount}} at your feet, weight over max." 88
                 endif
+
                 wait wait__short
 
                 if insysmsg "cannot drop anything"
@@ -800,6 +802,7 @@ while not dead
                 endif
 
                 wait wait__gold_drop
+
                 if config__chatty = 1
                     overhead "[ gold, dropped ]" 290
                 endif
@@ -1633,10 +1636,12 @@ while not dead
         if diffhits < config__heal_hits and not poisoned and not paralyzed
             if not hidden and not queued and not casting and not targetexists
                 settimer "timer__pack_leather" 0
+
                 if find global__my_loot_bag backpack
                     if config__sysmsg = 1
                         sysmsg "Leather pack BEGIN." 88
                     endif
+
                     dclick global__my_loot_bag
                     wait wait__pack_item
                     settimer "timer__pack_leather" 0
@@ -1652,6 +1657,7 @@ while not dead
                             if config__sysmsg = 1
                                 sysmsg "Leather move request: serial={{alias__leather_stack}}." 88
                             endif
+
                             lift alias__leather_stack 60000
                             drop global__my_loot_bag -1 -1
                             wait wait__pack_item
@@ -1661,6 +1667,7 @@ while not dead
                             wait wait__poll
                         endwhile
                     endwhile
+
                     if config__sysmsg = 1
                         sysmsg "Leather pack END." 88
                     endif

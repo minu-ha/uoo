@@ -384,29 +384,35 @@ if skill "Tracking" > 0
                     if findbuff "tracking"
                         gumpresponse 6 4267467659
                         wait wait__short
+
                         for 60
                             if not findbuff "tracking"
                                 break
                             endif
+
                             wait wait__poll
                         endfor
                     endif
 
                     clearsysmsg
+
                     if not findbuff "tracking" and gumpexists 4267467659
                         for 10
                             if diffhits >= config__heal_hits or poisoned or warmode or hidden or queued or casting or targetexists
                                 break
                             endif
+
                             if not gumpexists 4267467659
                                 break
                             endif
+
                             gumpresponse 8 4267467659
                             @setvar! var__tracking_button_answered 0
                             for 60
                                 if diffhits >= config__heal_hits or poisoned or warmode or hidden or queued or casting or targetexists
                                     break
                                 endif
+
                                 if config__tracking_color = 1
                                     if insysmsg "You will now hunt murderer players"
                                         @setvar! var__tracking_filter_confirmed 1
@@ -432,12 +438,15 @@ if skill "Tracking" > 0
                                         break
                                     endif
                                 endif
+
                                 if insysmsg "You will now hunt"
                                     @setvar! var__tracking_button_answered 1
                                     break
                                 endif
+
                                 wait wait__poll
                             endfor
+
                             if var__tracking_filter_confirmed = 1 or var__tracking_button_answered = 0
                                 break
                             endif
@@ -447,14 +456,17 @@ if skill "Tracking" > 0
 
                 if var__tracking_filter_confirmed = 1 and gumpexists 4267467659 and diffhits < config__heal_hits and not poisoned and not warmode and not hidden and not queued and not casting and not targetexists
                     clearsysmsg
+
                     if not findbuff "tracking"
                         gumpresponse 6 4267467659
                         wait wait__short
                     endif
+
                     if findbuff "tracking"
                         @setvar! var__tracking_hunting_active 1
                         @setvar! var__tracking_setup_color config__tracking_color
                     endif
+
                     if config__show_tracking = 0
                         gumpclose 4267467659
                     endif
@@ -512,6 +524,7 @@ while not dead
     if timer "timer__tracking_check" >= interval__tracking_check and skill "Tracking" > 0
         settimer "timer__tracking_check" 0
         @setvar! var__tracking_hunting_active 0
+
         if var__tracking_filter_confirmed = 1 and findbuff "tracking"
             @setvar! var__tracking_hunting_active 1
         endif
@@ -1183,9 +1196,11 @@ while not dead
             if findtype "gold coin" backpack as alias__found_gold
                 lift alias__found_gold config__gold_drop_amount
                 droprelloc 0 0
+
                 if config__sysmsg = 1
                     sysmsg "Gold drop: up to {{config__gold_drop_amount}} at your feet, weight over max." 88
                 endif
+
                 wait wait__short
 
                 if insysmsg "cannot drop anything"
@@ -1193,6 +1208,7 @@ while not dead
                 endif
 
                 wait wait__gold_drop
+
                 if config__chatty = 1
                     overhead "[ gold, dropped ]" 290
                 endif

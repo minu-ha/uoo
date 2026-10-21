@@ -795,6 +795,7 @@ if not varexist global__my_supply_pouch or not find global__my_supply_pouch back
 
     if counttype 3705 backpack 0 = 1 and findtype 3705 backpack 0 as alias__found_pouch
         setvar global__my_supply_pouch alias__found_pouch
+
         if config__chatty = 1
             overhead "[ supplies, set ]" 290
         endif
@@ -815,6 +816,7 @@ if not varexist global__my_loot_bag or not find global__my_loot_bag backpack
 
     if counttype 3702 backpack = 1 and findtype 3702 backpack as alias__found_bag
         setvar global__my_loot_bag alias__found_bag
+
         if config__chatty = 1
             overhead "[ loot bag, set ]" 290
         endif
@@ -838,9 +840,11 @@ if findtype 30765 backpack as alias__found_reagent_satchel
     wait wait__short
     drop backpack 56 200
     wait wait__short
+
     if config__chatty = 1
         overhead "[ reg satchel, moved ]" 290
     endif
+
     dclick alias__found_reagent_satchel
     wait wait__short
 endif
@@ -850,9 +854,11 @@ if findtype 31262 backpack as alias__found_alchemists_satchel
     wait wait__short
     drop backpack 64 200
     wait wait__short
+
     if config__chatty = 1
         overhead "[ alch satchel, moved ]" 290
     endif
+
     dclick alias__found_alchemists_satchel
     wait wait__short
 endif
@@ -862,9 +868,11 @@ if varexist global__my_supply_pouch and find global__my_supply_pouch backpack
     wait wait__short
     drop backpack 56 200
     wait wait__short
+
     if config__chatty = 1
         overhead "[ supplies, moved ]" 290
     endif
+
     dclick global__my_supply_pouch
     wait wait__short
 endif
@@ -874,9 +882,11 @@ if varexist global__my_loot_bag and find global__my_loot_bag backpack
     wait wait__short
     drop backpack 56 200
     wait wait__short
+
     if config__chatty = 1
         overhead "[ loot bag, moved ]" 290
     endif
+
     dclick global__my_loot_bag
     wait wait__short
 endif
@@ -911,9 +921,11 @@ for 10
         endif
 
         wait wait__short
+
         if config__chatty = 1
             overhead "[ pouch, moved ]" 290
         endif
+
         @ignore alias__found_trap_pouch
     endif
 endfor
@@ -923,9 +935,11 @@ while findtype 3705 backpack 38 as alias__found_trap_pouch
     wait wait__short
     drop backpack 56 200
     wait wait__short
+
     if config__chatty = 1
         overhead "[ pouch, moved ]" 290
     endif
+
     @ignore alias__found_trap_pouch
 endwhile
 
@@ -1009,11 +1023,13 @@ if varexist global__my_supply_pouch and find global__my_supply_pouch backpack
 
         lift sorting_item 1000
         wait wait__short
+
         if varexist global__my_loot_bag and find global__my_loot_bag backpack
             drop global__my_loot_bag 0 0
         else
             drop global__my_supply_pouch 0 0
         endif
+
         wait wait__short
     endfor
 
@@ -1070,6 +1086,7 @@ if gumpexists 2424293173
     gumpclose
 else
     overhead "[ aspect, miss ]" 254
+
     if config__sysmsg = 1
         sysmsg "Aspect: the [aspect gump did not open." 88
     endif
