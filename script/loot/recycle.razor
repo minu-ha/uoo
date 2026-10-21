@@ -2,7 +2,8 @@
 # Needs: a loot bag, a supply pouch, a single item ID wand (20496), and a recycling tool.
 # Based on "Item Recycle while Farming" by Jaseowns (outlands.uorazorscripts.com), 6/01/2026.
 # Containers use global__my_loot_bag and global__my_supply_pouch, or unique backpack matches.
-# Kept items go to the supply pouch at 130 200. Finish returns through list__resume_script.
+# Kept items go to the supply pouch at 130 200.
+# Normal completion and handled failures return through list__resume_script.
 
 clearall
 clearsysmsg
@@ -170,9 +171,9 @@ if var__running = 1
     endwhile
 
     if queued
+        @setvar! var__running 0
         overhead "[ loot bag, blocked ]" 254
-        sysmsg "Recycle: container action queue did not finish. Stop here." 88
-        stop
+        sysmsg "Recycle: container queue timeout. Returning to the loop." 88
     endif
 endif
 
@@ -308,29 +309,29 @@ if var__running = 1
                                 endwhile
 
                                 if queued
-                                    @clearignore
+                                    @setvar! var__running 0
+                                    @setvar! var__item_pending 0
                                     overhead "[ recycle, blocked ]" 254
-                                    sysmsg "Recycle: action queue did not finish. Stop here." 88
-                                    stop
-                                endif
-
-                                hotkey 'Cancel Current Target'
-                                dclick var__id_wand
-                                waitfortarget wait__target
-
-                                if targetexists
-                                    if find alias__item var__loot_bag
-                                        target alias__item
-                                        settimer "timer__recycle" 0
-                                        @setvar! var__id_sent 1
-                                    else
-                                        hotkey 'Cancel Current Target'
-                                        @setvar! var__item_pending 0
-                                    endif
+                                    sysmsg "Recycle: action queue timeout. Returning to the loop." 88
                                 else
                                     hotkey 'Cancel Current Target'
-                                    @ignore var__id_wand
-                                    @setvar! var__id_wand 0
+                                    dclick var__id_wand
+                                    waitfortarget wait__target
+
+                                    if targetexists
+                                        if find alias__item var__loot_bag
+                                            target alias__item
+                                            settimer "timer__recycle" 0
+                                            @setvar! var__id_sent 1
+                                        else
+                                            hotkey 'Cancel Current Target'
+                                            @setvar! var__item_pending 0
+                                        endif
+                                    else
+                                        hotkey 'Cancel Current Target'
+                                        @ignore var__id_wand
+                                        @setvar! var__id_wand 0
+                                    endif
                                 endif
                             endif
                         endif
@@ -531,10 +532,9 @@ if var__running = 1
                             endwhile
 
                             if not find alias__item var__supply_pouch
-                                @clearignore
+                                @setvar! var__running 0
                                 overhead "[ supplies, blocked ]" 254
-                                sysmsg "Recycle: move not confirmed. Stop here, check the item and pouch." 88
-                                stop
+                                sysmsg "Recycle: move not confirmed. Remaining loot left for the next run." 88
                             endif
                         endif
                     else
@@ -568,10 +568,9 @@ if var__running = 1
                                         endwhile
 
                                         if find alias__item var__loot_bag
-                                            @clearignore
+                                            @setvar! var__running 0
                                             overhead "[ recycle, blocked ]" 254
-                                            sysmsg "Recycle: item removal not confirmed. Stop here." 88
-                                            stop
+                                            sysmsg "Recycle: item removal not confirmed. Remaining loot left for the next run." 88
                                         endif
                                     else
                                         hotkey 'Cancel Current Target'
@@ -599,18 +598,14 @@ if var__running = 1
             @ignore alias__item
         endwhile
     endfor
+endif
 
-    if targetexists
-        hotkey 'Cancel Current Target'
-    endif
-    gumpclose 949095101
-    @clearignore
-
-    # ========================================================================================
-    # DROPS
-    # ========================================================================================
-    # An arcane essence first, then plain ingots, boards, leather and scrolls at your feet.
-    # Read a refused-drop message after the existing drop pause, then return the item to the pack.
+# ========================================================================================
+# DROPS
+# ========================================================================================
+# An arcane essence first, then plain ingots, boards, leather and scrolls at your feet.
+# Failed equipment processing skips drops and returns without more item actions.
+if var__running = 1
     if config__drink_arcane_essence = 1 and findtype 3901 backpack as alias__item
         dclick alias__item
         waitfortarget wait__target
@@ -668,15 +663,21 @@ if var__running = 1
     endwhile
 
     if queued
+        @setvar! var__running 0
         overhead "[ recycle, blocked ]" 254
-        sysmsg "Recycle: drop action queue did not finish. Stop here." 88
-        stop
+        sysmsg "Recycle: drop queue timeout. Returning to the loop." 88
     endif
 endif
 
 # ========================================================================================
 # RETURN
 # ========================================================================================
+# Clear targets and drag state, including a held item's backpack recovery request.
+# Never wait indefinitely or bypass the registered hunting loop after a handled failure.
+clearall
+@gumpclose 949095101
+@clearignore
+
 if listexists 'list__resume_script'
     foreach resume_hotkey in list__resume_script
         hotkey resume_hotkey
