@@ -100,8 +100,8 @@ clearignore
 @setvar! wait__target 500
 @setvar! wait__poll 50
 @setvar! wait__timeout 5000
-# Extra label retries after identification. A confirmed result proceeds immediately.
-@setvar! interval__id 650
+# Updated quality-label reply budget after a successful wand target.
+@setvar! wait__label 650
 
 # ========================================================================================
 # TIMER
@@ -109,6 +109,7 @@ clearignore
 if not timerexists "timer__recycle"
     createtimer "timer__recycle"
 endif
+
 settimer "timer__recycle" 0
 
 # ========================================================================================
@@ -121,7 +122,7 @@ settimer "timer__recycle" 0
 @setvar! var__tool 0
 @setvar! var__running 1
 @setvar! var__item_pending 0
-@setvar! var__id_attempted 0
+@setvar! var__id_sent 0
 @setvar! var__keep 0
 @setvar! var__kind 0
 @setvar! var__slayer 0
@@ -137,6 +138,7 @@ if varexist global__my_loot_bag and find global__my_loot_bag backpack
 elseif counttype 3702 backpack = 1 and findtype 3702 backpack as alias__loot_bag
     @setvar! var__loot_bag alias__loot_bag
 endif
+
 if varexist global__my_supply_pouch and find global__my_supply_pouch backpack
     @setvar! var__supply_pouch global__my_supply_pouch
 elseif counttype 3705 backpack 0 = 1 and findtype 3705 backpack 0 as alias__supply_pouch
@@ -162,15 +164,15 @@ if var__running = 1
     dclick var__loot_bag
     dclick var__supply_pouch
     settimer "timer__recycle" 0
+
     while queued and timer "timer__recycle" < wait__timeout
         wait wait__poll
     endwhile
-    @setvar! label__containers 0
-    getlabel backpack label__containers
-    if queued or label__containers = 0
-        @setvar! var__running 0
+
+    if queued
         overhead "[ loot bag, blocked ]" 254
-        sysmsg "Recycle: container opening not confirmed. Loot left untouched." 88
+        sysmsg "Recycle: container action queue did not finish. Stop here." 88
+        stop
     endif
 endif
 
@@ -190,6 +192,7 @@ if var__running = 1
         sysmsg "Recycle: no single item ID wand (20496)." 88
     endif
 endif
+
 if var__running = 1
     if findtype 4032|3997|7864|4148|4136 backpack as alias__tool
         @setvar! var__tool alias__tool
@@ -209,26 +212,73 @@ if var__running = 1
         @ignore alias__plain_item
     endwhile
 
-    # Kind: 0 other weapons, 1 macing, 2 instruments, 3 shields, 4 armor.
-    # Only the quality rules differ. Identification, movement and recycling are shared.
+    # Graphic IDs identify item types, not individual item serials.
+    # Names and ID mappings: document/game/item-list.md, parts 2 and 29.
     removelist list__recycle_types
     createlist list__recycle_types
-    pushlist list__recycle_types "31017|31019|31021|31023|31025|31027|31029|31031|31033|31035|31037|31038|31041|31043|31045|31047|31049|31051|31053|31055|dual wield tracker knife|duel wield katana|dual wield norse axe|dual wield rapier|dual wield sabre|dual wield scimitar|67773|67774|67775|67776|67777|67778|chakram|francisca|hurlbat|javelin|throwing knife|throwing star|67713|67723|67734|67744|67754|67764|3909|3911|3913|3915|3917|3934|3937|5046|5049|5115|5119|5182|5185|5187|30988|31128|31190|31172|31169|3719|3922|3938|5121|5123|5125|30989|30992|30996|30997|30998|31176|31188|3920|5042|5117|30990|30993|30994|30995|31184|31186|3570|3571|3572|3573|3834|22187|31141|31142"
+
+    # 0: Arcane staffs.
+    pushlist list__recycle_types "31017|31019|31021|31023|31025|31027|31029|31031|31033|31035|31037|31038|31041|31043|31045|31047|31049|31051|31053|31055"
+
+    # 1: Dual wielding.
+    # Existing name aliases and IDs retained together for this family.
+    pushlist list__recycle_types "dual wield tracker knife|duel wield katana|dual wield norse axe|dual wield rapier|dual wield sabre|dual wield scimitar|67773|67774|67775|67776|67777|67778"
+
+    # 2: Throwing.
+    # Existing name aliases and IDs retained together for this family.
+    pushlist list__recycle_types "chakram|francisca|hurlbat|javelin|throwing knife|throwing star|67713|67723|67734|67744|67754|67764"
+
+    # 3: Swordsmanship.
+    pushlist list__recycle_types "3909|3911|3913|3915|3917|3934|3937|5046|5049|5115|5119|5182|5185|5187|30988|31128|31190"
+
+    # 4: Macing.
     pushlist list__recycle_types "3568|3713|3721|3932|5040|5044|5112|5127|5177|5179|5181|30991|30999|31000|31001|31014|31178|31180|31182"
-    pushlist list__recycle_types "3740|3742|3762|3763|10245|20006|20008|20010|20012|20014|20016"
+
+    # 5: Fencing.
+    pushlist list__recycle_types "31172|31169|3719|3922|3938|5121|5123|5125|30989|30992|30996|30997|30998|31176|31188"
+
+    # 6: Archery.
+    pushlist list__recycle_types "3920|5042|5117|30990|30993|30994|30995|31184|31186"
+
+    # 7: Shields.
     pushlist list__recycle_types "7026|7027|7029|7031|7033|7034|7035|7107|7109|31002|31130"
+
+    # 8: Magery: wands and spellbooks.
+    pushlist list__recycle_types "3570|3571|3572|3573|3834"
+
+    # 9: Wrestling: caesti, fistblade and martial manual.
+    pushlist list__recycle_types "22187|31141|31142"
+
+    # 10: Instruments.
+    pushlist list__recycle_types "3740|3742|3762|3763|10245|20006|20008|20010|20012|20014|20016"
+
+    # 11: Armor: quality uses label material, not graphic orientation.
     pushlist list__recycle_types "5051|5054|5055|5056|5059|5060|5061|5062|5063|5067|5068|5069|5070|5074|5075|5076|5077|5078|5082|5083|5084|5085|5089|5090|5099|5100|5101|5102|5103|5104|5105|5106|5129|5131|5132|5135|5136|5137|5138|5139|5140|5141|5142|5143|5144|5146|5198|5199|5200|5201|5202|5203|5204|5205|5206|5207|7168|7169|7170|7171|7172|7173|7174|7175|7176|7177|7178|7179|7180|7181|7609|7610|7947|31003|31004|31005|31006|31007|31008|31009|31010|31011|31012|31015|31174|31191"
 
+    # Quality rules: 0 weapons, 1 macing, 2 instruments, 3 shields, 4 armor.
     foreach item_types in list__recycle_types
-        @setvar! var__kind index
+        @setvar! var__kind 0
+
+        if index = 4
+            @setvar! var__kind 1
+        elseif index = 10
+            @setvar! var__kind 2
+        elseif index = 7
+            @setvar! var__kind 3
+        elseif index = 11
+            @setvar! var__kind 4
+        endif
+
         while var__running = 1 and findtype item_types var__loot_bag as alias__item
             @setvar! var__item_pending 1
-            @setvar! var__id_attempted 0
+            @setvar! var__id_sent 0
+
             while var__item_pending = 1
                 # Reset the scoped reply and a numeric fallback, never reuse an old label.
                 @unsetvar! label__item
                 @setvar! label__item 0
                 getlabel alias__item label__item
+
                 if not find alias__item var__loot_bag
                     @setvar! var__item_pending 0
                 elseif label__item = 0
@@ -236,13 +286,14 @@ if var__running = 1
                     overhead "[ item, skip ]" 254
                     sysmsg "Recycle: no label. Item left untouched." 88
                 elseif "unidentified" in label__item
-                    if var__id_attempted = 0
+                    if var__id_sent = 0
                         if var__id_wand_out = 1
                             @setvar! var__item_pending 0
                         else
                             if var__id_wand = 0 and findtype 20496 backpack as alias__spare_wand
                                 @setvar! var__id_wand alias__spare_wand
                             endif
+
                             if var__id_wand = 0
                                 @setvar! var__item_pending 0
                                 @setvar! var__id_wand_out 1
@@ -251,23 +302,27 @@ if var__running = 1
                             else
                                 # A busy action queue is not a spent wand.
                                 settimer "timer__recycle" 0
+
                                 while queued and timer "timer__recycle" < wait__timeout
                                     wait wait__poll
                                 endwhile
+
                                 if queued
                                     @clearignore
                                     overhead "[ recycle, blocked ]" 254
                                     sysmsg "Recycle: action queue did not finish. Stop here." 88
                                     stop
                                 endif
+
                                 hotkey 'Cancel Current Target'
                                 dclick var__id_wand
                                 waitfortarget wait__target
+
                                 if targetexists
                                     if find alias__item var__loot_bag
                                         target alias__item
                                         settimer "timer__recycle" 0
-                                        @setvar! var__id_attempted 1
+                                        @setvar! var__id_sent 1
                                     else
                                         hotkey 'Cancel Current Target'
                                         @setvar! var__item_pending 0
@@ -279,18 +334,20 @@ if var__running = 1
                                 endif
                             endif
                         endif
-                    elseif timer "timer__recycle" >= interval__id
+                    elseif timer "timer__recycle" >= wait__label
                         @setvar! var__item_pending 0
-                        overhead "[ item id, miss ]" 254
-                        sysmsg "Recycle: ID not confirmed. Item left untouched: {{label__item}}" 88
+                        overhead "[ item, skip ]" 254
+                        sysmsg "Recycle: updated quality label not received. Item left untouched." 88
                     else
                         wait wait__poll
                     endif
                 else
                     @setvar! var__item_pending 0
+
                     if config__sysmsg = 1
                         sysmsg "Recycle check: {{label__item}}" 88
                     endif
+
                     @setvar! var__keep 0
                     if "aspect" in label__item
                         @setvar! var__keep 1
@@ -308,7 +365,6 @@ if var__running = 1
                         elseif config__save_defense = 1 and "defense" in label__item
                             @setvar! var__keep 1
                         endif
-
                     elseif var__kind = 4
                         @setvar! var__armor_type 0
                         if "plate" in label__item
@@ -414,7 +470,6 @@ if var__running = 1
                                 @setvar! var__keep 1
                             endif
                         endif
-
                     else
                         @setvar! var__slayer 0
                         if var__kind = 2
@@ -424,6 +479,7 @@ if var__running = 1
                         elseif "slaying" in label__item
                             @setvar! var__slayer 1
                         endif
+
                         if config__save_greater_slaying = 1 and var__slayer = 1 and "greater" in label__item
                             @setvar! var__keep 1
                         elseif config__save_lesser_slaying = 1 and var__slayer = 1 and "lesser" in label__item
@@ -455,7 +511,6 @@ if var__running = 1
                                 @setvar! var__keep 1
                             endif
                         endif
-
                     endif
 
                     if var__keep = 1
@@ -466,12 +521,15 @@ if var__running = 1
                             if config__sysmsg = 1
                                 sysmsg "Recycle save: {{label__item}}" 88
                             endif
+
                             lift alias__item
                             drop var__supply_pouch 130 200 0
                             settimer "timer__recycle" 0
+
                             while not find alias__item var__supply_pouch and timer "timer__recycle" < wait__timeout
                                 wait wait__poll
                             endwhile
+
                             if not find alias__item var__supply_pouch
                                 @clearignore
                                 overhead "[ supplies, blocked ]" 254
@@ -487,19 +545,34 @@ if var__running = 1
                                     @setvar! var__tool alias__spare_tool
                                 endif
                             endif
+
                             if var__tool != 0
                                 dclick var__tool
                                 waitforgump 949095101 wait__timeout
                             endif
                         endif
+
                         if gumpexists 949095101
                             if ingump "Recycle Single Item" 949095101
                                 hotkey 'Cancel Current Target'
                                 gumpresponse 3 949095101
                                 waitfortarget wait__target
+
                                 if targetexists
                                     if find alias__item var__loot_bag
                                         target alias__item
+                                        settimer "timer__recycle" 0
+
+                                        while find alias__item var__loot_bag and timer "timer__recycle" < wait__timeout
+                                            wait wait__poll
+                                        endwhile
+
+                                        if find alias__item var__loot_bag
+                                            @clearignore
+                                            overhead "[ recycle, blocked ]" 254
+                                            sysmsg "Recycle: item removal not confirmed. Stop here." 88
+                                            stop
+                                        endif
                                     else
                                         hotkey 'Cancel Current Target'
                                     endif
@@ -522,12 +595,11 @@ if var__running = 1
                     endif
                 endif
             endwhile
+
             @ignore alias__item
         endwhile
     endfor
 
-    # Wait for a server reply before reading the resources produced by the last recycle.
-    getlabel backpack label__ping
     if targetexists
         hotkey 'Cancel Current Target'
     endif
@@ -537,8 +609,8 @@ if var__running = 1
     # ========================================================================================
     # DROPS
     # ========================================================================================
-    # An arcane essence first, then plain ingots, boards, leather and scrolls at your feet. A refused
-    # drop goes back to the pack. The label read waits one round trip for the drop.
+    # An arcane essence first, then plain ingots, boards, leather and scrolls at your feet.
+    # Read a refused-drop message after the existing drop pause, then return the item to the pack.
     if config__drink_arcane_essence = 1 and findtype 3901 backpack as alias__item
         dclick alias__item
         waitfortarget wait__target
@@ -549,46 +621,57 @@ if var__running = 1
         clearsysmsg
         lift alias__drop_item 60000
         droprelloc 0 0
-        getlabel backpack label__ping
+        wait wait__drop
+
         if insysmsg "cannot drop anything"
             drop backpack -1 -1 -1
         endif
-        wait wait__drop
     endif
 
     if config__drop_boards = 1 and findtype 7127 backpack 0 as alias__drop_item
         clearsysmsg
         lift alias__drop_item 60000
         droprelloc 0 0
-        getlabel backpack label__ping
+        wait wait__drop
+
         if insysmsg "cannot drop anything"
             drop backpack -1 -1 -1
         endif
-        wait wait__drop
     endif
 
     if config__drop_leather = 1 and findtype 4225 backpack 0 as alias__drop_item
         clearsysmsg
         lift alias__drop_item 60000
         droprelloc 0 0
-        getlabel backpack label__ping
+        wait wait__drop
+
         if insysmsg "cannot drop anything"
             drop backpack -1 -1 -1
         endif
-        wait wait__drop
     endif
 
     if config__drop_scrolls = 1 and findtype 3827 backpack 0 as alias__drop_item
         clearsysmsg
         lift alias__drop_item 60000
         droprelloc 0 0
-        getlabel backpack label__ping
+        wait wait__drop
+
         if insysmsg "cannot drop anything"
             drop backpack -1 -1 -1
         endif
-        wait wait__drop
     endif
 
+    settimer "timer__recycle" 0
+
+    while queued and timer "timer__recycle" < wait__timeout
+        wait wait__poll
+    endwhile
+
+    if queued
+        overhead "[ recycle, blocked ]" 254
+        sysmsg "Recycle: drop action queue did not finish. Stop here." 88
+        stop
+    endif
 endif
 
 # ========================================================================================
