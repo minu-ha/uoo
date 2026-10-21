@@ -27,6 +27,7 @@ Combat loops are named after the template (`dexxer-basic`), variants get a suffi
 | `bard-necro-enhanced`  | Discord / Peace / Provo + Necromancy summons kept out and refreshed + Spirit Speak, with the Grimoire proc rotation            |
 | `bard-archer-enhanced` | Discord / Peace / Provo with Virtuoso kept up + archery codex stance and finisher by enemy count + Repeater. Shots stay manual |
 | `tamer-mage-enhanced`  | Tamer mage: veterinary supplies for you and the pets, self buffs, Flamestrike for the aspect proc                              |
+| `tamer-archer-enhanced` | Tamer archer: veterinary supplies for you and the pets, Herding crook, archery codex stance and finisher by enemy count + Full Draw. Shots and pets stay manual |
 | `pvp`                  | Shared field PvP self sustain with Magery, bandage, potion and swing-based weapon settings. All offense stays manual           |
 | `dexxer-basic`         | Minimal dexxer sustain: bandages, heal, cure and Refresh potions, pouch, gold drop, food                                       |
 
@@ -93,7 +94,7 @@ Design notes and in-game checks are in [document/questions/open-items.md](../doc
 `loot/recycle` runs every hotkey named in the list `list__resume_script` when it finishes or cannot start because a
 required container or tool is missing. An unconfirmed item move, unconfirmed recycling or a stuck action queue stops without resuming:
 see the [in-game checks](../document/questions/open-items.md#13). The farming loops fill the list at Play with their own Razor hotkey name, the one the profile
-stores (`Play Script: gather\skinning-enhanced`): `bard-necro-enhanced`, `bard-archer-enhanced`, `tamer-mage-enhanced`, `dexxer-basic`,
+stores (`Play Script: gather\skinning-enhanced`): `bard-necro-enhanced`, `bard-archer-enhanced`, `tamer-mage-enhanced`, `tamer-archer-enhanced`, `dexxer-basic`,
 `skinning-enhanced` and `lumberjack-enhanced`. The archived `bard-mace` and `bard-throwing` register their `Play Script: archive\…` name.
 It is a list because a variable reads a word back as 4294967295 (document/scripting/razor.md part 3).
 It lasts until the client closes, and with nothing registered recycle just ends. `combat/pvp` does not register,

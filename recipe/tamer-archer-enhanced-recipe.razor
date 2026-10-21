@@ -1,0 +1,300 @@
+# Recipe for script/combat/tamer-archer-enhanced.razor. Build it with: node util/build-scripts.mjs
+# Every setting of this loop: node util/build-scripts.mjs --settings recipe/tamer-archer-enhanced-recipe.razor
+# @ output script/combat/tamer-archer-enhanced.razor
+
+
+# ========================================================================================
+# @ header
+# ========================================================================================
+
+# Tamer Archer Enhanced: veterinary supplies for you and the pets, sustain, self buffs and
+# the archery codex, around shots you fire by hand.
+# Design and in-game checks: document/questions/open-items.md part 18.
+# Needs: veterinary supplies (25750), a shepherd's crook for Herding, a bow and a codex of
+# archery in the backpack, potions and reagents.
+# Pets and targeting stay manual: Z then V sends the pets, Shift+V (Attack Last Target)
+# fires the bow. The script never commands a pet and never attacks.
+# Pack picks: V, or Shift+Space (Set Last Target, Beneficial), then [ provo, set ]. Two or
+# more picked enemies in reach switch the codex to Incendiary and Ricochet.
+# A cast clears your hands: the bow goes back on as soon as the hand is empty.
+# The codex hotbar is opened once at Play ([CodexHotbar).
+# cooldowns.xml carries every bar this loop reads: heal pot, reflect and walk. A missing
+# bar reads 0.
+# A fight is a picked enemy inside target_range. In a fight: Full Draw once the meter is
+# full. Between fights: Arch Protection on you and the pets. Always: the archery stance
+# and finisher, Reactive Armor and Magic Reflection.
+# Warmode is the player's manual window: the self buffs and the food stand down. Cures,
+# heals, the vet kit, potions, the codex, the ability and the re-arm keep running.
+
+
+# ========================================================================================
+# @ blocks
+#
+#   One box per block, in the order the blocks run, base first. The builder writes the box.
+#   Yours are the "> " lines in it (a note on the block, or under a setting the reason for
+#   its value) and the @setvar! lines under it. Write a new @setvar! line under any box, its
+#   reason as a "#" line right above it: the builder moves both to the box it belongs to.
+# ========================================================================================
+
+# ----------------------------------------------------------------------------------------
+# @ use base
+#
+#   The frame of every loop and routine. Every recipe lists it first.
+#
+#   warmode_is_manual (default 0)
+#      Whose warmode it is.
+#        0  ours: our casts ignore it
+#        1  the player's manual control window: our casts and the food stand down while it
+#           is on. Potions and bandages still go out
+#      Read by recovery/cure, recovery/heal, buff/food, buff/spells.
+#      > Warmode is yours: our casts stand down too.
+#
+#   recover_in_warmode (default 0)
+#      With warmode_is_manual 1, what the recovery casts (cure, heal, light Heal) do in
+#      warmode.
+#        0  stand down with the rest
+#        1  keep going, so only the other casts wait for the player
+#      Read by recovery/cure, recovery/heal.
+#      > What keeps the character alive keeps running in warmode.
+#
+#   settle_first (default 0)
+#      What a pass does first.
+#        0  reads the state at once. Potions still go out while a spell is casting
+#        1  waits for the item queue and any cast to finish
+#      > Anything already in flight finishes before the pass reads state.
+# ----------------------------------------------------------------------------------------
+@setvar! config__warmode_is_manual 1
+@setvar! config__recover_in_warmode 1
+@setvar! config__settle_first 1
+
+# ----------------------------------------------------------------------------------------
+# @ use tamer/herding
+#
+#   Sets the shepherd's crook active once, before the loop.
+#   Runs once, before the loop.
+# ----------------------------------------------------------------------------------------
+
+# ----------------------------------------------------------------------------------------
+# @ use bard/provo-picks
+#
+#   Registers changed lastbeneficial enemies as Provocation candidates, before our casts.
+#   > No barding here: the registered picks only feed the archery codex's enemy count.
+# ----------------------------------------------------------------------------------------
+
+# ========================================================================================
+# @ when paralyzed or poisoned or diffhits > 0
+# ========================================================================================
+
+# ----------------------------------------------------------------------------------------
+# @ use recovery/cure
+#
+#   The trapped pouch while paralyzed, else a cure potion or the Smart Heal/Cure agent.
+# ----------------------------------------------------------------------------------------
+
+# ----------------------------------------------------------------------------------------
+# @ use recovery/heal
+#
+#   Heal potion at heal_hits, else Greater Heal at emergency_hits.
+#
+#   emergency_hits (default 35)
+#      Missing hit points that cast Greater Heal when no heal potion went out on this
+#      pass. Not below heal_hits.
+#      > The vet kit handles ordinary damage, so Greater Heal waits for 45.
+# ----------------------------------------------------------------------------------------
+@setvar! config__emergency_hits 45
+
+# ========================================================================================
+# @ end
+# ========================================================================================
+
+# ----------------------------------------------------------------------------------------
+# @ use tamer/vet-kit
+#
+#   Veterinary supplies on you and the followers around you, never over a running kit.
+# ----------------------------------------------------------------------------------------
+
+# ----------------------------------------------------------------------------------------
+# @ use fight/rearm
+#
+#   Re-arms what each hand held, out of the backpack, when a cast or a disarm empties it.
+#   > Right after recovery: the shots are your damage. The bow in hand at Play is the one
+#   > remembered, by serial, so looted bows in the backpack are never picked over it.
+#
+#   rearm_graphic (default 0)
+#      Graphic of the weapon to pick out of the backpack while both hands are empty and
+#      nothing is remembered, on a fresh client. 0 picks nothing: only an item once seen
+#      in hand goes back. The hand it goes to comes from the two-handed list in setup.
+#      5042 is the bow, 5187 the two handed axe and 31186 the Rampart Crossbow in
+#      document/game/item-list.md.
+#      > The bow, 5042 under Archery in item-list, for a fresh client with the bow packed.
+# ----------------------------------------------------------------------------------------
+@setvar! config__rearm_graphic 5042
+
+# ----------------------------------------------------------------------------------------
+# @ use fight/target
+#
+#   Remembers the picked enemy and sets var__fighting while it is in reach.
+#
+#   acquire_range (default 12)
+#      How far the enemy you pick is taken up from, and kept while it stays. The pets
+#      often open on a mob past target_range, and a song or self cast would otherwise
+#      move lastharmful off it before it comes in reach.
+#      Also read by bard/provo-picks, fight/archery-codex.
+#      > The whole screen: an enemy picked far off is kept while it walks in.
+#
+#   target_range (default 12)
+#      How far the remembered enemy may be and still count as a fight (var__fighting 1).
+#      Not above acquire_range.
+#      Also read by fight/archery-codex.
+#      > The bow reaches 10 tiles.
+#
+#   target_grace (default 1200)
+#      How long, in ms, a remembered enemy that left acquire_range is kept.
+#      > A target that left the screen is dropped half a second later.
+# ----------------------------------------------------------------------------------------
+@setvar! config__acquire_range 18
+@setvar! config__target_range 10
+@setvar! config__target_grace 500
+
+# ----------------------------------------------------------------------------------------
+# @ use magery/reagents
+#
+#   Reagent flags for the Magery casts, the mana per circle and the shared cast settings.
+# ----------------------------------------------------------------------------------------
+
+# ========================================================================================
+# @ every interval__housekeeping
+# ========================================================================================
+
+# ----------------------------------------------------------------------------------------
+# @ use recovery/refresh
+#
+#   Total Refresh at or below refresh_stam.
+#
+#   refresh_stam (default 15)
+#      Current stamina at or below this drinks a Refresh.
+#      > Shots slow with current stamina: a Refresh at 60, as in bard-archer.
+# ----------------------------------------------------------------------------------------
+@setvar! config__refresh_stam 60
+
+# ----------------------------------------------------------------------------------------
+# @ use buff/food
+#
+#   Eats from a tray while Food Satisfaction is missing, looked at once a minute.
+# ----------------------------------------------------------------------------------------
+
+# ----------------------------------------------------------------------------------------
+# @ use buff/potions
+#
+#   Strength and Agility by stat value, Magic Resist by its icon, while fighting.
+# ----------------------------------------------------------------------------------------
+
+# ----------------------------------------------------------------------------------------
+# @ use pack/gold-drop
+#
+#   Drops gold at your feet while over max weight, one drop per pass.
+# ----------------------------------------------------------------------------------------
+
+# ========================================================================================
+# @ end
+# ========================================================================================
+
+# ----------------------------------------------------------------------------------------
+# @ use fight/archery-codex
+#
+#   Codex of archery: Arcane, Fowling while hurt, Incendiary and Ricochet on a pack.
+# ----------------------------------------------------------------------------------------
+
+# ========================================================================================
+# @ when var__fighting = 1
+# ========================================================================================
+
+# ----------------------------------------------------------------------------------------
+# @ use fight/weapon-ability
+#
+#   The weapon ability on the remembered enemy in reach, once per meter fill.
+#
+#   ability_codex (default 1)
+#      The codex the held weapon belongs to, which names the three ability slots.
+#        1  Swords: Spinslash, Rend, Chop
+#        2  Archery: Skirmish, Full Draw, Repeater
+#      > The bow is an archery weapon.
+#
+#   ability_main (default 3)
+#      Weapon ability to use, by its slot in that codex.
+#        1  Spinslash, or Skirmish
+#        2  Rend, or Full Draw
+#        3  Chop, or Repeater
+#      > Full Draw: a bow fires every 2.21 s, 6.8 shots in 15 s, so 50% more is about
+#      > 340% against Repeater's 225% (open-items part 18). Needs 3 s standing still.
+#
+#   ability_range (default 2)
+#      How far, in tiles, the remembered enemy may be for the request. 2 for a melee
+#      weapon, the weapon's reach for a bow.
+#      > The bow reaches 10 tiles.
+# ----------------------------------------------------------------------------------------
+@setvar! config__ability_codex 2
+@setvar! config__ability_main 2
+@setvar! config__ability_range 10
+
+# ========================================================================================
+# @ end
+# ========================================================================================
+
+# ----------------------------------------------------------------------------------------
+# @ use buff/spells
+#
+#   Reactive Armor, then Magic Reflection, whenever one is missing.
+#
+#   mana_reactive_armor (default 4)
+#      Minimum current mana to start Reactive Armor.
+#      > Each start line is the spell cost plus 11 kept for Greater Heal, as in tamer-mage.
+#
+#   mana_magic_reflect (default 14)
+#      Minimum current mana to start Magic Reflection.
+#      > Same reserve: 14 plus 11.
+#
+#   use_arch_protection (default 0)
+#      1 keeps Bless on yourself, and Arch Protection on you and the followers around you,
+#      while no enemy is engaged (var__fighting 0) and warmode is off. Both open a cursor
+#      answered with yourself, Bless a beneficial one and Arch Protection a neutral one, so
+#      they never take a cast from a fight.
+#      > Arch Protection on you and the pets after a fight, as in tamer-mage.
+#
+#   mana_arch_protection (default 11)
+#      Minimum current mana to start Bless and Arch Protection.
+#      > Arch Protection costs 11: plus 11 for Greater Heal.
+#
+#   buff_when_poisoned (default 1)
+#      Buffs while poisoned.
+#        0  no: hold them back and cut one that is casting, so the cure goes first
+#        1  yes
+#      > The cure goes first: no buffs while poisoned.
+# ----------------------------------------------------------------------------------------
+@setvar! config__mana_reactive_armor 15
+@setvar! config__mana_magic_reflect 25
+@setvar! config__use_arch_protection 1
+@setvar! config__mana_arch_protection 22
+@setvar! config__buff_when_poisoned 0
+
+
+# ========================================================================================
+# @ setup
+# ========================================================================================
+
+# loot/recycle runs the hotkey named in this list when it finishes or gives up. A list, because
+# a variable cannot hold a word (document/scripting/razor.md part 3). It lasts until the client closes.
+if not listexists 'list__resume_script'
+    createlist 'list__resume_script'
+endif
+
+clearlist 'list__resume_script'
+pushlist 'list__resume_script' 'Play Script: combat\tamer-archer-enhanced'
+
+# The codex hotbar, so the stance and the finisher the loop switches stay in view.
+say "[CodexHotbar"
+wait wait__short
+
+if config__chatty = 1
+    overhead "[ tamer archer, on ]" 290
+endif

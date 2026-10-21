@@ -39,6 +39,7 @@ order: 10
 | [15](#15) | loadout, regear, aspect 인게임 확인 |
 | [16](#16) | bard-archer-enhanced 인게임 확인 |
 | [17](#17) | 프로보 후보 입력과 인게임 확인 |
+| [18](#18) | tamer-archer-enhanced 인게임 확인 |
 
 ::part[설정과 알림]
 
@@ -1204,3 +1205,31 @@ Outlands 포크의 해당 핫키와 커서 간섭은 아래 검증 필요.
 두 바드 루프는 조립 완료, 위 인게임 확인은 아직 대기.
 등록 커서를 자동 바딩과 구별하는 근거가 확보되기 전까지 기존 warmode 수동 구간에서 등록.
 실제 라타 복원은 별도 과제. 반영 방법은 [Workflow](../working/workflow.md#04) 04절.
+
+## <a id="18"></a>18 tamer-archer-enhanced 인게임 확인
+
+2026-10-21 추가. bard-archer-enhanced의 아처리 쪽에 tamer-mage-enhanced의 수의사 키트를 더한 루프. 정본은 레시피 [recipe/tamer-archer-enhanced-recipe.razor](https://github.com/minu-ha/uoo/blob/master/recipe/tamer-archer-enhanced-recipe.razor).
+summoner 프로필 기준: `Z` All Kill 커서 → `V` 가장 가까운 몹(펫 공격과 라타), `Shift+V` 내 사격.
+
+#### 템플릿과 설계
+
+- 바드 블록 없음. 펫 명령과 대상 지정은 수동, 루프는 펫을 명령하지 않음
+- 블록 순서: base, `tamer/herding`(크룩 활성, 시작 때 한 번), `bard/provo-picks`(마릿수 판정용 선택 등록), 회복(cure, heal), `tamer/vet-kit`, `fight/rearm`(활 5042), `fight/target`, `magery/reagents`,
+  5초마다 refresh, food, potions, gold-drop, `fight/archery-codex`, 교전 중 `fight/weapon-ability`, `buff/spells`
+- 뺀 것: `escape/tracking`(사용자 요청 2026-10-21), `recovery/bandage`(키트가 셀프 붕대, tamer-mage와 같음), `buff/mushroom`, `magery/flamestrike`, Bless
+- Full Draw: 활은 2.21초에 한 발([PvP](../game/pvp.md#09.B) 09.B절 표) → 15초에 6.8발 × 50% = 약 340%. Repeater 225%보다 큼. 정지 3초 조건이라 움직이며 쏘면 Repeater(`ability_main` 3)
+- 사거리 10: 활([Bard Archer](../templates/bard-archer.md#02.A) 02.A절). `target_range`와 `ability_range` 모두 10
+- Arch Protection: 교전 밖에서 나와 펫의 AR. 마나 예비는 tamer-mage와 같은 11(Greater Heal)
+- `[CodexHotbar`를 시작 때 한 번([Commands](https://wiki.uooutlands.com/Commands) "Launches the Codex Hotbar")
+- 스탯 포션 기준선 STR 120, DEX 100은 기본값. 이 템플릿의 스탯은 미기록 → 다르면 레시피에서 변경. Magery가 없는 템플릿이면 `use_magery` 0
+- 같은 활을 주워 여럿이 되어도 들고 있던 serial을 기억해 그것만 다시 듦. 아무것도 기억 못 하는 새 클라이언트에서만 graphic 5042로 검색, 그때는 첫 번째 활
+
+#### 인게임 확인
+
+- F1 → `[ crook, out ]` 없이 `[ tamer archer, on ]`, 코덱스 핫바가 뜨는지. 이미 떠 있을 때 다시 Play하면 닫히는지
+- 수의사 키트: [12절](#12)의 항목 그대로
+- 시전 뒤 활 재장착: [16절](#16) 재장착 항목. Journal `Rearm: two-handed layer remembered`, 시전 뒤 `Rearm: equip requested on the two-handed layer`
+- 자세와 피니셔 전환: [16절](#16) 코덱스 항목. 후보 등록은 `V`나 `Shift+Space`, 절차는 [17절](#17)
+- `[ full draw ]` 60초마다. 정지 3초 뒤 발사되는지, 움직이면 안 나가는지. 손해면 `ability_main` 3
+- Arch Protection: 교전이 끝나면 `Buff: Arch Protection.`, 펫에도 `Protection` 아이콘
+- 프로필 연결은 아직 없음. 쓸 캐릭터의 summoner 프로필 F1을 `Play Script: combat\tamer-archer-enhanced`로, 게임 종료 뒤 xml 확인
