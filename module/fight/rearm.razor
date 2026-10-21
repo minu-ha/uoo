@@ -8,8 +8,10 @@
 # variable anyway (document/scripting/razor.md part 3). Each layer remembers the item it
 # held by serial, so a replacement armed by hand is remembered the same way, and a looted
 # twin in the backpack is never mistaken for it. rearm_graphic adds a backpack search for
-# a fresh client, when nothing is remembered yet: the setup list below says which
-# graphics are two-handed, by the wiki weapon table, so the search knows the hand.
+# a fresh client, when nothing is remembered yet. That equip names the lefthand whatever
+# the weapon is: the server puts an item on its own layer, the way hotkey/weapon-katana
+# arms a one-handed katana, and the next check remembers it where it landed. Which hand
+# each weapon takes is listed under Weapons in document/game/item-list.md, for reference.
 # ----------------------------------------------------------------------------------------
 
 
@@ -19,9 +21,8 @@
 #   config__rearm_graphic
 #      Graphic of the weapon to pick out of the backpack while both hands are empty and
 #      nothing is remembered, on a fresh client. 0 picks nothing: only an item once seen
-#      in hand goes back. The hand it goes to comes from the two-handed list in setup.
-#      5042 is the bow, 5187 the two handed axe and 31186 the Rampart Crossbow in
-#      document/game/item-list.md.
+#      in hand goes back. 5042 is the bow, 5187 the two handed axe and 31186 the Rampart
+#      Crossbow in document/game/item-list.md.
 # ----------------------------------------------------------------------------------------
 @setvar! config__rearm_graphic 0
 
@@ -65,99 +66,6 @@ endif
 
 
 # ----------------------------------------------------------------------------------------
-# @ setup
-# ----------------------------------------------------------------------------------------
-# The two-handed graphics, from the (2H) rows of the wiki Armor & Weapons table and the
-# Archery weapon list (read 2026-10-21), with the ids of document/game/item-list.md. The
-# graphic search sends these to the lefthand and every other graphic to the righthand.
-# Built again on every Play, so an edit here needs no client restart.
-removelist 'list__rearm_two_handed'
-createlist 'list__rearm_two_handed'
-
-# Archery: bow 5042, hunting bow 30994, recurve bow 30995, great bow 30990, heavy crossbow
-# 5117, rampart crossbow 31186.
-pushlist 'list__rearm_two_handed' 5042
-pushlist 'list__rearm_two_handed' 30994
-pushlist 'list__rearm_two_handed' 30995
-pushlist 'list__rearm_two_handed' 30990
-pushlist 'list__rearm_two_handed' 5117
-pushlist 'list__rearm_two_handed' 31186
-
-# Fencing: short spear 5123, pitchfork 3719, spear 3938, sarissa 30992.
-pushlist 'list__rearm_two_handed' 5123
-pushlist 'list__rearm_two_handed' 3719
-pushlist 'list__rearm_two_handed' 3938
-pushlist 'list__rearm_two_handed' 30992
-
-# Mace Fighting: gnarled staff 5112, black staff 3568, quarter staff 3721, shepherd's crook
-# 3713, pickaxe 3717 and 3718, war hammer 5177, great sledge 31001, great mace 31180,
-# giant spiked mace 31182, giant club 31178.
-pushlist 'list__rearm_two_handed' 5112
-pushlist 'list__rearm_two_handed' 3568
-pushlist 'list__rearm_two_handed' 3721
-pushlist 'list__rearm_two_handed' 3713
-pushlist 'list__rearm_two_handed' 3717
-pushlist 'list__rearm_two_handed' 3718
-pushlist 'list__rearm_two_handed' 5177
-pushlist 'list__rearm_two_handed' 31001
-pushlist 'list__rearm_two_handed' 31180
-pushlist 'list__rearm_two_handed' 31182
-pushlist 'list__rearm_two_handed' 31178
-
-# Swordsmanship: axe 3913, battle axe 3911, double axe 3915, large battle axe 5115,
-# executioner's axe 3909, two handed axe 5187, hatchet 3907 and 3908, halberd 5182,
-# bardiche 3917, zweihander 30988, great axe 31190.
-pushlist 'list__rearm_two_handed' 3913
-pushlist 'list__rearm_two_handed' 3911
-pushlist 'list__rearm_two_handed' 3915
-pushlist 'list__rearm_two_handed' 5115
-pushlist 'list__rearm_two_handed' 3909
-pushlist 'list__rearm_two_handed' 5187
-pushlist 'list__rearm_two_handed' 3907
-pushlist 'list__rearm_two_handed' 3908
-pushlist 'list__rearm_two_handed' 5182
-pushlist 'list__rearm_two_handed' 3917
-pushlist 'list__rearm_two_handed' 30988
-pushlist 'list__rearm_two_handed' 31190
-
-# Arcane staves, all twenty of the Arcane Staffs group: 31017 to 31055.
-pushlist 'list__rearm_two_handed' 31017
-pushlist 'list__rearm_two_handed' 31019
-pushlist 'list__rearm_two_handed' 31021
-pushlist 'list__rearm_two_handed' 31023
-pushlist 'list__rearm_two_handed' 31025
-pushlist 'list__rearm_two_handed' 31027
-pushlist 'list__rearm_two_handed' 31029
-pushlist 'list__rearm_two_handed' 31031
-pushlist 'list__rearm_two_handed' 31033
-pushlist 'list__rearm_two_handed' 31035
-pushlist 'list__rearm_two_handed' 31037
-pushlist 'list__rearm_two_handed' 31038
-pushlist 'list__rearm_two_handed' 31041
-pushlist 'list__rearm_two_handed' 31043
-pushlist 'list__rearm_two_handed' 31045
-pushlist 'list__rearm_two_handed' 31047
-pushlist 'list__rearm_two_handed' 31049
-pushlist 'list__rearm_two_handed' 31051
-pushlist 'list__rearm_two_handed' 31053
-pushlist 'list__rearm_two_handed' 31055
-
-# Fishing: harpoon 31169, trident 31172.
-pushlist 'list__rearm_two_handed' 31169
-pushlist 'list__rearm_two_handed' 31172
-
-# One-handed by the same table, so the search sends them to the righthand. Archery:
-# crossbow 3920, balestra 30993, pistol crossbow 31184 (item-list also gives it 31186,
-# the rampart crossbow art, unverified). Fencing: kryss 5121, assassin's knife 30996,
-# hunting knife 31188, kukri 31176, war fork 5125, epee 30989, rapier 30997, fencing sabre
-# 30998, and the dagger 3922 that the table leaves out. Mace Fighting: club 5044, hammer
-# pick 5181, war axe 5040, cudgel 31014, skull club 31000, mace 3932, maul 5179, war mace
-# 5127, flanged mace 30991, flail 30999. Swordsmanship: katana 5119, cutlass 5185,
-# scimitar 5046, longsword 3937, broadsword 3934, viking sword 5049, norse axe 31128.
-# Throwing weapons have names, not ids, in item-list.
-
-
-# ----------------------------------------------------------------------------------------
 # @ loop
 # ----------------------------------------------------------------------------------------
     # ------------------------------------------------------------------------------------
@@ -168,8 +76,8 @@ pushlist 'list__rearm_two_handed' 31172
     # an item in hand is remembered once by serial, an empty hand gets its remembered
     # item back out of the backpack, and a remembered item in neither place is forgotten.
     # One equip per check, the two-handed layer first. With both hands empty and nothing
-    # remembered, rearm_graphic names the one to pick, and the setup list its hand. The
-    # request is not proof of the equip: the next check reads the hands again.
+    # remembered, rearm_graphic names the one to pick. The request is not proof of the
+    # equip: the next check reads the hands again.
     # ------------------------------------------------------------------------------------
     if timer "timer__equip" >= interval__equip_retry
         if not hidden and not queued and not casting and not targetexists
@@ -224,16 +132,10 @@ pushlist 'list__rearm_two_handed' 31172
 
             if var__rearm_sent = 0 and config__rearm_graphic != 0 and var__rearm_left = 0 and var__rearm_right = 0 and lhandempty and rhandempty
                 if findtype config__rearm_graphic backpack as alias__rearm_found
+                    # Nothing is remembered here: the next check reads the hands and keeps the
+                    # serial on the layer the server put it on.
                     lift alias__rearm_found
-
-                    if inlist 'list__rearm_two_handed' config__rearm_graphic
-                        @setvar! var__rearm_left alias__rearm_found
-                        drop self lefthand
-                    else
-                        @setvar! var__rearm_right alias__rearm_found
-                        drop self righthand
-                    endif
-
+                    drop self lefthand
                     if config__sysmsg = 1
                         sysmsg "Rearm: graphic {{config__rearm_graphic}} picked from the backpack, serial={{alias__rearm_found}}. The next check reads the hands." 88
                     endif

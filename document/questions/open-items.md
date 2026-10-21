@@ -1069,6 +1069,7 @@ loadout과 regear는 같은 `gear/aspect` 블록을 씀. 동작 설명은 각 �
 - Play 때 석궁을 든 상태면 Journal에 `Rearm: two-handed layer remembered`. 백팩에 있으면 graphic 31186으로 찾아 `Rearm: graphic 31186 picked`. 둘 다 아니면 `[ weapon, out ]`이 3초마다
 - RA, Reflect, Protection, Greater Heal 뒤 석궁이 백팩으로 떨어지고 2초 안에 다시 손에. Journal `Rearm: equip requested on the two-handed layer`
 - 같은 석궁을 하나 더 주워 백팩에 두고 시전 → 들고 있던 것(serial)이 돌아오는지. `rhandempty`와 `righthand`가 이 포크에 있는지(없으면 오류 줄)
+- graphic 검색은 1H 무기도 `drop self lefthand`로 보냄(`hotkey/weapon-katana`와 같은 경로). 서버가 제 레이어에 올리는지, 아니면 거절해 2초마다 다시 집는지
 - 다시 든 뒤 사격이 이어지는지, `V`를 다시 눌러야 하는지
 - 재장착이 바딩 커서나 자기 주문을 끊지 않는지. 끊기면 시전 중 가드가 샌 것
 - 31186이 Pistol Crossbow와 같은 art인지. 같으면 백팩에 둘 다 있을 때 `findtype`이 어느 쪽을 집는지

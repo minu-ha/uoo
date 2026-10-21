@@ -591,74 +591,6 @@ endif
 
 
 # ----------------------------------------------------------------------------------------
-# module/fight/rearm.razor
-# ----------------------------------------------------------------------------------------
-removelist 'list__rearm_two_handed'
-createlist 'list__rearm_two_handed'
-
-pushlist 'list__rearm_two_handed' 5042
-pushlist 'list__rearm_two_handed' 30994
-pushlist 'list__rearm_two_handed' 30995
-pushlist 'list__rearm_two_handed' 30990
-pushlist 'list__rearm_two_handed' 5117
-pushlist 'list__rearm_two_handed' 31186
-
-pushlist 'list__rearm_two_handed' 5123
-pushlist 'list__rearm_two_handed' 3719
-pushlist 'list__rearm_two_handed' 3938
-pushlist 'list__rearm_two_handed' 30992
-
-pushlist 'list__rearm_two_handed' 5112
-pushlist 'list__rearm_two_handed' 3568
-pushlist 'list__rearm_two_handed' 3721
-pushlist 'list__rearm_two_handed' 3713
-pushlist 'list__rearm_two_handed' 3717
-pushlist 'list__rearm_two_handed' 3718
-pushlist 'list__rearm_two_handed' 5177
-pushlist 'list__rearm_two_handed' 31001
-pushlist 'list__rearm_two_handed' 31180
-pushlist 'list__rearm_two_handed' 31182
-pushlist 'list__rearm_two_handed' 31178
-
-pushlist 'list__rearm_two_handed' 3913
-pushlist 'list__rearm_two_handed' 3911
-pushlist 'list__rearm_two_handed' 3915
-pushlist 'list__rearm_two_handed' 5115
-pushlist 'list__rearm_two_handed' 3909
-pushlist 'list__rearm_two_handed' 5187
-pushlist 'list__rearm_two_handed' 3907
-pushlist 'list__rearm_two_handed' 3908
-pushlist 'list__rearm_two_handed' 5182
-pushlist 'list__rearm_two_handed' 3917
-pushlist 'list__rearm_two_handed' 30988
-pushlist 'list__rearm_two_handed' 31190
-
-pushlist 'list__rearm_two_handed' 31017
-pushlist 'list__rearm_two_handed' 31019
-pushlist 'list__rearm_two_handed' 31021
-pushlist 'list__rearm_two_handed' 31023
-pushlist 'list__rearm_two_handed' 31025
-pushlist 'list__rearm_two_handed' 31027
-pushlist 'list__rearm_two_handed' 31029
-pushlist 'list__rearm_two_handed' 31031
-pushlist 'list__rearm_two_handed' 31033
-pushlist 'list__rearm_two_handed' 31035
-pushlist 'list__rearm_two_handed' 31037
-pushlist 'list__rearm_two_handed' 31038
-pushlist 'list__rearm_two_handed' 31041
-pushlist 'list__rearm_two_handed' 31043
-pushlist 'list__rearm_two_handed' 31045
-pushlist 'list__rearm_two_handed' 31047
-pushlist 'list__rearm_two_handed' 31049
-pushlist 'list__rearm_two_handed' 31051
-pushlist 'list__rearm_two_handed' 31053
-pushlist 'list__rearm_two_handed' 31055
-
-pushlist 'list__rearm_two_handed' 31169
-pushlist 'list__rearm_two_handed' 31172
-
-
-# ----------------------------------------------------------------------------------------
 # module/bard/instrument.razor
 # ----------------------------------------------------------------------------------------
 if not find var__my_instrument backpack
@@ -1010,15 +942,7 @@ while not dead
             if var__rearm_sent = 0 and config__rearm_graphic != 0 and var__rearm_left = 0 and var__rearm_right = 0 and lhandempty and rhandempty
                 if findtype config__rearm_graphic backpack as alias__rearm_found
                     lift alias__rearm_found
-
-                    if inlist 'list__rearm_two_handed' config__rearm_graphic
-                        @setvar! var__rearm_left alias__rearm_found
-                        drop self lefthand
-                    else
-                        @setvar! var__rearm_right alias__rearm_found
-                        drop self righthand
-                    endif
-
+                    drop self lefthand
                     if config__sysmsg = 1
                         sysmsg "Rearm: graphic {{config__rearm_graphic}} picked from the backpack, serial={{alias__rearm_found}}. The next check reads the hands." 88
                     endif

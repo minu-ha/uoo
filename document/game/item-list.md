@@ -1085,6 +1085,11 @@ UO Outlands 아이템 이름과 graphic ID 목록. `findtype` 인자와 hue 조�
 ```
 #Weapons, Arcane Staffs, Spellbook, Wands, Instruments and Shields - all IDs: "3568|3570|3571|3572|3573|3713|3719|3721|3740|3742|3762|3763|3834|3909|3911|3913|3915|3917|3920|3922|3932|3934|3937|3938|5040|5042|5044|5046|5049|5112|5115|5117|5119|5121|5123|5125|5127|5177|5179|5181|5182|5185|5187|7026|7027|7029|7031|7033|7034|7035|7107|7109|10245|20006|20008|20010|20012|20014|20016|22187|30988|30989|30990|30991|30992|30993|30994|30995|30996|30997|30998|30999|31000|31001|31002|31014|31017|31019|31021|31023|31025|31027|31029|31031|31033|31035|31037|31038|31041|31043|31045|31047|31049|31051|31053|31055|31128|31130|31141|31142|31176|31178|31180|31182|31184|31186|31188|31190|chakram|francisca|hurlbat|javelin|throwing knife|throwing star|dual wield tracker knife|duel wield katana|dual wield norse axe|dual wield rapier|dual wield sabre|dual wield scimitar"
 
+    #Two-handed (2H), the (2H) rows of the wiki Armor & Weapons table and the Archery list, read 2026-10-21 - all IDs: 5042|30994|30995|30990|5117|31186|5123|3719|3938|30992|5112|3568|3721|3713|3717|3718|5177|31001|31180|31182|31178|3913|3911|3915|5115|3909|5187|3907|3908|5182|3917|30988|31190|31017|31019|31021|31023|31025|31027|31029|31031|31033|31035|31037|31038|31041|31043|31045|31047|31049|31051|31053|31055|31169|31172
+    #    bows, heavy and rampart crossbows, spears and the pitchfork, staves and the shepherd's crook, the pickaxe, the big maces, axes and the hatchet, the halberd family, arcane staves, harpoon and trident
+    #One-handed (1H), the (1H) rows of the same table - all IDs: 3920|30993|31184|5121|30996|31188|31176|5125|30989|30997|30998|3922|5044|5181|5040|31014|31000|3932|5179|5127|30991|30999|5119|5185|5046|3937|3934|5049|31128
+    #    crossbow, balestra, pistol crossbow, the fencing blades (dagger 3922 is not in the table), the small maces, the one-handed swords and the norse axe. Throwing weapons have names only. Razor reads 2H on lefthand, 1H on righthand
+
     #Arcane Staffs - all IDs: 31017|31019|31021|31023|31025|31027|31029|31031|31033|31035|31037|31038|31041|31043|31045|31047|31049|31051|31053|31055
         #abyssal staff "abyssal staff" 31053
         #ancestral staff "ancestral staff" 31033
@@ -1108,7 +1113,6 @@ UO Outlands 아이템 이름과 graphic ID 목록. `findtype` 인자와 hue 조�
         #vine staff "vine staff" 31029
 
     #Archery - all IDs: 3920|5042|5117|30990|30993|30994|30995|31184|31186
-    # 1H and 2H per weapon, by the wiki Armor & Weapons table: the setup list of module/fight/rearm.razor
         #balestra "balestra" 30993
         #bow "bow" 5042
         #crossbow "crossbow" 3920
