@@ -73,8 +73,7 @@ order: 20
 라타 = last target. `Q`로 대상 지정 → 주문 커서가 뜨면 `E`로 라타에 시전.
 2026-10-20부터 두 프로필 모두 Harmful 쪽(`Set Last Target (Harmful)`, `Target Last Harmful`). 적대 대상 표시가 하나로 모이고, 루프도 `lastharmful`을 읽음
 
-두 바드 루프의 별도 프로보 후보 키는 [Open items](../questions/open-items.md#17) 17절.
-Alt+Q는 배치 예시, 현재 프로필에 자동으로 추가된 바인딩은 아님.
+두 바드 루프의 프로보 후보 키는 `Shift+Space`(01.F절).
 
 ### <a id="01.D"></a>01.D 홈줄
 
@@ -118,9 +117,12 @@ Alt+Q는 배치 예시, 현재 프로필에 자동으로 추가된 바인딩은 
 |  | Space | 휠 위 | 휠 아래 | 사이드 위 (`-5`) | 사이드 아래 (`-4`) |
 | --- | --- | --- | --- | --- | --- |
 | 무수정 | 자기 타겟 | — | **Interrupt** | 타겟 취소 | **Pouch** (마비 해제) |
-| Shift | — | 다음 아군 플레이어 | 이전 아군 플레이어 | — | — |
+| Shift | **프로보 후보** | 다음 아군 플레이어 | 이전 아군 플레이어 | — | — |
 | Ctrl | — | — | — | — | — |
 | Alt | — | — | — | — | — |
+
+- `Shift+Space`: `Set Last Target (Beneficial)`. 커서로 찍은 몹을 두 바드 루프의 프로보 후보에 등록, 바딩 대상은 그대로([Open items](../questions/open-items.md#17) 17절).
+  엄지 Space와 새끼 Shift, 손 이동 없음. 2026-10-21 summoner와 bard 프로필에 추가, 게임에 들어오는지 확인 전(07절)
 
 ## <a id="02"></a>02 규칙
 
@@ -129,7 +131,7 @@ Alt+Q는 배치 예시, 현재 프로필에 자동으로 추가된 바인딩은 
 | 층 | 뜻 | 줄별 |
 | --- | --- | --- |
 | 무수정 | 손에 익어야 하는 것 | 이동, 타겟, 펫, 핵심 콤보, 도주, 긴급 |
-| Shift | 밖으로 던지는 것 | 윗줄 공격 주문 6, 아랫줄 교전(summoner는 플레이어 순환, bard는 다음 몹, basic은 햄스트링과 디스암) |
+| Shift | 밖으로 던지는 것 | 윗줄 공격 주문 6, 아랫줄 교전(summoner는 플레이어 순환, bard는 다음 몹, basic은 햄스트링과 디스암), Space 프로보 후보 |
 | Ctrl | 나와 내 편에 좋은 것 | 숫자줄 포션 6, 윗줄 버프 4와 펫 큐어와 동료 부활, 아랫줄 필드와 유틸 4, `` ` `` 펫 힐 |
 | Alt | 소환만 | `1` VS → `2`\~`6`. 예외 `0` regear 하나(01.B절). 전투 밖에서 천천히 |
 
@@ -142,6 +144,7 @@ Ctrl = Cmd, Alt = Option(01절) → macOS가 먼저 가져가는 키 있음.
 | `Ctrl+Space` | macOS가 가져감 | 사용 안 함 |
 | `` Ctrl+` `` | macOS 기본 단축키 "다음 윈도우로 초점 이동"이 가져감 | 시스템 설정 → 키보드 → 키보드 단축키 → 키보드에서 그 항목을 끄고 사용 |
 | `` Alt+` `` | `` Option+` ``은 악센트 dead key → 게임에 안 들어옴 | 사용 안 함. Alt 줄은 `1`부터 |
+| `Shift+Space` | macOS 입력 소스 전환에 `Shift+Space`를 걸어 두면 macOS가 가져감 | 시스템 설정 → 키보드 → 키보드 단축키 → 입력 소스에서 `Shift+Space`가 아닌지 확인. 게임에 들어오는지는 확인 안 됨(07절) |
 
 ### <a id="02.C"></a>02.C 어디에 거는가
 
@@ -173,7 +176,7 @@ Ctrl = Cmd, Alt = Option(01절) → macOS가 먼저 가져가는 키 있음.
 | 소환 | `Alt+1` → `Alt+2` → `Alt+2`, 솔플은 `Alt+1` → `Alt+3` → `Alt+2` | Vengeful Spirit 켠 뒤 듀오는 Lich 둘, 솔플은 Rag Witch와 Lich([Bard Necro](../templates/bard-necro.md#04.B) 04.B절). bard-necro-enhanced가 돌면 루프가 대신 소환([Bard Necro](../templates/bard-necro.md#04.I) 04.I절) |
 | PvE 공격 | `Z` → `V` | 가장 가까운 몹 공격. summoner는 펫이, basic과 bard는 내가(01.E절) |
 | PvE 주문 | `V`(summoner)로 라타 → `1 E` `2 E` → `4 E` `5 E` | `1`, `2`는 시그니처 칸(03절) |
-| 몹 여럿(summoner, bard) | [프로보 후보 등록 절차](../questions/open-items.md#17) | 두 바드 루프의 후보 등록과 바딩 대상 선택 분리 |
+| 몹 여럿(summoner, bard) | `Z` → `V`, 그다음 `Shift+Space`로 한 마리씩 | 후보마다 `[ provo, set ]` 확인. 후보 등록과 바딩 대상 선택은 분리, 절차는 [Open items](../questions/open-items.md#17) 17절 |
 | PvP 시작 | `F4` | 전투 루프 정지, PvP 루프 시작. 펫 공격은 루프가 15초마다 `all kill`. 복귀는 `F1` |
 | PvP 타겟 | `Q`, summoner는 `Shift+X/C`, basic과 bard는 `X/C` | 라타 하나만 공격. 가장 가까운 플레이어 타겟은 서버가 막음 → 플레이어는 순환으로만 지정 |
 | PvP 주문 | 라타를 잡고 → `6 E` → `4 E` `5 E` |   |
@@ -203,7 +206,7 @@ Ctrl = Cmd, Alt = Option(01절) → macOS가 먼저 가져가는 키 있음.
 | --- | --- | --- | --- |
 | 1028 \~ 1034 | Drink Heal, Cure, Refresh, Magic Resist, Explosion, Strength, Agility | 1058 | Last Target |
 | 1059 | Target Self | 1060 | Set Last Target |
-| 2062 | Set Last Target (Harmful) | 2120 | Target Last Harmful |
+| 2061, 2062 | Set Last Target (Beneficial), Set Last Target (Harmful) | 2120 | Target Last Harmful |
 | 1332 | Cancel Current Target | 1391 | > Smart Heal/Cure Self |
 | 1395 | Attack Last Target | 1994 | > Interrupt |
 | 2013 | Target Closest Non-Friendly Monster | 2022, 2024, 2026 | All Follow Me, All Guard Me, All Kill |
@@ -255,6 +258,7 @@ Ctrl = Cmd, Alt = Option(01절) → macOS가 먼저 가져가는 키 있음.
 - 사이드 위, 아래와 코드 `-5`, `-4`의 대응. 반대면 두 줄 맞바꿈
 - macOS "다음 윈도우로 초점 이동"을 끈 뒤 `` Ctrl+` ``이 게임에 들어오는지
 - 아랫줄 새 배치(`summoner.xml`, `default.xml`, `bard.xml`)의 게임 동작
+- `Shift+Space`가 게임에 들어오는지. 안 들어오면 macOS 입력 소스 전환부터(02.B절)
 - 햄스트링과 디스암 토글 거는 방법(Razor 핫키, 채팅 명령, 버튼). 위키 Hamstring 문서 확인 후 basic `Shift+Z`, `Shift+X`에 걸기
 - Razor로 옮긴 주문 핫키(`L:3002011` \~ `L:3002074`)의 Outlands 동작. CE 규칙으로 계산한 번호, 이 포크에서 게임 확인 안 됨.
   주문 매크로는 여섯 캐릭터의 `macros.xml`에서 이미 삭제. 안 도는 키는 Razor Hotkeys 탭에서 다시 걸고 게임 종료로 프로필 저장

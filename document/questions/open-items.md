@@ -1075,10 +1075,10 @@ loadout과 regear는 같은 `gear/aspect` 블록을 씀. 동작 설명은 각 �
 
 #### 반영과 첫 확인
 
-1. Razor 핫키 `Set Last Target (Beneficial)`을 별도 키에 연결. 이 문서의 Alt+Q는 배치 예시, 프로필 설정은 이번 변경에 포함되지 않음
+1. `Shift+Space` = `Set Last Target (Beneficial)`(L:2061). 2026-10-21 summoner와 bard 프로필에 추가, 게임에 들어오는지 확인 전([Hotkeys](../game/hotkeys.md#01.F) 01.F절)
 2. 수정 파일 반영 뒤 루프 시작. 핫키 실행은 클라이언트 재시작, Scripts 탭 Play는 리로드([Workflow](../working/workflow.md#04) 04절)
 3. Tab으로 warmode 수동 구간 진입, 이미 나간 시전과 커서가 끝난 뒤 후보 선택
-4. Z로 A 선택, 아처는 V로 공격. A의 `[ provo, set ]` 확인 뒤 Alt+Q로 B부터 E까지 한 마리씩 등록
+4. Z로 A 선택, 아처는 V로 공격. A의 `[ provo, set ]` 확인 뒤 Shift+Space로 B부터 E까지 한 마리씩 등록
 5. 후보마다 `[ provo, set ]` 확인 뒤 다음 선택. Tab으로 자동 구간 복귀, A→B와 C→D 확인
 
 - 최초 실행 전에 남은 슬롯은 등록하지 않으므로 루프 시작 뒤 선택 필요
@@ -1092,7 +1092,7 @@ loadout과 regear는 같은 `gear/aspect` 블록을 씀. 동작 설명은 각 �
 | 역할 | 입력 | 저장과 알림 |
 | --- | --- | --- |
 | 현재 바딩 대상 T | 기존 Q의 `Set Last Target (Harmful)` 또는 Z의 가장 가까운 몹 선택 | `var__combat_target` 채택 뒤 `[ target, set ]` |
-| 프로보 후보 | Z의 가장 가까운 몹 선택 또는 별도 키의 `Set Last Target (Beneficial)` | `lastbeneficial`에서 serial 복사, `list__provo_candidates` 추가 뒤 `[ provo, set ]` |
+| 프로보 후보 | Z의 가장 가까운 몹 선택 또는 `Shift+Space`의 `Set Last Target (Beneficial)` | `lastbeneficial`에서 serial 복사, `list__provo_candidates` 추가 뒤 `[ provo, set ]` |
 | 이번 자동 시전 | 후보 목록에서 선택한 둘 | `var__provo_first`, `var__provo_second`에 고정 |
 
 - `lastbeneficial`은 단일 입력 슬롯. 후보 목록의 저장소나 수동 프로보 성공 기록으로 사용하지 않음
@@ -1127,7 +1127,7 @@ Outlands 포크의 해당 핫키와 커서 간섭은 아래 검증 필요.
 
 #### 다섯 마리 입력 시나리오
 
-루프 실행 중 Z로 A 선택, V로 A 공격, Alt+Q로 B부터 E까지 등록한 경우.
+루프 실행 중 Z로 A 선택, V로 A 공격, Shift+Space로 B부터 E까지 등록한 경우.
 모두 생존, 사거리 안, 라벨 수신, 시전 성공 가정. 시전 시점은 공유 쿨다운에 따름.
 
 - Z의 A부터 목록에 저장, B까지 등록되면 A→B. B가 이미 provoked이면 B→C 재시전 없음
@@ -1177,6 +1177,7 @@ Outlands 포크의 해당 핫키와 커서 간섭은 아래 검증 필요.
 
 | 검사 | 통과 기준 |
 | --- | --- |
+| `Shift+Space` | 커서가 뜨고 찍은 몹에 `[ provo, set ]`. 안 뜨면 macOS 입력 소스 전환부터([Hotkeys](../game/hotkeys.md#02.B) 02.B절) |
 | T 선택 뒤 Beneficial로 B 선택 | `lastharmful`과 루프 대상은 T, 후보는 B로 분리 |
 | B, C, D, E 등록 | 알림을 받은 serial 전부 목록에 존재, 후보 등록 중 T가 바뀌지 않음 |
 | T가 후보에 없고 B 하나만 등록 | B→T 자동 시전 없음 |

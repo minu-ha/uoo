@@ -227,7 +227,7 @@ Hinder와 Maiming.
 | 자리 | 블록 | 값과 출처 |
 | --- | --- | --- |
 | base | | `warmode_is_manual` 1, `recover_in_warmode` 1, `settle_first` 1(bard-necro). `heal_skill_min` 10(skinning) |
-| 패스 첫머리 | `bard/provo-picks` | 바딩 대상과 독립된 후보 입력. [Open items](../questions/open-items.md#17) 17절 |
+| 패스 첫머리 | `bard/provo-picks` | `Z` 또는 `Shift+Space`로 등록하는 후보 입력, 바딩 대상과 독립. [Open items](../questions/open-items.md#17) 17절 |
 | 다쳤거나 독, 마비 | `recovery/cure`, `heal`, `bandage`, `light-heal` | 잃은 HP 기준 `heal_hits` 35, `emergency_hits` 45. 회복 정책은 아래 |
 | 공용 | `fight/target`, `magery/reagents` | `acquire_range` 18, `target_range` 10, `target_grace` 500(bard-necro) |
 | 5초마다 | `bard/instrument`, `recovery/refresh`, `buff/food`, `buff/potions`, `pack/gold-drop` | `refresh_stam` 60(skinning). 포션 기준선 STR 120, DEX 100은 기본값 |
@@ -269,7 +269,7 @@ Hinder와 Maiming.
 
 - `summoner`를 복사한 `bard`. nomeehej의 에이전트, 정리 목록, 컨테이너 변수를 그대로 가져옴
 - 다른 점: 아랫줄은 basic식(`Z` 가장 가까운 몹, `V` Attack Last Target, `X`, `C` 플레이어), F1 = `combat\bard-archer-enhanced`, Alt 소환 줄 없음
-- 같은 점: `1 2 3` Disco, Peace, Provo, `Shift+Z` 다음 몹, Q와 E, Ctrl 버프 줄, F4 pvp
+- 같은 점: `1 2 3` Disco, Peace, Provo, `Shift+Z` 다음 몹, `Shift+Space` 프로보 후보, Q와 E, Ctrl 버프 줄, F4 pvp
 - 키 배치의 정본: [Hotkeys](../game/hotkeys.md) 01.E절, 03절
 
 ::part[기록]
