@@ -195,18 +195,7 @@
 # @ use fight/archery-codex
 #
 #   Codex of archery: Arcane, Fowling while hurt, Incendiary and Ricochet on a pack.
-#
-#   fowling_enter_diff (default 60)
-#      Missing hit points above which Fowling latches on.
-#      > Earlier defense when the healing has left the loss at the emergency line.
-#
-#   fowling_leave_diff (default 48)
-#      Missing hit points below which Fowling lets go. Below the enter line, so the
-#      stance cannot flap while bandages tick.
-#      > Keep Fowling until enough health returns, so the stance does not flap.
 # ----------------------------------------------------------------------------------------
-@setvar! config__fowling_enter_diff 45
-@setvar! config__fowling_leave_diff 30
 
 # ========================================================================================
 # @ when var__fighting = 1

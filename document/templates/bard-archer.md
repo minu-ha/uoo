@@ -135,7 +135,7 @@ Healer's Codex 20점: Immunize 5, Triage 5, Self Treatment 5, Specialist 5.
 | Maiming | Hinder 지속 10%, Overpowered Hinder 피해 10% | +70%, +70% | 안 씀. 아래 |
 
 - 출처: [Archery](https://wiki.uooutlands.com/Archery)의 Codex Stances
-- Fowling 기준: 2026-10-21 사용자 선택. 회복 뒤에도 큰 손실이 남으면 방어 전환, 충분히 회복한 뒤 해제. 인게임 효과는 확인되지 않았다
+- Fowling 기준은 `fight/archery-codex` 모듈 기본값. Sword Defensive도 같은 기준. 2026-10-21 사용자 선택, 인게임 효과는 확인되지 않았다
 - Incendiary: 프로보로 붙어 싸우는 짝이 대상 옆에 있으면 Arcane의 21%보다 큼. 대상 옆에 적이 없으면 손해
 
 Hinder와 Maiming.

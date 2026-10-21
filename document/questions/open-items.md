@@ -670,7 +670,8 @@ order: 10
 #### Sword Codex 라벨
 
 - `debug/dump-label`로 sword codex 라벨에 스탠스 이름과 `Execute`, `Bleed Out`이 보이는지
-- 피를 60 넘게 잃으면 `[ sword, defensive ]`, 48 아래로 회복하면 `[ sword, warrior ]`
+- `defensive_enter_diff` 초과면 `[ sword, defensive ]`, `defensive_leave_diff` 미만이면 `[ sword, warrior ]`
+- 기본값은 [sword-codex 모듈](https://github.com/minu-ha/uoo/blob/master/module/fight/sword-codex.razor). 경계값과 두 선 사이에서는 기존 상태 유지
 - Bleed Out이 골라져 있으면 `[SwordsFinisher2`로 Execute로 바뀌는지, 피니셔가 꺼져 있으면 명령 없이 `[ execute, off ]`만 뜨는지
 - 라벨에 스탠스 이름이 없으면 `[ sword stance, off ]`
 
