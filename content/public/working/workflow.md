@@ -44,7 +44,11 @@ flowchart LR
 | [PvP](../game/pvp.md) | 템플릿과 무관한 PvP 규칙과 숫자 |
 | [Hotkeys](../game/hotkeys.md) | 키 배치, 주문 데미지 메모 |
 | [Item list](../game/item-list.md) | 아이템 이름, graphic id, hue |
-| [Bard Necro](../templates/bard-necro.md) | Bard Necro 메커니즘, 소환수, 전투 루프 설계, PvP 판단, 인게임 확인 |
+| [Barding](../mechanics/barding.md) | 바드 세 스킬과 송의 쿨, 효과, 코덱스, Defensive Barding, 프로보 후보 입력 |
+| [Necromancy](../mechanics/necromancy.md) | Vengeful Spirit 소환, 언데드, Unholy Symbol 경제 |
+| [Magery](../mechanics/magery.md) | Magery 프록과 시전 시간 |
+| [Bard Necro](../templates/bard-necro.md) | Bard Necro의 캐릭터, 코덱스 배분, 소환수 선택, PvP 판단 |
+| [Bard Necro Enhanced](../loops/bard-necro-enhanced.md) | bard-necro-enhanced 루프의 설계, 자원, 마나 예산, 설계 결정, 소환수 블록 |
 | [Lumberjack PvP](../templates/lumberjack-pvp.md) | 벌목과 PvP 템플릿의 스킬, 스탯, 도끼 선택, 마나 예산, 교전 분기, 구현 요구사항 |
 | [Bard Archer](../templates/bard-archer.md) | Bard Archer의 스킬과 코덱스, 갑옷과 마나, 아처리 자세와 피니셔와 무기 능력, 부활, 전투 루프 설계 |
 | [Open items](../questions/open-items.md) | 사용자에게 물을 것. 뜨지 않는 바, 규칙과 어긋난 줄, 출처 없는 숫자, 인게임 확인 목록 |

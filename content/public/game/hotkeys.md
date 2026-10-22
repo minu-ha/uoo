@@ -57,7 +57,7 @@ order: 20
 | Ctrl | **Greater Heal** (커서 → 펫, 동료) | 힐 포션 | 큐어 포션 | 리프 포션 | 힘 포션 | 민 포션 | 레지 포션 | — |
 | Alt | — | **Vengeful Spirit** | Fire El → Lich | Water El → Rag Witch | Earth El → Mummy | Daemon → Vampire | Summon Creature | regear |
 
-- Alt 줄 → 뒤 이름: Vengeful Spirit(`Alt+1`)을 켜고 부를 때 나오는 언데드([Bard Necro](../templates/bard-necro.md#03.C) 03.C절)
+- Alt 줄 → 뒤 이름: Vengeful Spirit(`Alt+1`)을 켜고 부를 때 나오는 언데드([Necromancy](../mechanics/necromancy.md#01.A) 01.A절)
 - Alt 줄: 템플릿이 쓰는 소환만(03절). 예외 `Alt+0` regear(사망 뒤 장비 다시 갖추기, 옛 dress), 자주 안 눌러 줄 끝에 둠
 - 빈 `7`\~`9`는 표에서 제외
 
@@ -104,7 +104,7 @@ order: 20
 - summoner: `Z` → All Kill 커서, `V` → 그 커서를 가장 가까운 몹으로 채움. 커서가 없으면 `V`는 라타 지정만
 - summoner `Shift+Z`: 다음 몹을 라타로(Next Non-Friendly Monster Target, 인게임 확인됨 2026-10-20). 커서 없이 순환 → 루프의 커서와 안 부딪힘
 - basic: `Z`로 라타 지정, `V`로 공격. PvP는 `X`나 `C`로 플레이어 지정 → `V`
-- bard: 무수정은 basic과 같음. 펫이 없어 펫 명령 없음. `Shift+Z`는 summoner처럼 다음 몹으로 바딩 대상 변경. 프로보 후보 입력은 [Bard Necro](../templates/bard-necro.md#04.J) 04.J절
+- bard: 무수정은 basic과 같음. 펫이 없어 펫 명령 없음. `Shift+Z`는 summoner처럼 다음 몹으로 바딩 대상 변경. 프로보 후보 입력은 [Barding](../mechanics/barding.md#03.A) 03.A절
 - 플레이어 순환: summoner `Shift+X/C`, basic과 bard 무수정 `X/C`. 키 하나에 바인딩 하나 → summoner는 무수정 `X`, `C`를 펫 명령에 씀
 - summoner Follow `X`, Guard `C`. `C`는 가장 자주 누르는 `V` 옆 → 오입력 잦음.
   Guard 오입력은 펫이 싸움 유지, Follow 오입력은 펫이 싸움 중단
@@ -121,7 +121,7 @@ order: 20
 | Ctrl | — | — | — | — | — |
 | Alt | — | — | — | — | — |
 
-- `Shift+Space`: `Set Last Target (Beneficial)`. 커서로 찍은 몹을 두 바드 루프의 프로보 후보에 등록, 바딩 대상은 그대로([Bard Necro](../templates/bard-necro.md#04.J) 04.J절).
+- `Shift+Space`: `Set Last Target (Beneficial)`. 커서로 찍은 몹을 두 바드 루프의 프로보 후보에 등록, 바딩 대상은 그대로([Barding](../mechanics/barding.md#03.A) 03.A절).
   엄지 Space와 새끼 Shift, 손 이동 없음. 2026-10-21 summoner와 bard 프로필에 추가. 커서가 뜨고 찍은 몹에 `[ provo, set ]`. 인게임 확인됨 2026-10-22
 
 ## <a id="02"></a>02 규칙
@@ -173,10 +173,10 @@ Ctrl = Cmd, Alt = Option(01절) → macOS가 먼저 가져가는 키 있음.
 
 | 상황 | 키 | 메모 |
 | --- | --- | --- |
-| 소환 | `Alt+1` → `Alt+2` → `Alt+2`, 솔플은 `Alt+1` → `Alt+3` → `Alt+2` | Vengeful Spirit 켠 뒤 듀오는 Lich 둘, 솔플은 Rag Witch와 Lich([Bard Necro](../templates/bard-necro.md#04.B) 04.B절). bard-necro-enhanced가 돌면 루프가 대신 소환([Bard Necro](../templates/bard-necro.md#04.I) 04.I절) |
+| 소환 | `Alt+1` → `Alt+2` → `Alt+2`, 솔플은 `Alt+1` → `Alt+3` → `Alt+2` | Vengeful Spirit 켠 뒤 듀오는 Lich 둘, 솔플은 Rag Witch와 Lich([Bard Necro](../templates/bard-necro.md#03.A) 03.A절). bard-necro-enhanced가 돌면 루프가 대신 소환([Bard Necro Enhanced](../loops/bard-necro-enhanced.md#02.C) 02.C절) |
 | PvE 공격 | `Z` → `V` | 가장 가까운 몹 공격. summoner는 펫이, basic과 bard는 내가(01.E절) |
 | PvE 주문 | `V`(summoner)로 라타 → `1 E` `2 E` → `4 E` `5 E` | `1`, `2`는 시그니처 칸(03절) |
-| 몹 여럿(summoner, bard) | `Z` → `V`, 그다음 `Shift+Space`로 한 마리씩 | 후보마다 `[ provo, set ]` 확인. 후보 등록과 바딩 대상 선택은 분리, 절차는 [Bard Necro](../templates/bard-necro.md#04.J) 04.J절 |
+| 몹 여럿(summoner, bard) | `Z` → `V`, 그다음 `Shift+Space`로 한 마리씩 | 후보마다 `[ provo, set ]` 확인. 후보 등록과 바딩 대상 선택은 분리, 절차는 [Barding](../mechanics/barding.md#03.A) 03.A절 |
 | PvP 시작 | `F4` | 전투 루프 정지, PvP 루프 시작. 펫 공격은 루프가 15초마다 `all kill`. 복귀는 `F1` |
 | PvP 타겟 | `Q`, summoner는 `Shift+X/C`, basic과 bard는 `X/C` | 라타 하나만 공격. 가장 가까운 플레이어 타겟은 서버가 막음 → 플레이어는 순환으로만 지정 |
 | PvP 주문 | 라타를 잡고 → `6 E` → `4 E` `5 E` |   |

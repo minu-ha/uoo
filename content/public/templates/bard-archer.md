@@ -6,7 +6,7 @@ order: 30
 ---
 
 Bard Archer 템플릿의 판단과 숫자. 바딩, 회복, 버프는 루프, 사격은 손.
-바드 메커니즘(쿨, 송, Ensemble, Virtuoso)은 [Bard Necro](bard-necro.md) 02절, 방어구와 마나 재생, 붕대, AR은 [PvP](../game/pvp.md) 05.D절과 09절.
+바드 메커니즘(쿨, 송, Ensemble, Virtuoso)은 [Barding](../mechanics/barding.md), 방어구와 마나 재생, 붕대, AR은 [PvP](../game/pvp.md) 05.D절과 09절.
 **숫자는 추측 금지.** 인용과 확인 표시: [Workflow](../working/workflow.md#01.C) 01.C절.
 
 - 캐릭터 `nomeehej`, Razor 프로필 `bard`
@@ -34,7 +34,7 @@ Bard Archer 템플릿의 판단과 숫자. 바딩, 회복, 버프는 루프, 사
 | 스킬 | 값 |
 | --- | --- |
 | Provocation, Peacemaking, Discordance | 80 |
-| Musicianship | 0. Bard Codex `Self Taught` T2가 대체([Bard Necro](bard-necro.md#02.Q) 02.Q절) |
+| Musicianship | 0. Bard Codex `Self Taught` T2가 대체([Barding](../mechanics/barding.md#02.G) 02.G절) |
 | Anatomy, Healing | 80 |
 | Magery | 80 |
 | Tactics, Archery | 80 |
@@ -50,7 +50,7 @@ Bard Archer 템플릿의 판단과 숫자. 바딩, 회복, 버프는 루프, 사
 
 ### <a id="01.B"></a>01.B 코덱스
 
-Bard Codex 20점. 효과 원문과 티어별 값은 [Bard Necro](bard-necro.md#02.Q) 02.Q절.
+Bard Codex 20점. 효과 원문과 티어별 값은 [Barding](../mechanics/barding.md#02.G) 02.G절.
 
 | 업그레이드 | 점수 | 이 템플릿에서 |
 | --- | --- | --- |
@@ -61,7 +61,7 @@ Bard Codex 20점. 효과 원문과 티어별 값은 [Bard Necro](bard-necro.md#0
 | Refrain | 1 | Barding Break 4% 무시 |
 | Revolution Song | 1 | 프로보한 몹의 피해 +40% |
 
-- bard-necro의 배분([Bard Necro](bard-necro.md#03.F) 03.F절)과 다른 이유: 거기는 소환수가 딜의 63%. 여기는 딜 전부가 본체 → 본체 몫인 Ensemble, Virtuoso를 T3
+- bard-necro의 배분([Bard Necro](bard-necro.md#02.B) 02.B절)과 다른 이유: 거기는 소환수가 딜의 63%. 여기는 딜 전부가 본체 → 본체 몫인 Ensemble, Virtuoso를 T3
 - Refrain 1과 Reverb 1은 둘 다 4% 수준, 차이 미미
 - Sing Your Own Praises 제외: 테이머와 다니면 그쪽 펫이 받는 내 송 효과가 줄어듦
 - Virtuoso는 15초마다 다시 성공해야 유지 → 루프가 Discordance로 갱신(04.C절)
@@ -105,7 +105,7 @@ Healer's Codex 20점: Immunize 5, Triage 5, Self Treatment 5, Specialist 5.
 - bronze, GM 보정은 갑옷 AR에만 붙고 Protection에는 안 붙음 → 실제로는 플레이트 작은 부위가 Protection보다 조금 나을 수 있음
 - **Bless는 루프에서 뺌.** 포션과 안 겹쳐 남는 것은 최대 마나 +8.8뿐([PvP](../game/pvp.md#09.D) 09.D절). 2분마다 9마나. 부활 직전에 손으로(03절)
 - 시전 문턱: RA 24, Reflect 34, Protection 26. Greater Heal 11과 Telekinesis나 Teleport 9의 20을 남김. skinning-enhanced와 같은 방식
-- **Lyric Aspect 방어구.** bard-necro는 Lyric 방어구로 Effective Barding 170, 벗으면 136([Bard Necro](bard-necro.md#02.M) 02.M절).
+- **Lyric Aspect 방어구.** bard-necro는 Lyric 방어구로 Effective Barding 170, 벗으면 136([Barding](../mechanics/barding.md#02.C) 02.C절).
   체인으로 바꾸며 Lyric을 유지하는지 확인되지 않았다 → 송 메시지가 `8.5%`면 170, `6.8%`면 136
 
 ::part[메커니즘]
@@ -231,7 +231,7 @@ Hinder와 Maiming.
 | 자리 | 블록 | 값과 출처 |
 | --- | --- | --- |
 | base | | `warmode_is_manual` 1, `recover_in_warmode` 1, `settle_first` 1(bard-necro). `heal_skill_min` 10(skinning) |
-| 패스 첫머리 | `bard/provo-picks` | `Z` 또는 `Shift+Space`로 등록하는 후보 입력, 바딩 대상과 독립. [Bard Necro](bard-necro.md#04.J) 04.J절 |
+| 패스 첫머리 | `bard/provo-picks` | `Z` 또는 `Shift+Space`로 등록하는 후보 입력, 바딩 대상과 독립. [Barding](../mechanics/barding.md#03.A) 03.A절 |
 | 다쳤거나 독, 마비 | `recovery/cure`, `heal`, `bandage`, `light-heal` | 잃은 HP 기준 `heal_hits` 35, `emergency_hits` 45. 회복 정책은 아래 |
 | 회복 다음 | `fight/rearm` | `rearm_graphic` 31186. 기억한 손이 비면 그 패스에 다시 듦, 요청 뒤 2초 지나 손 확인. 확인 항목은 [Open items](../questions/open-items.md#16) 16절 |
 | 공용 | `fight/target`, `magery/reagents` | `acquire_range` 18, `target_range` 10, `target_grace` 500(bard-necro) |
@@ -243,8 +243,8 @@ Hinder와 Maiming.
 
 - 교전 = 고른 적이 10칸 안. 바딩 사거리. 사격 사거리 8칸은 손으로 맞춤
 - **바딩 우선순위: Provo, Disco, Peace.** Provo로 짝을 붙인 뒤 현재 대상에 Discordance, Peacemaking. bard-necro와 같은 순서. 코덱스 전환은 Provo와 Disco 사이
-- 프로보 후보 입력과 짝 선택은 [Bard Necro](bard-necro.md#04.J) 04.J절, 인게임 확인은 [Open items](../questions/open-items.md#17) 17절
-- 스킬별 쿨과 공유 쿨: [Bard Necro](bard-necro.md#02.E) 02.E절
+- 프로보 후보 입력과 짝 선택은 [Barding](../mechanics/barding.md#03.A) 03.A절, 인게임 확인은 [Open items](../questions/open-items.md#17) 17절
+- 스킬별 쿨과 공유 쿨: [Barding](../mechanics/barding.md#01.E) 01.E절
 - **평소 회복은 붕대.** 잃은 HP 35 이상이면 힐 포션, 그 패스에 포션을 안 마셨고 손실 45 이상이면 Greater Heal. 붕대 종료를 기다리지 않음
 - 일반 Heal은 붕대 대체용으로 유지. 이 템플릿의 기본 설정에서는 붕대가 없고 감는 중도 아닐 때만 사용, 붕대 중첩 시전 없음
 - `buff/spells`는 교전 중에도. 사격과 시전이 서로 안 막음(01.A절), 패스 끝에 둬서 바딩이 먼저
@@ -252,7 +252,7 @@ Hinder와 Maiming.
 
 ### <a id="04.B"></a>04.B 여러 마리 판정
 
-- 현재 바딩 대상과 등록한 프로보 후보를 중복 없이 합쳐 마릿수 판정. 입력 방법은 [Bard Necro](bard-necro.md#04.J) 04.J절
+- 현재 바딩 대상과 등록한 프로보 후보를 중복 없이 합쳐 마릿수 판정. 입력 방법은 [Barding](../mechanics/barding.md#03.A) 03.A절
 - 2초마다 목록에서 살아 있고 10칸 안인 적을 셈. **둘 이상이면 Incendiary와 Ricochet**, 아니면 Arcane과 Pincushion
 - 하나로 줄어도 6초 유지 → 짝 하나가 잠깐 멀어질 때 자세가 깜빡이지 않음
 - 대상 옆 2칸 판정은 불가. 몹끼리 거리를 재는 식이 없음. 프로보 짝은 붙어 싸우므로 짝 중 하나를 쏘면 Incendiary가 다른 쪽에 감
@@ -267,7 +267,7 @@ Hinder와 Maiming.
 ### <a id="04.C"></a>04.C Virtuoso 유지
 
 - `bard/disco`의 `keep_virtuoso` 1: Virtuoso가 빠지면 이미 Discord 걸린 대상에게도 다시 Discordance
-- 근거: Discord 걸린 대상에게 다시 성공해도 Virtuoso가 다시 생기고, 송으로는 안 생김([Bard Necro](bard-necro.md#02.Q) 02.Q절)
+- 근거: Discord 걸린 대상에게 다시 성공해도 Virtuoso가 다시 생기고, 송으로는 안 생김([Barding](../mechanics/barding.md#02.G) 02.G절)
 - 한 마리를 오래 잡으면 약 15초마다 Discordance. Music 5초를 쓰지만 Peace는 약 51초에 한 번([Bard Necro](bard-necro.md#01.D) 01.D절)이라 겹침이 적음
 
 ### <a id="04.D"></a>04.D bard 프로필

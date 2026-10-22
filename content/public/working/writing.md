@@ -36,7 +36,9 @@ order: 20
 | `working/` | How we work | 작업 순서, 문서 쓰는 법 |
 | `scripting/` | Scripting | 스크립트 규칙, Razor 문법, 모듈 조립, 머리 위 알림 |
 | `game/` | Game reference | 게임 규칙과 자료. PvP, 핫키, 아이템 번호 |
-| `templates/` | Templates | 템플릿별 판단과 설계 |
+| `mechanics/` | Mechanics | 스킬 계열별 서버 규칙. 바딩, 네크로, 매저리 |
+| `templates/` | Templates | 템플릿별 캐릭터 판단. 스킬, 코덱스 배분, 소환수 선택, PvP |
+| `loops/` | Loops | 루프 하나의 설계. 블록 순서, 설정 이유, 블록 설계 |
 | `questions/` | Open questions | 아직 확인 못 한 것 |
 
 | 경로 | 역할 |

@@ -188,7 +188,7 @@ Razor CE에 없거나 CE보다 넓어진 것. 존재 여부만 기록, 인자 �
 | 치유할 것이 없을 때 Smart Heal, Greater Heal 에이전트 | 풀피면 커서를 안 찍고 남김(인게임 확인됨 2026-09-29). 모든 블록 정지 | 에이전트 폴링 후 `targetexists and diffhits = 0`이면 `Cancel Current Target` |
 | 스크립트의 `target`과 `Target Self` | lasttarget이 백팩이나 나로 바뀜. 10칸 밖에서 고른 타겟을 노래가 덮어써서 교전 실패(인게임 확인됨 2026-09-29). 적대 커서에 찍으면 `lastharmful`도 바뀜 | 타겟은 화면 거리에서 받아 사본(`var__combat_target`)에 둠. 2026-10-20부터 루프는 `lastharmful`을 읽음. 블록이 자기 용도로 찍은 몹은 `var__target_hold`(`fight/target`). 손으로 누르는 E, Shift+V, 무기 핫키는 루프의 다음 공격 주문이나 다음 고르기 전까지 그 몹을 가리킬 수 있음 |
 | `Set Last Target (Harmful)`로 고른 대상을 `lasttarget`으로 읽기 | 일반 `lasttarget`은 그대로라 루프가 고른 대상을 못 따라감. `Target Closest Non-Friendly Monster`는 `lasttarget`, `lastharmful`, `lastbeneficial` 셋을 다 바꾸고, `Next Non-Friendly Monster Target`도 `lastharmful`을 바꿈(인게임 확인됨). 인게임 확인됨 2026-10-20(`debug/probe-last-targets`) | 루프는 `lastharmful`을 읽음(`fight/target`). Shift+V(Attack Last Target)와 All Kill 커서도 Harmful 대상을 따라감(인게임 확인됨 2026-10-20) |
-| 노래 커서에 백팩 찍기 | 노래 커서는 적대 커서라 `lastharmful`도 백팩으로 바뀜. 인게임 확인됨 2026-10-20(`debug/probe-last-targets`) | 루프는 사본을 써서 영향 없음, 그대로 백팩. 땅은 장소에 따라 거절([Bard Necro](../templates/bard-necro.md#02.B) 02.B절) |
+| 노래 커서에 백팩 찍기 | 노래 커서는 적대 커서라 `lastharmful`도 백팩으로 바뀜. 인게임 확인됨 2026-10-20(`debug/probe-last-targets`) | 루프는 사본을 써서 영향 없음, 그대로 백팩. 땅은 장소에 따라 거절([Barding](../mechanics/barding.md#01.B) 01.B절) |
 | 프로보 커서에 짝 찍기 | 프로보 커서도 적대 커서(인게임 확인됨 2026-10-20) → 지금 대상이 아닌 짝을 찍으면 `lastharmful`이 그 몹으로 바뀜 | `var__target_hold`로 빼 두고, 다음 주문이 지금 대상을 찍으며 되돌림(`bard/provo`) |
 | 네이티브 선택 커서를 색만으로 판별 | CE `OneTimeTarget`은 `_hasTarget`을 켜지만 `_curFlags`는 이전 값 유지. `Set Last Target (Beneficial)`의 커서도 이전 harmful 종류로 관찰될 수 있음. [CE Targeting 소스](https://github.com/markdwags/Razor/blob/master/Razor/Core/Targeting.cs), 2026-10-21 확인. Outlands의 중첩 동작은 미검증 | 자동 시전과 겹치는 등록의 소유권 보장 금지. 초기 사용은 warmode 수동 구간, [Open items](../questions/open-items.md#17) 17절 |
 | `setlasttarget alias__x`로 lasttarget 복원 | Razor CE 문서의 `setlasttarget ('serial')`과 달리 `Target a new 'Last Target'` 커서. 뒤의 sysmsg 줄 없음, 커서 취소마다 `Target queue cleared.`와 같은 커서가 번갈아 찍힘. 인게임 확인됨 2026-10-07(skinning-enhanced v3 Journal). 스크립트가 그 줄에서 커서 대기로 보임. 인자 무시 원인은 확인되지 않았다 | 사용 안 함. lasttarget 덮어쓰기는 기억한 대상이 없을 때만(`skinning-enhanced.razor` SKINNING) |
@@ -422,7 +422,7 @@ flowchart TD
 - 대기용 `getlabel backpack` 사용 금지. 백팩 라벨은 다른 아이템의 감정, 분해, 이동 완료 신호가 아님
   실제 대상의 품질 라벨, 소속 변경, 제거 여부로 확인. `queued`는 클라이언트 행동 큐 상태이며 서버 작업 성공과 별개
 
-Bard Necro 루프 적용 결과: [Bard Necro](../templates/bard-necro.md#05.H) 05.H절. 패스마다 `findtype` 최대 32번이던 시약 플래그 읽기를 10초에 7번으로 줄임(처음에는 30초).
+Bard Necro 루프 적용 결과: [Bard Necro Enhanced](../loops/bard-necro-enhanced.md#01.H) 01.H절. 패스마다 `findtype` 최대 32번이던 시약 플래그 읽기를 10초에 7번으로 줄임(처음에는 30초).
 
 ## <a id="07"></a>07 PvP 제약
 

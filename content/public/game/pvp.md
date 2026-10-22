@@ -8,7 +8,7 @@ order: 10
 템플릿과 무관한 PvP 서버 규칙과 숫자. 위키와 패치노트 원문 인용, 해석은 인용 아래.
 인게임 확인은 표시, 미확인은 "확인되지 않았다".
 
-- Bard Necro의 판단(Defensive Barding, 도주와 반격, Herding 대신 Resist): [Bard Necro](../templates/bard-necro.md#06) 06절
+- Bard Necro의 판단(Defensive Barding, 도주와 반격, Herding 대신 Resist): [Bard Necro](../templates/bard-necro.md#04) 04절
 - 벌목 겸 PvP 템플릿의 스킬, 스탯, 도끼 선택, 교전 분기: [Lumberjack PvP](../templates/lumberjack-pvp.md)
 - PvP에서 막히는 스크립트 명령: [Razor](../scripting/razor.md#07) 07절
 
@@ -36,7 +36,7 @@ order: 10
 ## <a id="01"></a>01 공격적 행동과 Heat of Battle
 
 **다른 플레이어에게 공격적 행동 → Heat of Battle.** 켜진 동안 리콜, 게이트, 문게이트, 여관 방 불가.
-바드는 Defensive Barding도 잃음([Bard Necro](../templates/bard-necro.md#06.A) 06.A절) → 바드의 방어 숫자(02.C절, 08절)는 Heat of Battle 여부로 갈림.
+바드는 Defensive Barding도 잃음([Barding](../mechanics/barding.md#02.I) 02.I절) → 바드의 방어 숫자(02.C절, 08절)는 Heat of Battle 여부로 갈림.
 
 ### <a id="01.A"></a>01.A 무엇이 켜는가
 
@@ -392,12 +392,12 @@ TK 쿨다운 제약은 2020-09-28 패치 원문에만, 현재 위키에는 없�
 #### 레슬링
 
 - 메이지는 근접 한 대에 시전 끊김(02.E절)
-- 바드는 도주할 때만 Defensive Barding이 레슬링을 채움([Bard Necro](../templates/bard-necro.md#06.E) 06.E절)
+- 바드는 도주할 때만 Defensive Barding이 레슬링을 채움([Bard Necro](../templates/bard-necro.md#04.D) 04.D절)
 - printed 레슬링 0이면 무기 100 PK의 근접은 **100%** 명중, 한 대마다 시전 끊김
 
 > "Wrestling will provide a (15% \* (Wrestling Skill / 100)) Mana Refund chance when casting spells" -- Wrestling (PvM)
 
-- 이 마나 환급은 PvM 전용. Defensive Barding이 채운 레슬링에는 미적용([Bard Necro](../templates/bard-necro.md#06.A) 06.A절)
+- 이 마나 환급은 PvM 전용. Defensive Barding이 채운 레슬링에는 미적용([Barding](../mechanics/barding.md#02.I) 02.I절)
 
 #### Magic Reflection과 Inscription
 
@@ -855,7 +855,7 @@ PvP 근접 데미지 기대 감소 = 막을 확률 × 감소율.
 - 서클(위키 Magery 주문표): Weaken 1, **Poison과 Telekinesis 3**, Curse 4, Paralyze 5, **Energy Bolt와 Explosion 6**, Mana Vampire 7
 - 위키 표는 3서클 N/A, 본문은 3서클 Poison을 예로 듦 → 불일치. 확인되지 않았다
 - Discordance, Peacemaking, Provocation 80, 80, 80 바드: **Defensive Barding이 켜지면 100 행, Heat of Battle 중이면 printed 행**.
-  2020 패치의 `/ 3` 공식이라면 켜져 있어도 80 행([Bard Necro](../templates/bard-necro.md#06.A) 06.A절)
+  2020 패치의 `/ 3` 공식이라면 켜져 있어도 80 행([Barding](../mechanics/barding.md#02.I) 02.I절)
 
 ## <a id="09"></a>09 근접 반격력
 
@@ -1016,7 +1016,7 @@ NPC 판매 방어구의 부위별 AR. [Armor & Weapons](https://wiki.uooutlands.
 | 80 | 84 | 42타일 | +8 | +20% | +8% |
 | 100 | 100 | 50타일 | +10 | +25% | +10% |
 
-- 바드의 Effective Barding 보너스, Hunting이 바드 스킬 쿨에 끼치는 영향: [Bard Necro](../templates/bard-necro.md#06.F) 06.F절
+- 바드의 Effective Barding 보너스, Hunting이 바드 스킬 쿨에 끼치는 영향: [Bard Necro](../templates/bard-necro.md#04.E) 04.E절
 - Tracking은 주문 데미지 보조 스킬이기도 함. 위키 예시는 Tracking 100을 +10%로 계산(05절)
 - Hamstring 요구조건 두 번째 줄 목록에도 포함(03절)
 - Hunting 모드 코드: `escape/tracking` 모듈. lumberjack-enhanced와 tamer-mage-enhanced 루프가 사용
@@ -1033,7 +1033,7 @@ NPC 판매 방어구의 부위별 AR. [Armor & Weapons](https://wiki.uooutlands.
 > "Tracking success chance is (100% \* (Tracking Skill / 100))"
 
 - 판정 한 번의 성공률: Tracking 80이면 80%
-- **Hunting 자동 판정도 5초 스킬 쿨 사용.** 서버 스킬 게이트는 하나뿐([Bard Necro](../templates/bard-necro.md#02.J) 02.J절) → 다른 스킬과 충돌 가능
+- **Hunting 자동 판정도 5초 스킬 쿨 사용.** 서버 스킬 게이트는 하나뿐([Barding](../mechanics/barding.md#01.J) 01.J절) → 다른 스킬과 충돌 가능
 - 판정 빈도: Hunt Frequency. "New When No Arrow", "New When No Target"은 화살표가 없을 때만 판정
 - 주변에 Murderer가 없으면 화살표도 없음 → 계속 판정
 

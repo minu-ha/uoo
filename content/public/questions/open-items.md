@@ -90,13 +90,13 @@ order: 10
 | 무엇 | 어디 | 물을 것 |
 | --- | --- | --- |
 | 캐릭터의 기본 STR과 DEX(스탯 포션 기준선) | 기준선: bard-necro-enhanced와 tamer-mage-enhanced 120과 45, pvp와 skinning-enhanced 120과 100, archive의 bard-mace, bard-throwing, hally-mage 120과 120 | 버프 없는 STR과 DEX. 기준선 = 그 값 + 20([PvP](../game/pvp.md#09.D) 09.D절). bard-necro의 DEX 25는 인게임 확인됨 2026-10-10(포션을 마셔도 45), 그 전 120은 옛 임계값 100에서 짐작. STR 100은 아직 짐작. pvp는 벌목과 skinning 템플릿의 100과 80 기준, summoner 프로필에서도 쓰므로 그 캐릭터의 기본값이 다르면 실행 전 변경. 선이 높으면 포션 도는 동안 5초마다 거절될 마시기, 낮으면 아예 안 마심 |
-| Lyric 방어구 무시 42.5% | [Bard Necro](../templates/bard-necro.md#03.F) 03.F절 | 출처. Peace 가동률 62%의 근거 |
-| Barding Break 동안 Virtuoso | [Bard Necro](../templates/bard-necro.md#03.F) 03.F절, `bard/peace` 모듈 | 정말 꺼지나. "Barded Creatures"에 디스코만 걸린 몹도 드는지 모름 |
-| PK의 Alchemy | [Bard Necro](../templates/bard-necro.md#06.C) 06.C절 | 80인가 100인가. 지금 숫자는 80 기준 |
-| `song`과 `peace/provo` 바의 성공 쿨 | `cooldowns.xml` 11초, 위키 10초([Bard Necro](../templates/bard-necro.md#02.C) 02.C절) | 1초는 의도한 추가인가 |
-| Vengeful Spirit의 마나 | [Bard Necro](../templates/bard-necro.md#04.A) 04.A절, 04.I절 | "마나 101"을 심볼 1과 마나 100으로 수정함. 마나가 따로 드나 |
+| Lyric 방어구 무시 42.5% | [Bard Necro](../templates/bard-necro.md#02.B) 02.B절 | 출처. Peace 가동률 62%의 근거 |
+| Barding Break 동안 Virtuoso | [Bard Necro](../templates/bard-necro.md#02.B) 02.B절, `bard/peace` 모듈 | 정말 꺼지나. "Barded Creatures"에 디스코만 걸린 몹도 드는지 모름 |
+| PK의 Alchemy | [Bard Necro](../templates/bard-necro.md#04.B) 04.B절 | 80인가 100인가. 지금 숫자는 80 기준 |
+| `song`과 `peace/provo` 바의 성공 쿨 | `cooldowns.xml` 11초, 위키 10초([Barding](../mechanics/barding.md#01.C) 01.C절) | 1초는 의도한 추가인가 |
+| Vengeful Spirit의 마나 | [Necromancy](../mechanics/necromancy.md#01.B) 01.B절, 04.I절 | "마나 101"을 심볼 1과 마나 100으로 수정함. 마나가 따로 드나 |
 | `cooldown "…"`의 반환값 | [Razor](../scripting/razor.md) | 1인가, 남은 초인가 |
-| `and`의 단락 평가 | [Bard Necro](../templates/bard-necro.md#05.H) 05.H절 | 버섯 `findtype`, `counttype`을 서 있을 때만 읽는다는 설명의 전제. Razor 문서에 없음 |
+| `and`의 단락 평가 | [Bard Necro Enhanced](../loops/bard-necro-enhanced.md#01.H) 01.H절 | 버섯 `findtype`, `counttype`을 서 있을 때만 읽는다는 설명의 전제. Razor 문서에 없음 |
 | `in`의 대소문자 구분 | [Conventions](../scripting/conventions.md#05) 05절 | 근거는 `dump-label.razor:11` 주석뿐. 인게임에서 봤다면 [Razor](../scripting/razor.md#03) 03절 함정 표로 |
 | Vampiric Embrace 확인 날짜 | [Razor](../scripting/razor.md#04) 04절 | 2026-09-25는 커밋 날짜. 실제로 본 날짜인가 |
 | `auto-mage.razor:1160` 인용 | [Razor](../scripting/razor.md#04) 04절 | 저장소와 이력 어디에도 없는 파일. 위치 |
@@ -121,10 +121,10 @@ order: 10
 
 | 무엇 | 제안 |
 | --- | --- |
-| [Bard Necro](../templates/bard-necro.md#04.H) 04.H절이 되풀이하는 문법 사실 | [Razor](../scripting/razor.md#03) 03절 링크로 교체 |
+| [Bard Necro Enhanced](../loops/bard-necro-enhanced.md#02.B) 02.B절이 되풀이하는 문법 사실 | [Razor](../scripting/razor.md#03) 03절 링크로 교체 |
 | "바드 쿨을 자기 타이머로 복사하지 않는다" | 세 문서에 있음. 한 곳을 정본으로, 나머지는 링크 |
-| Defensive Barding과 서버 스킬 게이트([Bard Necro](../templates/bard-necro.md#06.A) 06.A절) | 모든 바드 템플릿 공통 → [PvP](../game/pvp.md)로 이동 |
-| [Bard Necro](../templates/bard-necro.md#07) 07절의 "loadout 배치" 행 | 이 템플릿 이야기 아님. Conventions나 Hotkeys로 옮길까 |
+| Defensive Barding과 서버 스킬 게이트([Barding](../mechanics/barding.md#02.I) 02.I절) | 모든 바드 템플릿 공통 → [PvP](../game/pvp.md)로 이동 |
+| [Open items](open-items.md#14) 14절의 "loadout 배치" 행 | 이 템플릿 이야기 아님. Conventions나 Hotkeys로 옮길까 |
 | 2026-09-29에 바꾼 루프(교전과 이동 분기, 하우스키핑 시계, peace 대기, 한 줄로 접은 게이트) | 2026-10-10 모듈 조립 뒤 인게임 확인 목록은 14절. 교전과 이동은 있음, 하우스키핑 시계와 peace 대기와 한 줄로 접은 게이트는 없음. 14절에 추가할까 |
 
 ::part[보류]
@@ -734,7 +734,7 @@ A 공격자, B 대상의 통제 시험. 매번 화면 주인 기록.
 
 ## <a id="14"></a>14 bard-necro-enhanced 인게임 확인
 
-바뀐 동작은 [Modules](../scripting/modules.md#08.D) 08.D절. 재소환과 교체의 설계와 실패 증상은 [Bard Necro](../templates/bard-necro.md#04.I) 04.I절.
+바뀐 동작은 [Modules](../scripting/modules.md#08.D) 08.D절. 재소환과 교체의 설계와 실패 증상은 [Bard Necro Enhanced](../loops/bard-necro-enhanced.md#02.C) 02.C절.
 
 | 검사 | 하는 것 | 통과 기준 | 상태 |
 | --- | --- | --- | --- |
@@ -781,6 +781,20 @@ A 공격자, B 대상의 통제 시험. 매번 화면 주인 기록.
 | Journal 줄 | `config__sysmsg` 1로 실행 | 에이전트, 버프, 골드, 전투 대상 줄 기록. 너무 많으면 레시피에서 0 | 확인되지 않았다 |
 | 패스 속도 | 교전 | 교전 반응이 눈에 띄게 늦지 않음. 늦으면 기록 | 확인되지 않았다 |
 | 버섯 | 교전 중 마나 55 이하, 쿨다운 끝 | 먹음. Create Food는 이동 중에만 | 확인되지 않았다 |
+| 송의 슬롯 잠금 | [Barding](../mechanics/barding.md#01.E) 01.E절 근거 표의 순서를 Lyric 방어구를 벗고 한 번 실행. probe 스크립트는 git 이력. 실행 중 손 조작 금지 | 송이 바드 스킬 슬롯까지 잠그는지. 갈리는 것은 송 게이트의 모양 | 확인되지 않았다 |
+| 송 쿨 길이 | 같은 probe의 4단계(약 11초 뒤 시도) | 송 쿨의 정확한 길이. 갈리는 것은 `song` 바 길이 | 확인되지 않았다 |
+| Energy Bolt 회수와 환급 | 한 시전에 `[ mana, refund ]`와 `[ eb, refund ]`가 둘 다 뜨는지([Overheads](../scripting/overheads.md#07) 07절). 방법은 아직 후보 | 15마나 회수(5초 안에 마무리할 때만)와 환급 확률의 중첩 여부. 갈리는 것은 마나 예산이 초당 2.7인지 훨씬 낮은지([Bard Necro Enhanced](../loops/bard-necro-enhanced.md#01.D) 01.D절) | 확인되지 않았다 |
+| Ensemble, Reverb, Virtuoso 범위 | 포인트 변경 전후 데미지 트래커의 소환수 딜 절대값 비교 | 셋이 정말 본체에만 적용되는지. 갈리는 것은 코덱스 배분([Barding](../mechanics/barding.md#01.B) 01.B절) | 확인되지 않았다 |
+| 바디 번호 | Skeletal Fiend, skeletal marksman, rotting flesh가 나오면 `>info` | 바디 번호. 갈리는 것은 `SUMMON NAMES`의 `findtype` 줄([Bard Necro Enhanced](../loops/bard-necro-enhanced.md#02.B) 02.B절) | 확인되지 않았다 |
+| Corpse Skin 질병 틱 | 프록 한 방 뒤와, 프록 네 방과 볼트 뒤의 Poison Strike 피해를 데미지 트래커로 비교. 방법은 아직 후보 | 질병 하나의 틱 수. 갈리는 것은 Poison Strike 시점([Necromancy](../mechanics/necromancy.md#02) 02절) | 확인되지 않았다 |
+| SELF BUFFS | 몹이 없고 서 있을 때(`var__fighting = 0`, `cooldown "walk" = 0`) | 사냥 사이에 Reactive Armor와 Magic Reflection이 버프바에 붙고, 붙어 있는 동안 재시전 없음. 리플렉트가 소모되면 `[ reflect, off ]`와 30초 `reflect` 바, 바가 꺼진 뒤 다음 정지 때 재시전. 실패면 매 패스 재시전, `findbuff` 이름 불일치 | 확인되지 않았다 |
+| 시약 10초 리프레시 | 시약을 떨어뜨림 | 헛시전 한 번 뒤 그 주문을 건너뛰고 나머지 진행. 다시 채우면 최대 10초 안에 재개(2026-09-28 변경, 그때는 30초). 실패면 같은 주문의 헛시전 반복 → 캐릭터 이름으로 뜬 줄을 `insysmsg`가 못 읽음 | 확인되지 않았다 |
+| Poison Strike와 Energy Bolt 순서 | 교전 | Curse 뒤 네 프록이 이어서 나가고, 바 넷이 다 뜬 뒤 Energy Bolt 한 방, 그다음 `[ poison strike ]`. 몹을 바꾸면 그 몹에 프록이 간 뒤에만(2026-09-28 변경). 실패면 Curse나 첫 프록 바로 뒤에 둘 중 하나. 한 프록만 반복되면 그 바의 트리거 확인 | 확인되지 않았다 |
+| 네크로 능력 핫키 | 교전 | `[ blood oath ]` `[ corpse skin ]` `[ evil omen ]` `[ poison strike ]`가 전처럼 뜸(2026-09-28 변경). 실패면 Razor 핫키 목록의 이름 확인 | 확인되지 않았다 |
+| Corpse Skin과 Evil Omen 조건 | 교전 중 걷기, warmode | 걷는 동안과 warmode에서는 둘이 안 나가고 `[ blood oath ]`만. 멈추면 프록 앞에 시전(2026-09-28 변경) | 확인되지 않았다 |
+| Poison Strike와 Vampiric Embrace 거절 | 질병 없는 몹, 먼 시체 | Poison Strike가 매 패스 반복되지 않고 다음 프록 뒤 재시도. 시체가 멀면 Vampiric Embrace는 5초에 한 번만(2026-09-28 변경). 실패면 같은 거절 줄이 매 패스 | 확인되지 않았다 |
+| 타겟을 화면 거리에서 | 10칸 밖의 몹을 All Kill로 찍음 | `[ target, set ]`, 다가오면 교전. 그 사이 송이 나가도 타겟 유지(2026-09-29 변경). 실패면 `[ target, set ]` 없음, 몹이 붙었는데 송과 버프만 | 확인되지 않았다 |
+| 남의 소환수 | 파티원의 엘리멘탈 | `[ name, … ]` 없음(2026-09-29 변경). 실패면 뜸 | 확인되지 않았다 |
 
 #### 기록
 
@@ -878,7 +892,7 @@ A 공격자, B 대상의 통제 시험. 매번 화면 주인 기록.
 
 ## <a id="17"></a>17 프로보 후보 입력과 인게임 확인
 
-동작과 짝 선택 규칙은 [Bard Necro](../templates/bard-necro.md#04.J) 04.J절. 두 바드 루프 공통(`bard/provo-picks`, `bard/provo`).
+동작과 짝 선택 규칙은 [Barding](../mechanics/barding.md#03.A) 03.A절. 두 바드 루프 공통(`bard/provo-picks`, `bard/provo`).
 키는 [Hotkeys](../game/hotkeys.md#01.F) 01.F절. 반영은 클라이언트 재시작([Workflow](../working/workflow.md#04) 04절).
 
 쓰는 순서. 루프 시작 전에 고른 몹은 등록되지 않음.

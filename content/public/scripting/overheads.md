@@ -240,7 +240,7 @@ flowchart TD
   `Criminal`과 `PvP`는 **클라이언트가 서버 타이머로 직접 채우는 특수 바** → 트리거 없음. 근거는 Bapeths XML, 인게임 확인은 10절.
   Heat of Battle은 `pvp` 바
 - 항목 순서 = **자주 뜨는 순서.** 바드 바 다섯 개가 맨 앞, 그 뒤 매저리 프록 바.
-  순서와 트리거 문장의 근거는 [Bard Necro](../templates/bard-necro.md#02.I) 02.I절
+  순서와 트리거 문장의 근거는 [Barding](../mechanics/barding.md#01.I) 01.I절
 
 ### <a id="06.B"></a>06.B cooldown은 서버 값이 아님
 
@@ -249,7 +249,7 @@ flowchart TD
 
 그래도 스크립트는 자체 `timer__` 대신 이 바를 읽음. 게임이 예고 없이 쿨을 초기화해도(Lyric Aspect의 "Your barding skill cooldowns reset.")
 리셋 문장에 트리거를 걸면 바도 함께 0.
-예전 `music`에 송 트리거가 섞여 서로 덮어쓰던 사고와 수정: [Bard Necro](../templates/bard-necro.md#02.I) 02.I절.
+예전 `music`에 송 트리거가 섞여 서로 덮어쓰던 사고와 수정: [Barding](../mechanics/barding.md#01.I) 01.I절.
 
 ### <a id="06.C"></a>06.C 바 목록
 
@@ -275,13 +275,13 @@ flowchart TD
 
 | 바 | 메모 |
 | --- | --- |
-| `magic arrow` … `lightning`, `chain` `meteor` | 매저리 프록 15초. 발동 문장에 시작, "cast a wizardry … spell again"에 리셋. 앞의 넷은 [Bard Necro](../templates/bard-necro.md#03.A) 03.A절 |
+| `magic arrow` … `lightning`, `chain` `meteor` | 매저리 프록 15초. 발동 문장에 시작, "cast a wizardry … spell again"에 리셋. 앞의 넷은 [Magery](../mechanics/magery.md#01) 01절 |
 | `pain spike` `necrosis` `noble sacrifice` `holy light` `poison strike` `curse` `mass curse` `spyglass` `divine fury` `consecrate weapon` `spam` `crew heal` `quest` | 트리거 없음, 세우는 스크립트 없음 → 안 뜸([Open items](../questions/open-items.md#01) 01절) |
 | `corpse skin` `ability` | 트리거 없음, 스크립트가 직접 세움. 세우는 스크립트는 모두 archive. backstab-mugging의 `cooldown "corpse skin" 1000`, bard-mace와 bard-throwing의 `cooldown "ability" cooldown__ability` |
 | `drain` | 트리거는 머리 위 메시지 "MV ON" 하나. 지금 이 메시지를 띄우는 스크립트 없음 |
 | `teleki, target` `teleki, me` | 자기 TK뿐 아니라 적의 TK를 받아도 둘 다 켜질 수 있다는 사용자 보고 → target 바만으로 내 공격 TK 성공 확정 불가([PvP](../game/pvp.md#04.D) 04.D절) |
 | `reflect` | "Magic reflect removed." → 30초 바(몹), "Magic reflect removed (PvP)" → 60초 바(플레이어). 실제 서버 제한과 시작 시점의 확인 범위는 [PvP](../game/pvp.md#05.A) 05.A절. 내 주문으로 없애면 "You remove your magic reflect spell."이 한 줄 더 오지만 트리거로 안 씀 |
-| `walk` | `Walk` 타입, 0.3초, 트리거 없음. 스크립트는 걷는 중 신호로 읽고 시전을 미룸([Bard Necro](../templates/bard-necro.md#05.A) 05.A절의 행동 창 가드) |
+| `walk` | `Walk` 타입, 0.3초, 트리거 없음. 스크립트는 걷는 중 신호로 읽고 시전을 미룸([Bard Necro Enhanced](../loops/bard-necro-enhanced.md#01.A) 01.A절의 행동 창 가드) |
 | `pvp` `crim` | 특수 바 타입, 트리거 없음(06.A절) |
 | `bomb, me` | 5초. "An explosion potion has stuck to you"로 시작 |
 | `siphon` | 3600초. "Spell siphon active."로 시작, 만료 문장에 리셋 |
@@ -529,7 +529,7 @@ Razor 프로필 `summoner.xml`, `default.xml`의 `<overheadmessages>`. 정본은
 | You curse your target. | `[ curse, target ] (244)` | 스크립트의 `[ curse ]` 시전 알림은 삭제 |
 | Your reactive armor spell has been nullified. | `[ reactive, off ] (254)` | 25 흡수 후 빠짐. 다음에 서 있을 때 다시 시전 |
 | You generate mana for your spell. | `[ mana, refund ] (290)` | 예전 `generates mana`는 이 문장을 못 잡음 |
-| recovered from energy bolt kill | `[ eb, refund ] (290)` | 돌려받는 양이 티어마다 달라 숫자는 안 띄움([Bard Necro](../templates/bard-necro.md#03.A) 03.A절) |
+| recovered from energy bolt kill | `[ eb, refund ] (290)` | 돌려받는 양이 티어마다 달라 숫자는 안 띄움([Magery](../mechanics/magery.md#01) 01절) |
 | That is too far away. | `[ range, out ] (254)` |   |
 
 ## <a id="08"></a>08 스크립트 오버헤드
