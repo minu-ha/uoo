@@ -41,7 +41,9 @@ flowchart LR
 | [Razor](../scripting/razor.md) | Outlands Razor 확장 문법, 확인된 함정, 되는 구문의 선례, 명령문 비용, PvP 명령 제약 |
 | [Modules](../scripting/modules.md) | 모듈 폴더, 레시피와 모듈 형식, 조립 규칙, base와 블록 사이 신호, 옮긴 기록 |
 | [Overheads](../scripting/overheads.md) | 알림의 세 경로, `[ 대상, 상태 ]` 형식, 어휘, hue, 쿨다운 바, 프로필 오버헤드 표 |
-| [PvP](../game/pvp.md) | 템플릿과 무관한 PvP 규칙과 숫자 |
+| [PvP](../game/pvp.md) | 템플릿과 무관한 PvP 규칙과 숫자. Heat of Battle, 명중률, Hamstring, TK, 주문 싸움, 소환수 |
+| [Combat](../mechanics/combat.md) | 방어구와 마나 재생, 근접 반격력, 붕대, 스탯 포션, Parrying, Resisting Spells, Tracking |
+| [PvP Loop](../loops/pvp.md) | 공통 자기관리 루프 `combat/pvp`의 입력 규칙, 설정, 골격, 타이머, 무기 선택, 상태 |
 | [Hotkeys](../game/hotkeys.md) | 키 배치, 주문 데미지 메모 |
 | [Item list](../game/item-list.md) | 아이템 이름, graphic id, hue |
 | [Barding](../mechanics/barding.md) | 바드 세 스킬과 송의 쿨, 효과, 코덱스, Defensive Barding, 프로보 후보 입력 |
@@ -49,7 +51,8 @@ flowchart LR
 | [Magery](../mechanics/magery.md) | Magery 프록과 시전 시간 |
 | [Bard Necro](../templates/bard-necro.md) | Bard Necro의 캐릭터, 코덱스 배분, 소환수 선택, PvP 판단 |
 | [Bard Necro Enhanced](../loops/bard-necro-enhanced.md) | bard-necro-enhanced 루프의 설계, 자원, 마나 예산, 설계 결정, 소환수 블록 |
-| [Lumberjack PvP](../templates/lumberjack-pvp.md) | 벌목과 PvP 템플릿의 스킬, 스탯, 도끼 선택, 마나 예산, 교전 분기, 구현 요구사항 |
+| [Lumberjack PvP](../templates/lumberjack-pvp.md) | 벌목과 PvP 템플릿의 스킬, 스탯, 도끼 선택, 마나 예산, 교전 분기, 구현 요구사항, 공통 pvp 설정 |
+| [Lumberjack Enhanced](../loops/lumberjack-enhanced.md) | lumberjack-enhanced 루프의 실행 흐름, 채집 근거, 기본값과 상태, 실행 준비 |
 | [Archery](../mechanics/archery.md) | 아처리 무기와 사격 간격, 자세, 피니셔, 무기 능력, PvP에서 빠지는 것 |
 | [Bard Archer](../templates/bard-archer.md) | Bard Archer의 스킬과 코덱스, 갑옷과 마나, 부활, bard 프로필 |
 | [Bard Archer Enhanced](../loops/bard-archer-enhanced.md) | bard-archer-enhanced 루프의 블록 순서, 여러 마리 판정, Virtuoso 유지 |

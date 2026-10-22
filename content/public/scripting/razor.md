@@ -141,13 +141,13 @@ Razor CE에 없거나 CE보다 넓어진 것. 존재 여부만 기록, 인자 �
 | `findtype` 한 번으로 여러 모빌 중 하나 고르기 | 부를 때마다 **같은 모빌** | `while findtype … as`로 돌며 검사, 아니면 `@ignore`. `endwhile` 뒤 `@clearignore` |
 | 모빌을 이름으로 찾기 | 되긴 함. 이름 변경 후 Razor 캐시 갱신 여부는 확인되지 않았다 | 바디 번호로 찾기. 바디 번호는 인게임 `>info`. 내 소환수의 noto는 2(friend) |
 | 패스마다 `findtype`으로 상태 세기 | `findtype`이 가장 비쌈(한 번 20 \~ 40ms, 06절). 32번이면 패스마다 1초 안팎 | 천천히 변하는 상태는 타이머로 몇 초에 한 번. `elseif` 사슬은 통째로 한 틱이라 길어도 쌈 |
-| `findbuff 'Strength'`, `'Agility'`로 스탯 포션 판정 | Bless도 같은 이름 → 내 Bless든 아군 Bless든 걸려 있으면 포션 안 마심(05절) | 스탯을 기준선(기본 + 20)과 비교, 포션마다 재시도 간격([PvP](../game/pvp.md#09.D) 09.D절). Bless는 `Cunning`, Arch Protection은 `Protection`. `Magic Resist Potion`은 그 이름 그대로(인게임 확인됨 2026-10-09) |
+| `findbuff 'Strength'`, `'Agility'`로 스탯 포션 판정 | Bless도 같은 이름 → 내 Bless든 아군 Bless든 걸려 있으면 포션 안 마심(05절) | 스탯을 기준선(기본 + 20)과 비교, 포션마다 재시도 간격([Combat](../mechanics/combat.md#02.D) 02.D절). Bless는 `Cunning`, Arch Protection은 `Protection`. `Magic Resist Potion`은 그 이름 그대로(인게임 확인됨 2026-10-09) |
 
 #### 거리 확인과 Last Target
 
 - 수동으로 고른 플레이어 대상은 `find`로 거리 확인 불가 → 완료한 주문 커서는 Razor `Last Target` 거리 검사로 유지 가능
 - [Razor CE Options](https://www.razorce.com/help/options/#targeting-queues): `Range check Last Target`이 켜져 있으면 범위 밖 대상 요청 거부, 커서 유지. `target serial`의 거리 검사까지 보증하지는 않음
-- 이전 bard-necro-pvp는 이 경로로 Explosion과 후속 EB 요청. 지금 루프는 공격 수동([PvP](../game/pvp.md#05.E) 05.E절)
+- 이전 bard-necro-pvp는 이 경로로 Explosion과 후속 EB 요청. 지금 루프는 공격 수동([PvP Loop](../loops/pvp.md))
 - 커서가 닫혔다는 것만으로 명중, 거리, 취소 확정 금지
 - 지금 Outlands 클라이언트에서 거리 밖에서 안으로 들어올 때의 전환은 확인되지 않았다. 확인 항목: [Open items](../questions/open-items.md#08.B) 08.B절
 - 공통 PvP v5: 아이템, 자기 주문, 장비 중 하나를 처리하는 조건 사슬 후 다음 패스. 반복문 안 `break`, `continue` 없음. 새 본문 동작은 아직 확인되지 않았다

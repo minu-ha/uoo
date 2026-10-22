@@ -458,7 +458,7 @@ Bard Necro 기준 Herding 80 → Resisting Spells 80 비교:
 
 ### <a id="04.E"></a>04.E Tracking과 바드
 
-Tracking 규칙은 [PvP](../game/pvp.md#10) 10절, Hunting 판정의 5초 스킬 쿨은 [PvP](../game/pvp.md#10.A) 10.A절.
+Tracking 규칙은 [Combat](../mechanics/combat.md#05) 05절, Hunting 판정의 5초 스킬 쿨은 [Combat](../mechanics/combat.md#05.A) 05.A절.
 
 - Tracking의 Effective Barding 보너스는 Musicianship(또는 Self Taught 대체값) 상한 안에서만([Barding](../mechanics/barding.md#02.C) 02.C절)
 - 서버 스킬 게이트가 하나([Barding](../mechanics/barding.md#01.J) 01.J절) → 사냥 중 Hunting 판정이 바드 스킬을 "use another skill"로 막을 수 있음. 확인되지 않았다
@@ -466,13 +466,13 @@ Tracking 규칙은 [PvP](../game/pvp.md#10) 10절, Hunting 판정의 5초 스킬
 ### <a id="04.F"></a>04.F 공통 pvp의 mage 설정
 
 - [combat/pvp.razor](https://github.com/minu-ha/uoo/blob/master/script/combat/pvp.razor)는 `config__use_magery = 1`로
-  공통 [PvP 자기관리 루프](../game/pvp.md#05.E)의 자기 마법 사용
+  공통 [PvP Loop](../loops/pvp.md)의 자기 마법 사용
 - 무기 교체가 필요 없으면 [recipe/pvp-recipe.razor](https://github.com/minu-ha/uoo/blob/master/recipe/pvp-recipe.razor)에서
   `fight/weapon-swap` 줄을 빼고 재조립([Modules](../scripting/modules.md#07.B) 07.B절). 기능별로 켜고 끔, 템플릿 프리셋 없음
 - PK를 만나면 F1을 끄고 이것을 켬. 템플릿별 예전 PvP 파일은 삭제 → F4를 Razor에서
   `Play Script: combat\pvp`로 재연결([Hotkeys](../game/hotkeys.md#04) 04절)
 - 이 템플릿은 붕대와 무기 옵션을 끔. 공통 레시피가 무기 교체를 기본으로 켜 두므로 직접 끔
-- 자동과 수동의 구분, 세부 스위치와 타이머, 손으로 든 커서를 지키는 조건은 공통 문서 [PvP](../game/pvp.md#05.E) 05.E절이 정본
+- 자동과 수동의 구분, 세부 스위치와 타이머, 손으로 든 커서를 지키는 조건은 공통 문서 [PvP Loop](../loops/pvp.md)이 정본
 - 2026-10-05 상대 탐색, Q 대상 캐시, 자동 TK, Explosion에서 EB로 잇기, 소환수 공격 제거
 - TK, 공격 주문, 폭발 포션, 소환수 명령은 사용자가 시전하고 타겟. 상대의 색, 거리, 사망은 루프의 실행 조건이 아님.
   Q는 사용자가 손으로 Last Target을 고르는 데만
@@ -484,7 +484,7 @@ Tracking 규칙은 [PvP](../game/pvp.md#10) 10절, Hunting 판정의 5초 스킬
 
 ## <a id="05"></a>05 자주 틀렸던 것
 
-PvP 쪽(명중률, TK 폭탄, 패링, 던전 리콜)은 [PvP](../game/pvp.md#11) 11절.
+PvP 쪽(명중률, TK 폭탄, 패링, 던전 리콜)은 [PvP](../game/pvp.md#07) 07절.
 바딩, 네크로, 매저리 쪽은 각 메커니즘 문서의 자주 틀렸던 것: [Barding](../mechanics/barding.md#04) 04절, [Necromancy](../mechanics/necromancy.md#03) 03절, [Magery](../mechanics/magery.md#03) 03절.
 루프 쪽은 [Bard Necro Enhanced](../loops/bard-necro-enhanced.md#03) 03절.
 
@@ -494,7 +494,7 @@ PvP 쪽(명중률, TK 폭탄, 패링, 던전 리콜)은 [PvP](../game/pvp.md#11)
 
 ## <a id="06"></a>06 참고 링크
 
-PvP 출처는 [PvP](../game/pvp.md#12) 12절.
+PvP 출처는 [PvP](../game/pvp.md#08) 08절.
 바딩, 네크로, 매저리 출처는 각 메커니즘 문서의 참고 링크: [Barding](../mechanics/barding.md#05) 05절, [Necromancy](../mechanics/necromancy.md#04) 04절, [Magery](../mechanics/magery.md#04) 04절.
 
 - [Heat of Battle](https://wiki.uooutlands.com/Heat_of_Battle) -- 공격적 행동의 정의, 자동 반격 예외

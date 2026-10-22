@@ -71,7 +71,10 @@ Ultima Online Outlands용 Razor 스크립트 저장소.
 | Bard Necro 캐릭터, 소환수 선택   | [Bard Necro](content/public/templates/bard-necro.md)                                                                                                       |
 | bard-necro-enhanced 루프 설계    | [Bard Necro Enhanced](content/public/loops/bard-necro-enhanced.md)                                                                                         |
 | PvP 규칙                         | [PvP](content/public/game/pvp.md)                                                                                                                          |
+| 방어구, 근접, 붕대, 포션, Tracking | [Combat](content/public/mechanics/combat.md)                                                                                                             |
+| 공통 pvp 루프 설계               | [PvP Loop](content/public/loops/pvp.md)                                                                                                                    |
 | 벌목과 PvP 템플릿, 교전          | [Lumberjack PvP](content/public/templates/lumberjack-pvp.md)                                                                                               |
+| lumberjack-enhanced 루프 설계    | [Lumberjack Enhanced](content/public/loops/lumberjack-enhanced.md)                                                                                         |
 | 아처리 자세, 피니셔, 무기 능력   | [Archery](content/public/mechanics/archery.md)                                                                                                             |
 | Bard Archer 캐릭터, 코덱스, 부활 | [Bard Archer](content/public/templates/bard-archer.md)                                                                                                     |
 | bard-archer-enhanced 루프 설계   | [Bard Archer Enhanced](content/public/loops/bard-archer-enhanced.md)                                                                                       |

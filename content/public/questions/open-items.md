@@ -89,18 +89,18 @@ order: 10
 
 | 무엇 | 어디 | 물을 것 |
 | --- | --- | --- |
-| 캐릭터의 기본 STR과 DEX(스탯 포션 기준선) | 기준선: bard-necro-enhanced와 tamer-mage-enhanced 120과 45, pvp와 skinning-enhanced 120과 100, archive의 bard-mace, bard-throwing, hally-mage 120과 120 | 버프 없는 STR과 DEX. 기준선 = 그 값 + 20([PvP](../game/pvp.md#09.D) 09.D절). bard-necro의 DEX 25는 인게임 확인됨 2026-10-10(포션을 마셔도 45), 그 전 120은 옛 임계값 100에서 짐작. STR 100은 아직 짐작. pvp는 벌목과 skinning 템플릿의 100과 80 기준, summoner 프로필에서도 쓰므로 그 캐릭터의 기본값이 다르면 실행 전 변경. 선이 높으면 포션 도는 동안 5초마다 거절될 마시기, 낮으면 아예 안 마심 |
+| 캐릭터의 기본 STR과 DEX(스탯 포션 기준선) | 기준선: bard-necro-enhanced와 tamer-mage-enhanced 120과 45, pvp와 skinning-enhanced 120과 100, archive의 bard-mace, bard-throwing, hally-mage 120과 120 | 버프 없는 STR과 DEX. 기준선 = 그 값 + 20([Combat](../mechanics/combat.md#02.D) 02.D절). bard-necro의 DEX 25는 인게임 확인됨 2026-10-10(포션을 마셔도 45), 그 전 120은 옛 임계값 100에서 짐작. STR 100은 아직 짐작. pvp는 벌목과 skinning 템플릿의 100과 80 기준, summoner 프로필에서도 쓰므로 그 캐릭터의 기본값이 다르면 실행 전 변경. 선이 높으면 포션 도는 동안 5초마다 거절될 마시기, 낮으면 아예 안 마심 |
 | Lyric 방어구 무시 42.5% | [Bard Necro](../templates/bard-necro.md#02.B) 02.B절 | 출처. Peace 가동률 62%의 근거 |
 | Barding Break 동안 Virtuoso | [Bard Necro](../templates/bard-necro.md#02.B) 02.B절, `bard/peace` 모듈 | 정말 꺼지나. "Barded Creatures"에 디스코만 걸린 몹도 드는지 모름 |
 | PK의 Alchemy | [Bard Necro](../templates/bard-necro.md#04.B) 04.B절 | 80인가 100인가. 지금 숫자는 80 기준 |
 | `song`과 `peace/provo` 바의 성공 쿨 | `cooldowns.xml` 11초, 위키 10초([Barding](../mechanics/barding.md#01.C) 01.C절) | 1초는 의도한 추가인가 |
-| Vengeful Spirit의 마나 | [Necromancy](../mechanics/necromancy.md#01.B) 01.B절, 04.I절 | "마나 101"을 심볼 1과 마나 100으로 수정함. 마나가 따로 드나 |
+| Vengeful Spirit의 마나 | [Necromancy](../mechanics/necromancy.md#01.B) 01.B절, [Bard Necro Enhanced](../loops/bard-necro-enhanced.md#02.C) 02.C절 | "마나 101"을 심볼 1과 마나 100으로 수정함. 마나가 따로 드나 |
 | `cooldown "…"`의 반환값 | [Razor](../scripting/razor.md) | 1인가, 남은 초인가 |
 | `and`의 단락 평가 | [Bard Necro Enhanced](../loops/bard-necro-enhanced.md#01.H) 01.H절 | 버섯 `findtype`, `counttype`을 서 있을 때만 읽는다는 설명의 전제. Razor 문서에 없음 |
 | `in`의 대소문자 구분 | [Conventions](../scripting/conventions.md#05) 05절 | 근거는 `dump-label.razor:11` 주석뿐. 인게임에서 봤다면 [Razor](../scripting/razor.md#03) 03절 함정 표로 |
 | Vampiric Embrace 확인 날짜 | [Razor](../scripting/razor.md#04) 04절 | 2026-09-25는 커밋 날짜. 실제로 본 날짜인가 |
 | `auto-mage.razor:1160` 인용 | [Razor](../scripting/razor.md#04) 04절 | 저장소와 이력 어디에도 없는 파일. 위치 |
-| Overheads의 숫자 | [Overheads](../scripting/overheads.md#07) 07절, 09절 | 광역 바딩의 8타일과 5초, 2초. Resist 흡수 `25% x Resist/100`과 -75%(PvP의 Parrying 공식과 혼동 여부). siphon의 5분마다와 60분. reactive 25. drain의 레지 -10과 -20, 2분. Paralyze PvP 10초 |
+| Overheads의 숫자 | [Overheads](../scripting/overheads.md#07) 07절, 09절 | 광역 바딩의 8타일과 5초, 2초. Resist 흡수 `25% x Resist/100`과 -75%(PvP의 Parrying 공식과 혼동 여부). siphon의 5분마다와 60분. reactive 25. drain의 레지 -10과 -20, 2분. Paralyze Combat 05초 |
 | PvP의 주장 | [PvP](../game/pvp.md#02) 02절, 03절, 05절 | "Swordsmanship도 같은 형태다", 크리처 주문 패링 25%, Hamstring이 PvM 목록에 있다는 말의 출처 |
 
 ::part[규칙과 문서]
@@ -171,7 +171,7 @@ A 공격자, B 대상의 통제 시험. 매번 화면 주인 기록.
 | 검사 | 하는 것 | 통과 기준 | 상태 |
 | --- | --- | --- | --- |
 | 직접 serial 적용 | 직접 serial을 쓴 alt TK, Explosion에서 EB로 잇기 | 적용됨. 정본은 [Razor](../scripting/razor.md#03.A) 03.A절 | 인게임 확인됨 2026-10-04 |
-| 플레이어 조회 | 플레이어 find | find 실패, 변수 비교 방향 문제, 조회마다의 제한. 정본은 같은 03.A절 | 인게임 확인됨 2026-10-04 |
+| 플레이어 조회 | 플레이어 find | find 실패, 변수 비교 방향 문제, 조회마다의 제한. 정본은 [Razor](../scripting/razor.md#03.A) 03.A절 | 인게임 확인됨 2026-10-04 |
 | Range check | 실행 중 `Range check Last Target` | ON, 12타일 | 인게임 확인됨 |
 | 수동 Last Target | 거리 밖에서 안으로 들어올 때 수동 Last Target | 커서를 쥐었다 놓는지 | 확인되지 않았다 |
 | 진단, 바디 ID | 바디 ID를 넣은 findtype 비교 | 검색이 플레이어를 빠뜨리는 원인 | 확인되지 않았다 |
@@ -186,7 +186,7 @@ A 공격자, B 대상의 통제 시험. 매번 화면 주인 기록.
 | Bless, Magery 80 | Magery 80에서 Bless만 | STR, DEX, INT, 최댓값, 현재 마나 기록. 공식값 +8.8의 정수 처리 구분 | 확인되지 않았다 |
 | Bless 마나 | 같은 시행 | Bless 비용 9와 스크롤로 꺼내는 데 필요한 실제 마나 50 조건 구분 | 확인되지 않았다 |
 | Bless, Magery 100 | Magery 100에서 Bless | `changed by 11`로 +11. [12절](#12) | 인게임 확인됨 2026-10-09 |
-| 스탯 포션과 Bless | 포션이 걸린 동안 Bless | 안 겹침. Bless의 STR, DEX는 더해지지 않음. [PvP](../game/pvp.md#09.D) 09.D절 | 인게임 확인됨 2026-10-21 |
+| 스탯 포션과 Bless | 포션이 걸린 동안 Bless | 안 겹침. Bless의 STR, DEX는 더해지지 않음. [Combat](../mechanics/combat.md#02.D) 02.D절 | 인게임 확인됨 2026-10-21 |
 | 붕대 시간 | 포션 뒤 DEX 100에서 붕대 | 10초 | 확인되지 않았다 |
 | GA, Norse | STA 100에서 GA와 Norse | GA 3초, Norse 1.5625초 | 확인되지 않았다 |
 | 마지막 스윙 | 무기 교체 | 공유하는 마지막 스윙 기록 | 확인되지 않았다 |
@@ -202,7 +202,7 @@ A 공격자, B 대상의 통제 시험. 매번 화면 주인 기록.
 
 - 2026-10-04 bard-necro-pvp에서 공통 바 기반 자동 점화 블록 삭제. 실제 포션은 손으로 투척
 - 2026-10-05 공격을 수동으로 전환, 상대 조회와 자동 공격을 루프에서 삭제
-- v5: 보통의 수동 입력을 기다리고, 긴급 회복이 준비되면 수동 주문을 끊었음([PvP](../game/pvp.md#05.E) 05.E절)
+- v5: 보통의 수동 입력을 기다리고, 긴급 회복이 준비되면 수동 주문을 끊었음([PvP Loop](../loops/pvp.md))
 - v6: 수동 입력 중단 삭제([10절](#10))
 
 #### 메모
@@ -241,7 +241,7 @@ A 공격자, B 대상의 통제 시험. 매번 화면 주인 기록.
 
 ## <a id="09"></a>09 lumberjack-enhanced 인게임 확인
 
-지금 v18. 설정, 상태, 타이머, 반영 절차의 정본은 [Lumberjack PvP](../templates/lumberjack-pvp.md#08) 08절.
+지금 v18. 설정, 상태, 타이머, 반영 절차의 정본은 [Lumberjack Enhanced](../loops/lumberjack-enhanced.md).
 
 | 검사 | 하는 것 | 통과 기준 | 상태 |
 | --- | --- | --- | --- |
@@ -335,6 +335,23 @@ A 공격자, B 대상의 통제 시험. 매번 화면 주인 기록.
 | 거절 안내 | 이동 제한, 주변 자원 없음, 채집 불가 | 안내가 한 번씩 뜸 | 확인되지 않았다 |
 | 60초 제한 | 실제 이동 뒤 | 서버의 60초 제한과 스크립트의 4초 명령 재시도 간격 구분. 거절 메시지를 받은 때부터 60초를 새로 세지 않음 | 확인되지 않았다 |
 | 쿨다운 바 | 지금 캐릭터로 heal pot, walk, reflect | 실제 트리거 확인. 없거나 다르면 그 캐릭터만 나중에 수정 | 확인되지 않았다 |
+| 필터 확인 실패 | 감지 리콜 ON, 필터 확인 실패 또는 고른 필터와 다른 필터 | `[ track, miss ]`나 `[ track, check ]`, 채집 보류 | 확인되지 않았다 |
+| 설정 실패 중 회복 | 처음 Tracking 설정을 못 마침 | 회복은 계속 | 확인되지 않았다 |
+| 오래 채집 | Tracking 설정 뒤 오래 채집 | Tracking 창이나 필터 버튼을 다시 건드리지 않음 | 확인되지 않았다 |
+| 전체 필터 문장 | `tracking_color` 4로 재실행 | 전체 필터의 확인 문장 기록 | 확인되지 않았다 |
+| 리콜 없이 Tracking | `escape/recall`은 빼고 `escape/tracking`은 둔 조립 | Tracking 시작 설정은 실행 | 확인되지 않았다 |
+| 도끼 없음 | 손과 백팩 모두 도끼 없음, 또는 도끼 하나만 | 없으면 `[ hatchet, out ]`. 하나만 있으면 수량 경고 없이 채집 | 확인되지 않았다 |
+| hue별 묶음 | 정리 뒤 인벤토리 확인 | 같은 hue는 합쳐지고 다른 hue는 따로 남음 | 확인되지 않았다 |
+| 결과 중복 없음 | 채집 성공, 수확 실패, 두 배 수확 | 프로필만 표시. 스크립트가 같은 결과를 또 띄우면 실패 | 확인되지 않았다 |
+| 회복 우선 | 독, 보통 피해, 큰 피해 | 채집보다 해독과 회복 먼저 | 확인되지 않았다 |
+| 회복 자원 부족 | Cure 포션, 붕대, Heal 포션 부족 | `[ cure pot, out ]`, `[ bandage, out ]`, `[ heal pot, out ]` | 확인되지 않았다 |
+| 워모드 채집 | 워모드 ON | 채집 보류 | 확인되지 않았다 |
+| 리콜 알림 | 리콜 요청, 읽은 서버 거절, 마나 부족 | 각각 `[ recall, on ]`, `[ recall, blocked ]`, `[ mana, low ]` | 확인되지 않았다 |
+| 전송 뒤 회복 | RecallCharge 전송 뒤 | 회복은 계속, 채집은 재실행까지 보류. 실제 도착은 화면으로 확인 | 확인되지 않았다 |
+| 무게 리콜 | 무게 리콜 켬(기본)과 끔 | 켬: 다음 채집 전 5초 점검에서 `[ weight, low ]` 뒤 채집 정지와 리콜 요청. 끔: 여유 조건으로는 정지 없음 | 확인되지 않았다 |
+| 실제 무게 한도 | 실제 남은 무게 0 이하 | 채집 보류 | 확인되지 않았다 |
+| 음식 조건 | Food Satisfaction 버프 있음, 기존 커서, 시전, 큐 | 버프가 있으면 안 먹음. 먹는 동작이 기존 커서, 시전, 큐를 덮으면 실패 | 확인되지 않았다 |
+| 서버 저장 | 저장 시작과 완료 알림 | 알림은 기존 프로필 담당. 스크립트에 저장 상태나 저장 문구에 따른 정지와 재개 분기 없음 | 확인되지 않았다 |
 
 #### 기록
 
@@ -363,7 +380,7 @@ A 공격자, B 대상의 통제 시험. 매번 화면 주인 기록.
 
 ## <a id="10"></a>10 공통 pvp의 자기관리와 무기 장착 인게임 확인
 
-`combat/pvp` 지금 v9. 설정, 변수, 타이머, 커서 처리의 정본은 [PvP](../game/pvp.md#05.E) 05.E절.
+`combat/pvp` 지금 v9. 설정, 변수, 타이머, 커서 처리의 정본은 [PvP Loop](../loops/pvp.md).
 반영은 Scripts 탭에서 Stop → Reload all scripts → Play로 먼저 확인. 외부에서 고친 뒤 기존 핫키로 돌리면 클라이언트 재시작([Workflow](../working/workflow.md#04.A) 04.A절).
 
 | 검사 | 하는 것 | 통과 기준 | 상태 |
@@ -448,7 +465,7 @@ A 공격자, B 대상의 통제 시험. 매번 화면 주인 기록.
 - 2026-10-06 **v5**: 회복 선택, 긴급 수동 주문 중단, 자기관리 실행, 무기 장착 순서. GH와 긴급 중단 기준을 손실 35로 통일, 시폰과 버섯 자동화, 양손과 슬롯 상태 삭제
 - 2026-10-08 **v6**: 각 블록이 지금 상태를 읽고 바로 행동하는 구조로 재작성. 회복 주문은 에이전트, 버프는 빠지면 바로 시전, 스탯 포션은 켜 둔 동안 유지.
   수동 입력 중단, 주문의 이동 가드, 6초 시전 대기와 `[ cast, check ]` 정지, 재시도 타이머 삭제. 시약은 10초마다, 또는 시약 거절 직후 읽음
-- 2026-10-09 **v7**: Strength 포션, Agility 포션을 버프 대신 STR과 DEX 값으로 판정. 아군 Bless가 같은 아이콘을 띄워 포션을 막았음([PvP](../game/pvp.md#09.D) 09.D절)
+- 2026-10-09 **v7**: Strength 포션, Agility 포션을 버프 대신 STR과 DEX 값으로 판정. 아군 Bless가 같은 아이콘을 띄워 포션을 막았음([Combat](../mechanics/combat.md#02.D) 02.D절)
 - 2026-10-10 **v8**: 가벼운 Heal을 붕대 옆에서도 쓸지 `config__use_light_heal`로 결정(기본 0). 붕대를 못 쓰면 옵션과 무관하게 대신 나감
 - 2026-10-10 **v9**: 모듈 조립. 동작은 v8과 같음([Modules](../scripting/modules.md#08) 08절)
 
@@ -541,7 +558,7 @@ A 공격자, B 대상의 통제 시험. 매번 화면 주인 기록.
 - **v5**: 복원 삭제, 기억한 적이 없을 때만 칼질. 거절이 보이면 5분 동안 회색 시체만
 - **v6**: sword codex 이름에 `sword_` 접두, 칼질 결과와 범죄 행위 거절을 프로필 오버헤드로 이관. 같은 날 오버헤드 팔레트 채도 하향([Overheads](../scripting/overheads.md#05) 05절)
 - **v7**: 직접 지정 전 라벨을 읽어 "corpse"가 있고 "remains"가 없는 시체만. 그래도 범죄 판정이면 그 Play 동안 직접 지정 끔
-- 2026-10-09 **v9**: 힘 포션과 민첩 포션을 버프 대신 STR과 DEX 값으로 판정([PvP](../game/pvp.md#09.D) 09.D절), 세 스탯 포션을 따로 판정.
+- 2026-10-09 **v9**: 힘 포션과 민첩 포션을 버프 대신 STR과 DEX 값으로 판정([Combat](../mechanics/combat.md#02.D) 02.D절), 세 스탯 포션을 따로 판정.
   v8은 `elseif` 사슬이라 힘 포션이 떨어지면 민첩과 저항 포션까지 막힘
 - 2026-10-10 **v10**: 가벼운 Heal을 붕대 옆에서도 쓸지 `config__use_light_heal`로 결정(기본 0). 붕대를 못 쓸 때 대신 나가는 것은 그대로
 - 2026-10-10 **v11**: 모듈 조립. 회복, 포션, 버프, 시약을 pvp와 같은 core 블록으로. 바뀐 동작은 [Modules](../scripting/modules.md#08) 08절
@@ -887,7 +904,7 @@ A 공격자, B 대상의 통제 시험. 매번 화면 주인 기록.
 | 재장착, 커서 | 바딩 커서나 자기 주문 중 | 재장착이 끊지 않음. 끊기면 시전 중 가드가 샌 것 | 확인되지 않았다 |
 | `rhandempty`, `righthand` | Play | 오류 줄 없음 | 확인되지 않았다 |
 | 31186 | Pistol Crossbow와 같은 art인지 | 백팩에 둘 다 있을 때 `findtype`이 집는 것 기록 | 확인되지 않았다 |
-| 마나 | 체인 한 벌, 음식 없이 | 마나 10이 차는 시간 50초면 Butler 식([PvP](../game/pvp.md#05.D) 05.D절) | 확인되지 않았다 |
+| 마나 | 체인 한 벌, 음식 없이 | 마나 10이 차는 시간 50초면 Butler 식([Combat](../mechanics/combat.md#01) 01절) | 확인되지 않았다 |
 | Lyric | 송 메시지 | `8.5%`면 170. `6.8%`면 Lyric 보너스 없음([Bard Archer](../templates/bard-archer.md#01.C) 01.C절) | 확인되지 않았다 |
 
 ## <a id="17"></a>17 프로보 후보 입력과 인게임 확인
@@ -911,7 +928,7 @@ A 공격자, B 대상의 통제 시험. 매번 화면 주인 기록.
 | Z의 A | Z로 A, Shift+Space로 B | A도 후보. 바딩 대상이 A여도 A→B | 확인되지 않았다 |
 | 다섯 마리 | Z로 A, B부터 E 등록 | A→B, 다음 공유 쿨에 C→D. E는 대기. provoked 몹을 다른 짝에 안 씀 | 확인되지 않았다 |
 | Q 순회 | Q로 B, C, D, E 차례로 | 바딩 대상만 이동, 후보 목록과 짝 순서 유지. 각 몹의 Disco는 알림과 별도로 확인 | 확인되지 않았다 |
-| 자동 B→C 뒤 라타 | 자동 시전 뒤 E나 V | 루프 대상 T와 후보 목록 유지. 실제 `lastharmful`은 C로 남을 수 있음(04.J절 한계). V가 간 곳 기록 | 확인되지 않았다 |
+| 자동 B→C 뒤 라타 | 자동 시전 뒤 E나 V | 루프 대상 T와 후보 목록 유지. 실제 `lastharmful`은 C로 남을 수 있음([Barding](../mechanics/barding.md#03.A) 03.A절의 한계). V가 간 곳 기록 | 확인되지 않았다 |
 | 커서 대기 중 새 선택 | 두 프로보 커서 사이에 Q | 자동 시전 뒤에도 새 바딩 대상 유지 | 확인되지 않았다 |
 | 커서 중첩 | 자동 구간에서 Shift+Space | 자동 바딩이 등록 커서를 먹거나 엉뚱한 몹을 찍지 않음. 등록 취소도 정상. 이 확인 전까지 등록은 수동 구간에서 | 확인되지 않았다 |
 | 늦은 둘째 커서 | 렉이 있을 때 자동 프로보 | 둘째 커서를 1초까지 기다려 전달. 못 받으면 취소, 커서가 남지 않음(2026-10-22 변경). 남으면 그 뒤 멈춘 블록 기록 | 확인되지 않았다 |
@@ -946,7 +963,7 @@ A 공격자, B 대상의 통제 시험. 매번 화면 주인 기록.
 - 입력은 summoner 프로필 배치([Hotkeys](../game/hotkeys.md#01.E) 01.E절). 코덱스, 사격, 펫 명령, 대상 지정은 수동, 루프는 펫을 명령하지 않음
 - 바드 블록 없음
 - `[CodexHotbar`를 시작 때 한 번 요청([Commands](https://wiki.uooutlands.com/Commands) "Launches the Codex Hotbar"). 코덱스 자세와 피니셔의 자동 전환 없음
-- Full Draw: 활은 2.21초에 한 발([PvP](../game/pvp.md#09.B) 09.B절 표) → 15초에 6.8발 × 50% = 약 340%. Repeater 225%보다 큼. 정지 3초 조건이라 움직이며 쏘면 Repeater(`ability_main` 3)
+- Full Draw: 활은 2.21초에 한 발([Combat](../mechanics/combat.md#02.B) 02.B절 표) → 15초에 6.8발 × 50% = 약 340%. Repeater 225%보다 큼. 정지 3초 조건이라 움직이며 쏘면 Repeater(`ability_main` 3)
 - 사거리 10: 활([Archery](../mechanics/archery.md#01) 01절). `target_range`와 `ability_range` 모두 10
 - 버프는 bard-archer와 같은 RA 24, Reflect 34, Protection 26. Greater Heal 11과 Teleport 9의 20을 남김
 - 스탯 포션 기준선 STR 120, DEX 100은 기본값. 이 템플릿의 스탯은 미기록 → 다르면 레시피에서 변경

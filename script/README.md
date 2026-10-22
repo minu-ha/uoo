@@ -45,7 +45,7 @@ A new combat loop gets a row here. Every loop has the same shape, set out in
 Use [gather/lumberjack-enhanced.razor](gather/lumberjack-enhanced.razor) (v18), built from
 `recipe/lumberjack-enhanced-recipe.razor`. Each pass runs recovery, then the automatic Recall, the reagent read,
 Smart Harvest, the self buffs, food and lumber packing. Settings, in-game checks and the version history are in
-[content/public/templates/lumberjack-pvp.md](../content/public/templates/lumberjack-pvp.md#08) part 8.
+[content/public/loops/lumberjack-enhanced.md](../content/public/loops/lumberjack-enhanced.md).
 
 - Tracking (`escape/tracking`) sets the hunt filter once before the loop, red by default, and reuses a hunt this
   script already confirmed. After changing the filter by hand, turn Hunting off before Play. Every 5 seconds it
@@ -64,7 +64,7 @@ Smart Harvest, the self buffs, food and lumber packing. Settings, in-game checks
 - Warmode and any cursor belong to the player: recovery casts, buffs, food and gathering stand down while either
   is up. Potions and bandages still go out.
 - To fight a PK, switch to [combat/pvp.razor](combat/pvp.razor) with its own hotkey
-  ([the handbook](../content/public/templates/lumberjack-pvp.md#09) part 9).
+  ([the handbook](../content/public/templates/lumberjack-pvp.md#08) part 8).
 
 ## Skinning loop
 
@@ -178,7 +178,7 @@ equipment. Set each enabled bar to `WeaponSwing` and calibrate its duration in t
 
 Attack spells, TK, explosion potions, pet attacks, attack targeting and Hamstring stay manual.
 Self MA to prepare the next bandage also stays manual. `config__sysmsg` holds the Journal lines.
-Settings, cursor handling and pending in-game checks are in [the PvP doc](../content/public/game/pvp.md#05.E).
+Settings, cursor handling and pending in-game checks are in [the PvP Loop doc](../content/public/loops/pvp.md).
 
 ## Debug scripts
 

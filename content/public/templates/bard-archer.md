@@ -6,7 +6,7 @@ order: 30
 ---
 
 Bard Archer 템플릿의 판단과 숫자. 바딩, 회복, 버프는 루프, 사격은 손.
-아처리 규칙은 [Archery](../mechanics/archery.md), 바드 메커니즘(쿨, 송, Ensemble, Virtuoso)은 [Barding](../mechanics/barding.md), 방어구와 마나 재생, 붕대, AR은 [PvP](../game/pvp.md) 05.D절과 09절.
+아처리 규칙은 [Archery](../mechanics/archery.md), 바드 메커니즘(쿨, 송, Ensemble, Virtuoso)은 [Barding](../mechanics/barding.md), 방어구와 마나 재생, 붕대, AR은 [Combat](../mechanics/combat.md) 01절과 02절.
 루프의 블록 순서와 전환 규칙은 [Bard Archer Enhanced](../loops/bard-archer-enhanced.md).
 **숫자는 추측 금지.** 인용과 확인 표시: [Workflow](../working/workflow.md#01.C) 01.C절.
 
@@ -79,13 +79,13 @@ Healer's Codex 20점: Immunize 5, Triage 5, Self Treatment 5, Specialist 5.
 
 - 요구: Healing, Anatomy 각 80
 - Immunize가 Combat Medic보다 나음: 고렙 던전일수록 상태 이상이 많음. 사용자 판단 2026-10-21
-- Self Treatment: 자기 붕대 DEX 100에서 10초 → 6.25초, DEX 80에서 11.3초 → 7.6초([PvP](../game/pvp.md#09.C) 09.C절의 식)
+- Self Treatment: 자기 붕대 DEX 100에서 10초 → 6.25초, DEX 80에서 11.3초 → 7.6초([Combat](../mechanics/combat.md#02.C) 02.C절의 식)
 - Specialist: 부활 확률 1.4배(02절)
 - **몹 상대로만.** "will only apply for the patient against creatures"([Healing](https://wiki.uooutlands.com/Healing)) → PvP에서 Triage, Immunize 효과 없음
 
 ### <a id="01.C"></a>01.C 갑옷과 마나
 
-재생 식과 갑옷별 간격은 [PvP](../game/pvp.md#05.D) 05.D절, AR 표는 [PvP](../game/pvp.md#09.E) 09.E절. 아래는 음식 버프 +25%를 넣은 값.
+재생 식과 갑옷별 간격은 [Combat](../mechanics/combat.md#01) 01절, AR 표는 [Combat](../mechanics/combat.md#02.E) 02.E절. 아래는 음식 버프 +25%를 넣은 값.
 
 - Meditation 0, INT 45 → 최대 마나 45
 - 유지 버프: Reactive Armor 4, Magic Reflection 14, Protection 6. RA와 Reflect는 쓰여 없어질 때까지, Protection은 2분
@@ -104,7 +104,7 @@ Healer's Codex 20점: Immunize 5, Triage 5, Self Treatment 5, Specialist 5.
 - **고른 조합: 체인 + Protection.** AR 83.8 > 플레이트 한 벌 80, 재생은 120초에 30. Protection 6을 빼면 24 → Reflect 한 번(14)과 RA 두 번(8)
 - 섞을 수 있으면 머리, 목, 장갑만 플레이트. 가슴, 다리, 팔은 마나 대비 AR이 가장 비쌈
 - bronze, GM 보정은 갑옷 AR에만 붙고 Protection에는 안 붙음 → 실제로는 플레이트 작은 부위가 Protection보다 조금 나을 수 있음
-- **Bless는 루프에서 뺌.** 포션과 안 겹쳐 남는 것은 최대 마나 +8.8뿐([PvP](../game/pvp.md#09.D) 09.D절). 2분마다 9마나. 부활 직전에 손으로(02절)
+- **Bless는 루프에서 뺌.** 포션과 안 겹쳐 남는 것은 최대 마나 +8.8뿐([Combat](../mechanics/combat.md#02.D) 02.D절). 2분마다 9마나. 부활 직전에 손으로(02절)
 - 시전 문턱: RA 24, Reflect 34, Protection 26. Greater Heal 11과 Telekinesis나 Teleport 9의 20을 남김. skinning-enhanced와 같은 방식
 - **Lyric Aspect 방어구.** bard-necro는 Lyric 방어구로 Effective Barding 170, 벗으면 136([Barding](../mechanics/barding.md#02.C) 02.C절).
   체인으로 바꾸며 Lyric을 유지하는지 확인되지 않았다 → 송 메시지가 `8.5%`면 170, `6.8%`면 136
@@ -118,7 +118,7 @@ Healer's Codex 20점: Immunize 5, Triage 5, Self Treatment 5, Specialist 5.
 | 붕대 | 시도당 33.6% | DEX 100에서 시도당 5초, 평균 약 15초 | 붕대 |
 | Resurrection 스크롤 | 늘 성공 | 시전 5초 | 50마나, Bless 9, 스크롤 |
 
-- 붕대: Healing 80의 24%([PvP](../game/pvp.md#09.C) 09.C절) × Specialist 1.4 = 33.6%. 11번(56초) 연속 실패할 확률 1.1%
+- 붕대: Healing 80의 24%([Combat](../mechanics/combat.md#02.C) 02.C절) × Specialist 1.4 = 33.6%. 11번(56초) 연속 실패할 확률 1.1%
 - 스크롤: Magery 80은 8서클 최소치, 스크롤이 실효 Magery +20 → 100 → 늘 성공
 
 > "Min Required to Cast - 80 Magery" / "100% Success to Cast - 100 Magery" -- Magery, 8서클

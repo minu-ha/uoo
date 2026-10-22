@@ -71,7 +71,7 @@ order: 10
 | `script/shelf/` | outlandsbutler.com이 만든 Storage Shelf 로드아웃 | `<템플릿>` | `bard-dexxer`, `sailing` |
 
 - 전투 루프와 템플릿 대응의 정본: [script/README.md](https://github.com/minu-ha/uoo/blob/master/script/README.md) 전투 루프 표
-- `combat/pvp`: 여러 템플릿 공용 자기관리 루프. Magery, 무기, 붕대는 레시피 설정으로 켜고 끔. 템플릿별 PvP 진입 파일 없음([PvP](../game/pvp.md#05.E) 05.E절)
+- `combat/pvp`: 여러 템플릿 공용 자기관리 루프. Magery, 무기, 붕대는 레시피 설정으로 켜고 끔. 템플릿별 PvP 진입 파일 없음([PvP Loop](../loops/pvp.md))
 
 ### <a id="01.C"></a>01.C 파일 규칙
 
@@ -172,7 +172,7 @@ clearignore
 - 편집기 설정의 정본: `.editorconfig`
 - 예외 공통 `combat/pvp`: 플레이어 수동 입력과 함께 돌므로 시작 4줄 생략. 레시피에 `config__clear_at_start 0`([Modules](modules.md#06) 06절)
   - 이유: Play 시 플레이어가 든 주문 커서, 아이템 커서, 시전 큐, 장착 큐 보존
-  - 대신 자동 행동 직전에 수동 시전, 타깃, 큐 검사([PvP](../game/pvp.md#05.E) 05.E절)
+  - 대신 자동 행동 직전에 수동 시전, 타깃, 큐 검사([PvP Loop](../loops/pvp.md))
 
 빈 줄은 작업 단위의 경계에 하나씩.
 

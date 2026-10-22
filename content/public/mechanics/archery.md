@@ -29,7 +29,7 @@ order: 40
 - 사거리: 석궁과 Great Bow 8칸, 활 10칸([Archery](https://wiki.uooutlands.com/Archery))
 - 손: Rampart Crossbow, Heavy Crossbow, 활 넷은 2H. Crossbow, Balestra, Pistol Crossbow는 1H([Archery](https://wiki.uooutlands.com/Archery) 무기표).
   Razor의 `lefthand`가 2H 레이어. `fight/rearm`은 들고 있던 레이어를 기억해 손을 가름. graphic 31186, Item Data 인게임 확인 2026-10-21([Item list](../game/item-list.md) Archery)
-- 간격 식: [PvP](../game/pvp.md#09.B) 09.B절. 스태미나 100에서 3.75초. 맞아서 스태미나가 줄면 느려짐
+- 간격 식: [Combat](combat.md#02.B) 02.B절. 스태미나 100에서 3.75초. 맞아서 스태미나가 줄면 느려짐
 
 > "Increases Swing Speed by (5% \* (Anatomy Skill / 100))" -- Archery
 > "Ranged weapons (excluding Ocean Weapons) have a flat .5 second stationary delay requiring players, regardless of their Dexterity, to stay in place before firing." -- Armor & Weapons
@@ -106,7 +106,7 @@ Hinder와 Maiming.
 ## <a id="05"></a>05 PvP에서 빠지는 것
 
 - 코덱스, Mastery Chain, Aspect는 PvP에서 꺼짐. 인게임 확인됨 2026-10-21 → 자세, 피니셔 판단은 PvM 전용
-- 아처리 특수 공격(Hinder)은 몹에만, 보조 무기 스킬 보너스는 PvM 25%, PvP 10%([Archery](https://wiki.uooutlands.com/Archery))
+- 아처리 특수 공격(Hinder)은 몹에만, 보조 무기 스킬 보너스는 PvM 25%, Combat 05%([Archery](https://wiki.uooutlands.com/Archery))
 - PvP의 정지 대기는 DEX로 줄어듦: DEX 25 이하 1.0초, 100 이상 0.5초
 
 > "A player with 63 Dex must remain stationary for 0.75 seconds." -- Archery
