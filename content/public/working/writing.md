@@ -41,7 +41,7 @@ order: 20
 
 | 경로 | 역할 |
 | --- | --- |
-| `content/README.md` | 사이트 홈(`/`). 문서 표. frontmatter 없음 |
+| `content/README.md` | 사이트 홈(`/`). 프로젝트 소개, 시작 안내, 문서별 정본 표. frontmatter 없음 |
 | `content/public/` | 공개 문서. 하위 폴더명 `public`은 페이지 URL에서 제외 |
 | `content/private/` | 로컬에서만 읽는 문서. 현재 없음, 필요할 때 생성 |
 | `content/asset/favicon.svg` | 사이트 아이콘. `pnpm docs:build`가 결과물에 덮어씀 |
@@ -160,7 +160,7 @@ order: {묶음 안 순서}
 
 ## <a id="06"></a>06 Markdown
 
-- 본문은 GFM. 문단, 목록, 표, 코드, 인용(`>`). 원시 HTML은 제목 앵커와 아래 강조 예외만
+- 본문은 GFM. 문단, 목록, 표, 코드, 인용(`>`). 원시 HTML은 제목 앵커, 아래 강조 예외, 홈 소개의 가운데 정렬(`div`)과 로고(`img`)만
 - 강조 뒤에 문장부호나 코드가 오고 바로 한글이 붙으면 CommonMark가 강조로 읽지 않음(`**(A OR B)**다`) → `<strong>…</strong>`
 - 범위의 `~`는 `\~`. GFM이 한 문단 안의 `~` 둘을 취소선으로 읽음(`3~5초, 7~9초`)
 - 코드 밖의 `*`, `_`, `[`, 영문자 앞 `<`는 `\`로 막음. 식별자와 값은 코드(`var__fighting`)로
