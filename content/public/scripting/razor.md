@@ -141,7 +141,7 @@ Razor CE에 없거나 CE보다 넓어진 것. 존재 여부만 기록, 인자 �
 | `findtype` 한 번으로 여러 모빌 중 하나 고르기 | 부를 때마다 **같은 모빌** | `while findtype … as`로 돌며 검사, 아니면 `@ignore`. `endwhile` 뒤 `@clearignore` |
 | 모빌을 이름으로 찾기 | 되긴 함. 이름 변경 후 Razor 캐시 갱신 여부는 확인되지 않았다 | 바디 번호로 찾기. 바디 번호는 인게임 `>info`. 내 소환수의 noto는 2(friend) |
 | 패스마다 `findtype`으로 상태 세기 | `findtype`이 가장 비쌈(한 번 20 \~ 40ms, 06절). 32번이면 패스마다 1초 안팎 | 천천히 변하는 상태는 타이머로 몇 초에 한 번. `elseif` 사슬은 통째로 한 틱이라 길어도 쌈 |
-| `findbuff 'Strength'`, `'Agility'`로 스탯 포션 판정 | Bless도 같은 이름 → 내 Bless든 아군 Bless든 걸려 있으면 포션 안 마심(05절) | 스탯을 기준선(기본 + 20)과 비교, 포션마다 재시도 간격([PvP](../game/pvp.md#09.D) 09.D절). Bless는 `Cunning`, Arch Protection은 `Protection`. `Magic Resist Potion`은 그 이름 그대로(사용자 확인 2026-10-09) |
+| `findbuff 'Strength'`, `'Agility'`로 스탯 포션 판정 | Bless도 같은 이름 → 내 Bless든 아군 Bless든 걸려 있으면 포션 안 마심(05절) | 스탯을 기준선(기본 + 20)과 비교, 포션마다 재시도 간격([PvP](../game/pvp.md#09.D) 09.D절). Bless는 `Cunning`, Arch Protection은 `Protection`. `Magic Resist Potion`은 그 이름 그대로(인게임 확인됨 2026-10-09) |
 
 #### 거리 확인과 Last Target
 
@@ -183,13 +183,13 @@ Razor CE에 없거나 CE보다 넓어진 것. 존재 여부만 기록, 인자 �
 
 | 함정 | 증상 | 대신 |
 | --- | --- | --- |
-| `for 25`, `wait 100`으로 커서 폴링 | 4서클 커서가 루프 종료 후 뜸(2026-09-29). 남은 커서가 `not targetexists` 블록 전부 차단 | `for 60`. 한 바퀴가 `wait` 값보다 훨씬 짧게 도는 것으로 보임. 원인은 확인되지 않았다 |
-| 커서 없는 시전(힐 에이전트, Create Food, 자기 버프)을 `not casting`부터 보며 폴링 | 시전 끊김 순간 `casting` 해제 → 끊김 줄을 안 읽고 나감(2026-09-29). 다음 커서 폴링이 그 줄을 제 것으로 읽고 첫 바퀴에 나가 커서가 남음 | 커서 폴링 시작 전에 끊김 줄을 한 번 읽어 비움(`magery/rotation` 첫머리, `buff/spells`의 Spell Siphon 화살 앞) |
-| 치유할 것이 없을 때 Smart Heal, Greater Heal 에이전트 | 풀피면 커서를 안 찍고 남김(2026-09-29). 모든 블록 정지 | 에이전트 폴링 후 `targetexists and diffhits = 0`이면 `Cancel Current Target` |
-| 스크립트의 `target`과 `Target Self` | lasttarget이 백팩이나 나로 바뀜. 10칸 밖에서 고른 타겟을 노래가 덮어써서 교전 실패(2026-09-29). 적대 커서에 찍으면 `lastharmful`도 바뀜 | 타겟은 화면 거리에서 받아 사본(`var__combat_target`)에 둠. 2026-10-20부터 루프는 `lastharmful`을 읽음. 블록이 자기 용도로 찍은 몹은 `var__target_hold`(`fight/target`). 손으로 누르는 E, Shift+V, 무기 핫키는 루프의 다음 공격 주문이나 다음 고르기 전까지 그 몹을 가리킬 수 있음 |
-| `Set Last Target (Harmful)`로 고른 대상을 `lasttarget`으로 읽기 | 일반 `lasttarget`은 그대로라 루프가 고른 대상을 못 따라감. `Target Closest Non-Friendly Monster`는 `lasttarget`, `lastharmful`, `lastbeneficial` 셋을 다 바꾸고, `Next Non-Friendly Monster Target`도 `lastharmful`을 바꿈(사용자 확인). 인게임 확인됨 2026-10-20(`debug/probe-last-targets`) | 루프는 `lastharmful`을 읽음(`fight/target`). Shift+V(Attack Last Target)와 All Kill 커서도 Harmful 대상을 따라감(사용자 확인 2026-10-20) |
+| `for 25`, `wait 100`으로 커서 폴링 | 4서클 커서가 루프 종료 후 뜸(인게임 확인됨 2026-09-29). 남은 커서가 `not targetexists` 블록 전부 차단 | `for 60`. 한 바퀴가 `wait` 값보다 훨씬 짧게 도는 것으로 보임. 원인은 확인되지 않았다 |
+| 커서 없는 시전(힐 에이전트, Create Food, 자기 버프)을 `not casting`부터 보며 폴링 | 시전 끊김 순간 `casting` 해제 → 끊김 줄을 안 읽고 나감(인게임 확인됨 2026-09-29). 다음 커서 폴링이 그 줄을 제 것으로 읽고 첫 바퀴에 나가 커서가 남음 | 커서 폴링 시작 전에 끊김 줄을 한 번 읽어 비움(`magery/rotation` 첫머리, `buff/spells`의 Spell Siphon 화살 앞) |
+| 치유할 것이 없을 때 Smart Heal, Greater Heal 에이전트 | 풀피면 커서를 안 찍고 남김(인게임 확인됨 2026-09-29). 모든 블록 정지 | 에이전트 폴링 후 `targetexists and diffhits = 0`이면 `Cancel Current Target` |
+| 스크립트의 `target`과 `Target Self` | lasttarget이 백팩이나 나로 바뀜. 10칸 밖에서 고른 타겟을 노래가 덮어써서 교전 실패(인게임 확인됨 2026-09-29). 적대 커서에 찍으면 `lastharmful`도 바뀜 | 타겟은 화면 거리에서 받아 사본(`var__combat_target`)에 둠. 2026-10-20부터 루프는 `lastharmful`을 읽음. 블록이 자기 용도로 찍은 몹은 `var__target_hold`(`fight/target`). 손으로 누르는 E, Shift+V, 무기 핫키는 루프의 다음 공격 주문이나 다음 고르기 전까지 그 몹을 가리킬 수 있음 |
+| `Set Last Target (Harmful)`로 고른 대상을 `lasttarget`으로 읽기 | 일반 `lasttarget`은 그대로라 루프가 고른 대상을 못 따라감. `Target Closest Non-Friendly Monster`는 `lasttarget`, `lastharmful`, `lastbeneficial` 셋을 다 바꾸고, `Next Non-Friendly Monster Target`도 `lastharmful`을 바꿈(사용자 확인). 인게임 확인됨 2026-10-20(`debug/probe-last-targets`) | 루프는 `lastharmful`을 읽음(`fight/target`). Shift+V(Attack Last Target)와 All Kill 커서도 Harmful 대상을 따라감(인게임 확인됨 2026-10-20) |
 | 노래 커서에 백팩 찍기 | 노래 커서는 적대 커서라 `lastharmful`도 백팩으로 바뀜. 인게임 확인됨 2026-10-20(`debug/probe-last-targets`) | 루프는 사본을 써서 영향 없음, 그대로 백팩. 땅은 장소에 따라 거절([Bard Necro](../templates/bard-necro.md#02.B) 02.B절) |
-| 프로보 커서에 짝 찍기 | 프로보 커서도 적대 커서(사용자 확인 2026-10-20) → 지금 대상이 아닌 짝을 찍으면 `lastharmful`이 그 몹으로 바뀜 | `var__target_hold`로 빼 두고, 다음 주문이 지금 대상을 찍으며 되돌림(`bard/provo`) |
+| 프로보 커서에 짝 찍기 | 프로보 커서도 적대 커서(인게임 확인됨 2026-10-20) → 지금 대상이 아닌 짝을 찍으면 `lastharmful`이 그 몹으로 바뀜 | `var__target_hold`로 빼 두고, 다음 주문이 지금 대상을 찍으며 되돌림(`bard/provo`) |
 | 네이티브 선택 커서를 색만으로 판별 | CE `OneTimeTarget`은 `_hasTarget`을 켜지만 `_curFlags`는 이전 값 유지. `Set Last Target (Beneficial)`의 커서도 이전 harmful 종류로 관찰될 수 있음. [CE Targeting 소스](https://github.com/markdwags/Razor/blob/master/Razor/Core/Targeting.cs), 2026-10-21 확인. Outlands의 중첩 동작은 미검증 | 자동 시전과 겹치는 등록의 소유권 보장 금지. 초기 사용은 warmode 수동 구간, [Open items](../questions/open-items.md#17) 17절 |
 | `setlasttarget alias__x`로 lasttarget 복원 | Razor CE 문서의 `setlasttarget ('serial')`과 달리 `Target a new 'Last Target'` 커서. 뒤의 sysmsg 줄 없음, 커서 취소마다 `Target queue cleared.`와 같은 커서가 번갈아 찍힘. 인게임 확인됨 2026-10-07(skinning-enhanced v3 Journal). 스크립트가 그 줄에서 커서 대기로 보임. 인자 무시 원인은 확인되지 않았다 | 사용 안 함. lasttarget 덮어쓰기는 기억한 대상이 없을 때만(`skinning-enhanced.razor` SKINNING) |
 
@@ -339,8 +339,8 @@ flowchart TD
 
 03절 표의 긴 근거, 표와 같은 순서. 선례가 없어 쓰지 않는 것은 맨 끝.
 
-- **`for <변수>`**: `Invalid for loop syntax`(2026-09-28 프로브). 횟수는 리터럴만. 변수 횟수가 필요하면 값마다 `for N` 사슬
-- **`while not list 'x' >= var`**: `syntax error`, 파싱 불가(2026-09-28). `not` 뒤에 `list` 비교식 금지
+- **`for <변수>`**: `Invalid for loop syntax`(프로브, 인게임 확인됨 2026-09-28). 횟수는 리터럴만. 변수 횟수가 필요하면 값마다 `for N` 사슬
+- **`while not list 'x' >= var`**: `syntax error`, 파싱 불가(인게임 확인됨 2026-09-28). `not` 뒤에 `list` 비교식 금지
 - **`findtypelist`를 명령으로**: `Unknown command`. 쓴다면 `findtype`처럼 `if` 안의 표현식일 것, 확인되지 않았다
 - **중첩 반복에서 `if` 안의 `break`**
   - [CE Script.ExecuteNext의 BREAK](https://github.com/markdwags/Razor/blob/master/Razor/Scripts/Engine/Interpreter.cs): 반복문 뒤로 이동, 현재 범위는 `PopScope` 한 번으로만 지움
@@ -388,7 +388,7 @@ flowchart TD
 - **`findtype`은 매번 같은 모빌 반환**: Razor CE처럼 무작위 아님. 한 번만 부르면 이미 처리한 모빌만 계속(2026-09-28, 둘째 소환수에 이름 미부여)
   - `while findtype … as`로 돌며 검사, 아니면 `@ignore`, `endwhile` 뒤 `@clearignore`로 한 번에 전부
 - **`findbuff`로 스탯 포션 판정**: 위키 [BuffIcons](https://wiki.uooutlands.com/Template:BuffIcons)는 같은 아이콘을 `Strength Spell / Potion`으로 표기
-  - Bless는 버프 바에 `Strength`, `Agility`, `Cunning`으로 뜸, 포션 버프 이름에 Potion 없음(사용자 확인 2026-10-09)
+  - Bless는 버프 바에 `Strength`, `Agility`, `Cunning`으로 뜸, 포션 버프 이름에 Potion 없음(인게임 확인됨 2026-10-09)
   - 위키 표의 `Strength Potion Usage Cooldown`도 인게임 이름으로 확인되지 않았다
 - 선례가 없어 쓰지 않는 것
   - 산술 `@setvar! var__n var__n + 1`

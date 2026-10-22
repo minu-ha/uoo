@@ -102,7 +102,7 @@ order: 20
 | Alt | — | — | — | — | — | — |
 
 - summoner: `Z` → All Kill 커서, `V` → 그 커서를 가장 가까운 몹으로 채움. 커서가 없으면 `V`는 라타 지정만
-- summoner `Shift+Z`: 다음 몹을 라타로(Next Non-Friendly Monster Target, 2026-10-20). 커서 없이 순환 → 루프의 커서와 안 부딪힘
+- summoner `Shift+Z`: 다음 몹을 라타로(Next Non-Friendly Monster Target, 인게임 확인됨 2026-10-20). 커서 없이 순환 → 루프의 커서와 안 부딪힘
 - basic: `Z`로 라타 지정, `V`로 공격. PvP는 `X`나 `C`로 플레이어 지정 → `V`
 - bard: 무수정은 basic과 같음. 펫이 없어 펫 명령 없음. `Shift+Z`는 summoner처럼 다음 몹으로 바딩 대상 변경. 프로보 후보 입력은 [Open items](../questions/open-items.md#17) 17절
 - 플레이어 순환: summoner `Shift+X/C`, basic과 bard 무수정 `X/C`. 키 하나에 바인딩 하나 → summoner는 무수정 `X`, `C`를 펫 명령에 씀

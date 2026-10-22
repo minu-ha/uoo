@@ -665,7 +665,7 @@ END 뒤에도 채집이 보류되면 큐와 커서 안내, 리콜과 책과 Hunt
 
 #### 버전 기록
 
-- **v10(2026-10-05)**: 장착 판정을 실제 왼손 슬롯과 저장한 도끼 serial의 일치로 변경.
+- **v10** 2026-10-05: 장착 판정을 실제 왼손 슬롯과 저장한 도끼 serial의 일치로 변경.
   목재 가공과 파우치 이동을 housekeeping에 묶음. 책, Hunting, 무게 점검은 housekeeping 주기 사용,
   리콜 결과를 확인하지 않는 5초 안내 타이머와 그 상태는 삭제
 - **v11**: 집 문과 Stockpile의 설정, 선택, 동작, 타이머 삭제, housekeeping을 루프 끝으로 이동
@@ -686,7 +686,7 @@ END 뒤에도 채집이 보류되면 큐와 커서 안내, 리콜과 책과 Hunt
   직접 serial 검색에 대한 적용은 [Razor](../scripting/razor.md#03) 03절에서 별도 확인.
   지금 포크에서 이 순서가 같은 묶음 반복 이동의 실제 원인인지는 아직 확인되지 않았다.
   근거와 재확인 범위는 [Razor](../scripting/razor.md#03) 03절과 [Open items](../questions/open-items.md#09) 09절
-- **v18(2026-10-10)**: 모듈을 관심사별 폴더로 재분할하며 housekeeping 주기 삭제([Modules](../scripting/modules.md#08) 08절).
+- **v18** 2026-10-10: 모듈을 관심사별 폴더로 재분할하며 housekeeping 주기 삭제([Modules](../scripting/modules.md#08) 08절).
   리콜 블록이 자기 5초 주기로 책, Hunting, 무게 점검, 음식(`buff/food`)과 목재 정리(`pack/lumber`)는 각자의 타이머를 패스마다 확인.
   리콜 결정, 책 없음, Hunting 없음은 리콜 블록이 패스마다 `var__hold_gathering` 하나로 통합, 채집과 목재 정리는 그 값만 읽음.
   `config__auto_recall`, `use_tracking`, `pack_lumber` 삭제. 블록을 끄려면 레시피에서 그 블록 제외.

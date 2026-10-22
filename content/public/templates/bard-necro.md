@@ -882,9 +882,9 @@ PK를 만나도 조합 유지, 사냥하던 그대로 싸움(06.D절).
 | `skeletal knight` | `nite` |
 | `skeletal mage` | `majik` |
 | `lich` | `leech` |
-| `mummy` | `mumi` (받아짐 2026-10-10) |
+| `mummy` | `mumi` (받아짐, 인게임 확인됨 2026-10-10) |
 | `thrall` | `vampa` |
-| `witch` | `wichy` (`wicca`는 거절 2026-10-13) |
+| `witch` | `wichy` (`wicca`는 거절, 인게임 확인됨 2026-10-13) |
 | `zombie` | `zomz` |
 | `ghost` | `spook` |
 | `skeleton` | `skelz` |
@@ -1473,7 +1473,7 @@ endif
   - 교전 쪽: 디스코, 피스, 네크로 버스트, 오프닝, 프록 코어, 필러, Poison Strike. 이동 쪽(`# @ otherwise`): 자기 버프, Spell Siphon, 송, Vampiric Embrace
   - 버섯, 재소환, 프로보는 분기 앞. 후보 입력은 패스 첫머리의 별도 블록. 스탯 포션은 하우스키핑 안에서 `var__fighting`을 직접 읽음
   - 이전에는 블록마다 교전 여부를 따로 확인 → 이동 패스도 디스코와 피스의 실패하는 `find`까지 밟음
-- **하우스키핑 틱**(2026-09-29). 매 패스 볼 필요 없는 확인을 5초 `# @ every interval__housekeeping` 그룹 하나에 모음
+- **하우스키핑 틱**(2026-09-29 적용). 매 패스 볼 필요 없는 확인을 5초 `# @ every interval__housekeeping` 그룹 하나에 모음
   - 패스는 그 게이트 한 줄만. 더 긴 주기는 안에서 자기 시계를 한 번 더 확인
   - 시작 시 시계를 모두 만료 → 첫 패스는 다 확인. 시계는 조건 맨 앞 → 대부분 패스에서 뒤의 검색 생략
 
@@ -1487,10 +1487,10 @@ endif
 | 디스코 확인(`var__disco_seen`) | 30초 | Discordance 지속 1분 21초 \~ 1분 57초(01.D절). 한 번 확인한 대상은 30초 동안 `find`와 `getlabel` 생략 |
 | 피스 확인(`timer__peace_seen`) | 2초, 게이트에서 | 진정 12초와 슬롯 10초의 차이. 브레이크 40초 동안은 매 패스 대신 2초에 한 번 |
 
-- **생존 게이트**(2026-09-29). 마비, 독, HP 세 블록을 한 줄 게이트 뒤에 모음. 멀쩡한 패스는 세 줄 대신 한 줄
+- **생존 게이트**(2026-09-29 적용). 마비, 독, HP 세 블록을 한 줄 게이트 뒤에 모음. 멀쩡한 패스는 세 줄 대신 한 줄
   - 당시 게이트는 `if paralyzed or poisoned or diffhits > config__light_hits`
   - 2026-10-10부터 모든 레시피가 회복 블록을 `# @ when paralyzed or poisoned or diffhits > 0`으로 묶음([Modules](../scripting/modules.md#03) 03절)
-- **게이트 접기**(2026-09-29). 늘 참인 바깥 `if`(수동 모드, 행동 창, 스킬과 악기 준비)를 안쪽 조건 한 줄에 합침. 할 일 없는 블록은 패스마다 한 줄
+- **게이트 접기**(2026-09-29 적용). 늘 참인 바깥 `if`(수동 모드, 행동 창, 스킬과 악기 준비)를 안쪽 조건 한 줄에 합침. 할 일 없는 블록은 패스마다 한 줄
   - 대상 `find`는 실제로 쏘는 갈래 안으로 이동 → 오프닝과 프록 코어는 주문이 나갈 때만 대상 검색
   - 매 패스 세우던 플래그 둘(`var__bard_ready`, `var__manual`) 제거, 게이트가 `warmode`와 악기 상태를 직접 읽음
   - 드레인 둘은 `while queued or casting` 하나로, 시약 부족 문장은 리프레시 게이트의 `or`로 통합
@@ -1568,7 +1568,7 @@ flowchart TD
 - printed가 **더 높을 때만** printed 사용 → 켜져 있는 동안 printed Resist 80은 무의미. printed Wrestling은 0(01.A절)
 - **Heat of Battle이 켜지면 통째로 꺼짐.** 그때는 printed 값만
 
-첫 패치(2020-09-28) 원문은 지금 위키와 세 군데가 다름.
+2020-09-28 첫 패치 원문은 지금 위키와 세 군데가 다름.
 
 > "Effective Wrestling skill value of ((Discordance Skill + Peacemaking Skill + Provocation Skill) / 2) up to a maximum of 100 Skill value, when defending against creatures and other players while
 > unarmed"
@@ -1602,7 +1602,7 @@ flowchart TD
 
 ### <a id="06.C"></a>06.C Herding을 Resist로 바꿀 것인가
 
-**결론: PK를 만나면 싸우는 것이 기본 → Resisting Spells 80으로 교체**(2026-09-27). 레시피에 `tamer/herding` 없음,
+**결론: PK를 만나면 싸우는 것이 기본 → Resisting Spells 80으로 교체**(2026-09-27 결정). 레시피에 `tamer/herding` 없음,
 01.A절 전제도 Resisting Spells 80. 사냥이 본업이고 PK가 가끔인 캐릭터라면 Herding이 맞음.
 
 Bard Necro 기준 Herding 80 → Resisting Spells 80 비교:
@@ -1668,10 +1668,10 @@ Tracking 규칙은 [PvP](../game/pvp.md#10) 10절, Hunting 판정의 5초 스킬
 | Ensemble 조건은 `Discord AND (Peace OR Provo)` | 02.Q절 |
 | `cooldowns.xml` 정리 완료. `music`에서 송 트리거 제거, `song` 신설, `fireball`에 발동 트리거 추가 | 02.I절 |
 | 시전 시간은 서클별 고정(1서클 0.50 \~ 8서클 2.50, 회복 0.2초) | 03.B절 |
-| 소환수 이름 붙이기, 시약 30초 리프레시(지금은 10초), 심볼 리스트 재구성(2026-09-28) | 04.H, 05.H절 |
-| Lightning 프록은 `Wizardry lightning activated.`와 힌더 줄 둘 다(2026-09-28) | 03.A절 |
-| 시약과 마나는 대상을 찍을 때 검사와 소모. 시약 부족 줄은 캐릭터 이름으로(2026-09-28) | 03.B절 |
-| Poison Strike의 질병 없음 문장, Vampiric Embrace의 시체 없음 문장(2026-09-28) | 03.D절 |
+| 소환수 이름 붙이기, 시약 30초 리프레시(지금은 10초), 심볼 리스트 재구성. 인게임 확인됨 2026-09-28 | 04.H, 05.H절 |
+| Lightning 프록은 `Wizardry lightning activated.`와 힌더 줄 둘 다. 인게임 확인됨 2026-09-28 | 03.A절 |
+| 시약과 마나는 대상을 찍을 때 검사와 소모. 시약 부족 줄은 캐릭터 이름으로. 인게임 확인됨 2026-09-28 | 03.B절 |
+| Poison Strike의 질병 없음 문장, Vampiric Embrace의 시체 없음 문장. 인게임 확인됨 2026-09-28 | 03.D절 |
 | Rag Witch 바디 740. Vengeful Spirit 즉시 켜짐과 버프 이름, 소환에 커서 없음, release 즉시 사라짐, 팔로워 초과 문장. 인게임 확인됨 2026-10-18 | 03.C, 04.G절 |
 | 소환이 Wither 마나로 시전됨. Wither의 응답과 버프는 VS와 같은 모양. 인게임 확인됨 2026-10-18 | 03.D절 |
 
@@ -1692,15 +1692,15 @@ Tracking 규칙은 [PvP](../game/pvp.md#10) 10절, Hunting 판정의 5초 스킬
 | --- | --- | --- |
 | SELF BUFFS. 몹이 없고 서 있을 때(`var__fighting = 0`, `cooldown "walk" = 0`) Reactive Armor와 Magic Reflection 시전 | 사냥 사이에 버프바에 둘이 붙고, 붙어 있는 동안 재시전 없음. 리플렉트가 소모되면 `[ reflect, off ]`와 30초 `reflect` 바, 바가 꺼진 뒤 다음 정지 때 재시전 | 매 패스 재시전. `findbuff` 이름 불일치 |
 | 시약 10초 리프레시. 부족 문장이 보이면 즉시 재확인(2026-09-28, 그때는 30초) | 시약이 떨어지면 헛시전 한 번 뒤 그 주문을 건너뛰고 나머지 진행. 다시 채우면 최대 10초 안에 재개 | 같은 주문의 헛시전 반복 → 캐릭터 이름으로 뜬 이 줄을 `insysmsg`가 못 읽음 |
-| SUMMON NAMES 종류 이름(2026-10-10) | 소환수마다 `[ name, leech ]`처럼 종류 이름이 뜨고 네임태그 변경. 2026-10-10 `mumi`는 수락, `wytch`는 거절되어 이름 재작성. 2026-10-13 `wicca`도 거절 → `wichy`. 나머지 이름의 수락 여부는 아직 확인되지 않았다 | 04.H절 실패 증상 표 |
+| SUMMON NAMES 종류 이름(2026-10-10 변경) | 소환수마다 `[ name, leech ]`처럼 종류 이름이 뜨고 네임태그 변경. 2026-10-10 `mumi`는 수락, `wytch`는 거절되어 이름 재작성. 2026-10-13 `wicca`도 거절 → `wichy`. 나머지 이름의 수락 여부는 아직 확인되지 않았다 | 04.H절 실패 증상 표 |
 | 별도 후보 입력으로 프로보 | [Open items](../questions/open-items.md#17) 17절의 입력과 짝 검증 | 같은 절의 실패 기준 |
 | loadout 배치(2026-10-19 아래쪽으로) | 새첼 둘, 보급 파우치, 루팅 백이 아래쪽 한 자리에 쌓이고 트랩 파우치가 두 줄로 그 위를 덮음. 단검은 루팅 백, 가위와 악기는 보급 파우치. 좌표는 `module/pack/sorting.razor`의 배치 표 | 루팅 백이나 새첼이 트랩 파우치 사이로 삐져나옴. 그 배치 표의 좌표만 조정 |
-| Poison Strike와 Energy Bolt는 프록 코어 뒤(2026-09-28) | Curse 뒤 네 프록이 이어서 나가고, 바 넷이 다 뜬 뒤 Energy Bolt 한 방, 그다음 `[ poison strike ]`. 몹을 바꾸면 그 몹에 프록이 간 뒤에만 | Curse나 첫 프록 바로 뒤에 `[ poison strike ]`나 Energy Bolt. 한 프록만 반복되면 그 바의 트리거 확인(03.A절) |
-| 네크로 능력을 Razor 핫키로 복구(2026-09-28) | `[ blood oath ]` `[ corpse skin ]` `[ evil omen ]` `[ poison strike ]`가 전처럼 뜸 | 능력이 안 나가면 Razor 핫키 목록의 이름 확인 |
-| Corpse Skin과 Evil Omen은 서 있고 warmode가 아닐 때만(2026-09-28) | 교전 중 걷는 동안과 warmode에서는 둘이 안 나가고 `[ blood oath ]`만. 멈추면 프록 앞에 시전 | 걷는 중이나 warmode에서 `[ corpse skin ]`이나 `[ evil omen ]` |
-| Poison Strike와 Vampiric Embrace 거절(2026-09-28) | 질병 없는 몹에 Poison Strike가 매 패스 반복되지 않고 다음 프록 뒤 재시도. 시체가 멀면 Vampiric Embrace는 5초에 한 번만 | 같은 거절 줄이 매 패스 |
-| 타겟을 화면 거리에서 받아 둠(2026-09-29) | 10칸 밖의 몹을 All Kill로 찍으면 `[ target, set ]`, 다가오면 교전. 그 사이 송이 나가도 타겟 유지 | 찍었는데 `[ target, set ]` 없음. 몹이 붙었는데 송과 버프만 |
-| SUMMON NAMES가 남의 소환수를 거름(2026-09-29) | 파티원의 엘리멘탈이 나와도 `[ name, … ]` 없음 | 뜸 |
+| Poison Strike와 Energy Bolt는 프록 코어 뒤(2026-09-28 변경) | Curse 뒤 네 프록이 이어서 나가고, 바 넷이 다 뜬 뒤 Energy Bolt 한 방, 그다음 `[ poison strike ]`. 몹을 바꾸면 그 몹에 프록이 간 뒤에만 | Curse나 첫 프록 바로 뒤에 `[ poison strike ]`나 Energy Bolt. 한 프록만 반복되면 그 바의 트리거 확인(03.A절) |
+| 네크로 능력을 Razor 핫키로 복구(2026-09-28 변경) | `[ blood oath ]` `[ corpse skin ]` `[ evil omen ]` `[ poison strike ]`가 전처럼 뜸 | 능력이 안 나가면 Razor 핫키 목록의 이름 확인 |
+| Corpse Skin과 Evil Omen은 서 있고 warmode가 아닐 때만(2026-09-28 변경) | 교전 중 걷는 동안과 warmode에서는 둘이 안 나가고 `[ blood oath ]`만. 멈추면 프록 앞에 시전 | 걷는 중이나 warmode에서 `[ corpse skin ]`이나 `[ evil omen ]` |
+| Poison Strike와 Vampiric Embrace 거절(2026-09-28 변경) | 질병 없는 몹에 Poison Strike가 매 패스 반복되지 않고 다음 프록 뒤 재시도. 시체가 멀면 Vampiric Embrace는 5초에 한 번만 | 같은 거절 줄이 매 패스 |
+| 타겟을 화면 거리에서 받아 둠(2026-09-29 변경) | 10칸 밖의 몹을 All Kill로 찍으면 `[ target, set ]`, 다가오면 교전. 그 사이 송이 나가도 타겟 유지 | 찍었는데 `[ target, set ]` 없음. 몹이 붙었는데 송과 버프만 |
+| SUMMON NAMES가 남의 소환수를 거름(2026-09-29 변경) | 파티원의 엘리멘탈이 나와도 `[ name, … ]` 없음 | 뜸 |
 
 ## <a id="08"></a>08 자주 틀렸던 것
 
