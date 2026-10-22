@@ -116,11 +116,11 @@ if not find var__my_instrument backpack
         endif
     elseif find var__my_instrument backpack
         @setvar! var__my_instrument 0
-        overhead "[ inst, wrong ]" 53
+        overhead "[ inst, wrong ]" 254
         stop
     else
         @setvar! var__my_instrument 0
-        overhead "[ inst, out ]" 53
+        overhead "[ inst, out ]" 254
         stop
     endif
 endif
@@ -162,7 +162,7 @@ endif
                     overhead "[ inst, set ]" 53
                 endif
             elseif timer "timer__message" >= interval__message
-                overhead "[ inst, out ]" 53
+                overhead "[ inst, out ]" 254
                 settimer "timer__message" 0
             endif
         endif
