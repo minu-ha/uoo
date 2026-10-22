@@ -93,7 +93,7 @@ endif
 # The pick is checked by graphic, not by label: a label need not name the instrument, and
 # a vielle came without the word. A hand-picked vielle is taken (user check, 2026-10-19).
 if not find var__my_instrument backpack
-    overhead "[ inst, pick ]" 255
+    overhead "[ inst, pick ]" 53
     @setvar! var__my_instrument
     wait wait__instrument_pick
 
@@ -112,15 +112,15 @@ if not find var__my_instrument backpack
     if var__instrument_picked = 1
         if find var__my_instrument backpack as alias__picked_instrument
             getlabel alias__picked_instrument label__picked_instrument
-            overhead "[ inst, {{label__picked_instrument}} ]" 255
+            overhead "[ inst, {{label__picked_instrument}} ]" 53
         endif
     elseif find var__my_instrument backpack
         @setvar! var__my_instrument 0
-        overhead "[ inst, wrong ]" 254
+        overhead "[ inst, wrong ]" 53
         stop
     else
         @setvar! var__my_instrument 0
-        overhead "[ inst, out ]" 254
+        overhead "[ inst, out ]" 53
         stop
     endif
 endif
@@ -159,10 +159,10 @@ endif
                 @setvar! var__instrument_ok 1
 
                 if config__chatty = 1
-                    overhead "[ inst, set ]" 290
+                    overhead "[ inst, set ]" 53
                 endif
             elseif timer "timer__message" >= interval__message
-                overhead "[ inst, out ]" 254
+                overhead "[ inst, out ]" 53
                 settimer "timer__message" 0
             endif
         endif
