@@ -1102,7 +1102,7 @@ loadout과 regear는 같은 `gear/aspect` 블록을 씀. 동작 설명은 각 �
 1. `Shift+Space` = `Set Last Target (Beneficial)`(L:2061). 2026-10-21 summoner와 bard 프로필에 추가, 게임에 들어오는지 확인 전([Hotkeys](../game/hotkeys.md#01.F) 01.F절)
 2. 수정 파일 반영 뒤 루프 시작. 핫키 실행은 클라이언트 재시작, Scripts 탭 Play는 리로드([Workflow](../working/workflow.md#04) 04절)
 3. Tab으로 warmode 수동 구간 진입, 이미 나간 시전과 커서가 끝난 뒤 후보 선택
-4. Z로 A 선택, 아처는 V로 공격. A의 `[ provo, set ]` 확인 뒤 Shift+Space로 B부터 E까지 한 마리씩 등록
+4. 가장 가까운 몹 A 선택, 아처는 V로 공격. 선택 키는 프로필별 배치([Hotkeys](../game/hotkeys.md#01.E) 01.E절), A의 `[ provo, set ]` 확인 뒤 Shift+Space로 B부터 E까지 등록
 5. 후보마다 `[ provo, set ]` 확인 뒤 다음 선택. Tab으로 자동 구간 복귀, A→B와 C→D 확인
 
 - 최초 실행 전에 남은 슬롯은 등록하지 않으므로 루프 시작 뒤 선택 필요
@@ -1115,16 +1115,16 @@ loadout과 regear는 같은 `gear/aspect` 블록을 씀. 동작 설명은 각 �
 
 | 역할 | 입력 | 저장과 알림 |
 | --- | --- | --- |
-| 현재 바딩 대상 T | 기존 Q의 `Set Last Target (Harmful)` 또는 Z의 가장 가까운 몹 선택 | `var__combat_target` 채택 뒤 `[ target, set ]` |
-| 프로보 후보 | Z의 가장 가까운 몹 선택 또는 `Shift+Space`의 `Set Last Target (Beneficial)` | `lastbeneficial`에서 serial 복사, `list__provo_candidates` 추가 뒤 `[ provo, set ]` |
+| 현재 바딩 대상 T | Q의 `Set Last Target (Harmful)` 또는 가장 가까운 몹 선택 | `var__combat_target` 채택 뒤 `[ target, set ]` |
+| 프로보 후보 | 가장 가까운 몹 선택 또는 `Shift+Space`의 `Set Last Target (Beneficial)` | `lastbeneficial`에서 serial 복사, `list__provo_candidates` 추가 뒤 `[ provo, set ]` |
 | 이번 자동 시전 | 후보 목록에서 선택한 둘 | `var__provo_first`, `var__provo_second`에 고정 |
 
 - `lastbeneficial`은 단일 입력 슬롯. 후보 목록의 저장소나 수동 프로보 성공 기록으로 사용하지 않음
 - 입력 계약은 새로 관찰한 적대 `lastbeneficial` 값을 후보 등록으로 해석. 같은 슬롯을 갱신하는 다른 핫키와 병용 여부는 프로필에서 확인
-- Z로 고른 몹도 후보 등록으로 수용. 슬롯 갱신 동작의 근거는 [Razor](../scripting/razor.md#03) 03절
+- 가장 가까운 몹 선택도 후보 등록으로 수용. 슬롯 갱신 동작의 근거는 [Razor](../scripting/razor.md#03) 03절
 - 후보 수집은 자동 바딩보다 먼저, 쿨다운과 무관하게 실행. 검색 가능한 살아 있는 적대 모빌만 등록, 라벨 조회 없이 저장
 - serial을 먼저 복사하고 목록에 넣은 뒤 알림. 모든 선택의 무손실 수집 보장 없음, 입력 순서는 위 첫 확인 절 참고
-- Q만으로 채택한 T는 후보에 자동 추가하지 않음. Z 또는 Beneficial 키로 등록한 T는 다른 후보와 같은 규칙 적용
+- Q만으로 채택한 T는 후보에 자동 추가하지 않음. 가장 가까운 몹 선택 또는 Beneficial 키로 등록한 T는 다른 후보와 같은 규칙 적용
 - Bard Archer의 아처리 마릿수 판정에는 현재 대상과 등록된 후보의 중복 없는 합집합 반영
 
 CE의 `Set Last Target (Beneficial)`은 선택 커서로 `_lastBeneTarget`을 갱신.
@@ -1151,7 +1151,7 @@ Outlands 포크의 해당 핫키와 커서 간섭은 아래 검증 필요.
 
 #### 다섯 마리 입력 시나리오
 
-루프 실행 중 Z로 A 선택, V로 A 공격, Shift+Space로 B부터 E까지 등록한 경우.
+bard 프로필에서 루프 실행 중 Z로 A 선택, V로 A 공격, Shift+Space로 B부터 E까지 등록한 경우.
 모두 생존, 사거리 안, 라벨 수신, 시전 성공 가정. 시전 시점은 공유 쿨다운에 따름.
 
 - Z의 A부터 목록에 저장, B까지 등록되면 A→B. B가 이미 provoked이면 B→C 재시전 없음
@@ -1180,7 +1180,7 @@ Outlands 포크의 해당 핫키와 커서 간섭은 아래 검증 필요.
 - 그 사이 E와 V 등 기본 라타 핫키가 마지막 프로보 대상을 사용할 수 있음. 같은 serial을 Q로 다시 고르는 입력도 완전히 구별 불가
 - 두 프로보 커서 대기 중 완료된 새 harmful 선택은 자동 타깃 전에 T에 반영. 같은 serial 재선택 한계와 실제 슬롯 복원은 별개
 - 명시적 복원과 수동 라타 핫키 보존은 별도 검증 과제. 현재 금지한 `setlasttarget serial`에 의존하지 않음([Razor](../scripting/razor.md#03) 03절)
-- Z는 의도한 후보 입력에 포함. 그 밖의 Beneficial 타깃 지정도 `lastbeneficial`을 바꿀 수 있어 해당 슬롯만으로 입력 출처 보증 불가
+- 가장 가까운 몹 선택은 의도한 후보 입력에 포함. 그 밖의 Beneficial 타깃 지정도 `lastbeneficial`을 바꿀 수 있어 해당 슬롯만으로 입력 출처 보증 불가
 - 동료 회복 등에 Beneficial 라타를 쓰는 프로필에서는 후보 등록과 충돌 가능. 공용 슬롯을 전용 슬롯으로 간주하지 않음
 
 #### 추가된 상태와 검증 범위
@@ -1205,8 +1205,8 @@ Outlands 포크의 해당 핫키와 커서 간섭은 아래 검증 필요.
 | T 선택 뒤 Beneficial로 B 선택 | `lastharmful`과 루프 대상은 T, 후보는 B로 분리 |
 | B, C, D, E 등록 | 알림을 받은 serial 전부 목록에 존재, 후보 등록 중 T가 바뀌지 않음 |
 | T가 후보에 없고 B 하나만 등록 | B→T 자동 시전 없음 |
-| Z로 A 선택 뒤 B 등록 | 후보에 A와 B 존재, 현재 바딩 대상이 A여도 A→B 선택 |
-| Z로 A 선택 뒤 B, C, D, E 등록 | 성공한 짝은 A→B와 C→D, E 대기. provoked 몹을 다른 짝에 중복 사용하지 않음 |
+| 가장 가까운 몹 A 선택 뒤 B 등록 | 후보에 A와 B 존재, 현재 바딩 대상이 A여도 A→B 선택 |
+| 가장 가까운 몹 A 선택 뒤 B, C, D, E 등록 | 성공한 짝은 A→B와 C→D, E 대기. provoked 몹을 다른 짝에 중복 사용하지 않음 |
 | Q로 B, C, D, E 순회 | 프로보 목록과 짝 선택 우선순위 유지. Disco 시전은 선택 알림과 별도로 확인 |
 | 자동 B→C | 실제 harmful은 C로 바뀌어도 루프 대상 T와 후보 목록 유지 |
 | 두 프로보 커서 대기 중 새 harmful 선택 | 자동 시전 후에도 새 바딩 대상 유지, 선택하지 않은 몹으로 초점 이동 없음 |
@@ -1222,30 +1222,32 @@ Outlands 포크의 해당 핫키와 커서 간섭은 아래 검증 필요.
 
 ## <a id="18"></a>18 tamer-archer-enhanced 인게임 확인
 
-2026-10-21 추가. 정본은 레시피 [recipe/tamer-archer-enhanced-recipe.razor](https://github.com/minu-ha/uoo/blob/master/recipe/tamer-archer-enhanced-recipe.razor).
-summoner 프로필 기준: `Z` All Kill 커서 → `V` 가장 가까운 몹(펫 공격과 라타), `Shift+V` 내 사격.
+2026-10-21 추가. 블록 순서와 설정의 정본은 [recipe/tamer-archer-enhanced-recipe.razor](https://github.com/minu-ha/uoo/blob/master/recipe/tamer-archer-enhanced-recipe.razor).
+입력은 summoner 프로필 배치([Hotkeys](../game/hotkeys.md#01.E) 01.E절), 코덱스와 사격, 펫 명령은 수동.
 
 #### 템플릿과 설계
 
 - 템플릿: Animal Lore, Animal Taming 120. Veterinary, Resisting Spells, Magery, Archery, Tactics, Herding 80. 사용자 화면 2026-10-21.
   Healing 없음 → 붕대 블록 없음, 수의사 키트가 셀프 붕대([12절](#12)). 사용자 확인 2026-10-21
 - 바드 블록 없음. 펫 명령과 대상 지정은 수동, 루프는 펫을 명령하지 않음
-- 코덱스 자세와 피니셔는 수동. `[CodexHotbar`를 시작 때 한 번 띄움([Commands](https://wiki.uooutlands.com/Commands) "Launches the Codex Hotbar").
-  자동으로 바꾸려면 레시피에 `fight/archery-codex`와 그 마릿수 입력 `bard/provo-picks`를 넣음. 블록 켜고 끄기는 설정이 아니라 레시피([Modules](../scripting/modules.md#07.B) 07.B절)
-- 블록 순서: base, `tamer/herding`(크룩 활성, 시작 때 한 번), 회복(cure, heal 45), `tamer/vet-kit`, `fight/rearm`(활 5042), `fight/target`(18, 10, 500), `magery/reagents`,
-  5초마다 refresh 60, food, potions, gold-drop, 교전 중 `fight/weapon-ability`, `buff/spells`
+- `[CodexHotbar`를 시작 때 한 번 요청([Commands](https://wiki.uooutlands.com/Commands) "Launches the Codex Hotbar"). 코덱스 자세와 피니셔의 자동 전환 없음
 - 뺀 것: `escape/tracking`, `recovery/bandage`, `bard/provo-picks`, `fight/archery-codex`, `buff/mushroom`, `magery/flamestrike`, Bless, Arch Protection. 사용자 요청 2026-10-21
 - Full Draw: 활은 2.21초에 한 발([PvP](../game/pvp.md#09.B) 09.B절 표) → 15초에 6.8발 × 50% = 약 340%. Repeater 225%보다 큼. 정지 3초 조건이라 움직이며 쏘면 Repeater(`ability_main` 3)
 - 사거리 10: 활([Bard Archer](../templates/bard-archer.md#02.A) 02.A절). `target_range`와 `ability_range` 모두 10
 - 버프는 bard-archer와 같은 RA 24, Reflect 34, Protection 26. Greater Heal 11과 Teleport 9의 20을 남김
 - 스탯 포션 기준선 STR 120, DEX 100은 기본값. 이 템플릿의 스탯은 미기록 → 다르면 레시피에서 변경
-- 같은 활을 주워 여럿이 되어도 들고 있던 serial을 기억해 그것만 다시 듦. 아무것도 기억 못 하는 새 클라이언트에서만 graphic 5042로 검색, 그때는 첫 번째 활
+- `rearm_graphic` 5042로 활 검색. 공용 재장착 동작과 상태는 [16절](#16) 재장착 항목
+
+#### 반영과 첫 확인
+
+1. 사용할 캐릭터의 summoner 프로필 F1을 `Play Script: combat\tamer-archer-enhanced`로 연결. 현재 프로필에는 연결 없음, 설정 파일은 게임 종료 뒤 수정
+2. 수정 파일 반영 뒤 실행. 핫키는 클라이언트 재시작, Scripts 탭은 리로드 뒤 Play([Workflow](../working/workflow.md#04) 04절)
+3. `[ crook, out ]` 없이 `[ tamer archer, on ]`, 코덱스 핫바 표시 확인
 
 #### 인게임 확인
 
-- F1 → `[ crook, out ]` 없이 `[ tamer archer, on ]`, 코덱스 핫바가 뜨는지. 이미 떠 있을 때 다시 Play하면 닫히는지
+- 코덱스 핫바가 이미 떠 있을 때 다시 Play하면 닫히는지
 - 수의사 키트: [12절](#12)의 항목 그대로
 - 시전 뒤 활 재장착: [16절](#16) 재장착 항목. Journal `Rearm: two-handed layer remembered`, 시전 뒤 `Rearm: equip requested on the two-handed layer`
 - `[ full draw ]` 60초마다. 정지 3초 뒤 발사되는지, 움직이면 안 나가는지. 손해면 `ability_main` 3
 - `Buff: Protection.` 뒤 아이콘, 2분 뒤 다시([16절](#16) Protection 항목)
-- 프로필 연결은 아직 없음. 쓸 캐릭터의 summoner 프로필 F1을 `Play Script: combat\tamer-archer-enhanced`로, 게임 종료 뒤 xml 확인
