@@ -75,6 +75,7 @@ flowchart TD
 
 - 스크립트 `overhead`: 셋째 인자에 serial → 그 대상 머리 위
 - 상대에 관한 줄: 상대 머리 위, hue 1288. `[ target, set ]`, 커서에 쥔 Explosion의 `[ explo, on ]`
+- 예외: 바딩 줄은 상대 머리 위라도 53(05절). `[ provo, set ]` `[ provo, wrong ]`
 - 소환수에 붙인 이름 `[ name, leech ]`: 그 소환수 머리 위, hue 209
 - 나머지: 내 머리 위. 프로필 오버헤드는 항상 내 머리 위
 
@@ -195,11 +196,12 @@ UO hue 표는 100 단위 띠마다 같은 색이 탁해짐 → 같은 계열을 
 1288은 외부 벌목, 채광 스크립트가 이미 머리 위 알림에 쓰는 hue. 내 머리 위의 234와는 위치와 채도가 달라 혼동 없음.
 
 쿨다운 바의 hue(`cooldowns.xml`)는 이 팔레트와 별개, 이때 변경 없음.
+예외는 바딩. 바 넷(`music` `disco` `peace/provo` `song`)이 53이고 바딩 알림도 같은 53(아래 표, 2026-10-22). 스킬 하나는 어디서나 한 색.
 
 | hue | 색 | 뜻 | 상태 낱말 | 예 |
 | --- | --- | --- | --- | --- |
 | 234 | 진홍 `#de4a6a` | **나에게 걸린 것**, 지금 손쓸 것 | `me`, 나쁜 효과의 `on`, 바닥이 보이는 카운터 | `[ hams, me ]` `[ teleki, me ]` `[ poison, on ]` `[ throws, 0 ]` |
-| 244 | 주황 `#de834a` | **내 공격이나 스킬이 먹힘** | `target` `area` | `[ disco, target ]` `[ fireball, target ]` `[ bleed, target ]` |
+| 244 | 주황 `#de834a` | **내 공격이나 스킬이 먹힘** | `target` `area` | `[ hams, target ]` `[ fireball, target ]` `[ bleed, target ]` |
 | 254 | 노랑 `#dede4a` | 경고. 실패, 막힘, 재고 없음, 버프 빠짐. 스크립트를 멈추는 `out`도 | `miss` `wrong` `out` `disturbed` `cut` `over` `blocked`, 버프의 `off` | `[ hams, miss ]` `[ heal pot, out ]` `[ reflect, off ]` `[ wait, 4m ]` |
 | 290 | 하늘 `#73d5e6` | 정보, 카운터, 진행, 끝남. 스크립트에서는 `config__chatty`로 끔 | `on`, 숫자, `refund` `set` `done` | `[ unholy, 6/10 ]` `[ mana, refund ]` `[ lock, done ]` `[ var, set ]` |
 | 269 | 초록 `#5ade4a` | 준비됨, 내 것 성공 | `ready` | `[ str, ready ]` `[ house, clear ]` `[ siphon, on ]` |
@@ -210,6 +212,7 @@ UO hue 표는 100 단위 띠마다 같은 색이 탁해짐 → 같은 계열을 
 | 255 | 연노랑 `#e6e673` | 프롬프트 | `pick` | `[ inst, pick ]` `[ shelf, pick ]` |
 | 224 | 자홍 `#de4abd` | 월드 이벤트 | — | `[ world, saving ]` `[ boss, {7} ]` |
 | 1288 | 빨강 `#ff0008` | **상대 머리 위 표시**. 스크립트의 `overhead "…" 1288 <serial>` | `set` `on` | `[ target, set ]` `[ explo, on ]` |
+| 53 | 노랑 `#eeee00` | **바딩 계열.** 쿨다운 바와 같은 색. 성공, 실패, 안내를 가리지 않고 바딩이면 이 색, 상대 머리 위도 | `disco` `peace` `provo` `song` `inst` 줄 전부 | `[ provo, set ]`(상대 머리 위) `[ disco, target ]` `[ inst, out ]` |
 
 ::part[쿨다운 바]
 
