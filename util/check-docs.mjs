@@ -53,6 +53,9 @@ if (!existsSync(site)) {
         pages.set(file, {path, elements, ids: new Set(ids)});
     }
 
+    // The home canonical URL identifies the public mount point, while files stay at the output root.
+    const canonical = pages.get(join(site, "index.html"))?.elements.find((element) => element.tagName === "link" && attributeOf(element, "rel") === "canonical");
+    const baseUrl = new URL(canonical === undefined ? "/" : attributeOf(canonical, "href"), "http://site");
     let checked = 0;
 
     for (const [file, page] of pages) {
@@ -64,8 +67,14 @@ if (!existsSync(site)) {
                 continue;
             }
 
-            const url = new URL(reference, `http://site/${relative(site, file).split("\\").join("/")}`);
-            let target = join(site, decodeURIComponent(url.pathname));
+            const url = new URL(reference, new URL(relative(site, file).split("\\").join("/"), baseUrl));
+
+            if (!url.pathname.startsWith(baseUrl.pathname)) {
+                problems.push(`${page.path}: ${reference} -- outside the site deployment path`);
+                continue;
+            }
+
+            let target = join(site, decodeURIComponent(url.pathname.slice(baseUrl.pathname.length)));
 
             if (existsSync(target) && statSync(target).isDirectory()) {
                 target = join(target, "index.html");

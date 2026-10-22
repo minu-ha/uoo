@@ -9,8 +9,8 @@ importers:
   .:
     devDependencies:
       for-humanity:
-        specifier: 0.16.0
-        version: 0.16.0(rolldown@1.2.15)
+        specifier: 0.17.0
+        version: 0.17.0(rolldown@1.2.15)
       parse5:
         specifier: 7.3.0
         version: 7.3.0
@@ -458,8 +458,8 @@ packages:
       picomatch:
         optional: true
 
-  for-humanity@0.16.0:
-    resolution: {integrity: sha512-bscLqP1bhCPaxYXuaQeXqAjexDndgjq6jdFhqhbimElH/OzDqaf+uwPZHltDucGhtpUMzuL+8z9tiwdEr6I0Lg==}
+  for-humanity@0.17.0:
+    resolution: {integrity: sha512-M6N4irgHLQS2/jxObtlWEpTMTz5k8y/XyjDVWz9/yNyqmg3G+1VyvQevV18lYN+/ZS1G+YTwcuo35QuGpJLg7A==}
     engines: {node: '>=22.12.0'}
     hasBin: true
 
@@ -1351,7 +1351,7 @@ snapshots:
     optionalDependencies:
       picomatch: 4.0.7
 
-  for-humanity@0.16.0(rolldown@1.2.15):
+  for-humanity@0.17.0(rolldown@1.2.15):
     dependencies:
       '@hono/vite-dev-server': 0.26.1(hono@4.13.13)
       '@shikijs/rehype': 4.5.0

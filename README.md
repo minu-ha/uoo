@@ -44,10 +44,12 @@ pnpm install
 pnpm build       # assemble script/combat and script/gather from module/ and recipe/
 pnpm check       # block balance, unassigned variables, generated loops, config types and docs links
 pnpm test        # the PvP simulator and docs check tests
-pnpm docs:dev    # read the docs at localhost:4323
+pnpm docs:dev    # read the docs at localhost:4323/uoo/
 ```
 
 Generated loops are never edited by hand: edit `module/` and `recipe/`, then run `pnpm build`.
+
+Read the published [documentation](https://minu-ha.github.io/uoo/). Deployment settings are described in [Writing](content/public/working/writing.md#01).
 
 ## Where things are
 

@@ -34,6 +34,20 @@ test("passes a site whose links and anchors all exist", () => {
     assert.match(result.stdout, /2 local references/);
 });
 
+test("checks a project site's links and anchors under its canonical base path", () => {
+    const result = runCheck({html: '<link rel="canonical" href="https://example.github.io/uoo/"><h2 id="real">Heading</h2><a href="/uoo/">Home</a><a href="#real">Heading</a>'});
+
+    assert.equal(result.status, 0, result.stderr);
+    assert.match(result.stdout, /2 local references/);
+});
+
+test("rejects a project link that escapes the site's deployment path", () => {
+    const result = runCheck({html: '<link rel="canonical" href="https://example.github.io/uoo/"><a href="/">Wrong home</a>'});
+
+    assert.notEqual(result.status, 0);
+    assert.match(result.stderr, /outside the site deployment path/);
+});
+
 test("ignores markup inside scripts, styles and comments", () => {
     const result = runCheck({
         html: `<script>const s = '<a href="missing/">'</script><style>a::after { content: '<a href="missing/">' }</style>

@@ -54,11 +54,15 @@ order: 20
 
 | 명령 | 역할 |
 | --- | --- |
-| `pnpm docs:dev` | [localhost:4323](http://localhost:4323) 개발 서버. 수정 시 다시 그림 |
+| `pnpm docs:dev` | [localhost:4323/uoo/](http://localhost:4323/uoo/) 개발 서버. 수정 시 다시 그림 |
 | `pnpm docs:build` | `content/dist/`에 사이트 생성. frontmatter, 깨진 `.md` 링크, 부품 문법 검사 |
-| `pnpm docs:preview` | [localhost:4323](http://localhost:4323)에서 생성한 사이트 띄우기 |
+| `pnpm docs:preview` | [localhost:4323/uoo/](http://localhost:4323/uoo/)에서 생성한 사이트 띄우기 |
 | `pnpm typecheck` | `for-humanity.config.ts`의 설정 타입 검사 |
 | `node util/check-docs.mjs` | 끊긴 링크와 앵커, 번호 제목의 앵커 검사 |
+
+공개 사이트: [minu-ha.github.io/uoo](https://minu-ha.github.io/uoo/). 배포 경로는 `for-humanity.config.ts`의 `basePath`, 도메인은 `url`에서 지정.
+GitHub 저장소의 Pages 소스는 `GitHub Actions`. `master` push 또는 `Documentation` 수동 실행 시 `.github/workflows/docs.yml`이 빌드 후 `content/dist` 전체 배포.
+링크 검사는 빌드된 홈의 대표 주소에서 배포 경로 판별. 하위 경로 밖의 사이트 내부 링크는 오류.
 
 ::part[쓰기]
 

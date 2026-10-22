@@ -44,10 +44,12 @@ pnpm install
 pnpm build       # module/과 recipe/로 script/combat, script/gather를 조립
 pnpm check       # 블록 짝, 변수, 조립 결과, 설정 타입과 문서 링크
 pnpm test        # PvP 시뮬레이터와 문서 검사의 테스트
-pnpm docs:dev    # localhost:4323에서 문서 읽기
+pnpm docs:dev    # localhost:4323/uoo/에서 문서 읽기
 ```
 
 생성된 루프는 손으로 고치지 않습니다. `module/`과 `recipe/`를 고치고 `pnpm build`를 돌립니다.
+
+공개 [문서 사이트](https://minu-ha.github.io/uoo/). 배포 설정은 [Writing](../content/public/working/writing.md#01) 01절 참고.
 
 ## 어디에 뭐가
 

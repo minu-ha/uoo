@@ -42,4 +42,4 @@ Ultima Online Outlands Razor 스크립트의 작성과 수정 기준.
 
 ## 읽는 법
 
-저장소 루트에서 `pnpm install` 한 번 → `pnpm docs:dev` → [localhost:4323](http://localhost:4323).
+저장소 루트에서 `pnpm install` 한 번 → `pnpm docs:dev` → [localhost:4323/uoo/](http://localhost:4323/uoo/).
