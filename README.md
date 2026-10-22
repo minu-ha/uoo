@@ -58,5 +58,6 @@ The [configuration guide](config/README.md) documents the profile layout and gam
 The documentation records the game mechanics and design choices behind the scripts: skill interactions, recovery priorities, target handling and template tradeoffs.
 Source links and dated in-game observations distinguish confirmed behavior from questions that still need checking.
 
+The pages are grouped three ways: server rules by skill family (barding, necromancy, magery, archery, combat), one template page per character build, and one page per assembled loop.
 It also keeps Razor-specific pitfalls and pending checks close to the code, so later changes can build on earlier findings.
 The [documentation index](content/public/working/workflow.md#00.A) maps those topics to their reference pages.
