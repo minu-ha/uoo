@@ -33,6 +33,11 @@
 #      Read by magery/reagents, recovery/cure, recovery/heal.
 #      > No Magery in this template.
 #
+#   use_potions (default 1)
+#      1 uses potions: cure, heal, Refresh and the stat potions.
+#      Read by recovery/cure, recovery/heal, recovery/refresh.
+#      > Potions stay off. Bandages and the trapped pouch do the recovery.
+#
 #   heal_skill_min (default 0)
 #      Healing must be above this to bandage. At or below it recovery/light-heal stands
 #      in.
@@ -40,6 +45,7 @@
 #      > Healing must be above 10, as before the module build.
 # ----------------------------------------------------------------------------------------
 @setvar! config__use_magery 0
+@setvar! config__use_potions 0
 @setvar! config__heal_skill_min 10
 
 # ----------------------------------------------------------------------------------------
