@@ -21,7 +21,7 @@ UO Outlands 아이템 이름과 graphic ID 목록. `findtype` 인자와 hue 조�
 #Greater Heal potion "Yellow Potion" 3852 (Potion hue 0, keg hue 253)
 ```
 
-스크립트 주석에서는 줄 번호 대신 분류 이름으로 참조(`listed under Shields in document/game/item-list.md`). 목록 수정 시 줄 번호가 밀림.
+스크립트 주석에서는 줄 번호 대신 분류 이름으로 참조(`listed under Shields in content/public/game/item-list.md`). 목록 수정 시 줄 번호가 밀림.
 
 ## <a id="01"></a>01 Alchemy Potions, bottles, keg
 

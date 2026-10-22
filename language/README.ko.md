@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="../document/favicon.svg" width="96" height="96" alt="픽셀 금색 고리">
+<img src="../content/asset/favicon.svg" width="96" height="96" alt="픽셀 금색 고리">
 
 # uoo
 
@@ -8,15 +8,15 @@
 
 사냥, 채집, 스킬 훈련, 집 정리. 루프는 공용 블록으로 조립하고, 이유는 문서로 남긴다.
 
-[Outlands](https://uooutlands.com/) · [Razor Scripting](https://wiki.uooutlands.com/Razor_Scripting) · [문서](../document/README.md)
+[Outlands](https://uooutlands.com/) · [Razor Scripting](https://wiki.uooutlands.com/Razor_Scripting) · [문서](../content/README.md)
 
 [![MIT](https://img.shields.io/badge/license-MIT-1111aa?style=flat-square)](../LICENSE)
 ![UO Outlands](https://img.shields.io/badge/UO-Outlands-8b1a1a?style=flat-square)
 ![Razor](https://img.shields.io/badge/Razor-Outlands%20fork-2b6cb0?style=flat-square)
-![Node 22+](https://img.shields.io/badge/node-22%2B-444444?style=flat-square)
+![Node 22.12.0+](https://img.shields.io/badge/node-22.12.0%2B-444444?style=flat-square)
 ![Docs](https://img.shields.io/badge/docs-for%20humanity-444444?style=flat-square)
 
-[Quick start](#quick-start) · [스크립트](../script/README.md) · [문서](../document/README.md) · [설정](config.ko.md) · [English](../README.md)
+[Quick start](#quick-start) · [스크립트](../script/README.md) · [문서](../content/README.md) · [설정](config.ko.md) · [English](../README.md)
 
 </div>
 
@@ -37,7 +37,7 @@
 
 ### 빌드와 검사
 
-루프나 문서를 고치려면 Node.js 22 이상과 pnpm이 필요합니다.
+루프나 문서를 고치려면 Node.js 22.12.0 이상과 pnpm이 필요합니다.
 
 ```sh
 pnpm install
@@ -55,7 +55,7 @@ pnpm docs:dev    # localhost:4321에서 문서 읽기
 |----------------------------------------|------------------------------------------------------------------------------------------------------------------------------|
 | [`script/`](../script/README.md)       | 스크립트. 하는 일별로 묶음                                                                                                   |
 | `module/`, `recipe/`                   | 한 벌만 둔 루프 블록과, `util/build-scripts.mjs`가 `script/combat/`과 `script/gather/`의 모든 루프로 조립하는 레시피           |
-| [`document/`](../document/README.md) | Markdown 설계 문서. [for humanity](https://for-humanity.fyi)로 읽고, 묶음마다 폴더 하나다. 작업 방식, 스크립트 규칙, 게임 자료, 템플릿, 확인할 것. 지도는 [문서 홈](../document/README.md) |
+| [`content/`](../content/README.md) | Markdown 설계 문서. [for humanity](https://for-humanity.fyi)로 읽고, 묶음마다 폴더 하나다. 작업 방식, 스크립트 규칙, 게임 자료, 템플릿, 확인할 것. 지도는 [문서 홈](../content/README.md) |
 | [`config/`](config.ko.md)              | Razor와 ClassicUO 설정. 사람마다 폴더 하나를 쓴다. 게임을 저장소에 연결하는 방법도 있다                                                    |
 | `util/`                                | `setup.sh`는 게임을 저장소에 링크, `build-scripts.mjs`는 루프 조립, `check.sh`는 스크립트 검사, `check-docs.mjs`는 문서 링크 검사, `pvp-sim.mjs`는 필드 결투 모델, `razor-syntax/`는 WebStorm과 VS Code용 `.razor` 하이라이팅 |
 | `language/`                            | README 번역본 (이 파일)                                                                                                      |

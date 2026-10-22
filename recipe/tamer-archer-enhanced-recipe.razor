@@ -9,7 +9,7 @@
 
 # Tamer Archer Enhanced: veterinary supplies for you and the pets, sustain, self buffs and
 # Full Draw, around shots you fire by hand.
-# Design and in-game checks: document/questions/open-items.md part 18.
+# Design and in-game checks: content/public/questions/open-items.md part 18.
 # Template: Animal Lore and Animal Taming 120, Veterinary, Resisting Spells, Magery,
 # Archery, Tactics and Herding 80 (user screen, 2026-10-21).
 # Needs: veterinary supplies (25750), a shepherd's crook for Herding, a bow and a codex of
@@ -117,7 +117,7 @@
 #   rearm_graphic (default 0)
 #      Graphic of the weapon to pick out of the backpack while both hands are empty and
 #      nothing is remembered. 0 disables that search. A chosen serial is retried until
-#      a hand confirms it or it leaves the backpack. Graphics: document/game/item-list.md.
+#      a hand confirms it or it leaves the backpack. Graphics: content/public/game/item-list.md.
 #      > The bow, 5042 under Archery in item-list, for a fresh client with the bow packed.
 # ----------------------------------------------------------------------------------------
 @setvar! config__rearm_graphic 5042
@@ -266,7 +266,7 @@
 # ========================================================================================
 
 # loot/recycle runs the hotkey named in this list when it finishes or gives up. A list, because
-# a variable cannot hold a word (document/scripting/razor.md part 3). It lasts until the client closes.
+# a variable cannot hold a word (content/public/scripting/razor.md part 3). It lasts until the client closes.
 if not listexists 'list__resume_script'
     createlist 'list__resume_script'
 endif

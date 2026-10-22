@@ -5,18 +5,18 @@
     "type": "module",
     "packageManager": "pnpm@10.33.2",
     "engines": {
-        "node": ">=22"
+        "node": ">=22.12.0"
     },
     "scripts": {
         "build": "node util/build-scripts.mjs",
         "check": "util/check.sh && pnpm docs:build && node util/check-docs.mjs",
         "test": "node --test util/*.test.mjs",
-        "docs:dev": "for-humanity dev document",
-        "docs:build": "for-humanity build document && cp document/favicon.svg document/dist/favicon.svg",
-        "docs:preview": "for-humanity preview document"
+        "docs:dev": "for-humanity dev",
+        "docs:build": "for-humanity build && cp content/asset/favicon.svg content/dist/favicon.svg",
+        "docs:preview": "for-humanity preview"
     },
     "devDependencies": {
-        "for-humanity": "0.7.1",
+        "for-humanity": "0.16.0",
         "parse5": "7.3.0"
     }
 }

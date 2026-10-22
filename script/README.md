@@ -3,7 +3,7 @@
 Grouped by what a script does. Folders say *what*, file names say *which*.
 
 Every `combat/` and `gather/` loop is generated, and so are the routines `restock/loadout` and `hotkey/regear`:
-edit `module/` and `recipe/` at the repo root and run `node util/build-scripts.mjs`. The design is [document/scripting/modules.md](../document/scripting/modules.md).
+edit `module/` and `recipe/` at the repo root and run `node util/build-scripts.mjs`. The design is [content/public/scripting/modules.md](../content/public/scripting/modules.md).
 
 ```
 combat/    hunting loops per template, shared PvP self sustain
@@ -18,7 +18,7 @@ archive/   scripts not in use: no hotkey, no edits, skipped by util/check.sh
 ```
 
 Combat loops are named after the template (`dexxer-basic`), variants get a suffix (`bard-necro-enhanced`), shared PvP uses `pvp`, and everything else is `verb-noun` (`claim-loot`,
-`stock-vendor`). The full rules are in [document/scripting/conventions.md](../document/scripting/conventions.md).
+`stock-vendor`). The full rules are in [content/public/scripting/conventions.md](../content/public/scripting/conventions.md).
 
 ## Combat loops
 
@@ -38,14 +38,14 @@ and the old `lumberjack` and `mining` gather loops.
 To use one again, move it back to its folder.
 
 A new combat loop gets a row here. Every loop has the same shape, set out in
-[document/scripting/conventions.md](../document/scripting/conventions.md#02.B) 02.B: config and state first, then one `while not dead` loop.
+[content/public/scripting/conventions.md](../content/public/scripting/conventions.md#02.B) 02.B: config and state first, then one `while not dead` loop.
 
 ## Lumberjacking loop
 
 Use [gather/lumberjack-enhanced.razor](gather/lumberjack-enhanced.razor) (v18), built from
 `recipe/lumberjack-enhanced-recipe.razor`. Each pass runs recovery, then the automatic Recall, the reagent read,
 Smart Harvest, the self buffs, food and lumber packing. Settings, in-game checks and the version history are in
-[document/templates/lumberjack-pvp.md](../document/templates/lumberjack-pvp.md#08) part 8.
+[content/public/templates/lumberjack-pvp.md](../content/public/templates/lumberjack-pvp.md#08) part 8.
 
 - Tracking (`escape/tracking`) sets the hunt filter once before the loop, red by default, and reuses a hunt this
   script already confirmed. After changing the filter by hand, turn Hunting off before Play. Every 5 seconds it
@@ -64,7 +64,7 @@ Smart Harvest, the self buffs, food and lumber packing. Settings, in-game checks
 - Warmode and any cursor belong to the player: recovery casts, buffs, food and gathering stand down while either
   is up. Potions and bandages still go out.
 - To fight a PK, switch to [combat/pvp.razor](combat/pvp.razor) with its own hotkey
-  ([the handbook](../document/templates/lumberjack-pvp.md#09) part 9).
+  ([the handbook](../content/public/templates/lumberjack-pvp.md#09) part 9).
 
 ## Skinning loop
 
@@ -87,16 +87,16 @@ and Warding while poisoned, bleeding or diseased away from melee. Carving result
 `pack/leather` moves carried leather into the loadout loot bag every 2 minutes between fights.
 It ignores only bag stacks and never clears the list, so carved corpses stay skipped.
 Meet a PK with `combat/pvp` (F4).
-Design notes and in-game checks are in [document/questions/open-items.md](../document/questions/open-items.md#11) part 11.
+Design notes and in-game checks are in [content/public/questions/open-items.md](../content/public/questions/open-items.md#11) part 11.
 
 ## Returning to the loop
 
 `loot/recycle` runs every hotkey named in the list `list__resume_script` when it finishes or cannot start because a
 required container or tool is missing. An unconfirmed item move, unconfirmed recycling or a stuck action queue stops without resuming:
-see the [in-game checks](../document/questions/open-items.md#13). The farming loops fill the list at Play with their own Razor hotkey name, the one the profile
+see the [in-game checks](../content/public/questions/open-items.md#13). The farming loops fill the list at Play with their own Razor hotkey name, the one the profile
 stores (`Play Script: gather\skinning-enhanced`): `bard-necro-enhanced`, `bard-archer-enhanced`, `tamer-mage-enhanced`, `tamer-archer-enhanced`, `dexxer-basic`,
 `skinning-enhanced` and `lumberjack-enhanced`. The archived `bard-mace` and `bard-throwing` register their `Play Script: archive\…` name.
-It is a list because a variable reads a word back as 4294967295 (document/scripting/razor.md part 3).
+It is a list because a variable reads a word back as 4294967295 (content/public/scripting/razor.md part 3).
 It lasts until the client closes, and with nothing registered recycle just ends. `combat/pvp` does not register,
 so recycling during a fight returns to the farming loop.
 
@@ -178,7 +178,7 @@ equipment. Set each enabled bar to `WeaponSwing` and calibrate its duration in t
 
 Attack spells, TK, explosion potions, pet attacks, attack targeting and Hamstring stay manual.
 Self MA to prepare the next bandage also stays manual. `config__sysmsg` holds the Journal lines.
-Settings, cursor handling and pending in-game checks are in [the PvP doc](../document/game/pvp.md#05.E).
+Settings, cursor handling and pending in-game checks are in [the PvP doc](../content/public/game/pvp.md#05.E).
 
 ## Debug scripts
 
@@ -193,4 +193,4 @@ Diagnostics live in `debug/`. Stop the combat loop before running a probe or the
 | [probe-last-targets](debug/probe-last-targets.razor) | Show which last target slot (`lasttarget`, `lastharmful`, `lastbeneficial`) a key moved |
 
 After moving a script, rebind any old hotkey to its `debug\...` path. The probe results are recorded in
-[the Razor doc](../document/scripting/razor.md#03.A).
+[the Razor doc](../content/public/scripting/razor.md#03.A).

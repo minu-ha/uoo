@@ -8,7 +8,7 @@
 //
 //   pnpm docs:build && node util/check-docs.mjs [site] [docs]
 //
-// site defaults to document/dist and docs to document, both from the repository root.
+// site defaults to content/dist and docs to content, both from the repository root.
 // Exit 1 if anything is wrong.
 import {existsSync, readFileSync, readdirSync, statSync} from "node:fs";
 import {dirname, join, relative, resolve} from "node:path";
@@ -16,8 +16,8 @@ import {fileURLToPath} from "node:url";
 import {parse} from "parse5";
 
 const repo = resolve(dirname(fileURLToPath(import.meta.url)), "..");
-const site = resolve(process.argv[2] ?? join(repo, "document", "dist"));
-const docs = resolve(process.argv[3] ?? join(repo, "document"));
+const site = resolve(process.argv[2] ?? join(repo, "content", "dist"));
+const docs = resolve(process.argv[3] ?? join(repo, "content"));
 const problems = [];
 
 /**

@@ -6,13 +6,13 @@ order: 20
 ---
 
 설계 문서 작성 기준. 문서는 [for-humanity](https://for-humanity.fyi) Markdown, `pnpm docs:dev`로 읽음.
-문서별 정본은 [문서 홈](../README.md)의 표. for-humanity 기능(frontmatter, Note, Details, 표, 흐름도)의 정본은 for-humanity [Writing](https://github.com/minu-ha/for-humanity/blob/main/templates/document/writing.md).
+문서별 정본은 [문서 홈](../../README.md)의 표. for-humanity 기능(frontmatter, Note, Details, 표, 흐름도)의 정본은 for-humanity [Writing](https://for-humanity.fyi/writing/).
 
 ## <a id="00"></a>00 한눈에
 
 | 절 | 내용 |
 | --- | --- |
-| [01](#01) | `document/` 구성과 사이트 명령 |
+| [01](#01) | `content/` 구성과 사이트 명령 |
 | [02](#02) | 새 문서 추가 순서 |
 | [03](#03) | 빈 틀 |
 | [04](#04) | 짜임. 번호, 앵커, 가름 |
@@ -29,7 +29,7 @@ order: 20
 
 ## <a id="01"></a>01 파일
 
-묶음 하나 = 폴더 하나. 폴더와 사이드바 묶음이 같음.
+공개 문서는 `content/public/` 안에 보관. 묶음 하나 = 하위 폴더 하나, 폴더와 사이드바 묶음이 같음.
 
 | 폴더 | 묶음 | 내용 |
 | --- | --- | --- |
@@ -39,19 +39,23 @@ order: 20
 | `templates/` | Templates | 템플릿별 판단과 설계 |
 | `questions/` | Open questions | 아직 확인 못 한 것 |
 
-| 폴더 밖 파일 | 역할 |
+| 경로 | 역할 |
 | --- | --- |
-| `README.md` | 사이트 홈(`/`). 문서 표. frontmatter 없음 |
-| `for-humanity.config.mjs` | 사이트 이름, 묶음 순서(`navigation`), 확인 알약 문구(`status`) |
-| `favicon.svg` | 사이트 아이콘. `pnpm docs:build`가 결과물에 덮어씀 |
+| `content/README.md` | 사이트 홈(`/`). 문서 표. frontmatter 없음 |
+| `content/public/` | 공개 문서. 하위 폴더명 `public`은 페이지 URL에서 제외 |
+| `content/private/` | 로컬에서만 읽는 문서. 현재 없음, 필요할 때 생성 |
+| `content/asset/favicon.svg` | 사이트 아이콘. `pnpm docs:build`가 결과물에 덮어씀 |
+| `for-humanity.config.mjs` | 저장소 루트의 사이트 설정. 언어(`lang`), 묶음 순서(`navigation`), 확인 알약 문구(`status`) |
 
-- `dist/`: `pnpm docs:build` 결과물. git 제외
+- `content/dist/`: `pnpm docs:build` 결과물. git 제외
+- `dev`는 공개와 내부 문서, `build`와 `preview`는 홈과 공개 문서만 표시
 - 모양과 동작: `for-humanity` 패키지. 버전은 루트 `package.json`에 정확히 고정
+- 설치와 실행에는 Node.js 22.12.0 이상 필요
 
 | 명령 | 역할 |
 | --- | --- |
 | `pnpm docs:dev` | [localhost:4321](http://localhost:4321) 개발 서버. 수정 시 다시 그림 |
-| `pnpm docs:build` | `document/dist/`에 사이트 생성. frontmatter, 깨진 `.md` 링크, 부품 문법 검사 |
+| `pnpm docs:build` | `content/dist/`에 사이트 생성. frontmatter, 깨진 `.md` 링크, 부품 문법 검사 |
 | `pnpm docs:preview` | 생성한 사이트 띄우기 |
 | `node util/check-docs.mjs` | 끊긴 링크와 앵커, 번호 제목의 앵커 검사 |
 
@@ -59,17 +63,17 @@ order: 20
 
 ## <a id="02"></a>02 새 문서
 
-1. 맞는 묶음 폴더에 kebab-case `.md` 생성. 템플릿 문서는 `templates/<템플릿>.md`
+1. `content/public/` 안의 맞는 묶음 폴더에 kebab-case `.md` 생성. 템플릿 문서는 `templates/<템플릿>.md`
 2. 03절 빈 틀에서 시작
 3. frontmatter
    - `name`: 영어 이름. 문서 제목과 사이드바 목록
-   - `label`: 한글 이름. 사이드바 툴팁
+   - `label`: 한글 설명. 사이드바 툴팁, 검색 결과와 링크 미리보기 설명
    - `group`: 폴더에 맞는 묶음(01절 표). 새 묶음이면 폴더 추가, `for-humanity.config.mjs`의 `navigation`에 순서 추가
    - `order`: 묶음 안 순서. 10 단위
 4. 세 곳에 한 줄씩 추가
-   - [문서 홈](../README.md) 문서 표
+   - [문서 홈](../../README.md) 문서 표
    - [AGENTS.md](https://github.com/minu-ha/uoo/blob/master/AGENTS.md) "언제 무엇을 읽나" 표. 읽을 일이 있는 문서만
-   - 루트 [README.md](https://github.com/minu-ha/uoo/blob/master/README.md)의 `document/` 칸. 번역본도 함께(07절)
+   - 루트 [README.md](https://github.com/minu-ha/uoo/blob/master/README.md)의 `content/` 칸. 번역본도 함께(07절)
 
 ## <a id="03"></a>03 빈 틀
 
@@ -161,8 +165,8 @@ order: {묶음 안 순서}
 - 인용과 확인 표시: [Workflow](workflow.md#01.C) 01.C절. "인게임 확인됨"과 "확인되지 않았다"는 그대로 쓰면 확인 알약.
   날짜까지 알약(`인게임 확인됨 2026-09-28`), 괄호는 숨김. 코드, 링크, 제목 안은 그대로. 문구는 `for-humanity.config.mjs`의 `status`
 - 색 값만 든 인라인 코드(`#e80030`)에 색 칩
-- 다른 문서: 상대 경로 `.md` 링크. `document/` 밖 파일(AGENTS.md, `script/`, `util/` 등): GitHub 주소
-  (`https://github.com/minu-ha/uoo/blob/master/<경로>`). for-humanity는 문서 폴더 밖 상대 링크를 변환하지 못함
+- 같은 공개 문서끼리는 기존 상대 경로 `.md` 링크. 홈에서 공개 문서는 `public/` 포함, 공개 문서에서 홈은 실제 위치에 맞춰 `../` 추가
+- `content/` 밖 파일(AGENTS.md, `script/`, `util/` 등): GitHub 주소(`https://github.com/minu-ha/uoo/blob/master/<경로>`)
 
 ## <a id="07"></a>07 언어와 번역본
 
@@ -170,30 +174,29 @@ order: {묶음 안 순서}
 - README 원본: 영어. 번역본: `language/<무엇>.<언어>.md`
   - `language/README.ko.md` = 루트 README
   - `language/config.ko.md` = `config/README.md`
-- 예외: `document/`. 홈 `document/README.md`도 한국어, 번역본 없음
+- 예외: `content/`. 홈 `content/README.md`도 한국어, 번역본 없음
 - 원본 맨 위에 번역본 링크, 번역본 맨 위에 원본 링크. 원본 수정 시 번역본도 같은 커밋에서 수정
 
 ## <a id="08"></a>08 한 사실은 한 곳에
 
 - 같은 내용은 한 곳에만. 다른 곳은 절 번호 링크. 두 곳에 쓰면 한쪽만 고쳐짐(overheads.md의 옛 hue 표가 그 예)
-- 문서별 정본: [문서 홈](../README.md) 표 한 곳. 새 문서나 정본 이동 시 그 표 수정
+- 문서별 정본: [문서 홈](../../README.md) 표 한 곳. 새 문서나 정본 이동 시 그 표 수정
 - 규칙도 같음. 언제나 지킬 규칙과 커밋 규칙은 AGENTS.md에만, 나머지는 이 문서들에만. AGENTS.md는 한 줄 요약과 링크만
 - 템플릿 문서: **그 템플릿의 판단만.** 다른 템플릿에도 쓰이는 내용(서버 규칙, 문법)은 공통 문서로 옮기고 링크
 
 ## <a id="09"></a>09 흐름도
 
-- ` ```mermaid ` 코드 블록. 빌드 시 beautiful-mermaid 격자 렌더러가 SVG 생성. mermaid 문법 일부만 지원
-- 잘 되는 것: `flowchart TD` 사슬과 나무, `flowchart LR` 판단 사슬(`예` 사슬을 윗줄로), `sequenceDiagram`
-- 라벨에 괄호 금지. 렌더러가 괄호에서 글을 자름. 긴 라벨은 `<br>`
-- 선 라벨은 한 낱말(`-- 예 -->`). 띄어 쓰면 라벨이 둘로 갈림
-- 되돌아가는 선, 라벨 달린 합류선은 엉킴 → 여러 장으로 쪼갬([Bard Necro](../templates/bard-necro.md#05.A) 05.A절)
-- 폭 140칸 이내. 넘치면 `LR` → `TD` 또는 둘로 나눔
+- ` ```mermaid ` 코드 블록. 공식 Mermaid 12를 브라우저에서 렌더링, 사이트의 밝은 테마와 어두운 테마 적용
+- 절차와 조건은 `flowchart`, 참여자 간 요청은 `sequenceDiagram`. 유형별 문법은 [for-humanity Diagrams](https://for-humanity.fyi/diagrams/) 참고
+- 문법 오류는 빌드 성공만으로 검출되지 않음. `docs:dev` 또는 `docs:preview`에서 SVG 표시와 오류 안내 확인
+- JavaScript가 꺼졌거나 렌더링이 실패하면 원문 표시
+- 긴 라벨은 `<br>`, 복잡한 흐름은 여러 장으로 분리. 모바일에서 넘치면 `LR` 대신 `TD` 또는 그림 분할
 
 ::part[확인]
 
 ## <a id="10"></a>10 끝낼 때 확인
 
 - 한 줄 200자 이내(`.editorconfig`의 `max_line_length`). 넘으면 코드 밖 빈칸, 되도록 문장 끝에서 줄바꿈. 표의 줄과 코드 블록 안은 예외
-- 05절 기준 재확인. 가운뎃점은 `git grep -n '·' -- document`
+- 05절 기준 재확인. 가운뎃점은 `git grep -n '·' -- content`
 - `pnpm check`: 사이트 생성(`pnpm docs:build`), 링크와 앵커와 번호 제목 검사(`node util/check-docs.mjs`)
 - `pnpm docs:dev`로 확인. 밝은 테마와 어두운 테마, 폭 1024와 390에서 가로 밀림, 흐름도

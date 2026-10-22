@@ -7,10 +7,10 @@ Ultima Online Outlands용 Razor 스크립트 저장소.
 | `script/`            | 스크립트                      |
 | `module/`, `recipe/` | 루프를 조립하는 블록과 레시피 |
 | `config/`            | 클라이언트 설정               |
-| `document/`          | 설계 문서                     |
+| `content/`          | 설계 문서                     |
 
-이 파일: 언제나 지킬 규칙과 커밋 규칙만. 나머지 규칙은 `document/`, 3절 표에서 찾음.
-시작은 [Workflow](document/working/workflow.md). 사람은 `pnpm docs:dev`로 문서 사이트를 띄워 읽음.
+이 파일: 언제나 지킬 규칙과 커밋 규칙만. 나머지 규칙은 `content/`, 3절 표에서 찾음.
+시작은 [Workflow](content/public/working/workflow.md). 사람은 `pnpm docs:dev`로 문서 사이트를 띄워 읽음.
 
 ## 목차
 
@@ -24,14 +24,14 @@ Ultima Online Outlands용 Razor 스크립트 저장소.
 
 규칙당 한 줄. 이유와 자세한 내용은 링크한 절.
 
-- 답변과 문서는 한국어, 스크립트 주석은 영어 → [Writing](document/working/writing.md#07) 07절
-- `.razor` 수정 전 파일 끝까지 읽기, 확인된 함정 표 확인 → [Razor](document/scripting/razor.md#03) 03절
-- 게임 숫자는 추측 금지, 출처나 인게임 확인 날짜 기록 → [Workflow](document/working/workflow.md#01.C) 01.C절
-- `config/`는 게임 종료 상태에서만 수정 → [Workflow](document/working/workflow.md#04.C) 04.C절
-- 다른 사람의 `config/`는 손대지 않음. `settings.json` 커밋 금지 → [Conventions](document/scripting/conventions.md#01.D) 01.D절
-- 스크립트에 serial 숫자 직접 사용 금지 → [Conventions](document/scripting/conventions.md#03.C) 03.C절
-- 조립한 스크립트(머리에 `Generated from` 줄. `script/combat/*`, `script/gather/*`, loadout 같은 루틴) 직접 수정 금지. `module/`, `recipe/` 수정 후 `pnpm build` → [Modules](document/scripting/modules.md#07) 07절
-- 같은 규칙이나 사실은 한 곳에만. 다른 곳은 링크 → [Writing](document/working/writing.md#08) 08절
+- 답변과 문서는 한국어, 스크립트 주석은 영어 → [Writing](content/public/working/writing.md#07) 07절
+- `.razor` 수정 전 파일 끝까지 읽기, 확인된 함정 표 확인 → [Razor](content/public/scripting/razor.md#03) 03절
+- 게임 숫자는 추측 금지, 출처나 인게임 확인 날짜 기록 → [Workflow](content/public/working/workflow.md#01.C) 01.C절
+- `config/`는 게임 종료 상태에서만 수정 → [Workflow](content/public/working/workflow.md#04.C) 04.C절
+- 다른 사람의 `config/`는 손대지 않음. `settings.json` 커밋 금지 → [Conventions](content/public/scripting/conventions.md#01.D) 01.D절
+- 스크립트에 serial 숫자 직접 사용 금지 → [Conventions](content/public/scripting/conventions.md#03.C) 03.C절
+- 조립한 스크립트(머리에 `Generated from` 줄. `script/combat/*`, `script/gather/*`, loadout 같은 루틴) 직접 수정 금지. `module/`, `recipe/` 수정 후 `pnpm build` → [Modules](content/public/scripting/modules.md#07) 07절
+- 같은 규칙이나 사실은 한 곳에만. 다른 곳은 링크 → [Writing](content/public/working/writing.md#08) 08절
 
 ## 2. 커밋
 
@@ -58,19 +58,19 @@ Ultima Online Outlands용 Razor 스크립트 저장소.
 
 | 할 일                            | 읽을 것                                                                                                                                              |
 |----------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------|
-| 모든 작업의 시작                 | [Workflow](document/working/workflow.md)                                                                                                             |
-| `.razor` 수정이나 새 작성        | [Conventions](document/scripting/conventions.md), [Razor](document/scripting/razor.md). 알림을 띄우면 [Overheads](document/scripting/overheads.md)도 |
-| 모듈, 레시피 수정과 루프 조립    | [Modules](document/scripting/modules.md)                                                                                                             |
-| 새 파일과 이름 짓기              | [Conventions](document/scripting/conventions.md#01) 01절                                                                                             |
-| 게임에서 확인                    | [Workflow](document/working/workflow.md#04) 04절                                                                                                     |
-| `config/` 수정                   | [Workflow](document/working/workflow.md#04.C) 04.C절, [config/README.md](config/README.md)                                                           |
-| 오버헤드, 쿨다운 바 추가나 변경  | [Overheads](document/scripting/overheads.md)                                                                                                         |
-| 바드, 네크로, 소환수 숫자        | [Bard Necro](document/templates/bard-necro.md)                                                                                                       |
-| PvP 규칙                         | [PvP](document/game/pvp.md)                                                                                                                          |
-| 벌목과 PvP 템플릿, 교전          | [Lumberjack PvP](document/templates/lumberjack-pvp.md)                                                                                               |
-| 아처리, 바드 아처 템플릿         | [Bard Archer](document/templates/bard-archer.md)                                                                                                     |
-| 키 배치                          | [Hotkeys](document/game/hotkeys.md)                                                                                                                  |
-| `findtype` 인자(graphic id, hue) | [Item list](document/game/item-list.md)                                                                                                              |
-| 문서 수정이나 새 문서            | [Writing](document/working/writing.md)                                                                                                               |
-| 사용자에게 물을 것               | [Open items](document/questions/open-items.md)                                                                                                       |
-| 문서별 정본                      | [문서 홈](document/README.md)                                                                                                                        |
+| 모든 작업의 시작                 | [Workflow](content/public/working/workflow.md)                                                                                                             |
+| `.razor` 수정이나 새 작성        | [Conventions](content/public/scripting/conventions.md), [Razor](content/public/scripting/razor.md). 알림을 띄우면 [Overheads](content/public/scripting/overheads.md)도 |
+| 모듈, 레시피 수정과 루프 조립    | [Modules](content/public/scripting/modules.md)                                                                                                             |
+| 새 파일과 이름 짓기              | [Conventions](content/public/scripting/conventions.md#01) 01절                                                                                             |
+| 게임에서 확인                    | [Workflow](content/public/working/workflow.md#04) 04절                                                                                                     |
+| `config/` 수정                   | [Workflow](content/public/working/workflow.md#04.C) 04.C절, [config/README.md](config/README.md)                                                           |
+| 오버헤드, 쿨다운 바 추가나 변경  | [Overheads](content/public/scripting/overheads.md)                                                                                                         |
+| 바드, 네크로, 소환수 숫자        | [Bard Necro](content/public/templates/bard-necro.md)                                                                                                       |
+| PvP 규칙                         | [PvP](content/public/game/pvp.md)                                                                                                                          |
+| 벌목과 PvP 템플릿, 교전          | [Lumberjack PvP](content/public/templates/lumberjack-pvp.md)                                                                                               |
+| 아처리, 바드 아처 템플릿         | [Bard Archer](content/public/templates/bard-archer.md)                                                                                                     |
+| 키 배치                          | [Hotkeys](content/public/game/hotkeys.md)                                                                                                                  |
+| `findtype` 인자(graphic id, hue) | [Item list](content/public/game/item-list.md)                                                                                                              |
+| 문서 수정이나 새 문서            | [Writing](content/public/working/writing.md)                                                                                                               |
+| 사용자에게 물을 것               | [Open items](content/public/questions/open-items.md)                                                                                                       |
+| 문서별 정본                      | [문서 홈](content/README.md)                                                                                                                        |

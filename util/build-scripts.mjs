@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
  * Assemble Razor loops and once-only routines from module/ and recipe/ (design:
- * document/scripting/modules.md).
+ * content/public/scripting/modules.md).
  * Usage: the USAGE lines below, also printed on a wrong flag.
  *
  * Both kinds of file are made of boxes: a rule, the "# @" line, a blank "#" line and the "#" lines
@@ -497,7 +497,7 @@ const readBlocks = (recipe, name) => {
             continue;
         }
         if (text.startsWith("#")) {
-            if (text.includes(";")) throw new BuildError(`${name}:${number}: no ";" in a comment (document/scripting/razor.md part 3)`);
+            if (text.includes(";")) throw new BuildError(`${name}:${number}: no ";" in a comment (content/public/scripting/razor.md part 3)`);
             const body = commentText(line).trim();
             const reason = body.startsWith(">") ? body.slice(1).trim() : null;
             if (!body && box) continue;
@@ -869,7 +869,7 @@ const build = (path, modules, owner) => {
 
     for (const line of out) {
         if (line.trim().startsWith("#") && line.includes(";")) {
-            throw new BuildError(`${name}: a comment has ";" (document/scripting/razor.md part 3): ${line.trim()}`);
+            throw new BuildError(`${name}: a comment has ";" (content/public/scripting/razor.md part 3): ${line.trim()}`);
         }
     }
     return [[path, recipeText(loop, modules)], [join(REPO, recipe.output), textOf(out)]];

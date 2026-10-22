@@ -37,7 +37,7 @@ flowchart LR
 규칙이 다르면 앞의 것.
 
 1. 사용자 요청
-2. [AGENTS.md](https://github.com/minu-ha/uoo/blob/master/AGENTS.md)와 `document/`의 규칙 문서
+2. [AGENTS.md](https://github.com/minu-ha/uoo/blob/master/AGENTS.md)와 `content/`의 규칙 문서
 3. 같은 폴더의 기존 스크립트
 4. 공식 위키
 

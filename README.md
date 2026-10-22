@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="document/favicon.svg" width="96" height="96" alt="A gold ring in pixels">
+<img src="content/asset/favicon.svg" width="96" height="96" alt="A gold ring in pixels">
 
 # uoo
 
@@ -8,15 +8,15 @@
 
 Hunt, gather, train and keep house. Every loop built from shared blocks, every reason written down.
 
-[Outlands](https://uooutlands.com/) · [Razor Scripting](https://wiki.uooutlands.com/Razor_Scripting) · [Docs](document/README.md)
+[Outlands](https://uooutlands.com/) · [Razor Scripting](https://wiki.uooutlands.com/Razor_Scripting) · [Docs](content/README.md)
 
 [![MIT](https://img.shields.io/badge/license-MIT-1111aa?style=flat-square)](LICENSE)
 ![UO Outlands](https://img.shields.io/badge/UO-Outlands-8b1a1a?style=flat-square)
 ![Razor](https://img.shields.io/badge/Razor-Outlands%20fork-2b6cb0?style=flat-square)
-![Node 22+](https://img.shields.io/badge/node-22%2B-444444?style=flat-square)
+![Node 22.12.0+](https://img.shields.io/badge/node-22.12.0%2B-444444?style=flat-square)
 ![Docs](https://img.shields.io/badge/docs-for%20humanity-444444?style=flat-square)
 
-[Quick start](#quick-start) · [Scripts](script/README.md) · [Docs](document/README.md) · [Config](config/README.md) · [한국어](language/README.ko.md)
+[Quick start](#quick-start) · [Scripts](script/README.md) · [Docs](content/README.md) · [Config](config/README.md) · [한국어](language/README.ko.md)
 
 </div>
 
@@ -37,7 +37,7 @@ Hunt, gather, train and keep house. Every loop built from shared blocks, every r
 
 ### Build and check
 
-To change a loop or the docs you need Node.js 22 or later and pnpm:
+To change a loop or the docs you need Node.js 22.12.0 or later and pnpm:
 
 ```sh
 pnpm install
@@ -55,7 +55,7 @@ Generated loops are never edited by hand: edit `module/` and `recipe/`, then run
 |-------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------|
 | [`script/`](script/README.md) | the scripts, grouped by what they do                                                                                                      |
 | `module/`, `recipe/`          | loop blocks written once, and the recipes `util/build-scripts.mjs` assembles into every loop in `script/combat/` and `script/gather/`      |
-| [`document/`](document/README.md) | design docs in Markdown, read with [for humanity](https://for-humanity.fyi), one folder per group: how we work, scripting, game reference, templates, open questions. The [docs home](document/README.md) maps them |
+| [`content/`](content/README.md) | design docs in Markdown, read with [for humanity](https://for-humanity.fyi), one folder per group: how we work, scripting, game reference, templates, open questions. The [docs home](content/README.md) maps them |
 | [`config/`](config/README.md) | Razor and ClassicUO settings, one folder per player, and how the game gets linked to this repo                                           |
 | `util/`                       | `setup.sh` links the game to the repo, `build-scripts.mjs` assembles loops, `check.sh` checks scripts, `check-docs.mjs` checks docs links, `pvp-sim.mjs` models field duels, `razor-syntax/` highlights `.razor` in WebStorm and VS Code |
 | `language/`                   | translations of these READMEs                                                                                                             |
