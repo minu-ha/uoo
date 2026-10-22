@@ -51,7 +51,7 @@ order: 10
 | `razor-syntax/` | `.razor` 편집기 하이라이팅(02.F절) |
 
 - 웹이나 서버 프로젝트 아님. 스크립트 자동 검사는 `check.sh`와 그 안의 조립 검사뿐, 동작은 인게임에서만 확인
-- `pnpm check`: 스크립트 검사 + 문서 검사. `pnpm test`: `util/` 테스트
+- `pnpm check`: 스크립트, 설정 타입과 문서 검사. `pnpm test`: `util/` 테스트
 - 전투 모형의 입력, 정책, 실측 한계: [Lumberjack PvP](../templates/lumberjack-pvp.md#05.D) 05.D절
 
 ### <a id="01.B"></a>01.B script 분류와 파일명

@@ -9,14 +9,16 @@
     },
     "scripts": {
         "build": "node util/build-scripts.mjs",
-        "check": "util/check.sh && pnpm docs:build && node util/check-docs.mjs",
+        "check": "util/check.sh && pnpm typecheck && pnpm docs:build && node util/check-docs.mjs",
         "test": "node --test util/*.test.mjs",
         "docs:dev": "for-humanity dev",
         "docs:build": "for-humanity build && cp content/asset/favicon.svg content/dist/favicon.svg",
-        "docs:preview": "for-humanity preview"
+        "docs:preview": "for-humanity preview",
+        "typecheck": "tsc"
     },
     "devDependencies": {
         "for-humanity": "0.16.0",
-        "parse5": "7.3.0"
+        "parse5": "7.3.0",
+        "typescript": "7.0.2"
     }
 }

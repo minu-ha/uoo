@@ -42,9 +42,9 @@ To change a loop or the docs you need Node.js 22.12.0 or later and pnpm:
 ```sh
 pnpm install
 pnpm build       # assemble script/combat and script/gather from module/ and recipe/
-pnpm check       # block balance, unassigned variables, out-of-date loops and docs links
+pnpm check       # block balance, unassigned variables, generated loops, config types and docs links
 pnpm test        # the PvP simulator and docs check tests
-pnpm docs:dev    # read the docs at localhost:4321
+pnpm docs:dev    # read the docs at localhost:4323
 ```
 
 Generated loops are never edited by hand: edit `module/` and `recipe/`, then run `pnpm build`.

@@ -45,7 +45,7 @@ order: 20
 | `content/public/` | 공개 문서. 하위 폴더명 `public`은 페이지 URL에서 제외 |
 | `content/private/` | 로컬에서만 읽는 문서. 현재 없음, 필요할 때 생성 |
 | `content/asset/favicon.svg` | 사이트 아이콘. `pnpm docs:build`가 결과물에 덮어씀 |
-| `for-humanity.config.mjs` | 저장소 루트의 사이트 설정. 언어(`lang`), 묶음 순서(`navigation`), 확인 알약 문구(`status`) |
+| `for-humanity.config.ts` | 저장소 루트의 `SiteConfig` 타입 설정. 포트(`port`), 언어(`lang`), 묶음 순서(`navigation`), 확인 알약 문구(`status`) |
 
 - `content/dist/`: `pnpm docs:build` 결과물. git 제외
 - `dev`는 공개와 내부 문서, `build`와 `preview`는 홈과 공개 문서만 표시
@@ -54,9 +54,10 @@ order: 20
 
 | 명령 | 역할 |
 | --- | --- |
-| `pnpm docs:dev` | [localhost:4321](http://localhost:4321) 개발 서버. 수정 시 다시 그림 |
+| `pnpm docs:dev` | [localhost:4323](http://localhost:4323) 개발 서버. 수정 시 다시 그림 |
 | `pnpm docs:build` | `content/dist/`에 사이트 생성. frontmatter, 깨진 `.md` 링크, 부품 문법 검사 |
-| `pnpm docs:preview` | 생성한 사이트 띄우기 |
+| `pnpm docs:preview` | [localhost:4323](http://localhost:4323)에서 생성한 사이트 띄우기 |
+| `pnpm typecheck` | `for-humanity.config.ts`의 설정 타입 검사 |
 | `node util/check-docs.mjs` | 끊긴 링크와 앵커, 번호 제목의 앵커 검사 |
 
 ::part[쓰기]
@@ -68,7 +69,7 @@ order: 20
 3. frontmatter
    - `name`: 영어 이름. 문서 제목과 사이드바 목록
    - `label`: 한글 설명. 사이드바 툴팁, 검색 결과와 링크 미리보기 설명
-   - `group`: 폴더에 맞는 묶음(01절 표). 새 묶음이면 폴더 추가, `for-humanity.config.mjs`의 `navigation`에 순서 추가
+   - `group`: 폴더에 맞는 묶음(01절 표). 새 묶음이면 폴더 추가, `for-humanity.config.ts`의 `navigation`에 순서 추가
    - `order`: 묶음 안 순서. 10 단위
 4. 세 곳에 한 줄씩 추가
    - [문서 홈](../../README.md) 문서 표
@@ -163,7 +164,7 @@ order: {묶음 안 순서}
 - 코드 블록: 코드, 의사 코드, 파일 트리만. 칸 맞춤은 표로
 - Razor 코드 블록은 언어 표시 없이(` ``` `만). Shiki에 Razor 문법 없음
 - 인용과 확인 표시: [Workflow](workflow.md#01.C) 01.C절. "인게임 확인됨"과 "확인되지 않았다"는 그대로 쓰면 확인 알약.
-  날짜까지 알약(`인게임 확인됨 2026-09-28`), 괄호는 숨김. 코드, 링크, 제목 안은 그대로. 문구는 `for-humanity.config.mjs`의 `status`
+  날짜까지 알약(`인게임 확인됨 2026-09-28`), 괄호는 숨김. 코드, 링크, 제목 안은 그대로. 문구는 `for-humanity.config.ts`의 `status`
 - 색 값만 든 인라인 코드(`#e80030`)에 색 칩
 - 같은 공개 문서끼리는 기존 상대 경로 `.md` 링크. 홈에서 공개 문서는 `public/` 포함, 공개 문서에서 홈은 실제 위치에 맞춰 `../` 추가
 - `content/` 밖 파일(AGENTS.md, `script/`, `util/` 등): GitHub 주소(`https://github.com/minu-ha/uoo/blob/master/<경로>`)
@@ -198,5 +199,5 @@ order: {묶음 안 순서}
 
 - 한 줄 200자 이내(`.editorconfig`의 `max_line_length`). 넘으면 코드 밖 빈칸, 되도록 문장 끝에서 줄바꿈. 표의 줄과 코드 블록 안은 예외
 - 05절 기준 재확인. 가운뎃점은 `git grep -n '·' -- content`
-- `pnpm check`: 사이트 생성(`pnpm docs:build`), 링크와 앵커와 번호 제목 검사(`node util/check-docs.mjs`)
+- `pnpm check`: 설정 타입 검사(`pnpm typecheck`), 사이트 생성(`pnpm docs:build`), 링크와 앵커와 번호 제목 검사(`node util/check-docs.mjs`)
 - `pnpm docs:dev`로 확인. 밝은 테마와 어두운 테마, 폭 1024와 390에서 가로 밀림, 흐름도

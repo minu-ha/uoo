@@ -42,9 +42,9 @@
 ```sh
 pnpm install
 pnpm build       # module/과 recipe/로 script/combat, script/gather를 조립
-pnpm check       # 블록 짝, 값을 넣지 않은 변수, 오래된 루프, 문서 링크
+pnpm check       # 블록 짝, 변수, 조립 결과, 설정 타입과 문서 링크
 pnpm test        # PvP 시뮬레이터와 문서 검사의 테스트
-pnpm docs:dev    # localhost:4321에서 문서 읽기
+pnpm docs:dev    # localhost:4323에서 문서 읽기
 ```
 
 생성된 루프는 손으로 고치지 않습니다. `module/`과 `recipe/`를 고치고 `pnpm build`를 돌립니다.
