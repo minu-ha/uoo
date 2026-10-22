@@ -419,6 +419,11 @@ if not timerexists "timer__provo_retry"
 endif
 settimer "timer__provo_retry" interval__provo_retry
 
+if not timerexists "timer__provo_target"
+    createtimer "timer__provo_target"
+endif
+settimer "timer__provo_target" 0
+
 
 # ----------------------------------------------------------------------------------------
 # module/bard/disco.razor
@@ -649,6 +654,7 @@ endif
 @setvar! var__provo_second 0
 @setvar! var__provo_dropped 0
 @setvar! var__provo_sent 0
+@setvar! var__provo_done 0
 @setvar! var__provo_answer 0
 
 
@@ -2002,49 +2008,53 @@ while not dead
             endif
 
             @setvar! var__provo_sent 0
+            @setvar! var__provo_done 0
+            settimer "timer__provo_target" 0
 
-            for 2
-                if index = 0 or var__provo_sent = 1
-                    if targetexists "harmful" and not warmode
-                        if find lastharmful ground -1 -1 config__acquire_range as alias__fresh_target
-                            @setvar! var__fresh_serial alias__fresh_target
+            while var__provo_done = 0 and not warmode and timer "timer__provo_target" < wait__bard_target
+                if targetexists "harmful"
+                    if find lastharmful ground -1 -1 config__acquire_range as alias__fresh_target
+                        @setvar! var__fresh_serial alias__fresh_target
 
-                            if 0x40000000 > var__fresh_serial and var__combat_target != alias__fresh_target and var__target_hold != alias__fresh_target
-                                if not dead alias__fresh_target
-                                    if noto alias__fresh_target = "hostile" or noto alias__fresh_target = "criminal" or noto alias__fresh_target = "enemy" or noto alias__fresh_target = "murderer"
-                                        @setvar! var__combat_target alias__fresh_target
-                                        settimer "timer__target_grace" 0
+                        if 0x40000000 > var__fresh_serial and var__combat_target != alias__fresh_target and var__target_hold != alias__fresh_target
+                            if not dead alias__fresh_target
+                                if noto alias__fresh_target = "hostile" or noto alias__fresh_target = "criminal" or noto alias__fresh_target = "enemy" or noto alias__fresh_target = "murderer"
+                                    @setvar! var__combat_target alias__fresh_target
+                                    settimer "timer__target_grace" 0
 
-                                        if config__chatty = 1
-                                            overhead "[ target, set ]" 1288 var__combat_target
-                                        endif
+                                    if config__chatty = 1
+                                        overhead "[ target, set ]" 1288 var__combat_target
                                     endif
                                 endif
                             endif
                         endif
-
-                        if find var__provo_first ground -1 -1 config__target_range and find var__provo_second ground -1 -1 config__target_range
-                            if not dead var__provo_first and not dead var__provo_second
-                                if index = 0
-                                    @setvar! var__target_hold var__provo_first
-                                else
-                                    @setvar! var__target_hold var__provo_second
-                                endif
-
-                                target var__target_hold
-
-                                if index = 0
-                                    @setvar! var__provo_sent 1
-                                    waitfortarget wait__bard_target
-                                else
-                                    @setvar! var__provo_sent 2
-                                    wait wait__short
-                                endif
-                            endif
-                        endif
                     endif
+
+                    if find var__provo_first ground -1 -1 config__target_range and find var__provo_second ground -1 -1 config__target_range
+                        if not dead var__provo_first and not dead var__provo_second
+                            if var__provo_sent = 0
+                                @setvar! var__target_hold var__provo_first
+                                target var__target_hold
+                                @setvar! var__provo_sent 1
+                            else
+                                @setvar! var__target_hold var__provo_second
+                                target var__target_hold
+                                @setvar! var__provo_sent 2
+                                @setvar! var__provo_done 1
+                            endif
+
+                            settimer "timer__provo_target" 0
+                            wait wait__short
+                        else
+                            @setvar! var__provo_done 1
+                        endif
+                    else
+                        @setvar! var__provo_done 1
+                    endif
+                else
+                    wait wait__poll
                 endif
-            endfor
+            endwhile
 
             if targetexists "harmful" and not warmode
                 hotkey "Cancel Current Target"
@@ -3005,7 +3015,7 @@ while not dead
         # --------------------------------------------------------------------------------
         # BARD SONG                                                 module/bard/song.razor
         # --------------------------------------------------------------------------------
-        if cooldown "song" = 0 and cooldown "music" = 0 and timer "timer__song_retry" >= interval__song_retry and not warmode and var__instrument_ok = 1 and var__my_instrument != 0 and not targetexists and not casting
+        if var__combat_target = 0 and cooldown "song" = 0 and cooldown "music" = 0 and timer "timer__song_retry" >= interval__song_retry and not warmode and var__instrument_ok = 1 and var__my_instrument != 0 and not targetexists and not casting
             @setvar! var__song_after 0
 
             if insysmsg "under the effect of a Song"

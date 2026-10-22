@@ -1,8 +1,9 @@
 # ----------------------------------------------------------------------------------------
 # Re-arms what each hand held, out of the backpack, when a cast or a disarm empties it.
-# Hands are recorded at Play, before recovery can cast, then every two seconds. Each
-# layer keeps its serial across Plays. A missing item is forgotten, and a replacement
-# seen on that layer takes over. No label or weapon table is needed.
+# Hands are recorded at Play, before recovery can cast, then every two seconds. An empty
+# remembered hand is seen on every pass, so the pass after a cast already asks for the
+# weapon back. Each layer keeps its serial across Plays. A missing item is forgotten, and
+# a replacement seen on that layer takes over. No label or weapon table is needed.
 # With no remembered item, rearm_graphic picks from the backpack. Its pending serial
 # stays fixed until a hand confirms it or it leaves the backpack. The first request
 # uses lefthand, as hotkey/weapon-katana does. The actual layer is read after the equip.
@@ -25,16 +26,23 @@
 # @ wait
 #
 #   interval__equip_retry
-#      How often the hands are read. A refused equip, after a disarm for example, waits
-#      this long before the next try.
+#      How often the hands are read in full, and how long one equip request is given
+#      before the next. A refused equip, after a disarm for example, waits this long.
 # ----------------------------------------------------------------------------------------
 @setvar! interval__equip_retry 2000
 
 
 # ----------------------------------------------------------------------------------------
 # @ timer
+#
+#   timer__equip
+#      Runs from the last full read of the hands.
+#
+#   timer__equip_sent
+#      Runs from the last equip request. Ready on the first pass.
 # ----------------------------------------------------------------------------------------
 timer__equip interval__equip_retry
+timer__equip_sent interval__equip_retry
 
 
 # ----------------------------------------------------------------------------------------
@@ -51,6 +59,10 @@ timer__equip interval__equip_retry
 #
 #   var__rearm_sent
 #      Scratch: 1 once this check sent an equip, so the second hand waits for the next.
+#
+#   var__rearm_due
+#      Scratch: 1 on a pass that reads the hands, on the clock or because a remembered
+#      hand is empty.
 # ----------------------------------------------------------------------------------------
 if not varexist var__rearm_left
     @setvar! var__rearm_left 0
@@ -62,6 +74,7 @@ endif
 
 @setvar! var__rearm_pending 0
 @setvar! var__rearm_sent 0
+@setvar! var__rearm_due 0
 
 
 # ----------------------------------------------------------------------------------------
@@ -91,15 +104,27 @@ endif
     # ------------------------------------------------------------------------------------
     # REARM
     #
-    # Every two seconds. Arming before a cast completes interrupts the cast (wiki Combat
-    # Overview), so casting, a cursor, the item queue and hiding block this. Each layer:
-    # an item in hand is remembered once by serial, an empty hand gets its remembered
-    # item back out of the backpack, and a remembered item in neither place is forgotten.
-    # One equip per check, the two-handed layer first. With both hands empty and nothing
-    # remembered, rearm_graphic names the one to pick. The request is not proof of the
-    # equip: the next check reads the hands again.
+    # A remembered hand found empty is re-armed on the pass that sees it: a cast drops the
+    # weapon, settle_first waits the cast out, and lhandempty and rhandempty are cheap
+    # enough to read every pass. Arming before a cast completes interrupts the cast (wiki
+    # Combat Overview), so casting, a cursor, the item queue and hiding block this. Every
+    # interval__equip_retry the hands are read in full: an item in hand is remembered once
+    # by serial, and a remembered item in neither place is forgotten. One equip per pass,
+    # the two-handed layer first. The request is not proof of the equip, so the next one
+    # waits interval__equip_retry and the hands are read again. With both hands empty and
+    # nothing remembered, rearm_graphic names the one to pick.
     # ------------------------------------------------------------------------------------
+    @setvar! var__rearm_due 0
+
     if timer "timer__equip" >= interval__equip_retry
+        @setvar! var__rearm_due 1
+    elseif var__rearm_left != 0 and lhandempty
+        @setvar! var__rearm_due 1
+    elseif var__rearm_right != 0 and rhandempty
+        @setvar! var__rearm_due 1
+    endif
+
+    if var__rearm_due = 1
         if not hidden and not queued and not casting and not targetexists
             settimer "timer__equip" 0
             @setvar! var__rearm_sent 0
@@ -114,13 +139,14 @@ endif
                         sysmsg "Rearm: two-handed layer remembered, serial={{alias__rearm_left}}." 88
                     endif
                 endif
-            elseif var__rearm_left != 0
+            elseif var__rearm_left != 0 and timer "timer__equip_sent" >= interval__equip_retry
                 if find var__rearm_left backpack as alias__rearm_packed
-                    # lift waits for the held item. The retry timer spaces the next hand check,
+                    # lift waits for the held item. The sent timer spaces the next request,
                     # so a refused equip after a disarm does not stall recovery.
                     lift alias__rearm_packed
                     drop self lefthand
                     @setvar! var__rearm_sent 1
+                    settimer "timer__equip_sent" 0
 
                     if config__sysmsg = 1
                         sysmsg "Rearm: equip requested on the two-handed layer, serial={{alias__rearm_packed}}. The next check reads the hands." 88
@@ -143,11 +169,12 @@ endif
                             sysmsg "Rearm: one-handed layer remembered, serial={{alias__rearm_right}}." 88
                         endif
                     endif
-                elseif var__rearm_right != 0
+                elseif var__rearm_right != 0 and timer "timer__equip_sent" >= interval__equip_retry
                     if find var__rearm_right backpack as alias__rearm_packed
                         lift alias__rearm_packed
                         drop self righthand
                         @setvar! var__rearm_sent 1
+                        settimer "timer__equip_sent" 0
 
                         if config__sysmsg = 1
                             sysmsg "Rearm: equip requested on the one-handed layer, serial={{alias__rearm_packed}}. The next check reads the hands." 88
@@ -160,7 +187,7 @@ endif
                 endif
             endif
 
-            if var__rearm_sent = 0 and config__rearm_graphic != 0 and var__rearm_left = 0 and var__rearm_right = 0 and lhandempty and rhandempty
+            if var__rearm_sent = 0 and config__rearm_graphic != 0 and var__rearm_left = 0 and var__rearm_right = 0 and lhandempty and rhandempty and timer "timer__equip_sent" >= interval__equip_retry
                 if not find var__rearm_pending backpack
                     @setvar! var__rearm_pending 0
 
@@ -173,6 +200,7 @@ endif
                     # Keep the choice separate from the confirmed hand serials.
                     lift alias__rearm_found
                     drop self lefthand
+                    settimer "timer__equip_sent" 0
 
                     if config__sysmsg = 1
                         sysmsg "Rearm: graphic {{config__rearm_graphic}} picked from the backpack, serial={{alias__rearm_found}}. The next check reads the hands." 88

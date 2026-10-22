@@ -1,5 +1,6 @@
 # ----------------------------------------------------------------------------------------
-# One bard song per walk pass, Discordance, Peacemaking and Provocation in turn.
+# One bard song per walk pass with no enemy remembered, Discordance, Peacemaking and
+# Provocation in turn.
 #
 # @ hotkeys Cancel Current Target
 # ----------------------------------------------------------------------------------------
@@ -52,9 +53,10 @@ endif
     # BARD SONG
     #
     # Three 15 minute AoE buffs, each worth 8.5% at this Effective Barding, landing on the
-    # player and every follower in range. Sung on the walk between pulls, never in a
-    # fight: while engaged, Discordance and Peacemaking keep Music busy so a song rarely
-    # gets a window, and playing an instrument interrupts a spell already in flight.
+    # player and every follower in range. Sung on the walk between pulls, never while an
+    # enemy is remembered: in a fight Discordance and Peacemaking keep Music busy so a
+    # song rarely gets a window, playing an instrument interrupts a spell already in
+    # flight, and the song's cursor would move the last target (below).
     #
     # Singing on the walk is what removes follower tracking from this script. A resummoned
     # creature picks the songs up on the next walk, so nothing has to notice that it died.
@@ -72,12 +74,13 @@ endif
     # The song goes on yourself, the backpack. The ground works too, but a house refuses
     # it and Shadowspire Cathedral refuses the script's (Bard Necro 02.B), and each
     # refusal burns a Music window. The backpack answers a harmful cursor and moves
-    # lastharmful, which the loop does not read for its target (fight/target): only the
-    # keys pressed by hand point at the backpack until the next pick.
+    # lastharmful, which Attack Last Target and the last-target keys follow. So no song
+    # while an enemy is remembered (fight/target), not even one still walking in: a song
+    # there would send the next V at the backpack.
     #
     # The chain only picks the skill and the song after it, the three share the rest.
     # ------------------------------------------------------------------------------------
-    if cooldown "song" = 0 and cooldown "music" = 0 and timer "timer__song_retry" >= interval__song_retry and not warmode and var__instrument_ok = 1 and var__my_instrument != 0 and not targetexists and not casting
+    if var__combat_target = 0 and cooldown "song" = 0 and cooldown "music" = 0 and timer "timer__song_retry" >= interval__song_retry and not warmode and var__instrument_ok = 1 and var__my_instrument != 0 and not targetexists and not casting
         @setvar! var__song_after 0
 
         # Read off, so an old line cannot pass for this song's answer.

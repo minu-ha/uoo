@@ -30,9 +30,14 @@
 #
 #   timer__provo_seen, timer__provo_retry
 #      Ready on the first pass.
+#
+#   timer__provo_target
+#      Runs from the request and from each delivery, so each cursor gets its own
+#      wait__bard_target to show.
 # ----------------------------------------------------------------------------------------
 timer__provo_seen interval__provo_seen
 timer__provo_retry interval__provo_retry
+timer__provo_target 0
 
 
 # ----------------------------------------------------------------------------------------
@@ -49,6 +54,9 @@ timer__provo_retry interval__provo_retry
 #      Scratch: 0 before delivery, 1 after the first creature, 2 after the second.
 #      The second delivery is allowed only after the first was sent.
 #
+#   var__provo_done
+#      Scratch: 1 once both were delivered, or the pair broke while a cursor waited.
+#
 #   var__provo_answer
 #      Scratch: what the server answered, 0 nothing known, 1 provoked, 2 failed, 3 out of
 #      reach, 4 the first one cannot be provoked, 5 the slot was not free yet.
@@ -57,6 +65,7 @@ timer__provo_retry interval__provo_retry
 @setvar! var__provo_second 0
 @setvar! var__provo_dropped 0
 @setvar! var__provo_sent 0
+@setvar! var__provo_done 0
 @setvar! var__provo_answer 0
 
 
@@ -187,52 +196,60 @@ createlist 'list__provo_never'
                 endif
             endif
 
-            # Revalidate after each cursor wait. Never deliver the second alone.
+            # Deliver the pair: the first creature, then the one it is to attack. Each cursor
+            # is given wait__bard_target to show, polled the way bard/disco waits for its one,
+            # and the pair is checked again before each delivery. The second is never
+            # delivered alone, and a harmful cursor still up at the end is cancelled, so a
+            # late second cursor cannot stay open and take the next pick by hand.
             @setvar! var__provo_sent 0
+            @setvar! var__provo_done 0
+            settimer "timer__provo_target" 0
 
-            for 2
-                if index = 0 or var__provo_sent = 1
-                    if targetexists "harmful" and not warmode
-                        # Preserve a completed Q selection before our target overwrites it.
-                        if find lastharmful ground -1 -1 config__acquire_range as alias__fresh_target
-                            @setvar! var__fresh_serial alias__fresh_target
+            while var__provo_done = 0 and not warmode and timer "timer__provo_target" < wait__bard_target
+                if targetexists "harmful"
+                    # Preserve a completed Q selection before our target overwrites it.
+                    if find lastharmful ground -1 -1 config__acquire_range as alias__fresh_target
+                        @setvar! var__fresh_serial alias__fresh_target
 
-                            if 0x40000000 > var__fresh_serial and var__combat_target != alias__fresh_target and var__target_hold != alias__fresh_target
-                                if not dead alias__fresh_target
-                                    if noto alias__fresh_target = "hostile" or noto alias__fresh_target = "criminal" or noto alias__fresh_target = "enemy" or noto alias__fresh_target = "murderer"
-                                        @setvar! var__combat_target alias__fresh_target
-                                        settimer "timer__target_grace" 0
+                        if 0x40000000 > var__fresh_serial and var__combat_target != alias__fresh_target and var__target_hold != alias__fresh_target
+                            if not dead alias__fresh_target
+                                if noto alias__fresh_target = "hostile" or noto alias__fresh_target = "criminal" or noto alias__fresh_target = "enemy" or noto alias__fresh_target = "murderer"
+                                    @setvar! var__combat_target alias__fresh_target
+                                    settimer "timer__target_grace" 0
 
-                                        if config__chatty = 1
-                                            overhead "[ target, set ]" 1288 var__combat_target
-                                        endif
+                                    if config__chatty = 1
+                                        overhead "[ target, set ]" 1288 var__combat_target
                                     endif
                                 endif
                             endif
                         endif
-
-                        if find var__provo_first ground -1 -1 config__target_range and find var__provo_second ground -1 -1 config__target_range
-                            if not dead var__provo_first and not dead var__provo_second
-                                if index = 0
-                                    @setvar! var__target_hold var__provo_first
-                                else
-                                    @setvar! var__target_hold var__provo_second
-                                endif
-
-                                target var__target_hold
-
-                                if index = 0
-                                    @setvar! var__provo_sent 1
-                                    waitfortarget wait__bard_target
-                                else
-                                    @setvar! var__provo_sent 2
-                                    wait wait__short
-                                endif
-                            endif
-                        endif
                     endif
+
+                    if find var__provo_first ground -1 -1 config__target_range and find var__provo_second ground -1 -1 config__target_range
+                        if not dead var__provo_first and not dead var__provo_second
+                            if var__provo_sent = 0
+                                @setvar! var__target_hold var__provo_first
+                                target var__target_hold
+                                @setvar! var__provo_sent 1
+                            else
+                                @setvar! var__target_hold var__provo_second
+                                target var__target_hold
+                                @setvar! var__provo_sent 2
+                                @setvar! var__provo_done 1
+                            endif
+
+                            settimer "timer__provo_target" 0
+                            wait wait__short
+                        else
+                            @setvar! var__provo_done 1
+                        endif
+                    else
+                        @setvar! var__provo_done 1
+                    endif
+                else
+                    wait wait__poll
                 endif
-            endfor
+            endwhile
 
             if targetexists "harmful" and not warmode
                 hotkey "Cancel Current Target"

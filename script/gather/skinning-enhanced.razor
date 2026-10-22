@@ -268,6 +268,11 @@ if not timerexists "timer__equip"
 endif
 settimer "timer__equip" interval__equip_retry
 
+if not timerexists "timer__equip_sent"
+    createtimer "timer__equip_sent"
+endif
+settimer "timer__equip_sent" interval__equip_retry
+
 
 # ----------------------------------------------------------------------------------------
 # module/buff/potions.razor
@@ -410,6 +415,7 @@ if not varexist var__rearm_right
 endif
 @setvar! var__rearm_pending 0
 @setvar! var__rearm_sent 0
+@setvar! var__rearm_due 0
 
 
 # ----------------------------------------------------------------------------------------
@@ -784,7 +790,17 @@ while not dead
     # ------------------------------------------------------------------------------------
     # REARM                                                       module/fight/rearm.razor
     # ------------------------------------------------------------------------------------
+    @setvar! var__rearm_due 0
+
     if timer "timer__equip" >= interval__equip_retry
+        @setvar! var__rearm_due 1
+    elseif var__rearm_left != 0 and lhandempty
+        @setvar! var__rearm_due 1
+    elseif var__rearm_right != 0 and rhandempty
+        @setvar! var__rearm_due 1
+    endif
+
+    if var__rearm_due = 1
         if not hidden and not queued and not casting and not targetexists
             settimer "timer__equip" 0
             @setvar! var__rearm_sent 0
@@ -799,11 +815,12 @@ while not dead
                         sysmsg "Rearm: two-handed layer remembered, serial={{alias__rearm_left}}." 88
                     endif
                 endif
-            elseif var__rearm_left != 0
+            elseif var__rearm_left != 0 and timer "timer__equip_sent" >= interval__equip_retry
                 if find var__rearm_left backpack as alias__rearm_packed
                     lift alias__rearm_packed
                     drop self lefthand
                     @setvar! var__rearm_sent 1
+                    settimer "timer__equip_sent" 0
 
                     if config__sysmsg = 1
                         sysmsg "Rearm: equip requested on the two-handed layer, serial={{alias__rearm_packed}}. The next check reads the hands." 88
@@ -826,11 +843,12 @@ while not dead
                             sysmsg "Rearm: one-handed layer remembered, serial={{alias__rearm_right}}." 88
                         endif
                     endif
-                elseif var__rearm_right != 0
+                elseif var__rearm_right != 0 and timer "timer__equip_sent" >= interval__equip_retry
                     if find var__rearm_right backpack as alias__rearm_packed
                         lift alias__rearm_packed
                         drop self righthand
                         @setvar! var__rearm_sent 1
+                        settimer "timer__equip_sent" 0
 
                         if config__sysmsg = 1
                             sysmsg "Rearm: equip requested on the one-handed layer, serial={{alias__rearm_packed}}. The next check reads the hands." 88
@@ -843,7 +861,7 @@ while not dead
                 endif
             endif
 
-            if var__rearm_sent = 0 and config__rearm_graphic != 0 and var__rearm_left = 0 and var__rearm_right = 0 and lhandempty and rhandempty
+            if var__rearm_sent = 0 and config__rearm_graphic != 0 and var__rearm_left = 0 and var__rearm_right = 0 and lhandempty and rhandempty and timer "timer__equip_sent" >= interval__equip_retry
                 if not find var__rearm_pending backpack
                     @setvar! var__rearm_pending 0
 
@@ -855,6 +873,7 @@ while not dead
                 if find var__rearm_pending backpack as alias__rearm_found
                     lift alias__rearm_found
                     drop self lefthand
+                    settimer "timer__equip_sent" 0
 
                     if config__sysmsg = 1
                         sysmsg "Rearm: graphic {{config__rearm_graphic}} picked from the backpack, serial={{alias__rearm_found}}. The next check reads the hands." 88
