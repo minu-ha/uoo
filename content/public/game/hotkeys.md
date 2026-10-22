@@ -166,7 +166,7 @@ Ctrl = Cmd, Alt = Option(01절) → macOS가 먼저 가져가는 키 있음.
 | nomeehej, Bard Archer (bard) | Disco, Peace, Provo | bard-archer-enhanced | pvp | — |
 | nomeehui (옛 xuezhonglian), PK 메이지 (default) | Feeblemind, Weaken, Clumsy | skinning-enhanced (현재 연결) | pvp | Water El과 Earth El만 (`Alt+3`, `Alt+4`) |
 
-- 2026-10-21 nomeehej를 Bard Necro(summoner)에서 Bard Archer(bard)로. summoner 프로필과 bard-necro-enhanced는 그대로 둠([Bard Archer](../templates/bard-archer.md#04.D) 04.D절)
+- 2026-10-21 nomeehej를 Bard Necro(summoner)에서 Bard Archer(bard)로. summoner 프로필과 bard-necro-enhanced는 그대로 둠([Bard Archer](../templates/bard-archer.md#03) 03절)
 - summoner일 때 nomeehej의 Alt 줄: 소환 5와 VS
 
 ## <a id="04"></a>04 손에 잡히는 흐름

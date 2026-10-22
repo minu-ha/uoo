@@ -853,7 +853,7 @@ A 공격자, B 대상의 통제 시험. 매번 화면 주인 기록.
 
 ## <a id="16"></a>16 bard-archer-enhanced 인게임 확인
 
-설계와 숫자는 [Bard Archer](../templates/bard-archer.md#04) 04절. 새 루프와 새 프로필 → 클라이언트 재시작, nomeehej의 Razor 프로필을 `bard`로([Workflow](../working/workflow.md#04.A) 04.A절).
+설계와 숫자는 [Bard Archer Enhanced](../loops/bard-archer-enhanced.md). 새 루프와 새 프로필 → 클라이언트 재시작, nomeehej의 Razor 프로필을 `bard`로([Workflow](../working/workflow.md#04.A) 04.A절).
 프로보 후보 입력은 [17절](#17), 악기 복구는 [14절](#14).
 
 | 검사 | 하는 것 | 통과 기준 | 상태 |
@@ -947,7 +947,7 @@ A 공격자, B 대상의 통제 시험. 매번 화면 주인 기록.
 - 바드 블록 없음
 - `[CodexHotbar`를 시작 때 한 번 요청([Commands](https://wiki.uooutlands.com/Commands) "Launches the Codex Hotbar"). 코덱스 자세와 피니셔의 자동 전환 없음
 - Full Draw: 활은 2.21초에 한 발([PvP](../game/pvp.md#09.B) 09.B절 표) → 15초에 6.8발 × 50% = 약 340%. Repeater 225%보다 큼. 정지 3초 조건이라 움직이며 쏘면 Repeater(`ability_main` 3)
-- 사거리 10: 활([Bard Archer](../templates/bard-archer.md#02.A) 02.A절). `target_range`와 `ability_range` 모두 10
+- 사거리 10: 활([Archery](../mechanics/archery.md#01) 01절). `target_range`와 `ability_range` 모두 10
 - 버프는 bard-archer와 같은 RA 24, Reflect 34, Protection 26. Greater Heal 11과 Teleport 9의 20을 남김
 - 스탯 포션 기준선 STR 120, DEX 100은 기본값. 이 템플릿의 스탯은 미기록 → 다르면 레시피에서 변경
 - `rearm_graphic` 5042로 활 검색. 공용 재장착 동작과 상태는 [16절](#16) 재장착 항목

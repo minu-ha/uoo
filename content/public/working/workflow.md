@@ -50,7 +50,9 @@ flowchart LR
 | [Bard Necro](../templates/bard-necro.md) | Bard Necro의 캐릭터, 코덱스 배분, 소환수 선택, PvP 판단 |
 | [Bard Necro Enhanced](../loops/bard-necro-enhanced.md) | bard-necro-enhanced 루프의 설계, 자원, 마나 예산, 설계 결정, 소환수 블록 |
 | [Lumberjack PvP](../templates/lumberjack-pvp.md) | 벌목과 PvP 템플릿의 스킬, 스탯, 도끼 선택, 마나 예산, 교전 분기, 구현 요구사항 |
-| [Bard Archer](../templates/bard-archer.md) | Bard Archer의 스킬과 코덱스, 갑옷과 마나, 아처리 자세와 피니셔와 무기 능력, 부활, 전투 루프 설계 |
+| [Archery](../mechanics/archery.md) | 아처리 무기와 사격 간격, 자세, 피니셔, 무기 능력, PvP에서 빠지는 것 |
+| [Bard Archer](../templates/bard-archer.md) | Bard Archer의 스킬과 코덱스, 갑옷과 마나, 부활, bard 프로필 |
+| [Bard Archer Enhanced](../loops/bard-archer-enhanced.md) | bard-archer-enhanced 루프의 블록 순서, 여러 마리 판정, Virtuoso 유지 |
 | [Open items](../questions/open-items.md) | 사용자에게 물을 것. 뜨지 않는 바, 규칙과 어긋난 줄, 출처 없는 숫자, 인게임 확인 목록 |
 
 ::part[근거]
