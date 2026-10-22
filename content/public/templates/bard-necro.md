@@ -98,7 +98,7 @@ Bard Necro 템플릿의 메커니즘과 판단. 소환 조합, 전투 루프의 
 | Discordance 디버프 | printed 80이면 `80/120 x 25 = ` **16.7%** | printed 기준(02.L절) |
 | Discordance 지속 | **1분 21초 \~ 1분 57초** | 측정값. 장비와 대상에 따라 다름 |
 | Peace와 Provo의 최소 지속 | `15 x 0.8 = ` **12초** | 난이도 300 이상은 이 값(02.N절) |
-| Peace와 Provo 실제 지속(난이도 300) | **51초**. 유효 바드 스킬 169, 성공률 72.5% | 프로필 Barding 화면, 2026-10-20 사용자 확인(Provocation, Peacemaking 둘 다). 위 최소값 계산보다 훨씬 김 |
+| Peace와 Provo 실제 지속(난이도 300) | **51초**. 유효 바드 스킬 169, 성공률 72.5% | 프로필 Barding 화면, 인게임 확인됨 2026-10-20(Provocation, Peacemaking 둘 다). 위 최소값 계산보다 훨씬 김 |
 | 바딩 최소 성공률 | **56.1%**. Perfect Pitch T3를 더하면 **72.9%** | 공식(02.R절) |
 | Barding Break(난이도 400) | 초당 **4%**, 걸리면 **40초** | **Peace와 Provo만** 끊음(02.O절) |
 
@@ -151,7 +151,7 @@ target backpack
 ```
 
 - 위키 [Musicianship](https://wiki.uooutlands.com/Musicianship): 송은 땅을 찍어 켬. 받는 대상은 자신, 자신에게 초록으로 뜨는 플레이어와 생물(팔로워), 파티원. 50칸 안
-- 마지막 줄 `target backpack` → 자신에게 송(범위 효과). 땅(`targetrelloc 0 0`)도 송이 되지만 집 안에서는 `That is not accessible.`로 거절되고, Shadowspire Cathedral에서는 스크립트의 땅만 실패(손으로 바닥을 찍으면 됨). 모두 2026-10-20 사용자 확인
+- 마지막 줄 `target backpack` → 자신에게 송(범위 효과). 땅(`targetrelloc 0 0`)도 송이 되지만 집 안에서는 `That is not accessible.`로 거절되고, Shadowspire Cathedral에서는 스크립트의 땅만 실패(손으로 바닥을 찍으면 됨). 모두 인게임 확인됨 2026-10-20
   - `targetrelloc 0 0`은 발밑을 좌표로 찍어서, 건물 바닥에서는 보이는 바닥과 달라지는 것으로 추정. 참고 스크립트들이 백팩을 찍는 이유로 보임
 - 노래 커서는 적대 커서 → 백팩을 찍으면 `lastharmful`이 백팩으로 바뀜. 루프는 사본(`var__combat_target`)을 쓰고 백팩은 새 대상으로 안 받아 영향 없음. 손으로 누르는 E, V, Shift+V는 다음 고르기 전까지 백팩을 가리킴 → 적이 기억돼 있는 동안은 노래 없음(2026-10-22 변경)
 - `module/bard/song.razor`는 백팩. 2026-10-20 하루 땅을 썼다가, 거절되는 장소와 그때마다 태우는 Music 때문에 백팩으로 돌아옴
@@ -388,7 +388,7 @@ findbuff "song of peacemaking"
 - **데미지로 안 풀림.** 풀리는 것은 **Barding Break뿐**
 - 위키 어디에도 "damage breaks pacify" 없음. 클래식 UO 규칙 적용 안 함
 - → **피스를 걸고 때려도 됨.** 소환수 공격에도 안 풀림. 피스와 공격 로직이 서로 막을 이유 없음
-- **피스가 걸린 몹도 프로보가 걸림**(2026-10-20 사용자 확인). 대상으로 피스를 받던 A를 B에게 프로보한 첫 시험
+- **피스가 걸린 몹도 프로보가 걸림**(인게임 확인됨 2026-10-20). 대상으로 피스를 받던 A를 B에게 프로보한 첫 시험
 
 ### <a id="02.Q"></a>02.Q Bard Codex
 

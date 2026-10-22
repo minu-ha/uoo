@@ -300,9 +300,9 @@ TK 쿨다운 제약은 2020-09-28 패치 원문에만, 현재 위키에는 없�
 
 | 사용자가 준 화면 | 관찰된 메시지 | 판단 범위 |
 | --- | --- | --- |
-| 화면 1, 02:22, 상대에게 TK | `Your next explosion potion thrown at that player within 30 seconds will stick to them.` | TK 적용 안내. 상대 Reflect 유지는 사용자 확인 |
+| 화면 1, 02:22, 상대에게 TK | `Your next explosion potion thrown at that player within 30 seconds will stick to them.` | TK 적용 안내. 상대 Reflect 유지는 인게임 확인됨 |
 | 화면 2, 02:23, 자기 TK | `xuezhonglian has applied telekinesis to you.`와 위 포션 부착 안내 | 포션 부착 안내는 자기 TK에도 뜸. 이것만으로 상대 적용 판정 불가 |
-| 화면 3, 02:24, Harm | `Spell siphon active.`와 `-7` 표시 | 피해 반사는 사용자 관찰. 상대 Reflect 소진을 확정하는 메시지 없음 |
+| 화면 3, 02:24, Harm | `Spell siphon active.`와 `-7` 표시 | 피해 반사는 인게임 확인됨. 상대 Reflect 소진을 확정하는 메시지 없음 |
 
 - Razor의 `[ teleki, me ]`, `[ teleki, target ]` ≠ 서버의 대상 확인 메시지
 - `config/indian/classicuo/nomeehej/cooldowns.xml`의 target 바는 위 포션 안내로 켜짐 → 자기 TK에도 반응 가능
@@ -960,7 +960,7 @@ PvP 근접 데미지 기대 감소 = 막을 확률 × 감소율.
 - **포션과 안 겹침.** 힘, 민첩 포션이 걸린 동안 Bless는 STR, DEX를 더 올리지 않음 → 남는 것은 INT(최대 마나). 인게임 확인됨 2026-10-21
 - 실제 정수 처리는 확인되지 않았다
 - 버프 바로는 포션 판별 불가. 위키 [BuffIcons](https://wiki.uooutlands.com/Template:BuffIcons)는 같은 아이콘을 `Strength Spell / Potion`, `Agility Spell / Potion`으로 표기
-- 사용자 확인 2026-10-09: Magery 100 Bless는 `Your strength/dexterity/intelligence has changed by 11`, 버프 바에 `Strength`, `Agility`, `Cunning`
+- 인게임 확인됨 2026-10-09: Magery 100 Bless는 `Your strength/dexterity/intelligence has changed by 11`, 버프 바에 `Strength`, `Agility`, `Cunning`
 - 스탯 포션 버프 이름에도 Potion 없음 → `findbuff 'Strength'`로 보면 내 Bless든 아군 Bless든 걸린 동안 포션을 안 마심
 - 포션 루프는 스탯 값으로 판정. Greater 포션을 마신 값(기본 + 20)을 `config__str_potion`, `config__dex_potion`에 두고, 그보다 낮으면 마심
 - Bless와 Strength, Agility 주문은 식상 Magery 100에서 11, 120에서도 13.2 → 그 선 아래

@@ -81,7 +81,7 @@ order: 10
 
 | 무엇 | 어디 | 물을 것 |
 | --- | --- | --- |
-| 캐릭터의 기본 STR과 DEX(스탯 포션 기준선) | 기준선: bard-necro-enhanced와 tamer-mage-enhanced 120과 45, pvp와 skinning-enhanced 120과 100, archive의 bard-mace, bard-throwing, hally-mage 120과 120 | 버프 없는 STR과 DEX. 기준선 = 그 값 + 20([PvP](../game/pvp.md#09.D) 09.D절). bard-necro의 DEX 25는 사용자 확인(2026-10-10, 포션을 마셔도 45), 그 전 120은 옛 임계값 100에서 짐작. STR 100은 아직 짐작. pvp는 벌목과 skinning 템플릿의 100과 80 기준, summoner 프로필에서도 쓰므로 그 캐릭터의 기본값이 다르면 실행 전 변경. 선이 높으면 포션 도는 동안 5초마다 거절될 마시기, 낮으면 아예 안 마심 |
+| 캐릭터의 기본 STR과 DEX(스탯 포션 기준선) | 기준선: bard-necro-enhanced와 tamer-mage-enhanced 120과 45, pvp와 skinning-enhanced 120과 100, archive의 bard-mace, bard-throwing, hally-mage 120과 120 | 버프 없는 STR과 DEX. 기준선 = 그 값 + 20([PvP](../game/pvp.md#09.D) 09.D절). bard-necro의 DEX 25는 인게임 확인됨 2026-10-10(포션을 마셔도 45), 그 전 120은 옛 임계값 100에서 짐작. STR 100은 아직 짐작. pvp는 벌목과 skinning 템플릿의 100과 80 기준, summoner 프로필에서도 쓰므로 그 캐릭터의 기본값이 다르면 실행 전 변경. 선이 높으면 포션 도는 동안 5초마다 거절될 마시기, 낮으면 아예 안 마심 |
 | Lyric 방어구 무시 42.5% | [Bard Necro](../templates/bard-necro.md#03.F) 03.F절 | 출처. Peace 가동률 62%의 근거 |
 | Barding Break 동안 Virtuoso | [Bard Necro](../templates/bard-necro.md#03.F) 03.F절, `bard/peace` 모듈 | 정말 꺼지나. "Barded Creatures"에 디스코만 걸린 몹도 드는지 모름 |
 | PK의 Alchemy | [Bard Necro](../templates/bard-necro.md#06.C) 06.C절 | 80인가 100인가. 지금 숫자는 80 기준 |
@@ -161,7 +161,7 @@ order: 10
   결과의 정본은 [Razor](../scripting/razor.md#03.A) 03.A절
 - 지금: 2026-10-05 공격을 수동으로 전환, 상대 조회와 자동 공격을 루프에서 삭제. 새 자기관리 루프 확인은 10절.
   예전 자동 공격의 캐시와 후속 주문 시험은 지금 동작에 불필요
-- 확인할 것: 실행 중 `Range check Last Target` ON, 12타일(사용자 확인).
+- 확인할 것: 실행 중 `Range check Last Target` ON, 12타일(인게임 확인됨).
   거리 밖에서 안으로 들어올 때 수동 Last Target이 커서를 쥐었다 놓는지는 확인되지 않았다.
   검색이 플레이어를 빠뜨리는 내부 원인도 모름. 진단 핫키 유지.
   남은 진단 셋: 바디 ID를 넣은 findtype 비교, 실제 거리를 기록하며 되풀이하는 검사, NPC getlabel에 label이 안 온 이유
@@ -191,7 +191,7 @@ order: 10
 - 확인할 것: Magery 80에서 Bless만 쓰고 STR, DEX, INT, 최댓값, 현재 마나 기록.
   Bless 비용 9, 공식값 +8.8의 정수 처리, 스크롤로 꺼내는 데 필요한 실제 마나 50 조건을 구분
 - 기록: Magery 100의 Bless는 2026-10-09 `changed by 11`로 +11 확인(12절)
-- 기록: 포션과 Bless는 안 겹침. 포션이 걸린 동안 Bless의 STR, DEX는 더해지지 않음. 2026-10-21 사용자 확인, [PvP](../game/pvp.md#09.D) 09.D절
+- 기록: 포션과 Bless는 안 겹침. 포션이 걸린 동안 Bless의 STR, DEX는 더해지지 않음. 인게임 확인됨 2026-10-21, [PvP](../game/pvp.md#09.D) 09.D절
 
 #### 프리캐스트와 자동 회복
 
@@ -711,10 +711,10 @@ order: 10
 - 같은 날 버프 바 확인: Bless는 `Strength`, `Agility`, `Cunning` 세 아이콘, 시스템 메시지는 `Your strength/dexterity/intelligence has changed by 11`.
   Arch Protection은 `Protection`
 - `Strength`와 `Agility`는 스탯 포션과 겹침 → v2는 Bless를 `Cunning`으로, Arch Protection을 `Protection`으로 판정, 시전 시각 타이머 삭제
-- 힘 포션과 민첩 포션도 버프 이름에 Potion이 없음(사용자 확인) → 버프로는 Bless와 구분 불가. 위키 BuffIcons의 `Strength Potion Usage Cooldown`은 표의 라벨일 뿐
+- 힘 포션과 민첩 포션도 버프 이름에 Potion이 없음(인게임 확인됨) → 버프로는 Bless와 구분 불가. 위키 BuffIcons의 `Strength Potion Usage Cooldown`은 표의 라벨일 뿐
 - 그래서 포션은 스탯 값으로 판정. 포션을 마신 값(기본 + 20)을 `config__str_potion`과 `config__dex_potion`에, 그보다 낮으면 마심. Bless만 걸린 상태(기본 + 11)는 그보다 낮음
 - 거절된 마시기가 회복 포션과 같은 아이템 큐를 패스마다 차지하지 않도록 5초 재시도 간격
-- 수의사 키트가 나와 주변 팔로워를 함께 치료함(사용자 확인). 치료할 대상이 없거나 팔로워가 멀면
+- 수의사 키트가 나와 주변 팔로워를 함께 치료함(인게임 확인됨). 치료할 대상이 없거나 팔로워가 멀면
   `You or your nearby followers do not require healing.`만 남고 미적용 → v3에서 펫 지정과 거리 확인 삭제, 키트를 셀프 붕대로
 - v4: 프로필 오버헤드의 `You begin using veterinary supplies`, `You finish using veterinary supplies`로 키트 진행 구간 파악.
   진행 중에는 재사용 없음(재사용 시 진행 중 치료 취소). 피가 1이라도 빠지면 바로, 풀피면 끝난 직후와 거절 2초 뒤에 펫용으로
@@ -745,7 +745,7 @@ order: 10
 
 - `config__str_potion`과 `config__dex_potion`은 내 기본 힘과 민첩 + 20. 이 루프의 120과 45는 이 템플릿의 STR 100, DEX 25, INT 100 기준
 - Bless가 걸린 채 전투에 들어가도 힘 포션과 민첩 포션이 한 번씩 나가고, 마신 뒤 5초마다 다시 눌리지 않아야 함. 다시 눌리면 값이 높거나 포션이 +20이 아님
-- 포션(+20)과 Bless(+11)는 안 쌓임(120). 2026-10-21 사용자 확인. 포션이 끝난 뒤 `Cunning`이 남은 동안 Bless의 힘과 민첩이 살아 있는지 확인.
+- 포션(+20)과 Bless(+11)는 안 쌓임(120). 인게임 확인됨 2026-10-21. 포션이 끝난 뒤 `Cunning`이 남은 동안 Bless의 힘과 민첩이 살아 있는지 확인.
   사라진다면 그동안은 Bless 재시전 없음
 - 저항 포션은 아직 `findbuff "Magic Resist Potion"`으로 판정 → 버프 바에 그 이름이 뜨는지 확인
 
@@ -811,7 +811,7 @@ order: 10
 | 아이템별 Journal | `config__sysmsg 0` 기본값. `1`이면 검사와 저장 로그 |
 | 완드와 분해 도구 | 선택한 serial 재사용, 완드 커서 실패나 분해 도구 유실 시 다시 검색 |
 
-- 완드 감정은 성공 전제. 사용자 확인 2026-10-21. 이후 재조회는 갱신된 품질 라벨 수신용, 스킬 성공 여부 판정 아님
+- 완드 감정은 성공 전제. 인게임 확인됨 2026-10-21. 이후 재조회는 갱신된 품질 라벨 수신용, 스킬 성공 여부 판정 아님
 - `pushlist` 한 줄은 품목군 하나. 스태프, 쌍수, 투척, 검술, 메이싱, 펜싱, 활, 방패, 마법 장비, 레슬링, 악기, 방어구의 12종
 - 숫자는 개별 물건의 serial이 아닌 graphic ID. 쌍수와 투척은 기존 이름 검색어와 ID를 함께 유지
   이름과 ID의 대응은 [Item list](../game/item-list.md#29) 29절, 방어구는 같은 문서 [02절](../game/item-list.md#02)
@@ -1105,8 +1105,8 @@ loadout과 regear는 같은 `gear/aspect` 블록을 씀. 동작 설명은 각 �
 
 #### 템플릿과 설계
 
-- 템플릿: Animal Lore, Animal Taming 120. Veterinary, Resisting Spells, Magery, Archery, Tactics, Herding 80. 사용자 화면 2026-10-21.
-  Healing 없음 → 붕대 블록 없음, 수의사 키트가 셀프 붕대([12절](#12)). 사용자 확인 2026-10-21
+- 템플릿: Animal Lore, Animal Taming 120. Veterinary, Resisting Spells, Magery, Archery, Tactics, Herding 80. 인게임 확인됨 2026-10-21.
+  Healing 없음 → 붕대 블록 없음, 수의사 키트가 셀프 붕대([12절](#12)). 인게임 확인됨 2026-10-21
 - 바드 블록 없음. 펫 명령과 대상 지정은 수동, 루프는 펫을 명령하지 않음
 - `[CodexHotbar`를 시작 때 한 번 요청([Commands](https://wiki.uooutlands.com/Commands) "Launches the Codex Hotbar"). 코덱스 자세와 피니셔의 자동 전환 없음
 - 뺀 것: `escape/tracking`, `recovery/bandage`, `bard/provo-picks`, `fight/archery-codex`, `buff/mushroom`, `magery/flamestrike`, Bless, Arch Protection. 사용자 요청 2026-10-21

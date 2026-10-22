@@ -90,7 +90,7 @@ flowchart TD
 | 상태 | 03절 어휘. 드문 상태는 한 낱말 |
 | 시전 알림 | `[ blood oath ]`처럼 **대상만**. hue 219와 284가 "지금 나감"을 뜻하므로 상태 불필요 |
 | 값 | 서버 문장의 n번째 낱말 = `{n}`. **1부터**, 빈칸 기준. "You must wait another 4 minutes"의 `{5}`는 4. 검색어가 아닌 서버 문장 전체 기준, 구두점 포함. 스크립트 변수는 `{{var}}`(`[ inst, {{label__picked_instrument}} ]`) |
-| 폭 | 대괄호 포함 **목표 18자, 상한 31자.** 31자는 머리 위 한 줄에 들어가는 길이(`[ alch satchel, moooooooooooo ]`, 2026-10-19 사용자 확인). 넘으면 대상을 줄임(`No Longer Paralyzed` → `[ para, off ]`) |
+| 폭 | 대괄호 포함 **목표 18자, 상한 31자.** 31자는 머리 위 한 줄에 들어가는 길이(`[ alch satchel, moooooooooooo ]`, 인게임 확인됨 2026-10-19). 넘으면 대상을 줄임(`No Longer Paralyzed` → `[ para, off ]`) |
 | 구분 | 서버 문장은 `[`로 시작하지 않음 → 대괄호 = 직접 만든 알림 |
 | 쿨다운 바 이름 | 짝 알림과 같은 낱말, **대괄호 없이**(`music` `heal pot` `hams, me`). 쉼표 규칙은 06.A절 |
 
