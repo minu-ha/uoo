@@ -6,7 +6,7 @@ order: 20
 ---
 
 설계 문서 작성 기준. 문서는 [for-humanity](https://for-humanity.fyi) Markdown, `pnpm docs:dev`로 읽음.
-문서별 정본은 [문서 홈](../../README.md)의 표. for-humanity 기능(frontmatter, Note, Details, 표, 흐름도)의 정본은 for-humanity [Writing](https://for-humanity.fyi/writing/).
+문서별 정본은 [Workflow](workflow.md#00.A) 00.A절의 표. for-humanity 기능(frontmatter, Note, Details, 표, 흐름도)의 정본은 for-humanity [Writing](https://for-humanity.fyi/writing/).
 
 ## <a id="00"></a>00 한눈에
 
@@ -41,7 +41,7 @@ order: 20
 
 | 경로 | 역할 |
 | --- | --- |
-| `content/README.md` | 사이트 홈(`/`). 프로젝트 소개, 시작 안내, 문서별 정본 표. frontmatter 없음 |
+| `content/README.md` | 사이트 홈(`/`). 저장소 목적 소개와 문서 링크. frontmatter 없음 |
 | `content/public/` | 공개 문서. 하위 폴더명 `public`은 페이지 URL에서 제외 |
 | `content/private/` | 로컬에서만 읽는 문서. 현재 없음, 필요할 때 생성 |
 | `content/asset/favicon.svg` | 사이트 아이콘. `pnpm docs:build`가 결과물에 덮어씀 |
@@ -50,7 +50,7 @@ order: 20
 - `content/dist/`: `pnpm docs:build` 결과물. git 제외
 - `dev`는 공개와 내부 문서, `build`와 `preview`는 홈과 공개 문서만 표시
 - 모양과 동작: `for-humanity` 패키지. 버전은 루트 `package.json`에 정확히 고정
-- 설치와 실행에는 Node.js 22.12.0 이상 필요
+- 설치와 실행에는 Node.js 22.12.0 이상과 pnpm 필요. 저장소 루트에서 `pnpm install` 후 실행
 
 | 명령 | 역할 |
 | --- | --- |
@@ -75,10 +75,9 @@ GitHub 저장소의 Pages 소스는 `GitHub Actions`. `master` push 또는 `Docu
    - `label`: 한글 설명. 사이드바 툴팁, 검색 결과와 링크 미리보기 설명
    - `group`: 폴더에 맞는 묶음(01절 표). 새 묶음이면 폴더 추가, `for-humanity.config.ts`의 `navigation`에 순서 추가
    - `order`: 묶음 안 순서. 10 단위
-4. 세 곳에 한 줄씩 추가
-   - [문서 홈](../../README.md) 문서 표
+4. 두 곳에 한 줄씩 추가
+   - [Workflow](workflow.md#00.A) 00.A절 문서별 정본 표
    - [AGENTS.md](https://github.com/minu-ha/uoo/blob/master/AGENTS.md) "언제 무엇을 읽나" 표. 읽을 일이 있는 문서만
-   - 루트 [README.md](https://github.com/minu-ha/uoo/blob/master/README.md)의 `content/` 칸. 번역본도 함께(07절)
 
 ## <a id="03"></a>03 빈 틀
 
@@ -176,6 +175,7 @@ order: {묶음 안 순서}
 ## <a id="07"></a>07 언어와 번역본
 
 - 문서와 답변: 한국어. 스크립트 주석: 영어
+- 루트 README와 그 번역본, 사이트 홈은 저장소 목적 소개와 관련 링크만. 실행 방법과 작업 절차는 문서에 보관
 - README 원본: 영어. 번역본: `language/<무엇>.<언어>.md`
   - `language/README.ko.md` = 루트 README
   - `language/config.ko.md` = `config/README.md`
@@ -185,7 +185,7 @@ order: {묶음 안 순서}
 ## <a id="08"></a>08 한 사실은 한 곳에
 
 - 같은 내용은 한 곳에만. 다른 곳은 절 번호 링크. 두 곳에 쓰면 한쪽만 고쳐짐(overheads.md의 옛 hue 표가 그 예)
-- 문서별 정본: [문서 홈](../../README.md) 표 한 곳. 새 문서나 정본 이동 시 그 표 수정
+- 문서별 정본: [Workflow](workflow.md#00.A) 00.A절 표 한 곳. 새 문서나 정본 이동 시 그 표 수정
 - 규칙도 같음. 언제나 지킬 규칙과 커밋 규칙은 AGENTS.md에만, 나머지는 이 문서들에만. AGENTS.md는 한 줄 요약과 링크만
 - 템플릿 문서: **그 템플릿의 판단만.** 다른 템플릿에도 쓰이는 내용(서버 규칙, 문법)은 공통 문서로 옮기고 링크
 

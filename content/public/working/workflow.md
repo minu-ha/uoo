@@ -5,7 +5,7 @@ group: How we work
 order: 10
 ---
 
-근거, 스크립트 수정 순서, 게임 반영과 확인.
+문서별 정본, 로컬 작업, 근거, 스크립트 수정 순서, 게임 반영과 확인.
 파일 이름과 스크립트 모양은 [Conventions](../scripting/conventions.md), 문법과 함정은 [Razor](../scripting/razor.md).
 
 ## <a id="00"></a>00 한눈에
@@ -21,12 +21,33 @@ flowchart LR
 | 절 | 내용 |
 | --- | --- |
 | [01](#01) | 근거의 우선순위, 참고 사이트, 숫자 인용 |
-| [02](#02) | 스크립트 수정 순서 |
+| [02](#02) | 로컬 작업과 스크립트 수정 순서 |
 | [03](#03) | 변경 보고에 넣을 것 |
 | [04](#04) | 게임 반영. 리로드와 재시작, 캐시와 종료의 덮어쓰기 |
 | [05](#05) | 문서와 커밋 규칙의 위치 |
 
 이 문서에 걸린 질문은 [Open items](../questions/open-items.md).
+
+### <a id="00.A"></a>00.A 문서별 정본
+
+문서별 정본은 이 표 한 곳. 같은 내용은 다시 쓰지 않고 해당 문서로 링크.
+언제나 지킬 규칙과 커밋 규칙은 [AGENTS.md](https://github.com/minu-ha/uoo/blob/master/AGENTS.md).
+
+| 문서 | 정본인 내용 |
+| --- | --- |
+| [Workflow](workflow.md) | 문서별 정본, 로컬 작업, 근거의 우선순위와 참고 사이트, 스크립트 수정 순서, 변경 보고, 게임 반영과 확인 |
+| [Writing](writing.md) | 문서 작성. 새 문서, frontmatter, 짜임, 문장, Markdown, 언어와 번역본, 흐름도, 끝낼 때 확인 |
+| [Conventions](../scripting/conventions.md) | 폴더와 파일 이름, 스크립트 모양과 배너, 변수 접두, serial, 타이머 관용구, 편집기 하이라이팅 |
+| [Razor](../scripting/razor.md) | Outlands Razor 확장 문법, 확인된 함정, 되는 구문의 선례, 명령문 비용, PvP 명령 제약 |
+| [Modules](../scripting/modules.md) | 모듈 폴더, 레시피와 모듈 형식, 조립 규칙, base와 블록 사이 신호, 옮긴 기록 |
+| [Overheads](../scripting/overheads.md) | 알림의 세 경로, `[ 대상, 상태 ]` 형식, 어휘, hue, 쿨다운 바, 프로필 오버헤드 표 |
+| [PvP](../game/pvp.md) | 템플릿과 무관한 PvP 규칙과 숫자 |
+| [Hotkeys](../game/hotkeys.md) | 키 배치, 주문 데미지 메모 |
+| [Item list](../game/item-list.md) | 아이템 이름, graphic id, hue |
+| [Bard Necro](../templates/bard-necro.md) | Bard Necro 메커니즘, 소환수, 전투 루프 설계, PvP 판단, 인게임 확인 |
+| [Lumberjack PvP](../templates/lumberjack-pvp.md) | 벌목과 PvP 템플릿의 스킬, 스탯, 도끼 선택, 마나 예산, 교전 분기, 구현 요구사항 |
+| [Bard Archer](../templates/bard-archer.md) | Bard Archer의 스킬과 코덱스, 갑옷과 마나, 아처리 자세와 피니셔와 무기 능력, 부활, 전투 루프 설계 |
+| [Open items](../questions/open-items.md) | 사용자에게 물을 것. 뜨지 않는 바, 규칙과 어긋난 줄, 출처 없는 숫자, 인게임 확인 목록 |
 
 ::part[근거]
 
@@ -73,6 +94,21 @@ flowchart LR
 ::part[스크립트]
 
 ## <a id="02"></a>02 스크립트 고치기
+
+### <a id="02.A"></a>02.A 로컬 작업
+
+설치 요건과 문서 사이트 실행은 [Writing](writing.md#01) 01절.
+
+| 명령 | 역할 |
+| --- | --- |
+| `pnpm build` | 모듈과 레시피로 스크립트 조립. 형식과 조립 규칙은 [Modules](../scripting/modules.md#07) 07절 |
+| `pnpm check` | 스크립트, 조립 결과, 설정 타입과 문서 링크 검사 |
+| `pnpm test` | `util/`의 PvP 시뮬레이터와 문서 검사 테스트 실행 |
+
+- 단일 스크립트 사용: [스크립트 목록](https://github.com/minu-ha/uoo/blob/master/script/README.md)에서 `.razor` 파일을 골라 Razor의 `Scripts` 폴더에 복사
+- 게임에 저장소 연결: [설정 안내](https://github.com/minu-ha/uoo/blob/master/language/config.ko.md)
+
+### <a id="02.B"></a>02.B 수정 순서
 
 1. **대상 스크립트를 끝까지 읽음.** 메인 루프 하나에 타이머, 타겟 캐시, 후속 시전이 얽힘 → 한 분기만 고치면 다른 분기가 깨짐
 2. [Razor](../scripting/razor.md#03) 03절 확인된 함정 표. 새 패턴은 같은 문서 04절 선례부터

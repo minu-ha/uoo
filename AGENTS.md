@@ -73,4 +73,4 @@ Ultima Online Outlands용 Razor 스크립트 저장소.
 | `findtype` 인자(graphic id, hue) | [Item list](content/public/game/item-list.md)                                                                                                              |
 | 문서 수정이나 새 문서            | [Writing](content/public/working/writing.md)                                                                                                               |
 | 사용자에게 물을 것               | [Open items](content/public/questions/open-items.md)                                                                                                       |
-| 문서별 정본                      | [문서 홈](content/README.md)                                                                                                                        |
+| 문서별 정본                      | [Workflow](content/public/working/workflow.md#00.A) 00.A절                                                                                                                        |
