@@ -315,6 +315,7 @@ endif
 if not varexist var__rearm_right
     @setvar! var__rearm_right 0
 endif
+@setvar! var__rearm_pending 0
 @setvar! var__rearm_sent 0
 
 
@@ -387,6 +388,26 @@ if findtype "shepherd's crook" backpack as alias__crook
     wait wait__short
 else
     overhead "[ crook, out ]" 254
+endif
+
+
+# ----------------------------------------------------------------------------------------
+# module/fight/rearm.razor
+# ----------------------------------------------------------------------------------------
+if findlayer self lefthand as alias__rearm_left
+    @setvar! var__rearm_left alias__rearm_left
+
+    if config__sysmsg = 1
+        sysmsg "Rearm: two-handed layer remembered, serial={{alias__rearm_left}}." 88
+    endif
+endif
+
+if findlayer self righthand as alias__rearm_right
+    @setvar! var__rearm_right alias__rearm_right
+
+    if config__sysmsg = 1
+        sysmsg "Rearm: one-handed layer remembered, serial={{alias__rearm_right}}." 88
+    endif
 endif
 
 
@@ -585,8 +606,11 @@ while not dead
             @setvar! var__rearm_sent 0
 
             if findlayer self lefthand as alias__rearm_left
+                @setvar! var__rearm_pending 0
+
                 if var__rearm_left != alias__rearm_left
                     @setvar! var__rearm_left alias__rearm_left
+
                     if config__sysmsg = 1
                         sysmsg "Rearm: two-handed layer remembered, serial={{alias__rearm_left}}." 88
                     endif
@@ -596,9 +620,11 @@ while not dead
                     lift alias__rearm_packed
                     drop self lefthand
                     @setvar! var__rearm_sent 1
+
                     if config__sysmsg = 1
                         sysmsg "Rearm: equip requested on the two-handed layer, serial={{alias__rearm_packed}}. The next check reads the hands." 88
                     endif
+
                     wait wait__short
                 else
                     @setvar! var__rearm_left 0
@@ -607,8 +633,11 @@ while not dead
 
             if var__rearm_sent = 0
                 if findlayer self righthand as alias__rearm_right
+                    @setvar! var__rearm_pending 0
+
                     if var__rearm_right != alias__rearm_right
                         @setvar! var__rearm_right alias__rearm_right
+
                         if config__sysmsg = 1
                             sysmsg "Rearm: one-handed layer remembered, serial={{alias__rearm_right}}." 88
                         endif
@@ -618,9 +647,11 @@ while not dead
                         lift alias__rearm_packed
                         drop self righthand
                         @setvar! var__rearm_sent 1
+
                         if config__sysmsg = 1
                             sysmsg "Rearm: equip requested on the one-handed layer, serial={{alias__rearm_packed}}. The next check reads the hands." 88
                         endif
+
                         wait wait__short
                     else
                         @setvar! var__rearm_right 0
@@ -629,12 +660,22 @@ while not dead
             endif
 
             if var__rearm_sent = 0 and config__rearm_graphic != 0 and var__rearm_left = 0 and var__rearm_right = 0 and lhandempty and rhandempty
-                if findtype config__rearm_graphic backpack as alias__rearm_found
+                if not find var__rearm_pending backpack
+                    @setvar! var__rearm_pending 0
+
+                    if findtype config__rearm_graphic backpack as alias__rearm_pick
+                        @setvar! var__rearm_pending alias__rearm_pick
+                    endif
+                endif
+
+                if find var__rearm_pending backpack as alias__rearm_found
                     lift alias__rearm_found
                     drop self lefthand
+
                     if config__sysmsg = 1
                         sysmsg "Rearm: graphic {{config__rearm_graphic}} picked from the backpack, serial={{alias__rearm_found}}. The next check reads the hands." 88
                     endif
+
                     wait wait__short
                 elseif timer "timer__message" >= interval__message
                     overhead "[ weapon, out ]" 254

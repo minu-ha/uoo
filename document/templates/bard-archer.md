@@ -232,7 +232,7 @@ Hinder와 Maiming.
 | base | | `warmode_is_manual` 1, `recover_in_warmode` 1, `settle_first` 1(bard-necro). `heal_skill_min` 10(skinning) |
 | 패스 첫머리 | `bard/provo-picks` | `Z` 또는 `Shift+Space`로 등록하는 후보 입력, 바딩 대상과 독립. [Open items](../questions/open-items.md#17) 17절 |
 | 다쳤거나 독, 마비 | `recovery/cure`, `heal`, `bandage`, `light-heal` | 잃은 HP 기준 `heal_hits` 35, `emergency_hits` 45. 회복 정책은 아래 |
-| 회복 다음 | `fight/rearm` | 들고 있던 석궁을 serial로 기억, 손이 비면 백팩에서 다시 듦. 2초마다. `rearm_graphic` 31186은 새 클라이언트용 백팩 검색. skinning-enhanced와 같은 블록 |
+| 회복 다음 | `fight/rearm` | `rearm_graphic` 31186. 공용 재장착 동작과 상태는 [Open items](../questions/open-items.md#16) 16절 재장착 항목 |
 | 공용 | `fight/target`, `magery/reagents` | `acquire_range` 18, `target_range` 10, `target_grace` 500(bard-necro) |
 | 5초마다 | `bard/instrument`, `recovery/refresh`, `buff/food`, `buff/potions`, `pack/gold-drop` | `refresh_stam` 60(skinning). 포션 기준선 STR 120, DEX 100은 기본값 |
 | 늘 | `bard/provo`, `fight/archery-codex` | 자세와 피니셔 전환(04.B절) |

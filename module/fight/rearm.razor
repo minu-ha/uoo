@@ -1,17 +1,12 @@
 # ----------------------------------------------------------------------------------------
 # Re-arms what each hand held, out of the backpack, when a cast or a disarm empties it.
-# A cast clears the hands: the weapon lands in the backpack and the fight goes on with
-# fists until it is back (user check on the archer, 2026-10-21, and the gather loops
-# before it). Both hand layers are read every two seconds. Razor's lefthand is the
-# two-handed layer and its righthand the one-handed layer, so the layer an item was seen
-# on is the hand it goes back to: no weapon kind is named, and a word cannot live in a
-# variable anyway (document/scripting/razor.md part 3). Each layer remembers the item it
-# held by serial, so a replacement armed by hand is remembered the same way, and a looted
-# twin in the backpack is never mistaken for it. rearm_graphic adds a backpack search for
-# a fresh client, when nothing is remembered yet. That equip names the lefthand whatever
-# the weapon is: the server puts an item on its own layer, the way hotkey/weapon-katana
-# arms a one-handed katana, and the next check remembers it where it landed. Which hand
-# each weapon takes is listed under Weapons in document/game/item-list.md, for reference.
+# Hands are recorded at Play, before recovery can cast, then every two seconds. Each
+# layer keeps its serial across Plays. A missing item is forgotten, and a replacement
+# seen on that layer takes over. No label or weapon table is needed.
+# With no remembered item, rearm_graphic picks from the backpack. Its pending serial
+# stays fixed until a hand confirms it or it leaves the backpack. The first request
+# uses lefthand, as hotkey/weapon-katana does. The actual layer is read after the equip.
+# An equip request is not proof of success. In-game checks: Open items part 16.
 # ----------------------------------------------------------------------------------------
 
 
@@ -20,9 +15,8 @@
 #
 #   config__rearm_graphic
 #      Graphic of the weapon to pick out of the backpack while both hands are empty and
-#      nothing is remembered, on a fresh client. 0 picks nothing: only an item once seen
-#      in hand goes back. 5042 is the bow, 5187 the two handed axe and 31186 the Rampart
-#      Crossbow in document/game/item-list.md.
+#      nothing is remembered. 0 disables that search. A chosen serial is retried until
+#      a hand confirms it or it leaves the backpack. Graphics: document/game/item-list.md.
 # ----------------------------------------------------------------------------------------
 @setvar! config__rearm_graphic 0
 
@@ -51,6 +45,10 @@ timer__equip interval__equip_retry
 #      (righthand), kept across Stop and Play. 0 means nothing seen yet, or the item gone
 #      from hand and backpack.
 #
+#   var__rearm_pending
+#      Backpack choice awaiting a hand observation, not a confirmed equip. Cleared on
+#      Play, when an item is seen in hand, or when this choice leaves the backpack.
+#
 #   var__rearm_sent
 #      Scratch: 1 once this check sent an equip, so the second hand waits for the next.
 # ----------------------------------------------------------------------------------------
@@ -62,7 +60,29 @@ if not varexist var__rearm_right
     @setvar! var__rearm_right 0
 endif
 
+@setvar! var__rearm_pending 0
 @setvar! var__rearm_sent 0
+
+
+# ----------------------------------------------------------------------------------------
+# @ setup
+# ----------------------------------------------------------------------------------------
+# Snapshot before the first recovery pass. Empty hands retain the previous serials.
+if findlayer self lefthand as alias__rearm_left
+    @setvar! var__rearm_left alias__rearm_left
+
+    if config__sysmsg = 1
+        sysmsg "Rearm: two-handed layer remembered, serial={{alias__rearm_left}}." 88
+    endif
+endif
+
+if findlayer self righthand as alias__rearm_right
+    @setvar! var__rearm_right alias__rearm_right
+
+    if config__sysmsg = 1
+        sysmsg "Rearm: one-handed layer remembered, serial={{alias__rearm_right}}." 88
+    endif
+endif
 
 
 # ----------------------------------------------------------------------------------------
@@ -85,8 +105,11 @@ endif
             @setvar! var__rearm_sent 0
 
             if findlayer self lefthand as alias__rearm_left
+                @setvar! var__rearm_pending 0
+
                 if var__rearm_left != alias__rearm_left
                     @setvar! var__rearm_left alias__rearm_left
+
                     if config__sysmsg = 1
                         sysmsg "Rearm: two-handed layer remembered, serial={{alias__rearm_left}}." 88
                     endif
@@ -98,9 +121,11 @@ endif
                     lift alias__rearm_packed
                     drop self lefthand
                     @setvar! var__rearm_sent 1
+
                     if config__sysmsg = 1
                         sysmsg "Rearm: equip requested on the two-handed layer, serial={{alias__rearm_packed}}. The next check reads the hands." 88
                     endif
+
                     wait wait__short
                 else
                     @setvar! var__rearm_left 0
@@ -109,8 +134,11 @@ endif
 
             if var__rearm_sent = 0
                 if findlayer self righthand as alias__rearm_right
+                    @setvar! var__rearm_pending 0
+
                     if var__rearm_right != alias__rearm_right
                         @setvar! var__rearm_right alias__rearm_right
+
                         if config__sysmsg = 1
                             sysmsg "Rearm: one-handed layer remembered, serial={{alias__rearm_right}}." 88
                         endif
@@ -120,9 +148,11 @@ endif
                         lift alias__rearm_packed
                         drop self righthand
                         @setvar! var__rearm_sent 1
+
                         if config__sysmsg = 1
                             sysmsg "Rearm: equip requested on the one-handed layer, serial={{alias__rearm_packed}}. The next check reads the hands." 88
                         endif
+
                         wait wait__short
                     else
                         @setvar! var__rearm_right 0
@@ -131,14 +161,23 @@ endif
             endif
 
             if var__rearm_sent = 0 and config__rearm_graphic != 0 and var__rearm_left = 0 and var__rearm_right = 0 and lhandempty and rhandempty
-                if findtype config__rearm_graphic backpack as alias__rearm_found
-                    # Nothing is remembered here: the next check reads the hands and keeps the
-                    # serial on the layer the server put it on.
+                if not find var__rearm_pending backpack
+                    @setvar! var__rearm_pending 0
+
+                    if findtype config__rearm_graphic backpack as alias__rearm_pick
+                        @setvar! var__rearm_pending alias__rearm_pick
+                    endif
+                endif
+
+                if find var__rearm_pending backpack as alias__rearm_found
+                    # Keep the choice separate from the confirmed hand serials.
                     lift alias__rearm_found
                     drop self lefthand
+
                     if config__sysmsg = 1
                         sysmsg "Rearm: graphic {{config__rearm_graphic}} picked from the backpack, serial={{alias__rearm_found}}. The next check reads the hands." 88
                     endif
+
                     wait wait__short
                 elseif timer "timer__message" >= interval__message
                     overhead "[ weapon, out ]" 254

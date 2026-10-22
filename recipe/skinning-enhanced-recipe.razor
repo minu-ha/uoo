@@ -103,9 +103,8 @@
 #
 #   rearm_graphic (default 0)
 #      Graphic of the weapon to pick out of the backpack while both hands are empty and
-#      nothing is remembered, on a fresh client. 0 picks nothing: only an item once seen
-#      in hand goes back. 5042 is the bow, 5187 the two handed axe and 31186 the Rampart
-#      Crossbow in document/game/item-list.md.
+#      nothing is remembered. 0 disables that search. A chosen serial is retried until
+#      a hand confirms it or it leaves the backpack. Graphics: document/game/item-list.md.
 #      > The two handed axe, so a fresh client finds it in the backpack before any cast.
 # ----------------------------------------------------------------------------------------
 @setvar! config__rearm_graphic 5187

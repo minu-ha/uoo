@@ -1066,13 +1066,26 @@ loadout과 regear는 같은 `gear/aspect` 블록을 씀. 동작 설명은 각 �
 
 #### 재장착
 
-- Play 때 석궁을 든 상태면 Journal에 `Rearm: two-handed layer remembered`. 백팩에 있으면 graphic 31186으로 찾아 `Rearm: graphic 31186 picked`. 둘 다 아니면 `[ weapon, out ]`이 3초마다
-- RA, Reflect, Protection, Greater Heal 뒤 석궁이 백팩으로 떨어지고 2초 안에 다시 손에. Journal `Rearm: equip requested on the two-handed layer`
-- 같은 석궁을 하나 더 주워 백팩에 두고 시전 → 들고 있던 것(serial)이 돌아오는지. `rhandempty`와 `righthand`가 이 포크에 있는지(없으면 오류 줄)
+- 공용 `fight/rearm` 확인 항목. 2026-10-22 Play 때 회복보다 먼저 양손 기록, 백팩에서 고른 serial은 실제 장착을 관찰할 때까지 유지하도록 보강
+- Play 때 석궁을 들고 있으면 Journal `Rearm: two-handed layer remembered`. 양손이 비고 기억한 무기도 없으면 graphic 31186으로 검색, `Rearm: graphic 31186 picked`
+- 기억한 무기가 사라지면 graphic 검색으로 복귀. 검색 결과도 없으면 `[ weapon, out ]`, 공용 경고 타이머 3초 적용
+- RA, Reflect, Protection, Greater Heal 뒤 석궁이 백팩으로 떨어지면 다음 가능한 2초 점검에서 재장착 요청. Journal `Rearm: equip requested on the two-handed layer`
+- 같은 석궁을 하나 더 주워 둔 상태에서 Play 직후 회복 시전, 백팩에서 꺼낸 직후 버프 시전. 두 경우 모두 처음 든 것 또는 처음 고른 serial로 재장착하는지
+- 장착 거절 뒤에도 같은 serial 재시도. 그 무기를 백팩 밖으로 옮기면 다른 같은 graphic 검색으로 전환하는지
+- `rhandempty`와 `righthand`가 이 포크에 있는지. 없으면 오류 줄 기록
 - graphic 검색은 1H 무기도 `drop self lefthand`로 보냄(`hotkey/weapon-katana`와 같은 경로). 서버가 제 레이어에 올리는지, 아니면 거절해 2초마다 다시 집는지
 - 다시 든 뒤 사격이 이어지는지, `V`를 다시 눌러야 하는지
 - 재장착이 바딩 커서나 자기 주문을 끊지 않는지. 끊기면 시전 중 가드가 샌 것
 - 31186이 Pistol Crossbow와 같은 art인지. 같으면 백팩에 둘 다 있을 때 `findtype`이 어느 쪽을 집는지
+
+| 상태 | 역할 |
+| --- | --- |
+| `var__rearm_left`, `var__rearm_right` | 실제로 관찰한 손별 serial, Play를 넘어 유지 |
+| `var__rearm_pending` | 백팩에서 고른 뒤 장착 확인을 기다리는 serial, Play 때 초기화. 장착 성공 표시가 아님 |
+| `var__rearm_sent` | 이번 점검에서 장착 요청을 보냈으면 1, 둘째 손은 다음 점검 |
+
+소스 기반 모의 검사에서 최초 회복, 연속 시전, 장착 거절 때 다른 무기를 고르는 경우 재현 후 수정.
+서버의 레이어 배치와 실제 장착 시점은 인게임 확인 필요.
 
 #### 마나와 바딩
 
