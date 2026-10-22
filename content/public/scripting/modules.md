@@ -64,7 +64,7 @@ order: 30
 | `module/recovery/` | 살아남기 | `cure`(마비면 파우치, 독이면 포션이나 에이전트), `heal`, `bandage`, `light-heal`, `refresh`, `heal-first`(루틴 시작에 먼저 힐) |
 | `module/magery/` | 공격 주문과 시약 | `reagents`(모든 마법 블록이 읽는 시약 표시와 서클별 마나), `rotation`(Mana Drain과 Curse, Grimoire 프록 넷, 그 사이 Energy Bolt), `flamestrike`(aspect 발동용) |
 | `module/buff/` | 버프 아이콘 유지 | `spells`(Reactive Armor, Magic Reflection, 설정에 따라 Protection, Bless, Arch Protection, Spell Siphon용 자기 Magic Arrow), `potions`(Strength, Agility, Magic Resist), `food`(Food Satisfaction), `mushroom`(Magic Mushroom 먹기와 Create Food) |
-| `module/bard/` | 바드 스킬 | `instrument`(악기 찾기와 점검), `disco`(대상마다 한 번, 설정에 따라 Virtuoso가 빠지면 다시), `peace`, `provo-picks`(별도 후보 입력), `provo`(등록 후보 가운데 풀린 둘씩 서로에게 프로보), `song`(이동 중 노래 셋을 차례로) |
+| `module/bard/` | 바드 스킬 | `instrument`(악기 찾기와 점검), `disco`(대상마다 한 번, 설정에 따라 Virtuoso가 빠지면 다시), `peace`, `provo-picks`(별도 후보 입력), `provo`(등록 후보 가운데 풀린 둘씩 서로에게 프로보), `song`(적이 기억돼 있지 않은 이동 중 노래 셋을 차례로) |
 | `module/necro/` | 네크로 핫바와 소환수 | `symbols`(핫바 열어 두기, Unholy Symbol 수 읽기), `summon-names`(소환수 이름 바꾸기), `resummon`(Vengeful Spirit 뒤 빠진 소환수 재소환, 마나가 낮으면 Wither, 오래된 소환수 교체), `burst`(Blood Oath, Corpse Skin, Evil Omen), `poison-strike`, `vampiric-embrace` |
 | `module/tamer/` | 펫 스킬 | `herding`(목동 지팡이), `vet-kit`(나와 펫에게 수의사 키트) |
 | `module/fight/` | 무기 전투 보조 | `target`(기억한 적), `weapon-swap`(pvp 무기 슬롯), `rearm`(들고 있던 무기를 레이어마다 기억, 손이 비면 다시 들기), `sword-codex`, `parry-codex`, `archery-codex`(자세와 피니셔, 고른 적 수로 전환), `weapon-ability`(Swords나 Archery 코덱스의 능력, 사거리 설정) |
@@ -372,7 +372,7 @@ order: 30
 - `magery/reagents`의 `var__regs_*`, 서클별 마나, `interrupt_to_heal`, `wait__cast` ← 회복 시전, `buff/spells`, `buff/mushroom`, 공격 주문(`magery/*`), `necro/resummon`
 - `recovery/heal`의 `config__heal_hits` ← 다쳤을 때 쉬는 블록(`gather/*`, `pack/leather`, `escape/tracking`)
   - `emergency_hits` ← 시전 중에 끊는 공격 주문(`magery/*`), `necro/resummon`. `recovery/light-heal`의 `light_hits` ← `pack/lumber`
-- `fight/target`의 `var__combat_target`과 사거리 ← `fight/parry-codex`, `fight/archery-codex`, `fight/weapon-ability`, `pack/leather`, 바드와 네크로와 공격 주문 블록
+- `fight/target`의 `var__combat_target`과 사거리 ← `fight/parry-codex`, `fight/archery-codex`, `fight/weapon-ability`, `pack/leather`, 바드와 네크로와 공격 주문 블록, `bard/song`(적이 없을 때만 노래)
   - `var__keep_lasttarget` ← 자기를 찍거나 시전하기 전 `lastharmful`을 재확인하는 블록(`magery/flamestrike`, `necro/vampiric-embrace`)
   - `var__target_hold` ← `bard/provo`가 자기 용도로 찍은 몹을 적음. `fight/target`과 커서 중에 고르기를 받는 블록이 그 몹을 건너뜀
   - `gather/skinning`은 칼 커서를 든 동안 고른 적을 여기에 기록
@@ -573,7 +573,7 @@ pvp 결과물에서는 시작 4줄이 `if config__clear_at_start = 1` 안, pvp�
 
 합치지 않은 것:
 
-- `fight/rearm`과 `fight/weapon-swap`: 비슷해 보이지만 앞은 2초 시계로 빈손만, 뒤는 패스마다 두 손을 읽는 PvP용 → 비용이 다름
+- `fight/rearm`과 `fight/weapon-swap`: 비슷해 보이지만 앞은 패스마다 `lhandempty`, `rhandempty`만 보고 2초마다 손을 읽음, 뒤는 패스마다 두 손을 읽는 PvP용 → 비용이 다름
 - `bard/disco`와 `bard/peace`, 두 codex: 주고받는 것이 없는 독립 블록
 - `recovery/refresh`와 `buff/food`: 작지만 맡는 일이 다름
 

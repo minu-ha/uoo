@@ -46,7 +46,7 @@ Bard Archer 템플릿의 판단과 숫자. 바딩, 회복, 버프는 루프, 사
 - 루프가 맡는 것: 바딩, 회복, 자기 버프, 코덱스 자세와 피니셔 전환, 무기 능력 요청(04절)
 - **warmode는 Tab으로 직접.** 켜면 손으로 바딩하는 구간 → 루프의 바딩, 노래, 버프, 음식 정지(04.A절). `Z`, `V`는 warmode를 안 바꿈
 - 바딩, 시전과 사격은 서로 안 막음. 사용자 확인 2026-10-21
-- 시전하면 무기가 백팩으로 떨어짐. 사용자 확인 2026-10-21 → 빈 왼손이면 루프가 석궁을 다시 듦(04.A절)
+- 시전하면 무기가 백팩으로 떨어짐. 사용자 확인 2026-10-21 → 왼손이 비면 루프가 그 패스에 석궁을 다시 듦(04.A절)
 
 ### <a id="01.B"></a>01.B 코덱스
 
@@ -176,6 +176,7 @@ Hinder와 Maiming.
 > "All Weapon Abilities for the player share the same weapon ability cooldown." -- Weapon and Parry Codex
 
 - 세 능력이 게이지 하나. Arms Lore 없으면 60초
+- 요청은 토글이 아님. 게이지가 차면 한 번 요청, 다음 명중에 나감. 인게임 확인됨 2026-10-22
 - 15초에 4.2발(02.A절) 기준
 
 | 능력 | 15초 동안 더하는 피해 |
@@ -230,19 +231,19 @@ Hinder와 Maiming.
 | 자리 | 블록 | 값과 출처 |
 | --- | --- | --- |
 | base | | `warmode_is_manual` 1, `recover_in_warmode` 1, `settle_first` 1(bard-necro). `heal_skill_min` 10(skinning) |
-| 패스 첫머리 | `bard/provo-picks` | `Z` 또는 `Shift+Space`로 등록하는 후보 입력, 바딩 대상과 독립. [Open items](../questions/open-items.md#17) 17절 |
+| 패스 첫머리 | `bard/provo-picks` | `Z` 또는 `Shift+Space`로 등록하는 후보 입력, 바딩 대상과 독립. [Bard Necro](bard-necro.md#04.J) 04.J절 |
 | 다쳤거나 독, 마비 | `recovery/cure`, `heal`, `bandage`, `light-heal` | 잃은 HP 기준 `heal_hits` 35, `emergency_hits` 45. 회복 정책은 아래 |
-| 회복 다음 | `fight/rearm` | `rearm_graphic` 31186. 공용 재장착 동작과 상태는 [Open items](../questions/open-items.md#16) 16절 재장착 항목 |
+| 회복 다음 | `fight/rearm` | `rearm_graphic` 31186. 기억한 손이 비면 그 패스에 다시 듦, 요청 뒤 2초 지나 손 확인. 확인 항목은 [Open items](../questions/open-items.md#16) 16절 |
 | 공용 | `fight/target`, `magery/reagents` | `acquire_range` 18, `target_range` 10, `target_grace` 500(bard-necro) |
 | 5초마다 | `bard/instrument`, `recovery/refresh`, `buff/food`, `buff/potions`, `pack/gold-drop` | `refresh_stam` 60(skinning). 포션 기준선 STR 120, DEX 100은 기본값 |
 | 늘 | `bard/provo`, `fight/archery-codex` | 자세와 피니셔 전환(04.B절) |
 | 교전 중 | `bard/disco`, `bard/peace`, `fight/weapon-ability` | `keep_virtuoso` 1. Archery 코덱스, Repeater, 사거리 8 |
-| 이동 중 | `bard/song` | |
+| 이동 중 | `bard/song` | 기억한 적이 없을 때만. 노래 커서가 `lastharmful`을 백팩으로 옮겨 `V`가 빗나가는 것을 막음 |
 | 늘 | `buff/spells` | RA 24, Reflect 34, Protection 26, 독이면 버프 안 함 |
 
 - 교전 = 고른 적이 10칸 안. 바딩 사거리. 사격 사거리 8칸은 손으로 맞춤
 - **바딩 우선순위: Provo, Disco, Peace.** Provo로 짝을 붙인 뒤 현재 대상에 Discordance, Peacemaking. bard-necro와 같은 순서. 코덱스 전환은 Provo와 Disco 사이
-- 프로보 후보 입력, 현재 대상이 짝에 포함된 경우와 커서의 미검증 범위는 [Open items](../questions/open-items.md#17) 17절
+- 프로보 후보 입력과 짝 선택은 [Bard Necro](bard-necro.md#04.J) 04.J절, 인게임 확인은 [Open items](../questions/open-items.md#17) 17절
 - 스킬별 쿨과 공유 쿨: [Bard Necro](bard-necro.md#02.E) 02.E절
 - **평소 회복은 붕대.** 잃은 HP 35 이상이면 힐 포션, 그 패스에 포션을 안 마셨고 손실 45 이상이면 Greater Heal. 붕대 종료를 기다리지 않음
 - 일반 Heal은 붕대 대체용으로 유지. 이 템플릿의 기본 설정에서는 붕대가 없고 감는 중도 아닐 때만 사용, 붕대 중첩 시전 없음
@@ -251,7 +252,7 @@ Hinder와 Maiming.
 
 ### <a id="04.B"></a>04.B 여러 마리 판정
 
-- 현재 바딩 대상과 등록한 프로보 후보를 중복 없이 합쳐 마릿수 판정. 입력 방법은 [Open items](../questions/open-items.md#17) 17절
+- 현재 바딩 대상과 등록한 프로보 후보를 중복 없이 합쳐 마릿수 판정. 입력 방법은 [Bard Necro](bard-necro.md#04.J) 04.J절
 - 2초마다 목록에서 살아 있고 10칸 안인 적을 셈. **둘 이상이면 Incendiary와 Ricochet**, 아니면 Arcane과 Pincushion
 - 하나로 줄어도 6초 유지 → 짝 하나가 잠깐 멀어질 때 자세가 깜빡이지 않음
 - 대상 옆 2칸 판정은 불가. 몹끼리 거리를 재는 식이 없음. 프로보 짝은 붙어 싸우므로 짝 중 하나를 쏘면 Incendiary가 다른 쪽에 감

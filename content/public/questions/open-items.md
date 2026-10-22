@@ -945,6 +945,7 @@ order: 10
 
 - Shadowspire Cathedral과 집에서도 노래가 들어가는지(`You are now under the effect of a Song`). 노래는 다시 백팩
 - 노래가 막히거나 실패해도 곡을 건너뛰지 않고, `use another skill`이 매 바퀴 반복되지 않는지
+- 적이 기억돼 있으면(`[ target, set ]` 뒤, 10칸 밖이라도) 노래 없음. 적이 죽거나 놓인 뒤 다시(2026-10-22 변경)
 
 #### 프로보와 마지막 대상(2026-10-21)
 
@@ -1015,210 +1016,86 @@ loadout과 regear는 같은 `gear/aspect` 블록을 씀. 동작 설명은 각 �
 
 ## <a id="16"></a>16 bard-archer-enhanced 인게임 확인
 
-2026-10-21 추가. 설계와 숫자는 [Bard Archer](../templates/bard-archer.md) 04절.
-새 루프와 새 프로필 → 클라이언트 재시작, nomeehej의 Razor 프로필을 `bard`로([Workflow](../working/workflow.md#04.A) 04.A절).
+설계와 숫자는 [Bard Archer](../templates/bard-archer.md#04) 04절. 새 루프와 새 프로필 → 클라이언트 재시작, nomeehej의 Razor 프로필을 `bard`로([Workflow](../working/workflow.md#04.A) 04.A절).
+프로보 후보 입력은 [17절](#17), 악기 복구는 [14절](#14).
 
-#### 시작
+#### 확인됨
 
-- F1 → 악기 검색(없으면 `[ inst, pick ]`), `[ bard archer, on ]`
-- Tab으로 warmode를 켜면 바딩, 노래, RA, Reflect, Protection이 멈추고 끄면 다시. 회복, 포션, 붕대는 계속
-- 악기 복구: [14절](#14)의 공통 확인 항목
+- 무기 능력 요청은 토글이 아님. 인게임 확인됨 2026-10-22 → `Weapon ability ready` 문장에 맞출 필요 없음
 
-#### 회복
+#### 확인할 것
 
-- 붕대가 있으면 붕대로 회복, 일반 Heal 시전 없음. 붕대를 감는 도중 마지막 붕대를 다 써도 끝날 때까지 일반 Heal 대기
-- 붕대가 없고 감는 중도 아니면 손실이 `light_hits` 이상일 때만 `Agent: Smart Heal/Cure Self, light Heal.`. 마나나 시약이 없으면 시전 없음
-- 붕대 중 힐 포션 기준에 닿으면 `heal pot` 바. 그 패스에는 Greater Heal을 건너뛰고, 다음 패스에도 긴급선 이상이면 `Agent: Greater Heal/Cure Self.`
-- 힐 포션이 없거나 쿨 중이면 긴급선부터 Greater Heal. 마나나 시약이 없으면 시전 없음, 풀피가 되면 남은 회복 커서 취소
-- 기준값과 회복 정책: [Bard Archer](../templates/bard-archer.md#04.A) 04.A절
-
-#### 코덱스 라벨
-
-- `debug/dump-label`로 codex of archery(11886) 라벨 기록. 지금 자세 하나와 지금 피니셔 하나만, 대소문자 그대로(`Arcane`, `Ricochet`) 보여야 함
-- 다섯 자세나 두 피니셔를 모두 나열하면 `[ archery stance, off ]`나 `[ archery finisher, off ]`, 전환 정지. 그 라벨 문장으로 판정 방식 수정
-- `[ArcheryAmmunition3`이 Incendiary를 켜는지, 켜진 자세를 다시 말하면 꺼지는지(`You deactivate your stance.`)
-- `[ArcheryFinisher1`이 Ricochet을 고르고 Pincushion을 끄는지, 둘이 따로 켜지는지
-
-#### 자세와 피니셔 전환
-
-- 한 마리: Arcane, Pincushion. Journal에 `Archery stance switch`, `Archery finisher switch`
-- `Z`나 `Q`로 두 마리 이상을 찍어 10칸 안에 두면 2초 안에 Incendiary와 `[ archery, ricochet ]`. 하나로 줄면 6초 뒤 Arcane, Pincushion
-- [Bard Archer](../templates/bard-archer.md#02.B) 02.B절의 Fowling 기준: 진입선 초과에서 켜고 해제선 미만에서 원래 자세. 경계값과 두 선 사이에서는 기존 상태 유지
-- 프로보 짝 둘 중 하나를 쏠 때 Incendiary가 짝에게 들어가는지
-- 손으로 자세를 바꾸면 30초 안에 루프가 다시 맞추는지
-
-#### Virtuoso
-
-- 한 마리를 오래 잡을 때 Virtuoso 아이콘이 빠지면 Discordance가 다시 나가는지(약 15초마다). 실패하면 5초 뒤 다시
-- 새 대상에서는 Discordance 뒤 Peacemaking. 프로보할 짝이 있으면 Provocation이 먼저 나가는지
-- 끊긴 Peace와 Virtuoso 갱신이 겹치면 Discordance 먼저
-
-#### 무기 능력
-
-- 60초마다 `[ repeater ]`, Journal `Weapon ability request: codex 2, slot 3`. `[WeaponAbility3`이 Repeater인지
-- 요청한 뒤 다음 요청(60초)까지 한 발도 못 맞히면 능력이 꺼지는지. 토글이면 요청을 `Weapon ability ready` 문장에 맞춰야 함
-- Repeater 피해를 일반 사격 한 발과 비교. 무기 속도 보정 식이 위키에 없음
-
-#### Protection
-
-- `Buff: Protection.` 뒤 아이콘 `Protection`. 커서가 뜨는지, 뜨면 자기에게 들어가는지
-- 2분 뒤 아이콘이 사라지면 다시. 마나 26 아래에서는 안 나감
-
-#### 재장착
-
-- 공용 `fight/rearm` 확인 항목. 2026-10-22 Play 때 회복보다 먼저 양손 기록, 백팩에서 고른 serial은 실제 장착을 관찰할 때까지 유지하도록 보강
-- Play 때 석궁을 들고 있으면 Journal `Rearm: two-handed layer remembered`. 양손이 비고 기억한 무기도 없으면 graphic 31186으로 검색, `Rearm: graphic 31186 picked`
-- 기억한 무기가 사라지면 graphic 검색으로 복귀. 검색 결과도 없으면 `[ weapon, out ]`, 공용 경고 타이머 3초 적용
-- RA, Reflect, Protection, Greater Heal 뒤 석궁이 백팩으로 떨어지면 다음 가능한 2초 점검에서 재장착 요청. Journal `Rearm: equip requested on the two-handed layer`
-- 같은 석궁을 하나 더 주워 둔 상태에서 Play 직후 회복 시전, 백팩에서 꺼낸 직후 버프 시전. 두 경우 모두 처음 든 것 또는 처음 고른 serial로 재장착하는지
-- 장착 거절 뒤에도 같은 serial 재시도. 그 무기를 백팩 밖으로 옮기면 다른 같은 graphic 검색으로 전환하는지
-- `rhandempty`와 `righthand`가 이 포크에 있는지. 없으면 오류 줄 기록
-- graphic 검색은 1H 무기도 `drop self lefthand`로 보냄(`hotkey/weapon-katana`와 같은 경로). 서버가 제 레이어에 올리는지, 아니면 거절해 2초마다 다시 집는지
-- 다시 든 뒤 사격이 이어지는지, `V`를 다시 눌러야 하는지
-- 재장착이 바딩 커서나 자기 주문을 끊지 않는지. 끊기면 시전 중 가드가 샌 것
-- 31186이 Pistol Crossbow와 같은 art인지. 같으면 백팩에 둘 다 있을 때 `findtype`이 어느 쪽을 집는지
-
-| 상태 | 역할 |
-| --- | --- |
-| `var__rearm_left`, `var__rearm_right` | 실제로 관찰한 손별 serial, Play를 넘어 유지 |
-| `var__rearm_pending` | 백팩에서 고른 뒤 장착 확인을 기다리는 serial, Play 때 초기화. 장착 성공 표시가 아님 |
-| `var__rearm_sent` | 이번 점검에서 장착 요청을 보냈으면 1, 둘째 손은 다음 점검 |
-
-소스 기반 모의 검사에서 최초 회복, 연속 시전, 장착 거절 때 다른 무기를 고르는 경우 재현 후 수정.
-서버의 레이어 배치와 실제 장착 시점은 인게임 확인 필요.
-
-#### 마나와 바딩
-
-- 체인 한 벌, 음식 버프 없이 마나 10이 차는 시간. 50초면 Butler 식([PvP](../game/pvp.md#05.D) 05.D절)
-- 송 메시지가 `8.5%`인지. `6.8%`면 Lyric Aspect 보너스 없음([Bard Archer](../templates/bard-archer.md#01.C) 01.C절)
+| 검사 | 하는 것 | 통과 | 실패면 기록할 것 |
+| --- | --- | --- | --- |
+| 시작 | F1 | 악기 검색(없으면 `[ inst, pick ]`), `[ bard archer, on ]` | 첫 오버헤드 |
+| warmode 수동 구간 | Tab | 바딩, 노래, RA, Reflect, Protection 정지. 회복, 포션, 붕대, 코덱스 전환, 무기 능력, 재장착은 계속. Tab을 끄면 재개 | 멈추지 않은 블록 |
+| 붕대 회복 | 붕대를 들고 맞기 | 붕대만, 일반 Heal 시전 없음. 감는 중 마지막 붕대를 다 써도 끝날 때까지 Heal 대기 | Journal의 `Agent:` 줄 |
+| 붕대 없음 | 붕대를 빼고 맞기 | 손실 `light_hits`(15) 이상에서 `Agent: Smart Heal/Cure Self, light Heal.` | 시전이 없으면 마나와 시약 |
+| 힐 포션과 Greater Heal | 손실 35 이상 | `heal pot` 바, 그 패스는 Greater Heal 생략. 다음 패스에도 45 이상이면 `Agent: Greater Heal/Cure Self.` | 두 줄의 순서 |
+| 풀피 뒤 커서 | Greater Heal 뒤 바로 풀피 | 남은 회복 커서 취소 | 커서가 남으면 그 뒤 멈춘 블록 |
+| 코덱스 라벨 | `debug/dump-label`로 codex of archery(11886) | 지금 자세 하나와 피니셔 하나만, `Arcane`, `Ricochet`처럼 대소문자 그대로 | 다섯 자세나 두 피니셔가 다 보이면 `[ archery stance, off ]`, `[ archery finisher, off ]`. 라벨 문장 전체 |
+| 자세 명령 | `[ArcheryAmmunition3` 두 번 | 처음에 Incendiary, 다시 말하면 꺼짐(`You deactivate your stance.`) | 두 번째 반응 |
+| 피니셔 명령 | `[ArcheryFinisher1` | Ricochet이 켜지고 Pincushion이 꺼짐 | 둘이 따로 켜지는지 |
+| 한 마리 | Z → V | Arcane, Pincushion. Journal `Archery stance switch`, `Archery finisher switch` | 라벨 |
+| 여러 마리 | Z → V, Shift+Space로 둘째 등록, 둘 다 10칸 안 | 2초 안에 Incendiary와 `[ archery, ricochet ]`. 하나로 줄면 6초 뒤 Arcane, Pincushion | 전환 시점 |
+| Fowling | 잃은 HP 45 초과 → 30 미만 | 초과에서 Fowling, 미만에서 원래 자세. 그 사이는 유지 | 깜빡임 |
+| Incendiary 튐 | 프로보 짝 중 하나를 쏨 | 짝에게 Incendiary 피해 | 데미지 트래커 |
+| 손으로 바꾼 자세 | 자세를 손으로 변경 | 30초 안에 루프가 되돌림 | 되돌린 시점 |
+| Virtuoso 갱신 | 한 마리를 오래 잡음 | Virtuoso 아이콘이 빠지면 약 15초마다 Discordance. 실패하면 5초 뒤 다시 | 재시전 간격 |
+| 바딩 순서 | 새 대상, 짝 있음 | Provocation → Discordance → Peacemaking. Peace가 끊긴 때와 Virtuoso 갱신이 겹치면 Discordance 먼저 | 순서 |
+| Repeater | 교전 60초마다 | `[ repeater ]`, Journal `Weapon ability request: codex 2, slot 3`. `[WeaponAbility3`이 Repeater | 다른 능력이면 슬롯 번호 |
+| Repeater 피해 | 데미지 트래커 | 일반 한 발과 비교. 무기 속도 보정 식이 위키에 없음 | 숫자 |
+| Protection | `Buff: Protection.` | 아이콘 `Protection`. 커서가 뜨면 자기에게. 2분 뒤 다시, 마나 26 아래에서는 안 나감 | 커서 처리 |
+| 재장착, Play | 석궁을 들고 F1 | Journal `Rearm: two-handed layer remembered` | 줄 없음 |
+| 재장착, 시전 뒤 | RA, Reflect, Protection, Greater Heal | 석궁이 떨어진 다음 패스에 바로 `Rearm: equip requested on the two-handed layer`, 2초 뒤 손 확인(2026-10-22 변경) | 재장착까지 걸린 시간. 사격이 이어지는지, V를 다시 눌러야 하는지 |
+| 재장착, 빈손 | 양손이 비고 기억한 무기 없음 | graphic 31186 검색, `Rearm: graphic 31186 picked`. 없으면 `[ weapon, out ]` 3초마다 | 검색 결과 |
+| 재장착, 1H | graphic 검색으로 1H 무기 | `drop self lefthand`로 보냄. 서버가 제 레이어에 올리는지, 거절해 2초마다 다시 집는지 | 올라간 레이어 |
+| 재장착, 여분 | 같은 석궁 하나 더 | 처음 든 것 또는 처음 고른 serial로 | 다른 것을 집으면 그 serial |
+| 재장착, 거절 | 디스암 뒤 | 같은 serial을 2초마다 재시도. 백팩 밖으로 옮기면 같은 graphic 다른 것 | 거절 문장 |
+| 재장착, 커서 | 바딩 커서나 자기 주문 중 | 재장착이 끊지 않음 | 끊기면 시전 중 가드가 샌 것 |
+| `rhandempty`, `righthand` | Play | 오류 줄 없음 | 오류 줄 |
+| 31186 | Pistol Crossbow와 같은 art인지 | 백팩에 둘 다 있을 때 `findtype`이 집는 것 | 집은 것 |
+| 마나 | 체인 한 벌, 음식 없이 | 마나 10이 차는 시간 50초면 Butler 식([PvP](../game/pvp.md#05.D) 05.D절) | 초 |
+| Lyric | 송 메시지 | `8.5%`면 170. `6.8%`면 Lyric 보너스 없음([Bard Archer](../templates/bard-archer.md#01.C) 01.C절) | 숫자 |
 
 ## <a id="17"></a>17 프로보 후보 입력과 인게임 확인
 
-2026-10-21 두 바드 루프에 구현. 새 입력 경로의 인게임 동작은 확인되지 않았다.
-`bard/provo-picks`가 후보 입력, `bard/provo`가 짝 선택과 시전 담당.
+동작과 짝 선택 규칙은 [Bard Necro](../templates/bard-necro.md#04.J) 04.J절. 두 바드 루프 공통(`bard/provo-picks`, `bard/provo`).
+키는 [Hotkeys](../game/hotkeys.md#01.F) 01.F절. 반영은 클라이언트 재시작([Workflow](../working/workflow.md#04) 04절).
 
-#### 반영과 첫 확인
+#### 확인됨
 
-1. `Shift+Space` = `Set Last Target (Beneficial)`(L:2061). 2026-10-21 summoner와 bard 프로필에 추가, 게임에 들어오는지 확인 전([Hotkeys](../game/hotkeys.md#01.F) 01.F절)
-2. 수정 파일 반영 뒤 루프 시작. 핫키 실행은 클라이언트 재시작, Scripts 탭 Play는 리로드([Workflow](../working/workflow.md#04) 04절)
-3. Tab으로 warmode 수동 구간 진입, 이미 나간 시전과 커서가 끝난 뒤 후보 선택
-4. 가장 가까운 몹 A 선택, 아처는 V로 공격. 선택 키는 프로필별 배치([Hotkeys](../game/hotkeys.md#01.E) 01.E절), A의 `[ provo, set ]` 확인 뒤 Shift+Space로 B부터 E까지 등록
-5. 후보마다 `[ provo, set ]` 확인 뒤 다음 선택. Tab으로 자동 구간 복귀, A→B와 C→D 확인
+- `Shift+Space`가 게임에 들어오고 찍은 몹에 `[ provo, set ]`. 인게임 확인됨 2026-10-22
 
-- 최초 실행 전에 남은 슬롯은 등록하지 않으므로 루프 시작 뒤 선택 필요
-- 시작 슬롯과 같은 몹을 다시 골라도 값 변경이 없음. 새 알림이 없으면 다른 후보를 등록한 뒤 해당 몹 재선택
-- 알림 확인에는 `config__chatty` 1 필요. 중복 후보에는 새 등록 알림 없음
-- 전투 중 자동 시전과 등록 커서의 중첩은 아직 미검증. 초기 사용은 위 수동 구간, Q로 바딩 대상을 순회해도 프로보 목록 유지
-- 커서 색만으로 네이티브 등록 커서 식별 불가. 근거와 한계는 [Razor](../scripting/razor.md#03) 03절
+#### 쓰는 순서
 
-#### 입력과 저장
+1. 루프 시작. 시작 전에 고른 몹은 등록되지 않음
+2. Tab으로 warmode(수동 구간). 이미 나간 시전과 커서가 끝난 뒤
+3. Z로 A 선택, 아처는 V로 공격. A에 `[ provo, set ]`
+4. Shift+Space로 B부터 차례로. 몹마다 `[ provo, set ]`을 보고 다음
+5. Tab으로 자동 구간 복귀. A→B, C→D
 
-| 역할 | 입력 | 저장과 알림 |
-| --- | --- | --- |
-| 현재 바딩 대상 T | Q의 `Set Last Target (Harmful)` 또는 가장 가까운 몹 선택 | `var__combat_target` 채택 뒤 `[ target, set ]` |
-| 프로보 후보 | 가장 가까운 몹 선택 또는 `Shift+Space`의 `Set Last Target (Beneficial)` | `lastbeneficial`에서 serial 복사, `list__provo_candidates` 추가 뒤 `[ provo, set ]` |
-| 이번 자동 시전 | 후보 목록에서 선택한 둘 | `var__provo_first`, `var__provo_second`에 고정 |
+- 같은 몹을 다시 골라도 알림 없음. 알림은 `config__chatty` 1에서만
+- 등록 커서를 자동 바딩과 구별할 근거가 없어 당분간 수동 구간에서 등록. 자동 구간 등록은 아래 표의 "커서 중첩"
 
-- `lastbeneficial`은 단일 입력 슬롯. 후보 목록의 저장소나 수동 프로보 성공 기록으로 사용하지 않음
-- 입력 계약은 새로 관찰한 적대 `lastbeneficial` 값을 후보 등록으로 해석. 같은 슬롯을 갱신하는 다른 핫키와 병용 여부는 프로필에서 확인
-- 가장 가까운 몹 선택도 후보 등록으로 수용. 슬롯 갱신 동작의 근거는 [Razor](../scripting/razor.md#03) 03절
-- 후보 수집은 자동 바딩보다 먼저, 쿨다운과 무관하게 실행. 검색 가능한 살아 있는 적대 모빌만 등록, 라벨 조회 없이 저장
-- serial을 먼저 복사하고 목록에 넣은 뒤 알림. 모든 선택의 무손실 수집 보장 없음, 입력 순서는 위 첫 확인 절 참고
-- Q만으로 채택한 T는 후보에 자동 추가하지 않음. 가장 가까운 몹 선택 또는 Beneficial 키로 등록한 T는 다른 후보와 같은 규칙 적용
-- Bard Archer의 아처리 마릿수 판정에는 현재 대상과 등록된 후보의 중복 없는 합집합 반영
+#### 확인할 것
 
-CE의 `Set Last Target (Beneficial)`은 선택 커서로 `_lastBeneTarget`을 갱신.
-근거: [CE Targeting 구현](https://github.com/markdwags/Razor/blob/master/Razor/Core/Targeting.cs), 2026-10-21 확인.
-Outlands 포크의 해당 핫키와 커서 간섭은 아래 검증 필요.
-
-#### 후보와 짝
-
-- 자동 프로보는 등록된 후보끼리만. 사용 가능한 후보가 둘 미만이면 대기, 현재 대상 T로 자동 보충하지 않음
-- 현재 바딩 대상 T와 무관하게 사용 가능한 후보 둘을 등록 순서대로 선택. 실패한 후보는 선택 순서 뒤로 이동
-- 짝 탐색 때 거리, 생존, 라벨 확인. 라벨 미수신은 이번 선택에서 제외
-- 각 커서 대기 뒤 두 후보의 거리와 생존 재확인. 첫 후보를 보내지 않았으면 둘째 전달 생략
-- `provoked`는 유지, `barding break`는 대기. 어느 쪽에도 해당하지 않는 후보끼리 조합
-- 죽은 후보는 제거. 사거리 밖 후보는 시전에서 제외, 목록 유지 여부는 기존 acquire_range 판정 사용
-- 풀린 후보는 현재 라벨을 기준으로 다시 조합. 원래 성공했던 짝을 영구 저장하지 않음
-
-| 현재 대상 | 등록한 후보 | 사용 가능한 상태에서의 선택 |
-| --- | --- | --- |
-| T | B만 | 프로보 대기, T의 Disco와 Peace 계속 |
-| T | B, C | B→C, T의 바딩 대상 유지 |
-| T | B, C, D, E | B→C, 다음 공유 쿨이 허용할 때 D→E |
-| A | A, B | A→B. A가 provoked이면 Peace 생략 |
-| A | A, B, C, D, E | A→B, 다음 공유 쿨이 허용할 때 C→D. E는 짝 대기 |
-
-#### 다섯 마리 입력 시나리오
-
-bard 프로필에서 루프 실행 중 Z로 A 선택, V로 A 공격, Shift+Space로 B부터 E까지 등록한 경우.
-모두 생존, 사거리 안, 라벨 수신, 시전 성공 가정. 시전 시점은 공유 쿨다운에 따름.
-
-- Z의 A부터 목록에 저장, B까지 등록되면 A→B. B가 이미 provoked이면 B→C 재시전 없음
-- C와 D도 등록되면 C→D. E는 다른 사용 가능한 후보가 생길 때까지 대기
-- 현재 바딩 대상이 A이면 A에 Disco, provoked 동안 Peace 생략. 짝 없는 E를 자동으로 Peace하는 순회는 없음
-- Q로 B, C, D, E를 선택하면 바딩 대상만 이동, 후보 목록과 진행 중인 프로보 유지
-- B, C, D는 provoked 동안 Disco만. E는 현재 대상이 된 뒤 Disco와 Peace 조건을 각각 검사
-- `[ target, set ]`은 선택 확인. 쿨다운 중 빠른 Q 순회가 지나간 몹의 Disco 시전을 예약하지 않음
-- 평타 대상은 V를 다시 누르지 않으면 A 유지. 프로보가 풀리면 Q의 현재 대상과 무관하게 가능한 후보 둘을 다시 조합
-
-#### 수동 조작과 실패
-
-- 수동 프로보는 기존 warmode 수동 구간 사용. 등록된 후보의 실제 라벨로 효과 반영, 성공 메시지만으로 짝이나 후보 추측 금지
-- 수동 작업 뒤 Q로 바딩 대상 T를 다시 확인하고 자동 구간 복귀
-- 프로보나 후보 등록 커서가 보이면 다른 자동 바딩 시작 보류
-- 진행 중인 바딩도 warmode이면 커서 전달과 취소 보류. 전투 중 같은 종류의 등록 커서가 끼어드는 경우의 소유권 판별은 미검증
-- Peace는 provoked 후보를 덮어쓰지 않음. 효과 규칙은 [Bard Necro](../templates/bard-necro.md#02.P) 02.P절
-- 시전 요청만으로 성공 처리하지 않음. 서버 응답과 실제 라벨 확인, 대기와 재시도는 유한
-- 실패한 후보의 재시도 간격 적용, 다음 가능한 짝 검사. `stop`으로 사냥 루프 종료 금지
-- 등록과 짝 선택은 분리. 쿨다운 중에는 후보 저장만, 새 짝이 필요할 때 라벨 조회
-
-#### 실제 라타의 한계
-
-- 자동 프로보가 바꾼 `lastharmful`은 `var__target_hold`로 제외, 루프의 바딩 대상 T 유지
-- 실제 `lastharmful`을 T로 즉시 복원하는 기능까지 포함한 설계가 아님. 다음 T 대상 바딩 전까지 마지막 프로보 대상이 남을 수 있음
-- 그 사이 E와 V 등 기본 라타 핫키가 마지막 프로보 대상을 사용할 수 있음. 같은 serial을 Q로 다시 고르는 입력도 완전히 구별 불가
-- 두 프로보 커서 대기 중 완료된 새 harmful 선택은 자동 타깃 전에 T에 반영. 같은 serial 재선택 한계와 실제 슬롯 복원은 별개
-- 명시적 복원과 수동 라타 핫키 보존은 별도 검증 과제. 현재 금지한 `setlasttarget serial`에 의존하지 않음([Razor](../scripting/razor.md#03) 03절)
-- 가장 가까운 몹 선택은 의도한 후보 입력에 포함. 그 밖의 Beneficial 타깃 지정도 `lastbeneficial`을 바꿀 수 있어 해당 슬롯만으로 입력 출처 보증 불가
-- 동료 회복 등에 Beneficial 라타를 쓰는 프로필에서는 후보 등록과 충돌 가능. 공용 슬롯을 전용 슬롯으로 간주하지 않음
-
-#### 추가된 상태와 검증 범위
-
-| 이름 | 역할 |
-| --- | --- |
-| `var__provo_last_pick` | 마지막으로 관찰한 입력, Play를 넘어 유지 |
-| `var__provo_pick` | 이번 패스의 입력 serial 사본 |
-| `var__provo_added` | 새 후보 등록 신호, 그 패스에서 짝 탐색 대기 단축 |
-| `var__provo_sent` | 이번 요청의 모빌 전달 단계. 0은 전달 전, 1은 첫 후보 전달, 2는 둘째 후보 전달 |
-| `list__provo_candidates` | 등록 순서의 후보 목록, Play를 넘어 유지. 옛 harmful 입력 목록과 분리 |
-| `timer__disco_target`, `timer__peace_target` | 기존 `wait__bard_target`으로 커서 전달 반복 제한 |
-
-- `var__provo_skip` 제거. 실패한 첫 후보를 목록 뒤로 이동, 일반 실패는 서버 바의 공유 쿨다운 사용
-- 2026-10-21 소스 본문을 읽는 모의 시나리오 25개 통과. 서버, 커서 시점, 스코프는 모형이므로 인게임 검증의 대체가 아님
-
-#### 인게임 확인
-
-| 검사 | 통과 기준 |
-| --- | --- |
-| `Shift+Space` | 커서가 뜨고 찍은 몹에 `[ provo, set ]`. 안 뜨면 macOS 입력 소스 전환부터([Hotkeys](../game/hotkeys.md#02.B) 02.B절) |
-| T 선택 뒤 Beneficial로 B 선택 | `lastharmful`과 루프 대상은 T, 후보는 B로 분리 |
-| B, C, D, E 등록 | 알림을 받은 serial 전부 목록에 존재, 후보 등록 중 T가 바뀌지 않음 |
-| T가 후보에 없고 B 하나만 등록 | B→T 자동 시전 없음 |
-| 가장 가까운 몹 A 선택 뒤 B 등록 | 후보에 A와 B 존재, 현재 바딩 대상이 A여도 A→B 선택 |
-| 가장 가까운 몹 A 선택 뒤 B, C, D, E 등록 | 성공한 짝은 A→B와 C→D, E 대기. provoked 몹을 다른 짝에 중복 사용하지 않음 |
-| Q로 B, C, D, E 순회 | 프로보 목록과 짝 선택 우선순위 유지. Disco 시전은 선택 알림과 별도로 확인 |
-| 자동 B→C | 실제 harmful은 C로 바뀌어도 루프 대상 T와 후보 목록 유지 |
-| 두 프로보 커서 대기 중 새 harmful 선택 | 자동 시전 후에도 새 바딩 대상 유지, 선택하지 않은 몹으로 초점 이동 없음 |
-| 다른 커서와 등록 입력 중첩 | 자동 바딩이 후보 커서를 먹거나 잘못된 몹을 찍지 않음, 등록 취소도 정상 처리 |
-| 수동 B→C 뒤 자동 복귀 | 등록된 B, C에 재프로보와 Peace 중복 없음 |
-| 사망, 거리 이탈, 라벨 미수신 | 무한 반복과 스크립트 종료 없음, 유효한 다음 짝 처리 |
-| 아처리 코덱스 | Q로 T만 선택해도 등록 후보를 마릿수 판정에 반영 |
-| 다른 슬롯 갱신과 같은 값 재선택 | 초기 슬롯, 가장 가까운 몹 선택, 동료 회복, 중복 선택의 동작을 기록 |
-
-두 바드 루프는 조립 완료, 위 인게임 확인은 아직 대기.
-등록 커서를 자동 바딩과 구별하는 근거가 확보되기 전까지 기존 warmode 수동 구간에서 등록.
-실제 라타 복원은 별도 과제. 반영 방법은 [Workflow](../working/workflow.md#04) 04절.
+| 검사 | 하는 것 | 통과 | 실패면 기록할 것 |
+| --- | --- | --- | --- |
+| 대상과 후보 분리 | Q로 T, Shift+Space로 B | `lastharmful`과 `[ target, set ]`은 T, `[ provo, set ]`은 B. 등록 중 T가 안 바뀜 | 바뀐 쪽 |
+| 후보 넷 | B, C, D, E 등록 | 알림 받은 넷 전부 등록 | 빠진 serial |
+| 후보 하나 | T만 고르고 B 하나 등록 | B→T 자동 시전 없음, 대기 | 나간 시전 |
+| Z의 A | Z로 A, Shift+Space로 B | A도 후보. 바딩 대상이 A여도 A→B | 짝 |
+| 다섯 마리 | Z로 A, B부터 E 등록 | A→B, 다음 공유 쿨에 C→D. E는 대기. provoked 몹을 다른 짝에 안 씀 | 실제 짝 |
+| Q 순회 | Q로 B, C, D, E 차례로 | 바딩 대상만 이동, 후보 목록과 짝 순서 유지. 각 몹의 Disco는 알림과 별도로 확인 | 목록 변화 |
+| 자동 B→C 뒤 라타 | 자동 시전 뒤 E나 V | 루프 대상 T와 후보 목록 유지. 실제 `lastharmful`은 C로 남을 수 있음(04.J절 한계) | V가 간 곳 |
+| 커서 대기 중 새 선택 | 두 프로보 커서 사이에 Q | 자동 시전 뒤에도 새 바딩 대상 유지 | 초점이 간 몹 |
+| 커서 중첩 | 자동 구간에서 Shift+Space | 자동 바딩이 등록 커서를 먹거나 엉뚱한 몹을 찍지 않음. 등록 취소도 정상 | 먹힌 커서, 찍힌 몹 |
+| 늦은 둘째 커서 | 렉이 있을 때 자동 프로보 | 둘째 커서를 1초까지 기다려 전달. 못 받으면 취소, 커서가 남지 않음(2026-10-22 변경) | 남은 커서와 그 뒤 멈춘 블록 |
+| 수동 B→C 뒤 복귀 | 수동 구간에서 B→C, Tab | 등록된 B, C에 재프로보와 Peace 중복 없음 | 중복 시전 |
+| 사망, 이탈, 라벨 없음 | 짝 중 하나가 죽거나 멀어짐 | 무한 반복과 종료 없음, 다음 짝 | 반복 줄 |
+| 아처리 마릿수 | Q로 T, Shift+Space로 B | Incendiary와 Ricochet | 자세 |
+| 다른 슬롯 입력 | 동료 회복 커서, 같은 몹 재선택 | 동작 기록 | 등록된 것 |
 
 ## <a id="18"></a>18 tamer-archer-enhanced 인게임 확인
 

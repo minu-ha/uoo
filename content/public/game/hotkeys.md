@@ -104,7 +104,7 @@ order: 20
 - summoner: `Z` → All Kill 커서, `V` → 그 커서를 가장 가까운 몹으로 채움. 커서가 없으면 `V`는 라타 지정만
 - summoner `Shift+Z`: 다음 몹을 라타로(Next Non-Friendly Monster Target, 인게임 확인됨 2026-10-20). 커서 없이 순환 → 루프의 커서와 안 부딪힘
 - basic: `Z`로 라타 지정, `V`로 공격. PvP는 `X`나 `C`로 플레이어 지정 → `V`
-- bard: 무수정은 basic과 같음. 펫이 없어 펫 명령 없음. `Shift+Z`는 summoner처럼 다음 몹으로 바딩 대상 변경. 프로보 후보 입력은 [Open items](../questions/open-items.md#17) 17절
+- bard: 무수정은 basic과 같음. 펫이 없어 펫 명령 없음. `Shift+Z`는 summoner처럼 다음 몹으로 바딩 대상 변경. 프로보 후보 입력은 [Bard Necro](../templates/bard-necro.md#04.J) 04.J절
 - 플레이어 순환: summoner `Shift+X/C`, basic과 bard 무수정 `X/C`. 키 하나에 바인딩 하나 → summoner는 무수정 `X`, `C`를 펫 명령에 씀
 - summoner Follow `X`, Guard `C`. `C`는 가장 자주 누르는 `V` 옆 → 오입력 잦음.
   Guard 오입력은 펫이 싸움 유지, Follow 오입력은 펫이 싸움 중단
@@ -121,8 +121,8 @@ order: 20
 | Ctrl | — | — | — | — | — |
 | Alt | — | — | — | — | — |
 
-- `Shift+Space`: `Set Last Target (Beneficial)`. 커서로 찍은 몹을 두 바드 루프의 프로보 후보에 등록, 바딩 대상은 그대로([Open items](../questions/open-items.md#17) 17절).
-  엄지 Space와 새끼 Shift, 손 이동 없음. 2026-10-21 summoner와 bard 프로필에 추가, 게임에 들어오는지 확인 전(07절)
+- `Shift+Space`: `Set Last Target (Beneficial)`. 커서로 찍은 몹을 두 바드 루프의 프로보 후보에 등록, 바딩 대상은 그대로([Bard Necro](../templates/bard-necro.md#04.J) 04.J절).
+  엄지 Space와 새끼 Shift, 손 이동 없음. 2026-10-21 summoner와 bard 프로필에 추가. 커서가 뜨고 찍은 몹에 `[ provo, set ]`. 인게임 확인됨 2026-10-22
 
 ## <a id="02"></a>02 규칙
 
@@ -144,7 +144,7 @@ Ctrl = Cmd, Alt = Option(01절) → macOS가 먼저 가져가는 키 있음.
 | `Ctrl+Space` | macOS가 가져감 | 사용 안 함 |
 | `` Ctrl+` `` | macOS 기본 단축키 "다음 윈도우로 초점 이동"이 가져감 | 시스템 설정 → 키보드 → 키보드 단축키 → 키보드에서 그 항목을 끄고 사용 |
 | `` Alt+` `` | `` Option+` ``은 악센트 dead key → 게임에 안 들어옴 | 사용 안 함. Alt 줄은 `1`부터 |
-| `Shift+Space` | macOS 입력 소스 전환에 `Shift+Space`를 걸어 두면 macOS가 가져감 | 시스템 설정 → 키보드 → 키보드 단축키 → 입력 소스에서 `Shift+Space`가 아닌지 확인. 게임에 들어오는지는 확인 안 됨(07절) |
+| `Shift+Space` | macOS 입력 소스 전환에 `Shift+Space`를 걸어 두면 macOS가 가져감 | 시스템 설정 → 키보드 → 키보드 단축키 → 입력 소스에서 `Shift+Space`가 아닌지 확인. 지금 설정에서는 들어옴. 인게임 확인됨 2026-10-22 |
 
 ### <a id="02.C"></a>02.C 어디에 거는가
 
@@ -176,7 +176,7 @@ Ctrl = Cmd, Alt = Option(01절) → macOS가 먼저 가져가는 키 있음.
 | 소환 | `Alt+1` → `Alt+2` → `Alt+2`, 솔플은 `Alt+1` → `Alt+3` → `Alt+2` | Vengeful Spirit 켠 뒤 듀오는 Lich 둘, 솔플은 Rag Witch와 Lich([Bard Necro](../templates/bard-necro.md#04.B) 04.B절). bard-necro-enhanced가 돌면 루프가 대신 소환([Bard Necro](../templates/bard-necro.md#04.I) 04.I절) |
 | PvE 공격 | `Z` → `V` | 가장 가까운 몹 공격. summoner는 펫이, basic과 bard는 내가(01.E절) |
 | PvE 주문 | `V`(summoner)로 라타 → `1 E` `2 E` → `4 E` `5 E` | `1`, `2`는 시그니처 칸(03절) |
-| 몹 여럿(summoner, bard) | `Z` → `V`, 그다음 `Shift+Space`로 한 마리씩 | 후보마다 `[ provo, set ]` 확인. 후보 등록과 바딩 대상 선택은 분리, 절차는 [Open items](../questions/open-items.md#17) 17절 |
+| 몹 여럿(summoner, bard) | `Z` → `V`, 그다음 `Shift+Space`로 한 마리씩 | 후보마다 `[ provo, set ]` 확인. 후보 등록과 바딩 대상 선택은 분리, 절차는 [Bard Necro](../templates/bard-necro.md#04.J) 04.J절 |
 | PvP 시작 | `F4` | 전투 루프 정지, PvP 루프 시작. 펫 공격은 루프가 15초마다 `all kill`. 복귀는 `F1` |
 | PvP 타겟 | `Q`, summoner는 `Shift+X/C`, basic과 bard는 `X/C` | 라타 하나만 공격. 가장 가까운 플레이어 타겟은 서버가 막음 → 플레이어는 순환으로만 지정 |
 | PvP 주문 | 라타를 잡고 → `6 E` → `4 E` `5 E` |   |
@@ -259,7 +259,6 @@ Ctrl = Cmd, Alt = Option(01절) → macOS가 먼저 가져가는 키 있음.
 - 사이드 위, 아래와 코드 `-5`, `-4`의 대응. 반대면 두 줄 맞바꿈
 - macOS "다음 윈도우로 초점 이동"을 끈 뒤 `` Ctrl+` ``이 게임에 들어오는지
 - 아랫줄 새 배치(`summoner.xml`, `default.xml`, `bard.xml`)의 게임 동작
-- `Shift+Space`가 게임에 들어오는지. 안 들어오면 macOS 입력 소스 전환부터(02.B절)
 - 햄스트링과 디스암 토글 거는 방법(Razor 핫키, 채팅 명령, 버튼). 위키 Hamstring 문서 확인 후 basic `Shift+Z`, `Shift+X`에 걸기
 - Razor로 옮긴 주문 핫키(`L:3002011` \~ `L:3002074`)의 Outlands 동작. CE 규칙으로 계산한 번호, 이 포크에서 게임 확인 안 됨.
   주문 매크로는 여섯 캐릭터의 `macros.xml`에서 이미 삭제. 안 도는 키는 Razor Hotkeys 탭에서 다시 걸고 게임 종료로 프로필 저장

@@ -153,7 +153,7 @@ target backpack
 - 위키 [Musicianship](https://wiki.uooutlands.com/Musicianship): 송은 땅을 찍어 켬. 받는 대상은 자신, 자신에게 초록으로 뜨는 플레이어와 생물(팔로워), 파티원. 50칸 안
 - 마지막 줄 `target backpack` → 자신에게 송(범위 효과). 땅(`targetrelloc 0 0`)도 송이 되지만 집 안에서는 `That is not accessible.`로 거절되고, Shadowspire Cathedral에서는 스크립트의 땅만 실패(손으로 바닥을 찍으면 됨). 모두 2026-10-20 사용자 확인
   - `targetrelloc 0 0`은 발밑을 좌표로 찍어서, 건물 바닥에서는 보이는 바닥과 달라지는 것으로 추정. 참고 스크립트들이 백팩을 찍는 이유로 보임
-- 노래 커서는 적대 커서 → 백팩을 찍으면 `lastharmful`이 백팩으로 바뀜. 루프는 사본(`var__combat_target`)을 쓰고 백팩은 새 대상으로 안 받아 영향 없음. 손으로 누르는 E와 Shift+V만 다음 고르기 전까지 백팩을 가리킴
+- 노래 커서는 적대 커서 → 백팩을 찍으면 `lastharmful`이 백팩으로 바뀜. 루프는 사본(`var__combat_target`)을 쓰고 백팩은 새 대상으로 안 받아 영향 없음. 손으로 누르는 E, V, Shift+V는 다음 고르기 전까지 백팩을 가리킴 → 적이 기억돼 있는 동안은 노래 없음(2026-10-22 변경)
 - `module/bard/song.razor`는 백팩. 2026-10-20 하루 땅을 썼다가, 거절되는 장소와 그때마다 태우는 Music 때문에 백팩으로 돌아옴
 - 막힌 노래 시도도 Music 5초를 다시 시작하는데(02.C절 표의 마지막 줄) 그때 `music` 바는 그 문장에 반응하지 않았음 → 매 바퀴 재시도해서 노래가 영영 막힘. 2026-10-20 대성당에서 이 순환이 남. 같은 날 `music` 바에 막힘 문장을 넣음(02.I절)
 
@@ -1085,6 +1085,52 @@ PK를 만나도 조합 유지, 사냥하던 그대로 싸움(06.D절).
 | 언데드 대신 맨 엘리멘탈 | 시전이 끝날 때 VS가 꺼짐. 마감 23초를 줄임 |
 | `[ release, miss ]` | 이름이 안 붙었거나 거절됨. 다음 시도는 10분 뒤 |
 | Journal `Summon: too many followers, resting.` | `config__summon_followers`가 실제와 다르거나 다른 팔로워가 있음. 30초 쉼 |
+
+### <a id="04.J"></a>04.J 프로보 후보 입력, PROVO PICKS와 PROVOKE 블록
+
+2026-10-21 두 바드 루프에 구현(`bard/provo-picks`, `bard/provo`). 인게임 확인은 [Open items](../questions/open-items.md#17) 17절.
+
+#### 입력과 저장
+
+| 역할 | 입력 | 저장과 알림 |
+| --- | --- | --- |
+| 현재 바딩 대상 T | Q(`Set Last Target (Harmful)`) 또는 Z(가장 가까운 몹) | `lastharmful` → `var__combat_target`, `[ target, set ]` |
+| 프로보 후보 | Z 또는 `Shift+Space`(`Set Last Target (Beneficial)`) | `lastbeneficial` → `list__provo_candidates`, `[ provo, set ]` |
+| 이번 자동 시전 | 후보 목록에서 고른 둘 | `var__provo_first`, `var__provo_second` |
+
+- Z는 세 슬롯을 다 바꿈 → 대상이면서 후보. Q는 `lastharmful`만 → 대상만. `Shift+Space`는 `lastbeneficial`만 → 후보만. 근거는 [Razor](../scripting/razor.md#03) 03절
+- 후보 수집은 패스 첫머리, warmode와 쿨다운에 무관. 살아 있는 적대 모빌만, 라벨 조회 없음
+- `lastbeneficial`은 입력 슬롯일 뿐. 같은 값이 다시 와도 등록 없음. 동료 회복 같은 다른 Beneficial 커서도 이 슬롯을 바꿈
+- 후보 목록은 Play를 넘어 유지. 죽거나 `acquire_range` 밖이면 탐색 때 제거
+
+#### 짝 선택
+
+- 등록된 후보끼리만. 둘 미만이면 대기, T로 보충하지 않음
+- 등록 순서대로 라벨이 비어 있는 둘(`provoked`, `barding break` 아님). 라벨이 안 오면 이번 선택에서 제외
+- 첫째를 둘째에게. 커서마다 `wait__bard_target`(1초) 대기, 전달 전에 거리와 생존 재확인. 첫째를 못 보냈으면 둘째도 안 보냄. 끝에 남은 적대 커서는 취소
+- 실패한 첫째는 목록 뒤로. `incite that`(프로보 불가)은 그 Play 동안 제외. 성공은 라벨로 확인, 짝을 영구 저장하지 않음
+- Peace는 provoked 몹을 건너뜀(02.P절)
+
+| 현재 대상 | 등록한 후보 | 선택 |
+| --- | --- | --- |
+| T | B만 | 대기. T의 Disco와 Peace 계속 |
+| T | B, C | B→C. T는 바딩 대상 유지 |
+| T | B, C, D, E | B→C, 다음 공유 쿨에 D→E |
+| A | A, B | A→B. A가 provoked이면 Peace 생략 |
+| A | A, B, C, D, E | A→B, 다음 공유 쿨에 C→D. E는 대기 |
+
+#### 실제 라타의 한계
+
+- 자동 프로보가 바꾼 `lastharmful`은 `var__target_hold`로 걸러 루프 대상 T 유지
+- 실제 `lastharmful`은 되돌리지 않음(`setlasttarget` 불가, [Razor](../scripting/razor.md#03) 03절). 다음 T 바딩 전까지 마지막 프로보 대상이 남아 E와 V가 그 몹을 가리킬 수 있음
+- 두 프로보 커서 사이에 완료된 새 harmful 선택은 자동 타깃 전에 T로 반영
+
+| 상태 | 역할 |
+| --- | --- |
+| `var__provo_last_pick` | 마지막으로 본 입력. Play를 넘어 유지 |
+| `list__provo_candidates` | 등록 순서의 후보 목록. Play를 넘어 유지 |
+| `var__provo_first`, `var__provo_second` | 이번 짝 |
+| `var__provo_sent`, `var__provo_done` | 전달 단계. 0 전, 1 첫째, 2 둘째. `done`은 둘 다 보냈거나 짝이 깨짐 |
 
 ::part[설계]
 
