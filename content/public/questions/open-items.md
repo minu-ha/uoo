@@ -61,7 +61,7 @@ order: 10
 | 한 대상에 한 낱말([Overheads](../scripting/overheads.md#04) 04절) | 프로필 `[ omen, target ]`과 스크립트 `[ evil omen ]`, train/herding의 `[ herding, done ]`과 글로서리 `herd`, 바 `cannons`와 `[ cannon, out ]`도 불일치 | 어느 쪽으로 맞출까 |
 | 대상만 쓰는 줄 = 시전 알림([Overheads](../scripting/overheads.md#05) 05절) | 프로필의 `[ swing ]`(290)은 대상만인데 시전 알림 아님 | `[ swing, on ]`처럼 상태를 붙일까 |
 | 글로서리 낱말 | `gheal` `invis` `tp`를 쓰는 줄 없음 | 예약어로 둘까, 지울까 |
-| 바딩 계열은 바와 같은 53([Overheads](../scripting/overheads.md#05) 05절) | 스크립트 줄은 53(2026-10-22). 세 프로필(`bard.xml`, `summoner.xml`, `default.xml`)의 바딩 14줄(`[ song, on ]` `[ disco, miss ]` … `[ inst, out ]`)은 아직 290, 254, 244 | 할 일: 게임 종료 뒤 세 파일의 hue를 53으로, 그 뒤 [Overheads](../scripting/overheads.md#07) 07절 표 수정 |
+| 바딩 계열은 바와 같은 53([Overheads](../scripting/overheads.md#05) 05절) | 스크립트 줄은 53(2026-10-22 변경). 세 프로필(`bard.xml`, `summoner.xml`, `default.xml`)의 바딩 14줄(`[ song, on ]` `[ disco, miss ]` … `[ inst, out ]`)은 아직 290, 254, 244 | 할 일: 게임 종료 뒤 세 파일의 hue를 53으로, 그 뒤 [Overheads](../scripting/overheads.md#07) 07절 표 수정 |
 
 ## <a id="03"></a>03 캐릭터와 핫키
 
