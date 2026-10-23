@@ -170,7 +170,10 @@ Heat of Battle이 켜지면 printed 값만.
 > are now capped by a player's base melee skill for that weapon." -- Armor & Weapons
 > "Players will receive bonuses against creatures based on what "setup" they have for weapons/shields occupying their hands" -- Wrestling
 
-- 위 표는 보너스 0 기준. **공식은 보너스를 "plus"로만 표기.** 보너스 10%가 10%p 가산인지 1.1배인지는 위키에 없음
+- 위 표는 보너스 0 기준. **보너스는 %p로 더함.** 인게임 확인됨 2026-10-23(Player Stats Profile, Show Stats vs Monsters)
+  - `Accuracy (vs 100 Skill)`: 보너스 합 87%에 127%, 71%에 111% → 둘 다 40% + 합. 무기 비교는 [Bard Archer](../templates/bard-archer.md#01.A) 01.A절
+  - 식의 Archery 80 대 방어 100은 43.3%(02.A절). 화면의 40%와 3.3%p 차이, 이유는 확인되지 않았다
+  - 100% 넘는 명중이 버려지는지는 확인되지 않았다
 - Weapon Setup 보너스(한손 무방패 Accuracy 등)는 크리처 상대 보너스 → PvP 미적용
 
 ### <a id="02.E"></a>02.E 메이지가 레슬링을 올리는 이유

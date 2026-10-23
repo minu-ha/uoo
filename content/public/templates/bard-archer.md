@@ -49,6 +49,22 @@ Bard Archer 템플릿의 판단과 숫자. 바딩, 회복, 버프는 루프, 사
 - 바딩, 시전과 사격은 서로 안 막음. 인게임 확인됨 2026-10-21
 - 시전하면 무기가 백팩으로 떨어짐. 인게임 확인됨 2026-10-21 → 왼손이 비면 루프가 그 패스에 석궁을 다시 듦([Bard Archer Enhanced](../loops/bard-archer-enhanced.md#01) 01절)
 
+1H 석궁과 Rampart Crossbow. 2026-10-23 Player Stats Profile(Show Stats vs Monsters), 같은 장비에 무기만 바꿈.
+
+| 항목 | 1H 석궁 | Rampart Crossbow |
+| --- | --- | --- |
+| Swing Delay | 2.97초 | 4.16초 |
+| Accuracy (vs 100 Skill) | 127%. 셋업 20%, 재질 8%, Aspect 38%, Arcane 21% | 111%. 재질 12%, Aspect 38%, Arcane 21% |
+| Damage (vs 0 AR) | 65.2\~152.2, 평균 108.7 | 86.2\~228.3, 평균 157.3 |
+| 평균 피해 / 간격 | 36.6 | **37.8** |
+| Weapon Finisher Chance | 37.29% | 52.20% |
+
+- **Rampart 유지.** 둘 다 방어 100에 명중 100% 초과 → 남는 명중은 피해가 아님. 모두 맞히면 2H가 3% 높음
+- 피니셔는 발동까지의 시간이 같고 피해는 2H가 1.45배([Archery](../mechanics/archery.md#03) 03절)
+- 명중 보너스는 %p 가산([PvP](../game/pvp.md#02.D) 02.D절). 2H가 100% 밑으로 내려가는 방어 스킬은 약 157, 1H가 앞서는 것은 약 183부터.
+  화면의 40%를 02.A절 식으로 늘린 추정, 디스코로 깎기 전
+- 화면의 간격은 찍을 때 현재 스태미나 약 50 기준(Swing Speed 17%로 역산). 두 무기 비율은 같음
+
 ### <a id="01.B"></a>01.B 코덱스
 
 Bard Codex 20점. 효과 원문과 티어별 값은 [Barding](../mechanics/barding.md#02.G) 02.G절.

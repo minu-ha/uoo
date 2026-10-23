@@ -34,7 +34,9 @@ order: 40
 > "Increases Swing Speed by (5% \* (Anatomy Skill / 100))" -- Archery
 > "Ranged weapons (excluding Ocean Weapons) have a flat .5 second stationary delay requiring players, regardless of their Dexterity, to stay in place before firing." -- Armor & Weapons
 
-- Anatomy 80 → 공격 속도 +4% → 3.61초. **15초에 4.2발**
+- 공격 속도 보너스는 모두 더함([Swing Speed](https://wiki.uooutlands.com/Swing_Speed)). Anatomy 80 4%, Resisting Spells 80 8%, 음식 5% → 17%.
+  인게임 확인됨 2026-10-23(Player Stats Profile)
+- 스태미나 100에서 3.75 × 0.83 = 3.11초. **15초에 4.8발.** 음식이 없으면 12%, 3.30초
 - DEX 100(포션) → 스태미나 최대 100. 간격 식의 상한
 - PvM은 쏘기 전 0.5초 서 있어야 함
 
@@ -60,7 +62,8 @@ Hinder와 Maiming.
 > "Hinder effect duration scales based on weapon speed (slower archery weapons have longer effect duration)" -- Archery
 > "any new Hinder effects attempting to be applied will instead result in a damage bonus" -- Archery, Hinder가 끝난 뒤의 면역 동안
 
-- 특수 공격은 공격당 기본 10%. Arms Lore 없음 → 3.61초 간격, 모두 명중 가정 시 평균 36초에 한 번
+- 특수 공격은 무기와 무관하게 공격당 10%. 1H와 2H 화면 모두 `Weapon Special Chance` 10%, 인게임 확인됨 2026-10-23
+- Arms Lore 없음 → 3.11초 간격, 모두 명중 가정 시 평균 31초에 한 번
 - 시전 봉쇄 비율: Hinder 최대 8초 → 최대 22%. Maiming(+70%) 13.6초 → 최대 38%
 - Peace가 걸린 몹은 이미 못 움직이고 못 침. 프로보 짝을 묶으면 서로 못 싸움
 - Peace 중에도 주문을 쓰는 몹이 있음. 인게임 확인됨 2026-10-21 → 시전 몹이 많은 던전용으로 설정만 열어 둠(`archery_stance_main` 5)
@@ -72,6 +75,9 @@ Hinder와 Maiming.
 > "Players can only trigger a single Finisher on each mob (i.e. an infinite cooldown)." -- Weapon and Parry Codex
 
 - 5티어 → 대상 HP 25% 이하에서, 확률 18%. 무기 속도 보정이 더 붙음, 식은 위키에 없음
+- 화면의 `Weapon Finisher Chance`: Speed 28 1H 37.29%, Speed 20 2H 52.20%. 인게임 확인됨 2026-10-23
+  - 비율 1.40 = 사격 간격 비율 → 초당 발동은 무기와 무관. 피해는 무기 피해 비례라 느린 무기가 큼
+  - `Aspect Special Chance`도 같은 비율(2.49%, 3.48%)
 - Ricochet: 대상 350%, 대상 6칸 안 다른 적 최대 둘에 350%씩. Pincushion: 대상에 100% 여섯 번 = 600%
 
 | 상황 | 피니셔 | 이유 |
@@ -90,18 +96,19 @@ Hinder와 Maiming.
 
 - 세 능력이 게이지 하나. Arms Lore 없으면 60초
 - 요청은 토글이 아님. 게이지가 차면 한 번 요청, 다음 명중에 나감. 인게임 확인됨 2026-10-22
-- 15초에 4.2발(01절) 기준
+- 15초에 4.8발(01절) 기준
 
 | 능력 | 15초 동안 더하는 피해 |
 | --- | --- |
-| Full Draw | 4.2발 × 50% = 208%. 모두 명중하고 15초 내내 서 있을 때 |
+| Full Draw | 4.8발 × 50% = 240%. 모두 명중하고 15초 내내 서 있을 때 |
 | Repeater | 3 × 75% = **225%**. 즉시 |
-| Skirmish | 4.2발 × 35% = 147% |
+| Skirmish | 4.8발 × 35% = 168% |
 
-- **Repeater.** 대상이 중간에 죽거나 한 발 움직여도 손해 없음. 스태미나가 줄어 발 수가 줄면 차이가 더 벌어짐
+- **Repeater.** Full Draw와 15%p 차이는 15초 내내 서서 모두 맞힐 때만. 대상이 중간에 죽거나 한 발 움직이면 Repeater가 앞섬
+- 스태미나가 줄어 발 수가 줄면 Full Draw만 줄어듦
 - Full Draw는 사격 직후에 켜면 5발(250%)이지만 루프는 손으로 쏘는 박자에 못 맞춤
 - Repeater의 무기 속도 보정 식은 위키에 없음 → 일반 사격 한 발과 비교 필요
-- 일반 석궁(Speed 28, 1H)이었다면 15초에 5.8발 → Full Draw 291%가 나음
+- 1H 석궁(Speed 28)이었다면 2.68 × 0.83 = 2.22초, 15초에 6.7발 → Full Draw 337%가 나음
 
 ## <a id="05"></a>05 PvP에서 빠지는 것
 
