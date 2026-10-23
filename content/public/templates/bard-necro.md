@@ -92,7 +92,7 @@ Bard Necro 템플릿의 캐릭터, 코덱스 배분, 소환수 선택, PvP 판�
 - 한 마리 전투 → 10\~20초 이동 → 다음 한 마리
 - **이동 구간이 전체의 약 4분의 1.** 이 시간에 마나 회복, 버섯 60초 쿨 진행
 - 2분짜리 버프는 이 구간에서 낭비 → **2분 버프는 몹이 가까울 때만**
-- 스탯 포션을 교전 중에만 마시는 이유도 같음([Bard Necro Enhanced](../loops/bard-necro-enhanced.md#01.A) 01.A절 하우스키핑)
+- 스탯 포션을 교전 중에만 마시는 이유도 같음([Bard Necro Enhanced](../loops/bard-necro-enhanced.md#01.A) 01.A절 스탯 포션)
 
 ### <a id="01.D"></a>01.D 확정 수치, Effective Barding 170
 

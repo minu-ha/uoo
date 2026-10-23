@@ -34,8 +34,14 @@
 #      trip after the drink, and a Curse, Weaken or Clumsy can hold it under the line
 #      while the potion still runs: without the window that refused drink would go out
 #      every pass. An empty bag is looked up at the same pace.
+#
+#   interval__potion_check
+#      How often the block looks at the three while fighting. A drink makes the next
+#      pass look again, so a fight that starts with all three missing drinks them back to
+#      back. Out of a fight the clock runs on, so the first fighting pass looks at once.
 # ----------------------------------------------------------------------------------------
 @setvar! interval__stat_potion 5000
+@setvar! interval__potion_check 5000
 
 
 # ----------------------------------------------------------------------------------------
@@ -43,6 +49,7 @@
 # ----------------------------------------------------------------------------------------
 timer__str_potion interval__stat_potion
 timer__agi_potion interval__stat_potion
+timer__potion_check interval__potion_check
 
 
 # ----------------------------------------------------------------------------------------
@@ -51,36 +58,47 @@ timer__agi_potion interval__stat_potion
     # ------------------------------------------------------------------------------------
     # STAT POTIONS
     #
-    # Kept up while var__fighting is 1. Strength and Agility read the stat against
+    # Kept up while var__fighting is 1, looked at once per interval__potion_check, so the
+    # other passes pay one line. Strength and Agility read the stat against
     # config__str_potion and config__dex_potion, because Bless and the Strength and
     # Agility spells show the same icons as the potions, and each is tried once per
     # interval__stat_potion. Magic Resist has an icon of its own and is drunk once it is
-    # missing. Each potion is judged on its own, so running out of one does not hold up
-    # the others.
+    # missing. Razor's object delay lets one drink through the item queue at a time, so
+    # a drink sets the clock ready again: the next free pass drinks the next potion,
+    # after the recovery blocks ahead of this one. A busy queue, a paralysis, hiding or a
+    # cursor puts the look off to the next pass. Each potion is judged on its own, so
+    # running out of one does not hold up the others.
     # ------------------------------------------------------------------------------------
-    if var__fighting = 1 and config__use_potions = 1 and not paralyzed and not hidden and not targetexists
-        if not queued and str < config__str_potion and timer "timer__str_potion" >= interval__stat_potion
-            settimer "timer__str_potion" 0
+    if var__fighting = 1 and config__use_potions = 1 and timer "timer__potion_check" >= interval__potion_check
+        if not queued and not paralyzed and not hidden and not targetexists
+            settimer "timer__potion_check" 0
 
-            if findtype "White Potion" self
-                hotkey "Drink Strength"
-                wait wait__short
+            if str < config__str_potion and timer "timer__str_potion" >= interval__stat_potion
+                settimer "timer__str_potion" 0
+
+                if findtype "White Potion" self
+                    hotkey "Drink Strength"
+                    settimer "timer__potion_check" interval__potion_check
+                    wait wait__short
+                endif
             endif
-        endif
 
-        if not queued and dex < config__dex_potion and timer "timer__agi_potion" >= interval__stat_potion
-            settimer "timer__agi_potion" 0
+            if not queued and dex < config__dex_potion and timer "timer__agi_potion" >= interval__stat_potion
+                settimer "timer__agi_potion" 0
 
-            if findtype "Blue Potion" self
-                hotkey "Drink Agility"
-                wait wait__short
+                if findtype "Blue Potion" self
+                    hotkey "Drink Agility"
+                    settimer "timer__potion_check" interval__potion_check
+                    wait wait__short
+                endif
             endif
-        endif
 
-        if config__use_resist_potion = 1 and not queued and not findbuff "Magic Resist Potion"
-            if findtype "Black Potion" self
-                hotkey "Drink Magic Resist"
-                wait wait__short
+            if config__use_resist_potion = 1 and not queued and not findbuff "Magic Resist Potion"
+                if findtype "Black Potion" self
+                    hotkey "Drink Magic Resist"
+                    settimer "timer__potion_check" interval__potion_check
+                    wait wait__short
+                endif
             endif
         endif
     endif

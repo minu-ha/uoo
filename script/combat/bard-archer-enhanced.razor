@@ -104,17 +104,17 @@
 
 
 # ----------------------------------------------------------------------------------------
+# module/pack/gold-drop.razor
+# ----------------------------------------------------------------------------------------
+@setvar! config__gold_drop_amount 2000
+
+
+# ----------------------------------------------------------------------------------------
 # module/buff/potions.razor
 # ----------------------------------------------------------------------------------------
 @setvar! config__use_resist_potion 1
 @setvar! config__str_potion 120
 @setvar! config__dex_potion 100
-
-
-# ----------------------------------------------------------------------------------------
-# module/pack/gold-drop.razor
-# ----------------------------------------------------------------------------------------
-@setvar! config__gold_drop_amount 2000
 
 
 # ----------------------------------------------------------------------------------------
@@ -208,15 +208,16 @@
 
 
 # ----------------------------------------------------------------------------------------
-# module/buff/potions.razor
-# ----------------------------------------------------------------------------------------
-@setvar! interval__stat_potion 5000
-
-
-# ----------------------------------------------------------------------------------------
 # module/pack/gold-drop.razor
 # ----------------------------------------------------------------------------------------
 @setvar! wait__gold_drop 1000
+
+
+# ----------------------------------------------------------------------------------------
+# module/buff/potions.razor
+# ----------------------------------------------------------------------------------------
+@setvar! interval__stat_potion 5000
+@setvar! interval__potion_check 5000
 
 
 # ----------------------------------------------------------------------------------------
@@ -334,6 +335,11 @@ if not timerexists "timer__agi_potion"
     createtimer "timer__agi_potion"
 endif
 settimer "timer__agi_potion" interval__stat_potion
+
+if not timerexists "timer__potion_check"
+    createtimer "timer__potion_check"
+endif
+settimer "timer__potion_check" interval__potion_check
 
 
 # ----------------------------------------------------------------------------------------
@@ -1286,36 +1292,6 @@ while not dead
         endif
 
         # --------------------------------------------------------------------------------
-        # STAT POTIONS                                           module/buff/potions.razor
-        # --------------------------------------------------------------------------------
-        if var__fighting = 1 and config__use_potions = 1 and not paralyzed and not hidden and not targetexists
-            if not queued and str < config__str_potion and timer "timer__str_potion" >= interval__stat_potion
-                settimer "timer__str_potion" 0
-
-                if findtype "White Potion" self
-                    hotkey "Drink Strength"
-                    wait wait__short
-                endif
-            endif
-
-            if not queued and dex < config__dex_potion and timer "timer__agi_potion" >= interval__stat_potion
-                settimer "timer__agi_potion" 0
-
-                if findtype "Blue Potion" self
-                    hotkey "Drink Agility"
-                    wait wait__short
-                endif
-            endif
-
-            if config__use_resist_potion = 1 and not queued and not findbuff "Magic Resist Potion"
-                if findtype "Black Potion" self
-                    hotkey "Drink Magic Resist"
-                    wait wait__short
-                endif
-            endif
-        endif
-
-        # --------------------------------------------------------------------------------
         # GOLD                                                 module/pack/gold-drop.razor
         # --------------------------------------------------------------------------------
         if weight > maxweight
@@ -1339,6 +1315,43 @@ while not dead
                 elseif timer "timer__message" >= interval__message
                     overhead "[ weight, over ]" 254
                     settimer "timer__message" 0
+                endif
+            endif
+        endif
+    endif
+
+    # ------------------------------------------------------------------------------------
+    # STAT POTIONS                                               module/buff/potions.razor
+    # ------------------------------------------------------------------------------------
+    if var__fighting = 1 and config__use_potions = 1 and timer "timer__potion_check" >= interval__potion_check
+        if not queued and not paralyzed and not hidden and not targetexists
+            settimer "timer__potion_check" 0
+
+            if str < config__str_potion and timer "timer__str_potion" >= interval__stat_potion
+                settimer "timer__str_potion" 0
+
+                if findtype "White Potion" self
+                    hotkey "Drink Strength"
+                    settimer "timer__potion_check" interval__potion_check
+                    wait wait__short
+                endif
+            endif
+
+            if not queued and dex < config__dex_potion and timer "timer__agi_potion" >= interval__stat_potion
+                settimer "timer__agi_potion" 0
+
+                if findtype "Blue Potion" self
+                    hotkey "Drink Agility"
+                    settimer "timer__potion_check" interval__potion_check
+                    wait wait__short
+                endif
+            endif
+
+            if config__use_resist_potion = 1 and not queued and not findbuff "Magic Resist Potion"
+                if findtype "Black Potion" self
+                    hotkey "Drink Magic Resist"
+                    settimer "timer__potion_check" interval__potion_check
+                    wait wait__short
                 endif
             endif
         endif

@@ -879,6 +879,7 @@ A 공격자, B 대상의 통제 시험. 매번 화면 주인 기록.
 | warmode 수동 구간 | Tab | 바딩, 노래, RA, Reflect, Protection 정지. 회복, 포션, 붕대, 코덱스 전환, 무기 능력, 재장착은 계속. Tab을 끄면 재개 | 확인되지 않았다 |
 | 붕대 회복 | 붕대를 들고 맞기 | 붕대만, 일반 Heal 시전 없음. 감는 중 마지막 붕대를 다 써도 끝날 때까지 Heal 대기. 실패면 Journal의 `Agent:` 줄 | 확인되지 않았다 |
 | 붕대 없음 | 붕대를 빼고 맞기 | 손실 `light_hits`(15) 이상에서 `Agent: Smart Heal/Cure Self, light Heal.`. 시전이 없으면 마나와 시약 확인 | 확인되지 않았다 |
+| 스탯 포션 셋 | 셋 다 없이 교전 시작 | 첫 교전 패스부터 Strength, Agility, Magic Resist가 약 0.6초 간격으로 연달아. 한 병 뒤 5초 쉬면 실패 | 확인되지 않았다 |
 | 힐 포션과 Greater Heal | 손실 35 이상 | `heal pot` 바, 그 패스는 Greater Heal 생략. 다음 패스에도 45 이상이면 `Agent: Greater Heal/Cure Self.` | 확인되지 않았다 |
 | 풀피 뒤 커서 | Greater Heal 뒤 바로 풀피 | 남은 회복 커서 취소. 커서가 남으면 그 뒤 멈춘 블록 기록 | 확인되지 않았다 |
 | 코덱스 라벨 | `debug/dump-label`로 codex of archery(11886) | 지금 자세 하나와 피니셔 하나만, `Arcane`, `Ricochet`처럼 대소문자 그대로. 다섯 자세나 두 피니셔가 다 보이면 `[ archery stance, off ]`, `[ archery finisher, off ]`가 뜨고 전환 정지, 라벨 문장 전체 기록 | 확인되지 않았다 |

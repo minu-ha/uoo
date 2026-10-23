@@ -172,6 +172,9 @@ PvP 자체의 규칙(Heat of Battle, 명중률, TK)은 [PvP](../game/pvp.md), �
 - Razor 스크립트는 덧셈 불가 → 기본값이 아닌 기준선을 기록([Razor](../scripting/razor.md#05) 05절)
 - 포션마다 재시도 간격. 스탯은 마신 뒤 한 왕복 늦게 오르고, Curse, Weaken, Clumsy는 포션 효과 중에도 스탯을 선 아래로 누름
 - 간격이 없으면 거절될 마시기가 패스마다 회복 포션과 같은 아이템 큐로 나감
+- 셋을 보는 검사는 교전 중 5초에 한 번(`interval__potion_check`). 다른 패스는 조건 한 줄
+- Razor 행동 큐는 Object Delay마다 한 병만 보냄([Razor](../scripting/razor.md#03) 03절의 `queued`) → 마신 패스는 검사 시계를 준비 상태로, 다음 빈 패스가 다음 병. 셋이 다 빠졌으면 큐가 비는 대로 연달아
+- 교전 밖에서는 시계를 되돌리지 않음 → 교전 첫 패스가 바로 검사
 - Magic Resist 포션은 제 아이콘 `Magic Resist Potion`으로 판정(인게임 확인됨 2026-10-09)
 - INT 45에 Bless: 정수 처리 전 최대치 53.8(56 아님). Bless 자체도 9마나
 - 최대치 증가 시 현재 마나 증가량은 별도 측정 필요 → 시전 직후 현재 마나 53.8을 약속하지 않음

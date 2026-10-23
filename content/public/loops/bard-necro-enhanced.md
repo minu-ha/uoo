@@ -56,7 +56,7 @@ Bard Necro 템플릿의 사냥 루프 `bard-necro-enhanced`의 설계와 블록.
 ```mermaid
 flowchart TD
   drain("드레인<br>큐와 시전이 빌 때까지") --> picks("프로보 후보<br>입력 저장") --> survive("생존<br>마비, 독, HP") --> cache("타겟 캐시") --> flags("패스 플래그") --> house("하우스키핑<br>5초마다")
-  house --> mush("버섯") --> resummon("재소환<br>빠진 소환수, 교체") --> provo("프로보<br>고른 적끼리") --> engaged{"교전 중인가"}
+  house --> potions("스탯 포션<br>교전 중 5초마다") --> mush("버섯") --> resummon("재소환<br>빠진 소환수, 교체") --> provo("프로보<br>고른 적끼리") --> engaged{"교전 중인가"}
   engaged -- 예 --> combat("교전 블록 일곱")
   engaged -- 아니요 --> walk("이동 블록 셋")
 ```
@@ -70,7 +70,8 @@ flowchart TD
 | 생존 | `paralyzed or poisoned or diffhits > 0` | 세 상태를 한 줄로 묻고, 안에서 마비, 큐어, 힐 순서. 마비가 맨 앞: 마비 중에는 아래가 아무것도 못 함. 큐어가 힐보다 앞: 큐어는 즉시 끝나고 힐은 독 틱에 일부 손실 |
 | 타겟 캐시 | `lastharmful`과 `noto`, 화면 거리 | 18칸(`config__acquire_range`) 안에서 받아 두고 10칸(`config__target_range`) 안에서 교전. 블록은 사본(`var__combat_target`)에 걺. 블록이 자기 용도로 찍은 몹은 `var__target_hold`로 빼 둠 |
 | 패스 플래그 | `timer "timer__reagents"` 10초, 또는 시약 부족 문장 | 시약과 주문 플래그 생성(`magery/reagents`, 아래). 심볼 수를 읽는 `ingump` 사슬은 게이트 없이 매 패스(01.H절). 심볼을 못 읽으면 `necro/symbols`가 30초에 한 번 핫바 재오픈 |
-| 하우스키핑 | `# @ every interval__housekeeping` 5초 | 악기 회수, 리프레시 포션, 소환수 이름, 골드는 틱마다. 악기 확인(30초), 음식(60초), 스탯 포션(5초, 교전 중에만)은 자기 시계. 디스코 건 대상은 `bard/disco`가 교전 패스마다 30초 뒤 잊음(01.H절) |
+| 하우스키핑 | `# @ every interval__housekeeping` 5초 | 악기 회수, 리프레시 포션, 소환수 이름, 골드는 틱마다. 악기 확인(30초), 음식(60초)은 자기 시계. 디스코 건 대상은 `bard/disco`가 교전 패스마다 30초 뒤 잊음(01.H절) |
+| 스탯 포션 | 교전 중 `timer__potion_check` 5초. 마신 다음 패스는 바로 | 하우스키핑 밖. 이유는 01.H절 표 |
 | 재소환 | `followers < config__summon_followers` 또는 교체 시계 | 교전 중에도 빠진 소환수를 바로 채움. 교체는 기억한 적이 없을 때만. 설계는 02.C절 |
 | 프로보 | 짝 찾기는 교전 중, 쿨다운 칸과 Music이 빌 때 2초마다, 할 일이 없으면 5초마다 | 등록 후보 목록에서 선택(`bard/provo`). 입력은 별도 블록, 비용은 01.H절 |
 | 교전 중인가 | `var__fighting = 1`(레시피 그룹) | 한 번만 판정. 그 아래 블록은 재판정 안 함 |
@@ -401,7 +402,7 @@ endif
 - **교전과 이동 분기**(2026-09-29, 2026-10-10부터 레시피 그룹). 모든 패스가 지나는 블록(생존, 타겟 캐시, 시약, 심볼, 하우스키핑) 뒤에서,
   `# @ when var__fighting = 1` 그룹이 교전 여부를 한 번만 판정
   - 교전 쪽: 디스코, 피스, 네크로 버스트, 오프닝, 프록 코어, 필러, Poison Strike. 이동 쪽(`# @ otherwise`): 자기 버프, Spell Siphon, 송, Vampiric Embrace
-  - 버섯, 재소환, 프로보는 분기 앞. 후보 입력은 패스 첫머리의 별도 블록. 스탯 포션은 하우스키핑 안에서 `var__fighting`을 직접 읽음
+  - 스탯 포션, 버섯, 재소환, 프로보는 분기 앞. 후보 입력은 패스 첫머리의 별도 블록. 스탯 포션은 `var__fighting`을 직접 읽음
   - 이전에는 블록마다 교전 여부를 따로 확인 → 이동 패스도 디스코와 피스의 실패하는 `find`까지 밟음
 - **하우스키핑 틱**(2026-09-29 적용). 매 패스 볼 필요 없는 확인을 5초 `# @ every interval__housekeeping` 그룹 하나에 모음
   - 패스는 그 게이트 한 줄만. 더 긴 주기는 안에서 자기 시계를 한 번 더 확인
@@ -413,7 +414,7 @@ endif
 | 악기(`find var__my_instrument`) | 30초 | 부서지거나 도둑맞을 때만 사라짐. 바드 블록이 없어진 것을 보면 그 자리에서 즉시 내림 |
 | 핫바(`gumpexists`) | 30초 | 죽음, 재접속, 잘못 누름일 때만 닫힘. 닫힌 동안 네크로 능력 정지. 이 확인은 하우스키핑이 아닌 `necro/symbols`가 심볼을 못 읽었을 때 |
 | 음식 버프 | 60초 | 버프가 훨씬 오래 감 |
-| 스탯 포션 버프 | 5초(교전 중에만) | 버프가 몇 분 지속. 힘과 민첩은 Bless와 아이콘이 같아 STR과 DEX를 기준선과 비교, 이 5초가 재시도 간격([Combat](../mechanics/combat.md#02.D) 02.D절) |
+| 스탯 포션 버프 | 5초(교전 중에만), 마신 다음 패스는 바로 | 버프가 몇 분 지속. 2026-10-23부터 하우스키핑 밖 자기 시계. 틱 안에서는 행동 큐가 한 틱에 한 병만 보내 셋에 10초. 힘과 민첩은 Bless와 아이콘이 같아 STR과 DEX를 기준선과 비교, 재시도 간격도 5초([Combat](../mechanics/combat.md#02.D) 02.D절) |
 | 디스코 확인(`var__disco_seen`) | 30초 | Discordance 지속 1분 21초 \~ 1분 57초([Bard Necro](../templates/bard-necro.md#01.D) 01.D절). 한 번 확인한 대상은 30초 동안 `find`와 `getlabel` 생략 |
 | 피스 확인(`timer__peace_seen`) | 2초, 게이트에서 | 진정 12초와 슬롯 10초의 차이. 브레이크 40초 동안은 매 패스 대신 2초에 한 번 |
 

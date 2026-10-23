@@ -29,7 +29,8 @@ Bard Archer 템플릿의 사냥 루프 `bard-archer-enhanced`의 블록 순서�
 | 다쳤거나 독, 마비 | `recovery/cure`, `heal`, `bandage`, `light-heal` | 잃은 HP 기준 `heal_hits` 35, `emergency_hits` 45. 회복 정책은 아래 |
 | 회복 다음 | `fight/rearm` | `rearm_graphic` 31186. 기억한 손이 비면 그 패스에 다시 듦, 요청 뒤 2초 지나 손 확인. 확인 항목은 [Open items](../questions/open-items.md#16) 16절 |
 | 공용 | `fight/target`, `magery/reagents` | `acquire_range` 18, `target_range` 10, `target_grace` 500(bard-necro) |
-| 5초마다 | `bard/instrument`, `recovery/refresh`, `buff/food`, `buff/potions`, `pack/gold-drop` | `refresh_stam` 60(skinning). 포션 기준선 STR 120, DEX 100은 기본값 |
+| 5초마다 | `bard/instrument`, `recovery/refresh`, `buff/food`, `pack/gold-drop` | `refresh_stam` 60(skinning) |
+| 하우스키핑 다음 | `buff/potions` | 교전 중 5초마다 검사, 마신 다음 패스는 바로([Combat](../mechanics/combat.md#02.D) 02.D절). 기준선 STR 120, DEX 100은 기본값 |
 | 늘 | `bard/provo`, `fight/archery-codex` | 자세와 피니셔 전환(02절) |
 | 교전 중 | `bard/disco`, `bard/peace`, `fight/weapon-ability` | `keep_virtuoso` 1. Archery 코덱스, Repeater, 사거리 8 |
 | 이동 중 | `bard/song` | 기억한 적이 없을 때만. 노래 커서가 `lastharmful`을 백팩으로 옮겨 `V`가 빗나가는 것을 막음 |

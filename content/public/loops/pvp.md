@@ -109,7 +109,8 @@ PvP 시작 시 켜는 공통 자기관리 루프 `combat/pvp`의 설계. 서버 
 #### 비용과 타이머
 
 - `findtype`이 가장 비싼 명령([Razor](../scripting/razor.md#06) 06절) → 시약은 패스마다 찾지 않고 REAGENTS 플래그를 읽음
-- 포션은 필요한 블록 안에서만 찾음. Strength와 Agility 포션은 스탯이 기준선 아래일 때 5초에 한 번, Resist 포션은 버프가 빠졌을 때만
+- 포션은 필요한 블록 안에서만 찾음. 스탯 포션 셋은 교전 중 5초 검사에서만, 마신 다음 패스는 바로([Combat](../mechanics/combat.md#02.D) 02.D절)
+  - Strength와 Agility는 스탯이 기준선 아래일 때 5초에 한 번, Resist는 버프가 빠졌을 때만
 - 무기는 원하는 슬롯이 바뀔 때만 찾음. 평소에는 양손 레이어 두 개만 읽음
 - 없는 무기를 슬롯에 두면 패스마다 한 번씩 찾음 → 안 쓰는 슬롯은 0
 - 재시도 타이머는 `timer__str_potion`, `timer__agi_potion`(5초) 둘뿐
