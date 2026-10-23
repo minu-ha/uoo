@@ -102,6 +102,7 @@ order: 10
 | `auto-mage.razor:1160` 인용 | [Razor](../scripting/razor.md#04) 04절 | 저장소와 이력 어디에도 없는 파일. 위치 |
 | Overheads의 숫자 | [Overheads](../scripting/overheads.md#07) 07절, 09절 | 광역 바딩의 8타일과 5초, 2초. Resist 흡수 `25% x Resist/100`과 -75%(PvP의 Parrying 공식과 혼동 여부). siphon의 5분마다와 60분. reactive 25. drain의 레지 -10과 -20, 2분. Paralyze Combat 05초 |
 | PvP의 주장 | [PvP](../game/pvp.md#02) 02절, 03절, 05절 | "Swordsmanship도 같은 형태다", 크리처 주문 패링 25%, Hamstring이 PvM 목록에 있다는 말의 출처 |
+| Outlands의 아이템 사용 간격 | [Razor](../scripting/razor.md#03) 03절의 `queued` | 프로필 `ObjectDelay` 600을 줄여도 `You must wait to perform another action.`이 안 나는 값. 다른 샤드(Lost Lands)는 750ms 권장 |
 
 ::part[규칙과 문서]
 

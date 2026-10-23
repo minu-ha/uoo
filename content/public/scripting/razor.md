@@ -172,6 +172,7 @@ Razor CE에 없거나 CE보다 넓어진 것. 존재 여부만 기록, 인자 �
   - 큐가 실제 원인이었는지는 아직 확인되지 않았다
   - CE [ActionQueue](https://github.com/markdwags/Razor/blob/master/Razor/Core/ActionQueue.cs): 큐가 비고 타이머까지 멈춰야 빈 것. 타이머는 마지막 더블클릭에서 Object Delay(프로필 `ObjectDelay` 600ms) 뒤 다음 틱에 멈춤 → 그동안 `queued` 참
   - 같은 패스에서 `not queued`로 포션 여러 병을 이으면 첫 병만 나감. 하우스키핑 안의 bard-archer-enhanced가 5초 틱마다 한 병. 인게임 확인됨 2026-10-23 → `buff/potions`는 마신 다음 패스에 다시 검사
+  - Object Delay를 서버의 아이템 사용 간격보다 낮추면 `You must wait to perform another action.`으로 거절(skinning에서 본 문장). Outlands 서버의 간격은 확인되지 않았다
 - v8 기본 채집: 사용자 보고로 정상. 인게임 확인됨 2026-10-05
 - v10: 오른손 제어 추가 없음, 실제 왼손과 캐시 serial 비교. 새 장착과 교체 경로의 확인 항목: [Open items](../questions/open-items.md#09) 09절
 
